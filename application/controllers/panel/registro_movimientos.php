@@ -7,9 +7,6 @@ class registro_movimientos extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'productos_salidas/rpt_gastos_pdf/',
-    'productos_salidas/rpt_gastos_xls/',
-    'productos_salidas/imprimirticket/',
   );
 
   public function _remap($method){
@@ -43,13 +40,7 @@ class registro_movimientos extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('registro_movimientos_model');
 
-    $params['polizas'] = $this->registro_movimientos_model->getSalidas();
-
-    // $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
-    //   ->from("empresas")
-    //   ->where("predeterminado", "t")
-    //   ->get()
-    //   ->row();
+    $params['polizas'] = $this->registro_movimientos_model->getPolizas();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d"));
 
@@ -83,9 +74,7 @@ class registro_movimientos extends MY_Controller {
       array('panel/polizas/registro_agregar.js'),
     ));
 
-    $this->load->model('almacenes_model');
     $this->load->model('registro_movimientos_model');
-    $this->load->model('compras_areas_model');
     $this->load->model('empresas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -93,7 +82,7 @@ class registro_movimientos extends MY_Controller {
       'titulo' => 'Agregar movimiento'
     );
 
-    $this->configAddSalida();
+    $this->configAddPoliza();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -101,19 +90,14 @@ class registro_movimientos extends MY_Controller {
     else
     {
       $res_mdl = $this->registro_movimientos_model->agregar();
-      $this->registro_movimientos_model->agregarProductos($res_mdl['id_salida']);
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        redirect(base_url('panel/registro_movimientos/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_poliza'] ));
       }
     }
 
-    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
-    $params['next_folio'] = $this->registro_movimientos_model->folio();
     $params['fecha']      = str_replace(' ', 'T', date("Y-m-d H:i"));
-
-    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     //imprimir
     $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
@@ -123,12 +107,6 @@ class registro_movimientos extends MY_Controller {
 
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    // $this->db
-    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-    //   ->from("empresas AS e")
-    //   ->where("e.predeterminado", "t")
-    //   ->get()
-    //   ->row();
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -136,7 +114,7 @@ class registro_movimientos extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
-  public function ver()
+  public function modificar()
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
@@ -149,7 +127,7 @@ class registro_movimientos extends MY_Controller {
       array('general/supermodal.js'),
       array('general/util.js'),
       array('general/keyjump.js'),
-      array('panel/productos_salidas/agregar.js'),
+      array('panel/polizas/registro_agregar.js'),
     ));
 
     $this->load->model('registro_movimientos_model');
@@ -159,7 +137,7 @@ class registro_movimientos extends MY_Controller {
       'titulo' => 'Ver salida'
     );
 
-    $this->configModSalida();
+    $this->configAddPoliza();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -167,23 +145,23 @@ class registro_movimientos extends MY_Controller {
     else
     {
       $res_mdl = $this->registro_movimientos_model->modificar($_GET['id']);
-      $res_mdl = $this->registro_movimientos_model->modificarProductos($_GET['id']);
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/registro_movimientos/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
-    $params['salida'] = $this->registro_movimientos_model->info($_GET['id'], true);
-    $params['modificar'] = $this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/modificar/');
+    $params['poliza'] = $this->registro_movimientos_model->info($_GET['id'], true);
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/productos_salidas/ver', $params);
+    $this->load->view('panel/registro_movimientos/modificar', $params);
     $this->load->view('panel/footer');
   }
 
@@ -192,7 +170,7 @@ class registro_movimientos extends MY_Controller {
     $this->load->model('registro_movimientos_model');
     $this->registro_movimientos_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/productos_salidas/?' . MyString::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/registro_movimientos/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
   public function imprimir()
@@ -215,48 +193,6 @@ class registro_movimientos extends MY_Controller {
   }
 
 
-  /**
-   * REPORTES
-   * ***********************************
-   * @return [type] [description]
-   */
-  public function rpt_gastos()
-  {
-    $this->carabiner->css(array(
-      array('libs/jquery.treeview.css', 'screen')
-    ));
-    $this->carabiner->js(array(
-      array('libs/jquery.treeview.js'),
-      array('panel/productos_salidas/rpt_gastos.js'),
-    ));
-
-    $this->load->model('compras_areas_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Reporte gastos');
-
-    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-    $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
-    $params['vehiculos'] = $this->compras_areas_model->getFrmAreas();
-
-    $this->load->view('panel/header',$params);
-    // $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/productos_salidas/rpt_gastos',$params);
-    $this->load->view('panel/footer',$params);
-  }
-  public function rpt_gastos_pdf()
-  {
-    $this->load->model('registro_movimientos_model');
-    $this->registro_movimientos_model->rpt_gastos_pdf();
-  }
-  public function rpt_gastos_xls()
-  {
-    $this->load->model('registro_movimientos_model');
-    $this->registro_movimientos_model->rpt_gastos_xls();
-  }
-
-
 
   /*
    |------------------------------------------------------------------------
@@ -264,181 +200,37 @@ class registro_movimientos extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddSalida()
+  public function configAddPoliza()
   {
     $this->load->library('form_validation');
 
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
-            'rules' => 'required|callback_productos_existencia'),
+            'rules' => 'required'),
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
-
-      array('field' => 'id_almacen',
-            'label' => 'Almacen',
-            'rules' => 'required'),
-      array('field' => 'id_almacen',
-            'label' => 'Transferir',
-            'rules' => ''),
-
-      array('field' => 'solicito',
-            'label' => 'Solicito',
-            'rules' => 'required|max_length[130]'),
-      array('field' => 'recibio',
-            'label' => 'Recibio',
-            'rules' => 'required|max_length[130]'),
-      array('field' => 'ftrabajador',
-            'label' => 'Trabajador',
-            'rules' => ''),
-      array('field' => 'fid_trabajador',
-            'label' => 'Trabajador',
-            'rules' => ''),
-
-      array('field' => 'conceptoSalida',
+      array('field' => 'concepto',
             'label' => 'Concepto',
             'rules' => 'max_length[200]'),
 
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
-      array('field' => 'folio',
-            'label' => 'Folio',
-            'rules' => 'required'),
 
-      array('field' => 'areaId',
-            'label' => 'Cultivo',
-            'rules' => 'required|numeric'),
-      array('field' => 'area',
-            'label' => 'Cultivo',
-            'rules' => 'required'),
-      array('field' => 'ranchoId',
-            'label' => 'Rancho',
-            'rules' => 'required|numeric'),
-      array('field' => 'rancho',
-            'label' => 'Rancho',
-            'rules' => 'required'),
-      array('field' => 'centroCostoId',
-            'label' => 'Centro de costo',
-            'rules' => 'required|numeric'),
-      array('field' => 'centroCosto',
+      array('field' => 'centroCostoId[]',
             'label' => 'Centro de costo',
             'rules' => 'required'),
-      array('field' => 'activoId',
-            'label' => 'Activo',
-            'rules' => 'numeric'),
-      array('field' => 'activos',
-            'label' => 'Activo',
-            'rules' => ''),
-
-      array('field' => 'no_receta',
-            'label' => 'No receta',
-            'rules' => 'max_length[20]'),
-      array('field' => 'etapa',
-            'label' => 'Etapa',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ranchoC',
-            'label' => 'Rancho',
-            'rules' => 'required'),
-      array('field' => 'ranchoC_id',
-            'label' => 'Rancho',
-            'rules' => 'required|numeric'),
-      array('field' => 'centro_costo',
-            'label' => 'Centro de costo',
-            'rules' => 'required'),
-      array('field' => 'centro_costo_id',
-            'label' => 'Centro de costo',
-            'rules' => 'required|numeric'),
-      array('field' => 'hectareas',
-            'label' => 'Hectareas',
-            'rules' => 'numeric'),
-      array('field' => 'grupo',
-            'label' => 'Grupo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'no_secciones',
-            'label' => 'No melgas/seccion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'dias_despues_de',
-            'label' => 'Dias despues de',
-            'rules' => 'numeric'),
-      array('field' => 'metodo_aplicacion',
-            'label' => 'Metodo de aplicacion',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ciclo',
-            'label' => 'Ciclo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'tipo_aplicacion',
-            'label' => 'Tipo de aplicacion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'observaciones',
-            'label' => 'Observaciones',
-            'rules' => 'max_length[220]'),
-      array('field' => 'fecha_aplicacion',
-            'label' => 'Fecha de aplicacion',
-            'rules' => ''),
-
-
-      // array('field' => 'codigoArea[]',
-      //       'label' => 'Codigo Area',
-      //       'rules' => 'required'),
-      // array('field' => 'codigoAreaId[]',
-      //       'label' => 'Codigo Area',
-      //       'rules' => 'required'),
-      array('field' => 'tipoProducto[]',
-            'label' => '',
-            'rules' => 'required'),
-      array('field' => 'precioUnit[]',
+      array('field' => 'centroCosto[]',
             'label' => '',
             'rules' => ''),
-      array('field' => 'codigo[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'concepto[]',
-            'label' => 'Productos',
-            'rules' => 'required'),
-      array('field' => 'productoId[]',
-            'label' => '',
+      array('field' => 'tipo[]',
+            'label' => 'Tipo',
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
             'rules' => 'required|greater_than[0]')
-    );
-
-    $this->form_validation->set_rules($rules);
-  }
-
-  public function productos_existencia($str)
-  {
-    $this->load->model('inventario_model');
-    $productos = array();
-    if (isset($_POST['productoId'])) {
-      foreach ($_POST['productoId'] as $key => $value) {
-        if ($_POST['tipoProducto'][$key] == 'p') {
-          // id_almacen
-          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
-          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
-            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
-          }
-        }
-      }
-    }
-    if (count($productos)>0) {
-      $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
-      return FALSE;
-    }
-    return true;
-  }
-
-  public function configModSalida()
-  {
-    $this->load->library('form_validation');
-
-    $rules = array(
-      array('field' => 'cantidad[]',
-            'label' => 'Cantidad',
-            'rules' => 'required| [0]')
     );
 
     $this->form_validation->set_rules($rules);
@@ -461,15 +253,15 @@ class registro_movimientos extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La salida se agregó correctamente.';
+        $txt = 'El movimiento se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
-        $txt = 'La salida se cancelo correctamente.';
+        $txt = 'El movimiento se cancelo correctamente.';
         $icono = 'success';
       break;
       case 5:
-        $txt = 'La salida se modifico correctamente.';
+        $txt = 'El movimiento se modifico correctamente.';
         $icono = 'success';
       break;
     }

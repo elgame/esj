@@ -28,7 +28,7 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct
+ ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc
      CREATE TABLE otros.polizas
         (
           id bigserial NOT NULL,
@@ -67,7 +67,7 @@
      ALTER TABLE otros.centro_costo ADD COLUMN anios_credito integer;
      ALTER TABLE otros.centro_costo ADD COLUMN id_cuenta integer;
      ALTER TABLE otros.centro_costo ADD CONSTRAINT centro_costo_id_cuenta_fkey FOREIGN KEY (id_cuenta) REFERENCES public.banco_cuentas (id_cuenta) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct
+✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct|pcc
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_areac integer;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_centro_costo bigint;

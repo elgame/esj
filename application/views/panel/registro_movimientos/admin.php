@@ -84,27 +84,17 @@
                   </td>
                   <td class="center">
                     <?php
-                      echo $this->usuarios_model->getLinkPrivSm('registro_movimientos/ver/', array(
-                        'params'   => 'id='.$poliza->id_salida,
-                        'btn_type' => 'btn-success',
-                        'attrs' => array())
-                      );
-                      echo $this->usuarios_model->getLinkPrivSm('registro_movimientos/imprimir/', array(
-                        'params'   => 'id='.$poliza->id_salida,
-                        'btn_type' => 'btn-info',
-                        'attrs' => array('target' => '_BLANK'))
-                      );
-                      if($this->usuarios_model->tienePrivilegioDe('', 'registro_movimientos/imprimir/')){
-                        echo '<a class="btn btn-info" href="'.base_url('panel/registro_movimientos/imprimirticket/?id='.$poliza->id_salida).'" target="_BLANK" title="Imprimir">
-                                <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
-                      }
-
-                      if ($poliza->status !== 'ca')
+                      if ($poliza->status != 'f')
                       {
+                        echo $this->usuarios_model->getLinkPrivSm('registro_movimientos/modificar/', array(
+                          'params'   => 'id='.$poliza->id,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
                         echo $this->usuarios_model->getLinkPrivSm('registro_movimientos/cancelar/', array(
-                          'params'   => 'id='.$poliza->id_salida,
+                          'params'   => 'id='.$poliza->id,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la salida?', 'Salidas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar el movimiento?', 'Salidas', this); return false;"))
                         );
                       }
                     ?>

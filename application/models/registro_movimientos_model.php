@@ -12,7 +12,7 @@ class registro_movimientos_model extends CI_Model {
    *
    * @return
    */
-  public function getSalidas($perpage = '40')
+  public function getPolizas($perpage = '40')
     {
     $sql = '';
     //paginacion
@@ -80,63 +80,37 @@ class registro_movimientos_model extends CI_Model {
   {
     if ( ! $data)
     {
+      $next_folio = $this->folio($_POST['empresaId']);
+
       $data = array(
-        'id_empresa'        => $_POST['empresaId'],
-        'id_empleado'       => $this->session->userdata('id_usuario'),
-        'folio'             => $_POST['folio'],
-        'fecha_creacion'    => str_replace('T', ' ', $_POST['fecha']),
-        'fecha_registro'    => date("Y-m-d H:i:s"),
-        // 'concepto'       => '', //$_POST['conceptoSalida']
-        'status'            => 's',
-        'solicito'          => $_POST['solicito'],
-        'recibio'           => $_POST['recibio'],
-        'id_almacen'        => $_POST['id_almacen'],
-        // 'id_traspaso'    => intval($this->input->post('tid_almacen')),
-        'no_receta'         => $this->input->post('no_receta')? $_POST['no_receta']: NULL,
-        'etapa'             => $this->input->post('etapa')? $_POST['etapa']: NULL,
-        'rancho'            => $this->input->post('ranchoC_id')? $_POST['ranchoC_id']: NULL,
-        'centro_costo'      => $this->input->post('centro_costo_id')? $_POST['centro_costo_id']: NULL,
-        'hectareas'         => $this->input->post('hectareas')? $_POST['hectareas']: NULL,
-        'grupo'             => $this->input->post('grupo')? $_POST['grupo']: NULL,
-        'no_secciones'      => $this->input->post('no_secciones')? $_POST['no_secciones']: NULL,
-        'dias_despues_de'   => $this->input->post('dias_despues_de')? $_POST['dias_despues_de']: NULL,
-        'metodo_aplicacion' => $this->input->post('metodo_aplicacion')? $_POST['metodo_aplicacion']: NULL,
-        'ciclo'             => $this->input->post('ciclo')? $_POST['ciclo']: NULL,
-        'tipo_aplicacion'   => $this->input->post('tipo_aplicacion')? $_POST['tipo_aplicacion']: NULL,
-        'observaciones'     => $this->input->post('observaciones')? $_POST['observaciones']: NULL,
-        'fecha_aplicacion'  => $this->input->post('fecha_aplicacion')? $_POST['fecha_aplicacion']: NULL,
-
-        'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
-        'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
-        'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
-        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
+        'id_empresa' => $_POST['empresaId'],
+        'folio'      => $next_folio,
+        'fecha'      => str_replace('T', ' ', $_POST['fecha']),
+        'concepto'   => $_POST['concepto'],
       );
-
-      if (isset($_POST['fid_trabajador']{0})) {
-        $data['id_usuario'] = $_POST['fid_trabajador'];
-      }
     }
+    $this->db->insert('otros.polizas', $data);
+    $id_poliza = $this->db->insert_id();
+    $this->agregarMovimientos($id_poliza);
 
-    $this->db->insert('compras_salidas', $data);
-
-    return array('passes' => true, 'msg' => 3, 'id_salida' => $this->db->insert_id());
+    return array('passes' => true, 'msg' => 3, 'id_poliza' => $id_poliza);
   }
 
-  public function modificar($id_salida, $data = null)
+  public function modificar($id_poliza, $data = null)
   {
     if ( ! $data)
     {
       $data = array(
-        'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
-        'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
-        'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
-        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
+        'id_empresa' => $_POST['empresaId'],
+        'fecha'      => str_replace('T', ' ', $_POST['fecha']),
+        'concepto'   => $_POST['concepto'],
       );
     }
 
-    $this->db->update('compras_salidas', $data, ['id_salida' => $id_salida]);
+    $this->db->update('otros.polizas', $data, ['id' => $id_poliza]);
+    $this->agregarMovimientos($id_poliza);
 
-    return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
+    return array('passes' => true, 'msg' => 3, 'id_poliza' => $id_poliza);
   }
 
   /**
@@ -144,215 +118,61 @@ class registro_movimientos_model extends CI_Model {
    *
    * @return array
    */
-  public function agregarProductos($idSalida, $productos = null)
+  public function agregarMovimientos($id_poliza, $movimientos = null)
   {
-    if ( ! $productos)
+    if ( ! $movimientos)
     {
-      $this->load->model('inventario_model');
-
-      $productos = array();
-      foreach ($_POST['concepto'] as $key => $concepto)
+      $movimientos = array();
+      foreach ($_POST['centroCostoId'] as $key => $concepto)
       {
-        if($_POST['precioUnit'][$key] <= 0) {
-          $res = $this->inventario_model->promedioData($_POST['productoId'][$key], date('Y-m-d'), date('Y-m-d'));
-          $saldo = array_shift($res);
-          $saldo = $saldo['saldo'][1];
-        }else
-          $saldo = $_POST['precioUnit'][$key];
-
-        $productos[] = array(
-          'id_salida'                    => $idSalida,
-          'id_producto'                  => $_POST['productoId'][$key],
-          'no_row'                       => $key,
-          'cantidad'                     => $_POST['cantidad'][$key],
-          'precio_unitario'              => $saldo,
-          // 'id_area'                   => $_POST['codigoAreaId'][$key],
-          // $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'id_cat_codigos'               => $this->input->post('centro_costo_id')? $_POST['centro_costo_id']: NULL,
-          'tipo_orden'                   => $_POST['tipoProducto'][$key],
+        $movimientos[] = array(
+          'id_poliza'       => $id_poliza,
+          'row'             => $key,
+          'id_centro_costo' => $_POST['centroCostoId'][$key],
+          'tipo'            => $_POST['tipo'][$key],
+          'monto'           => $_POST['cantidad'][$key],
         );
       }
     }
 
-    $this->db->insert_batch('compras_salidas_productos', $productos);
-
-    // si es transferencia de almacenes
-    if ($this->input->post('tid_almacen') > 0) {
-      $this->load->model('compras_ordenes_model');
-
-      $fecha = date("Y-m-d H:i:s");
-      $rows_compras = 0;
-      $proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
-      $departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
-      $data = array(
-        'id_empresa'         => $_POST['empresaId'],
-        'id_proveedor'       => $proveedor->id_proveedor,
-        'id_departamento'    => $departamento->id_departamento,
-        'id_empleado'        => $this->session->userdata('id_usuario'),
-        'folio'              => $this->compras_ordenes_model->folio('t'),
-        'tipo_orden'         => 't',
-        'status'             => 'n',
-        'autorizado'         => 't',
-        'fecha_autorizacion' => $fecha,
-        'fecha_aceptacion'   => $fecha,
-        'fecha_creacion'     => $fecha,
-        'id_almacen'         => $this->input->post('tid_almacen')
-      );
-
-      $res = $this->compras_ordenes_model->agregarData($data);
-      $id_orden = $res['id_orden'];
-      $compra = array();
-      foreach ($productos as $key => $produto)
-      {
-        $ultima_compra = $this->compras_ordenes_model->getUltimaCompra($produto['id_producto']);
-        $precio_unitario = (isset($ultima_compra->precio_unitario)? $ultima_compra->precio_unitario: 0);
-        $presenta = $this->db->query("SELECT p.nombre, pp.id_presentacion
-            FROM productos p LEFT JOIN (
-              SELECT * FROM productos_presentaciones WHERE status = 'ac' AND cantidad = 1
-            ) pp ON p.id_producto = pp.id_producto
-            WHERE p.id_producto = {$produto['id_producto']}")->row();
-        $compra[] = array(
-          'id_orden'         => $id_orden,
-          'num_row'          => $rows_compras,
-          'id_producto'      => $produto['id_producto'],
-          'id_presentacion'  => ($presenta->id_presentacion>0? $presenta->id_presentacion: NULL),
-          'descripcion'      => $presenta->nombre,
-          'cantidad'         => abs($produto['cantidad']),
-          'precio_unitario'  => $precio_unitario,
-          'importe'          => (abs($produto['cantidad'])*$precio_unitario),
-          'status'           => 'a',
-          'fecha_aceptacion' => $fecha,
-        );
-        $rows_compras++;
-      }
-      $this->compras_ordenes_model->agregarProductosData($compra);
-
-      // actualiza el campo traspaso, de la salida
-      $this->db->update('compras_salidas',
-        array('id_traspaso' => $id_orden),
-        array('id_salida' => $idSalida));
-
-      $this->db->insert('compras_transferencias', array('id_salida' => $idSalida, 'id_orden' => $id_orden));
-    }
-
-    $this->db->query("SELECT refreshallmaterializedviews();");
-
-    return array('passes' => true, 'msg' => 3);
+    $this->db->delete('otros.polizas_movimientos', "id_poliza = {$id_poliza}");
+    $this->db->insert_batch('otros.polizas_movimientos', $movimientos);
   }
 
-  /**
-   * Modificar los productos de una salida.
-   *
-   * @return array
-   */
-  public function modificarProductos($idSalida)
+
+  public function cancelar($id_poliza)
   {
-    foreach ($_POST['id_producto'] as $key => $producto)
-    {
-      $this->db->update('compras_salidas_productos',
-        array(
-          'cantidad' => $_POST['cantidad'][$key],
-        ),
-        array('id_salida' => $idSalida, 'id_producto' => $producto));
-    }
-
-    $this->db->query("SELECT refreshallmaterializedviews();");
-
-    return array('passes' => true, 'msg' => 5);
-  }
-
-  public function cancelar($idOrden)
-  {
-    $this->db->update('compras_salidas', array('status' => 'ca'), array('id_salida' => $idOrden));
-
-    $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
-    $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
-
-    $this->db->query("SELECT refreshallmaterializedviews();");
-
+    $this->db->update('otros.polizas', array('status' => 'f'), array('id' => $id_poliza));
     return array('passes' => true);
   }
 
-  public function info($idSalida, $full = false)
+  public function info($id_poliza, $full = false)
   {
     $query = $this->db->query(
-      "SELECT cs.id_salida,
-              cs.id_empresa, e.nombre_fiscal AS empresa, e.logo, e.dia_inicia_semana,
-              cs.id_empleado, (u.nombre || ' ' || u.apellido_paterno) AS empleado,
-              cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-              cs.status, cs.concepto, cs.solicito, cs.recibio,
-              cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
-              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso,
-              cs.no_receta, cs.etapa, cs.rancho, cs.centro_costo, cs.hectareas, cs.grupo,
-              cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
-              cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
-              ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
-              cs.id_area, cs.id_rancho, cs.id_centro_costo, cs.id_activo
-        FROM compras_salidas AS cs
-        INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
-        INNER JOIN usuarios AS u ON u.id = cs.id_empleado
-        INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
-        LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
-        LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
-        LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
-        WHERE cs.id_salida = {$idSalida}");
+      "SELECT p.id, p.id_empresa, e.nombre_fiscal AS empresa, e.logo, e.dia_inicia_semana,
+              p.folio, p.fecha, p.status, p.concepto
+        FROM otros.polizas AS p
+          INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
+        WHERE p.id = {$id_poliza}");
 
     $data = array();
     if ($query->num_rows() > 0)
     {
-      $data['info'] = $query->result();
+      $data['info'] = $query->row();
 
       $query->free_result();
       if ($full)
       {
         $query = $this->db->query(
-          "SELECT csp.id_salida, csp.no_row,
-                  csp.id_producto, pr.nombre AS producto, pr.codigo,
-                  pu.abreviatura, pu.nombre as unidad,
-                  csp.cantidad, csp.precio_unitario, csp.tipo_orden,
-                  COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-                  COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
-                  COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
-           FROM compras_salidas_productos AS csp
-             INNER JOIN productos AS pr ON pr.id_producto = csp.id_producto
-             LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-             LEFT JOIN compras_areas AS ca ON ca.id_area = csp.id_area
-             LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = csp.id_cat_codigos
-           WHERE csp.id_salida = {$data['info'][0]->id_salida}");
+          "SELECT pm.id_poliza, pm.row, pm.id_centro_costo, cc.nombre AS centro_costo, pm.tipo, pm.monto
+          FROM otros.polizas_movimientos AS pm
+            INNER JOIN otros.centro_costo AS cc ON cc.id_centro_costo = pm.id_centro_costo
+          WHERE pm.id_poliza = {$data['info']->id}");
 
-        $data['info'][0]->productos = array();
+        $data['info']->movimientos = array();
         if ($query->num_rows() > 0)
         {
-          $data['info'][0]->productos = $query->result();
-        }
-
-        $data['info'][0]->area = null;
-        if ($data['info'][0]->id_area)
-        {
-          $this->load->model('areas_model');
-          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
-        }
-
-        $data['info'][0]->rancho = null;
-        if ($data['info'][0]->id_rancho)
-        {
-          $this->load->model('ranchos_model');
-          $data['info'][0]->rancho = $this->ranchos_model->getRanchoInfo($data['info'][0]->id_rancho, true)['info'];
-        }
-
-        $data['info'][0]->centroCosto = null;
-        if ($data['info'][0]->id_centro_costo)
-        {
-          $this->load->model('centros_costos_model');
-          $data['info'][0]->centroCosto = $this->centros_costos_model->getCentroCostoInfo($data['info'][0]->id_centro_costo, true)['info'];
-        }
-
-        $data['info'][0]->activo = null;
-        if ($data['info'][0]->id_activo)
-        {
-          $this->load->model('productos_model');
-          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
+          $data['info']->movimientos = $query->result();
         }
       }
 
@@ -361,11 +181,11 @@ class registro_movimientos_model extends CI_Model {
     return $data;
   }
 
-  public function folio($tipo = 'p')
+  public function folio($empresa_id)
   {
     $res = $this->db->select('folio')
-      ->from('compras_salidas')
-      ->where('concepto', null)
+      ->from('otros.polizas')
+      ->where('id_empresa', $empresa_id)
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
