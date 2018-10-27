@@ -83,7 +83,7 @@
               </div>
               <div class="span4">
                 <div class="row-fluid">
-                  <input type="hidden" name="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
+                  <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
                   <?php if ($cajas_cerradas) { ?>
                     <div>Para modificar la caja no tiene que haber días cerrados mayores a esta fecha</div>
@@ -212,7 +212,9 @@
                             <tr>
                               <th colspan="4">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                <?php if ($_GET['fno_caja'] !== '1'): ?>
                                 <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
+                                <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>
                             </tr>
@@ -386,7 +388,11 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="6">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="6">GASTOS DEL DIA
+                                    <?php if ($_GET['fno_caja'] !== '1'): ?>
+                                    <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php endif ?>
+                                  </th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
                                 <tr>

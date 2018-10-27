@@ -28,7 +28,7 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Bascula intangilbes @done (18-10-24 20:50) pcc
+ ✔ New -> Bascula intangilbes @done (18-10-24 20:50) pcc|pct
      ALTER TABLE public.bascula ADD COLUMN intangible boolean NOT NULL DEFAULT false;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Boletas intangibles',42,TRUE,'bascula/aintangibles/','file-text-alt',FALSE);
  ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc
