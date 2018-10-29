@@ -243,8 +243,9 @@ class caja_chica_model extends CI_Model {
         }
       }
       $info['saldo_clientes'] = $empresas;
+    }
 
-
+    if ($noCaja == '2' || $noCaja == '1') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -1500,7 +1501,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
     $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 1) {
       // Deudores
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
