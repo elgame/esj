@@ -29,10 +29,13 @@ RUBÃ IZAGUIRRE
  ✔ Agregar a los productos el tipo de color para distinguir para cultivos orgánicos @done (18-09-26 20:54)
  ✔ Crear catalogo de ranchos @done (18-10-01 10:19)
  ✔ Crear catalogo de centros de costo y asignar a proveedores multi costos @done (18-10-01 22:03)
- ✔ En Ordenes de requisicion, ordenes de compra y gastos agregar los nuevos catalogos para reportes @done (18-10-16 10:10)
- ✔ activos agregar tipo de activo (Movliario, vehiculo, etc), Cambiar nombre al area a cultivo y productos poner otra lista de precios @done (18-10-16 20:35)
- ✔ En salidas agregar los nuevos catalogos @done (18-10-16 20:35)
- ☐ Quitar los retiro y depositos de bancos, porque se registrarin desde el apartado de Registro manual de movimientos (contable)
+ ✔ En Ordenes de requisición, ordenes de compra y gastos agregar los nuevos catalogos para reportes @done (18-10-16 10:10)
+ ✔ activos agregar tipo de activo (Mobiliario, vehículo, etc), Cambiar nombre al area a cultivo y productos poner otra lista de precios @done (18-10-16 20:35)
+ ✔ En salidas agregar los nuevos catálogos @done (18-10-16 20:35)
+ ✔ En bancos agregar los nuevos catálogos en retiros y depósitos directos @done (18-10-24 20:49)
+ ✔ En caja chica en los gastos agregar los nuevos catálogos @done (18-10-24 20:45)
+ ✔ En bascula agregar cheque con privilegio para agregar las boletas intangibles @done (18-10-24 20:46)
+ ☐ Quitar los retiro y depósitos de bancos, porque se registrarían desde el apartado de Registro manual de movimientos (contable)
  ☐ Crear apartado de Registro manual de movimientos utilizando el catalogo de centros de costo,
    y en centro de costo el tipo "banco" se cambiaria por Gastos finacieros y se agregaria el tipo "banco" que
    serian para las cuentas de banco (esas se tienen que ligar con las cuentas de banco), Agregar en centro de costo
