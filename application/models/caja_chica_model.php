@@ -6,6 +6,7 @@ class caja_chica_model extends CI_Model {
   {
     $info = array(
       'saldo_inicial'         => 0,
+      'fondo_caja'            => 0,
       'ingresos'              => array(),
       'otros'                 => array(),
       'remisiones'            => array(),
@@ -20,6 +21,18 @@ class caja_chica_model extends CI_Model {
       'deudores_prest_dia'    => 0,
       'deudores_abonos_dia'   => 0,
     );
+
+    // Obtiene el saldo incial.
+    $fondoCaja = $this->db->query(
+      "SELECT presupuesto
+       FROM cajachicas
+       WHERE no_caja = '{$noCaja}'
+       LIMIT 1"
+    );
+    if ($fondoCaja->num_rows() > 0)
+    {
+      $info['fondo_caja'] = $fondoCaja->result()[0]->presupuesto;
+    }
 
     // Obtiene el saldo incial.
     $ultimoSaldo = $this->db->query(
@@ -1827,7 +1840,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
     // $page_aux = $pdf->page;
     $pdf->page = 1;
@@ -1835,7 +1848,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(110, 26.5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($caja['fondo_caja'] , 2, '$', false)), false, false);
     $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
 
     // if(count($codigoAreas) > 0){
