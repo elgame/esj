@@ -78,11 +78,14 @@
                 <div class="row-fluid">
 
                   <div class="span12 mquit">
-                    <div class="span5">
+                    <div class="span4">
                       <input type="text" name="centroCosto" class="span12" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
                       <input type="hidden" name="centroCostoId" id="centroCostoId" value="">
                     </div><!--/span3s -->
-                    <div class="span3">
+                    <div class="span2">
+                      <input type="text" value="" class="span12 vpositive" id="fcuentaCtp" placeholder="Contpaq">
+                    </div>
+                    <div class="span2">
                       <select name="tipo" id="tipo" class="span12">
                         <option value="t">Suma</option>
                         <option value="f">Resta</option>
@@ -103,6 +106,7 @@
                       <thead>
                         <tr>
                           <th>CENTRO DE COSTO</th>
+                          <th>CONTPAQ</th>
                           <th>TIPO</th>
                           <th>CANT.</th>
                           <th></th>
@@ -119,6 +123,10 @@
                                 <?php echo $_POST['centroCosto'][$key] ?>
                               </td>
                               <td>
+                                <?php echo $_POST['cuentaCtp'][$key] ?>
+                                <input type="hidden" name="cuentaCtp[]" value="<?php echo $_POST['cuentaCtp'][$key] ?>" class="span12 cuentaCtp">
+                              </td>
+                              <td>
                                 <?php echo ($_POST['tipo'][$key] == 't'? 'Suma': 'Resta') ?>
                                 <input type="hidden" name="tipo[]" value="<?php echo $_POST['tipo'][$key] ?>" class="span12 tipo">
                               </td>
@@ -132,6 +140,7 @@
                       </tbody>
                       <tfoot>
                         <tr>
+                          <td></td>
                           <td>Sumas: <strong id="sumas"></strong></td>
                           <td>Restas: <strong id="restas"></strong></td>
                           <td>Diferencia: <strong id="diferencia"></strong></td>

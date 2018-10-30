@@ -32,8 +32,16 @@
                   <div class="control-group">
                     <label class="control-label" for="nombre">Nombre </label>
                     <div class="controls">
-                      <input type="text" name="nombre" id="nombre" class="span10" maxlength="100"
+                      <input type="text" name="nombre" id="nombre" class="span10" maxlength="100" autofocus
                       value="<?php echo set_value('nombre'); ?>" required placeholder="centro de costo">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="cuenta_cpi">Cuenta Contpaq </label>
+                    <div class="controls">
+                      <input type="text" name="cuenta_cpi" id="cuenta_cpi" class="span10" maxlength="15"
+                      value="<?php echo set_value('cuenta_cpi'); ?>" placeholder="cuenta contpaq">
                     </div>
                   </div>
 

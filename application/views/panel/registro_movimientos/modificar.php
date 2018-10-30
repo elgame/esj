@@ -32,7 +32,7 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo isset($poliza['info']->empresa)? $poliza['info']->empresa:''; ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo isset($poliza['info']->empresa)? $poliza['info']->empresa:''; ?>" placeholder="" autofocus readonly><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
                   <input type="hidden" name="empresaId" id="empresaId" value="<?php echo isset($poliza['info']->id_empresa)? $poliza['info']->id_empresa:''; ?>">
                 </div>
@@ -42,7 +42,7 @@
                 <label class="control-label" for="concepto">Concepto</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="concepto" class="span11" id="concepto" value="<?php echo isset($poliza['info']->concepto)? $poliza['info']->concepto:''; ?>" placeholder="" required>
+                    <input type="text" name="concepto" class="span11" id="concepto" value="<?php echo isset($poliza['info']->concepto)? $poliza['info']->concepto:''; ?>" placeholder="" required readonly>
                   </div>
                 </div>
               </div>
@@ -52,14 +52,14 @@
               <div class="control-group">
                 <label class="control-label" for="fecha">Fecha</label>
                 <div class="controls">
-                  <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo isset($poliza['info']->fecha)? $poliza['info']->fecha:''; ?>">
+                  <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo isset($poliza['info']->fecha)? $poliza['info']->fecha:''; ?>" readonly>
                 </div>
               </div>
 
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
-                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                      <!-- <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button> -->
                   </div>
                 </div>
               </div>
@@ -77,24 +77,27 @@
               <div class="box-content">
                 <div class="row-fluid">
 
-                  <div class="span12 mquit">
-                    <div class="span5">
+                  <!-- <div class="span12 mquit">
+                    <div class="span4">
                       <input type="text" name="centroCosto" class="span12" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
                       <input type="hidden" name="centroCostoId" id="centroCostoId" value="">
-                    </div><!--/span3s -->
-                    <div class="span3">
+                    </div>
+                    <div class="span2">
+                      <input type="text" value="" class="span12 vpositive" id="fcuentaCtp" placeholder="Contpaq">
+                    </div>
+                    <div class="span2">
                       <select name="tipo" id="tipo" class="span12">
                         <option value="t">Suma</option>
                         <option value="f">Resta</option>
                       </select>
-                    </div><!--/span3s -->
+                    </div>
                     <div class="span2">
                       <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
-                    </div><!--/span3s -->
+                    </div>
                     <div class="span2">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
-                    </div><!--/span2 -->
-                  </div><!--/span12 -->
+                    </div>
+                  </div> -->
                 </div><!--/row-fluid -->
                 <br>
                 <div class="row-fluid">
@@ -103,6 +106,7 @@
                       <thead>
                         <tr>
                           <th>CENTRO DE COSTO</th>
+                          <th>CONTPAQ</th>
                           <th>TIPO</th>
                           <th>CANT.</th>
                           <th></th>
@@ -129,6 +133,10 @@
                                 <?php echo $movimiento->centro_costo ?>
                               </td>
                               <td>
+                                <?php echo $movimiento->cuenta_cpi ?>
+                                <input type="hidden" name="cuentaCtp[]" value="<?php echo $movimiento->cuenta_cpi ?>" class="span12 cuentaCtp">
+                              </td>
+                              <td>
                                 <?php echo $tipo ?>
                                 <input type="hidden" name="tipo[]" value="<?php echo $movimiento->tipo ?>" class="span12 tipo">
                               </td>
@@ -136,7 +144,9 @@
                                 <?php echo $movimiento->monto ?>
                                 <input type="hidden" name="cantidad[]" value="<?php echo $movimiento->monto ?>" class="span12 cantidad">
                               </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
+                              <td style="width: 35px;">
+                                <!-- <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button> -->
+                              </td>
                             </tr>
                          <?php }} ?>
                       </tbody>

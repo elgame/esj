@@ -122,8 +122,10 @@ class registro_movimientos_model extends CI_Model {
   {
     if ( ! $movimientos)
     {
+      $this->load->model('centros_costos_model');
+
       $movimientos = array();
-      foreach ($_POST['centroCostoId'] as $key => $concepto)
+      foreach ($_POST['centroCostoId'] as $key => $centroCostoId)
       {
         $movimientos[] = array(
           'id_poliza'       => $id_poliza,
@@ -131,7 +133,33 @@ class registro_movimientos_model extends CI_Model {
           'id_centro_costo' => $_POST['centroCostoId'][$key],
           'tipo'            => $_POST['tipo'][$key],
           'monto'           => $_POST['cantidad'][$key],
+          'cuenta_cpi'      => $_POST['cuentaCtp'][$key],
         );
+
+        $centro = $this->centros_costos_model->getCentroCostoInfo($centroCostoId, true);
+        if ($centro['info']->tipo == 'banco' && intval($centro['info']->id_cuenta) > 0) {
+          $cuenta = $this->banco_cuentas_model->getCuentaInfo($centro['info']->id_cuenta, true);
+
+          if ($data==NULL) {
+            $data = array(
+                  'id_cuenta'   => $centro['info']->id_cuenta,
+                  'id_banco'    => $cuenta['info']->id_banco,
+                  'fecha'       => str_replace('T', ' ', $_POST['fecha']).':'.date("H:i:s"),
+                  'numero_ref'  => $this->input->post('freferencia'),
+                  'concepto'    => $this->input->post('fconcepto'),
+                  'monto'       => $this->input->post('fmonto'),
+                  'tipo'        => 't',
+                  'entransito'  => 'f',
+                  'metodo_pago' => $this->input->post('fmetodo_pago'),
+                  'a_nombre_de' => $this->input->post('dcliente'),
+                  );
+            if(is_numeric($_POST['did_cliente']))
+              $data['id_cliente'] = $this->input->post('did_cliente');
+            if(is_numeric($_POST['did_cuentacpi']))
+              $data['cuenta_cpi'] = $this->input->post('did_cuentacpi');
+          }
+          $data['concepto'] = substr($data['concepto'], 0, 120);
+        }
       }
     }
 
@@ -164,7 +192,7 @@ class registro_movimientos_model extends CI_Model {
       if ($full)
       {
         $query = $this->db->query(
-          "SELECT pm.id_poliza, pm.row, pm.id_centro_costo, cc.nombre AS centro_costo, pm.tipo, pm.monto
+          "SELECT pm.id_poliza, pm.row, pm.id_centro_costo, cc.nombre AS centro_costo, pm.tipo, pm.monto, pm.cuenta_cpi
           FROM otros.polizas_movimientos AS pm
             INNER JOIN otros.centro_costo AS cc ON cc.id_centro_costo = pm.id_centro_costo
           WHERE pm.id_poliza = {$data['info']->id}");

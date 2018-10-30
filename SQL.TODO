@@ -28,6 +28,11 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
+ ✔ New -> Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap
+     ALTER TABLE otros.centro_costo ADD COLUMN cuenta_cpi character varying(15);
+     ALTER TABLE otros.polizas_movimientos ADD COLUMN cuenta_cpi character varying(15);
+ ✔ New -> Cambio en activos @done (18-10-23 12:55) lap
+     ALTER TABLE public.productos ADD COLUMN monto double precision NOT NULL DEFAULT 0;
  ✔ New -> Caja chica de rosy poner saldo y no agregar gastos @done (18-10-29 16:26) pct|lap
     CREATE TABLE public.cajachicas
       (
@@ -49,8 +54,6 @@
  ✔ New -> Bascula intangilbes @done (18-10-24 20:50) pcc|pct|lap
      ALTER TABLE public.bascula ADD COLUMN intangible boolean NOT NULL DEFAULT false;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Boletas intangibles',42,TRUE,'bascula/aintangibles/','file-text-alt',FALSE);
- ✔ New -> Cambio en activos @done (18-10-23 12:55) lap
-     ALTER TABLE public.productos ADD COLUMN monto double precision NOT NULL DEFAULT 0;
  ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc|lap
      CREATE TABLE otros.polizas
         (
@@ -87,6 +90,7 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',480,FALSE,'registro_movimientos/cancelar/','ban-circle',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',480,FALSE,'registro_movimientos/imprimir/','print',FALSE);
  ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pcc|pct|lap
+     ALTER TABLE otros.centro_costo ADD COLUMN cuenta_cpi character varying(15);
      ALTER TABLE otros.centro_costo ADD COLUMN anios_credito integer;
      ALTER TABLE otros.centro_costo ADD COLUMN id_cuenta integer;
      ALTER TABLE otros.centro_costo ADD CONSTRAINT centro_costo_id_cuenta_fkey FOREIGN KEY (id_cuenta) REFERENCES public.banco_cuentas (id_cuenta) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
@@ -101,7 +105,7 @@
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a retiros de banco @done (18-10-08 21:42) pct
+✔ New -> Agregar catalogos a retiros de banco @done (18-10-08 21:42) pct|lap
      ALTER TABLE public.banco_movimientos ADD COLUMN id_area integer;
      ALTER TABLE public.banco_movimientos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.banco_movimientos ADD COLUMN id_centro_costo bigint;
@@ -115,72 +119,108 @@
 ✔ New -> Seeder catalogo centro de costos @done (18-10-16 10:22) pct|pcc
       DELETE FROM otros.centro_costo;
       ALTER SEQUENCE otros.centro_costo_id_centro_costo_seq RESTART WITH 1;
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Sueldos y Salarios', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Aguinaldo', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Vacaciones', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Prima Vacacional', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Despensa', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('P Puntualidad', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('P Asistencia', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Horas Extras', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Indemnización Constitucional', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Prima de Antigüedad', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bonificación Laboral', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR PAGOS PROVISIONALES', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR RETENCIONES BANCO', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR SALDO A FAVOR', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IEPS PAGADO', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IVA ACREDITABLE', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SUBSIDIO PARA EL EMPLEO', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IMSS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INFONAVIT', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RCV', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR POR SALARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RETENCION IVA 4%', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RETENCION IVA 10.67% HONORARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RETENCION ISR 10% HONORARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RETENCION IVA 10.67% ARRENDAMIENTO', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RETENCION ISR 10% ARRENDAMIENTO', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR POR ASIMILABLES A SALARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR ANUAL', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PTU ANUAL', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('2% SOBRE NOMINAS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PROVISION RETENCION ISR 10% HONORARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PROVISION RETENCION IVA 10.67% HONORARIOS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PROVISION RETENCION ISR 10% ARRENDAMIENTO', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PROVISION RETENCION IVA 10.67% ARRENDAMIENTO', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PROVISION RETENCION IVA 4%', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IVA TRASLADADO', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('APOYOS RECIBIDOS', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SEGUROS Y FIANZAS', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CERTIFICADOS FITOSANITARIOS', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('REVISION DE CARGA', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('BULTOS MAQUILADOS', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('OTROS INGRESOS VARIOS', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RENDIMIENTOS BANCARIOS (INTERESES)', 'productofinanc');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GANANCIA CAMBIARIA', 'productofinanc');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SUELDOS Y SALARIOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('AGUINALDO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('VACACIONES', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PRIMA VACACIONAL', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('DESPENSA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('P PUNTUALIDAD', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('P ASISTENCIA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('HORAS EXTRAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INDEMNIZACION CONSTITUCIONAL', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PRIMA DE ANTIGUEDAD', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('BONIFICACION LABORAL', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IMSS', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INFONAVIT', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RCV', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('2% Sobre Nominas', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Impuestos y Derechos', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Recargos', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Arrendamiento P Física', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Arrendamiento P Moral', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Honorarios P Física', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Honorarios P Moral', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Depreciaciones', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gasolina', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Diesel', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gas L.P.', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Energía Eléctrica (Luz)', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Agua', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Teléfono', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Teléfono Celular', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Papelería y Art. de Oficina', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Viáticos y Gastos de Viaje', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mensajería y Paqueteria', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Publicidad', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Uniformes', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Seguridad y Vigilancia', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Seguros y Fianzas', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Artículos de Limpieza y Aseo', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Material y Herramientas de Trabajo', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Renta de Maquinaria', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Renta de Terrenos', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cuotas, Suscripciones y Membresías', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Capacitación y Adiestramiento', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gastos de Representación', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Pagadas por Ventas', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fletes y Acarreos', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisión y Representación de ventas', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gastos de Certificación ', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Estudios y Análisis de Suelo', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Constancias de Movilización', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fumigaciones', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cuentas Incobrables', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Despacho Aduanal y/o Otros Ca', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Conexión de Refrigerado', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Servicios de Facturación (Timbrado)', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Donativos', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gastos Varios', 'gasto');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Transporte', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Computo', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Mobiliario y Equipo', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Edificios e Instalaciones', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Maquinaria y Equipo', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Riego', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Sitio Web y Sistemas Informáticos', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Bancarias', 'banco');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Perdida Cambiaría', 'banco');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados', 'banco');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('2% SOBRE NOMINAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IMPUESTOS Y DERECHOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RECARGOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ARRENDAMIENTO P FISICA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ARRENDAMIENTO P MORAL', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('HONORARIOS P FISICA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('HONORARIOS P MORAL', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('DEPRECIACIONES', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GASOLINA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('DIESEL', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GAS L.P.', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ENERGIA ELECTRICA (LUZ)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('AGUA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('TELEFONO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('TELEFONO CELULAR', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PAPELERIA Y ART. DE OFICINA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('VIATICOS Y GASTOS DE VIAJE', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MENSAJERIA Y PAQUETERIA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PUBLICIDAD', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('UNIFORMES', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SEGURIDAD Y VIGILANCIA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SEGUROS Y FIANZAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ARTICULOS DE LIMPIEZA Y ASEO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MATERIAL Y HERRAMIENTAS DE TRABAJO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RENTA DE MAQUINARIA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RENTA DE TERRENOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CUOTAS, SUBCRIPCIONES Y MEMBRESIAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CAPACITACION Y ADIESTRAMIENTO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GASTOS DE REPRESENTACION', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('COMISIONES PAGADAS POR VENTAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('FLETES Y ACARREOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('COMISION Y REPRESENTACION DE VENTAS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GASTOS DE CERTIFICACIÓN ', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ESTUDIOS Y ANALISIS DE SUELO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CONSTANCIAS DE MOVILIZACIÓN', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('FUMIGACIONES', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CUENTAS INCOBRABLES', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('DESPACHO ADUANAL Y/O OTROS CA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CONEXION DE REFRIGERADO', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SERVICIOS DE FACTURACION (TIMBRADO)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('DONATIVOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('GASTOS VARIOS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PTU', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO DE SITIO WEB Y SISTEMAS INFORMATICOS', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO. DE EQUIPO DE TRANSPORTE', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO. DE EQUIPO DE COMPUTO', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO DE MOBILIARIO Y EQUIPO', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO. DE EDIFICIOS E INSTALACIONES', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO. DE MAQUINARIA Y EQUIPO', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MANTTO. DE EQUIPO DE RIEGO', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('COMISIONES BANCARIAS', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INTERESES ORDINARIOS', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INTERESES MORATORIOS', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PERDIDA CAMBIARIA', 'gastofinanciero');
 ✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc|pct
    ALTER TABLE public.productos ADD COLUMN tipo_activo character varying(5);
    COMMENT ON COLUMN public.productos.tipo_activo IS 'et: Equipo de Transporte, ec: Equipo de Computo, meo: Mobiliario y Equipo de Oficina, me: Maquinaria y Equipo, e: Edificios, t: Terrenos';

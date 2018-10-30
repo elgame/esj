@@ -19,23 +19,21 @@ $(function(){
     }
   });
 
-  // // Autocomplete areas
-  // $("#farea").autocomplete({
-  //   source: base_url + 'panel/areas/ajax_get_areas/',
-  //   minLength: 1,
-  //   selectFirst: true,
-  //   select: function( event, ui ) {
-  //     $("#did_area").val(ui.item.id);
-  //     $("#farea").val(ui.item.label).css({'background-color': '#99FF99'});
-  //   }
-  // }).keydown(function(e) {
-  //   if (e.which === 8) {
-  //     $(this).css({'background-color': '#FFD9B3'});
-  //     $('#did_area').val('');
-  //     $("#id_cuenta").val(ui.item.id);
-  //     $("#cuenta").val(ui.item.label).css({'background-color': '#99FF99'});
-  //   }
-  // });
+  // Autocomplete areas
+  $("#farea").autocomplete({
+    source: base_url + 'panel/areas/ajax_get_areas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_area").val(ui.item.id);
+      $("#farea").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e) {
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#did_area').val('');
+    }
+  });
 
   $("#cuenta").autocomplete({
     source: function(request, response) {
@@ -66,7 +64,7 @@ $(function(){
 
   $('#tipo').on('change', function(event) {
     var tipo = $(this).val();
-    $("#farea, #hectareas, #no_plantas, #anios_credito").val('');
+    $("#farea, #did_area, #hectareas, #no_plantas, #anios_credito, #fempresa, #did_empresa, #cuenta, #id_cuenta").val('');
 
     if (tipo == 'melga' || tipo == 'tabla' || tipo == 'seccion') {
       $('#is_lotes').show();

@@ -61,9 +61,9 @@
       selectFirst: true,
       select: function( event, ui ) {
         var $centroCosto =  $(this);
-
-        $centroCosto.val(ui.item.id);
+        // $centroCosto.val(ui.item.id);
         $("#centroCostoId").val(ui.item.id);
+        $("#fcuentaCtp").val(ui.item.item.cuenta_cpi);
         $centroCosto.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
@@ -83,6 +83,7 @@
     $('#btnAddProd').on('click', function(event) {
       var $centroCosto   = $('#centroCosto').css({'background-color': '#FFF'}),
           $centroCostoId = $('#centroCostoId').css({'background-color': '#FFF'}),
+          $cuentaCtp     = $('#fcuentaCtp').css({'background-color': '#FFF'}),
           $tipo          = $('#tipo'),
           $fcantidad     = $('#fcantidad').css({'background-color': '#FFF'}),
           campos         = [$fcantidad, $centroCosto],
@@ -128,6 +129,7 @@
         producto = {
           'centroCosto'   : $centroCosto.val(),
           'centroCostoId' : $centroCostoId.val(),
+          'cuentaCtp'     : $cuentaCtp.val(),
           'tipo'          : $tipo.val(),
           'cantidad'      : $fcantidad.val(),
         };
@@ -187,6 +189,10 @@
                     '<input type="hidden" name="centroCosto[]" value="'+producto.centroCosto+'" class="centroCosto">'+
                     '<input type="hidden" name="centroCostoId[]" value="'+(producto.centroCostoId||'0')+'" class="centroCostoId">'+
                     producto.centroCosto +
+                  '</td>' +
+                  '<td>' +
+                    producto.cuentaCtp +
+                    '<input type="hidden" name="cuentaCtp[]" value="'+producto.cuentaCtp+'" class="span12 cuentaCtp">' +
                   '</td>' +
                   '<td>' +
                     tipos[producto.tipo] +

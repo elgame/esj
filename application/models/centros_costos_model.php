@@ -79,6 +79,7 @@ class centros_costos_model extends CI_Model {
         'id_area'       => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
         'anios_credito' => floatval($this->input->post('anios_credito')),
         'id_cuenta'     => NULL,
+        'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -103,13 +104,14 @@ class centros_costos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'nombre'     => $this->input->post('nombre'),
-        'tipo'       => $this->input->post('tipo'),
-        'hectareas'  => floatval($this->input->post('hectareas')),
-        'no_plantas' => floatval($this->input->post('no_plantas')),
-        'id_area'    => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'nombre'        => $this->input->post('nombre'),
+        'tipo'          => $this->input->post('tipo'),
+        'hectareas'     => floatval($this->input->post('hectareas')),
+        'no_plantas'    => floatval($this->input->post('no_plantas')),
+        'id_area'       => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
         'anios_credito' => floatval($this->input->post('anios_credito')),
         'id_cuenta'     => NULL,
+        'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -134,7 +136,7 @@ class centros_costos_model extends CI_Model {
     $id_centro_costo = $id_centro_costo? $id_centro_costo: (isset($_GET['id'])? $_GET['id']: 0);
 
     $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas, anios_credito,
-                                  id_cuenta" )
+                                  id_cuenta, cuenta_cpi" )
                         ->from("otros.centro_costo")
                         ->where("id_centro_costo", $id_centro_costo)
                         ->get();
@@ -184,7 +186,7 @@ class centros_costos_model extends CI_Model {
       $sql .= $sqlX;
 
     $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, a.id_area, a.nombre AS area
+        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area
         FROM otros.centro_costo cc
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'

@@ -234,6 +234,9 @@ class centro_costo extends MY_Controller {
       array('field' => 'tipo',
             'label' => 'Tipo',
             'rules' => 'required'),
+      array('field' => 'cuenta_cpi',
+            'label' => 'Cuenta Contpaq',
+            'rules' => 'max_length[15]'),
 
       array('field' => 'farea',
             'label' => '',
