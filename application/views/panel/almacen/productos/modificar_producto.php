@@ -160,6 +160,13 @@
                     </select>
                   </div>
                 </div>
+                <div class="control-group">
+                  <label class="control-label" for="fmonto">Monto</label>
+                  <div class="controls">
+                    <input type="text" name="fmonto" id="fmonto" class="span12" maxlength="12"
+                        value="<?php echo set_value('fmonto', (isset($data['info']->monto)? $data['info']->monto: '')) ?>" placeholder="Monto">
+                  </div>
+                </div>
                 <?php endif ?>
               </div>
 

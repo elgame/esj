@@ -249,7 +249,9 @@ class productos_model extends CI_Model {
         'ieps'        => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
         'cuenta_cpi'  => $this->input->post('cuenta_contpaq'),
         'tipo'        => $this->input->post('ftipo'),
+        // Activos
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
+        'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
 				);
 		}
 
@@ -281,7 +283,9 @@ class productos_model extends CI_Model {
         'ieps'        => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
         'cuenta_cpi'  => $this->input->post('cuenta_contpaq'),
         'tipo'        => $this->input->post('ftipo'),
+        // Activos
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
+        'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
 			);
 		}
 
@@ -346,7 +350,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
-									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo" )
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo, monto" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();

@@ -28,7 +28,9 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc
+ ✔ New -> Cambio en activos @done (18-10-23 12:55) lap
+     ALTER TABLE public.productos ADD COLUMN monto double precision NOT NULL DEFAULT 0;
+ ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc|lap
      CREATE TABLE otros.polizas
         (
           id bigserial NOT NULL,
@@ -63,11 +65,11 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',480,FALSE,'registro_movimientos/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',480,FALSE,'registro_movimientos/cancelar/','ban-circle',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',480,FALSE,'registro_movimientos/imprimir/','print',FALSE);
- ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pcc|pct
+ ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pcc|pct|lap
      ALTER TABLE otros.centro_costo ADD COLUMN anios_credito integer;
      ALTER TABLE otros.centro_costo ADD COLUMN id_cuenta integer;
      ALTER TABLE otros.centro_costo ADD CONSTRAINT centro_costo_id_cuenta_fkey FOREIGN KEY (id_cuenta) REFERENCES public.banco_cuentas (id_cuenta) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct|pcc
+✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct|pcc|lap
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_areac integer;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_centro_costo bigint;
@@ -148,6 +150,7 @@
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Servicios de Facturación (Timbrado)', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Donativos', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gastos Varios', 'gasto');
+
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Transporte', 'servicio');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Computo', 'servicio');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Mobiliario y Equipo', 'servicio');
@@ -155,15 +158,54 @@
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Maquinaria y Equipo', 'servicio');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Riego', 'servicio');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Sitio Web y Sistemas Informáticos', 'servicio');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Bancarias', 'banco');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Perdida Cambiaría', 'banco');
-      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados', 'banco');
-✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc|pct
+
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Bancarias', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Perdida Cambiaría', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados', 'gastofinanciero');
+
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Rendimientos Bancarios (Intereses)', 'productofinanc');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Ganancia Cambiaria', 'productofinanc');
+
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Apoyos Recibidos', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Seguros y Fianzas', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Certificados Fitosanitarios', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Revision de Carga', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bultos Maquilados', 'otrosingresos');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Otros Ingresos Varios', 'otrosingresos');
+
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IMSS', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INFONAVIT', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RCV', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR por Salarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Retencion IVA 4%', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Retencion IVA 10.67% Honorarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Retencion ISR 10% Honorarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Retencion IVA 10.67% Arrendamiento', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Retencion ISR 10% Arrendamiento', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR por Asimilables a Salarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR Anual', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PTU Anual', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('2% Sobre Nominas', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Provision Retencion ISR 10% Honorarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Provision Retencion IVA 10.67% Honorarios', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Provision Retencion ISR 10% Arrendamiento', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Provision Retencion IVA 10.67% Arrendamiento', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Provision Retencion IVA 4%', 'impuestoxpagar');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IVA TRASLADADO', 'impuestoxpagar');
+
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR PAGOS PROVISIONALES', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR RETENCIONES BANCO', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR SALDO A FAVOR', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IEPS PAGADO', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IVA ACREDITABLE', 'impuestoafavor');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('SUBSIDIO PARA EL EMPLEO', 'impuestoafavor');
+✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc||lap
    ALTER TABLE public.productos ADD COLUMN tipo_activo character varying(5);
    COMMENT ON COLUMN public.productos.tipo_activo IS 'et: Equipo de Transporte, ec: Equipo de Computo, meo: Mobiliario y Equipo de Oficina, me: Maquinaria y Equipo, e: Edificios, t: Terrenos';
    ALTER TABLE public.compras ADD COLUMN intangible boolean DEFAULT false;
    COMMENT ON COLUMN public.compras.intangible IS 'true: son gastos por fuera o de facturas';
-✔ New -> Agregar catalogos a salidas @done (18-10-08 21:42) pcc|pct
+✔ New -> Agregar catalogos a salidas @done (18-10-08 21:42) pcc|pct|lap
      ALTER TABLE public.compras_salidas ADD COLUMN id_area integer;
      ALTER TABLE public.compras_salidas ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_salidas ADD COLUMN id_centro_costo bigint;
@@ -174,7 +216,7 @@
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a gastos @done (18-10-08 21:42) pcc|pct
+✔ New -> Agregar catalogos a gastos @done (18-10-08 21:42) pcc|pct|lap
      ALTER TABLE public.compras ADD COLUMN id_area integer;
      ALTER TABLE public.compras ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras ADD COLUMN id_centro_costo bigint;
@@ -185,7 +227,7 @@
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc|pct
+✔ New -> Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc|pct|lap
      ALTER TABLE public.compras_ordenes ADD COLUMN id_area integer;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_centro_costo bigint;
