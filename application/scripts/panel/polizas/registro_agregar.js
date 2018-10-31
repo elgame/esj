@@ -6,6 +6,7 @@
     $('#form').keyJump();
 
     autocompleteEmpresas();
+    autocompleteCliente();
     autocompleteCentroCosto();
 
     eventBtnAddProducto();
@@ -40,7 +41,37 @@
     });
   };
 
-  var autocompleteCentroCosto = function () {
+  var autocompleteCliente = function () {
+    $("#cliente").autocomplete({
+      source: function(request, response) {
+        $.ajax({
+          url: base_url+'panel/clientes/ajax_get_proveedores/',
+          dataType: "json",
+          data: {
+            term : request.term,
+            did_empresa : $("#empresaId").val()
+          },
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_cliente").val(ui.item.id);
+        $("#cliente").css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#cliente").css("background-color", "#FFD9B3");
+        $("#did_cliente").val("");
+      }
+    });
+  };
+
+  var centroCostoSel = null,
+  autocompleteCentroCosto = function () {
     $("#centroCosto").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
@@ -65,11 +96,20 @@
         $("#centroCostoId").val(ui.item.id);
         $("#fcuentaCtp").val(ui.item.item.cuenta_cpi);
         $centroCosto.css("background-color", "#A1F57A");
+        centroCostoSel = ui.item;
+
+        $('#grupoBanco').hide();
+        if (ui.item.item.tipo == 'banco') {
+          $('#grupoBanco').show();
+        }
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#centroCosto").css("background-color", "#FFD071");
         $("#centroCostoId").val('');
+        centroCostoSel = null;
+        $('#grupoBanco').hide();
+        $('#conceptoMov, #cliente, #did_cliente').val('');
       }
     });
   };
@@ -86,21 +126,14 @@
           $cuentaCtp     = $('#fcuentaCtp').css({'background-color': '#FFF'}),
           $tipo          = $('#tipo'),
           $fcantidad     = $('#fcantidad').css({'background-color': '#FFF'}),
+          $conceptoMov   = $('#conceptoMov').css({'background-color': '#FFF'}),
+          $cliente       = $('#cliente').css({'background-color': '#FFF'}),
+          $didCliente   = $('#did_cliente').css({'background-color': '#FFF'}),
+          $fmetodoPago  = $('#fmetodo_pago').css({'background-color': '#FFF'}),
           campos         = [$fcantidad, $centroCosto],
           producto,
           error          = false,
           msg = 'Los campos marcados son obligatorios.';
-
-      // Recorre los campos para verificar si alguno esta vacio. Si existen
-      // campos vacios entonces los pinta de amarillo y manda una alerta.
-      for (var i in campos) {
-        if (campos[i].val() === '') {
-          campos[i].css({'background-color': '#FDFC9A'})
-          error = true;
-        } else {
-          campos[i].css({'background-color': '#FFF'})
-        }
-      }
 
       // Si el tipo de orden es producto entonces verifica si se selecciono
       // un producto, si no no deja agregar descripciones.
@@ -123,6 +156,20 @@
         }
       });
 
+      if (centroCostoSel.item.tipo == 'banco') {
+        campos.push($conceptoMov, $cliente);
+      }
+      // Recorre los campos para verificar si alguno esta vacio. Si existen
+      // campos vacios entonces los pinta de amarillo y manda una alerta.
+      for (var i in campos) {
+        if (campos[i].val() === '') {
+          campos[i].css({'background-color': '#FDFC9A'})
+          error = true;
+        } else {
+          campos[i].css({'background-color': '#FFF'})
+        }
+      }
+
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
       if ( ! error) {
@@ -132,6 +179,11 @@
           'cuentaCtp'     : $cuentaCtp.val(),
           'tipo'          : $tipo.val(),
           'cantidad'      : $fcantidad.val(),
+
+          'conceptoMov'   : $conceptoMov.val(),
+          'cliente'       : $cliente.val(),
+          'idCliente'     : $didCliente.val(),
+          'metodoPago'    : $fmetodoPago.val(),
         };
 
         addProducto(producto);
@@ -160,9 +212,13 @@
   };
 
   var eventCantKeypress = function () {
-    $('#fcantidad').on('keypress', function(event) {
+    $('#fcantidad, #fmetodo_pago').on('keypress', function(event) {
       if (event.which === 13) {
-        $('#btnAddProd').click();
+        if ($(this).attr('id') == 'fcantidad' && centroCostoSel && centroCostoSel.item.tipo != 'banco') {
+          $('#btnAddProd').click();
+        } else if ($(this).attr('id') == 'fmetodo_pago' && centroCostoSel && centroCostoSel.item.tipo == 'banco') {
+          $('#btnAddProd').click();
+        }
       }
     });
   };
@@ -186,6 +242,11 @@
     if ( ! exist) {
       $trHtml = $('<tr>' +
                   '<td>' +
+                    '<input type="hidden" name="conceptoMov[]" value="'+producto.conceptoMov+'" class="conceptoMov">'+
+                    '<input type="hidden" name="cliente[]" value="'+producto.cliente+'" class="cliente">'+
+                    '<input type="hidden" name="idCliente[]" value="'+producto.idCliente+'" class="idCliente">'+
+                    '<input type="hidden" name="metodoPago[]" value="'+producto.metodoPago+'" class="metodoPago">'+
+
                     '<input type="hidden" name="centroCosto[]" value="'+producto.centroCosto+'" class="centroCosto">'+
                     '<input type="hidden" name="centroCostoId[]" value="'+(producto.centroCostoId||'0')+'" class="centroCostoId">'+
                     producto.centroCosto +

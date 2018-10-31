@@ -78,25 +78,49 @@
                 <div class="row-fluid">
 
                   <div class="span12 mquit">
-                    <div class="span4">
-                      <input type="text" name="centroCosto" class="span12" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
-                      <input type="hidden" name="centroCostoId" id="centroCostoId" value="">
-                    </div><!--/span3s -->
-                    <div class="span2">
-                      <input type="text" value="" class="span12 vpositive" id="fcuentaCtp" placeholder="Contpaq">
-                    </div>
-                    <div class="span2">
-                      <select name="tipo" id="tipo" class="span12">
-                        <option value="t">Suma</option>
-                        <option value="f">Resta</option>
-                      </select>
-                    </div><!--/span3s -->
-                    <div class="span2">
-                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
-                    </div><!--/span3s -->
-                    <div class="span2">
-                      <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
-                    </div><!--/span2 -->
+                    <!-- <div class="row-fluid">
+                    </div> -->
+                      <div class="span4">
+                        <input type="text" class="span12" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
+                        <input type="hidden" id="centroCostoId" value="">
+                      </div><!--/span3s -->
+                      <div class="span2">
+                        <input type="text" value="" class="span12 vpositive" id="fcuentaCtp" placeholder="Contpaq">
+                      </div>
+                      <div class="span2">
+                        <select id="tipo" class="span12">
+                          <option value="t">Suma</option>
+                          <option value="f">Resta</option>
+                        </select>
+                      </div><!--/span3s -->
+                      <div class="span2">
+                        <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant." data-next="conceptoMov">
+                      </div>
+
+                      <div style="display: none" id="grupoBanco">
+                        <div class="span4">
+                          <input type="text" class="span12 sikey" id="conceptoMov" value="" placeholder="Concepto del movimiento">
+                        </div>
+                        <div class="span4">
+                          <input type="text" class="span12 sikey" id="cliente" value="" placeholder="Cliente">
+                          <input type="hidden" id="did_cliente" value="">
+                        </div>
+                        <div class="span2">
+                          <select id="fmetodo_pago" class="sikey">
+                            <?php  foreach ($metods_pago as $key => $value) {
+                            ?>
+                            <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
+                            <?php
+                            } ?>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="span2">
+                        <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
+                      </div>
+                    <!-- <div class="row-fluid">
+                    </div> -->
                   </div><!--/span12 -->
                 </div><!--/row-fluid -->
                 <br>
@@ -118,6 +142,11 @@
                               foreach ($_POST['centroCostoId'] as $key => $concepto) { ?>
                             <tr>
                               <td>
+                                <input type="hidden" name="conceptoMov[]" value="<?php echo $_POST['conceptoMov'][$key] ?>" class="conceptoMov">
+                                <input type="hidden" name="cliente[]" value="<?php echo $_POST['cliente'][$key] ?>" class="cliente">
+                                <input type="hidden" name="idCliente[]" value="<?php echo $_POST['idCliente'][$key] ?>" class="idCliente">
+                                <input type="hidden" name="metodoPago[]" value="<?php echo $_POST['metodoPago'][$key] ?>" class="metodoPago">
+
                                 <input type="hidden" name="centroCosto[]" value="<?php echo $_POST['centroCosto'][$key] ?>" class="centroCosto">
                                 <input type="hidden" name="centroCostoId[]" value="<?php echo $_POST['centroCostoId'][$key] ?>" class="centroCostoId">
                                 <?php echo $_POST['centroCosto'][$key] ?>

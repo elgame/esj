@@ -99,6 +99,13 @@ class registro_movimientos extends MY_Controller {
 
     $params['fecha']      = str_replace(' ', 'T', date("Y-m-d H:i"));
 
+    $params['metods_pago']  = array(
+      array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+      array('nombre' => 'Cheque', 'value' => 'cheque'),
+      array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+      array('nombre' => 'Deposito', 'value' => 'deposito'),
+    );
+
     //imprimir
     $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
 

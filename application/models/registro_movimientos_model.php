@@ -91,9 +91,10 @@ class registro_movimientos_model extends CI_Model {
     }
     $this->db->insert('otros.polizas', $data);
     $id_poliza = $this->db->insert_id();
-    $this->agregarMovimientos($id_poliza);
 
-    return array('passes' => true, 'msg' => 3, 'id_poliza' => $id_poliza);
+    $movimiento = $this->agregarMovimientos($id_poliza);
+
+    return array('passes' => true, 'msg' => 3, 'id_poliza' => $id_poliza, 'movimiento' => $movimiento);
   }
 
   public function modificar($id_poliza, $data = null)
@@ -120,6 +121,7 @@ class registro_movimientos_model extends CI_Model {
    */
   public function agregarMovimientos($id_poliza, $movimientos = null)
   {
+    $cheques = [];
     if ( ! $movimientos)
     {
       $this->load->model('centros_costos_model');
@@ -140,31 +142,46 @@ class registro_movimientos_model extends CI_Model {
         if ($centro['info']->tipo == 'banco' && intval($centro['info']->id_cuenta) > 0) {
           $cuenta = $this->banco_cuentas_model->getCuentaInfo($centro['info']->id_cuenta, true);
 
-          if ($data==NULL) {
-            $data = array(
-                  'id_cuenta'   => $centro['info']->id_cuenta,
-                  'id_banco'    => $cuenta['info']->id_banco,
-                  'fecha'       => str_replace('T', ' ', $_POST['fecha']).':'.date("H:i:s"),
-                  'numero_ref'  => $this->input->post('freferencia'),
-                  'concepto'    => $this->input->post('fconcepto'),
-                  'monto'       => $this->input->post('fmonto'),
-                  'tipo'        => 't',
-                  'entransito'  => 'f',
-                  'metodo_pago' => $this->input->post('fmetodo_pago'),
-                  'a_nombre_de' => $this->input->post('dcliente'),
-                  );
-            if(is_numeric($_POST['did_cliente']))
-              $data['id_cliente'] = $this->input->post('did_cliente');
-            if(is_numeric($_POST['did_cuentacpi']))
-              $data['cuenta_cpi'] = $this->input->post('did_cuentacpi');
+          $data = array(
+            'id_cuenta'   => $centro['info']->id_cuenta,
+            'id_banco'    => $cuenta['info']->id_banco,
+            'fecha'       => str_replace('T', ' ', $_POST['fecha']).':'.date("H:i:s"),
+            'numero_ref'  => '',
+            'concepto'    => substr($_POST['conceptoMov'][$key], 0, 120),
+            'monto'       => $_POST['cantidad'][$key],
+            'tipo'        => $_POST['tipo'][$key],
+            'entransito'  => 'f',
+            'metodo_pago' => $_POST['metodoPago'][$key],
+            'a_nombre_de' => $_POST['cliente'][$key],
+          );
+          if(is_numeric($_POST['idCliente'][$key]))
+            $data['id_cliente'] = $_POST['idCliente'][$key];
+          if($_POST['cuentaCtp'][$key] != '')
+            $data['cuenta_cpi'] = $_POST['cuentaCtp'][$key];
+
+          if ($_POST['tipo'][$key] == 't') {
+            $movimiento = $this->banco_cuentas_model->addDeposito($data);
+          } else {
+            $movimiento = $this->banco_cuentas_model->addRetiro($data);
           }
-          $data['concepto'] = substr($data['concepto'], 0, 120);
+
+          // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
+          if (isset($movimiento['id_movimiento']) && $movimiento['id_movimiento'] > 0) {
+            $movimientos[count($movimientos)-1]['id_movimiento'] = $movimiento['id_movimiento'];
+            // si es cheque se agrega para mostrar la impresión
+            if ($_POST['metodoPago'][$key] == 'cheque') {
+              $cheques[]
+            }
+          }
+
         }
       }
     }
 
     $this->db->delete('otros.polizas_movimientos', "id_poliza = {$id_poliza}");
     $this->db->insert_batch('otros.polizas_movimientos', $movimientos);
+
+    return $movimiento;
   }
 
 
