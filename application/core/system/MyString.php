@@ -244,7 +244,7 @@ class MyString {
     while (isset($num[0]) && $num[0] == '0') $num = substr($num, 1);
     if (isset($num[0]) && ($num[0] < '1' or $num[0] > 9))
       $num = '0' . $num;
-    else
+    elseif (!isset($num[0]))
       $num = '0';
     $zeros = true;
     $punt = false;
