@@ -105,7 +105,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $factura;
   }
 
-  public function addComPago($id_movimiento, $id_cuenta_cliente)
+  public function addComPago($id_movimiento, $id_cuenta_cliente, $cfdiRel = null)
   {
     $query = $this->db->query(
           "SELECT *, (select Count(id_movimiento) from banco_movimientos_com_pagos where id_movimiento = {$id_movimiento}) AS num_row
@@ -120,7 +120,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           "SELECT bm.id_movimiento, bm.fecha, bm.metodo_pago AS forma_pago, bm.concepto,
             bm.monto AS pago, bc.numero AS num_cuenta, (caf.total - Coalesce(fao.total, 0)) AS pago_factura, v.version, v.serie, v.folio,
             v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa, v.metodo_pago,
-            bb.rfc, bb.nombre AS banco
+            v.moneda, v.tipo_cambio, bb.rfc, bb.nombre AS banco
            FROM banco_movimientos bm
             INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
             INNER JOIN banco_bancos bb ON bb.id_banco = bm.id_banco
@@ -156,7 +156,8 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         $queryMov[0]->num_cuenta = str_replace('-', '', $queryMov[0]->num_cuenta);
 
         // xml 3.3
-        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio);
+        $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
+        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio, $cfdiRel);
         // echo "<pre>";
         //   var_dump($datosApi);
         // echo "</pre>";exit;
@@ -169,31 +170,6 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
         if ($result['passes'])
         {
-
-          // // $xmlName = explode('/', $archivos['pathXML']);
-
-          // // copy($archivos['pathXML'], $pathDocs.end($xmlName));
-
-          // //Si es otra moneda actualiza al tipo de cambio
-          // if($datosFactura['moneda'] !== 'MXN')
-          // {
-          //   $datosFactura1 = array();
-          //   $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
-
-          //   foreach ($productosFactura as $key => $value)
-          //   {
-          //     $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
-          //   }
-          // }
-
           $dataTimbrado = array(
             'id_movimiento'   => $id_movimiento,
             'id_empresa'      => $queryMov[0]->id_empresa,
@@ -325,6 +301,46 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     }
 
     return array('msg' => $status_uuid);
+  }
+
+  public function getComPagosAjax(){
+    $sql = '';
+    if ($this->input->get('term') !== false) {
+      $sql = " AND f.folio::text LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+    }
+
+    if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
+      $sql .= " AND e.id_empresa = ".$this->input->get('did_empresa')."";
+    if ($this->input->get('did_cliente') !== false && $this->input->get('did_cliente') !== '')
+      $sql .= " AND c.id_cliente = ".$this->input->get('did_cliente')."";
+
+    $res = $this->db->query(
+        "SELECT
+          f.id, Date(f.fecha) AS fecha, f.serie, f.folio, f.uuid, f.id_empresa, bm.monto,
+          c.nombre_fiscal, e.nombre_fiscal AS empresa
+        FROM banco_movimientos_com_pagos AS f
+          LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
+          LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+          INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
+        WHERE 1 = 1
+         {$sql}
+        ORDER BY fecha DESC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->uuid,
+            'label' => $itm->serie.$itm->folio.' | '.$itm->nombre_fiscal.' | '.number_format($itm->monto, 2),
+            'value' => $itm->serie.$itm->folio.' | '.$itm->nombre_fiscal.' | '.number_format($itm->monto, 2),
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
   }
 
   public function descargarZipCP($idFactura)

@@ -27,19 +27,51 @@
                 <div class="controls">
                   <select name="dcuenta" id="dcuenta" required>
                     <option value=""></option>
-                <?php
-                foreach ($cuentas as $key => $value) {
-                ?>
+                    <?php
+                    foreach ($cuentas as $key => $value) {
+                    ?>
                     <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->full_alias; ?></option>
-                <?php
-                }
-                ?>
+                    <?php
+                    }
+                    ?>
                   </select>
                 </div>
               </div>
             <?php } ?>
+              <hr>
+              <div class="control-group">
+                <label class="control-label" for="dcuenta">Tipo relación</label>
+                <div class="controls">
+                  <select name="cfdiRel[tipo]" id="cfdiRelTipo">
+                    <option value=""></option>
+                    <?php
+                    foreach ($tiposRelacion as $key => $value) {
+                    ?>
+                    <option value="<?php echo $value['key']; ?>" <?php echo set_select('cfdiRel[tipo]', $value['key']); ?>><?php echo $value['key'].' - '.$value['value']; ?></option>
+                    <?php
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div>
 
-            <button type="submit" name="save" id="btnRegComPago" class="btn btn-success btn-large">
+              <div class="control-group">
+                <label class="control-label" for="addComplemento">Complemento de pago </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" class="span11" id="addComplemento" placeholder="folio de complemento de pago">
+                    <input type="hidden" id="empresaId" value="<?php echo $movs->id_empresa ?>">
+                    <input type="hidden" id="clienteId" value="<?php echo $movs->id_cliente ?>">
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <ol id="listaComPago">
+                </ol>
+              </div>
+
+            <button type="submit" name="save" id="btnRegComPago" class="btn btn-success btn-large" style="float: right;">
               <img class="loader" src="<?php echo base_url('application/images/bootstrap/ajax-loaders/ajax-loader-9.gif'); ?>" style="display: none;">
               Registrar</button>
           </div><!--/row-->
