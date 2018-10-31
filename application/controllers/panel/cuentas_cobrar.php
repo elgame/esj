@@ -28,6 +28,7 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/cancelar_com_pago/',
     'cuentas_cobrar/imprimir_com_pago/',
     'cuentas_cobrar/xml_com_pago/',
+    'cuentas_cobrar/ajax_get_com_pagos/',
   );
 
 
@@ -341,7 +342,10 @@ class cuentas_cobrar extends MY_Controller {
       $params['template']   = '';
       $params['closeModal'] = false;
 
-      $movs = $this->db->query("SELECT id_cliente, metodo_pago FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
+      $movs = $this->db->query("SELECT bm.id_cliente, bm.metodo_pago, bc.id_empresa
+        FROM banco_movimientos bm
+          INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
+        WHERE bm.id_movimiento = {$_GET['idm']}")->row();
 
         // echo "<pre>";
         //   var_dump('dd', $_POST);
@@ -349,7 +353,7 @@ class cuentas_cobrar extends MY_Controller {
       if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');
-        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0));
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel']);
         if($respons['passes']) {
           $params['frm_errors'] = $this->showMsgs('8', $respons['msg']);
           $params['closeModal'] = true;
@@ -367,6 +371,10 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->model('clientes_model');
       $params['cuentas'] = $this->clientes_model->getCuentas($movs->id_cliente);
       $params['metodo_pago'] = $movs->metodo_pago;
+      $params['movs'] = $movs;
+
+      $tipoRelacionC = new TipoRelacion;
+      $params['tiposRelacion'] = $tipoRelacionC->get();
 
       $params['noHeader'] = false;
       $this->load->view('panel/header', $params);
@@ -374,6 +382,13 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->view('panel/footer', $params);
     }else
       redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'idm')).'&msg=1'));
+  }
+
+  public function ajax_get_com_pagos(){
+    $this->load->model('cuentas_cobrar_pago_model');
+    $params = $this->cuentas_cobrar_pago_model->getComPagosAjax();
+
+    echo json_encode($params);
   }
 
   public function cancelar_com_pago()
