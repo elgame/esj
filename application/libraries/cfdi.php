@@ -1058,7 +1058,7 @@ class cfdi{
     return $datosApi;
   }
 
-  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio)
+  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio, $cfdiRelacionados = null)
   {
     // echo "<pre>";
     //   var_dump($data, $cuentaCliente);
@@ -1093,10 +1093,18 @@ class cfdi{
       $nombreBancoOrdExt = $cuentaCliente->banco;
     }
 
-    $cfdiRel = array(
-      'tipoRelacion' => '04',
-      'cfdiRelacionado' => array(),
-    );
+    if ($cfdiRelacionados != null) {
+      $cfdiRel = array(
+        'tipoRelacion' => $cfdiRelacionados['tipo'],
+        'cfdiRelacionado' => array(),
+      );
+      foreach ($cfdiRelacionados['uuids'] as $key => $uuid) {
+        $cfdiRel['cfdiRelacionado'][] = array(
+          'uuid' => $uuid,
+        );
+      }
+    }
+
     $comPago = [
       'cadenaPago'        => "",
       'certificadoPago'   => "",
@@ -1117,12 +1125,6 @@ class cfdi{
     ];
     foreach ($data as $key => $pago) {
       if (floatval($pago->version) > 3.2) {
-        // if ($pago->parcialidades > 1) {
-        //   $cfdiRel['tipoRelacion'] = '07';
-        // }
-        $cfdiRel['cfdiRelacionado'][] = array(
-          'uuid' => $pago->uuid,
-        );
 
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
@@ -1130,17 +1132,20 @@ class cfdi{
         $metodoDePago = $pago->metodo_pago;
         // if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
         //   $metodoDePago = 'PUE';
+
+        $pago->tipo_cambio = floatval($pago->tipo_cambio);
+        $pago->tipo_cambio = $pago->tipo_cambio > 0? $pago->tipo_cambio: 1;
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
-          "moneda"         => $cfdi_ext->moneda,
-          "tipoCambio"     => $cfdi_ext->tipoCambio,
+          "moneda"         => $pago->moneda,
+          "tipoCambio"     => $pago->tipo_cambio,
           "metodoDePago"   => $metodoDePago,
           "numParcialidad" => $pago->parcialidades,
-          "saldoAnterior"  => $saldoAnt,
-          "importePagado"  => $pago->pago_factura,
-          "saldoInsoluto"  => $saldo_factura['saldo']
+          "saldoAnterior"  => $saldoAnt/$pago->tipo_cambio,
+          "importePagado"  => $pago->pago_factura/$pago->tipo_cambio,
+          "saldoInsoluto"  => $saldo_factura['saldo']/$pago->tipo_cambio
         );
       }
     }
@@ -1229,7 +1234,7 @@ class cfdi{
       ],
       'pagos' => [$comPago]
     );
-    if ($cfdiRel) {
+    if (isset($cfdiRel)) {
       $datosApi['cfdiRelacionados'] = $cfdiRel;
     }
 
