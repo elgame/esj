@@ -156,7 +156,8 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         $queryMov[0]->num_cuenta = str_replace('-', '', $queryMov[0]->num_cuenta);
 
         // xml 3.3
-        $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
+        // $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
+        $cfdiRel = $cfdiRel['tipo'] != ''? $cfdiRel: null;
         $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio, $cfdiRel);
         // echo "<pre>";
         //   var_dump($datosApi);
