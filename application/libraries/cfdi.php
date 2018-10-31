@@ -1098,10 +1098,12 @@ class cfdi{
         'tipoRelacion' => $cfdiRelacionados['tipo'],
         'cfdiRelacionado' => array(),
       );
-      foreach ($cfdiRelacionados['uuids'] as $key => $uuid) {
-        $cfdiRel['cfdiRelacionado'][] = array(
-          'uuid' => $uuid,
-        );
+      if (isset($cfdiRelacionados['uuids'])) {
+        foreach ($cfdiRelacionados['uuids'] as $key => $uuid) {
+          $cfdiRel['cfdiRelacionado'][] = array(
+            'uuid' => $uuid,
+          );
+        }
       }
     }
 
@@ -1123,8 +1125,14 @@ class cfdi{
       'tipoCambio'        => $cfdi_ext->tipoCambio,
       'doctoRelacionado'  => []
     ];
+    $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
     foreach ($data as $key => $pago) {
       if (floatval($pago->version) > 3.2) {
+        if ($firstCfdiRel) { // cuando es la primera ves
+          $cfdiRel['cfdiRelacionado'][] = array(
+            'uuid' => $pago->uuid,
+          );
+        }
 
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
