@@ -28,7 +28,7 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
-✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct
+✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|lap
      ALTER TABLE otros.polizas_movimientos ADD COLUMN id_movimiento bigint;
      ALTER TABLE otros.polizas_movimientos ADD CONSTRAINT polizas_movimientos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
  ✔ New -> Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap|pct

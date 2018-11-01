@@ -138,6 +138,7 @@ class registro_movimientos_model extends CI_Model {
           'cuenta_cpi'      => $_POST['cuentaCtp'][$key],
         );
 
+        // Cuando es de tipo banco inserta el mov en bancos
         $centro = $this->centros_costos_model->getCentroCostoInfo($centroCostoId, true);
         if ($centro['info']->tipo == 'banco' && intval($centro['info']->id_cuenta) > 0) {
           $cuenta = $this->banco_cuentas_model->getCuentaInfo($centro['info']->id_cuenta, true);
@@ -168,10 +169,10 @@ class registro_movimientos_model extends CI_Model {
           // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
           if (isset($movimiento['id_movimiento']) && $movimiento['id_movimiento'] > 0) {
             $movimientos[count($movimientos)-1]['id_movimiento'] = $movimiento['id_movimiento'];
-            // si es cheque se agrega para mostrar la impresión
-            if ($_POST['metodoPago'][$key] == 'cheque') {
-              $cheques[]
-            }
+            // // si es cheque se agrega para mostrar la impresión
+            // if ($_POST['metodoPago'][$key] == 'cheque') {
+            //   $cheques[]
+            // }
           }
 
         }
