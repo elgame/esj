@@ -148,16 +148,19 @@
         error = true;
       }
 
-      $("#table-productos tbody tr").each(function(index, el) {
-        var $tr = $(this);
-        if ($tr.find('.centroCostoId').val() === $centroCostoId.val()) {
-          error = true;
-          msg = 'El centro de costo ya esta agregado a los movimientos.';
-        }
-      });
+      // $("#table-productos tbody tr").each(function(index, el) {
+      //   var $tr = $(this);
+      //   if ($tr.find('.centroCostoId').val() === $centroCostoId.val()) {
+      //     error = true;
+      //     msg = 'El centro de costo ya esta agregado a los movimientos.';
+      //   }
+      // });
 
       if (centroCostoSel.item.tipo == 'banco') {
-        campos.push($conceptoMov, $cliente);
+        campos.push($conceptoMov);
+        // if ($tipo.val() == 'f') {
+        //   campos.push($cliente);
+        // }
       }
       // Recorre los campos para verificar si alguno esta vacio. Si existen
       // campos vacios entonces los pinta de amarillo y manda una alerta.

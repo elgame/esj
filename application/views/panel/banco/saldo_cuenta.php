@@ -148,6 +148,10 @@
                         <li><a href="#" role="button" class="modalimprimir"
                           data-idm="<?php echo $movimiento->id_movimiento ?>"
                           data-idc=""><i class="icon-print"></i> Sello digital</a></li>
+                        <?php if ($movimiento->metodo_pago == 'cheque' && $movimiento->tipo == 'f'): ?>
+                        <li><a href="<?php echo base_url("panel/banco/cheque?id={$movimiento->id_movimiento}") ?>" role="button" target="_blank">
+                          <i class="icon-print"></i> Imprimir cheque</a></li>
+                        <?php endif ?>
                       </ul>
                     </div>
                 <?php } ?>

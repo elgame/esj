@@ -62,6 +62,7 @@
                   <th>Fecha</th>
                   <th>Folio</th>
                   <th>Empresa</th>
+                  <th>Concepto</th>
                   <th>Estado</th>
                   <th>Opc</th>
                 </tr>
@@ -72,6 +73,7 @@
                   <td><?php echo substr($poliza->fecha, 0, 10); ?></td>
                   <td><span class="label"><?php echo $poliza->folio; ?></span></td>
                   <td><?php echo $poliza->empresa; ?></td>
+                  <td><?php echo $poliza->concepto; ?></td>
                   <td><?php
                           $texto = 'CANCELADA';
                           $label = 'warning';

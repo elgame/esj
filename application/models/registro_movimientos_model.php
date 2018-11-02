@@ -119,76 +119,86 @@ class registro_movimientos_model extends CI_Model {
    *
    * @return array
    */
-  public function agregarMovimientos($id_poliza, $movimientos = null)
+  public function agregarMovimientos($id_poliza)
   {
     $cheques = [];
-    if ( ! $movimientos)
-    {
-      $this->load->model('centros_costos_model');
-
-      $movimientos = array();
-      foreach ($_POST['centroCostoId'] as $key => $centroCostoId)
-      {
-        $movimientos[] = array(
-          'id_poliza'       => $id_poliza,
-          'row'             => $key,
-          'id_centro_costo' => $_POST['centroCostoId'][$key],
-          'tipo'            => $_POST['tipo'][$key],
-          'monto'           => $_POST['cantidad'][$key],
-          'cuenta_cpi'      => $_POST['cuentaCtp'][$key],
-        );
-
-        // Cuando es de tipo banco inserta el mov en bancos
-        $centro = $this->centros_costos_model->getCentroCostoInfo($centroCostoId, true);
-        if ($centro['info']->tipo == 'banco' && intval($centro['info']->id_cuenta) > 0) {
-          $cuenta = $this->banco_cuentas_model->getCuentaInfo($centro['info']->id_cuenta, true);
-
-          $data = array(
-            'id_cuenta'   => $centro['info']->id_cuenta,
-            'id_banco'    => $cuenta['info']->id_banco,
-            'fecha'       => str_replace('T', ' ', $_POST['fecha']).':'.date("H:i:s"),
-            'numero_ref'  => '',
-            'concepto'    => substr($_POST['conceptoMov'][$key], 0, 120),
-            'monto'       => $_POST['cantidad'][$key],
-            'tipo'        => $_POST['tipo'][$key],
-            'entransito'  => 'f',
-            'metodo_pago' => $_POST['metodoPago'][$key],
-            'a_nombre_de' => $_POST['cliente'][$key],
-          );
-          if(is_numeric($_POST['idCliente'][$key]))
-            $data['id_cliente'] = $_POST['idCliente'][$key];
-          if($_POST['cuentaCtp'][$key] != '')
-            $data['cuenta_cpi'] = $_POST['cuentaCtp'][$key];
-
-          if ($_POST['tipo'][$key] == 't') {
-            $movimiento = $this->banco_cuentas_model->addDeposito($data);
-          } else {
-            $movimiento = $this->banco_cuentas_model->addRetiro($data);
-          }
-
-          // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
-          if (isset($movimiento['id_movimiento']) && $movimiento['id_movimiento'] > 0) {
-            $movimientos[count($movimientos)-1]['id_movimiento'] = $movimiento['id_movimiento'];
-            // // si es cheque se agrega para mostrar la impresión
-            // if ($_POST['metodoPago'][$key] == 'cheque') {
-            //   $cheques[]
-            // }
-          }
-
-        }
-      }
-    }
+    $this->load->model('centros_costos_model');
+    $this->load->model('banco_cuentas_model');
 
     $this->db->delete('otros.polizas_movimientos', "id_poliza = {$id_poliza}");
-    $this->db->insert_batch('otros.polizas_movimientos', $movimientos);
 
-    return $movimiento;
+    $movimiento = $movimientos = array();
+    foreach ($_POST['centroCostoId'] as $key => $centroCostoId)
+    {
+      $movimiento = array(
+        'id_poliza'       => $id_poliza,
+        'row'             => $key,
+        'id_centro_costo' => $_POST['centroCostoId'][$key],
+        'tipo'            => $_POST['tipo'][$key],
+        'monto'           => $_POST['cantidad'][$key],
+        'cuenta_cpi'      => $_POST['cuentaCtp'][$key],
+      );
+
+      // Cuando es de tipo banco inserta el mov en bancos
+      $centro = $this->centros_costos_model->getCentroCostoInfo($centroCostoId, true);
+      if ($centro['info']->tipo == 'banco' && intval($centro['info']->id_cuenta) > 0) {
+        $cuenta = $this->banco_cuentas_model->getCuentaInfo($centro['info']->id_cuenta, true);
+
+        $data = array(
+          'id_cuenta'   => $centro['info']->id_cuenta,
+          'id_banco'    => $cuenta['info']->id_banco,
+          'fecha'       => str_replace('T', ' ', $_POST['fecha']).':'.date("H:i:s"),
+          'numero_ref'  => '',
+          'concepto'    => substr($_POST['conceptoMov'][$key], 0, 120),
+          'monto'       => $_POST['cantidad'][$key],
+          'tipo'        => $_POST['tipo'][$key],
+          'entransito'  => 'f',
+          'metodo_pago' => $_POST['metodoPago'][$key],
+          'a_nombre_de' => $_POST['cliente'][$key],
+        );
+        if(is_numeric($_POST['idCliente'][$key]))
+          $data['id_cliente'] = $_POST['idCliente'][$key];
+        if($_POST['cuentaCtp'][$key] != '')
+          $data['cuenta_cpi'] = $_POST['cuentaCtp'][$key];
+
+        if ($_POST['tipo'][$key] == 't') {
+          $movBanco = $this->banco_cuentas_model->addDeposito($data);
+        } else {
+          $movBanco = $this->banco_cuentas_model->addRetiro($data);
+        }
+
+        // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
+        if (isset($movBanco['id_movimiento']) && $movBanco['id_movimiento'] > 0) {
+          $movimiento['id_movimiento'] = $movBanco['id_movimiento'];
+          // // si es cheque se agrega para mostrar la impresión
+          // if ($_POST['metodoPago'][$key] == 'cheque') {
+          //   $cheques[]
+          // }
+        }
+      }
+
+      $movimientos[] = $movimiento;
+      $this->db->insert('otros.polizas_movimientos', $movimiento);
+    }
+
+    return $movimientos;
   }
 
 
   public function cancelar($id_poliza)
   {
     $this->db->update('otros.polizas', array('status' => 'f'), array('id' => $id_poliza));
+
+    $this->load->model('banco_cuentas_model');
+    $data = $this->info($id_poliza, true);
+    if (is_array($data['info']->movimientos)) {
+      foreach ($data['info']->movimientos as $key => $value) {
+        // Si hay un movimiento ligado de bancos se elimina
+        if ($value->id_movimiento > 0) {
+          $this->banco_cuentas_model->deleteMovimiento($value->id_movimiento);
+        }
+      }
+    }
     return array('passes' => true);
   }
 
@@ -210,7 +220,8 @@ class registro_movimientos_model extends CI_Model {
       if ($full)
       {
         $query = $this->db->query(
-          "SELECT pm.id_poliza, pm.row, pm.id_centro_costo, cc.nombre AS centro_costo, pm.tipo, pm.monto, pm.cuenta_cpi
+          "SELECT pm.id_poliza, pm.row, pm.id_centro_costo, cc.nombre AS centro_costo, pm.tipo, pm.monto,
+            pm.cuenta_cpi, pm.id_movimiento
           FROM otros.polizas_movimientos AS pm
             INNER JOIN otros.centro_costo AS cc ON cc.id_centro_costo = pm.id_centro_costo
           WHERE pm.id_poliza = {$data['info']->id}");

@@ -28,15 +28,15 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
-✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|lap
+✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|lap|pcc
      ALTER TABLE otros.polizas_movimientos ADD COLUMN id_movimiento bigint;
      ALTER TABLE otros.polizas_movimientos ADD CONSTRAINT polizas_movimientos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
- ✔ New -> Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap|pct
+ ✔ New -> Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap|pct|pcc
      ALTER TABLE otros.centro_costo ADD COLUMN cuenta_cpi character varying(15);
      ALTER TABLE otros.polizas_movimientos ADD COLUMN cuenta_cpi character varying(15);
- ✔ New -> Cambio en activos @done (18-10-23 12:55) lap|pct
+ ✔ New -> Cambio en activos @done (18-10-23 12:55) lap|pct|pcc
      ALTER TABLE public.productos ADD COLUMN monto double precision NOT NULL DEFAULT 0;
- ✔ New -> Caja chica de rosy poner saldo y no agregar gastos @done (18-10-29 16:26) pct|lap
+ ✔ New -> Caja chica de rosy poner saldo y no agregar gastos @done (18-10-29 16:26) pct|lap|pcc
     CREATE TABLE public.cajachicas
       (
         id serial NOT NULL,
