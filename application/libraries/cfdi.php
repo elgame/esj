@@ -1148,12 +1148,12 @@ class cfdi{
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
           "moneda"         => $pago->moneda,
-          "tipoCambio"     => $pago->tipo_cambio,
+          "tipoCambio"     => number_format($pago->tipo_cambio, 2, '.', ''),
           "metodoDePago"   => $metodoDePago,
           "numParcialidad" => $pago->parcialidades,
-          "saldoAnterior"  => $saldoAnt/$pago->tipo_cambio,
-          "importePagado"  => $pago->pago_factura/$pago->tipo_cambio,
-          "saldoInsoluto"  => $saldo_factura['saldo']/$pago->tipo_cambio
+          "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
+          "importePagado"  => number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', ''),
+          "saldoInsoluto"  => number_format($saldo_factura['saldo']/$pago->tipo_cambio, 2, '.', '')
         );
       }
     }
