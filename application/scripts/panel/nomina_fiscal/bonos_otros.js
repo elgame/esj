@@ -109,6 +109,13 @@
     $('#btn-add-prestamo').on('click', function(event) {
        addItemPrestamo();
     });
+
+    $("#").on('change', '.ptipo_efectico', function(event) {
+      var $tr = $(this).parent().parent();
+      if ($(this).val() == 'fi') {
+        openModalCuenta($tr);
+      }
+    });
   };
 
   var addItemPrestamo = function () {
@@ -128,9 +135,10 @@
                     '<option value="t">Pausado</option>' +
                   '</select></td>' +
                 '<td style="width: 50px;">'+
-                  '<select name="tipo_efectico[]" required style="width: 50px;">'+
-                    '<option value="fi">Fiscal</option>'+
+                  '<select name="tipo_efectico[]" required style="width: 50px;" class="ptipo_efectico">'+
                     '<option value="ef">Efectivo</option>'+
+                    '<option value="fi">Fiscal</option>'+
+                    '<option value="mt">Materiales</option>'+
                   '</select>'+
                 '</td>'+
                 '<td>' +
@@ -141,6 +149,9 @@
     $(htmlTr).appendTo($tablePrestamos.find('tbody'));
 
     $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var openModalCuenta = function ($tr) {
   };
 
   var eventClickBtnDelItemPrestamo = function () {
