@@ -1137,6 +1137,7 @@ class cfdi{
 
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
+        $saldo_factura['saldo'] = $saldo_factura['saldo']<0? 0: $saldo_factura['saldo'];
         $saldoAnt = ($saldo_factura['saldo']+$pago->pago_factura);
         $metodoDePago = $pago->metodo_pago;
         // if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
@@ -1144,7 +1145,7 @@ class cfdi{
 
         $pago->tipo_cambio = floatval($pago->tipo_cambio);
         $pago->tipo_cambio = $pago->tipo_cambio > 0? $pago->tipo_cambio: 1;
-        $pagado = abs(number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', ''));
+        $pagado = number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', '');
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
