@@ -1126,6 +1126,7 @@ class cfdi{
       'doctoRelacionado'  => []
     ];
     $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
+    $monto = 0;
     foreach ($data as $key => $pago) {
       if (floatval($pago->version) > 3.2) {
         if ($firstCfdiRel) { // cuando es la primera ves
@@ -1136,6 +1137,7 @@ class cfdi{
 
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
+        $saldo_factura['saldo'] = $saldo_factura['saldo']<0? 0: $saldo_factura['saldo'];
         $saldoAnt = ($saldo_factura['saldo']+$pago->pago_factura);
         $metodoDePago = $pago->metodo_pago;
         // if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
@@ -1143,20 +1145,24 @@ class cfdi{
 
         $pago->tipo_cambio = floatval($pago->tipo_cambio);
         $pago->tipo_cambio = $pago->tipo_cambio > 0? $pago->tipo_cambio: 1;
+        $pagado = number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', '');
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
           "moneda"         => $pago->moneda,
-          "tipoCambio"     => $pago->tipo_cambio,
+          "tipoCambio"     => number_format($pago->tipo_cambio, 2, '.', ''),
           "metodoDePago"   => $metodoDePago,
           "numParcialidad" => $pago->parcialidades,
-          "saldoAnterior"  => $saldoAnt/$pago->tipo_cambio,
-          "importePagado"  => $pago->pago_factura/$pago->tipo_cambio,
-          "saldoInsoluto"  => $saldo_factura['saldo']/$pago->tipo_cambio
+          "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
+          "importePagado"  => $pagado,
+          "saldoInsoluto"  => number_format($saldo_factura['saldo']/$pago->tipo_cambio, 2, '.', '')
         );
+        $monto += $pagado;
       }
     }
+
+    $comPago['monto'] = $monto;
 
     $noCertificado = $this->obtenNoCertificado();
 
