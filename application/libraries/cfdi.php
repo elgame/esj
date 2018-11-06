@@ -1126,6 +1126,7 @@ class cfdi{
       'doctoRelacionado'  => []
     ];
     $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
+    $monto = 0;
     foreach ($data as $key => $pago) {
       if (floatval($pago->version) > 3.2) {
         if ($firstCfdiRel) { // cuando es la primera ves
@@ -1143,6 +1144,7 @@ class cfdi{
 
         $pago->tipo_cambio = floatval($pago->tipo_cambio);
         $pago->tipo_cambio = $pago->tipo_cambio > 0? $pago->tipo_cambio: 1;
+        $pagado = abs(number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', ''));
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
@@ -1152,11 +1154,14 @@ class cfdi{
           "metodoDePago"   => $metodoDePago,
           "numParcialidad" => $pago->parcialidades,
           "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
-          "importePagado"  => number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', ''),
+          "importePagado"  => $pagado,
           "saldoInsoluto"  => number_format($saldo_factura['saldo']/$pago->tipo_cambio, 2, '.', '')
         );
+        $monto += $pagado;
       }
     }
+
+    $comPago['monto'] = $monto;
 
     $noCertificado = $this->obtenNoCertificado();
 
