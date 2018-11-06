@@ -110,21 +110,48 @@
        addItemPrestamo();
     });
 
-    $("#").on('change', '.ptipo_efectico', function(event) {
+    $("#table-prestamos").on('change', '.ptipo_efectico', function(event) {
       var $tr = $(this).parent().parent();
+      $('#pCuentasBanco').hide();
       if ($(this).val() == 'fi') {
-        openModalCuenta($tr);
+        $('#pCuentasBanco').show();
+      }
+    });
+
+    $("#pBtnCancelar").on('click', function(event) {
+      $('#'+idTrAdd).remove();
+      $('#pCuentasBanco').hide();
+      $("#pContpaq, #pConcepto").val('');
+    });
+    $("#pBtnAgregar").on('click', function(event) {
+      var $tr = $('#'+idTrAdd);
+      if ($('#pCuenta').val() != '' && $('#pMetodoPago').val() != '') {
+        $tr.find('.cuentaId').val($('#pCuenta').val());
+        $tr.find('.contpaq').val($('#pContpaq').val());
+        $tr.find('.concepto').val($('#pConcepto').val());
+        $tr.find('.metodoPago').val($('#pMetodoPago').val());
+        $('#pCuentasBanco').hide();
+        $("#pContpaq, #pConcepto").val('');
+      } else {
+        noty({"text": 'La cuenta y el metodo de pago son requeridos!', "layout":"topRight", "type": 'error'});
       }
     });
   };
 
-  var addItemPrestamo = function () {
+  var idTrAdd = '',
+  addItemPrestamo = function () {
     var htmlTr = '',
         $tablePrestamos = $('#table-prestamos'),
         $fecha = $('#fecha-prestamos');
-
-    htmlTr = '<tr>' +
-                '<td style="width: 200px;"><input type="text" name="fecha[]" value="'+$fecha.find('option:selected').val()+'" class="span12" readonly> </td>' +
+    idTrAdd = (new Date()).getTime();
+    htmlTr = '<tr id="'+idTrAdd+'">' +
+                '<td style="width: 200px;">'+
+                  '<input type="text" name="fecha[]" value="'+$fecha.find('option:selected').val()+'" class="span12" readonly>'+
+                  '<input type="hidden" name="cuentaId[]" value="" class="cuentaId">'+
+                  '<input type="hidden" name="contpaq[]" value="" class="contpaq">'+
+                  '<input type="hidden" name="concepto[]" value="" class="concepto">'+
+                  '<input type="hidden" name="metodoPago[]" value="" class="metodoPago">'+
+                '</td>' +
                 '<td style="width: 100px;"><input type="text" name="cantidad[]" value="0" class="span12 vpositive cantidad" required></td>' +
                 '<td style="width: 100px;"><input type="text" name="pago_semana[]" value="0" class="span12 vpositive pago-semana" required></td>' +
                 '<td style="width: 200px;"><input type="date" name="fecha_inicia_pagar[]" value="" class="span12 vpositive fecha-inicia-pagar" required></td>' +
@@ -151,8 +178,6 @@
     $(".vpositive").numeric({ negative: false }); //Numero positivo
   };
 
-  var openModalCuenta = function ($tr) {
-  };
 
   var eventClickBtnDelItemPrestamo = function () {
     $('#table-prestamos').on('click', '.btn-del-item-prestamo', function(event) {

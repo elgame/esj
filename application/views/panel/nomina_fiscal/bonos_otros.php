@@ -139,7 +139,13 @@
                       <tbody>
                         <?php foreach ($prestamos as $key => $prestamo) { ?>
                           <tr>
-                            <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $prestamo->fecha ?>" class="span12" readonly> </td>
+                            <td style="width: 200px;">
+                              <input type="text" name="fecha[]" value="<?php echo $prestamo->fecha ?>" class="span12" readonly>
+                              <input type="hidden" name="cuentaId[]" value="" class="cuentaId">
+                              <input type="hidden" name="contpaq[]" value="" class="contpaq">
+                              <input type="hidden" name="concepto[]" value="" class="concepto">
+                              <input type="hidden" name="metodoPago[]" value="" class="metodoPago">
+                            </td>
                             <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $prestamo->prestado ?>" class="span12 vpositive cantidad" required></td>
                             <td style="width: 100px;"><input type="text" name="pago_semana[]" value="<?php echo $prestamo->pago_semana ?>" class="span12 vpositive pago-semana" required></td>
                             <td style="width: 200px;"><input type="date" name="fecha_inicia_pagar[]" value="<?php echo $prestamo->inicio_pago ?>" class="span12 vpositive" required></td>
@@ -164,12 +170,16 @@
                         <?php } ?>
                       </tbody>
                     </table>
-                    <div id="pCuentasBanco" style="position: absolute;top: 105px;background-color: #fff;width: 100%;">
+                    <div id="pCuentasBanco" style="position: absolute;top: 105px;background-color: #fff;width: 100%;display: none">
                       <div class="control-group">
                         <label class="control-label" for="pCuenta">Cuenta</label>
                         <div class="controls">
                           <div class="input-append span12">
-                            <input type="text" name="pCuenta" class="span11" id="pCuenta" value="" placeholder="">
+                            <select id="pCuenta" class="span11">
+                            <?php foreach ($cuentas as $key => $value): ?>
+                              <option value="<?php echo $value->id_cuenta ?>"><?php echo $value->banco.' - '.$value->alias ?></option>
+                            <?php endforeach ?>
+                            </select>
                           </div>
                         </div>
                       </div>

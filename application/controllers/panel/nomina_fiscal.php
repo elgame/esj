@@ -543,11 +543,11 @@ class nomina_fiscal extends MY_Controller {
       array('nombre' => 'Deposito', 'value' => 'deposito'),
     );
 
+    $this->load->model('banco_cuentas_model');
     $data['id_empresa'] = $params['empleado'];
-    echo "<pre>";
-    print_r ($params['empleado']);
-    echo "</pre>";exit;
-    $response = $this->banco_cuentas_model->getCuentas(false);
+    $pdatos = ['id_empresa' => $params['empleado']['info'][0]->id_empresa];
+    $cuentas = $this->banco_cuentas_model->getCuentas(false, null, $pdatos);
+    $params['cuentas'] = $cuentas['cuentas'];
 
     if(isset($_GET['msg']{0}))
     {
