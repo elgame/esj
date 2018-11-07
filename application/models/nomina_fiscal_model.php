@@ -2112,19 +2112,24 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $anio==null? date("Y"): $anio;
     $this->load->model('usuarios_model');
     $this->load->model('banco_cuentas_model');
+
+    $infoPrestamos = [];
     $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
     if (isset($datos['prestamos_existentes']))
     {
       $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana, $anio, $empled['info'][0]->dia_inicia_semana);
       if(count($datos['eliminar_prestamo']) > 0) {
-        $this->db->delete('nomina_prestamos', "id_prestamo IN(".implode(',', $datos['eliminar_prestamo']).") AND
-            id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
         // Si hay un movimiento ligado de bancos se elimina
         foreach ($datos['eliminar_prestamo'] as $keye => $elim_mov) {
-          if ($elim_mov > 0) {
-            $this->banco_cuentas_model->deleteMovimiento($elim_mov);
+          $infoPrestamos[$elim_mov] = $this->db->query("SELECT * FROM nomina_prestamos WHERE id_prestamo = {$elim_mov}")->row();
+
+          if ($infoPrestamos[$elim_mov]->id_movimiento > 0) {
+            $this->banco_cuentas_model->deleteMovimiento($infoPrestamos[$elim_mov]->id_movimiento);
           }
         }
+        // Elimina los prestamos
+        $this->db->delete('nomina_prestamos', "id_prestamo IN(".implode(',', $datos['eliminar_prestamo']).") AND
+            id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
       }
     }
 
@@ -2133,7 +2138,9 @@ class nomina_fiscal_model extends CI_Model {
     {
       if($datos['id_prestamo'][$key] > 0)
       {
-        $info = $this->db->query("SELECT * FROM nomina_prestamos WHERE id_prestamo = {$datos['id_prestamo'][$key]}")->row();
+        if (!isset($infoPrestamos[$datos['id_prestamo'][$key]])) {
+          $infoPrestamos[$datos['id_prestamo'][$key]] = $this->db->query("SELECT * FROM nomina_prestamos WHERE id_prestamo = {$datos['id_prestamo'][$key]}")->row();
+        }
 
         $this->db->update('nomina_prestamos', array(
           'id_usuario'  => $empleadoId,
@@ -2146,11 +2153,11 @@ class nomina_fiscal_model extends CI_Model {
         ), "id_prestamo = {$datos['id_prestamo'][$key]}");
 
         // Actualiza el movimiento de banco si tiene el prestamo
-        if (intval($info->id_movimiento) > 0) {
+        if (intval($infoPrestamos[$datos['id_prestamo'][$key]]->id_movimiento) > 0) {
           $this->db->update('banco_movimientos', [
             'monto' => $datos['cantidad'][$key],
             'fecha' => str_replace('T', ' ', $datos['fecha'][$key]).':'.date("H:i:s")
-          ], "id_movimiento = {$info->id_movimiento}");
+          ], "id_movimiento = {$infoPrestamos[$datos['id_prestamo'][$key]]->id_movimiento}");
         }
       }else{ // insertar el prestamo
         $insertData = array(
