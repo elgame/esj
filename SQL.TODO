@@ -28,7 +28,46 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Agregar nuevos cultivos o aras @done (18-11-06 21:14) pcc
+ ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27)
+     CREATE TABLE otros.bodega_traspasos
+        (
+          id_traspaso bigserial NOT NULL,
+          concepto character varying(500) NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          no_impresiones integer NOT NULL DEFAULT 0,
+          id_usuario bigint,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          tipo boolean NOT NULL DEFAULT true, -- true: ingreso, false: retiro
+          CONSTRAINT bodega_traspasos_pkey PRIMARY KEY (id_traspaso),
+          CONSTRAINT bodega_traspasos_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        ) WITH ( OIDS=FALSE );
+        ALTER TABLE public.cajachica_gastos OWNER TO programa;
+        COMMENT ON COLUMN otros.bodega_traspasos.tipo IS 'true: ingreso, false: retiro';
+     CREATE TABLE public.cajachica_traspasos
+        (
+          id_traspaso bigserial NOT NULL,
+          concepto character varying(500) NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          no_impresiones integer NOT NULL DEFAULT 0,
+          id_usuario bigint,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          tipo boolean NOT NULL DEFAULT true, -- true: ingreso, false: retiro
+          CONSTRAINT cajachica_traspasos_pkey PRIMARY KEY (id_traspaso),
+          CONSTRAINT cajachica_traspasos_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        ) WITH ( OIDS=FALSE );
+        ALTER TABLE public.cajachica_traspasos OWNER TO programa;
+        COMMENT ON COLUMN public.cajachica_traspasos.tipo IS 'true: ingreso, false: retiro';
+ ✔ New -> Agregar nuevos cultivos o aras y agregarlo a empleados @done (18-11-06 21:14) pcc|pct
+     ALTER TABLE public.usuarios ADD COLUMN id_area integer;
+     ALTER TABLE public.usuarios ADD CONSTRAINT usuarios_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      -- INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('BODEGA GDL','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INTANGIBLES','ot',TRUE,FALSE);

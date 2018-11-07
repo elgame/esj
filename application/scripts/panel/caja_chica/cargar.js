@@ -24,6 +24,8 @@
     btnAddGasto();
     btnDelGasto();
     btnShowGastoCat();
+    btnAddTraspaso();
+    btnDelTraspaso();
 
     btnAddDeudor();
     btnDelDeudor();
@@ -34,6 +36,7 @@
     autocompleteCategoriasLive();
 
     onChanceImporteGastos();
+    onChanceImporteTraspaso();
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
@@ -885,6 +888,73 @@
           $(this).val("").css("background-color", "#FFD9B3");
         }
       });
+    });
+  };
+
+  var btnAddTraspaso = function () {
+    $('#btn-add-traspaso').on('click', function(event) {
+      agregarTraspaso();
+    });
+  };
+  var agregarTraspaso = function () {
+    var $table = $('#table-traspasos').find('tbody .row-total'),
+        tr = '<tr>'+
+                '<td>'+
+                  '<select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura">'+
+                    '<option value="t">Ingreso</option>'+
+                    '<option value="f">Egreso</option>'+
+                  '</select>'+
+                  '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
+                  '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+
+                '</td>'+
+                '<td style="">'+
+                  '<input type="text" name="traspaso_concepto[]" value="" class="span12 traspaso-concepto">'+
+                '</td>'+
+                '<td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="" class="span12 vpositive traspaso-importe"></td>'+
+                '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
+              '</tr>';
+
+    $(tr).insertBefore($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+  var btnDelTraspaso = function () {
+    $('#table-traspasos').on('click', '.btn-del-traspaso', function(event) {
+      var $tr = $(this).parents('tr'),
+          // id = $tr.find('.gasto-cargo-id').val(),
+          // $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
+          $traspaso_id_traspaso = $tr.find('#traspaso_id_traspaso'),
+          $traspaso_del = $tr.find('#traspaso_del'),
+          total = 0;
+
+      if ($traspaso_id_traspaso.val() != '') {
+        $traspaso_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
+      calculaTotalTraspaso();
+      calculaCorte();
+    });
+  };
+  var calculaTotalTraspaso = function () {
+    var total = 0;
+    $('#table-traspasos .traspaso-importe').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+    $('input#ttotal-traspasos').val(total.toFixed(2));
+  };
+  var onChanceImporteTraspaso = function () {
+    $('#table-traspasos').on('keyup', '.traspaso-importe', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $t = $('#table-traspasos'),
+          total = 0;
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        calculaTotalTraspaso();
+        calculaCorte();
+      }
     });
   };
 

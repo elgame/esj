@@ -489,6 +489,12 @@ class empleados extends MY_Controller {
               array('field' => 'fpuesto',
                     'label' => 'Puesto',
                     'rules' => ''),
+              array('field' => 'area',
+                    'label' => 'Cultivo',
+                    'rules' => ''),
+              array('field' => 'areaId',
+                    'label' => 'Cultivo',
+                    'rules' => ''),
 		);
 
 		if ($accion == 'agregar')

@@ -245,6 +245,16 @@
 									  </div>
 									</div>
 
+                  <div class="control-group" id="cultivosGrup">
+                    <label class="control-label" for="area">Cultivo </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña, Administrativos">
+                      </div>
+                      <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                    </div>
+                  </div>
+
 									<div class="control-group">
 									  <label class="control-label" for="fsalario_diario">Salario diario </label>
 									  <div class="controls">
