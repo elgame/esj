@@ -28,7 +28,10 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Prestamos nomina @done (18-11-05 14:28) lap
+✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct
+     ALTER TABLE nomina_prestamos ADD COLUMN id_movimiento bigint;
+     ALTER TABLE nomina_prestamos ADD CONSTRAINT nomina_prestamos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+✔ New -> Prestamos nomina @done (18-11-05 14:28) lap|pct
      COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja), mt: materiales';
 ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|lap|pcc
      ALTER TABLE otros.polizas_movimientos ADD COLUMN id_movimiento bigint;
