@@ -275,6 +275,15 @@
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INTERESES ORDINARIOS', 'gastofinanciero');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INTERESES MORATORIOS', 'gastofinanciero');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('PERDIDA CAMBIARIA', 'gastofinanciero');
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 1', 'melga', 0.661, 3, 37464);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 2', 'melga', 0.584, 3, 34672);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 3', 'melga', 0.662, 3, 36717);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 4', 'melga', 0.672, 3, 33610);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 5', 'melga', 0.576, 3, 33761);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 6', 'melga', 0.711, 3, 35503);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 7', 'melga', 0.516, 3, 36224);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 8', 'melga', 0.474, 3, 25695);
+      INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 9', 'melga', 0.045, 3, 2618);
 ✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc|pct
    ALTER TABLE public.productos ADD COLUMN tipo_activo character varying(5);
    COMMENT ON COLUMN public.productos.tipo_activo IS 'et: Equipo de Transporte, ec: Equipo de Computo, meo: Mobiliario y Equipo de Oficina, me: Maquinaria y Equipo, e: Edificios, t: Terrenos';

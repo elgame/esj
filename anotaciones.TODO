@@ -38,7 +38,7 @@
  ✔ Agregar el catalogo de cultivos (áreas) al catalogo de trabajadores para poder asignar en cual área labora y separar los costos @done (18-11-07 09:46)
  ✔ En la caja chica y en la caja de bodega agregar apartado de traspaso de dinero, para poder enviar dinero entre cajas @done (18-11-07 15:59)
  ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
- ☐ Agregar los centros de costo (catalogo de rodrigo y de melgas)
+ ✔ Agregar los centros de costo (catalogo de rodrigo y de melgas) @done (18-11-08 12:22)
  ☐ Quitar los retiro y depósitos de bancos, porque se registrarían desde el apartado de Registro manual de movimientos (contable)
  ✔ Crear apartado de Registro manual de movimientos utilizando el catalogo de centros de costo, @done (18-11-06 19:00)
    y en centro de costo el tipo "banco" se cambiaría por Gastos financieros y se agregaría el tipo "banco" que
