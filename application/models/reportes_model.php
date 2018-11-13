@@ -220,46 +220,47 @@ class reportes_model extends CI_Model {
     $sql = '';
     $response = array();
 
-    $fecha = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
-    $empresa = $this->input->get('did_empresa')? $this->input->get('did_empresa'): null;
+    $fecha1 = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m").'-01';
+    $fecha2 = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    if ($this->input->get('did_empresa') > 0) {
+      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa'): '';
+    }
 
-    // Saldo de caja
-    $response['caja'] = $this->getSaldoCajaIngClientes($fecha, $empresa) +
-            $this->getSaldoCajaIngRemisiones($fecha, $empresa) -
-            $this->getSaldoCajaBascula($fecha, $empresa) -
-            $this->getSaldoCajaGastos($fecha, $empresa);
-    $response['caja2'] = $this->getSaldoCaja($fecha);
+    // Ingresos
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
+      FROM facturacion f
+        INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+        LEFT JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
+        LEFT JOIN areas a ON a.id_area = c.id_area
+        LEFT JOIN (
+          SELECT id_remision, id_factura, status
+          FROM remisiones_historial
+          WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+      WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'ingreso'
+        AND COALESCE(fh.id_remision, 0) = 0 {$sqlemp1}
+      GROUP BY a.id_area
+      UNION
+      SELECT 0 AS id_area, 'INTANGIBLES' AS cultivo, Coalesce(Sum(ci.monto), 0) AS total
+      FROM cajachica_ingresos ci
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+      WHERE ci.id_nomenclatura = 11 AND ci.no_caja = 2
+        $sqlemp2");
+    $response['ingresos'] = $query->result()
 
-    // Saldo bancos
-    $this->load->model('banco_cuentas_model');
-    $_GET['did_empresa'] = $empresa? $empresa: 'all';
-    $_GET['contable'] = 't';
-    $bancos = $this->banco_cuentas_model->getSaldosCuentasData();
-    $response['bancos'] = $bancos['total_saldos'];
-
-    // Saldo clientes
-    $this->load->model('cuentas_cobrar_model');
-    $_GET['did_empresa'] = $empresa? $empresa: 'all';
-    $clientes = $this->cuentas_cobrar_model->getCuentasCobrarData(1000);
-    $response['clientes'] = $clientes['ttotal_saldo'];
-
-    // Saldo proveedores
-    $this->load->model('cuentas_pagar_model');
-    $_GET['did_empresa'] = $empresa? $empresa: 'all';
-    $proveedor = $this->cuentas_pagar_model->getCuentasPagarData(10000);
-    $response['proveedores'] = $proveedor['ttotal_saldo'];
-
-    // Deudores diversos / saldo caja prestamo
-    $this->load->model('caja_chica_prest_model');
-    $prestamos = $this->caja_chica_prest_model->get_saldos($fecha, '1' );
-    $response['deudores_diversos'] = $prestamos['prestamos_lp_fi']+$prestamos['prestamos_lp_ef']+$prestamos['prestamos_cp'];
-    $response['caja_prestamos'] = $prestamos['saldo_caja'];
-
-    // Almacén
-    $this->load->model('inventario_model');
-    $_GET['did_empresa'] = $empresa;
-    $response['almacen'] = $this->inventario_model->getCostoInventario($fecha);
-    $response['almacen'] = $response['almacen']->costo;
+    // Ingresos descuentos
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
+      FROM facturacion f
+        INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+        LEFT JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
+        LEFT JOIN areas a ON a.id_area = c.id_area
+      WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'egreso'
+        {$sqlemp1}
+      GROUP BY a.id_area");
+    $response['ingresos_descuentos'] = $query->result()
 
     return $response;
   }

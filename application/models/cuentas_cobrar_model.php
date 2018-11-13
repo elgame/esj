@@ -354,17 +354,17 @@ class cuentas_cobrar_model extends privilegios_model{
             AND f.id_cliente = '{$_GET['id_cliente']}'
             AND Date(f.fecha) <= '{$fecha2}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
-            ) AS d
-GROUP BY d.id_cliente, d.id_factura
-) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-LEFT JOIN (SELECT id_remision, id_factura, status
-  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-  ) fh ON f.id_factura = fh.id_remision
-WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-AND f.id_abono_factura IS NULL AND id_nc IS NULL
-AND Date(f.fecha) < '{$fecha1}'
-AND COALESCE(fh.id_remision, 0) = 0 {$sql}
-GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
+          ) AS d
+          GROUP BY d.id_cliente, d.id_factura
+        ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+        WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
+        AND f.id_abono_factura IS NULL AND id_nc IS NULL
+        AND Date(f.fecha) < '{$fecha1}'
+        AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+        GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
 
           -- UNION ALL
 
@@ -396,7 +396,7 @@ GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
           --      AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
           -- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
 
-          ) AS sal
+        ) AS sal
 {$sql2}
 GROUP BY id_cliente, tipo
 ");
@@ -431,29 +431,29 @@ $res = $this->db->query(
         facturacion_abonos as fa
         WHERE Date(fecha) <= '{$fecha2}'
         GROUP BY id_factura
-        )
-UNION
-(
-  SELECT
-  id_nc AS id_factura,
-  Sum(total) AS abono
-  FROM
-  facturacion
-  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
-  AND id_cliente = {$_GET['id_cliente']}
-  AND Date(fecha) <= '{$fecha2}'
-  GROUP BY id_nc
-  )
-) AS ffs
-GROUP BY id_factura
-) AS ac ON f.id_factura = ac.id_factura {$sql}
-LEFT JOIN (SELECT id_remision, id_factura, status
-  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+      )
+      UNION
+      (
+        SELECT
+        id_nc AS id_factura,
+        Sum(total) AS abono
+        FROM
+        facturacion
+        WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+        AND id_cliente = {$_GET['id_cliente']}
+        AND Date(fecha) <= '{$fecha2}'
+        GROUP BY id_nc
+      )
+    ) AS ffs
+    GROUP BY id_factura
+  ) AS ac ON f.id_factura = ac.id_factura {$sql}
+  LEFT JOIN (SELECT id_remision, id_factura, status
+    FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
   ) fh ON f.id_factura = fh.id_remision
-WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
-AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
-AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+  WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
+  AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+  AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+  AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
       -- UNION ALL
 

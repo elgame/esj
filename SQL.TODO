@@ -28,7 +28,7 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27)
+ ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap
      CREATE TABLE otros.bodega_traspasos
         (
           id_traspaso bigserial NOT NULL,
@@ -65,7 +65,7 @@
         ) WITH ( OIDS=FALSE );
         ALTER TABLE public.cajachica_traspasos OWNER TO programa;
         COMMENT ON COLUMN public.cajachica_traspasos.tipo IS 'true: ingreso, false: retiro';
- ✔ New -> Agregar nuevos cultivos o aras y agregarlo a empleados @done (18-11-06 21:14) pcc|pct
+ ✔ New -> Agregar nuevos cultivos o aras y agregarlo a empleados @done (18-11-06 21:14) pcc|pct|lap
      ALTER TABLE public.usuarios ADD COLUMN id_area integer;
      ALTER TABLE public.usuarios ADD CONSTRAINT usuarios_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      -- INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
@@ -73,7 +73,7 @@
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INTANGIBLES','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('FLETES','ot',TRUE,FALSE);
-✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|pcc
+✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|pcc|lap
      Nota: en la tabla cajachica_categorias solo tiene que haber una categoria ligada a 1 empresa con status activo
      ALTER TABLE nomina_prestamos ADD COLUMN id_movimiento bigint;
      ALTER TABLE nomina_prestamos ADD CONSTRAINT nomina_prestamos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
