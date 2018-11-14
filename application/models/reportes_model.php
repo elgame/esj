@@ -217,7 +217,7 @@ class reportes_model extends CI_Model {
 
   public function getDataEstadoResultado()
   {
-    $sql = '';
+    $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sql = '';
     $response = array();
 
     $fecha1 = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m").'-01';
@@ -225,6 +225,9 @@ class reportes_model extends CI_Model {
     if ($this->input->get('did_empresa') > 0) {
       $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa'): '';
       $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa'): '';
     }
 
     // Ingresos
@@ -261,6 +264,55 @@ class reportes_model extends CI_Model {
         {$sqlemp1}
       GROUP BY a.id_area");
     $response['ingresos_descuentos'] = $query->result()
+
+    // Egresos salidas almacén
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(csp.cantidad*csp.precio_unitario) AS total
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
+        LEFT JOIN areas a ON a.id_area = cs.id_area
+      WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3} AND Date(cs.fecha_creacion) BETWEEN '2018-01-01' AND '2018-12-30'
+      GROUP BY a.id_area");
+    $response['egresos_salidas'] = $query->result()
+
+    // Egresos gastos directos
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'COSTO GASTOS DIRECTOS') AS cultivo, Sum(c.subtotal) AS total, c.intangible
+      FROM compras c
+        LEFT JOIN areas a ON a.id_area = c.id_area
+      WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4} AND Date(c.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      GROUP BY a.id_area, c.intangible");
+    $response['egresos_gastos_dir'] = $query->result()
+
+    // Egresos gastos de ordenes
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(cp.importe) AS total
+      FROM compras_ordenes co
+        INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+        LEFT JOIN areas a ON a.id_area = co.id_area
+      WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5} AND Date(co.fecha_aceptacion) BETWEEN '2018-01-01' AND '2018-12-30'
+      GROUP BY a.id_area");
+    $response['egresos_gastos_ord'] = $query->result()
+
+    // Egresos gastos de caja tryana
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA 2') AS cultivo, Sum(cg.monto) AS total
+      FROM cajachica_gastos cg
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+        LEFT JOIN areas a ON a.id_area = cg.id_areac
+      WHERE cg.no_caja = 2 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      GROUP BY a.id_area");
+    $response['egresos_gastos_caja_try'] = $query->result()
+
+    // Egresos gastos de caja Gdl
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA GDL') AS cultivo, Sum(cg.monto) AS total
+      FROM otros.bodega_gastos cg
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+        LEFT JOIN areas a ON a.id_area = cg.id_areac
+      WHERE cg.no_caja = 1 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      GROUP BY a.id_area");
+    $response['egresos_gastos_caja_gdl'] = $query->result()
 
     return $response;
   }
