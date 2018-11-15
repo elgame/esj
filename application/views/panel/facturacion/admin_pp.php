@@ -208,12 +208,12 @@
                     <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/xml_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
                       <i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>
                     <?php
-                      if ($fact->status !== 'cancelada')
-                      {
+                      // if ($fact->status !== 'cancelada')
+                      // {
                         echo '<a class="btn btn-danger" href="'.base_url('panel/cuentas_cobrar/cancelar_com_pago/?id='.$fact->id).'"
                           onclick="msb.confirm(\'Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>\', \'Facturas\', this); return false;" title="Cancelar">
                         <i class="icon-ban-circle icon-white"></i> <span class="hidden-tablet">Cancelar</span></a>';
-                      }
+                      // }
 
                       // if ($fact->status !== 'b')
                       // {
