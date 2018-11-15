@@ -251,7 +251,7 @@ class reportes_model extends CI_Model {
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
       WHERE ci.id_nomenclatura = 11 AND ci.no_caja = 2
         $sqlemp2");
-    $response['ingresos'] = $query->result()
+    $response['ingresos'] = $query->result();
 
     // Ingresos descuentos
     $query = $this->db->query(
@@ -263,7 +263,7 @@ class reportes_model extends CI_Model {
       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'egreso'
         {$sqlemp1}
       GROUP BY a.id_area");
-    $response['ingresos_descuentos'] = $query->result()
+    $response['ingresos_descuentos'] = $query->result();
 
     // Egresos salidas almacén
     $query = $this->db->query(
@@ -273,7 +273,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = cs.id_area
       WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3} AND Date(cs.fecha_creacion) BETWEEN '2018-01-01' AND '2018-12-30'
       GROUP BY a.id_area");
-    $response['egresos_salidas'] = $query->result()
+    $response['egresos_salidas'] = $query->result();
 
     // Egresos gastos directos
     $query = $this->db->query(
@@ -282,7 +282,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = c.id_area
       WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4} AND Date(c.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
       GROUP BY a.id_area, c.intangible");
-    $response['egresos_gastos_dir'] = $query->result()
+    $response['egresos_gastos_dir'] = $query->result();
 
     // Egresos gastos de ordenes
     $query = $this->db->query(
@@ -292,7 +292,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = co.id_area
       WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5} AND Date(co.fecha_aceptacion) BETWEEN '2018-01-01' AND '2018-12-30'
       GROUP BY a.id_area");
-    $response['egresos_gastos_ord'] = $query->result()
+    $response['egresos_gastos_ord'] = $query->result();
 
     // Egresos gastos de caja tryana
     $query = $this->db->query(
@@ -302,7 +302,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = cg.id_areac
       WHERE cg.no_caja = 2 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
       GROUP BY a.id_area");
-    $response['egresos_gastos_caja_try'] = $query->result()
+    $response['egresos_gastos_caja_try'] = $query->result();
 
     // Egresos gastos de caja Gdl
     $query = $this->db->query(
@@ -312,7 +312,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = cg.id_areac
       WHERE cg.no_caja = 1 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
       GROUP BY a.id_area");
-    $response['egresos_gastos_caja_gdl'] = $query->result()
+    $response['egresos_gastos_caja_gdl'] = $query->result();
 
     return $response;
   }
