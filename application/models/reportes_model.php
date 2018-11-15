@@ -215,22 +215,11 @@ class reportes_model extends CI_Model {
 
 
 
-  public function getDataEstadoResultado()
+
+  /////////////////////////// ESTADO DE RESULTADO ///////////////////////////////////////
+
+  public function erIngresos($sqlFecha, $sqlemp1, $sqlemp2)
   {
-    $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sql = '';
-    $response = array();
-
-    $fecha1 = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m").'-01';
-    $fecha2 = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
-    if ($this->input->get('did_empresa') > 0) {
-      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa'): '';
-    }
-
-    // Ingresos
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
       FROM facturacion f
@@ -243,17 +232,20 @@ class reportes_model extends CI_Model {
           WHERE status <> 'ca' AND status <> 'b'
         ) fh ON f.id_factura = fh.id_remision
       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'ingreso'
-        AND COALESCE(fh.id_remision, 0) = 0 {$sqlemp1}
+        AND COALESCE(fh.id_remision, 0) = 0
+        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1}
       GROUP BY a.id_area
       UNION
       SELECT 0 AS id_area, 'INTANGIBLES' AS cultivo, Coalesce(Sum(ci.monto), 0) AS total
       FROM cajachica_ingresos ci
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
       WHERE ci.id_nomenclatura = 11 AND ci.no_caja = 2
-        $sqlemp2");
-    $response['ingresos'] = $query->result();
+        AND Date(ci.fecha) BETWEEN {$sqlFecha} $sqlemp2");
+    return $query->result();
+  }
 
-    // Ingresos descuentos
+  public function erIngresosDescuentos($sqlFecha, $sqlemp1)
+  {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
       FROM facturacion f
@@ -261,38 +253,96 @@ class reportes_model extends CI_Model {
         LEFT JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         LEFT JOIN areas a ON a.id_area = c.id_area
       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'egreso'
-        {$sqlemp1}
+        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1}
       GROUP BY a.id_area");
-    $response['ingresos_descuentos'] = $query->result();
+    return $query->result();
+  }
 
-    // Egresos salidas almacén
+  public function erEgresosSalidas($sqlFecha, $sqlemp3)
+  {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(csp.cantidad*csp.precio_unitario) AS total
       FROM compras_salidas cs
         INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
         LEFT JOIN areas a ON a.id_area = cs.id_area
-      WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3} AND Date(cs.fecha_creacion) BETWEEN '2018-01-01' AND '2018-12-30'
+      WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3}
+        AND Date(cs.fecha_creacion) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
-    $response['egresos_salidas'] = $query->result();
+    return $query->result();
+  }
 
-    // Egresos gastos directos
+  public function erEgresosGastosDir($sqlFecha, $sqlemp4)
+  {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO GASTOS DIRECTOS') AS cultivo, Sum(c.subtotal) AS total, c.intangible
       FROM compras c
         LEFT JOIN areas a ON a.id_area = c.id_area
-      WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4} AND Date(c.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4}
+        AND Date(c.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area, c.intangible");
-    $response['egresos_gastos_dir'] = $query->result();
+    return $query->result();
+  }
 
-    // Egresos gastos de ordenes
+  public function erEgresosGastosOrd($sqlFecha, $sqlemp5)
+  {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(cp.importe) AS total
       FROM compras_ordenes co
         INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
         LEFT JOIN areas a ON a.id_area = co.id_area
-      WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5} AND Date(co.fecha_aceptacion) BETWEEN '2018-01-01' AND '2018-12-30'
+      WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5}
+        AND Date(co.fecha_aceptacion) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
-    $response['egresos_gastos_ord'] = $query->result();
+    return $query->result();
+  }
+
+  public function getDataEstadoResultado()
+  {
+    $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 = $sql = '';
+    $response = ['saldo' => [], 'mes' => []];
+
+    $anio = date("Y");
+    $ini_anio = $anio.'-01-01';
+    if ($this->input->get('ffecha1')) {
+      $fecha = explode('-', $this->input->get('ffecha1'));
+      $anio = $fecha[0];
+      $ini_anio = $anio.'-01-01';
+    }
+    $mes_actual[1] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    $mes_actual[0] = substr($mes_actual[1], 0, 8).'01';
+    $fin_anio = new DateTime($mes_actual[0]);
+    $fin_anio->sub(new DateInterval('P1D'));
+    if ($this->input->get('did_empresa') > 0) {
+      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp6 = " nf.id_empresa = ".$this->input->get('did_empresa'): '';
+    }
+
+    $sqlFechaSaldo = "'{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'";
+    $sqlFechaMes = "'{$mes_actual[0]}' AND '{$mes_actual[0]}'";
+
+    // Ingresos
+    $response['saldo']['ingresos'] = $this->erIngresos($sqlFechaSaldo, $sqlemp1, $sqlemp2);
+    $response['mes']['ingresos'] = $this->erIngresos($sqlFechaMes, $sqlemp1, $sqlemp2);
+
+    // Ingresos descuentos
+    $response['saldo']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaSaldo, $sqlemp1);
+    $response['mes']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaMes, $sqlemp1);
+
+    // Egresos salidas almacén
+    $response['saldo']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaSaldo, $sqlemp3);
+    $response['mes']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaMes, $sqlemp3);
+
+    // Egresos gastos directos
+    $response['saldo']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaSaldo, $sqlemp4);
+    $response['mes']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaMes, $sqlemp4);
+
+    // Egresos gastos de ordenes
+    $response['saldo']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaSaldo, $sqlemp5);
+    $response['mes']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaMes, $sqlemp5);
 
     // Egresos gastos de caja tryana
     $query = $this->db->query(
@@ -300,9 +350,10 @@ class reportes_model extends CI_Model {
       FROM cajachica_gastos cg
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
         LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 2 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      WHERE cg.no_caja = 2 {$sqlemp2}
+        AND Date(cg.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
       GROUP BY a.id_area");
-    $response['egresos_gastos_caja_try'] = $query->result();
+    $response['saldo']['egresos_gastos_caja_try'] = $query->result();
 
     // Egresos gastos de caja Gdl
     $query = $this->db->query(
@@ -310,9 +361,20 @@ class reportes_model extends CI_Model {
       FROM otros.bodega_gastos cg
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
         LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 1 {$sqlemp2} AND Date(cg.fecha) BETWEEN '2018-01-01' AND '2018-12-30'
+      WHERE cg.no_caja = 1 {$sqlemp2}
+        AND Date(cg.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
       GROUP BY a.id_area");
-    $response['egresos_gastos_caja_gdl'] = $query->result();
+    $response['saldo']['egresos_gastos_caja_gdl'] = $query->result();
+
+    // Egresos nomina
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS'), Sum(nf.total_percepcion-nf.subsidio) AS total
+      FROM nomina_fiscal nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+        LEFT JOIN areas a ON a.id_area = u.id_area
+      WHERE {$sqlemp6} AND Date(nf.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
+      GROUP BY a.id_area");
+    $response['saldo']['egresos_gastos_nomina'] = $query->result();
 
     return $response;
   }

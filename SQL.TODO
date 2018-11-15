@@ -82,7 +82,7 @@
      -- INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('BODEGA GDL','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INTANGIBLES','ot',TRUE,FALSE);
-     INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
+     --INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('FLETES','ot',TRUE,FALSE);
 ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|pcc|lap
      Nota: en la tabla cajachica_categorias solo tiene que haber una categoria ligada a 1 empresa con status activo
