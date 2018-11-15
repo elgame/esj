@@ -133,11 +133,15 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+        $('#proveedor').val('');
+        $('#proveedorId').val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+        $('#proveedor').val('');
+        $('#proveedorId').val('');
       }
     });
   };
