@@ -580,6 +580,7 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->AddPage();
     $this->load->model('gastos_model');
     $fac_ligados = array();
+    $total_producto = $totla_general = $iva_general = 0;
     if(count($response[0]) > 0){
       $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $response[0]), true);
 
