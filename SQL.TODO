@@ -28,7 +28,7 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
-✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc
+✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_areac integer;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_centro_costo bigint;
@@ -56,7 +56,7 @@
               REFERENCES public.usuarios (id) MATCH SIMPLE
               ON UPDATE CASCADE ON DELETE CASCADE
         ) WITH ( OIDS=FALSE );
-        ALTER TABLE public.cajachica_gastos OWNER TO programa;
+        ALTER TABLE otros.bodega_traspasos OWNER TO programa;
         COMMENT ON COLUMN otros.bodega_traspasos.tipo IS 'true: ingreso, false: retiro';
      CREATE TABLE public.cajachica_traspasos
         (
