@@ -296,9 +296,126 @@ class reportes_model extends CI_Model {
     return $query->result();
   }
 
+  public function erEgresosGastosCajaTry($sqlFecha, $sqlemp2)
+  {
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA 2') AS cultivo, Sum(cg.monto) AS total
+      FROM cajachica_gastos cg
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+        LEFT JOIN areas a ON a.id_area = cg.id_areac
+      WHERE cg.no_caja = 2 {$sqlemp2}
+        AND Date(cg.fecha) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+    return $query->result();
+  }
+
+  public function erEgresosGastosCajaGdl($sqlFecha, $sqlemp2)
+  {
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA GDL') AS cultivo, Sum(cg.monto) AS total
+      FROM otros.bodega_gastos cg
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+        LEFT JOIN areas a ON a.id_area = cg.id_areac
+      WHERE cg.no_caja = 1 {$sqlemp2}
+        AND Date(cg.fecha) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+    return $query->result();
+  }
+
+  public function erEgresosGastosNomina($sqlFecha, $sqlemp6)
+  {
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS'), Sum(nf.total_percepcion-nf.subsidio) AS total
+      FROM nomina_fiscal nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+        LEFT JOIN areas a ON a.id_area = u.id_area
+      WHERE {$sqlemp6} Date(nf.fecha) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+    return $query->result();
+  }
+
+  public function erEgresosComisionesBan($sqlFecha, $sqlemp7)
+  {
+    $query = $this->db->query(
+      "SELECT p.id_empresa, Sum(pm.monto) AS total, Coalesce(Sum(n_areas.no_areas), 1) AS no_areas
+      FROM otros.polizas p
+        INNER JOIN otros.polizas_movimientos pm ON p.id = pm.id_poliza
+        INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = pm.id_centro_costo
+        LEFT JOIN (
+          SELECT id_empresa, Count(*) AS no_areas
+          FROM areas_empresas
+          GROUP BY id_empresa
+        ) n_areas ON p.id_empresa = n_areas.id_empresa
+      WHERE p.status = 't' AND cc.tipo = 'gastofinanciero' AND cc.nombre = 'COMISIONES BANCARIAS'
+        {$sqlemp7} AND p.fecha BETWEEN {$sqlFecha}
+      GROUP BY p.id_empresa");
+    return $query->result();
+  }
+
+  public function erEgresosNc($sqlFecha, $sqlemp4)
+  {
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'no') AS cultivo, Sum(c.subtotal) AS total
+      FROM compras c
+        INNER JOIN (
+          SELECT c.id_compra, c.id_area
+          FROM compras c
+          WHERE c.status <> 'ca' AND c.tipo = 'c' AND c.id_area IS NOT NULL
+          GROUP BY c.id_compra, c.id_area
+        ) ca ON c.id_nc = ca.id_compra
+        LEFT JOIN areas a ON a.id_area = ca.id_area
+      WHERE c.status <> 'ca' AND c.tipo = 'nc'
+        AND a.id_area IS NOT NULL
+        {$sqlemp4} AND (c.fecha) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+    $response = $query->result();
+
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'no') AS cultivo, Sum(c.subtotal/ca.num) AS total
+      FROM compras c
+        INNER JOIN (
+          SELECT c.id_compra, co.id_area, Sum(cc.num) AS num
+          FROM compras c
+            INNER JOIN compras_productos cp ON c.id_compra = cp.id_compra
+            INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+            INNER JOIN (
+              SELECT c.id_compra, Count(c.id_compra) AS num
+              FROM compras c
+                INNER JOIN compras_productos cp ON c.id_compra = cp.id_compra
+                INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+              WHERE c.status <> 'ca' AND c.tipo = 'c' AND co.id_area IS NOT NULL
+              GROUP BY c.id_compra
+            ) cc ON cc.id_compra = c.id_compra
+          WHERE c.status <> 'ca' AND c.tipo = 'c' AND co.id_area IS NOT NULL
+          GROUP BY c.id_compra, co.id_area
+        ) ca ON c.id_nc = ca.id_compra
+        LEFT JOIN areas a ON a.id_area = ca.id_area
+      WHERE c.status <> 'ca' AND c.tipo = 'nc'
+        {$sqlemp4} AND (c.fecha) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+
+    foreach ($query->result() as $key => $value) {
+      $entro = false;
+      foreach ($response as $key1 => $value1) {
+        if ($value->id_area == $value1->id_area) {
+          $value1->total += $value->total;
+          $entro = true;
+          break;
+        }
+      }
+
+      if (!$entro) {
+        $response[] = $value;
+      }
+    }
+
+    return $response;
+  }
+
   public function getDataEstadoResultado()
   {
-    $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 = $sql = '';
+    $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 =
+    $sqlemp7 = $sql = '';
     $response = ['saldo' => [], 'mes' => []];
 
     $anio = date("Y");
@@ -313,12 +430,13 @@ class reportes_model extends CI_Model {
     $fin_anio = new DateTime($mes_actual[0]);
     $fin_anio->sub(new DateInterval('P1D'));
     if ($this->input->get('did_empresa') > 0) {
-      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa'): '';
-      $sqlemp6 = " nf.id_empresa = ".$this->input->get('did_empresa'): '';
+      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa');
+      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa');
+      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa');
+      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa');
+      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa');
+      $sqlemp6 = " nf.id_empresa = ".$this->input->get('did_empresa')." AND ";
+      $sqlemp7 = "AND p.id_empresa = ".$this->input->get('did_empresa');
     }
 
     $sqlFechaSaldo = "'{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'";
@@ -345,42 +463,34 @@ class reportes_model extends CI_Model {
     $response['mes']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaMes, $sqlemp5);
 
     // Egresos gastos de caja tryana
-    $query = $this->db->query(
-      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA 2') AS cultivo, Sum(cg.monto) AS total
-      FROM cajachica_gastos cg
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-        LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 2 {$sqlemp2}
-        AND Date(cg.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
-      GROUP BY a.id_area");
-    $response['saldo']['egresos_gastos_caja_try'] = $query->result();
+    $response['saldo']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaSaldo, $sqlemp2);
+    $response['mes']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaMes, $sqlemp2);
 
     // Egresos gastos de caja Gdl
-    $query = $this->db->query(
-      "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA GDL') AS cultivo, Sum(cg.monto) AS total
-      FROM otros.bodega_gastos cg
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-        LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 1 {$sqlemp2}
-        AND Date(cg.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
-      GROUP BY a.id_area");
-    $response['saldo']['egresos_gastos_caja_gdl'] = $query->result();
+    $response['saldo']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaSaldo, $sqlemp2);
+    $response['mes']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaMes, $sqlemp2);
 
     // Egresos nomina
-    $query = $this->db->query(
-      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS'), Sum(nf.total_percepcion-nf.subsidio) AS total
-      FROM nomina_fiscal nf
-        INNER JOIN usuarios u ON u.id = nf.id_empleado
-        LEFT JOIN areas a ON a.id_area = u.id_area
-      WHERE {$sqlemp6} AND Date(nf.fecha) BETWEEN '{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'
-      GROUP BY a.id_area");
-    $response['saldo']['egresos_gastos_nomina'] = $query->result();
+    $response['saldo']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaSaldo, $sqlemp6);
+    $response['mes']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaMes, $sqlemp6);
+
+    // Egresos comisiones bancarias
+    $response['saldo']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaSaldo, $sqlemp7);
+    $response['mes']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaMes, $sqlemp7);
+
+    // Egresos notas de credito
+    $response['saldo']['egresos_nc'] = $this->erEgresosNc($sqlFechaSaldo, $sqlemp4);
+    $response['mes']['egresos_nc'] = $this->erEgresosNc($sqlFechaMes, $sqlemp4);
 
     return $response;
   }
+
   public function estado_resultado_pdf()
   {
     $datos = $this->getDataEstadoResultado();
+    echo "<pre>";
+    var_dump($datos);
+    echo "</pre>";exit;
 
     $this->load->model('empresas_model');
     if ($this->input->get('did_empresa'))
