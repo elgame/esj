@@ -218,7 +218,42 @@ class reportes_model extends CI_Model {
 
   /////////////////////////// ESTADO DE RESULTADO ///////////////////////////////////////
 
-  public function erIngresos($sqlFecha, $sqlemp1, $sqlemp2)
+  public function erCultivosAjuste($saldo, $mes)
+  {
+    $campos = [];
+    foreach ($saldo as $key => $value) {
+      $campos[$value->id_area] = (object)['cultivo' => $value->cultivo, 'saldo' => $value->total, 'mes' => 0];
+    }
+
+    foreach ($mes as $key => $value) {
+      if (isset($campos[$value->id_area])) {
+        $campos[$value->id_area]->mes = $value->total;
+      } else {
+        $campos[$value->id_area] = (object)['cultivo' => $value->cultivo, 'saldo' => 0, 'mes' => $value->total];
+      }
+    }
+
+    return $campos;
+  }
+
+  public function erCultivosMergue(...$listas)
+  {
+    $response = [];
+    foreach ($listas as $key => $lista) {
+      foreach ($lista as $area => $value) {
+        if (isset($response[$area])) {
+          $response[$area]->saldo += $value->saldo;
+          $response[$area]->mes += $value->mes;
+        } else {
+          $response[$area] = $value;
+        }
+      }
+    }
+
+    return $response;
+  }
+
+  public function erIngresos($sqlFecha, $sqlemp1, $sqlemp2, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
@@ -233,7 +268,7 @@ class reportes_model extends CI_Model {
         ) fh ON f.id_factura = fh.id_remision
       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'ingreso'
         AND COALESCE(fh.id_remision, 0) = 0
-        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1}
+        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1} {$sqlarea1}
       GROUP BY a.id_area
       UNION
       SELECT 0 AS id_area, 'INTANGIBLES' AS cultivo, Coalesce(Sum(ci.monto), 0) AS total
@@ -244,7 +279,7 @@ class reportes_model extends CI_Model {
     return $query->result();
   }
 
-  public function erIngresosDescuentos($sqlFecha, $sqlemp1)
+  public function erIngresosDescuentos($sqlFecha, $sqlemp1, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'OTROS INGRESOS') AS cultivo, Sum(fp.importe) AS total
@@ -253,88 +288,88 @@ class reportes_model extends CI_Model {
         LEFT JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         LEFT JOIN areas a ON a.id_area = c.id_area
       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.tipo_comprobante = 'egreso'
-        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1}
+        AND Date(f.fecha) BETWEEN {$sqlFecha} {$sqlemp1} {$sqlarea1}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosSalidas($sqlFecha, $sqlemp3)
+  public function erEgresosSalidas($sqlFecha, $sqlemp3, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(csp.cantidad*csp.precio_unitario) AS total
       FROM compras_salidas cs
         INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
         LEFT JOIN areas a ON a.id_area = cs.id_area
-      WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3}
+      WHERE (cs.status = 's' OR cs.status = 'b') {$sqlemp3} {$sqlarea1}
         AND Date(cs.fecha_creacion) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosGastosDir($sqlFecha, $sqlemp4)
+  public function erEgresosGastosDir($sqlFecha, $sqlemp4, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO GASTOS DIRECTOS') AS cultivo, Sum(c.subtotal) AS total, c.intangible
       FROM compras c
         LEFT JOIN areas a ON a.id_area = c.id_area
-      WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4}
+      WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4} {$sqlarea1}
         AND Date(c.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area, c.intangible");
     return $query->result();
   }
 
-  public function erEgresosGastosOrd($sqlFecha, $sqlemp5)
+  public function erEgresosGastosOrd($sqlFecha, $sqlemp5, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'COSTO SALIDAS ALMACEN') AS cultivo, Sum(cp.importe) AS total
       FROM compras_ordenes co
         INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
         LEFT JOIN areas a ON a.id_area = co.id_area
-      WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5}
+      WHERE (co.status = 'a' OR co.status = 'f') AND co.tipo_orden in('d', 'f', 'oc') {$sqlemp5} {$sqlarea1}
         AND Date(co.fecha_aceptacion) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosGastosCajaTry($sqlFecha, $sqlemp2)
+  public function erEgresosGastosCajaTry($sqlFecha, $sqlemp2, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA 2') AS cultivo, Sum(cg.monto) AS total
       FROM cajachica_gastos cg
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
         LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 2 {$sqlemp2}
+      WHERE cg.no_caja = 2 {$sqlemp2} {$sqlarea1}
         AND Date(cg.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosGastosCajaGdl($sqlFecha, $sqlemp2)
+  public function erEgresosGastosCajaGdl($sqlFecha, $sqlemp2, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'GASTOS CAJA GDL') AS cultivo, Sum(cg.monto) AS total
       FROM otros.bodega_gastos cg
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
         LEFT JOIN areas a ON a.id_area = cg.id_areac
-      WHERE cg.no_caja = 1 {$sqlemp2}
+      WHERE cg.no_caja = 1 {$sqlemp2} {$sqlarea1}
         AND Date(cg.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosGastosNomina($sqlFecha, $sqlemp6)
+  public function erEgresosGastosNomina($sqlFecha, $sqlemp6, $sqlarea1)
   {
     $query = $this->db->query(
-      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS'), Sum(nf.total_percepcion-nf.subsidio) AS total
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTROS') AS cultivo, Sum(nf.total_percepcion-nf.subsidio) AS total
       FROM nomina_fiscal nf
         INNER JOIN usuarios u ON u.id = nf.id_empleado
         LEFT JOIN areas a ON a.id_area = u.id_area
-      WHERE {$sqlemp6} Date(nf.fecha) BETWEEN {$sqlFecha}
+      WHERE {$sqlemp6} Date(nf.fecha) BETWEEN {$sqlFecha} {$sqlarea1}
       GROUP BY a.id_area");
     return $query->result();
   }
 
-  public function erEgresosComisionesBan($sqlFecha, $sqlemp7)
+  public function erEgresosComisionesBan($sqlFecha, $sqlemp7, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT p.id_empresa, Sum(pm.monto) AS total, Coalesce(Sum(n_areas.no_areas), 1) AS no_areas
@@ -347,12 +382,22 @@ class reportes_model extends CI_Model {
           GROUP BY id_empresa
         ) n_areas ON p.id_empresa = n_areas.id_empresa
       WHERE p.status = 't' AND cc.tipo = 'gastofinanciero' AND cc.nombre = 'COMISIONES BANCARIAS'
-        {$sqlemp7} AND p.fecha BETWEEN {$sqlFecha}
+        {$sqlemp7} {$sqlarea1} AND p.fecha BETWEEN {$sqlFecha}
       GROUP BY p.id_empresa");
-    return $query->result();
+
+    $total = 0;
+    foreach ($query->result() as $key => $value) {
+      if ($sqlarea1 !== '') {
+        $total += $value->total / $value->no_areas;
+      } else {
+        $total += $value->total;
+      }
+    }
+
+    return $total;
   }
 
-  public function erEgresosNc($sqlFecha, $sqlemp4)
+  public function erEgresosNc($sqlFecha, $sqlemp4, $sqlarea1)
   {
     $query = $this->db->query(
       "SELECT a.id_area, Coalesce(a.nombre, 'no') AS cultivo, Sum(c.subtotal) AS total
@@ -366,7 +411,7 @@ class reportes_model extends CI_Model {
         LEFT JOIN areas a ON a.id_area = ca.id_area
       WHERE c.status <> 'ca' AND c.tipo = 'nc'
         AND a.id_area IS NOT NULL
-        {$sqlemp4} AND (c.fecha) BETWEEN {$sqlFecha}
+        {$sqlemp4} {$sqlarea1} AND (c.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
     $response = $query->result();
 
@@ -391,7 +436,7 @@ class reportes_model extends CI_Model {
         ) ca ON c.id_nc = ca.id_compra
         LEFT JOIN areas a ON a.id_area = ca.id_area
       WHERE c.status <> 'ca' AND c.tipo = 'nc'
-        {$sqlemp4} AND (c.fecha) BETWEEN {$sqlFecha}
+        {$sqlemp4} {$sqlarea1} AND (c.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
 
     foreach ($query->result() as $key => $value) {
@@ -416,7 +461,9 @@ class reportes_model extends CI_Model {
   {
     $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 =
     $sqlemp7 = $sql = '';
-    $response = ['saldo' => [], 'mes' => []];
+    $sqlarea1 = '';
+    $res = ['saldo' => [], 'mes' => []];
+    $response = [];
 
     $anio = date("Y");
     $ini_anio = $anio.'-01-01';
@@ -438,49 +485,64 @@ class reportes_model extends CI_Model {
       $sqlemp6 = " nf.id_empresa = ".$this->input->get('did_empresa')." AND ";
       $sqlemp7 = "AND p.id_empresa = ".$this->input->get('did_empresa');
     }
+    if ($this->input->get('did_area') > 0) {
+      $sqlarea1 = "AND a.id_area = ".$this->input->get('did_area');
+    }
 
     $sqlFechaSaldo = "'{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'";
-    $sqlFechaMes = "'{$mes_actual[0]}' AND '{$mes_actual[0]}'";
+    $sqlFechaMes = "'{$mes_actual[0]}' AND '{$mes_actual[1]}'";
 
     // Ingresos
-    $response['saldo']['ingresos'] = $this->erIngresos($sqlFechaSaldo, $sqlemp1, $sqlemp2);
-    $response['mes']['ingresos'] = $this->erIngresos($sqlFechaMes, $sqlemp1, $sqlemp2);
+    $res['saldo']['ingresos'] = $this->erIngresos($sqlFechaSaldo, $sqlemp1, $sqlemp2, $sqlarea1);
+    $res['mes']['ingresos'] = $this->erIngresos($sqlFechaMes, $sqlemp1, $sqlemp2, $sqlarea1);
+    $response['ingresos'] = $this->erCultivosAjuste($res['saldo']['ingresos'], $res['mes']['ingresos']);
 
     // Ingresos descuentos
-    $response['saldo']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaSaldo, $sqlemp1);
-    $response['mes']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaMes, $sqlemp1);
+    $res['saldo']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaSaldo, $sqlemp1, $sqlarea1);
+    $res['mes']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaMes, $sqlemp1, $sqlarea1);
+    $response['ingresos_descuentos'] = $this->erCultivosAjuste($res['saldo']['ingresos_descuentos'], $res['mes']['ingresos_descuentos']);
 
     // Egresos salidas almacén
-    $response['saldo']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaSaldo, $sqlemp3);
-    $response['mes']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaMes, $sqlemp3);
+    $res['saldo']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaSaldo, $sqlemp3, $sqlarea1);
+    $res['mes']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaMes, $sqlemp3, $sqlarea1);
+    $response['egresos_salidas'] = $this->erCultivosAjuste($res['saldo']['egresos_salidas'], $res['mes']['egresos_salidas']);
 
     // Egresos gastos directos
-    $response['saldo']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaSaldo, $sqlemp4);
-    $response['mes']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaMes, $sqlemp4);
+    $res['saldo']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaSaldo, $sqlemp4, $sqlarea1);
+    $res['mes']['egresos_gastos_dir'] = $this->erEgresosGastosDir($sqlFechaMes, $sqlemp4, $sqlarea1);
+    $response['egresos_gastos_dir'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_dir'], $res['mes']['egresos_gastos_dir']);
 
     // Egresos gastos de ordenes
-    $response['saldo']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaSaldo, $sqlemp5);
-    $response['mes']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaMes, $sqlemp5);
+    $res['saldo']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaSaldo, $sqlemp5, $sqlarea1);
+    $res['mes']['egresos_gastos_ord'] = $this->erEgresosGastosOrd($sqlFechaMes, $sqlemp5, $sqlarea1);
+    $response['egresos_gastos_ord'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_ord'], $res['mes']['egresos_gastos_ord']);
+
+    $response['egresos_costos_ventas'] = $this->erCultivosMergue($response['egresos_salidas'], $response['egresos_gastos_dir'], $response['egresos_gastos_ord']);
 
     // Egresos gastos de caja tryana
-    $response['saldo']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaSaldo, $sqlemp2);
-    $response['mes']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaMes, $sqlemp2);
+    $res['saldo']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaSaldo, $sqlemp2, $sqlarea1);
+    $res['mes']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaMes, $sqlemp2, $sqlarea1);
+    $response['egresos_gastos_caja_try'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_caja_try'], $res['mes']['egresos_gastos_caja_try']);
 
     // Egresos gastos de caja Gdl
-    $response['saldo']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaSaldo, $sqlemp2);
-    $response['mes']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaMes, $sqlemp2);
+    $res['saldo']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaSaldo, $sqlemp2, $sqlarea1);
+    $res['mes']['egresos_gastos_caja_gdl'] = $this->erEgresosGastosCajaGdl($sqlFechaMes, $sqlemp2, $sqlarea1);
+    $response['egresos_gastos_caja_gdl'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_caja_gdl'], $res['mes']['egresos_gastos_caja_gdl']);
 
     // Egresos nomina
-    $response['saldo']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaSaldo, $sqlemp6);
-    $response['mes']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaMes, $sqlemp6);
+    $res['saldo']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaSaldo, $sqlemp6, $sqlarea1);
+    $res['mes']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaMes, $sqlemp6, $sqlarea1);
+    $response['egresos_gastos_nomina'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_nomina'], $res['mes']['egresos_gastos_nomina']);
 
     // Egresos comisiones bancarias
-    $response['saldo']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaSaldo, $sqlemp7);
-    $response['mes']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaMes, $sqlemp7);
+    $res['saldo']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaSaldo, $sqlemp7, $sqlarea1);
+    $res['mes']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaMes, $sqlemp7, $sqlarea1);
+    $response['egresos_comisiones_ban'] = (object)['cultivo' => 'COMISIONES BANCARIAS', 'saldo' => $res['saldo']['egresos_comisiones_ban'], 'mes' => $res['mes']['egresos_comisiones_ban']];
 
     // Egresos notas de credito
-    $response['saldo']['egresos_nc'] = $this->erEgresosNc($sqlFechaSaldo, $sqlemp4);
-    $response['mes']['egresos_nc'] = $this->erEgresosNc($sqlFechaMes, $sqlemp4);
+    $res['saldo']['egresos_nc'] = $this->erEgresosNc($sqlFechaSaldo, $sqlemp4, $sqlarea1);
+    $res['mes']['egresos_nc'] = $this->erEgresosNc($sqlFechaMes, $sqlemp4, $sqlarea1);
+    $response['egresos_nc'] = $this->erCultivosAjuste($res['saldo']['egresos_nc'], $res['mes']['egresos_nc']);
 
     return $response;
   }
@@ -488,9 +550,9 @@ class reportes_model extends CI_Model {
   public function estado_resultado_pdf()
   {
     $datos = $this->getDataEstadoResultado();
-    echo "<pre>";
-    var_dump($datos);
-    echo "</pre>";exit;
+    // echo "<pre>";
+    // var_dump($datos);
+    // echo "</pre>";exit;
 
     $this->load->model('empresas_model');
     if ($this->input->get('did_empresa'))
@@ -505,7 +567,7 @@ class reportes_model extends CI_Model {
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = isset($empresa)? $empresa['info']->nombre_fiscal: '';
-    $pdf->titulo2 = "Balance General";
+    $pdf->titulo2 = "Estado de resultado";
 
     // $pdf->titulo3 = "{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
@@ -517,34 +579,122 @@ class reportes_model extends CI_Model {
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
-    // $links = array('', '', '', '');
     $pdf->SetY(30);
-    $aligns = array('L', 'R');
-    $widths = array(50, 30);
 
-    $pdf->SetFont('Arial','',7);
+    $aligns = array('L', 'R', 'R');
+    $widths = array(150);
+    $widths2 = array(80, 40, 30);
+
     $pdf->SetTextColor(0,0,0);
-
     $pdf->SetAligns($aligns);
+
+    $pdf->SetFont('Arial','B', 9);
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
-    $pdf->Row(['Caja', MyString::formatoNumero($datos['caja'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Caja 2', MyString::formatoNumero($datos['caja2'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Bancos', MyString::formatoNumero($datos['bancos'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Clientes', MyString::formatoNumero($datos['clientes'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Proveedores', MyString::formatoNumero($datos['proveedores'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Deudores Diversos', MyString::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Caja prestamos', MyString::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
-    $pdf->SetX(6);
-    $pdf->Row(['Almacén', MyString::formatoNumero($datos['almacen'], 2, '', false)], false);
+    $pdf->Row(['INGRESOS'], false, false);
 
-    $pdf->Output('balance.pdf', 'I');
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Ingresos'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_singreso = $total_mingreso = 0;
+    foreach ($datos['ingresos'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_singreso += $value->saldo;
+      $total_mingreso += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_singreso, 2, '', false),
+      MyString::formatoNumero($total_mingreso, 2, '', false)
+    ], false, true);
+
+    // --
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Devoluciones y descuentos'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_singresodesc = $total_mingresodesc = 0;
+    foreach ($datos['ingresos_descuentos'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_singresodesc += $value->saldo;
+      $total_mingresodesc += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_singresodesc, 2, '', false),
+      MyString::formatoNumero($total_mingresodesc, 2, '', false)
+    ], false, true);
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_singreso-$total_singresodesc, 2, '', false),
+      MyString::formatoNumero($total_mingreso-$total_mingresodesc, 2, '', false)
+    ], false, false);
+
+    // ----------------------- EGRESO
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(6);
+    $pdf->Row(['EGRESOS'], false, false);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Costo de venta'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_scostoventa = $total_mcostoventa = 0;
+    foreach ($datos['egresos_costos_ventas'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_scostoventa += $value->saldo;
+      $total_mcostoventa += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_scostoventa, 2, '', false),
+      MyString::formatoNumero($total_mcostoventa, 2, '', false)
+    ], false, true);
+
+    $pdf->Output('estado_resultado.pdf', 'I');
   }
 
 
