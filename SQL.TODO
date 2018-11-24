@@ -28,7 +28,18 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
- ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap
+✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap
+     ALTER TABLE otros.bodega_gastos ADD COLUMN id_areac integer;
+     ALTER TABLE otros.bodega_gastos ADD COLUMN id_rancho bigint;
+     ALTER TABLE otros.bodega_gastos ADD COLUMN id_centro_costo bigint;
+     ALTER TABLE otros.bodega_gastos ADD COLUMN id_activo bigint;
+     COMMENT ON COLUMN otros.bodega_gastos.id_areac IS 'Area de bascula = Cultivos';
+     COMMENT ON COLUMN otros.bodega_gastos.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+     ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_areac_fkey FOREIGN KEY (id_areac) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+ ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap|pcc
      CREATE TABLE otros.bodega_traspasos
         (
           id_traspaso bigserial NOT NULL,
@@ -45,7 +56,7 @@
               REFERENCES public.usuarios (id) MATCH SIMPLE
               ON UPDATE CASCADE ON DELETE CASCADE
         ) WITH ( OIDS=FALSE );
-        ALTER TABLE public.cajachica_gastos OWNER TO programa;
+        ALTER TABLE otros.bodega_traspasos OWNER TO programa;
         COMMENT ON COLUMN otros.bodega_traspasos.tipo IS 'true: ingreso, false: retiro';
      CREATE TABLE public.cajachica_traspasos
         (
@@ -71,7 +82,7 @@
      -- INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('BODEGA GDL','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INTANGIBLES','ot',TRUE,FALSE);
-     INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
+     --INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('FLETES','ot',TRUE,FALSE);
 ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|pcc|lap
      Nota: en la tabla cajachica_categorias solo tiene que haber una categoria ligada a 1 empresa con status activo

@@ -474,6 +474,10 @@ class bodega_guadalajara_model extends CI_Model {
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
 
           $this->db->update('otros.bodega_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
@@ -488,6 +492,10 @@ class bodega_guadalajara_model extends CI_Model {
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('otros.bodega_gastos', $gastos);
           $gastos_ids['adds'][] = $this->db->insert_id();
@@ -674,11 +682,16 @@ class bodega_guadalajara_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
-          'id_area' AS campo
+          'id_area' AS campo, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
        FROM otros.bodega_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN bodega_catalogo ca ON ca.id_area = cg.id_area
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
        WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
