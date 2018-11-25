@@ -306,14 +306,14 @@ class reportes_model extends CI_Model {
     return $query->result();
   }
 
-  public function erEgresosGastosDir($sqlFecha, $sqlemp4, $sqlarea1)
+  public function erEgresosGastosDir($sqlFecha, $sqlemp4, $sqlarea1, $intangible = 'f')
   {
     $query = $this->db->query(
-      "SELECT a.id_area, Coalesce(a.nombre, 'COSTO GASTOS DIRECTOS') AS cultivo, Sum(c.subtotal) AS total, c.intangible
+      "SELECT a.id_area, Coalesce(a.nombre, 'COSTO GASTOS DIRECTOS') AS cultivo, Sum(c.subtotal) AS total
       FROM compras c
         LEFT JOIN areas a ON a.id_area = c.id_area
       WHERE c.status <> 'ca' AND c.isgasto = 't' {$sqlemp4} {$sqlarea1}
-        AND Date(c.fecha) BETWEEN {$sqlFecha}
+        AND Date(c.fecha) BETWEEN {$sqlFecha} AND c.intangible = '{$intangible}'
       GROUP BY a.id_area, c.intangible");
     return $query->result();
   }
@@ -457,7 +457,59 @@ class reportes_model extends CI_Model {
     return $response;
   }
 
-  public function getDataEstadoResultado()
+  public function getTotalResultado($datos)
+  {
+    // Ingresos
+    $total_singreso = $total_mingreso = 0;
+    foreach ($datos['ingresos'] as $key => $value) {
+      $total_singreso += $value->saldo;
+      $total_mingreso += $value->mes;
+    }
+
+    $total_singresodesc = $total_mingresodesc = 0;
+    foreach ($datos['ingresos_descuentos'] as $key => $value) {
+      $total_singresodesc += $value->saldo;
+      $total_mingresodesc += $value->mes;
+    }
+
+    // Egresos
+    $total_scostoventa = $total_mcostoventa = 0;
+    foreach ($datos['egresos_costos_ventas'] as $key => $value) {
+      $total_scostoventa += $value->saldo;
+      $total_mcostoventa += $value->mes;
+    }
+
+    $total_sgastosgenerales = $total_mgastosgenerales = 0;
+    foreach ($datos['egresos_gastos_generales'] as $key => $value) {
+      $total_sgastosgenerales += $value->saldo;
+      $total_mgastosgenerales += $value->mes;
+    }
+
+    $total_sgastosintangibles = $total_mgastosintangibles = 0;
+    foreach ($datos['egresos_gastos_intangibles'] as $key => $value) {
+      $total_sgastosintangibles += $value->saldo;
+      $total_mgastosintangibles += $value->mes;
+    }
+
+    $total_scomisionesban = $total_mcomisionesban = 0;
+    $total_scomisionesban += $datos['egresos_comisiones_ban']->saldo;
+    $total_mcomisionesban += $datos['egresos_comisiones_ban']->mes;
+
+    $total_segresosnc = $total_megresosnc = 0;
+    foreach ($datos['egresos_nc'] as $key => $value) {
+      $total_segresosnc += $value->saldo;
+      $total_megresosnc += $value->mes;
+    }
+
+    $response['ingresos'] = ($total_mingreso-$total_mingresodesc)+
+                            ($total_singreso-$total_singresodesc);
+    $response['egresos'] = ($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
+                           ($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc);
+    $response['resultado'] = $response['ingresos'] - $response['egresos'];
+    return $response;
+  }
+
+  public function getDataEstadoResultado($request, $onlyTotal = false)
   {
     $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 =
     $sqlemp7 = $sql = '';
@@ -467,30 +519,32 @@ class reportes_model extends CI_Model {
 
     $anio = date("Y");
     $ini_anio = $anio.'-01-01';
-    if ($this->input->get('ffecha1')) {
-      $fecha = explode('-', $this->input->get('ffecha1'));
+    if (!empty($request['ffecha1'])) {
+      $fecha = explode('-', $request['ffecha1']);
       $anio = $fecha[0];
       $ini_anio = $anio.'-01-01';
     }
-    $mes_actual[1] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    $mes_actual[1] = !empty($request['ffecha2'])? $request['ffecha2']: date("Y-m-d");
     $mes_actual[0] = substr($mes_actual[1], 0, 8).'01';
     $fin_anio = new DateTime($mes_actual[0]);
     $fin_anio->sub(new DateInterval('P1D'));
-    if ($this->input->get('did_empresa') > 0) {
-      $sqlemp1 = "AND f.id_empresa = ".$this->input->get('did_empresa');
-      $sqlemp2 = "AND cc.id_empresa = ".$this->input->get('did_empresa');
-      $sqlemp3 = "AND cs.id_empresa = ".$this->input->get('did_empresa');
-      $sqlemp4 = "AND c.id_empresa = ".$this->input->get('did_empresa');
-      $sqlemp5 = "AND co.id_empresa = ".$this->input->get('did_empresa');
-      $sqlemp6 = " nf.id_empresa = ".$this->input->get('did_empresa')." AND ";
-      $sqlemp7 = "AND p.id_empresa = ".$this->input->get('did_empresa');
+    if (!empty($request['did_empresa'])) {
+      $sqlemp1 = "AND f.id_empresa = ".$request['did_empresa'];
+      $sqlemp2 = "AND cc.id_empresa = ".$request['did_empresa'];
+      $sqlemp3 = "AND cs.id_empresa = ".$request['did_empresa'];
+      $sqlemp4 = "AND c.id_empresa = ".$request['did_empresa'];
+      $sqlemp5 = "AND co.id_empresa = ".$request['did_empresa'];
+      $sqlemp6 = " nf.id_empresa = ".$request['did_empresa']." AND ";
+      $sqlemp7 = "AND p.id_empresa = ".$request['did_empresa'];
     }
-    if ($this->input->get('did_area') > 0) {
-      $sqlarea1 = "AND a.id_area = ".$this->input->get('did_area');
+    if (!empty($request['did_area'])) {
+      $sqlarea1 = "AND a.id_area = ".$request['did_area'];
     }
 
     $sqlFechaSaldo = "'{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'";
     $sqlFechaMes = "'{$mes_actual[0]}' AND '{$mes_actual[1]}'";
+
+    $response['filtros']['mes'] = MyString::mes(substr($mes_actual[0], 5, 2));
 
     // Ingresos
     $res['saldo']['ingresos'] = $this->erIngresos($sqlFechaSaldo, $sqlemp1, $sqlemp2, $sqlarea1);
@@ -534,29 +588,40 @@ class reportes_model extends CI_Model {
     $res['mes']['egresos_gastos_nomina'] = $this->erEgresosGastosNomina($sqlFechaMes, $sqlemp6, $sqlarea1);
     $response['egresos_gastos_nomina'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_nomina'], $res['mes']['egresos_gastos_nomina']);
 
+    $response['egresos_gastos_generales'] = $this->erCultivosMergue($response['egresos_gastos_caja_try'], $response['egresos_gastos_caja_gdl'], $response['egresos_gastos_nomina']);
+
     // Egresos comisiones bancarias
     $res['saldo']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaSaldo, $sqlemp7, $sqlarea1);
     $res['mes']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaMes, $sqlemp7, $sqlarea1);
     $response['egresos_comisiones_ban'] = (object)['cultivo' => 'COMISIONES BANCARIAS', 'saldo' => $res['saldo']['egresos_comisiones_ban'], 'mes' => $res['mes']['egresos_comisiones_ban']];
+
+    // Egresos gastos directos intangibles
+    $res['saldo']['egresos_gastos_intangibles'] = $this->erEgresosGastosDir($sqlFechaSaldo, $sqlemp4, $sqlarea1, 't');
+    $res['mes']['egresos_gastos_intangibles'] = $this->erEgresosGastosDir($sqlFechaMes, $sqlemp4, $sqlarea1, 't');
+    $response['egresos_gastos_intangibles'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_intangibles'], $res['mes']['egresos_gastos_intangibles']);
 
     // Egresos notas de credito
     $res['saldo']['egresos_nc'] = $this->erEgresosNc($sqlFechaSaldo, $sqlemp4, $sqlarea1);
     $res['mes']['egresos_nc'] = $this->erEgresosNc($sqlFechaMes, $sqlemp4, $sqlarea1);
     $response['egresos_nc'] = $this->erCultivosAjuste($res['saldo']['egresos_nc'], $res['mes']['egresos_nc']);
 
-    return $response;
+    if ($onlyTotal) {
+      return $this->getTotalResultado($response);
+    } else{
+      return $response;
+    }
   }
 
-  public function estado_resultado_pdf()
+  public function estado_resultado_pdf($request)
   {
-    $datos = $this->getDataEstadoResultado();
+    $datos = $this->getDataEstadoResultado($request);
     // echo "<pre>";
     // var_dump($datos);
     // echo "</pre>";exit;
 
     $this->load->model('empresas_model');
-    if ($this->input->get('did_empresa'))
-      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    if (!empty($request['did_empresa']))
+      $empresa = $this->empresas_model->getInfoEmpresa($request['did_empresa']);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -568,22 +633,16 @@ class reportes_model extends CI_Model {
 
     $pdf->titulo1 = isset($empresa)? $empresa['info']->nombre_fiscal: '';
     $pdf->titulo2 = "Estado de resultado";
-
-    // $pdf->titulo3 = "{$_GET['dproducto']} \n";
-    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
-    elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
-    elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
+    $pdf->titulo3 = $datos['filtros']['mes'];
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
     $pdf->SetY(30);
 
-    $aligns = array('L', 'R', 'R');
+    $aligns = array('L', 'R', 'R', 'R');
     $widths = array(150);
     $widths2 = array(80, 40, 30);
+    $widths3 = array(80, 40, 30, 45);
 
     $pdf->SetTextColor(0,0,0);
     $pdf->SetAligns($aligns);
@@ -651,12 +710,16 @@ class reportes_model extends CI_Model {
       MyString::formatoNumero($total_singresodesc, 2, '', false),
       MyString::formatoNumero($total_mingresodesc, 2, '', false)
     ], false, true);
+
     $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetWidths($widths3);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
       MyString::formatoNumero($total_singreso-$total_singresodesc, 2, '', false),
-      MyString::formatoNumero($total_mingreso-$total_mingresodesc, 2, '', false)
+      MyString::formatoNumero($total_mingreso-$total_mingresodesc, 2, '', false),
+      MyString::formatoNumero(($total_mingreso-$total_mingresodesc)+
+                              ($total_singreso-$total_singresodesc), 2, '', false)
     ], false, false);
 
     // ----------------------- EGRESO
@@ -693,6 +756,147 @@ class reportes_model extends CI_Model {
       MyString::formatoNumero($total_scostoventa, 2, '', false),
       MyString::formatoNumero($total_mcostoventa, 2, '', false)
     ], false, true);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Gastos generales'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_sgastosgenerales = $total_mgastosgenerales = 0;
+    foreach ($datos['egresos_gastos_generales'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_sgastosgenerales += $value->saldo;
+      $total_mgastosgenerales += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_sgastosgenerales, 2, '', false),
+      MyString::formatoNumero($total_mgastosgenerales, 2, '', false)
+    ], false, true);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Gastos intangibles'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_sgastosintangibles = $total_mgastosintangibles = 0;
+    foreach ($datos['egresos_gastos_intangibles'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_sgastosintangibles += $value->saldo;
+      $total_mgastosintangibles += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_sgastosintangibles, 2, '', false),
+      MyString::formatoNumero($total_mgastosintangibles, 2, '', false)
+    ], false, true);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Comisiones bancarias'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_scomisionesban = $total_mcomisionesban = 0;
+    $pdf->SetX(12);
+    $pdf->Row([
+      $datos['egresos_comisiones_ban']->cultivo,
+      MyString::formatoNumero($datos['egresos_comisiones_ban']->saldo, 2, '', false),
+      MyString::formatoNumero($datos['egresos_comisiones_ban']->mes, 2, '', false)
+    ], false, true);
+    $total_scomisionesban += $datos['egresos_comisiones_ban']->saldo;
+    $total_mcomisionesban += $datos['egresos_comisiones_ban']->mes;
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_scomisionesban, 2, '', false),
+      MyString::formatoNumero($total_mcomisionesban, 2, '', false)
+    ], false, true);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
+    $pdf->Row(['Devoluciones y descuentos'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_segresosnc = $total_megresosnc = 0;
+    foreach ($datos['egresos_nc'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero($value->mes, 2, '', false)
+      ], false, true);
+      $total_segresosnc += $value->saldo;
+      $total_megresosnc += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_segresosnc, 2, '', false),
+      MyString::formatoNumero($total_megresosnc, 2, '', false)
+    ], false, true);
+
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetWidths($widths3);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc, 2, '', false),
+      MyString::formatoNumero($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc, 2, '', false),
+      MyString::formatoNumero(($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
+                              ($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc), 2, '', false)
+    ], false, false);
+
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetWidths([150, 45]);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'RESULTADO',
+      MyString::formatoNumero(
+        (
+          ($total_mingreso-$total_mingresodesc)+
+          ($total_singreso-$total_singresodesc)
+        ) - (
+          ($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
+          ($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc)
+        )
+      , 2, '', false)
+    ], false, false);
 
     $pdf->Output('estado_resultado.pdf', 'I');
   }
