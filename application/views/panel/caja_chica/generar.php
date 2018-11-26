@@ -83,7 +83,7 @@
               </div>
               <div class="span4">
                 <div class="row-fluid">
-                  <input type="hidden" name="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
+                  <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
                   <?php if ($cajas_cerradas) { ?>
                     <div>Para modificar la caja no tiene que haber días cerrados mayores a esta fecha</div>
@@ -212,7 +212,9 @@
                             <tr>
                               <th colspan="4">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                <?php if ($_GET['fno_caja'] !== '1'): ?>
                                 <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
+                                <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>
                             </tr>
@@ -386,7 +388,11 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="6">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="6">GASTOS DEL DIA
+                                    <?php if ($_GET['fno_caja'] !== '1'): ?>
+                                    <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php endif ?>
+                                  </th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
                                 <tr>
@@ -416,6 +422,15 @@
                                             <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
                                             <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                            <input type="hidden" name="area[]" value="<?php echo $_POST['area'][$key] ?>" class="area span12">
+                                            <input type="hidden" name="areaId[]" value="<?php echo $_POST['areaId'][$key] ?>" class="areaId span12">
+                                            <input type="hidden" name="rancho[]" value="<?php echo $_POST['rancho'][$key] ?>" class="rancho span12">
+                                            <input type="hidden" name="ranchoId[]" value="<?php echo $_POST['ranchoId'][$key] ?>" class="ranchoId span12">
+                                            <input type="hidden" name="centroCosto[]" value="<?php echo $_POST['centroCosto'][$key] ?>" class="centroCosto span12">
+                                            <input type="hidden" name="centroCostoId[]" value="<?php echo $_POST['centroCostoId'][$key] ?>" class="centroCostoId span12">
+                                            <input type="hidden" name="activos[]" value="<?php echo $_POST['activos'][$key] ?>" class="activos span12">
+                                            <input type="hidden" name="activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
+                                            <input type="hidden" name="empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
                                           </td>
                                           <td style="width: 100px;">
                                             <input type="text" name="gasto_empresa[]" value="<?php echo $_POST['gasto_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -437,7 +452,10 @@
                                             <input type="hidden" name="gasto_reposicion[]" value="<?php echo $_POST['gasto_reposicion'][$key] ?>" class="gasto-reposicionhid">
                                           </td>
                                           <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
-                                          <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                          <td style="width: 30px;">
+                                            <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
+                                          </td>
                                         </tr>
                                 <?php }} else {
                                   foreach ($caja['gastos'] as $gasto) {
@@ -451,6 +469,15 @@
                                       <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
                                       <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                      <input type="hidden" name="area[]" value="<?php echo $gasto->area ?>" class="area span12">
+                                      <input type="hidden" name="areaId[]" value="<?php echo $gasto->id_areac ?>" class="areaId span12">
+                                      <input type="hidden" name="rancho[]" value="<?php echo $gasto->rancho ?>" class="rancho span12">
+                                      <input type="hidden" name="ranchoId[]" value="<?php echo $gasto->id_rancho ?>" class="ranchoId span12">
+                                      <input type="hidden" name="centroCosto[]" value="<?php echo $gasto->centro_costo ?>" class="centroCosto span12">
+                                      <input type="hidden" name="centroCostoId[]" value="<?php echo $gasto->id_centro_costo ?>" class="centroCostoId span12">
+                                      <input type="hidden" name="activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
+                                      <input type="hidden" name="activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
+                                      <input type="hidden" name="empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -477,6 +504,7 @@
                                     <td style="width: 30px;">
                                       <?php if ($modificar_gasto): ?>
                                         <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
                                       <?php endif ?>
                                     </td>
                                   </tr>
@@ -496,6 +524,88 @@
                 </div>
               </div>
               <!-- /Gastos -->
+
+              <?php if ($_GET['fno_caja'] == '2'): ?>
+              <!-- Traspasos -->
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
+                              <thead>
+                                <tr>
+                                  <th colspan="2">TRASPASOS <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="2">IMPORTE</th>
+                                </tr>
+                                <tr>
+                                  <th>TIPO</th>
+                                  <th>CONCEPTO</th>
+                                  <th>CARGO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                  $totalTraspasos = 0;
+                                  if (isset($_POST['traspaso_concepto'])) {
+                                    foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
+                                      $totalTraspasos += floatval($_POST['traspaso_importe'][$key]); ?>
+                                    <tr>
+                                      <td>
+                                        <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                          <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                          <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                        </select>
+                                        <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
+                                        <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                      </td>
+                                      <td style="">
+                                        <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                      </td>
+                                      <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                    </tr>
+                                <?php }} else {
+                                  if (isset($caja['traspasos']))
+                                  foreach ($caja['traspasos'] as $traspaso) {
+                                    $totalTraspasos += floatval($traspaso->monto);
+                                  ?>
+                                  <tr>
+                                    <td>
+                                      <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                        <option value="t" <?php echo $traspaso->tipo == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                        <option value="f" <?php echo $traspaso->tipo == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                      </select>
+                                      <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
+                                      <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                    </td>
+                                    <td style="">
+                                      <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                    </td>
+                                    <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  </tr>
+                                <?php }} ?>
+                                <tr class="row-total">
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td><input type="text" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                                  <td></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Traspasos -->
+              <?php endif ?>
 
               <!-- Deudores -->
               <div class="row-fluid" style="margin-top: 5px;">
@@ -580,8 +690,12 @@
                                       <?php echo $deudor->abonos ?>
                                     </td>
                                     <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>" data-mismo="<?php echo $deudor->mismo_dia ?>">
+                                      <?php if (!isset($caja['status']) || $caja['status'] === 't'): ?>
                                       <a class="btn_abonos_deudores" href="<?php echo base_url('panel/caja_chica/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$_GET['fno_caja']}&monto={$deudor->saldo}" ?>" style="" rel="superbox-50x500" title="Abonar">
                                         <?php echo $deudor->saldo ?></a>
+                                      <?php else: ?>
+                                        <?php echo $deudor->saldo ?>
+                                      <?php endif ?>
                                     </td>
                                     <td style="width: 30px;">
                                       <?php if ($modificar_gasto && $deudor->mismo_dia == ''): ?>
@@ -855,6 +969,79 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
       <button class="btn btn-primary" id="btnModalAreasSel">Seleccionar</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalCatalogos" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalCatalogosLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalCatalogosLavel">Catálogos</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+        <div class="span6">
+          <input type="hidden" id="accion_catalogos" value="true">
+          <div class="control-group">
+            <label class="control-label" for="dempresa">Empresa</label>
+            <div class="controls">
+              <input type="text" name="dempresa" class="span11" id="dempresa" value="" size="">
+              <input type="hidden" name="did_empresa" id="did_empresa" value="">
+              <input type="hidden" name="did_categoria" id="did_categoria" value="">
+            </div>
+          </div>
+
+          <div class="control-group" id="cultivosGrup">
+            <label class="control-label" for="area">Cultivo </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+              </div>
+              <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+          <div class="control-group" id="ranchosGrup">
+            <label class="control-label" for="rancho">Area </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+              </div>
+              <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+        </div>
+
+        <div class="span6">
+          <div class="control-group" id="centrosCostosGrup">
+            <label class="control-label" for="centroCosto">Centro de costo </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+              </div>
+              <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+          <div class="control-group" id="activosGrup">
+            <label class="control-label" for="activos">Activos </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+              </div>
+              <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+            </div>
+          </div><!--/control-group -->
+        </div>
+
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalCatalogosSel">Guardar</button>
     </div>
   </div>
 

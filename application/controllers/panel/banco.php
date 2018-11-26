@@ -29,7 +29,8 @@ class banco extends MY_Controller {
     'banco/rpt_acumulado_empresa/',
     'banco/rpt_acumulado_empresa_pdf/',
     'banco/rpt_saldos_bancarios_pdf/',
-    'banco/rpt_saldos_bancarios_xls/'
+    'banco/rpt_saldos_bancarios_xls/',
+    'banco/ajax_get_cuentas/',
 		);
 
 	public function _remap($method){
@@ -552,15 +553,15 @@ class banco extends MY_Controller {
 			redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
-	// /**
-	//  * Obtiene lostado de camiones para el autocomplete, ajax
-	//  */
-	// public function ajax_get_lineas(){
-	// 	$this->load->model('banco_cuentas_model');
-	// 	$params = $this->banco_cuentas_model->getLineasAjax();
+	/**
+   * Obtiene lostado de productores para el autocomplete, ajax
+   */
+  public function ajax_get_cuentas(){
+    $this->load->model('banco_cuentas_model');
+    $params = $this->banco_cuentas_model->getCuentasAjax();
 
-	// 	echo json_encode($params);
-	// }
+    echo json_encode($params);
+  }
 
 
 
@@ -633,6 +634,34 @@ class banco extends MY_Controller {
 			array('field' => 'did_cliente',
 						'label' => 'Cliente',
 						'rules' => ''),
+
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => 'numeric'),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => ''),
+      array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => 'numeric'),
+      array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'centroCostoId',
+            'label' => 'Centro de costo',
+            'rules' => 'numeric'),
+      array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => ''),
+      array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric'),
+      array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => ''),
+      array('field' => 'intangible',
+            'label' => 'Gasto intangible',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
@@ -676,6 +705,36 @@ class banco extends MY_Controller {
       $rules[] = array('field'   => 'did_cuentacpi',
             'label'   => 'Cuenta contpaq',
             'rules'   => '');
+
+      if ($this->input->post('tipo_mov') == 'f') {
+        $rules[] = array('field' => 'areaId',
+              'label' => 'Cultivo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'area',
+              'label' => 'Cultivo',
+              'rules' => '');
+        $rules[] = array('field' => 'ranchoId',
+              'label' => 'Area',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'rancho',
+              'label' => 'Area',
+              'rules' => '');
+        $rules[] = array('field' => 'centroCostoId',
+              'label' => 'Centro de costo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'centroCosto',
+              'label' => 'Centro de costo',
+              'rules' => '');
+        $rules[] = array('field' => 'activoId',
+              'label' => 'Activo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'activos',
+              'label' => 'Activo',
+              'rules' => '');
+        $rules[] = array('field' => 'intangible',
+              'label' => 'Gasto intangible',
+              'rules' => '');
+      }
     }
     $this->form_validation->set_rules($rules);
   }

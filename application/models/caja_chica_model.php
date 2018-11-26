@@ -6,6 +6,7 @@ class caja_chica_model extends CI_Model {
   {
     $info = array(
       'saldo_inicial'         => 0,
+      'fondo_caja'            => 0,
       'ingresos'              => array(),
       'otros'                 => array(),
       'remisiones'            => array(),
@@ -15,11 +16,24 @@ class caja_chica_model extends CI_Model {
       'saldo_clientes'        => array(),
       'denominaciones'        => array(),
       'gastos'                => array(),
+      'traspasos'             => array(),
       'deudores'              => array(),
       'categorias'            => array(),
       'deudores_prest_dia'    => 0,
       'deudores_abonos_dia'   => 0,
     );
+
+    // Obtiene el saldo incial.
+    $fondoCaja = $this->db->query(
+      "SELECT presupuesto
+       FROM cajachicas
+       WHERE no_caja = '{$noCaja}'
+       LIMIT 1"
+    );
+    if ($fondoCaja->num_rows() > 0)
+    {
+      $info['fondo_caja'] = $fondoCaja->result()[0]->presupuesto;
+    }
 
     // Obtiene el saldo incial.
     $ultimoSaldo = $this->db->query(
@@ -243,8 +257,9 @@ class caja_chica_model extends CI_Model {
         }
       }
       $info['saldo_clientes'] = $empresas;
+    }
 
-
+    if ($noCaja == '2' || $noCaja == '1') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -366,12 +381,17 @@ class caja_chica_model extends CI_Model {
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.reposicion
+          cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
        WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
@@ -379,6 +399,15 @@ class caja_chica_model extends CI_Model {
     if ($gastos->num_rows() > 0)
     {
       $info['gastos'] = $gastos->result();
+    }
+
+    if ($noCaja == '2') {
+      // Traspasos
+      $traspasos = $this->getTraspasos($fecha, $noCaja);
+      if (count($traspasos) > 0)
+      {
+        $info['traspasos'] = $traspasos;
+      }
     }
 
     $info['categorias'] = $this->db->query(
@@ -399,6 +428,27 @@ class caja_chica_model extends CI_Model {
     }
 
     return $info;
+  }
+
+  public function getTraspasos($fecha, $noCaja, $total=false)
+  {
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM public.cajachica_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.no_caja = {$noCaja}"
+      )->row();
+      return $traspaso->monto;
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones, bt.id_usuario, bt.fecha_creacion, bt.tipo
+       FROM public.cajachica_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND bt.no_caja = {$noCaja}
+       ORDER BY bt.id_traspaso ASC"
+    );
+
+    return $traspaso->result();
   }
 
   public function guardar($data)
@@ -595,6 +645,10 @@ class caja_chica_model extends CI_Model {
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
 
           // Bitacora
@@ -621,6 +675,10 @@ class caja_chica_model extends CI_Model {
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
             'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('cajachica_gastos', $gastos);
           $gastooidd = $this->db->insert_id();
@@ -638,6 +696,41 @@ class caja_chica_model extends CI_Model {
       if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
         $this->enviarEmail($gastos_ids);
         // $this->db->insert_batch('cajachica_gastos', $gastos);
+      }
+    }
+
+    // Traspasos
+    if (isset($data['traspaso_concepto']))
+    {
+      $traspasos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['traspaso_concepto'] as $key => $concepto)
+      {
+        if (isset($data['traspaso_del'][$key]) && $data['traspaso_del'][$key] == 'true' &&
+          isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          // $traspasos_ids['delets'][] = $this->getDataGasto($data['traspaso_id_traspaso'][$key]);
+
+          $this->db->delete('public.cajachica_traspasos', "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } elseif (isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          $gastos_udt = array(
+            'concepto' => $concepto,
+            'monto'    => $data['traspaso_importe'][$key],
+            'tipo'     => $data['traspaso_tipo'][$key],
+          );
+
+          $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } else {
+          $traspaso = array(
+            'concepto'   => $concepto,
+            'monto'      => $data['traspaso_importe'][$key],
+            'tipo'       => $data['traspaso_tipo'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'id_usuario' => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('public.cajachica_traspasos', $traspaso);
+          $traspasos_ids['adds'][] = $this->db->insert_id();
+        }
       }
     }
 
@@ -1366,6 +1459,39 @@ class caja_chica_model extends CI_Model {
     //   $pdf->SetY($comprasY);
     // }
 
+    // Traspasos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+3);
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(104, 25));
+    $pdf->Row(array('TRASPASOS'), true, true);
+
+    $pdf->SetFont('Arial','', 6.5);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(10, 69, 25));
+    $pdf->Row(array('TIPO', 'CONCEPTO', 'IMPORTE'), true, true);
+    $pdf->SetFont('Arial','', 6);
+
+    $codigoAreas = array();
+    $totalTraspasos = 0;
+    foreach ($caja['traspasos'] as $key => $traspaso)
+    {
+      $totalTraspasos += floatval($traspaso->monto);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
+        $traspaso->concepto,
+        MyString::float(MyString::formatoNumero($traspaso->monto, 2, '', false))), false, true);
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(79, 25));
+    $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
 
     // Boletas
     $pdf->SetFont('Arial','', 6);
@@ -1487,7 +1613,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
     $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 1) {
       // Deudores
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
@@ -1813,7 +1939,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
     // $page_aux = $pdf->page;
     $pdf->page = 1;
@@ -1821,7 +1947,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(110, 26.5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($caja['fondo_caja'] , 2, '$', false)), false, false);
     $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
 
     // if(count($codigoAreas) > 0){

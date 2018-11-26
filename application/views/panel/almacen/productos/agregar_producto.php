@@ -114,23 +114,48 @@
                   <label class="control-label" for="cuenta_contpaq"><strong>Cuenta contpaq</strong> </label>
                   <div class="controls">
                     <input type="text" name="cuenta_contpaq" id="cuenta_contpaq" class="span12" maxlength="12"
-                    value="<?php echo set_value('cuenta_contpaq'); ?>" placeholder="Cuenta afectable contpaq">
+                      value="<?php echo set_value('cuenta_contpaq'); ?>" placeholder="Cuenta afectable contpaq">
                   </div>
                 </div>
               </div>
 
               <div class="control-group">
-                  <label class="control-label" for="ftipo">Tipo </label>
-                  <div class="controls">
-                    <select name="ftipo" id="ftipo" class="span12" required>
-                      <option value=""></option>
-                      <option value="v">Verde (Orgánico)</option>
-                      <option value="a">Amarillo (Orgánico Opc)</option>
-                      <option value="r">Rojo (No Orgánico)</option>
-                    </select>
-                  </div>
+                <label class="control-label" for="ftipo">Tipo lista</label>
+                <div class="controls">
+                  <select name="ftipo" id="ftipo" class="span12">
+                    <option value=""></option>
+                    <option value="v">Verde (Orgánico)</option>
+                    <option value="a">Amarillo (Orgánico Opc)</option>
+                    <option value="r">Rojo (No Orgánico)</option>
+                  </select>
                 </div>
               </div>
+
+              <?php if ($familia['info']->tipo == 'a'): ?>
+              <div class="control-group">
+                <label class="control-label" for="ftipo_activo">Tipo activo</label>
+                <div class="controls">
+                  <select name="ftipo_activo" id="ftipo_activo" class="span12">
+                    <option value=""></option>
+                    <option value="et">Equipo De Transporte</option>
+                    <option value="ec">Equipo De Computo</option>
+                    <option value="meo">Mobiliario Y Equipo De Oficina</option>
+                    <option value="me">Maquinaria Y Equipo</option>
+                    <option value="ec">Edificios Y Construcciones</option>
+                    <option value="t">Terrenos</option>
+                    <option value="ia">Inversiones Agrícolas</option>
+                    <option value="gpo">Gastos Pre-operativos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="fmonto">Monto</label>
+                <div class="controls">
+                  <input type="text" name="fmonto" id="fmonto" class="span12" maxlength="12"
+                      value="<?php echo set_value('fmonto'); ?>" placeholder="Monto">
+                </div>
+              </div>
+              <?php endif ?>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $familia['info']->tipo ?>">
 

@@ -76,6 +76,7 @@ class centro_costo extends MY_Controller {
     ));
 
     $this->load->model('empresas_model');
+    $this->load->model('banco_cuentas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -97,6 +98,8 @@ class centro_costo extends MY_Controller {
     }
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    //Cuentas de banco
+    $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $params['empresa']->id_empresa));
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -231,6 +234,9 @@ class centro_costo extends MY_Controller {
       array('field' => 'tipo',
             'label' => 'Tipo',
             'rules' => 'required'),
+      array('field' => 'cuenta_cpi',
+            'label' => 'Cuenta Contpaq',
+            'rules' => 'max_length[15]'),
 
       array('field' => 'farea',
             'label' => '',
@@ -244,6 +250,23 @@ class centro_costo extends MY_Controller {
       array('field' => 'no_plantas',
             'label' => 'No de plantas',
             'rules' => ($val? 'required|numeric': '')),
+
+      array('field' => 'anios_credito',
+            'label' => 'Años del crédito',
+            'rules' => ($this->input->post('tipo') == 'creditobancario'? 'required|numeric': '')),
+
+      array('field' => 'id_cuenta',
+            'label' => 'Cuenta de banco',
+            'rules' => ($this->input->post('tipo') == 'banco'? 'required|numeric': '')),
+      array('field' => 'cuenta',
+            'label' => 'Cuenta de banco',
+            'rules' => ''),
+      array('field' => 'fempresa',
+            'label' => 'Empresa',
+            'rules' => ''),
+      array('field' => 'did_empresa',
+            'label' => 'Empresa',
+            'rules' => ''),
     );
 
     $this->form_validation->set_rules($rules);

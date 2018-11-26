@@ -216,7 +216,7 @@ class caja_chica_prest_model extends CI_Model {
       FROM nomina_prestamos np
       INNER JOIN usuarios u ON u.id = np.id_usuario
       INNER JOIN empresas e ON e.id_empresa = u.id_empresa
-      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
       LEFT JOIN (
         SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
         FROM nomina_fiscal_prestamos nfp
@@ -255,7 +255,7 @@ class caja_chica_prest_model extends CI_Model {
         COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
       FROM otros.cajaprestamo_prestamos cp
         INNER JOIN usuarios u ON u.id = cp.id_empleado
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
         LEFT JOIN (
           SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
           FROM otros.cajaprestamo_pagos nfp
@@ -1056,8 +1056,8 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->page = $page_aux2;
     $pdf->SetY($y_aux2);
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetWidths(array(25, 19));
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(25, 19, 40, 19));
 
     if($pdf->GetY() >= $pdf->limiteY){
       if (count($pdf->pages) > $pdf->page) {
@@ -1067,19 +1067,26 @@ class caja_chica_prest_model extends CI_Model {
         $pdf->AddPage();
     }
     $pdf->SetXY(63, $pdf->GetY()+15);
-    $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($tt_saldo_inicial, 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($tt_saldo_inicial, 2, '$', false),
+                    'PTMO A LARGO PLAZO', MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
-    $pdf->Row(array('EFECTIVO ANTERIOR', MyString::formatoNumero($tt_efectivo_anterior, 2, '$', false)), false, false);
+    $pdf->Row(array('EFECTIVO ANTERIOR', MyString::formatoNumero($tt_efectivo_anterior, 2, '$', false),
+                    'PTMO A CORTO PLAZO', MyString::formatoNumero($totalprescp_salfin, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
-    $pdf->Row(array('CAJA INGRESOS ', MyString::formatoNumero($tt_caja_ingreso, 2, '$', false)), false, false);
+    $pdf->Row(array('CAJA INGRESOS ', MyString::formatoNumero($tt_caja_ingreso, 2, '$', false),
+                    'PTMO DEL DIA', MyString::formatoNumero($totalpreslgcp_salfin, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
-    $pdf->Row(array('CAJA EGRESOS', MyString::formatoNumero($totalpreslgcp_monto, 2, '$', false)), false, false);
+    $pdf->Row(array('CAJA EGRESOS', MyString::formatoNumero($totalpreslgcp_monto, 2, '$', false),
+                    'TABULACION DE EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
-    $pdf->Row(array('EFECTIVO DISPONIBLE', MyString::formatoNumero($tt_efectivo_disponible, 2, '$', false)), false, false);
+    $pdf->Row(array('EFECTIVO DISPONIBLE', MyString::formatoNumero($tt_efectivo_disponible, 2, '$', false),
+                    'TOTAL', MyString::formatoNumero($totalpreslp_salfin_ef+$totalprescp_salfin+$totalEfectivo, 2, '$', false)), false, false);
+
+    $pdf->SetWidths(array(25, 19));
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('DIFERENCIA DEL CORTE', MyString::formatoNumero($tt_efectivo_disponible-$totalEfectivo, 2, '$', false)), false, false);

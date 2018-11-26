@@ -8,7 +8,8 @@ class productos extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'productos/ajax_get_familias/',
-			'productos/ajax_get_productos/',
+      'productos/ajax_get_productos/',
+			'productos/ajax_aut_productos/',
 			'productos/acomoda_codigos/',
 		);
 
@@ -369,6 +370,13 @@ class productos extends MY_Controller {
 				));
 	}
 
+  public function ajax_aut_productos(){
+    $this->load->model('productos_model');
+    $params = $this->productos_model->getProductosAjax();
+
+    echo json_encode($params);
+  }
+
 
 
   /*
@@ -402,6 +410,12 @@ class productos extends MY_Controller {
 	public function configAddModProducto($accion='agregar')
 	{
 		$this->load->library('form_validation');
+
+    $val_activo = false;
+    if (isset($_POST['tipo_familia']) && $_POST['tipo_familia'] == 'a') {
+      $val_activo = true;
+    }
+
 		$rules = array(
 			array('field' => 'fcodigo',
 						'label' => 'Codigo',
@@ -418,7 +432,7 @@ class productos extends MY_Controller {
 			array('field' => 'ubicacion',
 						'label' => 'Ubicacion',
 						'rules' => 'max_length[70]'),
-	      array('field' => 'fieps',
+	    array('field' => 'fieps',
             'label' => 'IEPS',
             'rules' => 'numeric'),
 			array('field' => 'cuenta_contpaq',
@@ -427,6 +441,13 @@ class productos extends MY_Controller {
       array('field' => 'ftipo',
             'label' => 'Tipo',
             'rules' => ''),
+
+      array('field' => 'ftipo_activo',
+            'label' => 'Tipo',
+            'rules' => $val_activo? 'required': ''),
+      array('field' => 'fmonto',
+            'label' => 'Monto',
+            'rules' => $val_activo? 'required': ''),
 
 			array('field' => 'pnombre[]',
 						'label' => 'Presentacion',

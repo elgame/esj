@@ -18,6 +18,7 @@
           'pagar'      => '',
           'cajas'      => array('',''),
           'metodo_pago' => '',
+          'intangible'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')? 'block': 'none'),
         );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';
@@ -46,6 +47,7 @@
           'pagar'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
           'fecha_pago'  => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
           'cajas'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
+          'intangible'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')? 'block': 'none'),
           );
         }
       ?>
@@ -99,11 +101,14 @@
           <div class="btn-group">
             <button class="btn dropdown-toggle" data-toggle="dropdown">Fotos <span class="caret"></span></button>
             <ul class="dropdown-menu">
-          <?php foreach ($fotos as $key => $value) {
-            $nombre = ($value->tipo=='en'? 'Entrada': 'Salida')." Cam {$value->no_camara}";
+          <?php
+          if (isset($fotos)) {
+            foreach ($fotos as $key => $value) {
+              $nombre = ($value->tipo=='en'? 'Entrada': 'Salida')." Cam {$value->no_camara}";
           ?>
               <li><a href="<?php echo base_url($value->url_foto) ?>" target="_blank"><?php echo $nombre ?></a></li>
           <?php
+            }
           } ?>
             </ul>
           </div>
@@ -155,10 +160,18 @@
                             ($this->input->post('ptipo') === 'en') ){ ?>
                   <input type="hidden" name="pno_lote" id="pno_lote" value="<?php echo $_POST['pno_lote']; ?>">
                   <?php } ?>
-                  <div class="control-group" style="margin:0px 0px 2px 0px;">
-                    <label class="control-label" for="ptipo">Certificado</label>
-                    <div class="controls">
-                      <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                  <div class="span12">
+                    <div class="control-group span4" style="margin:0px 0px 2px 0px;">
+                      <label class="control-label" for="ptipo">Certificado</label>
+                      <div class="controls">
+                        <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                      </div>
+                    </div>
+                    <div class="control-group span4" style="margin:0px 0px 2px 0px; display: <?php echo $bmod['intangible'] ?>">
+                      <label class="control-label" for="intangible">Intangible</label>
+                      <div class="controls">
+                        <input type="checkbox" name="intangible" id="intangible" value="1" data-uniform="false"  <?php echo set_checkbox('intangible', "1", isset($intangible) && $intangible == '1' ? true : false) ?>>
+                      </div>
                     </div>
                   </div>
 

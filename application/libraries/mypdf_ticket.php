@@ -376,7 +376,7 @@ class mypdf_ticket extends FPDF {
       $this->Row(array('FIRMA RECIBIDO'), false, false);
 
 
-      if (isset($data->bitacora) && count($data->bitacora) > 0 && $data->no_impresiones > 2) {
+      if (isset($data->bitacora) && count($data->bitacora) > 0 && $data->no_impresiones >= 2) {
         $this->AddPage();
         $this->SetY($this->GetY()+1);
         $this->Row(array('---------------------------------------------------------'), false, false, 4);

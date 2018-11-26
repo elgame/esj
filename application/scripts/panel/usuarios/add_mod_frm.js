@@ -26,6 +26,7 @@ $(function(){
 	campos_requeridos($("#festa_asegurado"));
 
   getPrivilegiosEmpresa();
+  autocompleteCultivo();
 });
 
 function cargaDepaPues () {
@@ -110,3 +111,33 @@ function eventoCheck() {
     }
   });
 }
+
+var autocompleteCultivo = function () {
+  $("#area").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/areas/ajax_get_areas/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $area =  $(this);
+      $area.css("background-color", "#A1F57A");
+      $("#areaId").val(ui.item.id);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $("#area").css("background-color", "#FFD071");
+      $("#areaId").val('');
+    }
+  });
+};

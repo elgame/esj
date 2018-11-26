@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						Ranchos
+						Áreas
 					</li>
 				</ul>
 			</div>
@@ -16,7 +16,7 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> Ranchos</h2>
+						<h2><i class="icon-user"></i> Áreas</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 						</div>
@@ -28,7 +28,7 @@
 
 								<label for="fnombre">Buscar</label>
 								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
-									class="input-large search-query" placeholder="RANCHO" autofocus> |
+									class="input-large search-query" placeholder="RANCHO, Linea" autofocus> |
 
                 <label class="control-label" for="fempresa">Empresa </label>
                 <input type="text" name="fempresa" id="fempresa" class="input-xlarge search-query" value="<?php echo set_value_get('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">

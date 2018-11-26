@@ -380,6 +380,17 @@ $(function(){
     }
   });
 
+  $('#intangible').on('keypress', function(e) {
+    var $this = $(this);
+    if (e.charCode == '32') {
+      e.preventDefault();
+      if ($this.is(':checked'))
+        $this.removeAttr("checked");
+      else
+        $this.attr("checked", "checked");
+    }
+  });
+
   // Evento keypress para el input del folio.
   $('#pfolio').on('keypress', function(e) {
     var $this = $(this);
@@ -490,7 +501,7 @@ $(function(){
 
         location.href = base_url + 'panel/bascula/agregar?idb=' + data + editar + focus;
 
-        winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
+        // winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
         // winFotos.location.reload();
 
         } else {

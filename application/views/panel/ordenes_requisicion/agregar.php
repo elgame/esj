@@ -137,9 +137,10 @@
                 <div class="controls">
                   <select name="tipoOrden" class="span9" id="tipoOrden">
                     <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios</option>
-                    <option value="oc" <?php echo set_select('tipoOrden', 'oc'); ?>>Orden de compra</option>
-                    <option value="f" <?php echo set_select('tipoOrden', 'f'); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios (Gasto)</option>
+                    <option value="oc" <?php echo set_select('tipoOrden', 'oc'); ?>>Gastos (Gasto)</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f'); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes (Gasto)</option>
+                    <option value="a" <?php echo set_select('tipoOrden', 'a'); ?>>Activo</option>
                   </select>
                 </div>
               </div>
@@ -258,6 +259,66 @@
                       </div>
                     </div>
                   </div>
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
+          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo isset($_POST['tipoOrden']) ? ($_POST['tipoOrden'] !== 'p' ? 'block' : 'none') : 'none' ?>;">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Area </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+                        </div>
+                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+                        </div>
+                        <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
                 </div>
 
                </div> <!-- /box-body -->

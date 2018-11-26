@@ -129,19 +129,45 @@
                     value="<?php echo set_value('fcodigo', (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: '')) ?>" placeholder="Cuenta afectable contpaq">
                   </div>
                 </div>
-              </div>
 
-              <div class="control-group">
-                  <label class="control-label" for="ftipo">Tipo </label>
+                <div class="control-group">
+                    <label class="control-label" for="ftipo">Tipo lista</label>
+                    <div class="controls">
+                      <select name="ftipo" id="ftipo" class="span12">
+                        <option value=""></option>
+                        <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
+                        <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
+                        <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <?php if ($data['familia']->tipo == 'a'): ?>
+                <div class="control-group">
+                  <label class="control-label" for="ftipo_activo">Tipo activo</label>
                   <div class="controls">
-                    <select name="ftipo" id="ftipo" class="span12" required>
+                    <select name="ftipo_activo" id="ftipo_activo" class="span12">
                       <option value=""></option>
-                      <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
-                      <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
-                      <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
+                      <option value="et" <?php echo set_select('ftipo_activo', 'et', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Equipo De Transporte</option>
+                      <option value="ec" <?php echo set_select('ftipo_activo', 'ec', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Equipo De Computo</option>
+                      <option value="meo" <?php echo set_select('ftipo_activo', 'meo', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Mobiliario Y Equipo De Oficina</option>
+                      <option value="me" <?php echo set_select('ftipo_activo', 'me', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Maquinaria Y Equipo</option>
+                      <option value="ec" <?php echo set_select('ftipo_activo', 'ec', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Edificios Y Construcciones</option>
+                      <option value="t" <?php echo set_select('ftipo_activo', 't', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Terrenos</option>
+                      <option value="ia" <?php echo set_select('ftipo_activo', 'ia', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Inversiones Agrícolas</option>
+                      <option value="gpo" <?php echo set_select('ftipo_activo', 'gpo', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Gastos Pre-operativos</option>
                     </select>
                   </div>
                 </div>
+                <div class="control-group">
+                  <label class="control-label" for="fmonto">Monto</label>
+                  <div class="controls">
+                    <input type="text" name="fmonto" id="fmonto" class="span12" maxlength="12"
+                        value="<?php echo set_value('fmonto', (isset($data['info']->monto)? $data['info']->monto: '')) ?>" placeholder="Monto">
+                  </div>
+                </div>
+                <?php endif ?>
               </div>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $data['familia']->tipo ?>">

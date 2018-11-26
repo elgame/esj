@@ -84,6 +84,9 @@ class bodega_guadalajara extends MY_Controller {
       array('panel/bodega_guadalajara/cargar.js'),
       array('panel/bodega_guadalajara/catalogo_bodega.js'),
     ));
+    $this->carabiner->css(array(
+      array('panel/caja_chica.css', 'screen'),
+    ));
 
     $this->load->library('pagination');
     $this->load->model('bodega_guadalajara_model');

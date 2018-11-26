@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						<a href="<?php echo base_url('panel/ranchos/'); ?>">Ranchos</a> <span class="divider">/</span>
+						<a href="<?php echo base_url('panel/ranchos/'); ?>">Áreas</a> <span class="divider">/</span>
 					</li>
 					<li>Agregar</li>
 				</ul>
@@ -17,7 +17,7 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-plus"></i> Agregar Rancho</h2>
+						<h2><i class="icon-plus"></i> Agregar Área</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 						</div>
@@ -37,7 +37,7 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="farea">Área </label>
+                    <label class="control-label" for="farea">Cultivo </label>
                     <div class="controls">
                     <input type="text" name="farea" id="farea" class="span10" value="<?php echo set_value('farea'); ?>" placeholder="Limon, Piña">
                     <input type="hidden" name="did_area" value="<?php echo set_value('did_area'); ?>" id="did_area">

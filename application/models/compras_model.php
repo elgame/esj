@@ -148,6 +148,34 @@ class compras_model extends privilegios_model{
         $response['productos'][count($response['productos'])-1]->importe       = $response['info']->subtotal;
         $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
         $response['productos'][count($response['productos'])-1]->cuenta_cpi    = $response['info']->cuenta_cpi_gst;//Cuenta del gasto
+
+        $response['info']->area = null;
+        if ($response['info']->id_area)
+        {
+          $this->load->model('areas_model');
+          $response['info']->area = $this->areas_model->getAreaInfo($response['info']->id_area, true)['info'];
+        }
+
+        $response['info']->rancho = null;
+        if ($response['info']->id_rancho)
+        {
+          $this->load->model('ranchos_model');
+          $response['info']->rancho = $this->ranchos_model->getRanchoInfo($response['info']->id_rancho, true)['info'];
+        }
+
+        $response['info']->centroCosto = null;
+        if ($response['info']->id_centro_costo)
+        {
+          $this->load->model('centros_costos_model');
+          $response['info']->centroCosto = $this->centros_costos_model->getCentroCostoInfo($response['info']->id_centro_costo, true)['info'];
+        }
+
+        $response['info']->activo = null;
+        if ($response['info']->id_activo)
+        {
+          $this->load->model('productos_model');
+          $response['info']->activo = $this->productos_model->getProductosInfo($response['info']->id_activo, true)['info'];
+        }
       }
 
       //gasolina

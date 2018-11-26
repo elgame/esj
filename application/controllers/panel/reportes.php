@@ -92,7 +92,7 @@ class reportes extends MY_Controller {
   public function estado_resultado_pdf()
   {
     $this->load->model('reportes_model');
-    $this->reportes_model->estado_resultado_pdf();
+    $this->reportes_model->estado_resultado_pdf($_GET);
   }
 }
 ?>

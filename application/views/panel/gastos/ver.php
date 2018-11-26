@@ -180,6 +180,75 @@
                 </div>
               </div> -->
 
+            <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($gasto['info']->isgasto == 't' ? 'block' : 'none') ?>;">  <!-- Box catalogos-->
+              <div class="box span12">
+                <div class="box-header well" data-original-title>
+                  <h2><i class="icon-truck"></i> Catálogos</h2>
+                  <div class="box-icon">
+                    <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                  </div>
+                </div><!--/box-header -->
+                <div class="box-content">
+                  <div class="row-fluid">
+                    <div class="span6">
+                      <div class="control-group" id="cultivosGrup">
+                        <label class="control-label" for="area">Cultivo </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($gasto['info']->area->nombre) ? $gasto['info']->area->nombre : '') ?>" placeholder="Limon, Piña" readonly>
+                          </div>
+                          <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($gasto['info']->area->id_area) ? $gasto['info']->area->id_area : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+
+                      <div class="control-group" id="ranchosGrup">
+                        <label class="control-label" for="rancho">Área </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($gasto['info']->rancho->nombre) ? $gasto['info']->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1" readonly>
+                          </div>
+                          <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($gasto['info']->rancho->id_rancho) ? $gasto['info']->rancho->id_rancho : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+
+                      <div class="control-group">
+                        <label class="control-label" for="intangible">Gasto intangible</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="checkbox" name="intangible" id="intangible" data-uniform="false" value="si" data-next="subtotal" <?php echo set_checkbox('intangible', 'si', $gasto['info']->intangible == 't' ? true : false); ?> disabled></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="span6">
+                      <div class="control-group" id="centrosCostosGrup">
+                        <label class="control-label" for="centroCosto">Centro de costo </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto', isset($gasto['info']->centroCosto->nombre) ? $gasto['info']->centroCosto->nombre : '') ?>" placeholder="Mantenimiento, Gasto general" readonly>
+                          </div>
+                          <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId', isset($gasto['info']->centroCosto->id_centro_costo) ? $gasto['info']->centroCosto->id_centro_costo : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+
+                      <div class="control-group" id="activosGrup">
+                        <label class="control-label" for="activos">Activos </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($gasto['info']->activo->nombre) ? $gasto['info']->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" readonly>
+                          </div>
+                          <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($gasto['info']->activo->id_producto) ? $gasto['info']->activo->id_producto : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+                    </div>
+
+                  </div>
+
+                 </div> <!-- /box-body -->
+              </div> <!-- /box -->
+            </div><!-- /row-fluid -->
+
             <div class="row-fluid">
               <div class="span4">
                 <div class="control-group">
