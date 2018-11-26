@@ -1,34 +1,12 @@
 
- ✔ Balance general @done (18-08-28 12:59) pct|pcc|lap
+ ✔ Balance general @done (18-08-28 12:59) pct|pcc|lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado de resultado',468,TRUE,'reportes/estado_resultado/','print',TRUE);
     ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
     COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
 
-    SELECT a.nombre AS area, Sum(fp.importe) AS importe, 'devoluciones' as tipo
-    FROM facturacion f
-      INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
-      INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
-      INNER JOIN areas a ON a.id_area = c.id_area
-    WHERE Date(f.fecha) BETWEEN '2018-09-01' AND '2018-09-28' AND f.status <> 'ca' AND f.status <> 'b'
-              AND f.id_empresa = 2 AND f.id_abono_factura IS NULL AND id_nc IS NOT NULL
-    GROUP BY a.id_area
-    SELECT a.nombre AS area, Sum(fp.importe) AS importe, 'ingresos' AS tipo
-    FROM facturacion f
-      INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
-      INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
-      INNER JOIN areas a ON a.id_area = c.id_area
-      LEFT JOIN (
-              SELECT id_remision, id_factura, status
-              FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-            ) fh ON f.id_factura = fh.id_remision
-    WHERE Date(f.fecha) BETWEEN '2018-09-01' AND '2018-09-28' AND f.status <> 'ca' AND f.status <> 'b'
-              AND f.id_empresa = 2 AND f.id_abono_factura IS NULL AND id_nc IS NULL
-              AND COALESCE(fh.id_remision, 0) = 0
-    GROUP BY a.id_area
-
-✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap
+✔ Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap|san
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_areac integer;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_centro_costo bigint;
@@ -39,7 +17,7 @@
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
- ✔ New -> Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap|pcc
+ ✔ Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap|pcc|san
      CREATE TABLE otros.bodega_traspasos
         (
           id_traspaso bigserial NOT NULL,
@@ -76,29 +54,29 @@
         ) WITH ( OIDS=FALSE );
         ALTER TABLE public.cajachica_traspasos OWNER TO programa;
         COMMENT ON COLUMN public.cajachica_traspasos.tipo IS 'true: ingreso, false: retiro';
- ✔ New -> Agregar nuevos cultivos o aras y agregarlo a empleados @done (18-11-06 21:14) pcc|pct|lap
+ ✔ Agregar nuevos cultivos o aras y agregarlo a empleados @done (18-11-06 21:14) pcc|pct|lap|san
      ALTER TABLE public.usuarios ADD COLUMN id_area integer;
      ALTER TABLE public.usuarios ADD CONSTRAINT usuarios_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-     -- INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
+     INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('PLASTICOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('BODEGA GDL','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INTANGIBLES','ot',TRUE,FALSE);
      --INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('ADMINISTRATIVOS','ot',TRUE,FALSE);
      INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('FLETES','ot',TRUE,FALSE);
-✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|pcc|lap
+✔ Cambios en centros de costo @done (18-10-20 13:55) pct|pcc|lap|san
      Nota: en la tabla cajachica_categorias solo tiene que haber una categoria ligada a 1 empresa con status activo
      ALTER TABLE nomina_prestamos ADD COLUMN id_movimiento bigint;
      ALTER TABLE nomina_prestamos ADD CONSTRAINT nomina_prestamos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-✔ New -> Prestamos nomina @done (18-11-05 14:28) lap|pct|pcc
+✔ Prestamos nomina @done (18-11-05 14:28) lap|pct|pcc|san
      COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja), mt: materiales';
-✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pct|lap|pcc
+✔ Cambios en centros de costo @done (18-10-20 13:55) pct|lap|pcc|san
      ALTER TABLE otros.polizas_movimientos ADD COLUMN id_movimiento bigint;
      ALTER TABLE otros.polizas_movimientos ADD CONSTRAINT polizas_movimientos_id_movimiento_fkey FOREIGN KEY (id_movimiento) REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
- ✔ New -> Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap|pct|pcc
+ ✔ Cambios en centros de costo y movimientos directos @done (18-10-20 13:55) lap|pct|pcc|san
      ALTER TABLE otros.centro_costo ADD COLUMN cuenta_cpi character varying(15);
      ALTER TABLE otros.polizas_movimientos ADD COLUMN cuenta_cpi character varying(15);
- ✔ New -> Cambio en activos @done (18-10-23 12:55) lap|pct|pcc
+ ✔ Cambio en activos @done (18-10-23 12:55) lap|pct|pcc|san
      ALTER TABLE public.productos ADD COLUMN monto double precision NOT NULL DEFAULT 0;
- ✔ New -> Caja chica de rosy poner saldo y no agregar gastos @done (18-10-29 16:26) pct|lap|pcc
+ ✔ Caja chica de rosy poner saldo y no agregar gastos @done (18-10-29 16:26) pct|lap|pcc|san
     CREATE TABLE public.cajachicas
       (
         id serial NOT NULL,
@@ -116,10 +94,10 @@
       INSERT INTO public.cajachicas (no_caja, nombre, presupuesto) VALUES ('3', 'Caja Coco', 0);
       INSERT INTO public.cajachicas (no_caja, nombre, presupuesto) VALUES ('4', 'Caja Venta de Contado', 0);
       INSERT INTO public.cajachicas (no_caja, nombre, presupuesto) VALUES ('prest1', 'Caja prestamos', 0);
- ✔ New -> Bascula intangilbes @done (18-10-24 20:50) pcc|pct|lap
+ ✔ Bascula intangilbes @done (18-10-24 20:50) pcc|pct|lap|san
      ALTER TABLE public.bascula ADD COLUMN intangible boolean NOT NULL DEFAULT false;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Boletas intangibles',42,TRUE,'bascula/aintangibles/','file-text-alt',FALSE);
- ✔ New -> Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc|lap
+ ✔ Modulo de Registro de movimientos (Plizas) @done (18-10-22 14:54) pct|pcc|lap|san
      CREATE TABLE otros.polizas
         (
           id bigserial NOT NULL,
@@ -154,12 +132,12 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',480,FALSE,'registro_movimientos/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',480,FALSE,'registro_movimientos/cancelar/','ban-circle',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',480,FALSE,'registro_movimientos/imprimir/','print',FALSE);
- ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pcc|pct|lap
+ ✔ Cambios en centros de costo @done (18-10-20 13:55) pcc|pct|lap|san
      ALTER TABLE otros.centro_costo ADD COLUMN cuenta_cpi character varying(15);
      ALTER TABLE otros.centro_costo ADD COLUMN anios_credito integer;
      ALTER TABLE otros.centro_costo ADD COLUMN id_cuenta integer;
      ALTER TABLE otros.centro_costo ADD CONSTRAINT centro_costo_id_cuenta_fkey FOREIGN KEY (id_cuenta) REFERENCES public.banco_cuentas (id_cuenta) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct|pcc|lap
+✔ Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pct|pcc|lap|san
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_areac integer;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_centro_costo bigint;
@@ -170,7 +148,7 @@
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a retiros de banco @done (18-10-08 21:42) pct|lap
+✔ Agregar catalogos a retiros de banco @done (18-10-08 21:42) pct|lap|san
      ALTER TABLE public.banco_movimientos ADD COLUMN id_area integer;
      ALTER TABLE public.banco_movimientos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.banco_movimientos ADD COLUMN id_centro_costo bigint;
@@ -181,7 +159,7 @@
      ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Seeder catalogo centro de costos @done (18-10-16 10:22) pct|pcc
+✔ Seeder catalogo centro de costos @done (18-10-16 10:22) pct|pcc|san
       DELETE FROM otros.centro_costo;
       ALTER SEQUENCE otros.centro_costo_id_centro_costo_seq RESTART WITH 1;
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ISR PAGOS PROVISIONALES', 'impuestoafavor');
@@ -295,12 +273,12 @@
       INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 7', 'melga', 0.516, 3, 36224);
       INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 8', 'melga', 0.474, 3, 25695);
       INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 9', 'melga', 0.045, 3, 2618);
-✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc|pct
+✔ Tipo de activos en productos @done (18-10-16 20:46) pcc|pct|san
    ALTER TABLE public.productos ADD COLUMN tipo_activo character varying(5);
    COMMENT ON COLUMN public.productos.tipo_activo IS 'et: Equipo de Transporte, ec: Equipo de Computo, meo: Mobiliario y Equipo de Oficina, me: Maquinaria y Equipo, e: Edificios, t: Terrenos';
    ALTER TABLE public.compras ADD COLUMN intangible boolean DEFAULT false;
    COMMENT ON COLUMN public.compras.intangible IS 'true: son gastos por fuera o de facturas';
-✔ New -> Agregar catalogos a salidas @done (18-10-08 21:42) pcc|pct
+✔ Agregar catalogos a salidas @done (18-10-08 21:42) pcc|pct|san
      ALTER TABLE public.compras_salidas ADD COLUMN id_area integer;
      ALTER TABLE public.compras_salidas ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_salidas ADD COLUMN id_centro_costo bigint;
@@ -311,7 +289,7 @@
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a gastos @done (18-10-08 21:42) pcc|pct
+✔ Agregar catalogos a gastos @done (18-10-08 21:42) pcc|pct|san
      ALTER TABLE public.compras ADD COLUMN id_area integer;
      ALTER TABLE public.compras ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras ADD COLUMN id_centro_costo bigint;
@@ -322,7 +300,7 @@
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc|pct
+✔ Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc|pct|san
      ALTER TABLE public.compras_ordenes ADD COLUMN id_area integer;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_centro_costo bigint;
@@ -334,7 +312,7 @@
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      COMMENT ON COLUMN public.compras_ordenes.tipo_orden IS 'p:productos (inventario), d:descripciones (servicios gasto), f:fletes (gasto), oc: Gastos, a: Activos';
- ✔ New -> Agregar catalogos a ordenes de requisicion @done (18-10-08 21:42) pcc|lap|pct
+ ✔ Agregar catalogos a ordenes de requisicion @done (18-10-08 21:42) pcc|lap|pct|san
      ALTER TABLE public.compras_requisicion ADD COLUMN id_area integer;
      ALTER TABLE public.compras_requisicion ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_requisicion ADD COLUMN id_centro_costo bigint;
@@ -345,7 +323,7 @@
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
- ✔ New -> Catalogo Ranchos y centros de costo @done (18-10-01 10:59) pct|pcc|lap|san
+ ✔ Catalogo Ranchos y centros de costo @done (18-10-01 10:59) pct|pcc|lap|san
      CREATE TABLE otros.ranchos
         (
           id_rancho bigserial NOT NULL,
@@ -417,7 +395,7 @@
         ALTER TABLE otros.proveedores_centros_costo
           OWNER TO programa;
 
- ✔ New -> Familia activos y tipo de productos @done (18-09-26 20:54) pcc|pct|lap|san
+ ✔ Familia activos y tipo de productos @done (18-09-26 20:54) pcc|pct|lap|san
    ALTER TABLE public.productos ADD COLUMN tipo character varying(5);
    COMMENT ON COLUMN public.productos.tipo IS 'v: verde (organico), a: amarillo (organico opc), r: rojo (no organico)';
    COMMENT ON COLUMN public.productos_familias.tipo IS 'p:productos (inventario), d:descripciones (servicios), f:fletes, a: activos';
