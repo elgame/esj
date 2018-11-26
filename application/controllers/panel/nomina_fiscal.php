@@ -536,6 +536,19 @@ class nomina_fiscal extends MY_Controller {
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
     $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
+    $params['metods_pago']  = array(
+      array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+      array('nombre' => 'Cheque', 'value' => 'cheque'),
+      array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+      array('nombre' => 'Deposito', 'value' => 'deposito'),
+    );
+
+    $this->load->model('banco_cuentas_model');
+    $data['id_empresa'] = $params['empleado'];
+    $pdatos = ['id_empresa' => $params['empleado']['info'][0]->id_empresa];
+    $cuentas = $this->banco_cuentas_model->getCuentas(false, null, $pdatos);
+    $params['cuentas'] = $cuentas['cuentas'];
+
     if(isset($_GET['msg']{0}))
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

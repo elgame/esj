@@ -183,10 +183,13 @@ class ranchos_model extends CI_Model {
 			$sql = " AND lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
 		if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
-			$sql .= " AND e.id_empresa in(".$this->input->get('did_empresa').")";
+      $sql .= " AND r.id_empresa in(".$this->input->get('did_empresa').")";
 
-	    if ( ! is_null($sqlX))
-	      $sql .= $sqlX;
+    if ($this->input->get('area') !== false && $this->input->get('area') !== '')
+      $sql .= " AND a.id_area = ".$this->input->get('area')."";
+
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
 
 		$res = $this->db->query(
       	"SELECT r.id_rancho, r.nombre, r.status, a.id_area, a.nombre AS area

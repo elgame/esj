@@ -114,6 +114,17 @@ class compras_requisicion_model extends CI_Model {
       'id_almacen'      => $_POST['id_almacen'],
     );
 
+    // Si es un gasto son requeridos los campos de catálogos
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+      $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+      $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
+      $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+
+      if ($_POST['tipoOrden'] !== 'a') {
+        $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
+      }
+    }
+
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
     {
@@ -268,6 +279,17 @@ class compras_requisicion_model extends CI_Model {
         'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
         'id_almacen'      => $_POST['id_almacen'],
       );
+
+      // Si es un gasto son requeridos los campos de catálogos
+      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+        $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
+        $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+
+        if ($_POST['tipoOrden'] !== 'a') {
+          $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
+        }
+      }
 
       if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true')
       {
@@ -455,6 +477,18 @@ class compras_requisicion_model extends CI_Model {
           'id_autorizo'        => $data->id_autorizo,
           'id_almacen'         => $data->id_almacen,
         );
+
+        // Si es un gasto son requeridos los campos de catálogos
+        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a') {
+          $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+          $dataOrden['id_rancho']       = !empty($data->id_rancho)? $data->id_rancho: NULL;
+          $dataOrden['id_centro_costo'] = !empty($data->id_centro_costo)? $data->id_centro_costo: NULL;
+
+          if ($data->tipo_orden !== 'a') {
+            $dataOrden['id_activo'] = !empty($data->id_activo)? $data->id_activo: NULL;
+          }
+        }
+
         //si se registra a un vehiculo
         if (is_numeric($data->id_vehiculo))
         {
@@ -714,8 +748,9 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
-              co.flete_de, co.id_almacen
-       FROM compras_requisicion AS co
+              co.flete_de, co.id_almacen,
+              co.id_area, co.id_rancho, co.id_centro_costo, co.id_activo
+      FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
@@ -856,16 +891,33 @@ class compras_requisicion_model extends CI_Model {
           }
         }
 
-        // //Compras de la orden
-        // $this->load->model('compras_model');
-        // $compras_data = $this->db->query("SELECT id_compra
-        //                            FROM compras_facturas
-        //                            WHERE id_orden = {$data['info'][0]->id_orden}");
-        // $data['info'][0]->compras = $compras_data->result();
+        $data['info'][0]->area = null;
+        if ($data['info'][0]->id_area)
+        {
+          $this->load->model('areas_model');
+          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
+        }
 
-        // //eNTRADA ALMACEN
-        // $data['info'][0]->entrada_almacen = array();
-        // $data['info'][0]->entrada_almacen = $this->getInfoEntrada(0,0, $data['info'][0]->id_orden);
+        $data['info'][0]->rancho = null;
+        if ($data['info'][0]->id_rancho)
+        {
+          $this->load->model('ranchos_model');
+          $data['info'][0]->rancho = $this->ranchos_model->getRanchoInfo($data['info'][0]->id_rancho, true)['info'];
+        }
+
+        $data['info'][0]->centroCosto = null;
+        if ($data['info'][0]->id_centro_costo)
+        {
+          $this->load->model('centros_costos_model');
+          $data['info'][0]->centroCosto = $this->centros_costos_model->getCentroCostoInfo($data['info'][0]->id_centro_costo, true)['info'];
+        }
+
+        $data['info'][0]->activo = null;
+        if ($data['info'][0]->id_activo)
+        {
+          $this->load->model('productos_model');
+          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
+        }
       }
     }
     return $data;

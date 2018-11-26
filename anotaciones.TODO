@@ -18,17 +18,43 @@
  ☐ Programa semillera, tambien se programa las actividades
  ☐ Actividades de mantenimiento, quien solicito, a que se aplico, cuanto costo
 
-AVENDAÃ‘O OLGUIN MARTIN ALFREDO
-GREENCORP BIORGANIKS DE MÃ‰XICO SA DE CV
-MATERIALES PARA LA CONSTRUCCIÃ“N ARMERÃA, S.A. DE C.V
-SECRETARIA DE AGRICULTURA, GANADERA, DESARROLLO RURAL, PESCA Y ALIMENTACION (SAGARPA)
-RUBÃ IZAGUIRRE
 
  ☐ Crear Balance general
+ ☐ Reporte estado de resultados
+ ☐ Poliza de nominas que se guenere por trabajador las percepcion y deduccion
  ✔ Crear familias de tipo Activos en los productos @done (18-09-26 20:54)
  ✔ Agregar a los productos el tipo de color para distinguir para cultivos orgánicos @done (18-09-26 20:54)
  ✔ Crear catalogo de ranchos @done (18-10-01 10:19)
  ✔ Crear catalogo de centros de costo y asignar a proveedores multi costos @done (18-10-01 22:03)
+ ✔ En Ordenes de requisición, ordenes de compra y gastos agregar los nuevos catalogos para reportes @done (18-10-16 10:10)
+ ✔ activos agregar tipo de activo (Mobiliario, vehículo, etc), Cambiar nombre al area a cultivo y productos poner otra lista de precios @done (18-10-16 20:35)
+ ✔ En salidas agregar los nuevos catálogos @done (18-10-16 20:35)
+ ✔ En bancos agregar los nuevos catálogos en retiros y depósitos directos @done (18-10-24 20:49)
+ ✔ En caja chica en los gastos agregar los nuevos catálogos @done (18-10-24 20:45)
+ ✔ En bascula agregar casilla para agregar las boletas intangibles y poner un privilegio para que solo Francis pueda agregarlas @done (18-10-24 20:46)
+ ✔ En la caja chica de rosy que no pueda agregar gastos ni ingresos por remisión y dejar con un fondo fijo esa caja para controlar bien su saldo. @done (18-11-06 21:03)
+ ✔ En caja chica agregar apartado de prestamos @done (18-11-06 19:01)
+ ✔ En apartado de asistencias de nomina al agregar prestamos cuando sea fiscal que aplique el movimiento directo en bancos. Agregar un nuevo tipo de prestamos "Materiales" @done (18-11-06 20:36)
+ ✔ Modificar caja de prestamos acomodar los saldos de los prestamos que se descuentan desde nomina @done (18-11-06 20:37)
+ ✔ Agregar en cultivos (áreas) Bodega Gdl, Intangibles, Administrativos, Fletes. Para el control de costos @done (18-11-06 21:17)
+ ✔ Agregar el catalogo de cultivos (áreas) al catalogo de trabajadores para poder asignar en cual área labora y separar los costos @done (18-11-07 09:46)
+ ✔ En la caja chica y en la caja de bodega agregar apartado de traspaso de dinero, para poder enviar dinero entre cajas @done (18-11-07 15:59)
+ ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
+ ✔ Agregar los centros de costo (catalogo de rodrigo y de melgas) @done (18-11-08 12:22)
+ ☐ Quitar los retiro y depósitos de bancos, porque se registrarían desde el apartado de Registro manual de movimientos (contable)
+ ✔ Crear apartado de Registro manual de movimientos utilizando el catalogo de centros de costo, @done (18-11-06 19:00)
+   y en centro de costo el tipo "banco" se cambiaría por Gastos financieros y se agregaría el tipo "banco" que
+   serian para las cuentas de banco (esas se tienen que ligar con las cuentas de banco), Agregar en centro de costo
+   el tipo "Resultado" (resultados e ejercicios anteriores) esos al dar cerrar el ejercicio de un año se registraría
+   en Movimientos manuales el ingreso de la utilidad o perdida del ejercicio. Agregar en centros de costo el tipo
+   "Créditos bancarios" en el cual debe de pedir los años del crédito (para separar lo de corto y largo plazo)
+   ese centro de costo se tiene que ligar con las cuentas de banco para registrar depósitos y salidas en banco,
+   Agregar tipo de "Otros ingresos" ellos agregarían, Agregar el ptu e isr en gastos (catalogo),
+   Agregar tipo de "Impuestos por pagar" son para disminuir los impuestos acumulados de nomina y facturas,
+   Agregar tipo "Productos financieros" ellos agregarían,
+   Agregar tipo "Impuestos a favor" son para disminuir,
+
+
 
 
  ✔ Validaciones de complemento de pago @done (18-09-07 19:11)

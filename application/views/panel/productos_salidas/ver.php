@@ -33,6 +33,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $salida['info'][0]->empresa) ?>" placeholder="" readonly>
+                    <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $salida['info'][0]->id_empresa) ?>">
                   </div>
                 </div>
               </div><!--/control-group -->
@@ -79,6 +80,66 @@
                 </div>
             </div>
           </div>
+
+          <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($salida['info'][0]->area->nombre) ? $salida['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($salida['info'][0]->area->id_area) ? $salida['info'][0]->area->id_area : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Area </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($salida['info'][0]->rancho->nombre) ? $salida['info'][0]->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($salida['info'][0]->rancho->id_rancho) ? $salida['info'][0]->rancho->id_rancho : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto', isset($salida['info'][0]->centroCosto->nombre) ? $salida['info'][0]->centroCosto->nombre : '') ?>" placeholder="Mantenimiento, Gasto general" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId', isset($salida['info'][0]->centroCosto->id_centro_costo) ? $salida['info'][0]->centroCosto->id_centro_costo : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($salida['info'][0]->activo->nombre) ? $salida['info'][0]->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($salida['info'][0]->activo->id_producto) ? $salida['info'][0]->activo->id_producto : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
 
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">

@@ -46,6 +46,13 @@
                   <option value="" <?php echo set_select('ftipo', '', false, $this->input->get('ftipo')) ?>>Todos</option>
                   <option value="gasto" <?php echo set_select('ftipo', 'gasto', false, $this->input->get('ftipo')) ?>>Gasto</option>
                   <option value="banco" <?php echo set_select('ftipo', 'banco', false, $this->input->get('ftipo')) ?>>Banco</option>
+                  <option value="gastofinanciero" <?php echo set_select('ftipo', 'gastofinanciero') ?>>Gastos financieros</option>
+                  <option value="resultado" <?php echo set_select('ftipo', 'resultado') ?>>Resultado (ejercicios)</option>
+                  <option value="creditobancario" <?php echo set_select('ftipo', 'creditobancario') ?>>Créditos bancarios</option>
+                  <option value="otrosingresos" <?php echo set_select('ftipo', 'otrosingresos') ?>>Otros ingresos</option>
+                  <option value="impuestoxpagar" <?php echo set_select('ftipo', 'impuestoxpagar') ?>>Impuestos por pagar</option>
+                  <option value="productofinanc" <?php echo set_select('ftipo', 'productofinanc') ?>>Productos financieros</option>
+                  <option value="impuestoafavor" <?php echo set_select('ftipo', 'impuestoafavor') ?>>Impuestos a favor</option>
                   <option value="melga" <?php echo set_select('ftipo', 'melga', false, $this->input->get('ftipo')) ?>>Melga</option>
                   <option value="tabla" <?php echo set_select('ftipo', 'tabla', false, $this->input->get('ftipo')) ?>>Tabla</option>
                   <option value="seccion" <?php echo set_select('ftipo', 'seccion', false, $this->input->get('ftipo')) ?>>Sección</option>

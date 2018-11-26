@@ -11,6 +11,10 @@
     // autocompleteCodigo();
     autocompleteConcepto();
     autocompleteClientes();
+    autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+    autocompleteActivos();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -86,8 +90,9 @@
    */
 
    // Obtiene el siguiente folio segun el tipo de orden.
-  var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
   var eventOnChangeTipoOrden = function () {
+    var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
+
     $('#tipoOrden').on('change', function(event) {
       var $this      = $(this),
           $folio     = $('#folio'),
@@ -95,7 +100,7 @@
 
       if ($tableProd.find('tbody tr').length > 0) {
         noty({"text": 'Ya tiene productos para un tipo de orden, si desea cambiar de tipo de orden elimine los productos del listado', "layout":"topRight", "type": 'error'});
-
+        console.log('test', tipoOrderActual);
         $this.val(tipoOrderActual);
       } else {
         $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
@@ -133,11 +138,29 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+	$('#proveedor').val('');
+        $('#proveedorId').val('');
+        $('#groupCatalogos').show();
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+	$('#proveedor').val('');
+        $('#proveedorId').val('');
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
+        $('#groupCatalogos').show();
       }
     });
   };
@@ -213,6 +236,145 @@
       }
     });
   };
+
+  var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        $area.val(ui.item.id);
+        $("#areaId").val(ui.item.id);
+        $area.css("background-color", "#A1F57A");
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $("#ranchoId").val('');
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#area").css("background-color", "#FFD071");
+        $("#areaId").val('');
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $("#ranchoId").val('');
+      }
+    });
+  };
+
+  var autocompleteRanchos = function () {
+    $("#rancho").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#areaId").val()) > 0)
+          params.area = $("#areaId").val();
+        $.ajax({
+            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $rancho =  $(this);
+
+        $rancho.val(ui.item.id);
+        $("#ranchoId").val(ui.item.id);
+        $rancho.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#rancho").css("background-color", "#FFD071");
+        $("#ranchoId").val('');
+      }
+    });
+  };
+
+  var autocompleteCentroCosto = function () {
+    $("#centroCosto").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+
+        params.tipo = ['gasto'];
+
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $centroCosto =  $(this);
+
+        $centroCosto.val(ui.item.id);
+        $("#centroCostoId").val(ui.item.id);
+        $centroCosto.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#centroCosto").css("background-color", "#FFD071");
+        $("#centroCostoId").val('');
+      }
+    });
+  };
+
+  var autocompleteActivos = function () {
+    $("#activos").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $activos =  $(this);
+
+        $activos.val(ui.item.id);
+        $("#activoId").val(ui.item.id);
+        $activos.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#activos").css("background-color", "#FFD071");
+        $("#activoId").val('');
+      }
+    });
+  };
+
+
   // Autocomplete para el codigo.
   var autocompleteCodigo = function () {
     $("#fcodigo").autocomplete({

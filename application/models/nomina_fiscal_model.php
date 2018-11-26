@@ -2111,13 +2111,26 @@ class nomina_fiscal_model extends CI_Model {
   {
     $anio = $anio==null? date("Y"): $anio;
     $this->load->model('usuarios_model');
+    $this->load->model('banco_cuentas_model');
+
+    $infoPrestamos = [];
     $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
     if (isset($datos['prestamos_existentes']))
     {
       $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana, $anio, $empled['info'][0]->dia_inicia_semana);
-      if(count($datos['eliminar_prestamo']) > 0)
+      if(count($datos['eliminar_prestamo']) > 0) {
+        // Si hay un movimiento ligado de bancos se elimina
+        foreach ($datos['eliminar_prestamo'] as $keye => $elim_mov) {
+          $infoPrestamos[$elim_mov] = $this->db->query("SELECT * FROM nomina_prestamos WHERE id_prestamo = {$elim_mov}")->row();
+
+          if ($infoPrestamos[$elim_mov]->id_movimiento > 0) {
+            $this->banco_cuentas_model->deleteMovimiento($infoPrestamos[$elim_mov]->id_movimiento);
+          }
+        }
+        // Elimina los prestamos
         $this->db->delete('nomina_prestamos', "id_prestamo IN(".implode(',', $datos['eliminar_prestamo']).") AND
             id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
+      }
     }
 
     $insertData = array();
@@ -2125,6 +2138,10 @@ class nomina_fiscal_model extends CI_Model {
     {
       if($datos['id_prestamo'][$key] > 0)
       {
+        if (!isset($infoPrestamos[$datos['id_prestamo'][$key]])) {
+          $infoPrestamos[$datos['id_prestamo'][$key]] = $this->db->query("SELECT * FROM nomina_prestamos WHERE id_prestamo = {$datos['id_prestamo'][$key]}")->row();
+        }
+
         $this->db->update('nomina_prestamos', array(
           'id_usuario'  => $empleadoId,
           'prestado'    => $datos['cantidad'][$key],
@@ -2134,8 +2151,16 @@ class nomina_fiscal_model extends CI_Model {
           'pausado'     => $datos['pausarp'][$key],
           'tipo'        => $datos['tipo_efectico'][$key],
         ), "id_prestamo = {$datos['id_prestamo'][$key]}");
-      }else{
-        $insertData[] = array(
+
+        // Actualiza el movimiento de banco si tiene el prestamo
+        if (intval($infoPrestamos[$datos['id_prestamo'][$key]]->id_movimiento) > 0) {
+          $this->db->update('banco_movimientos', [
+            'monto' => $datos['cantidad'][$key],
+            'fecha' => str_replace('T', ' ', $datos['fecha'][$key]).':'.date("H:i:s")
+          ], "id_movimiento = {$infoPrestamos[$datos['id_prestamo'][$key]]->id_movimiento}");
+        }
+      }else{ // insertar el prestamo
+        $insertData = array(
           'id_usuario'  => $empleadoId,
           'prestado'    => $datos['cantidad'][$key],
           'pago_semana' => $datos['pago_semana'][$key],
@@ -2144,12 +2169,35 @@ class nomina_fiscal_model extends CI_Model {
           'pausado'     => $datos['pausarp'][$key],
           'tipo'        => $datos['tipo_efectico'][$key],
         );
-      }
-    }
 
-    if (count($insertData) > 0)
-    {
-      $this->db->insert_batch('nomina_prestamos', $insertData);
+        // Cuando es de tipo fiscal inserta el mov en bancos
+        if ($datos['tipo_efectico'][$key] == 'fi' && intval($datos['cuentaId'][$key]) > 0) {
+          $cuenta = $this->banco_cuentas_model->getCuentaInfo($datos['cuentaId'][$key], true);
+
+          $data = array(
+            'id_cuenta'   => $datos['cuentaId'][$key],
+            'id_banco'    => $cuenta['info']->id_banco,
+            'fecha'       => str_replace('T', ' ', $datos['fecha'][$key]).':'.date("H:i:s"),
+            'numero_ref'  => '',
+            'concepto'    => substr($datos['concepto'][$key], 0, 120),
+            'monto'       => $datos['cantidad'][$key],
+            'tipo'        => 'f', // ratiro
+            'entransito'  => 'f',
+            'metodo_pago' => $datos['metodoPago'][$key],
+            'a_nombre_de' => $empled['info'][0]->nombre.' '.$empled['info'][0]->apellido_paterno.' '.$empled['info'][0]->apellido_materno,
+          );
+          if($datos['contpaq'][$key] != '')
+            $data['cuenta_cpi'] = $datos['contpaq'][$key];
+
+          $movBanco = $this->banco_cuentas_model->addRetiro($data);
+
+          // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
+          if (isset($movBanco['id_movimiento']) && $movBanco['id_movimiento'] > 0) {
+            $insertData['id_movimiento'] = $movBanco['id_movimiento'];
+          }
+        }
+        $this->db->insert('nomina_prestamos', $insertData);
+      }
     }
 
     return array('passes' => true);

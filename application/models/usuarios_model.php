@@ -101,7 +101,8 @@ class Usuarios_model extends privilegios_model {
 						'email'            => $this->input->post('femail'),
 
 						'id_empresa'           => $this->input->post('did_empresa'),
-						'id_puesto'            => $this->input->post('fpuesto'),
+            'id_puesto'            => $this->input->post('fpuesto'),
+						'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
 						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
             'fondo_ahorro'         => is_numeric($this->input->post('ffondo_ahorro'))? $this->input->post('ffondo_ahorro'): 0,
@@ -185,6 +186,7 @@ class Usuarios_model extends privilegios_model {
 
 						'id_empresa'           => $this->input->post('did_empresa'),
 						'id_puesto'            => $this->input->post('fpuesto'),
+            'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
             'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
 						'fondo_ahorro'         => is_numeric($this->input->post('ffondo_ahorro'))? $this->input->post('ffondo_ahorro'): 0,
@@ -264,7 +266,7 @@ class Usuarios_model extends privilegios_model {
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
-            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador" )
+            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")
@@ -288,6 +290,11 @@ class Usuarios_model extends privilegios_model {
 					$data['privilegios'][] = $priv->privilegio_id;
 			}
 			$res->free_result();
+
+      if ($data['info'][0]->id_area > 0) {
+        $this->load->model('areas_model');
+        $data['cultivo'] = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
+      }
 		}
 
 		return $data;

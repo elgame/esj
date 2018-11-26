@@ -14,6 +14,7 @@ class bodega_guadalajara_model extends CI_Model {
       'existencia_dia'    => array(),
       'denominaciones'    => array(),
       'gastos'            => array(),
+      'traspasos'         => array(),
       'categorias'        => array(),
       'a_bultos_vendidos' => $this->getVentas($fecha, true),
       'costo_venta'       => 0,
@@ -243,6 +244,13 @@ class bodega_guadalajara_model extends CI_Model {
       $info['gastos'] = $gastos;
     }
 
+    // Traspasos
+    $traspasos = $this->getTraspasos($fecha, $noCaja);
+    if (count($traspasos) > 0)
+    {
+      $info['traspasos'] = $traspasos;
+    }
+
     $info['categorias'] = $this->db->query(
     "SELECT id_categoria, nombre, abreviatura
      FROM cajachica_categorias
@@ -466,6 +474,10 @@ class bodega_guadalajara_model extends CI_Model {
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
 
           $this->db->update('otros.bodega_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
@@ -480,6 +492,10 @@ class bodega_guadalajara_model extends CI_Model {
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('otros.bodega_gastos', $gastos);
           $gastos_ids['adds'][] = $this->db->insert_id();
@@ -504,6 +520,41 @@ class bodega_guadalajara_model extends CI_Model {
       // }
 
       // $this->db->insert_batch('otros.bodega_gastos', $gastos);
+    }
+
+    // Traspasos
+    if (isset($data['traspaso_concepto']))
+    {
+      $traspasos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['traspaso_concepto'] as $key => $concepto)
+      {
+        if (isset($data['traspaso_del'][$key]) && $data['traspaso_del'][$key] == 'true' &&
+          isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          // $traspasos_ids['delets'][] = $this->getDataGasto($data['traspaso_id_traspaso'][$key]);
+
+          $this->db->delete('otros.bodega_traspasos', "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } elseif (isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          $gastos_udt = array(
+            'concepto' => $concepto,
+            'monto'    => $data['traspaso_importe'][$key],
+            'tipo'     => $data['traspaso_tipo'][$key],
+          );
+
+          $this->db->update('otros.bodega_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } else {
+          $traspaso = array(
+            'concepto'   => $concepto,
+            'monto'      => $data['traspaso_importe'][$key],
+            'tipo'       => $data['traspaso_tipo'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'id_usuario' => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('otros.bodega_traspasos', $traspaso);
+          $traspasos_ids['adds'][] = $this->db->insert_id();
+        }
+      }
     }
 
     return true;
@@ -631,16 +682,42 @@ class bodega_guadalajara_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
-          'id_area' AS campo
+          'id_area' AS campo, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
        FROM otros.bodega_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN bodega_catalogo ca ON ca.id_area = cg.id_area
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
        WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
 
     return $gastos->result();
+  }
+
+  public function getTraspasos($fecha, $noCaja, $total=false)
+  {
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM otros.bodega_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.no_caja = {$noCaja}"
+      )->row();
+      return $traspaso->monto;
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones, bt.id_usuario, bt.fecha_creacion, bt.tipo
+       FROM otros.bodega_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND bt.no_caja = {$noCaja}
+       ORDER BY bt.id_traspaso ASC"
+    );
+
+    return $traspaso->result();
   }
 
   public function getUtilidades($fecha, $noCaja)
@@ -1552,6 +1629,40 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(50, 30));
     $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalGastos, 2, '$', false)), false, false);
+
+    // Traspasos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(170, 25));
+    $pdf->Row(array('TRASPASOS'), false, false);
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(50, 123, 30));
+    $pdf->Row(array('TIPO', 'CONCEPTO', 'IMPORTE'), false, 'B');
+    $pdf->SetFont('Arial','', 6);
+
+    $codigoAreas = array();
+    $totalTraspasos = 0;
+    foreach ($caja['traspasos'] as $key => $traspaso)
+    {
+      $totalTraspasos += floatval($traspaso->monto);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
+        $traspaso->concepto,
+        MyString::float(MyString::formatoNumero($traspaso->monto, 2, '', false))), false, 'B');
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(129);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(50, 30));
+    $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
 
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);

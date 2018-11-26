@@ -72,12 +72,19 @@ class centros_costos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'nombre'     => $this->input->post('nombre'),
-        'tipo'       => $this->input->post('tipo'),
-        'hectareas'  => floatval($this->input->post('hectareas')),
-        'no_plantas' => floatval($this->input->post('no_plantas')),
-        'id_area'    => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'nombre'        => $this->input->post('nombre'),
+        'tipo'          => $this->input->post('tipo'),
+        'hectareas'     => floatval($this->input->post('hectareas')),
+        'no_plantas'    => floatval($this->input->post('no_plantas')),
+        'id_area'       => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'anios_credito' => floatval($this->input->post('anios_credito')),
+        'id_cuenta'     => NULL,
+        'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
       );
+
+      if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
+        $data['id_cuenta'] = intval($this->input->post('id_cuenta'));
+      }
     }
 
     $this->db->insert('otros.centro_costo', $data);
@@ -97,12 +104,19 @@ class centros_costos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'nombre'     => $this->input->post('nombre'),
-        'tipo'       => $this->input->post('tipo'),
-        'hectareas'  => floatval($this->input->post('hectareas')),
-        'no_plantas' => floatval($this->input->post('no_plantas')),
-        'id_area'    => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'nombre'        => $this->input->post('nombre'),
+        'tipo'          => $this->input->post('tipo'),
+        'hectareas'     => floatval($this->input->post('hectareas')),
+        'no_plantas'    => floatval($this->input->post('no_plantas')),
+        'id_area'       => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'anios_credito' => floatval($this->input->post('anios_credito')),
+        'id_cuenta'     => NULL,
+        'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
       );
+
+      if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
+        $data['id_cuenta'] = intval($this->input->post('id_cuenta'));
+      }
     }
 
     $this->db->update('otros.centro_costo', $data, array('id_centro_costo' => $id_centro_costo));
@@ -121,7 +135,8 @@ class centros_costos_model extends CI_Model {
   {
     $id_centro_costo = $id_centro_costo? $id_centro_costo: (isset($_GET['id'])? $_GET['id']: 0);
 
-    $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas" )
+    $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas, anios_credito,
+                                  id_cuenta, cuenta_cpi" )
                         ->from("otros.centro_costo")
                         ->where("id_centro_costo", $id_centro_costo)
                         ->get();
@@ -135,11 +150,16 @@ class centros_costos_model extends CI_Model {
     if ($basic_info == False) {
 
       // Carga la info de la area.
-      $this->load->model('areas_model');
-
       if (isset($data['info']->id_area)) {
+        $this->load->model('areas_model');
         $empresa = $this->areas_model->getAreaInfo($data['info']->id_area, true);
         $data['info']->area = $empresa['info'];
+      }
+
+      if (isset($data['info']->id_cuenta)) {
+        $this->load->model('banco_cuentas_model');
+        $cuenta = $this->banco_cuentas_model->getCuentaInfo($data['info']->id_cuenta, true);
+        $data['info']->cuenta = $cuenta['info'];
       }
     }
 
@@ -154,15 +174,19 @@ class centros_costos_model extends CI_Model {
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
     if ($this->input->get('term') !== false)
-      $sql = " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-    if ($this->input->get('tipo') !== false)
-      $sql = " AND cc.tipo = '".$this->input->get('tipo')."'";
+      $sql .= " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+    if ($this->input->get('tipo') !== false) {
+      if (is_array($this->input->get('tipo'))) {
+        $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
+      } else
+        $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
+    }
 
     if (!is_null($sqlX))
       $sql .= $sqlX;
 
     $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, a.id_area, a.nombre AS area
+        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area
         FROM otros.centro_costo cc
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'

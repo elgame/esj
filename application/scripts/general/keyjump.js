@@ -66,7 +66,7 @@
         }
       });
     });
-
+    console.log(hiddens);
     hiddens.forEach(function ($h, i) {
       $h.on('keypress', function(event) {
         if (event.which == settings.next) {

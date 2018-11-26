@@ -127,6 +127,7 @@ class bascula_model extends CI_Model {
           'tipo'         => $this->input->post('ptipo'),
           'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'],
           'certificado' => isset($_POST['certificado']) ? 't' : 'f',
+          'intangible'  => isset($_POST['intangible']) ? 't' : 'f',
 
           'metodo_pago'  => $this->input->post('pmetodo_pago'),
           'id_productor' => empty($_POST['pid_productor']) ? null : $_POST['pid_productor'],
@@ -190,6 +191,10 @@ class bascula_model extends CI_Model {
         {
           $data2['id_proveedor'] = $this->input->post('pid_proveedor');
           $data2['id_cliente']    = null;
+
+          if ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')) {
+            $data2['intangible'] = isset($_POST['intangible']) ? 't' : 'f';
+          }
         }
         else
         {
@@ -456,6 +461,7 @@ class bascula_model extends CI_Model {
                 b.no_impresiones,
                 pr.nombre_fiscal AS productor,
                 b.certificado,
+                b.intangible,
                 (u.nombre || ' ' || u.apellido_paterno) AS creadox,
                 (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario")
       ->from("bascula AS b")
@@ -2968,6 +2974,7 @@ class bascula_model extends CI_Model {
       'obcervaciones'   => 'Observaciones',
       'accion'          => 'Accion',
       'certificado'     => 'Certificado',
+      'intangible'      => 'Intangible',
       'fecha_pago'      => 'Fecha de pago',
       'status'      => 'Estado boleta',
     );

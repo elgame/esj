@@ -909,19 +909,23 @@ class banco_cuentas_model extends banco_model {
 			$comision = (isset($_POST['fcomision']{0})? $_POST['fcomision']: 0);
 			$traspaso = ($this->input->post('ftraspaso') == 'si'? true: false);
 			$data = array(
-						'id_cuenta'   => $this->input->post('fcuenta'),
-						'id_banco'    => $this->input->post('fbanco'),
-						'fecha'       => $this->input->post('ffecha').':'.date("s"),
-						'numero_ref'  => $this->input->post('freferencia'),
-						'concepto'    => $this->input->post('fconcepto'),
-						'monto'       => $this->input->post('fmonto'),
-						'tipo'        => 'f',
-						'entransito'  => 'f',
-						'metodo_pago' => $this->input->post('fmetodo_pago'),
-						'a_nombre_de' => $this->input->post('dproveedor'),
-						'clasificacion' => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
-            'desglosar_iva' => ($this->input->post('fdesglosa_iva')=='t'? 't': 'f'),
-						);
+        'id_cuenta'       => $this->input->post('fcuenta'),
+        'id_banco'        => $this->input->post('fbanco'),
+        'fecha'           => $this->input->post('ffecha').':'.date("s"),
+        'numero_ref'      => $this->input->post('freferencia'),
+        'concepto'        => $this->input->post('fconcepto'),
+        'monto'           => $this->input->post('fmonto'),
+        'tipo'            => 'f',
+        'entransito'      => 'f',
+        'metodo_pago'     => $this->input->post('fmetodo_pago'),
+        'a_nombre_de'     => $this->input->post('dproveedor'),
+        'clasificacion'   => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
+        'desglosar_iva'   => ($this->input->post('fdesglosa_iva')=='t'? 't': 'f'),
+        'id_area'         => ($this->input->post('areaId')? $this->input->post('areaId'): NULL),
+        'id_rancho'       => ($this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL),
+        'id_centro_costo' => ($this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL),
+        'id_activo'       => ($this->input->post('activoId')? $this->input->post('activoId'): NULL),
+			);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
       if(is_numeric($_POST['did_cuentacpi']))
@@ -1039,6 +1043,34 @@ class banco_cuentas_model extends banco_model {
       $this->load->model('cuentas_cpi_model');
       $response['cuenta_cpi'] = $this->cuentas_cpi_model->getCuentaInfo(array('cuenta' => $response['info']->cuenta_cpi), true);
 
+      $response['info']->area = null;
+      if ($response['info']->id_area)
+      {
+        $this->load->model('areas_model');
+        $response['info']->area = $this->areas_model->getAreaInfo($response['info']->id_area, true)['info'];
+      }
+
+      $response['info']->rancho = null;
+      if ($response['info']->id_rancho)
+      {
+        $this->load->model('ranchos_model');
+        $response['info']->rancho = $this->ranchos_model->getRanchoInfo($response['info']->id_rancho, true)['info'];
+      }
+
+      $response['info']->centroCosto = null;
+      if ($response['info']->id_centro_costo)
+      {
+        $this->load->model('centros_costos_model');
+        $response['info']->centroCosto = $this->centros_costos_model->getCentroCostoInfo($response['info']->id_centro_costo, true)['info'];
+      }
+
+      $response['info']->activo = null;
+      if ($response['info']->id_activo)
+      {
+        $this->load->model('productos_model');
+        $response['info']->activo = $this->productos_model->getProductosInfo($response['info']->id_activo, true)['info'];
+      }
+
 			return $response;
 		}else
 			return false;
@@ -1047,11 +1079,15 @@ class banco_cuentas_model extends banco_model {
   public function editMovimiento($datosP, $datosG)
   {
     $data = array(
-            'id_cuenta' => $datosP['fcuenta'],
-            'id_banco'  => $datosP['fbanco'],
-            'fecha'     => $datosP['dfecha'],
-            'concepto'  => $datosP['dconcepto'],
-            );
+      'id_cuenta'       => $datosP['fcuenta'],
+      'id_banco'        => $datosP['fbanco'],
+      'fecha'           => $datosP['dfecha'],
+      'concepto'        => $datosP['dconcepto'],
+      'id_area'         => ($datosP['areaId']? $datosP['areaId']: NULL),
+      'id_rancho'       => ($datosP['ranchoId']? $datosP['ranchoId']: NULL),
+      'id_centro_costo' => ($datosP['centroCostoId']? $datosP['centroCostoId']: NULL),
+      'id_activo'       => ($datosP['activoId']? $datosP['activoId']: NULL),
+    );
     if (isset($datosP['did_proveedor']) && $datosP['did_proveedor'] != '')
     {
       $data['a_nombre_de'] = $datosP['dproveedor'];
@@ -1375,6 +1411,44 @@ class banco_cuentas_model extends banco_model {
     }
 
     return 32;
+  }
+
+  public function getCuentasAjax($sqlX = null){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql .= " AND ( lower(c.numero) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                lower(c.alias) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                lower(bb.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+    if ($this->input->get('did_empresa') !== false) {
+      $sql .= " AND c.id_empresa = ".intval($this->input->get('did_empresa'))."";
+    }
+
+    if (!is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+        "SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco,
+                c.numero, (bb.nombre || ' - ' || c.alias) AS alias, c.cuenta_cpi, c.status
+            FROM banco_cuentas AS c
+              INNER JOIN banco_bancos AS bb ON c.id_banco = bb.id_banco
+            {$sql}
+            ORDER BY (bb.nombre, c.alias) ASC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_cuenta,
+            'label' => $itm->alias,
+            'value' => $itm->alias,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
   }
 
 
