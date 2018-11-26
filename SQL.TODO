@@ -367,7 +367,7 @@
         ALTER TABLE otros.ranchos
           OWNER TO programa;
         COMMENT ON COLUMN otros.ranchos.id_area IS 'el area son los cultivos';
-     *CREATE TABLE otros.centro_costo
+     CREATE TABLE otros.centro_costo
         (
           id_centro_costo bigserial NOT NULL,
           id_area integer,
@@ -388,7 +388,7 @@
           OWNER TO programa;
         COMMENT ON TABLE otros.centro_costo
           IS 'donde se asigna el gasto, donde se aplican los productos, etc';
-     *COMMENT ON COLUMN otros.centro_costo.tipo IS 'gasto (compras), servicio (compras servicios), banco (bancos), melga (piña), tabla (platano), seccion (limon)';
+     COMMENT ON COLUMN otros.centro_costo.tipo IS 'gasto (compras), servicio (compras servicios), banco (bancos), melga (piña), tabla (platano), seccion (limon)';
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Areas',0,TRUE,'ranchos/','magnet',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',470,TRUE,'ranchos/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',470,FALSE,'ranchos/modificar/','edit',FALSE);
@@ -399,7 +399,7 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',475,FALSE,'centro_costo/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',475,FALSE,'centro_costo/eliminar/','remove',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',475,FALSE,'centro_costo/activar/','ok',FALSE);
-     *CREATE TABLE otros.proveedores_centros_costo
+     CREATE TABLE otros.proveedores_centros_costo
         (
           id_proveedor bigint NOT NULL,
           id_centro_costo bigint NOT NULL,
