@@ -138,7 +138,8 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
-
+	$('#proveedor').val('');
+        $('#proveedorId').val('');
         $('#groupCatalogos').show();
         $('#area').val('');
         $('#areaId').val('');
@@ -151,7 +152,8 @@
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
-
+	$('#proveedor').val('');
+        $('#proveedorId').val('');
         $('#area').val('');
         $('#areaId').val('');
         $('#rancho').val('');
