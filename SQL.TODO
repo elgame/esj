@@ -3,6 +3,9 @@
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
 
+    INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('EMPAQUE','ot',TRUE,FALSE);
+    INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('APLICACION GENERAL','ot',TRUE,FALSE);
+
  ✔ Balance general @done (18-08-28 12:59) pct|pcc|lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
@@ -10,7 +13,7 @@
     ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
     COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
 
-✔ Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap|san
+✔ Agregar catalogos a caja chica gastos @done (18-10-08 21:42) pcc|lap|san|pct
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_areac integer;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE otros.bodega_gastos ADD COLUMN id_centro_costo bigint;
@@ -21,7 +24,7 @@
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
- ✔ Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap|pcc|san
+ ✔ Apartado de traspaso en bodega y caja chica @done (18-11-07 12:27) lap|pcc|san|pct
      CREATE TABLE otros.bodega_traspasos
         (
           id_traspaso bigserial NOT NULL,

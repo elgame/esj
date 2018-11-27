@@ -531,7 +531,7 @@ class compras_requisicion extends MY_Controller {
 
     $valGasto = $valFlete = false;
     $tipoOrden = $this->input->post('tipoOrden');
-    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f' && $tipoOrden == 'a') {
+    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f') {
       $valGasto = true;
 
       if ($tipoOrden == 'f')

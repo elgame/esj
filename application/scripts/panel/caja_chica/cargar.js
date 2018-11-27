@@ -745,8 +745,8 @@
   var calculaCorte = function () {
     var total = 0;
 
-    total = parseFloat($('#total-saldo-ingresos').val() || 0) - parseFloat($('#total-boletas').val() || 0) -
-      (parseFloat($('#ttotal-gastos').val() || 0)) - (parseFloat($('#ttotal-deudores').val())||0);
+    total = parseFloat($('#total-saldo-ingresos').val() || 0) + parseFloat($('#ttotal-acreedores').val() || 0) -
+      parseFloat($('#total-boletas').val() || 0) - (parseFloat($('#ttotal-gastos').val() || 0)) - (parseFloat($('#ttotal-deudores').val())||0);
     $('#ttotal-corte').val(total.toFixed(2));
   };
 

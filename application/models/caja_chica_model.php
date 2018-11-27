@@ -18,6 +18,7 @@ class caja_chica_model extends CI_Model {
       'gastos'                => array(),
       'traspasos'             => array(),
       'deudores'              => array(),
+      'acreedores'            => array(),
       'categorias'            => array(),
       'deudores_prest_dia'    => 0,
       'deudores_abonos_dia'   => 0,
@@ -291,6 +292,33 @@ class caja_chica_model extends CI_Model {
         )->row();
         if (isset($deudores->abonos)) {
           $info['deudores_abonos_dia'] = $deudores->abonos;
+        }
+      }
+    }
+
+    if ($noCaja == '1') {
+      // acreedores
+      $acreedores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo
+        FROM cajachica_deudores cd
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja = 2 AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja = 2 AND cd.tipo = 'caja_limon' AND fecha <= '{$fecha}'
+          AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($acreedores->num_rows() > 0)
+      {
+        $info['acreedores'] = $acreedores->result();
+        $info['deudores_prest_dia'] = 0;
+        foreach ($info['acreedores'] as $key => $value) {
+          $info['acreedores'][$key]->mismo_dia = false;
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['acreedores'][$key]->mismo_dia = true;
+          }
         }
       }
     }
@@ -1682,6 +1710,73 @@ class caja_chica_model extends CI_Model {
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
     }
 
+    if ($noCajas == 1) {
+      // Acreedores
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(83, 17));
+      $pdf->Row(array('ACREEDOR CAJA TRYANA', ''), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(111);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+
+      $codigoAreas = array();
+      $totalAcreedores = $totalAcreedoresHoy = 0;
+      foreach ($caja['acreedores'] as $key => $acreedor)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(111, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+        }
+
+        $totalAcreedores += floatval($acreedor->saldo);
+        if ($acreedor->mismo_dia) {
+          $totalAcreedoresHoy += floatval($acreedor->saldo);
+        }
+
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+        $pdf->SetX(111);
+        $pdf->Row(array(
+          $acreedor->fecha,
+          $acreedor->nombre,
+          $acreedor->concepto,
+          MyString::formatoNumero($acreedor->monto, 2, '$', false),
+          MyString::formatoNumero($acreedor->abonos, 2, '$', false),
+          MyString::formatoNumero($acreedor->saldo, 2, '$', false)
+        ), false, true);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetFont('Arial', 'B', 6.4);
+      $pdf->SetX(111);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetWidths(array(34, 33, 33));
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->Row(array('', '',
+        'TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false)), true, true);
+    }
+
     // Boletas pendientes x recuperar
     $totalBoletas2 = 0;
     if ($noCajas == 1 || $noCajas == 3) {
@@ -1915,7 +2010,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
     $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + $totalAcreedoresHoy - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -1938,7 +2033,9 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero($totalAcreedoresHoy, 2, '$', false)), false, false);
+    $pdf->SetX(168);
+    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + $totalAcreedoresHoy - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 

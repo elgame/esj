@@ -740,6 +740,86 @@
               </div>
               <!-- /Deudores -->
 
+              <?php
+              $totalAcreedores = $totalAcreedoresHoy = 0;
+              if ($_GET['fno_caja'] == '1' && count($caja['acreedores']) > 0) { ?>
+              <!-- Acreedores -->
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-acreedor">
+                              <thead>
+                                <tr>
+                                  <th colspan="8">ACREEDOR CAJA TRYANA</th>
+                                </tr>
+                                <tr>
+                                  <th>FECHA</th>
+                                  <th>TIPO</th>
+                                  <th>NOMBRE</th>
+                                  <th>CONCEPTO</th>
+                                  <th>PRESTADO</th>
+                                  <th>ABONOS</th>
+                                  <th>SALDO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                  foreach ($caja['acreedores'] as $acreedor) {
+                                    $totalAcreedores += floatval($acreedor->saldo);
+                                    if ($acreedor->mismo_dia) {
+                                      $totalAcreedoresHoy += floatval($acreedor->saldo);
+                                    }
+                                  ?>
+                                  <tr>
+                                    <td style="width: 80px;">
+                                      <?php echo $acreedor->fecha ?>
+                                    </td>
+                                    <td style="width: 80px;">
+                                      <?php echo str_replace('_', ' ', $acreedor->tipo); ?>
+                                    </td>
+                                    <td style="width: 200px;">
+                                      <?php echo $acreedor->nombre ?>
+                                    </td>
+                                    <td style="width: 200px;">
+                                      <?php echo $acreedor->concepto ?>
+                                    </td>
+                                    <td style="width: 80px;">
+                                      <?php echo $acreedor->monto ?>
+                                    </td>
+                                    <td style="width: 80px;">
+                                      <?php echo $acreedor->abonos ?>
+                                    </td>
+                                    <td style="width: 80px;">
+                                      <?php echo $acreedor->saldo ?>
+                                    </td>
+                                    <td style="width: 30px;">
+                                    </td>
+                                  </tr>
+                                <?php } ?>
+                                <tr class="row-total">
+                                  <td colspan="5"></td>
+                                  <td style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td><input type="text" value="<?php echo $totalAcreedores ?>" class="input-small vpositive" id="total-acreddor" style="text-align: right;" readonly></td>
+                                  <td></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Acreedores -->
+              <?php } ?>
+
               <!-- Tabulacion -->
               <div class="row-fluid">
                 <div class="span12">
@@ -831,9 +911,13 @@
                               <td><input type="text" name="" value="<?php echo ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
+                              <td>TOTAL ACREEDORES:</td>
+                              <td><input type="text" name="" value="<?php echo $totalAcreedoresHoy ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
+                            </tr>
+                            <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + $totalAcreedoresHoy - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + $totalAcreedoresHoy - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>

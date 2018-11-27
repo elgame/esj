@@ -253,6 +253,31 @@ class reportes_model extends CI_Model {
     return $response;
   }
 
+  public function repartAplicacionGeneral($datos)
+  {
+    $response = [];
+    $aplicacione_gral = [0, 0];
+    foreach ($datos as $key => $value) {
+      if ($value->cultivo === 'APLICACION GENERAL') {
+        $aplicacione_gral[0] += $value->saldo;
+        $aplicacione_gral[1] += $value->mes;
+      } else {
+        $response[] = $value;
+      }
+    }
+
+    if ($aplicacione_gral[0] > 0 || $aplicacione_gral[1] > 0) {
+      $aplicacione_gral[0] = $aplicacione_gral[0]/(count($response)>0? count($response): 1);
+      $aplicacione_gral[1] = $aplicacione_gral[1]/(count($response)>0? count($response): 1);
+      foreach ($response as $key => $value) {
+        $response[$key]->saldo += $aplicacione_gral[0];
+        $response[$key]->mes += $aplicacione_gral[1];
+      }
+    }
+
+    return $response;
+  }
+
   public function erIngresos($sqlFecha, $sqlemp1, $sqlemp2, $sqlarea1)
   {
     $query = $this->db->query(
@@ -341,6 +366,7 @@ class reportes_model extends CI_Model {
       WHERE cg.no_caja = 2 {$sqlemp2} {$sqlarea1}
         AND Date(cg.fecha) BETWEEN {$sqlFecha}
       GROUP BY a.id_area");
+
     return $query->result();
   }
 
@@ -572,6 +598,7 @@ class reportes_model extends CI_Model {
     $response['egresos_gastos_ord'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_ord'], $res['mes']['egresos_gastos_ord']);
 
     $response['egresos_costos_ventas'] = $this->erCultivosMergue($response['egresos_salidas'], $response['egresos_gastos_dir'], $response['egresos_gastos_ord']);
+    $response['egresos_costos_ventas'] = $this->repartAplicacionGeneral($response['egresos_costos_ventas']);
 
     // Egresos gastos de caja tryana
     $res['saldo']['egresos_gastos_caja_try'] = $this->erEgresosGastosCajaTry($sqlFechaSaldo, $sqlemp2, $sqlarea1);
@@ -589,6 +616,7 @@ class reportes_model extends CI_Model {
     $response['egresos_gastos_nomina'] = $this->erCultivosAjuste($res['saldo']['egresos_gastos_nomina'], $res['mes']['egresos_gastos_nomina']);
 
     $response['egresos_gastos_generales'] = $this->erCultivosMergue($response['egresos_gastos_caja_try'], $response['egresos_gastos_caja_gdl'], $response['egresos_gastos_nomina']);
+    $response['egresos_gastos_generales'] = $this->repartAplicacionGeneral($response['egresos_gastos_generales']);
 
     // Egresos comisiones bancarias
     $res['saldo']['egresos_comisiones_ban'] = $this->erEgresosComisionesBan($sqlFechaSaldo, $sqlemp7, $sqlarea1);
