@@ -12,8 +12,9 @@
 |
 | If this is not set then CodeIgniter will guess the protocol, domain and
 | path to your installation.
-|http://localhost/sanjorge/   http://sanjorge.dev/
+|
 */
+//$config['base_url'] = 'http://192.168.1.35/sanjorge/'; //http://192.168.1.100/sanjorge/
 function getBaseUrl()
 {
   // output: /myproject/index.php
@@ -32,9 +33,9 @@ function getBaseUrl()
   // .$pathInfo['dirname']."/"
   return $protocol.$hostName;
 }
+$config['base_url'] = getBaseUrl().'/sanjorge/';//'http://201.155.246.163/sanjorge/'; //http://192.168.1.100/sanjorge/
+$config['base_url_bascula'] = 'http://192.168.1.35/sanjorge_bascula/';
 
-$config['base_url'] = getBaseUrl().'/sanjorge/'; //http://192.168.1.100/sanjorge/
-$config['base_url_bascula'] = 'http://localhost/sanjorge_bascula/';
 
 $config['base_url_cam_salida_stream']  = 'http://192.168.1.42:8053/videostream.cgi?user=admin&pwd=&resolution=32&rate=0';
 $config['base_url_cam_salida_snapshot']	= 'http://192.168.1.42:8053/snapshot.cgi?user=admin&pwd=';

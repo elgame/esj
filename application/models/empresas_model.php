@@ -1,7 +1,7 @@
 <?php
 
 class empresas_model extends CI_Model{
-	private $pass_finkok = 'gamaL1!l'; //F4ctur4rt!
+	private $pass_finkok = 'F4ctur4rt!'; //F4ctur4rt!
 
 	function __construct(){
 		parent::__construct();
