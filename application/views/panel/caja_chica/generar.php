@@ -619,10 +619,11 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-deudor">
                               <thead>
                                 <tr>
-                                  <th colspan="7">DEUDORES <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="8">DEUDORES <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
                                 </tr>
                                 <tr>
                                   <th>FECHA</th>
+                                  <th>TIPO</th>
                                   <th>NOMBRE</th>
                                   <th>CONCEPTO</th>
                                   <th>PRESTADO</th>
@@ -642,6 +643,12 @@
                                         <tr>
                                           <td style="">
                                             <input type="hidden" name="deudor_fecha[]" value="">
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <select name="deudor_tipo[]" style="width: 80px;">
+                                              <option value="otros" <?php echo $_POST['deudor_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                              <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                            </select>
                                           </td>
                                           <td style="width: 200px;">
                                             <input type="text" name="deudor_nombre[]" value="<?php echo $_POST['deudor_nombre'][$key] ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $readonly.$mod_gas_readonly ?>>
@@ -672,6 +679,10 @@
                                     <td style="width: 80px;">
                                       <?php echo $deudor->fecha ?>
                                       <input type="hidden" name="deudor_fecha[]" value="<?php echo $deudor->fecha ?>">
+                                    </td>
+                                    <td style="width: 80px;">
+                                      <?php echo str_replace('_', ' ', $deudor->tipo); ?>
+                                      <input type="hidden" name="deudor_tipo[]" value="<?php echo $deudor->tipo ?>">
                                     </td>
                                     <td style="width: 200px;">
                                       <input type="text" name="deudor_nombre[]" value="<?php echo $deudor->nombre ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
@@ -705,6 +716,7 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
+                                  <td></td>
                                   <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
                                   <td style="text-align: right; font-weight: bolder;">
                                     <input type="text" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="total-deudores-pres-dia" style="text-align: right;" readonly>

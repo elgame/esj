@@ -42,6 +42,8 @@ class bitacora_msg_model extends CI_Model {
     'cajachica_ingresos_update'  => 'Se modifico :accion :folio :empresa',
     'cajachica_gastos_insert'    => 'Se agrego :accion :folio :empresa',
     'cajachica_gastos_update'    => 'Se modifico :accion :folio :empresa',
+    'cajachica_deudores_insert'    => 'Se agrego :accion :folio :empresa',
+    'cajachica_deudores_update'    => 'Se modifico :accion :folio :empresa',
 		);
 
   protected $secciones = array(
@@ -325,6 +327,15 @@ class bitacora_msg_model extends CI_Model {
         ),
         'campos_ids' => array(
           'id_categoria' => "SELECT abreviatura as dato FROM cajachica_categorias WHERE id_categoria = ?",
+        )
+      ),
+      'cajachica_deudores_update' => array(
+        'campos' => array(
+          'nombre' => 'Nombre',
+          'concepto'    => 'Concepto',
+          'monto'     => 'Cargo',
+        ),
+        'campos_ids' => array(
         )
       ),
 

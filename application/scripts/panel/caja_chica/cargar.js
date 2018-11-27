@@ -786,6 +786,12 @@
                   fecha+
                   '<input type="hidden" name="deudor_fecha[]" value="'+fecha+'">'+
                 '</td>'+
+                '<td style="width: 80px;">'+
+                  '<select name="deudor_tipo[]" style="width: 80px;">'+
+                    '<option value="otros">Otros</option>'+
+                    '<option value="caja_limon">Caja limón</option>'+
+                  '</select>'+
+                '</td>'+
                 '<td style="width: 200px;">'+
                   '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor_nombre" required autocomplete="off">'+
                   '<input type="hidden" name="deudor_id_deudor[]" value="" id="deudor_id_deudor">'+

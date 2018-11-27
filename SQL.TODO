@@ -2,6 +2,7 @@
  ☐ New -> Cambios caja chica
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
+
  ✔ Balance general @done (18-08-28 12:59) pct|pcc|lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);

@@ -263,7 +263,7 @@ class caja_chica_model extends CI_Model {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
-          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo
         FROM cajachica_deudores cd
           LEFT JOIN (
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
@@ -769,12 +769,13 @@ class caja_chica_model extends CI_Model {
           $this->db->update('cajachica_deudores', $deudor_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
         } else {
           $deudor = array(
-            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
-            'nombre'          => $nombre,
-            'concepto'        => $data['deudor_concepto'][$key],
-            'monto'           => $data['deudor_importe'][$key],
-            'no_caja'         => $data['fno_caja'],
-            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'fecha'      => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
+            'tipo'       => $data['deudor_tipo'][$key],
+            'nombre'     => $nombre,
+            'concepto'   => $data['deudor_concepto'][$key],
+            'monto'      => $data['deudor_importe'][$key],
+            'no_caja'    => $data['fno_caja'],
+            'id_usuario' => $this->session->userdata('id_usuario'),
           );
           $this->db->insert('cajachica_deudores', $deudor);
           $gastooidd = $this->db->insert_id();

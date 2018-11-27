@@ -442,6 +442,31 @@ class caja_chica extends MY_Controller {
             'rules' => '');
     }
 
+    if (isset($_POST['deudor_nombre']))
+    {
+      $rules[] = array('field' => 'deudor_fecha[]',
+                        'label' => 'Fecha deudor',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'deudor_tipo[]',
+                        'label' => 'Tipo deudor',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'deudor_nombre[]',
+                        'label' => 'Nombre deudor',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'deudor_concepto[]',
+                        'label' => 'Concepto deudor',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'deudor_id_deudor[]',
+                        'label' => 'Deudor',
+                        'rules' => '');
+      $rules[] = array('field' => 'deudor_concepto[]',
+                      'label' => 'Abonos deudor',
+                      'rules' => '');
+      $rules[] = array('field' => 'deudor_importe[]',
+                      'label' => 'Saldo deudor',
+                      'rules' => '');
+    }
+
     $this->form_validation->set_rules($rules);
   }
 
