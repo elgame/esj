@@ -335,6 +335,13 @@ class productos_salidas_model extends CI_Model {
           $data['info'][0]->productos = $query->result();
         }
 
+        $data['info'][0]->traspaso = null;
+        if ($data['info'][0]->id_traspaso > 0)
+        {
+          $this->load->model('compras_ordenes_model');
+          $data['info'][0]->traspaso = $this->compras_ordenes_model->info($data['info'][0]->id_traspaso)['info'][0];
+        }
+
         $data['info'][0]->area = null;
         if ($data['info'][0]->id_area)
         {
@@ -529,6 +536,11 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(100, 100));
     $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones),
                     'Almacen: '.$orden['info'][0]->almacen.($orden['info'][0]->id_traspaso>0? ' | Traspaso de almacen': '') ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetX(6);
+      $pdf->Row(array( 'TRASPASO: '.$orden['info'][0]->traspaso->almacen,
+                      'Fecha: '.$orden['info'][0]->traspaso->fecha.' | Orden: '.$orden['info'][0]->traspaso->folio ), false, false);
+    }
 
     //Totales
     $pdf->SetFont('Arial','',8);
@@ -601,6 +613,10 @@ class productos_salidas_model extends CI_Model {
     $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Traspaso: '.$orden['info'][0]->traspaso->almacen, 'Fecha: '.MyString::fechaAT($orden['info'][0]->traspaso->fecha) ), false, false);
+    }
     $pdf->SetWidths(array(65));
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);

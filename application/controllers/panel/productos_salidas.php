@@ -274,7 +274,7 @@ class productos_salidas extends MY_Controller {
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => 'required'),
-      array('field' => 'id_almacen',
+      array('field' => 'tid_almacen',
             'label' => 'Transferir',
             'rules' => ''),
 
@@ -301,31 +301,6 @@ class productos_salidas extends MY_Controller {
       array('field' => 'folio',
             'label' => 'Folio',
             'rules' => 'required'),
-
-      array('field' => 'areaId',
-            'label' => 'Cultivo',
-            'rules' => 'required|numeric'),
-      array('field' => 'area',
-            'label' => 'Cultivo',
-            'rules' => 'required'),
-      array('field' => 'ranchoId',
-            'label' => 'Rancho',
-            'rules' => 'required|numeric'),
-      array('field' => 'rancho',
-            'label' => 'Rancho',
-            'rules' => 'required'),
-      array('field' => 'centroCostoId',
-            'label' => 'Centro de costo',
-            'rules' => 'required|numeric'),
-      array('field' => 'centroCosto',
-            'label' => 'Centro de costo',
-            'rules' => 'required'),
-      array('field' => 'activoId',
-            'label' => 'Activo',
-            'rules' => 'numeric'),
-      array('field' => 'activos',
-            'label' => 'Activo',
-            'rules' => ''),
 
       array('field' => 'no_receta',
             'label' => 'No receta',
@@ -399,6 +374,33 @@ class productos_salidas extends MY_Controller {
             'label' => 'Cantidad',
             'rules' => 'required|greater_than[0]')
     );
+
+    if ($this->input->post('tid_almacen') == '') {
+      $rules[] = array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => 'required');
+      $rules[] = array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => 'required');
+      $rules[] = array('field' => 'centroCostoId',
+            'label' => 'Centro de costo',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => 'required');
+      $rules[] = array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => '');
+    }
 
     $this->form_validation->set_rules($rules);
   }
