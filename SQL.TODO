@@ -1,5 +1,6 @@
 
- ☐ New -> Cambios caja chica
+ ☐ New ->
+ ✔ Cambios caja chica @done (18-11-27 19:11) pcc|pct|san
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
 

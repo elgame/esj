@@ -84,7 +84,7 @@
                 <label class="control-label" for="tid_almacen">Transferir a:</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <select name="tid_almacen" class="span11">
+                    <select name="tid_almacen" class="span11" id="tid_almacen">
                       <option value=""></option>
                     <?php foreach ($almacenes['almacenes'] as $key => $value) { ?>
                       <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('tid_almacen', $value->id_almacen, false, $this->input->post('tid_almacen')) ?>><?php echo $value->nombre ?></option>

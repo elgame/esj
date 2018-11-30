@@ -17,6 +17,7 @@
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantKeypress();
+    eventChangeTraspaso();
 
     copyCodigoAll();
   });
@@ -372,6 +373,15 @@
     $('#fcantidad').on('keypress', function(event) {
       if (event.which === 13) {
         $('#btnAddProd').click();
+      }
+    });
+  };
+
+  var eventChangeTraspaso = function () {
+    $('#tid_almacen').change(function(event) {
+      $('#groupCatalogos').show();
+      if ($(this).val() != '') {
+        $('#groupCatalogos').hide();
       }
     });
   };

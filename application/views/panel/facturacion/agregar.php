@@ -321,6 +321,14 @@
                   </div>
                   <?php }?>
 
+                  <div style="text-align: center;">
+                    <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>
+                    <input type="hidden" name="cfdiRelPrev" id="cfdiRelPrev" value="<?php echo set_value('cfdiRelPrev'); ?>">
+                    <br>
+                    <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
+                    <br>
+                  </div>
+
                   <div class="control-group">
                     <div class="controls">
                       <div class="well span9">
@@ -1745,6 +1753,23 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddRemisiones">Agregar Remisiones</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal -->
+  <div id="modal-cfdiRelPrev" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Sustitución de CFDI</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="file" id="fileCfdiRelPrev" placeholder="XML Factura" accept="text/xml">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary hide" id="BtnClearCfdiRel">Quitar</button>
     </div>
   </div><!--/modal pallets -->
 
