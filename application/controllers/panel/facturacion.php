@@ -591,6 +591,10 @@ class facturacion extends MY_Controller {
               'label'   => 'Fecha de aprobacion',
               'rules'   => $required.'|max_length[10]|'.$callback_isValidDate),
 
+        array('field'   => 'cfdiRelPrev',
+              'label'   => 'CFDIREl',
+              'rules'   => ''),
+
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
               'rules'   => $required.'|max_length[25]'), //|callback_isValidDate

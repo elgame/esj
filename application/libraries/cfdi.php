@@ -956,6 +956,17 @@ class cfdi{
       }
     }
 
+    if (isset($data['cfdiRelPrev']) && $data['cfdiRelPrev'] != '') {
+      $cfdiRel = array(
+        'tipoRelacion' => '04',
+        'cfdiRelacionado' => array(
+          array(
+            'uuid' => $data['cfdiRelPrev'],
+          )
+        )
+      );
+    }
+
     // $CI->load->model('catalogos33_model');
     // $this->regimen_fiscal = $CI->catalogos33_model->regimenFiscales($this->regimen_fiscal);
 

@@ -554,7 +554,49 @@ $(function(){
         calculaTotalProducto($(this));
     });
   }
+
+  modalCfdiRel();
 });
+
+var modalCfdiRel = function () {
+  $('#btnCfdiRelPrev').on('click', function(event) {
+    $('#modal-cfdiRelPrev').modal('show');
+
+    $('#BtnClearCfdiRel').hide();
+    if ($('#cfdiRelPrev').val() != '') {
+      $('#BtnClearCfdiRel').show();
+    }
+  });
+
+  $("#fileCfdiRelPrev").change(function(){
+    var file = document.getElementById("fileCfdiRelPrev").files[0]
+    var reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+
+    reader.onloadend = function(){
+      var uuid = reader.result.match(/UUID="([A-Z0-9\-]){35,38}"/g);
+      if (uuid && uuid.length > 0) {
+        var $uuid = uuid[0].replace(/(UUID=|")/g, '');
+        $('#cfdiRelPrev').val($uuid);
+        $('#cfdiRelPrevText').text($uuid);
+        $('#modal-cfdiRelPrev').modal('hide');
+      } else {
+        alert('No se encontró el UUID en el archivo XML.');
+      }
+    };
+
+    reader.onerror = function (error) {
+      alert('No se pudo cargar el archivo XML.')
+    };
+  });
+
+  $('#BtnClearCfdiRel').on('click', function(event) {
+    $('#cfdiRelPrev').val('');
+    $('#cfdiRelPrevText').text('');
+    $('#fileCfdiRelPrev').val('');
+    $('#modal-cfdiRelPrev').modal('hide');
+  });
+};
 
 var getRemisionesEmpresa = function (dataa) {
   $.get(base_url + 'panel/facturacion/getRemisiones', dataa, function(remisiones) {
