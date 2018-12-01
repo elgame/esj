@@ -1710,6 +1710,7 @@ class caja_chica_model extends CI_Model {
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
     }
 
+    $totalAcreedores = $totalAcreedoresHoy = 0;
     if ($noCajas == 1) {
       // Acreedores
       $pdf->SetFillColor(230, 230, 230);
@@ -1729,7 +1730,6 @@ class caja_chica_model extends CI_Model {
       $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
 
       $codigoAreas = array();
-      $totalAcreedores = $totalAcreedoresHoy = 0;
       foreach ($caja['acreedores'] as $key => $acreedor)
       {
         if ($pdf->GetY() >= $pdf->limiteY)
