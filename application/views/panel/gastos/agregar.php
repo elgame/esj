@@ -225,7 +225,7 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
-                      <label class="control-label" for="area">Cultivo </label>
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
@@ -235,7 +235,7 @@
                     </div><!--/control-group -->
 
                     <div class="control-group" id="ranchosGrup">
-                      <label class="control-label" for="rancho">Area </label>
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">

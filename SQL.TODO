@@ -1,5 +1,9 @@
 
  ☐ New ->
+   UPDATE public.privilegios SET nombre='Cultivo / Actividad / Producto' WHERE id = 15;
+   UPDATE public.privilegios SET nombre='Areas / Ranchos / Lineas' WHERE id = 470;
+
+
  ✔ Cambios caja chica @done (18-11-27 19:11) pcc|pct|san
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
