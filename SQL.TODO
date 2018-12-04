@@ -46,6 +46,34 @@
    INSERT INTO compras_salidas_centro_costo (id_salida, id_centro_costo) (SELECT id_salida, id_centro_costo FROM compras_salidas WHERE id_centro_costo IS NOT NULL);
    --> ALTER TABLE public.compras_salidas DROP COLUMN id_rancho;
    --> ALTER TABLE public.compras_salidas DROP COLUMN id_centro_costo;
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Limon Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Piña Miel Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Coco Jimado Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cajas de Carton para Empaque', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cajas de Plastico para Empaque', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Arpillas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Malla Verde CIU (Malladora)', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Film Generico (CIU)', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa Plana Empaque ', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa de Plastico para Arpilla', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Separador Perforado Plastico', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Papel', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Progib', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Resistol o Silicato', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cinta Flexo Piñas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Esquineros', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cera', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fleje', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Etiquetas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Sellos', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Material de Empaque Diverso', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarimas de Madera', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarimas de Plastico', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarima Certificada', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Agroquímicos y Fertilizantes Nutrientes', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Agroquímicos y Fertilizantes Plagas y Enfermedades', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa Para Racimo Tratada', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Rafia', 'costosventa');
 
 
 

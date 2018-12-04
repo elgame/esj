@@ -13,7 +13,7 @@ class productos_salidas_model extends CI_Model {
    * @return
    */
   public function getSalidas($perpage = '40')
-    {
+  {
     $sql = '';
     //paginacion
     $params = array(
