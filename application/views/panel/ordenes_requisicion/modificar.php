@@ -302,10 +302,18 @@
                       <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($orden['info'][0]->rancho->nombre) ? $orden['info'][0]->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1" <?php echo $modificar ? '' : 'readonly' ?>>
                         </div>
-                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($orden['info'][0]->rancho->id_rancho) ? $orden['info'][0]->rancho->id_rancho : '') ?>">
                       </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($orden['info'][0]->centroCosto->rancho)) {
+                        foreach ($orden['info'][0]->centroCosto->rancho as $key => $rancho) { ?>
+                          <li class="<?php echo $modificar? '': 'disable' ?>"><span class="tag"><?php echo $rancho->nombre ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
                   </div>
 

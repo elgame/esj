@@ -143,7 +143,7 @@
         $area.css("background-color", "#A1F57A");
 
         $("#rancho").val('').css("background-color", "#FFD071");
-        $('#tagsRanchoIds').html('')
+        $('#tagsRanchoIds').html('');
         // $("#ranchoId").val('');
       }
     }).on("keydown", function(event) {
