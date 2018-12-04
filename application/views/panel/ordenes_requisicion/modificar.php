@@ -289,7 +289,7 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
-                      <label class="control-label" for="area">Cultivo </label>
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña">
@@ -299,7 +299,7 @@
                     </div><!--/control-group -->
 
                     <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
-                      <label class="control-label" for="rancho">Rancho </label>
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($orden['info'][0]->rancho->nombre) ? $orden['info'][0]->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1">

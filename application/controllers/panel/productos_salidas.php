@@ -65,6 +65,7 @@ class productos_salidas extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -135,6 +136,7 @@ class productos_salidas extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -382,18 +384,24 @@ class productos_salidas extends MY_Controller {
       $rules[] = array('field' => 'area',
             'label' => 'Cultivo',
             'rules' => 'required');
-      $rules[] = array('field' => 'ranchoId',
+      $rules[] = array('field' => 'ranchoId[]',
             'label' => 'Rancho',
             'rules' => 'required|numeric');
+      $rules[] = array('field' => 'ranchoText[]',
+            'label' => 'Rancho',
+            'rules' => '');
       $rules[] = array('field' => 'rancho',
             'label' => 'Rancho',
-            'rules' => 'required');
-      $rules[] = array('field' => 'centroCostoId',
+            'rules' => '');
+      $rules[] = array('field' => 'centroCostoId[]',
             'label' => 'Centro de costo',
             'rules' => 'required|numeric');
+      $rules[] = array('field' => 'centroCostoText[]',
+            'label' => 'Centro de costo',
+            'rules' => '');
       $rules[] = array('field' => 'centroCosto',
             'label' => 'Centro de costo',
-            'rules' => 'required');
+            'rules' => '');
       $rules[] = array('field' => 'activoId',
             'label' => 'Activo',
             'rules' => 'numeric');
