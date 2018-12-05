@@ -156,19 +156,15 @@ class compras_model extends privilegios_model{
           $response['info']->area = $this->areas_model->getAreaInfo($response['info']->id_area, true)['info'];
         }
 
-        $response['info']->rancho = null;
-        if ($response['info']->id_rancho)
-        {
-          $this->load->model('ranchos_model');
-          $response['info']->rancho = $this->ranchos_model->getRanchoInfo($response['info']->id_rancho, true)['info'];
-        }
+        $response['info']->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
+                                   FROM compras_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_compra = {$response['info']->id_compra}")->result();
 
-        $response['info']->centroCosto = null;
-        if ($response['info']->id_centro_costo)
-        {
-          $this->load->model('centros_costos_model');
-          $response['info']->centroCosto = $this->centros_costos_model->getCentroCostoInfo($response['info']->id_centro_costo, true)['info'];
-        }
+        $response['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
+                                   FROM compras_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_compra = {$response['info']->id_compra}")->result();
 
         $response['info']->activo = null;
         if ($response['info']->id_activo)

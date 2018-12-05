@@ -255,14 +255,16 @@
         $area.css("background-color", "#A1F57A");
 
         $("#rancho").val('').css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#area").css("background-color", "#FFD071");
         $("#areaId").val('');
         $("#rancho").val('').css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
       }
     });
   };
@@ -289,15 +291,34 @@
       select: function( event, ui ) {
         var $rancho =  $(this);
 
-        $rancho.val(ui.item.id);
-        $("#ranchoId").val(ui.item.id);
-        $rancho.css("background-color", "#A1F57A");
+        addRanchoTag(ui.item);
+        setTimeout(function () {
+          $rancho.val('');
+        }, 200);
+        // $rancho.val(ui.item.id);
+        // $("#ranchoId").val(ui.item.id);
+        // $rancho.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#rancho").css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        // $("#ranchoId").val('');
       }
+    });
+
+    function addRanchoTag(item) {
+      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
     });
   };
 
@@ -322,15 +343,34 @@
       select: function( event, ui ) {
         var $centroCosto =  $(this);
 
-        $centroCosto.val(ui.item.id);
-        $("#centroCostoId").val(ui.item.id);
-        $centroCosto.css("background-color", "#A1F57A");
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#centroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#centroCosto").css("background-color", "#FFD071");
-        $("#centroCostoId").val('');
+        // $("#centroCostoId").val('');
       }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
     });
   };
 

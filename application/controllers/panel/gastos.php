@@ -34,6 +34,9 @@ class gastos extends MY_Controller {
 
   public function agregar()
   {
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
@@ -128,6 +131,10 @@ class gastos extends MY_Controller {
 
   public function ver()
   {
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
     $this->load->model('gastos_model');
     $this->load->model('compras_model');
     $this->load->model('proveedores_model');
@@ -452,18 +459,18 @@ class gastos extends MY_Controller {
       array('field' => 'area',
             'label' => 'Cultivo',
             'rules' => 'required'),
-      array('field' => 'ranchoId',
+      array('field' => 'ranchoId[]',
             'label' => 'Rancho',
             'rules' => 'required|numeric'),
-      array('field' => 'rancho',
+      array('field' => 'ranchoText[]',
             'label' => 'Rancho',
-            'rules' => 'required'),
-      array('field' => 'centroCostoId',
+            'rules' => ''),
+      array('field' => 'centroCostoId[]',
             'label' => 'Centro de costo',
             'rules' => 'required|numeric'),
-      array('field' => 'centroCosto',
+      array('field' => 'centroCostoText[]',
             'label' => 'Centro de costo',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'activoId',
             'label' => 'Activo',
             'rules' => 'numeric'),

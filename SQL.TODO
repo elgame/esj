@@ -1,5 +1,48 @@
 
- ✔ New -> Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc
+ ✔ New -> Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct
+    CREATE TABLE public.compras_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_compra bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la compras
+        CONSTRAINT compras_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_compra),
+        CONSTRAINT compras_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_centro_costo_id_compra_fkey FOREIGN KEY (id_compra)
+            REFERENCES public.compras (id_compra) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_centro_costo.num IS 'numero de centro de costo asignados a la compras';
+   CREATE TABLE public.compras_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_compra bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la compras
+        CONSTRAINT compras_rancho_pkey PRIMARY KEY (id_rancho, id_compra),
+        CONSTRAINT compras_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_rancho_id_compra_fkey FOREIGN KEY (id_compra)
+            REFERENCES public.compras (id_compra) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_rancho.num IS 'numero de ranchos asignados a la compras';
+      COMMENT ON COLUMN public.compras_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_rancho (id_compra, id_rancho) (SELECT id_compra, id_rancho FROM compras WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_centro_costo (id_compra, id_centro_costo) (SELECT id_compra, id_centro_costo FROM compras WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras DROP COLUMN id_centro_costo;
    CREATE TABLE public.compras_ordenes_centro_costo
       (
         id_centro_costo bigint NOT NULL,
@@ -87,7 +130,7 @@
    --> ALTER TABLE public.compras_requisicion DROP COLUMN id_rancho;
    --> ALTER TABLE public.compras_requisicion DROP COLUMN id_centro_costo;
 
- ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san|pct
    UPDATE public.privilegios SET nombre='Cultivo / Actividad / Producto' WHERE id = 15;
    UPDATE public.privilegios SET nombre='Areas / Ranchos / Lineas' WHERE id = 470;
    CREATE TABLE public.compras_salidas_centro_costo
