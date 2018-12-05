@@ -191,7 +191,7 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  public function agregarData($data, $dataVeiculo=array())
+  public function agregarData($data, $dataVeiculo=array(), $dataOrdenCats = [])
   {
     $this->db->insert('compras_ordenes', $data);
     $id_orden = $this->db->insert_id();
@@ -202,6 +202,20 @@ class compras_ordenes_model extends CI_Model {
     {
       $dataVeiculo['id_orden'] = $id_orden;
       $this->db->insert('compras_vehiculos_gasolina', $dataVeiculo);
+    }
+
+    // Si es un gasto son requeridos los campos de catálogos
+    if(isset($dataOrdenCats['rancho']) && count($dataOrdenCats['rancho']) > 0) {
+      foreach ($dataOrdenCats['rancho'] as $keyr => $rancho) {
+        $rancho['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_rancho', $rancho);
+      }
+    }
+    if(isset($dataOrdenCats['centroCosto']) && count($dataOrdenCats['centroCosto']) > 0) {
+      foreach ($dataOrdenCats['centroCosto'] as $keyr => $centro_costo) {
+        $centro_costo['id_orden'] = $id_orden;
+        $this->db->insert('compras_requisicion_centro_costo', $centro_costo);
+      }
     }
 
     return array('passes' => true, 'msg' => 3, 'id_orden' => $id_orden);

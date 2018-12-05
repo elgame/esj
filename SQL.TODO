@@ -1,8 +1,95 @@
 
- ☐ New ->
+ ✔ New -> Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc
+   CREATE TABLE public.compras_ordenes_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_orden bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
+        CONSTRAINT compras_ordenes_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_orden),
+        CONSTRAINT compras_ordenes_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_ordenes_centro_costo_id_orden_fkey FOREIGN KEY (id_orden)
+            REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_ordenes_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_ordenes_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+   CREATE TABLE public.compras_ordenes_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_orden bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
+        CONSTRAINT compras_ordenes_rancho_pkey PRIMARY KEY (id_rancho, id_orden),
+        CONSTRAINT compras_ordenes_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_ordenes_rancho_id_orden_fkey FOREIGN KEY (id_orden)
+            REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_ordenes_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_ordenes_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+      COMMENT ON COLUMN public.compras_ordenes_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_ordenes_rancho (id_orden, id_rancho) (SELECT id_orden, id_rancho FROM compras_ordenes WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_ordenes_centro_costo (id_orden, id_centro_costo) (SELECT id_orden, id_centro_costo FROM compras_ordenes WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras_ordenes DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras_ordenes DROP COLUMN id_centro_costo;
+   CREATE TABLE public.compras_requisicion_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_requisicion bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
+        CONSTRAINT compras_requisicion_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_requisicion),
+        CONSTRAINT compras_requisicion_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_requisicion_centro_costo_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+            REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_requisicion_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_requisicion_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+   CREATE TABLE public.compras_requisicion_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_requisicion bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
+        CONSTRAINT compras_requisicion_rancho_pkey PRIMARY KEY (id_rancho, id_requisicion),
+        CONSTRAINT compras_requisicion_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_requisicion_rancho_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+            REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_requisicion_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_requisicion_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+      COMMENT ON COLUMN public.compras_requisicion_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_requisicion_rancho (id_requisicion, id_rancho) (SELECT id_requisicion, id_rancho FROM compras_requisicion WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_requisicion_centro_costo (id_requisicion, id_centro_costo) (SELECT id_requisicion, id_centro_costo FROM compras_requisicion WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras_requisicion DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras_requisicion DROP COLUMN id_centro_costo;
+
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san
    UPDATE public.privilegios SET nombre='Cultivo / Actividad / Producto' WHERE id = 15;
    UPDATE public.privilegios SET nombre='Areas / Ranchos / Lineas' WHERE id = 470;
-
    CREATE TABLE public.compras_salidas_centro_costo
       (
         id_centro_costo bigint NOT NULL,

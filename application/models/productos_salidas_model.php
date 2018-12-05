@@ -400,23 +400,11 @@ class productos_salidas_model extends CI_Model {
                                    FROM compras_salidas_rancho csr
                                     INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
                                    WHERE csr.id_salida = {$data['info'][0]->id_salida}")->result();
-        // $data['info'][0]->rancho = null;
-        // if ($data['info'][0]->id_rancho)
-        // {
-        //   $this->load->model('ranchos_model');
-        //   $data['info'][0]->rancho = $this->ranchos_model->getRanchoInfo($data['info'][0]->id_rancho, true)['info'];
-        // }
 
         $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
                                    FROM compras_salidas_centro_costo cscc
                                     INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
                                    WHERE cscc.id_salida = {$data['info'][0]->id_salida}")->result();
-        // $data['info'][0]->centroCosto = null;
-        // if ($data['info'][0]->id_centro_costo)
-        // {
-        //   $this->load->model('centros_costos_model');
-        //   $data['info'][0]->centroCosto = $this->centros_costos_model->getCentroCostoInfo($data['info'][0]->id_centro_costo, true)['info'];
-        // }
 
         $data['info'][0]->activo = null;
         if ($data['info'][0]->id_activo)
