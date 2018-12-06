@@ -2600,12 +2600,12 @@ class inventario_model extends privilegios_model{
     }
 
 		$res = $this->db->query(
-		"SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, tipo
+		"SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, folio, tipo
 		FROM
 			(
 				(
 				SELECT cp.id_producto, cp.num_row, co.fecha_creacion AS fecha, cp.fecha_aceptacion AS fecha_reg,
-          cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+          cp.cantidad, cp.precio_unitario, cp.importe, co.folio, 'c' AS tipo
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
@@ -2615,7 +2615,7 @@ class inventario_model extends privilegios_model{
 				UNION ALL
 				(
 				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
-        sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+          sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, sa.folio, 's' AS tipo
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
 				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
@@ -2633,7 +2633,7 @@ class inventario_model extends privilegios_model{
 						'saldo' => array(0, 0, 0, 0), );
 		foreach ($res->result() as $key => $value)
 		{
-			$row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0));
+			$row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0), 'folio' => $value->folio);
 			if ($value->tipo == 'c')
 			{
 				$row['entrada'][0] = $value->cantidad;
@@ -2737,9 +2737,9 @@ class inventario_model extends privilegios_model{
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
-		$widths = array(20, 18, 18, 26, 18, 18, 26, 18, 18, 26);
-		$header = array('Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
+		$aligns = array('C', 'C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+		$widths = array(14, 18, 18, 18, 22, 18, 18, 22, 18, 18, 23);
+		$header = array('Folio', 'Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
 
 		$familia = '';
 		$keyconta = 0;
@@ -2751,9 +2751,9 @@ class inventario_model extends privilegios_model{
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
-				$pdf->SetX(26);
+				$pdf->SetX(38);
 				$pdf->SetAligns(array('C', 'C', 'C'));
-				$pdf->SetWidths(array(62, 62, 62));
+				$pdf->SetWidths(array(58, 58, 59));
 				$pdf->Row(array('Entradas', 'Salidas', 'Saldo'), true);
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
@@ -2770,6 +2770,7 @@ class inventario_model extends privilegios_model{
 				$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 			$datos = array(
+        (isset($item['folio'])? $item['folio']: ''),
 				MyString::fechaAT($item['fecha']),
 
 				$item['entrada'][0]!=''? MyString::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],

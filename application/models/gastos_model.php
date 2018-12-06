@@ -33,8 +33,8 @@ class gastos_model extends privilegios_model{
       'retencion_iva'   => $data['ret_iva'],
       'retencion_isr'   => $data['ret_isr'],
       'id_area'         => ($data['areaId']? $data['areaId']: NULL),
-      'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
-      'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
+      // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
+      // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
       'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
       'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
     );
@@ -97,6 +97,29 @@ class gastos_model extends privilegios_model{
                                           ':folio'      => $datos['serie'].$datos['folio'],
                                           ':id_empresa' => $datos['id_empresa'],
                                           ':empresa'    => 'en '.$this->input->post('empresa')));
+
+    // Si es un gasto son requeridos los campos de catálogos
+    // Inserta los ranchos
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+        $this->db->insert('compras_rancho', [
+          'id_rancho' => $id_rancho,
+          'id_compra' => $compraId,
+          'num'       => count($_POST['ranchoId'])
+        ]);
+      }
+    }
+
+    // Inserta los centros de costo
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+        $this->db->insert('compras_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_compra'       => $compraId,
+          'num'             => count($_POST['centroCostoId'])
+        ]);
+      }
+    }
 
     $respons = array();
     // //si es contado, se registra el abono y el retiro del banco

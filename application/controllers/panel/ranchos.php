@@ -43,7 +43,7 @@ public function fecha($fecha)
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Administración de Ranchos'
+			'titulo' => 'Administración de Areas / Ranchos / Lineas'
 		);
 
     	$this->load->model('empresas_model');
@@ -81,7 +81,7 @@ public function fecha($fecha)
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Agregar Cliente'
+			'titulo' => 'Agregar Areas / Ranchos / Lineas'
 		);
 
 		$this->configAddModRanchos();
@@ -131,7 +131,7 @@ public function fecha($fecha)
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
-				'titulo' => 'Modificar Rancho'
+				'titulo' => 'Modificar Areas / Ranchos / Lineas'
 			);
 
 			$this->configAddModRanchos('modificar');
@@ -253,19 +253,19 @@ public function fecha($fecha)
 				$icono = 'error';
 				break;
 			case 3:
-				$txt = 'El rancho se agregó correctamente.';
+				$txt = 'El Areas / Ranchos / Lineas se agregó correctamente.';
 				$icono = 'success';
 				break;
 			case 4:
-				$txt = 'El rancho se modificó correctamente.';
+				$txt = 'El Areas / Ranchos / Lineas se modificó correctamente.';
 				$icono = 'success';
 				break;
 			case 5:
-				$txt = 'El rancho se eliminó correctamente.';
+				$txt = 'El Areas / Ranchos / Lineas se eliminó correctamente.';
 				$icono = 'success';
 				break;
 			case 6:
-				$txt = 'El rancho se activó correctamente.';
+				$txt = 'El Areas / Ranchos / Lineas se activó correctamente.';
 				$icono = 'success';
 				break;
 		}

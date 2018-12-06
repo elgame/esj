@@ -61,6 +61,7 @@
                         <option value="impuestoxpagar" <?php echo set_select('tipo', 'impuestoxpagar', false, (isset($data->tipo)? $data->tipo: '')) ?>>Impuestos por pagar</option>
                         <option value="productofinanc" <?php echo set_select('tipo', 'productofinanc', false, (isset($data->tipo)? $data->tipo: '')) ?>>Productos financieros</option>
                         <option value="impuestoafavor" <?php echo set_select('tipo', 'impuestoafavor', false, (isset($data->tipo)? $data->tipo: '')) ?>>Impuestos a favor</option>
+                        <option value="costosventa" <?php echo set_select('tipo', 'costosventa', false, (isset($data->tipo)? $data->tipo: '')) ?>>Costo de venta</option>
                         <option value="melga" <?php echo set_select('tipo', 'melga', false, (isset($data->tipo)? $data->tipo: '')) ?>>Melga</option>
                         <option value="tabla" <?php echo set_select('tipo', 'tabla', false, (isset($data->tipo)? $data->tipo: '')) ?>>Tabla</option>
                         <option value="seccion" <?php echo set_select('tipo', 'seccion', false, (isset($data->tipo)? $data->tipo: '')) ?>>Sección</option>

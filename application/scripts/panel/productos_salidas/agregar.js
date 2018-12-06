@@ -143,14 +143,16 @@
         $area.css("background-color", "#A1F57A");
 
         $("#rancho").val('').css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#area").css("background-color", "#FFD071");
         $("#areaId").val('');
+        $('#tagsRanchoIds').html('');
         $("#rancho").val('').css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        // $("#ranchoId").val('');
       }
     });
   };
@@ -177,15 +179,34 @@
       select: function( event, ui ) {
         var $rancho =  $(this);
 
-        $rancho.val(ui.item.id);
-        $("#ranchoId").val(ui.item.id);
-        $rancho.css("background-color", "#A1F57A");
+        addRanchoTag(ui.item);
+        setTimeout(function () {
+          $rancho.val('');
+        }, 200);
+        // $rancho.val(ui.item.id);
+        // $("#ranchoId").val(ui.item.id);
+        // $rancho.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#rancho").css("background-color", "#FFD071");
-        $("#ranchoId").val('');
+        // $("#ranchoId").val('');
       }
+    });
+
+    function addRanchoTag(item) {
+      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
     });
   };
 
@@ -194,7 +215,7 @@
       source: function(request, response) {
         var params = {term : request.term};
 
-        params.tipo = ['gasto'];
+        params.tipo = ['gasto', 'melga', 'tabla', 'seccion', 'costosventa'];
 
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
@@ -210,15 +231,34 @@
       select: function( event, ui ) {
         var $centroCosto =  $(this);
 
-        $centroCosto.val(ui.item.id);
-        $("#centroCostoId").val(ui.item.id);
-        $centroCosto.css("background-color", "#A1F57A");
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#centroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#centroCosto").css("background-color", "#FFD071");
-        $("#centroCostoId").val('');
+        // $("#centroCostoId").val('');
       }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
     });
   };
 
@@ -226,8 +266,8 @@
     $("#activos").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        // if(parseInt($("#empresaId").val()) > 0)
+        //   params.did_empresa = $("#empresaId").val();
         params.tipo = 'a'; // activos
         $.ajax({
             url: base_url + 'panel/productos/ajax_aut_productos/',

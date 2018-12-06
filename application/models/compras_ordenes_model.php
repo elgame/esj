@@ -191,7 +191,7 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  public function agregarData($data, $dataVeiculo=array())
+  public function agregarData($data, $dataVeiculo=array(), $dataOrdenCats = [])
   {
     $this->db->insert('compras_ordenes', $data);
     $id_orden = $this->db->insert_id();
@@ -202,6 +202,20 @@ class compras_ordenes_model extends CI_Model {
     {
       $dataVeiculo['id_orden'] = $id_orden;
       $this->db->insert('compras_vehiculos_gasolina', $dataVeiculo);
+    }
+
+    // Si es un gasto son requeridos los campos de catálogos
+    if(isset($dataOrdenCats['rancho']) && count($dataOrdenCats['rancho']) > 0) {
+      foreach ($dataOrdenCats['rancho'] as $keyr => $rancho) {
+        $rancho['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_rancho', $rancho);
+      }
+    }
+    if(isset($dataOrdenCats['centroCosto']) && count($dataOrdenCats['centroCosto']) > 0) {
+      foreach ($dataOrdenCats['centroCosto'] as $keyr => $centro_costo) {
+        $centro_costo['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_centro_costo', $centro_costo);
+      }
     }
 
     return array('passes' => true, 'msg' => 3, 'id_orden' => $id_orden);
@@ -266,8 +280,32 @@ class compras_ordenes_model extends CI_Model {
       // Si es un gasto son requeridos los campos de catálogos
       if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
         $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
-        $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
-        $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+        // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
+        // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+
+        // Inserta los ranchos
+        $this->db->delete('compras_ordenes_rancho', ['id_orden' => $idOrden]);
+        if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+          foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+            $this->db->insert('compras_ordenes_rancho', [
+              'id_rancho' => $id_rancho,
+              'id_orden'  => $idOrden,
+              'num'       => count($_POST['ranchoId'])
+            ]);
+          }
+        }
+
+        // Inserta los centros de costo
+        $this->db->delete('compras_ordenes_centro_costo', ['id_orden' => $idOrden]);
+        if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+          foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+            $this->db->insert('compras_ordenes_centro_costo', [
+              'id_centro_costo' => $id_centro_costo,
+              'id_orden'        => $idOrden,
+              'num'             => count($_POST['centroCostoId'])
+            ]);
+          }
+        }
 
         if ($_POST['tipoOrden'] !== 'a') {
           $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
@@ -657,7 +695,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_almacen, ca.nombre AS almacen,
               co.cont_x_dia,
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
-              co.id_area, co.id_rancho, co.id_centro_costo, co.id_activo
+              co.id_area, co.id_activo
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -775,19 +813,15 @@ class compras_ordenes_model extends CI_Model {
           $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
         }
 
-        $data['info'][0]->rancho = null;
-        if ($data['info'][0]->id_rancho)
-        {
-          $this->load->model('ranchos_model');
-          $data['info'][0]->rancho = $this->ranchos_model->getRanchoInfo($data['info'][0]->id_rancho, true)['info'];
-        }
+        $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
+                                   FROM compras_ordenes_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_orden = {$data['info'][0]->id_orden}")->result();
 
-        $data['info'][0]->centroCosto = null;
-        if ($data['info'][0]->id_centro_costo)
-        {
-          $this->load->model('centros_costos_model');
-          $data['info'][0]->centroCosto = $this->centros_costos_model->getCentroCostoInfo($data['info'][0]->id_centro_costo, true)['info'];
-        }
+        $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
+                                   FROM compras_ordenes_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_orden = {$data['info'][0]->id_orden}")->result();
 
         $data['info'][0]->activo = null;
         if ($data['info'][0]->id_activo)

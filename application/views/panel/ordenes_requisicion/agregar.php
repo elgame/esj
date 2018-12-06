@@ -277,7 +277,7 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
-                      <label class="control-label" for="area">Cultivo </label>
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
@@ -287,13 +287,21 @@
                     </div><!--/control-group -->
 
                     <div class="control-group" id="ranchosGrup">
-                      <label class="control-label" for="rancho">Area </label>
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
                         </div>
-                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
                       </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($_POST['ranchoId'])) {
+                        foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
                   </div>
 
@@ -304,8 +312,16 @@
                         <div class="input-append span12">
                           <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
                         </div>
-                        <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId') ?>">
                       </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($_POST['centroCostoId'])) {
+                        foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
 
                     <div class="control-group" id="activosGrup">

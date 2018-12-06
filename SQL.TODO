@@ -1,5 +1,295 @@
 
- ☐ New ->
+ ✔ New -> Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct
+   CREATE TABLE public.compras_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_compra bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la compras
+        CONSTRAINT compras_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_compra),
+        CONSTRAINT compras_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_centro_costo_id_compra_fkey FOREIGN KEY (id_compra)
+            REFERENCES public.compras (id_compra) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_centro_costo.num IS 'numero de centro de costo asignados a la compras';
+   CREATE TABLE public.compras_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_compra bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la compras
+        CONSTRAINT compras_rancho_pkey PRIMARY KEY (id_rancho, id_compra),
+        CONSTRAINT compras_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_rancho_id_compra_fkey FOREIGN KEY (id_compra)
+            REFERENCES public.compras (id_compra) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_rancho.num IS 'numero de ranchos asignados a la compras';
+      COMMENT ON COLUMN public.compras_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_rancho (id_compra, id_rancho) (SELECT id_compra, id_rancho FROM compras WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_centro_costo (id_compra, id_centro_costo) (SELECT id_compra, id_centro_costo FROM compras WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras DROP COLUMN id_centro_costo;
+   CREATE TABLE public.compras_ordenes_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_orden bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
+        CONSTRAINT compras_ordenes_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_orden),
+        CONSTRAINT compras_ordenes_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_ordenes_centro_costo_id_orden_fkey FOREIGN KEY (id_orden)
+            REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_ordenes_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_ordenes_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+   CREATE TABLE public.compras_ordenes_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_orden bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
+        CONSTRAINT compras_ordenes_rancho_pkey PRIMARY KEY (id_rancho, id_orden),
+        CONSTRAINT compras_ordenes_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_ordenes_rancho_id_orden_fkey FOREIGN KEY (id_orden)
+            REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_ordenes_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_ordenes_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+      COMMENT ON COLUMN public.compras_ordenes_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_ordenes_rancho (id_orden, id_rancho) (SELECT id_orden, id_rancho FROM compras_ordenes WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_ordenes_centro_costo (id_orden, id_centro_costo) (SELECT id_orden, id_centro_costo FROM compras_ordenes WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras_ordenes DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras_ordenes DROP COLUMN id_centro_costo;
+   CREATE TABLE public.compras_requisicion_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_requisicion bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
+        CONSTRAINT compras_requisicion_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_requisicion),
+        CONSTRAINT compras_requisicion_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_requisicion_centro_costo_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+            REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_requisicion_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_requisicion_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+   CREATE TABLE public.compras_requisicion_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_requisicion bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
+        CONSTRAINT compras_requisicion_rancho_pkey PRIMARY KEY (id_rancho, id_requisicion),
+        CONSTRAINT compras_requisicion_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_requisicion_rancho_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+            REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_requisicion_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_requisicion_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+      COMMENT ON COLUMN public.compras_requisicion_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_requisicion_rancho (id_requisicion, id_rancho) (SELECT id_requisicion, id_rancho FROM compras_requisicion WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_requisicion_centro_costo (id_requisicion, id_centro_costo) (SELECT id_requisicion, id_centro_costo FROM compras_requisicion WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras_requisicion DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras_requisicion DROP COLUMN id_centro_costo;
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 1 Milagro D', 'melga', 0.661, 3, 37464);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 2 Milagro D', 'melga', 0.584, 3, 34672);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 3 Milagro D', 'melga', 0.662, 3, 36717);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 4 Milagro D', 'melga', 0.672, 3, 33610);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 5 Milagro D', 'melga', 0.576, 3, 33761);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 6 Milagro D', 'melga', 0.711, 3, 35503);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 7 Milagro D', 'melga', 0.516, 3, 36224);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 8 Milagro D', 'melga', 0.474, 3, 25695);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 9 Milagro D', 'melga', 0.045, 3, 2618);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 1 Milagro B', 'melga', 0.216, 3, 10920);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 2 Milagro B', 'melga', 0.495, 3, 24039);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 3 Milagro B', 'melga', 0.726, 3, 37812);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 4 Milagro B', 'melga', 0.779, 3, 37812);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 5 Milagro B', 'melga', 0.778, 3, 39343);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 6 Milagro B', 'melga', 0.787, 3, 40756);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 7 Milagro B', 'melga', 0.774, 3, 40084);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 8 Milagro B', 'melga', 0.776, 3, 39119);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 9 Milagro B', 'melga', 0.779, 3, 37071);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 10 Milagro B', 'melga', 0.856, 3, 45295);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 11 Milagro B', 'melga', 0.796, 3, 34202);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 12 Milagro B', 'melga', 0.704, 3, 47182);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 13 Milagro B', 'melga', 0.773, 3, 34450);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 14 Milagro B', 'melga', 0.803, 3, 42198);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 15 Milagro B', 'melga', 0.735, 3, 40179);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 16 Milagro B', 'melga', 0.741, 3, 35056);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 17 Milagro B', 'melga', 0.471, 3, 25694);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 18 Milagro B', 'melga', 0.062, 3, 3444);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 19 Milagro B', 'melga', 0.243, 3, 12749);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 20 Milagro B', 'melga', 0.762, 3, 43670);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 21 Milagro B', 'melga', 0.826, 3, 43670);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 22 Milagro B', 'melga', 0.031, 3, 6110);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 4 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 5 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 6 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 7 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 8 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 9 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 10 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 11 Rositas', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 Guadalupana', 'seccion', 10.14, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 Guadalupana', 'seccion', 9.91, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 Guadalupana', 'seccion', 9.92, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 4 Guadalupana', 'seccion', 9.92, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 San Jorge', 'seccion', 7.22, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 San Jorge', 'seccion', 7.22, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 San Jorge', 'seccion', 7.21, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 4 San Jorge', 'seccion', 7.21, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 El Llanito', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 El Llanito', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 El Llanito', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 4 El Llanito', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 Papaloapan', 'tabla', 3.2862, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 Papaloapan', 'tabla', 3.4216, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 Papaloapan', 'tabla', 3.2221, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 Papaloapan', 'tabla', 3.2612, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 Papaloapan', 'tabla', 3.2203, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 6 Papaloapan', 'tabla', 3.2594, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 7 Papaloapan', 'tabla', 3.1893, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 8 Papaloapan', 'tabla', 3.2212, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 9 Papaloapan', 'tabla', 3.2785, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 10 Papaloapan', 'tabla', 3.3683, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 11 Papaloapan', 'tabla', 3.2334, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 12 Papaloapan', 'tabla', 4.2547, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 13 Papaloapan', 'tabla', 2.023, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 14 Papaloapan', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 15 Papaloapan', 'tabla', 2.1869, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 16 Papaloapan', 'tabla', 4.4139, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 San Luis', 'tabla', 3.5721, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 San Luis', 'tabla', 3.4956, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 San Luis', 'tabla', 3.0031, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 San Luis', 'tabla', 3.4609, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 San Luis', 'tabla', 3.2054, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 6 San Luis', 'tabla', 3.4096, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 7 San Luis', 'tabla', 3.4112, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 8 San Luis', 'tabla', 3.5248, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 9 San Luis', 'tabla', 3.687, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 10 San Luis', 'tabla', 3.7135, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 11 San Luis', 'tabla', 3.6455, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 12 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 13 San Luis', 'tabla', 0, 15, 0);
+
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san|pct
+   UPDATE public.privilegios SET nombre='Cultivo / Actividad / Producto' WHERE id = 15;
+   UPDATE public.privilegios SET nombre='Areas / Ranchos / Lineas' WHERE id = 470;
+   CREATE TABLE public.compras_salidas_centro_costo
+      (
+        id_centro_costo bigint NOT NULL,
+        id_salida bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la salida
+        CONSTRAINT compras_salidas_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_salida),
+        CONSTRAINT compras_salidas_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_salidas_centro_costo_id_salida_fkey FOREIGN KEY (id_salida)
+            REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_salidas_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_salidas_centro_costo.num IS 'numero de centro de costo asignados a la salida';
+   CREATE TABLE public.compras_salidas_rancho
+      (
+        id_rancho bigint NOT NULL,
+        id_salida bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la salida
+        CONSTRAINT compras_salidas_rancho_pkey PRIMARY KEY (id_rancho, id_salida),
+        CONSTRAINT compras_salidas_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT compras_salidas_rancho_id_salida_fkey FOREIGN KEY (id_salida)
+            REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.compras_salidas_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.compras_salidas_rancho.num IS 'numero de ranchos asignados a la salida';
+      COMMENT ON COLUMN public.compras_salidas_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+   INSERT INTO compras_salidas_rancho (id_salida, id_rancho) (SELECT id_salida, id_rancho FROM compras_salidas WHERE id_rancho IS NOT NULL);
+   INSERT INTO compras_salidas_centro_costo (id_salida, id_centro_costo) (SELECT id_salida, id_centro_costo FROM compras_salidas WHERE id_centro_costo IS NOT NULL);
+   --> ALTER TABLE public.compras_salidas DROP COLUMN id_rancho;
+   --> ALTER TABLE public.compras_salidas DROP COLUMN id_centro_costo;
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Limon Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Piña Miel Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Coco Jimado Materia Prima', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cajas de Carton para Empaque', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cajas de Plastico para Empaque', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Arpillas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Malla Verde CIU (Malladora)', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Film Generico (CIU)', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa Plana Empaque ', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa de Plastico para Arpilla', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Separador Perforado Plastico', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Papel', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Progib', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Resistol o Silicato', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cinta Flexo Piñas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Esquineros', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cera', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fleje', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Etiquetas', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Sellos', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Material de Empaque Diverso', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarimas de Madera', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarimas de Plastico', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Tarima Certificada', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Agroquímicos y Fertilizantes Nutrientes', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Agroquímicos y Fertilizantes Plagas y Enfermedades', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Bolsa Para Racimo Tratada', 'costosventa');
+    INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Rafia', 'costosventa');
+
+
+
  ✔ Cambios caja chica @done (18-11-27 19:11) pcc|pct|san
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';

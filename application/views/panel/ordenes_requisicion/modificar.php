@@ -289,7 +289,7 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
-                      <label class="control-label" for="area">Cultivo </label>
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
                           <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña">
@@ -299,13 +299,21 @@
                     </div><!--/control-group -->
 
                     <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
-                      <label class="control-label" for="rancho">Rancho </label>
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($orden['info'][0]->rancho->nombre) ? $orden['info'][0]->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1">
                         </div>
-                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($orden['info'][0]->rancho->id_rancho) ? $orden['info'][0]->rancho->id_rancho : '') ?>">
                       </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($orden['info'][0]->rancho)) {
+                        foreach ($orden['info'][0]->rancho as $key => $rancho) { ?>
+                          <li class=""><span class="tag"><?php echo $rancho->nombre ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
                   </div>
 
@@ -314,10 +322,18 @@
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto', isset($orden['info'][0]->centroCosto->nombre) ? $orden['info'][0]->centroCosto->nombre : '') ?>" placeholder="Mantenimiento, Gasto general">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
                         </div>
-                        <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId', isset($orden['info'][0]->centroCosto->id_centro_costo) ? $orden['info'][0]->centroCosto->id_centro_costo : '') ?>">
                       </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($orden['info'][0]->centroCosto)) {
+                        foreach ($orden['info'][0]->centroCosto as $key => $centroCosto) { ?>
+                          <li class=""><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
 
                     <div class="control-group" id="activosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">

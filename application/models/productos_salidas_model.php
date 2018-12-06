@@ -13,7 +13,7 @@ class productos_salidas_model extends CI_Model {
    * @return
    */
   public function getSalidas($perpage = '40')
-    {
+  {
     $sql = '';
     //paginacion
     $params = array(
@@ -115,8 +115,8 @@ class productos_salidas_model extends CI_Model {
         'fecha_aplicacion'  => $this->input->post('fecha_aplicacion')? $_POST['fecha_aplicacion']: NULL,
 
         'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
-        'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
-        'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
+        // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
+        // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
         'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
       );
 
@@ -126,8 +126,31 @@ class productos_salidas_model extends CI_Model {
     }
 
     $this->db->insert('compras_salidas', $data);
+    $id_salida = $this->db->insert_id();
 
-    return array('passes' => true, 'msg' => 3, 'id_salida' => $this->db->insert_id());
+    // Inserta los ranchos
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+        $this->db->insert('compras_salidas_rancho', [
+          'id_rancho' => $id_rancho,
+          'id_salida' => $id_salida,
+          'num'       => count($_POST['ranchoId'])
+        ]);
+      }
+    }
+
+    // Inserta los centros de costo
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+        $this->db->insert('compras_salidas_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_salida'       => $id_salida,
+          'num'             => count($_POST['centroCostoId'])
+        ]);
+      }
+    }
+
+    return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
   }
 
   public function modificar($id_salida, $data = null)
@@ -136,13 +159,37 @@ class productos_salidas_model extends CI_Model {
     {
       $data = array(
         'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
-        'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
-        'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
+        // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
+        // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
         'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
       );
     }
 
     $this->db->update('compras_salidas', $data, ['id_salida' => $id_salida]);
+
+    // Inserta los ranchos
+    $this->db->delete('compras_salidas_rancho', ['id_salida' => $id_salida]);
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+        $this->db->insert('compras_salidas_rancho', [
+          'id_rancho' => $id_rancho,
+          'id_salida' => $id_salida,
+          'num'       => count($_POST['ranchoId'])
+        ]);
+      }
+    }
+
+    // Inserta los centros de costo
+    $this->db->delete('compras_salidas_centro_costo', ['id_salida' => $id_salida]);
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+        $this->db->insert('compras_salidas_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_salida'       => $id_salida,
+          'num'             => count($_POST['centroCostoId'])
+        ]);
+      }
+    }
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
   }
@@ -295,7 +342,7 @@ class productos_salidas_model extends CI_Model {
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
-              cs.id_area, cs.id_rancho, cs.id_centro_costo, cs.id_activo
+              cs.id_area, cs.id_activo
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
@@ -349,19 +396,15 @@ class productos_salidas_model extends CI_Model {
           $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
         }
 
-        $data['info'][0]->rancho = null;
-        if ($data['info'][0]->id_rancho)
-        {
-          $this->load->model('ranchos_model');
-          $data['info'][0]->rancho = $this->ranchos_model->getRanchoInfo($data['info'][0]->id_rancho, true)['info'];
-        }
+        $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre
+                                   FROM compras_salidas_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_salida = {$data['info'][0]->id_salida}")->result();
 
-        $data['info'][0]->centroCosto = null;
-        if ($data['info'][0]->id_centro_costo)
-        {
-          $this->load->model('centros_costos_model');
-          $data['info'][0]->centroCosto = $this->centros_costos_model->getCentroCostoInfo($data['info'][0]->id_centro_costo, true)['info'];
-        }
+        $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
+                                   FROM compras_salidas_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_salida = {$data['info'][0]->id_salida}")->result();
 
         $data['info'][0]->activo = null;
         if ($data['info'][0]->id_activo)

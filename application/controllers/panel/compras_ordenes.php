@@ -129,6 +129,7 @@ class compras_ordenes extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -220,6 +221,7 @@ class compras_ordenes extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -298,6 +300,9 @@ class compras_ordenes extends MY_Controller {
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
+    // echo "<pre>";
+    //   var_dump($params['orden']);
+    // echo "</pre>";exit;
 
     $params['impresoras'] = $this->compras_ordenes_model->impresoras();
 
@@ -716,18 +721,18 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'area',
             'label' => 'Cultivo',
             'rules' => ($valGasto? 'required': '')),
-      array('field' => 'ranchoId',
+      array('field' => 'ranchoId[]',
             'label' => 'Rancho',
             'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
-      array('field' => 'rancho',
+      array('field' => 'ranchoText[]',
             'label' => 'Rancho',
-            'rules' => ($valGasto && !$valFlete? 'required': '')),
-      array('field' => 'centroCostoId',
+            'rules' => ''),
+      array('field' => 'centroCostoId[]',
             'label' => 'Centro de costo',
             'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
-      array('field' => 'centroCosto',
+      array('field' => 'centroCostoText[]',
             'label' => 'Centro de costo',
-            'rules' => ($valGasto && !$valFlete? 'required': '')),
+            'rules' => ''),
       array('field' => 'activoId',
             'label' => 'Activo',
             'rules' => ($valGasto && !$valFlete? 'numeric': '')),
