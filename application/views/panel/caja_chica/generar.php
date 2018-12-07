@@ -648,6 +648,7 @@
                                             <select name="deudor_tipo[]" style="width: 80px;">
                                               <option value="otros" <?php echo $_POST['deudor_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                              <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                             </select>
                                           </td>
                                           <td style="width: 200px;">
@@ -742,7 +743,7 @@
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if ($_GET['fno_caja'] == '1' && count($caja['acreedores']) > 0) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2') && count($caja['acreedores']) > 0) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -755,7 +756,7 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-acreedor">
                               <thead>
                                 <tr>
-                                  <th colspan="8">ACREEDOR CAJA TRYANA</th>
+                                  <th colspan="8">ACREEDOR CAJA <?php echo ($_GET['fno_caja'] == '1'? 'GASTOS': 'LIMON') ?></th>
                                 </tr>
                                 <tr>
                                   <th>FECHA</th>

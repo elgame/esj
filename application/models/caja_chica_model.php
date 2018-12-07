@@ -296,7 +296,13 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '1') {
+    if ($noCaja == '1' || $noCaja == '2') {
+      $ddNoCaja = 1;
+      $ddTipo = 'caja_gastos';
+      if ($noCaja == '1') {
+        $ddNoCaja = 2;
+        $ddTipo = 'caja_limon';
+      }
       // acreedores
       $acreedores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -304,9 +310,9 @@ class caja_chica_model extends CI_Model {
         FROM cajachica_deudores cd
           LEFT JOIN (
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
-            WHERE no_caja = 2 AND fecha <= '{$fecha}' GROUP BY id_deudor
+            WHERE no_caja = {$ddNoCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
-        WHERE cd.no_caja = 2 AND cd.tipo = 'caja_limon' AND fecha <= '{$fecha}'
+        WHERE cd.no_caja = {$ddNoCaja} AND cd.tipo = '{$ddTipo}' AND fecha <= '{$fecha}'
           AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
       );
 
@@ -1711,13 +1717,13 @@ class caja_chica_model extends CI_Model {
     }
 
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if ($noCajas == 1) {
+    if ($noCajas == 1 || $noCajas == 2) {
       // Acreedores
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(111, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
       $pdf->SetWidths(array(83, 17));
-      $pdf->Row(array('ACREEDOR CAJA TRYANA', ''), true, true);
+      $pdf->Row(array('ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': 'LIMON'), ''), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(111);
