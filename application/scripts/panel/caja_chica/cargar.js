@@ -790,6 +790,7 @@
                   '<select name="deudor_tipo[]" style="width: 80px;">'+
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
+                    '<option value="caja_gastos">Caja gastos</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 200px;">'+
