@@ -319,7 +319,6 @@ class caja_chica_model extends CI_Model {
       if ($acreedores->num_rows() > 0)
       {
         $info['acreedores'] = $acreedores->result();
-        $info['deudores_prest_dia'] = 0;
         foreach ($info['acreedores'] as $key => $value) {
           $info['acreedores'][$key]->mismo_dia = false;
           if (strtotime($value->fecha) == strtotime($fecha)) {
