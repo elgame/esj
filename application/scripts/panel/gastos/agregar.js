@@ -327,7 +327,7 @@
       source: function(request, response) {
         var params = {term : request.term};
 
-        params.tipo = ['gasto'];
+        params.tipo = ['gasto', 'gastofinanciero'];
 
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
