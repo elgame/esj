@@ -215,7 +215,7 @@
       source: function(request, response) {
         var params = {term : request.term};
 
-        params.tipo = ['gasto', 'melga', 'tabla', 'seccion', 'costosventa'];
+        params.tipo = ['gasto', 'melga', 'tabla', 'seccion', 'costosventa', 'servicio'];
 
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
