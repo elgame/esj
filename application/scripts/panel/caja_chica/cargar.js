@@ -641,8 +641,8 @@
     $("#activos").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#did_empresa").val()) > 0)
-          params.did_empresa = $("#did_empresa").val();
+        // if(parseInt($("#did_empresa").val()) > 0)
+        //   params.did_empresa = $("#did_empresa").val();
         params.tipo = 'a'; // activos
         $.ajax({
             url: base_url + 'panel/productos/ajax_aut_productos/',
