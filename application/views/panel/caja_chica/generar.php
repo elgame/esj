@@ -773,9 +773,9 @@
                                 <?php
                                   foreach ($caja['acreedores'] as $acreedor) {
                                     $totalAcreedores += floatval($acreedor->saldo);
-                                    if ($acreedor->mismo_dia) {
-                                      $totalAcreedoresHoy += floatval($acreedor->saldo);
-                                    }
+                                    // if ($acreedor->mismo_dia) {
+                                    //   $totalAcreedoresHoy += floatval($acreedor->saldo);
+                                    // }
                                   ?>
                                   <tr>
                                     <td style="width: 80px;">
@@ -804,7 +804,15 @@
                                   </tr>
                                 <?php } ?>
                                 <tr class="row-total">
-                                  <td colspan="5"></td>
+                                  <td></td>
+                                  <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
+                                  <td style="text-align: right; font-weight: bolder;">
+                                    <input type="text" value="<?php echo $caja['acreedor_prest_dia'] ?>" class="input-small vpositive" id="total-acreddor-pres-dia" style="text-align: right;" readonly>
+                                  </td>
+                                  <td style="text-align: right; font-weight: bolder;">ABONOS DEL DIA</td>
+                                  <td style="text-align: right; font-weight: bolder;">
+                                    <input type="text" value="<?php echo $caja['acreedor_abonos_dia'] ?>" class="input-small vpositive" id="total-acreddor-abono-dia" style="text-align: right;" readonly>
+                                  </td>
                                   <td style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td><input type="text" value="<?php echo $totalAcreedores ?>" class="input-small vpositive" id="total-acreddor" style="text-align: right;" readonly></td>
                                   <td></td>
@@ -913,12 +921,12 @@
                             </tr>
                             <tr>
                               <td>TOTAL ACREEDORES:</td>
-                              <td><input type="text" name="" value="<?php echo $totalAcreedoresHoy ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + $totalAcreedoresHoy - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + $totalAcreedoresHoy - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>
