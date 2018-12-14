@@ -275,7 +275,7 @@ class caja_chica_model extends CI_Model {
         WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
       );
 
-      if ($deudores->num_rows() > 0)
+      if ($deudores && $deudores->num_rows() > 0)
       {
         $info['deudores'] = $deudores->result();
         $info['deudores_prest_dia'] = 0;
@@ -318,7 +318,7 @@ class caja_chica_model extends CI_Model {
           AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
       );
 
-      if ($acreedores->num_rows() > 0)
+      if ($acreedores && $acreedores->num_rows() > 0)
       {
         $info['acreedores'] = $acreedores->result();
         $info['acreedor_prest_dia'] = 0;

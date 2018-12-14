@@ -1,5 +1,7 @@
 
- ✔ New -> Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san
+ ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct
+    UPDATE public.privilegios SET nombre='Labores de trabajo' WHERE id = 342;
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san
    CREATE TABLE public.compras_centro_costo
       (
         id_centro_costo bigint NOT NULL,
