@@ -743,7 +743,7 @@
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2') && count($caja['acreedores']) > 0) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2')) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -771,6 +771,7 @@
                               </thead>
                               <tbody>
                                 <?php
+                                if (count($caja['acreedores']) > 0) {
                                   foreach ($caja['acreedores'] as $acreedor) {
                                     $totalAcreedores += floatval($acreedor->saldo);
                                     // if ($acreedor->mismo_dia) {
@@ -802,7 +803,8 @@
                                     <td style="width: 30px;">
                                     </td>
                                   </tr>
-                                <?php } ?>
+                                <?php }
+                                } ?>
                                 <tr class="row-total">
                                   <td></td>
                                   <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
