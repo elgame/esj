@@ -287,14 +287,15 @@ class caja_chica_model extends CI_Model {
           }
         }
 
-        $info['deudores_abonos_dia'] = 0;
-        $deudores = $this->db->query(
-          "SELECT Sum(monto) AS abonos FROM cajachica_deudores_pagos
-          WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
-        )->row();
-        if (isset($deudores->abonos)) {
-          $info['deudores_abonos_dia'] = $deudores->abonos;
-        }
+      }
+
+      $info['deudores_abonos_dia'] = 0;
+      $deudores = $this->db->query(
+        "SELECT Sum(monto) AS abonos FROM cajachica_deudores_pagos
+        WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
+      )->row();
+      if (isset($deudores->abonos)) {
+        $info['deudores_abonos_dia'] = $deudores->abonos;
       }
     }
 
@@ -329,16 +330,16 @@ class caja_chica_model extends CI_Model {
             $info['acreedores'][$key]->mismo_dia = true;
           }
         }
+      }
 
-        $info['acreedor_abonos_dia'] = 0;
-        $acreedores = $this->db->query(
-          "SELECT Sum(ab.monto) AS abonos FROM cajachica_deudores cd
-            INNER JOIN cajachica_deudores_pagos ab ON cd.id_deudor = ab.id_deudor
-          WHERE ab.no_caja = {$ddNoCaja} AND cd.tipo = '{$ddTipo}' AND ab.fecha = '{$fecha}'"
-        )->row();
-        if (isset($acreedores->abonos)) {
-          $info['acreedor_abonos_dia'] = $acreedores->abonos;
-        }
+      $info['acreedor_abonos_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(ab.monto) AS abonos FROM cajachica_deudores cd
+          INNER JOIN cajachica_deudores_pagos ab ON cd.id_deudor = ab.id_deudor
+        WHERE ab.no_caja = {$ddNoCaja} AND cd.tipo = '{$ddTipo}' AND ab.fecha = '{$fecha}'"
+      )->row();
+      if (isset($acreedores->abonos)) {
+        $info['acreedor_abonos_dia'] = $acreedores->abonos;
       }
     }
 
