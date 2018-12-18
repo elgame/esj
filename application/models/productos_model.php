@@ -513,12 +513,12 @@ class productos_model extends CI_Model {
   public function getProductosAjax(){
     $sql = '';
     if ($this->input->get('term') !== false)
-      $sql = " AND lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+      $sql .= " AND lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
     if ($this->input->get('tipo') !== false) {
       if (is_array($this->input->get('tipo'))) {
-        $sql = " AND pf.tipo in('".implode("','", $this->input->get('tipo'))."')";
+        $sql .= " AND pf.tipo in('".implode("','", $this->input->get('tipo'))."')";
       } else
-        $sql = " AND pf.tipo = '".$this->input->get('tipo')."'";
+        $sql .= " AND pf.tipo = '".$this->input->get('tipo')."'";
     }
 
     if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
