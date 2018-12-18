@@ -1,7 +1,47 @@
 
- ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct
+ ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct|lap
     UPDATE public.privilegios SET nombre='Labores de trabajo' WHERE id = 342;
- ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 10 Milagro D', 'melga', 0.045, 3, 2618);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 11 Milagro D', 'melga', 0.045, 3, 2618);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 12 Milagro D', 'melga', 0.045, 3, 2618);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 13 Milagro D', 'melga', 0.045, 3, 2618);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 1 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 2 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 4 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 3 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 5 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 6 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 7 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 8 Milagro A', 'melga', 0, 3, 0);
+    -- INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 9 Milagro A', 'melga', 0, 3, 0);
+    UPDATE otros.centro_costo SET nombre = 'Melga 1 Milagro A' WHERE id_centro_costo = 103;
+    UPDATE otros.centro_costo SET nombre = 'Melga 2 Milagro A' WHERE id_centro_costo = 104;
+    UPDATE otros.centro_costo SET nombre = 'Melga 3 Milagro A' WHERE id_centro_costo = 105;
+    UPDATE otros.centro_costo SET nombre = 'Melga 4 Milagro A' WHERE id_centro_costo = 106;
+    UPDATE otros.centro_costo SET nombre = 'Melga 5 Milagro A' WHERE id_centro_costo = 107;
+    UPDATE otros.centro_costo SET nombre = 'Melga 6 Milagro A' WHERE id_centro_costo = 108;
+    UPDATE otros.centro_costo SET nombre = 'Melga 7 Milagro A' WHERE id_centro_costo = 109;
+    UPDATE otros.centro_costo SET nombre = 'Melga 8 Milagro A' WHERE id_centro_costo = 110;
+    UPDATE otros.centro_costo SET nombre = 'Melga 9 Milagro A' WHERE id_centro_costo = 111;
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 10 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 11 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 12 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 13 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 14 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 15 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 16 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 17 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 18 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 19 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 20 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 21 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 22 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 23 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 24 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 25 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 26 Milagro A', 'melga', 0, 3, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 27 Milagro A', 'melga', 0, 3, 0);
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san|lap
    CREATE TABLE public.compras_centro_costo
       (
         id_centro_costo bigint NOT NULL,
@@ -215,7 +255,7 @@
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 12 San Luis', 'tabla', 0, 15, 0);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 13 San Luis', 'tabla', 0, 15, 0);
 
- ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san|pct
+ ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|san|pct|lap
    UPDATE public.privilegios SET nombre='Cultivo / Actividad / Producto' WHERE id = 15;
    UPDATE public.privilegios SET nombre='Areas / Ranchos / Lineas' WHERE id = 470;
    CREATE TABLE public.compras_salidas_centro_costo
@@ -292,7 +332,7 @@
 
 
 
- ✔ Cambios caja chica @done (18-11-27 19:11) pcc|pct|san
+ ✔ Cambios caja chica @done (18-11-27 19:11) pcc|pct|san|lap
     ALTER TABLE public.cajachica_deudores ADD COLUMN tipo character varying(30) NOT NULL DEFAULT 'otros'::character varying;
     COMMENT ON COLUMN public.cajachica_deudores.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
 

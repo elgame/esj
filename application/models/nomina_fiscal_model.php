@@ -1572,7 +1572,7 @@ class nomina_fiscal_model extends CI_Model {
           'tipoContrato'                  => $nomina[0]->nomina->receptor['TipoContrato'],
           'tipoRegimen'                   => $nomina[0]->nomina->receptor['TipoRegimen'],
           'sdi'                           => $nomina[0]->nomina->receptor['SalarioDiarioIntegrado'],
-          'diasPago'                      => $nomina[0]->nomina->NumDiasPagados,
+          'diasPago'                      => $nomina[0]->dias_trabajados, // $nomina[0]->nomina->NumDiasPagados
           'total'                         => ($nomina[0]->nomina->TotalPercepciones-$nomina[0]->nomina->TotalDeducciones+$nomina[0]->nomina->TotalOtrosPagos),
         )
       )
