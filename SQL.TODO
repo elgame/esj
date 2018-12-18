@@ -41,6 +41,15 @@
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 25 Milagro A', 'melga', 0, 3, 0);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 26 Milagro A', 'melga', 0, 3, 0);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 27 Milagro A', 'melga', 0, 3, 0);
+
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 San Antonio', 'seccion', 0, 2, 0);
  ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san|lap
    CREATE TABLE public.compras_centro_costo
       (
