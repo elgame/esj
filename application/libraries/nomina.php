@@ -451,7 +451,7 @@ class nomina
         $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
       }
 
-      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] != 'ptu') )
+      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] != 'ptu' && $this->nominaFiltros['tipo_nomina']['tipo'] != 'ag') )
         $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
 
       $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
