@@ -41,15 +41,42 @@
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 25 Milagro A', 'melga', 0, 3, 0);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 26 Milagro A', 'melga', 0, 3, 0);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 27 Milagro A', 'melga', 0, 3, 0);
-
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 Juan Pedro', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 Juan Pedro', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 Juan Pedro', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 San Antonio', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 San Antonio', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 San Antonio', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 San Antonio', 'seccion', 0, 2, 0);
-    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 Juan Pedro', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 1 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 2 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 3 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 4 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Seccion 5 San Antonio', 'seccion', 0, 2, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 6 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 7 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 8 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 9 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 10 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 11 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 12 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 13 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 14 La lupita', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 1 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 2 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 3 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 4 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 5 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 6 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 7 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 8 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 9 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 10 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 11 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 12 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 13 San Luis', 'tabla', 0, 15, 0);
+    INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Tabla 14 San Luis', 'tabla', 0, 15, 0);
  ✔ Cambio en catalogos de salida seleccion multiple @done (18-12-04 20:21) pcc|pct|san|lap
    CREATE TABLE public.compras_centro_costo
       (
