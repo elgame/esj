@@ -1527,7 +1527,7 @@ class nomina_fiscal_model extends CI_Model {
   *
   * @return array
   */
-  private function datosCadenaOriginal($empleado, $empresa, $nomina=null)
+  private function datosCadenaOriginal($empleado, $empresa, $nomina=null, $tipo='semana')
   {
     // echo "<pre>";
     //   var_dump($empleado, $empresa, $nomina);
@@ -1536,6 +1536,10 @@ class nomina_fiscal_model extends CI_Model {
     $this->cfdi->cargaDatosFiscales($empresa['info']->id_empresa);
 
     $noCertificado = $this->cfdi->obtenNoCertificado();
+    $diasPago = ceil($nomina[0]->dias_trabajados);
+    if ($tipo === 'aguinaldo') {
+      $diasPago = $nomina[0]->nomina->NumDiasPagados;
+    }
 
     // Array con los datos necesarios para generar la cadena original.
     $datosApi = array(
@@ -1572,7 +1576,7 @@ class nomina_fiscal_model extends CI_Model {
           'tipoContrato'                  => $nomina[0]->nomina->receptor['TipoContrato'],
           'tipoRegimen'                   => $nomina[0]->nomina->receptor['TipoRegimen'],
           'sdi'                           => $nomina[0]->nomina->receptor['SalarioDiarioIntegrado'],
-          'diasPago'                      => $nomina[0]->dias_trabajados, // $nomina[0]->nomina->NumDiasPagados
+          'diasPago'                      => $diasPago,
           'total'                         => ($nomina[0]->nomina->TotalPercepciones-$nomina[0]->nomina->TotalDeducciones+$nomina[0]->nomina->TotalOtrosPagos),
         )
       )
@@ -9585,7 +9589,7 @@ class nomina_fiscal_model extends CI_Model {
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
-          $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
+          $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina, 'ptu');
           // $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
           // $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
           // // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
@@ -11584,7 +11588,7 @@ class nomina_fiscal_model extends CI_Model {
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
-          $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
+          $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina, 'aguinaldo');
           // $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
           // $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
           // // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
@@ -11651,7 +11655,7 @@ class nomina_fiscal_model extends CI_Model {
               'semana'              => $datos['numSemana'],
               'fecha_inicio'        => $fechasSemana['fecha_inicio'],
               'fecha_final'         => $fechasSemana['fecha_final'],
-              'dias_trabajados'     => $empleadoNomina[0]->dias_trabajados,
+              'dias_trabajados'     => ceil($empleadoNomina[0]->dias_aguinaldo),
               'salario_diario'      => $empleadoNomina[0]->salario_diario,
               'salario_integral'    => $empleadoNomina[0]->nomina->salario_diario_integrado,
               'aguinaldo_grabable'  => $aguinaldoGravado,
@@ -11694,16 +11698,16 @@ class nomina_fiscal_model extends CI_Model {
               'semana'              => $datos['numSemana'],
               'fecha_inicio'        => $fechasSemana['fecha_inicio'],
               'fecha_final'         => $fechasSemana['fecha_final'],
-              'dias_trabajados'     => $empleadoNomina[0]->dias_trabajados,
+              'dias_trabajados'     => ceil($empleadoNomina[0]->dias_aguinaldo),
               'salario_diario'      => $empleadoNomina[0]->salario_diario_real,
               'salario_integral'    => 0,
               'aguinaldo_grabable'  => 0,
               'aguinaldo_exento'    => 0,
-              'aguinaldo'           => ($empleadoNomina[0]->dias_aguinaldo * $empleadoNomina[0]->salario_diario_real),
+              'aguinaldo'           => (ceil($empleadoNomina[0]->dias_aguinaldo) * $empleadoNomina[0]->salario_diario_real),
               'total_percepcion'    => 0,
               'isr'                 => 0,
               'total_deduccion'     => 0,
-              'total_neto'          => ($empleadoNomina[0]->dias_aguinaldo * $empleadoNomina[0]->salario_diario_real),
+              'total_neto'          => (ceil($empleadoNomina[0]->dias_aguinaldo) * $empleadoNomina[0]->salario_diario_real),
               'id_empleado_creador' => $this->session->userdata('id_usuario'),
               'id_puesto'           => $empleadoNomina[0]->id_puesto,
               'xml'                 => '',
