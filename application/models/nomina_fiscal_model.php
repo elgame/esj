@@ -107,7 +107,7 @@ class nomina_fiscal_model extends CI_Model {
     if ($tipo === null || $tipo === 'ag')
     {
       $sql .= " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
-      $sql_nm_guardadas2 = " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) <= '{$diaUltimoDeLaSemana}')) ";
+      $sql_nm_guardadas2 = " (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) AND ";
       $nm_tipo = $tipo===null? 'se': 'ag';
     }
     else if($tipo === 'ptu')
@@ -209,7 +209,7 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
          LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
-         WHERE {$sql_nm_guardadas} {$sql_nm_guardadas2}
+         WHERE {$sql_nm_guardadas2} {$sql_nm_guardadas}
       ");
     } else
     { // nomina no guardada
