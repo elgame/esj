@@ -102,11 +102,12 @@ class nomina_fiscal_model extends CI_Model {
     $descuentoOtros = $descuentoOtros ?: 0;
     $utilidadEmpresa = $utilidadEmpresa ?: 0;
 
+    $sql_nm_guardadas2 = '';
     $nm_tipo = 'se';
     if ($tipo === null || $tipo === 'ag')
     {
       $sql .= " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
-      $sql_nm_guardadas2 = " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
+      $sql_nm_guardadas2 = " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) <= '{$diaUltimoDeLaSemana}')) ";
       $nm_tipo = $tipo===null? 'se': 'ag';
     }
     else if($tipo === 'ptu')
