@@ -12150,8 +12150,10 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio']);
-    $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+      'anio' => $semana['anio'],
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
+    $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ag' );
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
     // echo "<pre>";
