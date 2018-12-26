@@ -274,7 +274,7 @@
                           }
                     ?>
                       <tr class="tr-empleado" id="empleado<?php echo $e->id ?>">
-                        <td style="<?php echo $bgColor ?>">
+                        <td style="<?php echo $bgColor ?> width: 20px;">
                           <?php if($nominas_finalizadas){ ?>
                           <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_aguinaldo_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php } ?>
