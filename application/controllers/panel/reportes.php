@@ -72,8 +72,7 @@ class reportes extends MY_Controller {
   public function estado_resultado()
   {
     $this->carabiner->js(array(
-      array('panel/facturacion/admin.js'),
-      array('panel/facturacion/rep_productos_facturados.js'),
+      array('panel/reportes/rep_estado_resultado.js'),
     ));
 
     $this->load->model('empresas_model');

@@ -408,7 +408,7 @@ class reportes_model extends CI_Model {
           GROUP BY id_empresa
         ) n_areas ON p.id_empresa = n_areas.id_empresa
       WHERE p.status = 't' AND cc.tipo = 'gastofinanciero' AND cc.nombre = 'COMISIONES BANCARIAS'
-        {$sqlemp7} {$sqlarea1} AND p.fecha BETWEEN {$sqlFecha}
+        {$sqlemp7} AND p.fecha BETWEEN {$sqlFecha}
       GROUP BY p.id_empresa");
 
     $total = 0;
@@ -563,8 +563,8 @@ class reportes_model extends CI_Model {
       $sqlemp6 = " nf.id_empresa = ".$request['did_empresa']." AND ";
       $sqlemp7 = "AND p.id_empresa = ".$request['did_empresa'];
     }
-    if (!empty($request['did_area'])) {
-      $sqlarea1 = "AND a.id_area = ".$request['did_area'];
+    if (!empty($request['areaId'])) {
+      $sqlarea1 = "AND a.id_area = ".$request['areaId'];
     }
 
     $sqlFechaSaldo = "'{$ini_anio}' AND '{$fin_anio->format('Y-m-d')}'";

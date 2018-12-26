@@ -690,7 +690,7 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
-              co.no_impresiones_tk,
+              co.no_impresiones, co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
               co.id_almacen, ca.nombre AS almacen,
               co.cont_x_dia,
@@ -1454,6 +1454,8 @@ class compras_ordenes_model extends CI_Model {
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
+      $pdf->Text(182, 15, 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones));
+
       $pdf->SetXY(6, $pdf->GetY()-10);
 
       $pdf->SetFont('helvetica','B', 10);
@@ -1702,6 +1704,9 @@ class compras_ordenes_model extends CI_Model {
          }
       }
 
+
+      $this->db->where('id_orden', $orden['info'][0]->id_orden)->set('no_impresiones', 'no_impresiones+1', false)->update('compras_ordenes');
+
       if ($path)
       {
         $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
@@ -1712,7 +1717,7 @@ class compras_ordenes_model extends CI_Model {
       {
         $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
       }
-   }
+  }
 
   public function print_orden_compra_ticket($ordenId, $path = null)
   {

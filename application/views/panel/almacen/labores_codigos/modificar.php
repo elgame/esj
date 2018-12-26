@@ -46,7 +46,7 @@
               </div><!--/control-group -->
 
               <div class="control-group">
-                <label class="control-label" for="costo">Costo x hr </label>
+                <label class="control-label" for="costo">Costo x unidad </label>
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="costo" class="span11" id="costo" value="<?php echo set_value('costo', $categoria['info'][0]->costo) ?>" maxlength="20" required>
