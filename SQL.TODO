@@ -1,5 +1,8 @@
 
- ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct|lap
+ ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap
+   ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones smallint NOT NULL DEFAULT 0;
+
+ ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct|lap|san
     UPDATE public.privilegios SET nombre='Labores de trabajo' WHERE id = 342;
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 10 Milagro D', 'melga', 0.045, 3, 2618);
     INSERT INTO otros.centro_costo(nombre, tipo, hectareas, id_area, no_plantas) VALUES ('Melga 11 Milagro D', 'melga', 0.045, 3, 2618);

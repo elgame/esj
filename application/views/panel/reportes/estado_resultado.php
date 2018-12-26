@@ -27,6 +27,16 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                    </div>
+                    <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
