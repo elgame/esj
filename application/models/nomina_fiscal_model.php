@@ -12533,7 +12533,7 @@ class nomina_fiscal_model extends CI_Model {
 
     foreach ($empleados as $key => $value)
     {
-      if ($value->esta_asegurado == 't')
+      if ($value->esta_asegurado == 't' || $value->aguinaldo_generado != 'false')
         $this->pdfReciboNominaFiscalAguinaldo($value->id, $semana['semana'], $anio, $empresaId, $pdf);
     }
 

@@ -1,5 +1,5 @@
 
- ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap
+ ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap|san
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones smallint NOT NULL DEFAULT 0;
 
  ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct|lap|san
