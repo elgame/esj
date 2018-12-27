@@ -22,8 +22,8 @@
                 <div class="control-group">
                   <label class="control-label" for="dempresa">Empresa</label>
                   <div class="controls">
-                    <input type="text" name="dempresa" class="input-xlarge search-query" id="dempresa" value="<?php echo set_value_get('dempresa', $empresa->nombre_fiscal); ?>" size="73">
-                    <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', $empresa->id_empresa); ?>">
+                    <input type="text" name="dempresa" class="input-xlarge search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
+                    <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa'); ?>">
                   </div>
                 </div>
 
