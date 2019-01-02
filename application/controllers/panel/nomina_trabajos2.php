@@ -33,6 +33,7 @@ class nomina_trabajos2 extends MY_Controller {
   public function index()
   {
     $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
       array('panel/general_sanjorge.css')
     ));
     $this->carabiner->js(array(
@@ -55,10 +56,9 @@ class nomina_trabajos2 extends MY_Controller {
     $params['fecha'] = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
 
     $filtros = array(
-      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
-      'anio'      => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'semana'    => '',
+      'anio'      => date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
-      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
     );
 
     $_GET['anio'] = $filtros['anio'];
@@ -73,34 +73,8 @@ class nomina_trabajos2 extends MY_Controller {
     }
     $filtros['dia_inicia_semana'] = $dia;
 
-    // Datos para la vista.
-    $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleadosAsistencias($filtros);
-    $params['infoE'] = $this->nomina_trabajos2_model->info($params['fecha'], $filtros['empresaId']);
-    // $params['empresas'] = $this->empresas_model->getEmpresasAjax();
-    // $params['puestos'] = $this->usuarios_model->departamentos(); //puestos();
-
-    $_GET['did_empresa'] = $filtros['empresaId'];
-    $params['puestos'] = $this->usuarios_departamentos_model->getPuestos(false); //puestos();
-    $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
-
-    // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
-
-    // // Determina cual es la semana que dejara seleccionada en la vista.
-    // $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    // $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
-
-    // // Obtiene los rangos de fecha de la semana seleccionada para obtener
-    // // las fechas de los 7 dias siguientes.
-    // $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
-    // $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
-
-    // $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
-
-
-
-    $this->load->model('compras_areas_model');
-
-    $params['areas'] = $this->compras_areas_model->getTipoAreas();
+    $semana = MyString::obtenerSemanaDeFecha($params['fecha'], $filtros['dia_inicia_semana']);
+    $params['filtros'] = array_merge($filtros, $semana);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

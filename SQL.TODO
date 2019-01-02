@@ -1,4 +1,75 @@
 
+ ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
+   CREATE TABLE public.nomina_trabajos_dia2
+      (
+        id_empresa integer NOT NULL,
+        id_usuario bigint NOT NULL,
+        fecha date NOT NULL DEFAULT now(),
+        rows integer NOT NULL,
+        id_labor integer NOT NULL,
+        id_area integer,
+        anio integer not null,
+        semana integer not null,
+        costo double precision NOT NULL DEFAULT 0,
+        avance double precision NOT NULL DEFAULT 0,
+        importe double precision NOT NULL DEFAULT 0,
+        CONSTRAINT nomina_trabajos_dia2_pkey PRIMARY KEY (id_empresa, id_usuario, fecha, rows),
+        CONSTRAINT nomina_trabajos_dia2_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT nomina_trabajos_dia2_id_usuario_fkey FOREIGN KEY (id_usuario)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT nomina_trabajos_dia2_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE SET NULL,
+        CONSTRAINT nomina_trabajos_dia2_id_labor_fkey FOREIGN KEY (id_labor)
+            REFERENCES public.compras_salidas_labores (id_labor) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE public.nomina_trabajos_dia2 OWNER TO programa;
+      COMMENT ON COLUMN public.nomina_trabajos_dia2.id_area IS 'Area de bascula = Cultivos';
+   CREATE TABLE public.nomina_trabajos_dia2_rancho
+      (
+        id_empresa integer NOT NULL,
+        id_usuario bigint NOT NULL,
+        fecha date NOT NULL,
+        rows integer NOT NULL,
+        id_rancho bigint NOT NULL, -- Areas de aplicacion = ranchos, lineas, etc
+        num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
+        CONSTRAINT nomina_trabajos_dia2_rancho_pkey PRIMARY KEY (id_empresa, id_usuario, fecha, rows, id_rancho),
+        CONSTRAINT nomina_trabajos_dia2_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+            REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.nomina_trabajos_dia2_rancho
+        OWNER TO programa;
+      COMMENT ON COLUMN public.nomina_trabajos_dia2_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+      COMMENT ON COLUMN public.nomina_trabajos_dia2_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+   CREATE TABLE public.nomina_trabajos_dia2_centro_costo
+      (
+        id_empresa integer NOT NULL,
+        id_usuario bigint NOT NULL,
+        fecha date NOT NULL,
+        rows integer NOT NULL,
+        id_centro_costo bigint NOT NULL,
+        num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
+        CONSTRAINT nomina_trabajos_dia2_centro_costo_pkey PRIMARY KEY (id_empresa, id_usuario, fecha, rows, id_centro_costo),
+        CONSTRAINT nomina_trabajos_dia2_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+            REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.nomina_trabajos_dia2_centro_costo
+        OWNER TO programa;
+      COMMENT ON COLUMN public.nomina_trabajos_dia2_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+
+
  ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap|san|pct
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones smallint NOT NULL DEFAULT 0;
 
