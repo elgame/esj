@@ -7,127 +7,68 @@ class nomina_trabajos2_model extends CI_Model {
     $this->load->model('nomina_fiscal_model');
 
     $data = array(
-      'fecha'           => $datos['fecha'],
-      'id_empresa'      => $datos['id_empresa'],
-      // 'id_area'         => $datos['id_area'],
-      'id_usuario'      => $datos['id_usuario'],
-      'sueldo_diario'   => floatval($datos['sueldo_diario']),
-      'hrs_extra'       => 0,
-      'descripcion'     => $datos['descripcion'],
-      'importe'         => floatval($datos['importe']),
-      'horas'           => floatval($datos['horas']),
-      'importe_trabajo' => floatval($datos['importe_trabajo']),
-      'importe_extra'   => floatval($datos['importe_extra']),
-      // 'tipo_asistencia' => $datos['tipo_asistencia'],
+      'id_empresa' => $datos['id_empresa'],
+      'id_usuario' => $datos['id_empleado'],
+      'fecha'      => $datos['fecha'],
+      'rows'       => isset($datos['rows'])? $datos['rows']: uniqid(),
+      'id_labor'   => $datos['id_labor'],
+      'id_area'    => $datos['id_area'],
+      'anio'       => $datos['anio'],
+      'semana'     => $datos['semana'],
+      'costo'      => floatval($datos['costo']),
+      'avance'     => floatval($datos['avance']),
+      'importe'    => floatval($datos['importe']),
     );
 
-    $data_labores = isset($datos['arealhr'])? $datos['arealhr']: [];
-    $hrs_extra = isset($datos['hrs_extra'])? $datos['hrs_extra']: [];
+    if (isset($datos['rows'])){
+      $this->db->update('nomina_trabajos_dia2', $data,
+        "id_empresa = {$data['id_empresa']} AND id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND rows = '{$data['rows']}'");
 
-    // echo "<pre>";
-    //   var_dump($data_labores, $hrs_extra);
-    // echo "</pre>";exit;
-    // total de hrs extras
-    $total_hrsext = 0;
-    $insert_hrs_extras = [];
-    foreach ($hrs_extra as $key => $value) {
-      if ($value['fhoras'] > 0) {
-        $total_hrsext += $value['fhoras'];
-        $insert_hrs_extras[] = array(
-            'id_usuario' => $data['id_usuario'],
-            'id_empresa' => $data['id_empresa'],
-            'fecha'      => $data['fecha'],
-            'id_area'    => $value['id_area'],
-            'horas'      => $value['fhoras'],
-            'importe'    => $value['fimporte'],
-            );
-      }
-    }
-    $data['hrs_extra'] = $total_hrsext;
-
-    // si existe el registro
-    $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_trabajos_dia WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}")->row();
-
-    // && $data['tipo_asistencia'] == 'a'
-    if ($data['horas'] > 5 && $data['importe_trabajo'] > 0 &&
-      $data['fecha'] != '' && $data['id_empresa'] > 0 && count($data_labores) > 0 ) {
-
-      if ($existe->num > 0)
-        $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
-      else {
-        $this->db->insert('nomina_trabajos_dia', $data);
-      }
-
-      $this->db->delete('nomina_trabajos_dia_labores', "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
-      if (count($data_labores) > 0) {
-        $dias_labores = array();
-        foreach ($data_labores as $key => $value) {
-          foreach ($value['flabor_id'] as $lkey => $labor) {
-            if (isset($labor{0}) && isset($value['fhoras'][$lkey]{0})) {
-              $dias_labores[] = array(
-                'id_usuario' => $data['id_usuario'],
-                'id_empresa' => $data['id_empresa'],
-                'fecha'      => $data['fecha'],
-                'id_area'    => $value['id_area'],
-                'id_labor'   => $labor,
-                'horas'      => $value['fhoras'][$lkey],
-                'importe'    => round(($value['fhoras'][$lkey] * $data['importe_trabajo'] / $data['horas']), 4),
-                );
-            }
-          }
-        }
-        if (count($dias_labores) > 0) {
-          $this->db->insert_batch('nomina_trabajos_dia_labores', $dias_labores);
-        }
-      }
-
-      // registra las hrs extras
-      $this->db->delete('nomina_trabajos_dia_hrsext', "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
-      if (count($insert_hrs_extras) > 0) {
-        $this->db->insert_batch('nomina_trabajos_dia_hrsext', $insert_hrs_extras);
-      }
-
-      // Registra los Bonos
-      if($data['importe_extra'] > 0) {
-        // si esta igual o cambio el bono
-        $existe_bono = $this->db->query("SELECT Count(*) AS num FROM nomina_percepciones_ext WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND bono = {$data['importe_extra']}")->row();
-        if ($existe_bono->num == 0) {
-          $this->db->delete('nomina_percepciones_ext', array('id_usuario' => $data['id_usuario'], 'fecha' => $data['fecha']));
-          $this->db->insert('nomina_percepciones_ext', array(
-                'id_usuario' => $data['id_usuario'],
-                'fecha'      => $data['fecha'],
-                'bono'       => $data['importe_extra'],
-                'otro'       => 0,
-                'domingo'    => 0,
-              ));
-        }
-      }
-
-      // // Quita la falta al trabajador
-      // $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
-
-      return array('passess' => true);
+      $this->db->delete('nomina_trabajos_dia2_rancho',
+        "id_empresa = {$data['id_empresa']} AND id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND rows = '{$data['rows']}'");
+      $this->db->delete('nomina_trabajos_dia2_centro_costo',
+        "id_empresa = {$data['id_empresa']} AND id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND rows = '{$data['rows']}'");
     } else {
-      if ($existe->num > 0)
-        $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
-      else {
-        $this->db->insert('nomina_trabajos_dia', $data);
+      $this->db->insert('nomina_trabajos_dia2', $data);
+    }
+
+    $ranchos = [];
+    if (isset($datos['ranchos']) && count($datos['ranchos']) > 0) {
+      foreach ($datos['ranchos'] as $key => $value) {
+        $ranchos[] = array(
+          'id_empresa' => $data['id_empresa'],
+          'id_usuario' => $data['id_usuario'],
+          'fecha'      => $data['fecha'],
+          'rows'       => $data['rows'],
+          'id_rancho'  => $value['id'],
+          'num'        => count($datos['ranchos']),
+        );
       }
 
-      // $tipo = explode('-', $data['tipo_asistencia']);
-      // if ($tipo[0] == 'a')
-      //   $tipo[0] = 'f';
-      // // Registra falta al trabajador
-      // $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
-      // $this->db->insert('nomina_asistencia', array(
-      //       'id_usuario' => $data['id_usuario'],
-      //       'fecha_ini'  => $data['fecha'],
-      //       'fecha_fin'  => $data['fecha'],
-      //       'tipo'       => $tipo[0],
-      //       'id_clave'   => isset($tipo[1])? $tipo[1]: null,
-      //     ));
-      return array('passess' => false);
+      if (count($ranchos) > 0) {
+        $this->db->insert_batch('nomina_trabajos_dia2_rancho', $ranchos);
+      }
     }
+
+    $centros_costos = [];
+    if (isset($datos['centros_costos']) && count($datos['centros_costos']) > 0) {
+      foreach ($datos['centros_costos'] as $key => $value) {
+        $centros_costos[] = array(
+          'id_empresa'      => $data['id_empresa'],
+          'id_usuario'      => $data['id_usuario'],
+          'fecha'           => $data['fecha'],
+          'rows'            => $data['rows'],
+          'id_centro_costo' => $value['id'],
+          'num'             => count($datos['centros_costos']),
+        );
+      }
+
+      if (count($centros_costos) > 0) {
+        $this->db->insert_batch('nomina_trabajos_dia2_centro_costo', $centros_costos);
+      }
+    }
+
+    return array('passess' => false);
   }
 
   /**

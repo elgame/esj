@@ -1,3 +1,7 @@
+<style type="text/css" media="screen">
+  .ui-autocomplete { z-index:1005 !important;}
+</style>
+
     <div id="content" class="span10">
       <!-- content starts -->
 
@@ -48,30 +52,30 @@
                 <div class="span3">
                   <label for="dempleado">Empleado</label>
                   <input type="text" class="span12" id="dempleado" value="">
-                  <input type="hidden" id="dempleadoId" value="">
+                  <input type="hidden" class="valAddTr" id="dempleadoId" value="">
                 </div>
                 <div class="span3">
                   <label for="dlabor">Labor</label>
                   <input type="text" class="span12" id="dlabor" value="">
-                  <input type="hidden" id="dlaborId" value="">
+                  <input type="hidden" class="valAddTr" id="dlaborId" value="">
                 </div>
                 <div class="span1">
                   <label for="dcosto">Costo</label>
-                  <input type="text" class="span12" id="dcosto" value="" readonly>
+                  <input type="text" class="span12 valAddTr" id="dcosto" value="" readonly>
                 </div>
                 <div class="span1">
                   <label for="davance">Avance</label>
-                  <input type="text" class="span12" id="davance" value="">
+                  <input type="text" class="span12 valAddTr vpositive" id="davance" value="">
                 </div>
                 <div class="span2">
                   <label for="dimporte">Importe</label>
-                  <input type="text" class="span12" id="dimporte" value="" readonly>
+                  <input type="text" class="span12 valAddTr not0" id="dimporte" value="" readonly>
                 </div>
 
                 <div class="span3">
                   <label for="area">Cultivo / Actividad / Producto</label>
                   <input type="text" class="span12" id="area" value="">
-                  <input type="hidden" id="areaId" value="">
+                  <input type="hidden" class="valAddTr" id="areaId" value="">
                 </div>
 
                 <div class="span3">
@@ -82,26 +86,22 @@
                     </div>
                   </div>
                   <ul class="tags" id="tagsRanchoIds">
-                    <li><span class="tag"></span>
-                      <input type="hidden" name="ranchoId[]" class="ranchoId" value="">
-                      <input type="hidden" name="ranchoText[]" class="ranchoText" value="">
-                    </li>
                   </ul>
                 </div>
 
-                <div class="span3">
+                <div class="span4">
                   <label class="control-label" for="centroCosto">Centro de costo </label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
+                      <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" data-next="addTrabajador">
                     </div>
                   </div>
                   <ul class="tags" id="tagsCCIds">
-                    <li><span class="tag"></span>
-                      <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="">
-                      <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="">
-                    </li>
                   </ul>
+                </div>
+
+                <div class="span1">
+                  <button type="button" class="btn" id="addTrabajador">Guardar</button>
                 </div>
               </form>
 

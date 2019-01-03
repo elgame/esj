@@ -660,6 +660,17 @@ class bascula_model extends CI_Model {
 
     $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
 
+    $pdf->header_entrar = true;
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('R'));
+    $pdf->Row(array('Pag 1'), false, false);
+    $pdf->SetY($pdf->GetY()+10);
+    $pdf->Row(array('---------------------------------------------------------'), false, false);
+    $pdf->SetY($pdf->GetY()+10);
+    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+    $pdf->SetAligns(array('R'));
+    $pdf->Row(array('Pag 2'), false, false);
+
     // $pdf->AutoPrint(true);
     $pdf->Output();
   }

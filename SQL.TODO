@@ -1,11 +1,11 @@
 
- ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
+ ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct
    CREATE TABLE public.nomina_trabajos_dia2
       (
         id_empresa integer NOT NULL,
         id_usuario bigint NOT NULL,
         fecha date NOT NULL DEFAULT now(),
-        rows integer NOT NULL,
+        rows character varying(15) NOT NULL,
         id_labor integer NOT NULL,
         id_area integer,
         anio integer not null,
@@ -34,7 +34,7 @@
         id_empresa integer NOT NULL,
         id_usuario bigint NOT NULL,
         fecha date NOT NULL,
-        rows integer NOT NULL,
+        rows character varying(15) NOT NULL,
         id_rancho bigint NOT NULL, -- Areas de aplicacion = ranchos, lineas, etc
         num integer NOT NULL DEFAULT 1, -- numero de ranchos asignados a la orden de compra
         CONSTRAINT nomina_trabajos_dia2_rancho_pkey PRIMARY KEY (id_empresa, id_usuario, fecha, rows, id_rancho),
@@ -54,7 +54,7 @@
         id_empresa integer NOT NULL,
         id_usuario bigint NOT NULL,
         fecha date NOT NULL,
-        rows integer NOT NULL,
+        rows character varying(15) NOT NULL,
         id_centro_costo bigint NOT NULL,
         num integer NOT NULL DEFAULT 1, -- numero de centro de costo asignados a la orden de compra
         CONSTRAINT nomina_trabajos_dia2_centro_costo_pkey PRIMARY KEY (id_empresa, id_usuario, fecha, rows, id_centro_costo),
