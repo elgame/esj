@@ -19,7 +19,7 @@ class mypdf_ticket extends FPDF {
 	 * @param unknown_type $unit
 	 * @param unknown_type $size
 	 */
-	function __construct($orientation='P', $unit='mm', $size=array(63, 250)){
+	function __construct($orientation='P', $unit='mm', $size=array(63, 300)){
 		parent::__construct($orientation, $unit, $size);
 		$this->limiteY = 50;
     $this->pag_size = $size;
