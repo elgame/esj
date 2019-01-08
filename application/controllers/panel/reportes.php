@@ -81,7 +81,7 @@ class reportes extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']            = array('titulo' => 'Estado de resultado');
 
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);

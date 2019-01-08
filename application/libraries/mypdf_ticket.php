@@ -11,7 +11,7 @@ class mypdf_ticket extends FPDF {
 
     var $pag_size = array();
 
-    private $header_entrar = true;
+    public $header_entrar = true;
 
 	/**
 	 * P:Carta Vertical, L:Carta Horizontal, lP:Legal vertical, lL:Legal Horizontal
@@ -48,14 +48,14 @@ class mypdf_ticket extends FPDF {
             $this->SetFounts(array($this->fount_txt), array(-1.5));
             $this->SetAligns(array('L'));
             $this->SetWidths(array(38));
-            $this->SetXY(0, 3.5);
+            $this->SetXY(0, $this->GetY()-1);
             $this->Row(array(($data->tipo=='en'? 'ENTRADA': 'SALIDA').' '.$data->area ), false, true, 4);
-            $this->SetXY(38, 3.5);
+            $this->SetXY(38, $this->GetY()-4);
             $this->SetWidths(array(12));
             $this->SetFounts(array($this->fount_txt), array(-1));
             $this->Row(array('BOLETA'), false, false, 4);
-            $this->SetXY(50, 3.5);
-            $this->SetWidths(array(13));
+            $this->SetXY(49, $this->GetY()-4);
+            $this->SetWidths(array(15));
             $this->SetFounts(array($this->fount_num), array(1));
             $this->Row(array($data->folio), false, true, 4);
 
@@ -70,7 +70,7 @@ class mypdf_ticket extends FPDF {
     }
 
     public function datosTicket($data) {
-        $this->SetXY(0, 11.5);
+        $this->SetXY(0, $this->GetY()-2);
         $this->MultiCell($this->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
 
         $this->SetY($this->GetY()-1);

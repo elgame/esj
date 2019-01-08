@@ -318,6 +318,19 @@ class reportes_model extends CI_Model {
     return $query->result();
   }
 
+  public function erEgresosCompraFruta($sqlFecha, $sqlemp3, $sqlarea1)
+  {
+    $query = $this->db->query(
+      "SELECT a.id_area, Coalesce(a.nombre, 'OTRA FRUTA') AS cultivo, Sum(b.importe) AS total
+      FROM bascula b
+        LEFT JOIN areas a ON a.id_area = b.id_area
+      WHERE b.status = 't' AND b.intangible = 'f' AND b.tipo = 'en' AND a.tipo = 'fr'
+         {$sqlemp3} {$sqlarea1}
+         AND Date(b.fecha_bruto) BETWEEN {$sqlFecha}
+      GROUP BY a.id_area");
+    return $query->result();
+  }
+
   public function erEgresosSalidas($sqlFecha, $sqlemp3, $sqlarea1)
   {
     $query = $this->db->query(
@@ -535,10 +548,21 @@ class reportes_model extends CI_Model {
     return $response;
   }
 
+  public function getTotalOfData($datos)
+  {
+    $total_mes = $total_saldo = 0;
+    foreach ($datos as $key => $value) {
+      $total_saldo += $value->saldo+$value->mes;
+      $total_mes += $value->mes;
+    }
+
+    return ['mes' => $total_mes, 'saldo' => $total_saldo];
+  }
+
   public function getDataEstadoResultado($request, $onlyTotal = false)
   {
     $sqlemp1 = $sqlemp2 = $sqlemp3 = $sqlemp4 = $sqlemp5 = $sqlemp6 =
-    $sqlemp7 = $sql = '';
+    $sqlemp7 = $sqlemp8 = $sql = '';
     $sqlarea1 = '';
     $res = ['saldo' => [], 'mes' => []];
     $response = [];
@@ -562,6 +586,7 @@ class reportes_model extends CI_Model {
       $sqlemp5 = "AND co.id_empresa = ".$request['did_empresa'];
       $sqlemp6 = " nf.id_empresa = ".$request['did_empresa']." AND ";
       $sqlemp7 = "AND p.id_empresa = ".$request['did_empresa'];
+      $sqlemp8 = "AND b.id_empresa = ".$request['did_empresa'];
     }
     if (!empty($request['areaId'])) {
       $sqlarea1 = "AND a.id_area = ".$request['areaId'];
@@ -581,6 +606,11 @@ class reportes_model extends CI_Model {
     $res['saldo']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaSaldo, $sqlemp1, $sqlarea1);
     $res['mes']['ingresos_descuentos'] = $this->erIngresosDescuentos($sqlFechaMes, $sqlemp1, $sqlarea1);
     $response['ingresos_descuentos'] = $this->erCultivosAjuste($res['saldo']['ingresos_descuentos'], $res['mes']['ingresos_descuentos']);
+
+    // Egresos compra de fruta
+    $res['saldo']['egresos_compra_fruta'] = $this->erEgresosCompraFruta($sqlFechaSaldo, $sqlemp8, $sqlarea1);
+    $res['mes']['egresos_compra_fruta'] = $this->erEgresosCompraFruta($sqlFechaMes, $sqlemp8, $sqlarea1);
+    $response['egresos_compra_fruta'] = $this->erCultivosAjuste($res['saldo']['egresos_compra_fruta'], $res['mes']['egresos_compra_fruta']);
 
     // Egresos salidas almacén
     $res['saldo']['egresos_salidas'] = $this->erEgresosSalidas($sqlFechaSaldo, $sqlemp3, $sqlarea1);
@@ -659,7 +689,7 @@ class reportes_model extends CI_Model {
     if (isset($empresa) && $empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = isset($empresa)? $empresa['info']->nombre_fiscal: '';
+    $pdf->titulo1 = isset($empresa)? $empresa['info']->nombre_fiscal: 'Todas las empresas';
     $pdf->titulo2 = "Estado de resultado";
     $pdf->titulo3 = $datos['filtros']['mes'];
 
@@ -667,10 +697,10 @@ class reportes_model extends CI_Model {
     $pdf->AddPage();
     $pdf->SetY(30);
 
-    $aligns = array('L', 'R', 'R', 'R');
+    $aligns = array('L', 'R', 'R', 'R', 'R');
     $widths = array(150);
-    $widths2 = array(80, 40, 30);
-    $widths3 = array(80, 40, 30, 45);
+    $widths2 = array(70, 30, 10, 40, 10);
+    $widths3 = array(70, 30, 10, 40, 10);
 
     $pdf->SetTextColor(0,0,0);
     $pdf->SetAligns($aligns);
@@ -688,25 +718,30 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_singreso = $total_mingreso = 0;
+    $totales = $this->getTotalOfData($datos['ingresos']);
     foreach ($datos['ingresos'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
-        MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
+        MyString::formatoNumero($value->saldo+$value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_singreso += $value->saldo;
+      $total_singreso += $value->saldo+$value->mes;
       $total_mingreso += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_mingreso, 2, '', false),
+      '',
       MyString::formatoNumero($total_singreso, 2, '', false),
-      MyString::formatoNumero($total_mingreso, 2, '', false)
+      ''
     ], false, true);
 
     // --
@@ -718,25 +753,30 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_singresodesc = $total_mingresodesc = 0;
+    $totales = $this->getTotalOfData($datos['ingresos_descuentos']);
     foreach ($datos['ingresos_descuentos'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
-        MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
+        MyString::formatoNumero($value->saldo+$value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_singresodesc += $value->saldo;
+      $total_singresodesc += $value->saldo+$value->mes;
       $total_mingresodesc += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_mingresodesc, 2, '', false),
+      '',
       MyString::formatoNumero($total_singresodesc, 2, '', false),
-      MyString::formatoNumero($total_mingresodesc, 2, '', false)
+      ''
     ], false, true);
 
     $pdf->SetFont('Arial', 'B', 8);
@@ -744,10 +784,10 @@ class reportes_model extends CI_Model {
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
-      MyString::formatoNumero($total_singreso-$total_singresodesc, 2, '', false),
       MyString::formatoNumero($total_mingreso-$total_mingresodesc, 2, '', false),
-      MyString::formatoNumero(($total_mingreso-$total_mingresodesc)+
-                              ($total_singreso-$total_singresodesc), 2, '', false)
+      '',
+      MyString::formatoNumero($total_singreso-$total_singresodesc, 2, '', false),
+      '',
     ], false, false);
 
     // ----------------------- EGRESO
@@ -759,30 +799,69 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial','B', 9);
     $pdf->SetWidths($widths);
     $pdf->SetX(12);
+    $pdf->Row(['Compra de fruta'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetWidths($widths2);
+    $pdf->SetX(12);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
+    $pdf->SetFont('Arial', '', 7);
+    $total_scomprafruta = $total_mcomprafruta = 0;
+    $totales = $this->getTotalOfData($datos['egresos_compra_fruta']);
+    foreach ($datos['egresos_compra_fruta'] as $key => $value) {
+      $pdf->SetX(12);
+      $pdf->Row([
+        $value->cultivo,
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
+        MyString::formatoNumero($value->saldo, 2, '', false),
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
+      ], false, true);
+      $total_scomprafruta += $value->saldo+$value->mes;
+      $total_mcomprafruta += $value->mes;
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(12);
+    $pdf->Row([
+      'TOTAL',
+      MyString::formatoNumero($total_mcomprafruta, 2, '', false),
+      '',
+      MyString::formatoNumero($total_scomprafruta, 2, '', false),
+      '',
+    ], false, true);
+
+    $pdf->SetFont('Arial','B', 9);
+    $pdf->SetWidths($widths);
+    $pdf->SetX(12);
     $pdf->Row(['Costo de venta'], false, false);
 
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_scostoventa = $total_mcostoventa = 0;
+    $totales = $this->getTotalOfData($datos['egresos_costos_ventas']);
     foreach ($datos['egresos_costos_ventas'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
         MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_scostoventa += $value->saldo;
+      $total_scostoventa += $value->saldo+$value->mes;
       $total_mcostoventa += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_mcostoventa, 2, '', false),
+      '',
       MyString::formatoNumero($total_scostoventa, 2, '', false),
-      MyString::formatoNumero($total_mcostoventa, 2, '', false)
+      '',
     ], false, true);
 
     $pdf->SetFont('Arial','B', 9);
@@ -793,25 +872,30 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_sgastosgenerales = $total_mgastosgenerales = 0;
+    $totales = $this->getTotalOfData($datos['egresos_gastos_generales']);
     foreach ($datos['egresos_gastos_generales'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
         MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_sgastosgenerales += $value->saldo;
+      $total_sgastosgenerales += $value->saldo+$value->mes;
       $total_mgastosgenerales += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_mgastosgenerales, 2, '', false),
+      '',
       MyString::formatoNumero($total_sgastosgenerales, 2, '', false),
-      MyString::formatoNumero($total_mgastosgenerales, 2, '', false)
+      '',
     ], false, true);
 
     $pdf->SetFont('Arial','B', 9);
@@ -822,25 +906,30 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_sgastosintangibles = $total_mgastosintangibles = 0;
+    $totales = $this->getTotalOfData($datos['egresos_gastos_intangibles']);
     foreach ($datos['egresos_gastos_intangibles'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
         MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_sgastosintangibles += $value->saldo;
+      $total_sgastosintangibles += $value->saldo+$value->mes;
       $total_mgastosintangibles += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_mgastosintangibles, 2, '', false),
+      '',
       MyString::formatoNumero($total_sgastosintangibles, 2, '', false),
-      MyString::formatoNumero($total_mgastosintangibles, 2, '', false)
+      '',
     ], false, true);
 
     $pdf->SetFont('Arial','B', 9);
@@ -851,23 +940,27 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_scomisionesban = $total_mcomisionesban = 0;
     $pdf->SetX(12);
     $pdf->Row([
       $datos['egresos_comisiones_ban']->cultivo,
+      MyString::formatoNumero($datos['egresos_comisiones_ban']->mes, 2, '', false),
+      '',
       MyString::formatoNumero($datos['egresos_comisiones_ban']->saldo, 2, '', false),
-      MyString::formatoNumero($datos['egresos_comisiones_ban']->mes, 2, '', false)
+      '',
     ], false, true);
-    $total_scomisionesban += $datos['egresos_comisiones_ban']->saldo;
+    $total_scomisionesban += $datos['egresos_comisiones_ban']->saldo+$datos['egresos_comisiones_ban']->mes;
     $total_mcomisionesban += $datos['egresos_comisiones_ban']->mes;
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
       MyString::formatoNumero($total_scomisionesban, 2, '', false),
-      MyString::formatoNumero($total_mcomisionesban, 2, '', false)
+      '',
+      MyString::formatoNumero($total_mcomisionesban, 2, '', false),
+      '',
     ], false, true);
 
     $pdf->SetFont('Arial','B', 9);
@@ -878,25 +971,30 @@ class reportes_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetWidths($widths2);
     $pdf->SetX(12);
-    $pdf->Row(['Cultivo', 'Acumulado', 'Mes'], false, true);
+    $pdf->Row(['Cultivo', 'Mes', '%', 'Acumulado', '%'], false, true);
     $pdf->SetFont('Arial', '', 7);
     $total_segresosnc = $total_megresosnc = 0;
+    $totales = $this->getTotalOfData($datos['egresos_nc']);
     foreach ($datos['egresos_nc'] as $key => $value) {
       $pdf->SetX(12);
       $pdf->Row([
         $value->cultivo,
+        MyString::formatoNumero($value->mes, 2, '', false),
+        MyString::formatoNumero(($totales['mes']>0? $value->mes/$totales['mes']: 0)*100, 2, '', false),
         MyString::formatoNumero($value->saldo, 2, '', false),
-        MyString::formatoNumero($value->mes, 2, '', false)
+        MyString::formatoNumero(($totales['saldo']>0? (($value->saldo+$value->mes)/$totales['saldo']): 0)*100, 2, '', false),
       ], false, true);
-      $total_segresosnc += $value->saldo;
+      $total_segresosnc += $value->saldo+$value->mes;
       $total_megresosnc += $value->mes;
     }
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
+      MyString::formatoNumero($total_megresosnc, 2, '', false),
+      '',
       MyString::formatoNumero($total_segresosnc, 2, '', false),
-      MyString::formatoNumero($total_megresosnc, 2, '', false)
+      '',
     ], false, true);
 
     $pdf->SetFont('Arial', 'B', 8);
@@ -904,24 +1002,32 @@ class reportes_model extends CI_Model {
     $pdf->SetX(12);
     $pdf->Row([
       'TOTAL',
-      MyString::formatoNumero($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc, 2, '', false),
-      MyString::formatoNumero($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc, 2, '', false),
-      MyString::formatoNumero(($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
-                              ($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc), 2, '', false)
+      MyString::formatoNumero($total_mcomprafruta+$total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc, 2, '', false),
+      '',
+      MyString::formatoNumero($total_scomprafruta+$total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc, 2, '', false),
+      '',
     ], false, false);
 
     $pdf->SetFont('Arial', 'B', 8);
-    $pdf->SetWidths([150, 45]);
+    $pdf->SetWidths([70, 30, 50, 40]);
     $pdf->SetX(12);
     $pdf->Row([
       'RESULTADO',
+      MyString::formatoNumero(
+        ($total_mingreso-$total_mingresodesc) -
+        ($total_mcomprafruta+$total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)
+      , 2, '', false),
+      MyString::formatoNumero(
+        ($total_singreso-$total_singresodesc) -
+        ($total_scomprafruta+$total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc)
+      , 2, '', false),
       MyString::formatoNumero(
         (
           ($total_mingreso-$total_mingresodesc)+
           ($total_singreso-$total_singresodesc)
         ) - (
-          ($total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
-          ($total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc)
+          ($total_mcomprafruta+$total_mcostoventa+$total_mgastosgenerales+$total_mgastosintangibles+$total_mcomisionesban-$total_megresosnc)+
+          ($total_scomprafruta+$total_scostoventa+$total_sgastosgenerales+$total_sgastosintangibles+$total_scomisionesban-$total_segresosnc)
         )
       , 2, '', false)
     ], false, false);
