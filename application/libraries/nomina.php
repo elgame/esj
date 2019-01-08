@@ -1092,9 +1092,13 @@ class nomina
   {
     $otros = 0; //floatval($this->empleado->descuento_playeras);
 
-    foreach ($this->empleado->prestamos as $prestamo)
-    {
-      $otros += floatval($prestamo['pago_semana_descontar']);
+    if ($this->empleado->esta_generada != 'false') {
+      $otros += floatval($this->empleado->nomina_fiscal_prestamos);
+    } else {
+      foreach ($this->empleado->prestamos as $prestamo)
+      {
+        $otros += floatval($prestamo['pago_semana_descontar']);
+      }
     }
 
     // Fondo de ahorro
