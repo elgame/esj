@@ -379,7 +379,7 @@
                         <td style="<?php echo $bgColor ?>"><!-- prestamos -->
                           <?php
                                 $totalPrestamosEmpleado = 0;
-                                if (floatval($e->nomina_fiscal_prestamos) > 0)
+                                if (floatval($e->nomina_fiscal_prestamos) != 'false')
                                 {
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
                                 }

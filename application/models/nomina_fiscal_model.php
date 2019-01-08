@@ -457,7 +457,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $prestamos = array();
       // Si hay prestamos entra.
-      if ($queryPrestamos->num_rows() > 0)
+      if ($queryPrestamos->num_rows() > 0 && $nm_guardada->num == 0)
       {
         $prestamos = $queryPrestamos->result();
       }
