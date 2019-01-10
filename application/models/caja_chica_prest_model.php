@@ -628,6 +628,38 @@ class caja_chica_prest_model extends CI_Model {
       $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
   }
 
+  public function saldarPrestamo($prestamoId, $fecha)
+  {
+    $prestamos = $this->db->query("SELECT np.id_prestamo, u.id_empresa, np.id_usuario, np.prestado,
+        COALESCE(Sum(nfp.monto), 0) AS pagado, (np.prestado-COALESCE(Sum(nfp.monto), 0)) AS saldo
+      FROM nomina_prestamos np
+        INNER JOIN usuarios u ON u.id = np.id_usuario
+        LEFT JOIN nomina_fiscal_prestamos nfp ON np.id_prestamo = nfp.id_prestamo
+      WHERE np.id_prestamo = {$prestamoId}
+      GROUP BY np.id_prestamo, u.id
+      HAVING (np.prestado-COALESCE(Sum(nfp.monto), 0)) > 0")->result();
+
+    $semana = MyString::obtenerSemanaDeFecha($fecha);
+
+    $prestamosEmpleados = array();
+    foreach ($prestamos as $key => $value) {
+      $prestamosEmpleados[] = array(
+              'id_empleado' => $value->id_usuario,
+              'id_empresa'  => $value->id_empresa,
+              'anio'        => $semana['anio'],
+              'semana'      => $semana['semana'],
+              'id_prestamo' => $value->id_prestamo,
+              'monto'       => $value->saldo,
+              'fecha'       => $fecha,
+              'saldado'     => 't',
+            );
+      $this->db->update('nomina_prestamos', array('status' => 'f'), "id_prestamo = {$value->id_prestamo}");
+    }
+    if (count($prestamosEmpleados) > 0) {
+      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+    }
+  }
+
   public function printCajaNomenclatura(&$pdf, $nomenclaturas)
   {
     // nomenclatura

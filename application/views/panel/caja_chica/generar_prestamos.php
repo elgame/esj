@@ -220,7 +220,18 @@
                                       <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->no_ticket."&fecha=".$fecha_caja_chica)?>"
                                             target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->no_ticket>0? 'block': 'none') ?>">
                                           <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->no_ticket ?></a></td>
-                                      <td><?php echo $prestamo->saldo_fin ?></td>
+                                      <td>
+                                        <?php if ($priv_saldar_prestamo): ?>
+                                          <a href="<?php echo base_url('panel/caja_chica_prest/saldar_prestamos/?id='.$prestamo->id_prestamo_nom."&fecha=".$fecha_caja_chica."&fno_caja=".$_GET['fno_caja'])?>"
+                                            onclick="msb.confirm('Estas seguro saldar este préstamo? \n No se podrá revertir.', 'Prestamos', this); return false;">
+                                        <?php endif ?>
+
+                                        <?php echo $prestamo->saldo_fin ?>
+
+                                        <?php if ($priv_saldar_prestamo): ?>
+                                          </a>
+                                        <?php endif ?>
+                                      </td>
                                     </tr>
                             <?php } ?>
                                   <tr class="row-total">
