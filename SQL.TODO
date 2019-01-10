@@ -1,4 +1,6 @@
 
+ ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Saldar prestamos',410,FALSE,'caja_chica_prest/saldar_prestamos/','edit',FALSE);
  ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct
    CREATE TABLE public.nomina_trabajos_dia2
       (

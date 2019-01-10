@@ -61,25 +61,6 @@ class caja_chica_prest extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
-  // public function caja2()
-  // {
-  //   $this->load->library('pagination');
-  //   $this->load->model('caja_chica_model');
-
-  //   $params['info_empleado']  = $this->info_empleado['info'];
-  //   $params['seo']        = array('titulo' => 'Caja chica 2');
-  //   $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
-
-  //   $this->db->query("SELECT refreshallmaterializedviews();");
-
-  //   if(isset($_GET['msg']{0}))
-  //     $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-  //   $this->load->view('panel/header',$params);
-  //   $this->load->view('panel/caja_chica/index2',$params);
-  //   $this->load->view('panel/footer',$params);
-  // }
-
   public function cargar()
   {
     $this->carabiner->js(array(
@@ -122,9 +103,7 @@ class caja_chica_prest extends MY_Controller {
     // $params['movimientos'] = $this->caja_chica_model->getMovimientos();
     $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
 
-    // echo "<pre>";
-    //   var_dump($params['remisiones']);
-    // echo "</pre>";exit;
+    $params['priv_saldar_prestamo'] = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica_prest/saldar_prestamos/');
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -169,6 +148,18 @@ class caja_chica_prest extends MY_Controller {
       if(!$res_mdl['error'])
         redirect(base_url('panel/caja_chica_prest/cargar?ffecha='.$_POST['fecha'].'&fno_caja='.$_POST['no_caja']));
     }
+  }
+
+  /**
+   * Saldar adeudos de prestamos a largo plazo
+   * @return [type] [description]
+   */
+  public function saldar_prestamos()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->saldarPrestamo($this->input->get('id'), $this->input->get('fecha'));
+
+    redirect(base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function ajax_saldar_adeudos()
