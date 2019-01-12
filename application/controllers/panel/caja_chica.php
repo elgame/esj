@@ -109,6 +109,7 @@ class caja_chica extends MY_Controller {
 
   public function caja4()
   {
+    // Caja general Vianey
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
 

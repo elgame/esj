@@ -177,7 +177,8 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '2') {
+    // Tryana y sra vianey
+    if ($noCaja == '2' || $noCaja == '4') {
       // saldo de clientes
       $empresas = $this->db->query("SELECT id_empresa, nombre_fiscal
         FROM empresas WHERE status = 't'
@@ -262,7 +263,7 @@ class caja_chica_model extends CI_Model {
       $info['saldo_clientes'] = $empresas;
     }
 
-    if ($noCaja == '2' || $noCaja == '1') {
+    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -300,11 +301,14 @@ class caja_chica_model extends CI_Model {
     }
 
     if ($noCaja == '1' || $noCaja == '2') {
-      $ddNoCaja = 1;
+      $ddNoCaja = '1, 4';
       $ddTipo = 'caja_gastos';
       if ($noCaja == '1') {
-        $ddNoCaja = 2;
+        $ddNoCaja = "2, 4";
         $ddTipo = 'caja_limon';
+      } elseif ($noCaja == '4') {
+        $ddNoCaja = "2, 1";
+        $ddTipo = 'caja_general';
       }
       // acreedores
       $acreedores = $this->db->query(
@@ -313,9 +317,9 @@ class caja_chica_model extends CI_Model {
         FROM cajachica_deudores cd
           LEFT JOIN (
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
-            WHERE no_caja = {$ddNoCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
+            WHERE no_caja in({$ddNoCaja}) AND fecha <= '{$fecha}' GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
-        WHERE cd.no_caja = {$ddNoCaja} AND cd.tipo = '{$ddTipo}' AND fecha <= '{$fecha}'
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.tipo = '{$ddTipo}' AND fecha <= '{$fecha}'
           AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
       );
 
