@@ -152,19 +152,21 @@
     var $table = $('#table-remisiones').find('tbody .row-total'),
         tr;
 
-    var numRemision = '', folio = '', id = '', abono = '0', concepto = '';
+    var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '';
     if (remision) {
       id           = remision.id;
       numRemision  = remision.numremision;
       abono        = remision.total;
       foliofactura = remision.foliofactura;
       concepto     = remision.concepto;
+      idempresa    = remision.idempresa;
+      empresa      = remision.empresa;
     }
 
     tr =  '<tr>' +
             '<td style="width: 100px;">' +
-              '<input type="text" name="remision_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
-              '<input type="hidden" name="remision_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+              '<input type="text" name="remision_empresa[]" value="'+empresa+'" class="input-small gasto-cargo" style="width: 150px;" required>' +
+              '<input type="hidden" name="remision_empresa_id[]" value="'+idempresa+'" class="input-small vpositive gasto-cargo-id">' +
               '<input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">' +
             '</td>' +
             '<td style="width: 70px;"><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;"></td>' +
@@ -236,7 +238,12 @@
         $('.chk-remision:checked').each(function(index, el) {
           $this = $(this);
 
-          agregarRemisiones({id: $this.attr('data-id'), numremision: $this.attr('data-numremision'), total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'), concepto: $this.attr('data-concepto')});
+          agregarRemisiones({
+            id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
+            total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
+            concepto: $this.attr('data-concepto'),
+            idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
+          });
 
           // html += '<tr>' +
           //           '<td>' +
@@ -791,6 +798,7 @@
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
+                    '<option value="caja_general">Caja general</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 200px;">'+
@@ -990,10 +998,14 @@
         var html = '';
         for (var key in json) {
           html += '<tr>'+
-              '<td><input type="checkbox" class="chk-remision" data-id="'+json[key].id_factura+'" data-numremision="'+json[key].folio+'" data-total="'+json[key].saldo+'" data-foliofactura="'+(json[key].folio_factura||'')+'" data-concepto="'+json[key].cliente+'"></td>'+
+              '<td><input type="checkbox" class="chk-remision" data-id="'+json[key].id_factura+'" '+
+                'data-numremision="'+json[key].folio+'" data-total="'+json[key].saldo+'" '+
+                'data-foliofactura="'+(json[key].folio_factura||'')+'" data-concepto="'+json[key].cliente+'" '+
+                'data-idempresa="'+json[key].id_empresa+'" data-empresa="'+json[key].empresa+'"></td>'+
               '<td style="width: 66px;">'+json[key].fecha+'</td>'+
               '<td>'+json[key].serie+json[key].folio+'</td>'+
               '<td>'+json[key].cliente+'</td>'+
+              '<td>'+json[key].empresa+'</td>'+
               '<td style="text-align: right;">'+json[key].saldo+'</td>'+
             '</tr>';
         }
