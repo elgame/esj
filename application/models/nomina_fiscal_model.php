@@ -151,6 +151,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.tipo_contrato,
                 u.tipo_jornada,
                 u.riesgo_puesto,
+                COALESCE(hrs.hrs, 0) AS hrs,
                 upp.nombre as puesto,
                 COALESCE(nf.dias_trabajados, -1) as dias_trabajados,
                 extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
@@ -209,6 +210,12 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
          LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+         LEFT JOIN (
+          SELECT id_empleado, Sum(hrs) AS hrs
+          FROM nomina_asistencia_hrs
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana['semana']}
+          GROUP BY id_empleado
+         ) hrs ON u.id = hrs.id_empleado
          WHERE {$sql_nm_guardadas2} {$sql_nm_guardadas}
       ");
     } else
@@ -233,6 +240,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.tipo_contrato,
                 u.tipo_jornada,
                 u.riesgo_puesto,
+                COALESCE(hrs.hrs, 0) AS hrs,
                 COALESCE(upp.nombre, up.nombre) as puesto,
                 COALESCE(nf.dias_trabajados, -1) as dias_trabajados,
                 extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
@@ -291,6 +299,12 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
          LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+         LEFT JOIN (
+          SELECT id_empleado, Sum(hrs) AS hrs
+          FROM nomina_asistencia_hrs
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana['semana']}
+          GROUP BY id_empleado
+         ) hrs ON u.id = hrs.id_empleado
          WHERE u.user_nomina = 't' AND u.status = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
          {$ordenar}
       ";
@@ -635,6 +649,7 @@ class nomina_fiscal_model extends CI_Model {
     // echo "<pre>";
     //   var_dump($empleados);
     // echo "</pre>";exit;
+
     return $empleados;
   }
 
@@ -5151,8 +5166,9 @@ class nomina_fiscal_model extends CI_Model {
     //no mostrar algunas columnas
     $ver_des_otro = $ver_des_playera = false;
     foreach ($_POST['empleado_id'] as $key => $empleado){
-      if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
+      if($_POST['descuento_playeras'][$key]>0) $ver_des_otro = true;
       if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
+      if($_POST['descuento_cocina'][$key]>0) $ver_des_otro = true;
     }
 
     $empleados_sin_departamento = [];
@@ -5173,9 +5189,10 @@ class nomina_fiscal_model extends CI_Model {
       ];
     }
 
-    $columnas = array('n' => array(), 'w' => array(6, 60, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(6, 60, 10, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R'));
     $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
+    $columnas['n'][] = 'HRS';
     $columnas['n'][] = 'SUELDO';
     // $columnas['n'][] = 'ASISTENCIA';
     // $columnas['n'][] = 'DESPENSA';
@@ -5308,6 +5325,7 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+          $dataarr[] = $_POST['hrs_trabajadas'][$key];
           $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
           // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
           // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
@@ -5331,8 +5349,11 @@ class nomina_fiscal_model extends CI_Model {
 
           if($ver_des_playera)
             $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
-          if($ver_des_otro)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
+          if($ver_des_otro){
+            $dataarr[] = MyString::formatoNumero(
+              floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key])
+              , 2, '$', false);
+          }
           $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
           if ($ver_trans != 0)
@@ -5352,7 +5373,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_infonavit     += $_POST['total_infonavit'][$key];
           $total_fondo         += $_POST['fondo_ahorro'][$key];
           $descuento_playeras  += $_POST['descuento_playeras'][$key];
-          $descuento_otros     += $_POST['descuento_otros'][$key];
+          $descuento_otros     += floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key]);
           $ttotal_pagar        += $total_pagar;
           $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
           $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
@@ -5367,7 +5388,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_infonavit1     += $_POST['total_infonavit'][$key];
           $total_fondo1         += $_POST['fondo_ahorro'][$key];
           $descuento_playeras1  += $_POST['descuento_playeras'][$key];
-          $descuento_otros1     += $_POST['descuento_otros'][$key];
+          $descuento_otros1     += floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key]);
           $ttotal_pagar1        += $total_pagar;
           $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
           $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
@@ -5384,6 +5405,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
+      $datatto[] = '';
       $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
       // $datatto[] = MyString::formatoNumero($premio_asistencia1, 2, '$', false);
       // $datatto[] = MyString::formatoNumero($despensa1, 2, '$', false);
@@ -5471,6 +5493,7 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr = array();
         $dataarr[] = $numero_empleado;
         $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+        $dataarr[] = $_POST['hrs_trabajadas'][$key];
         $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
         // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
         // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
@@ -5494,8 +5517,11 @@ class nomina_fiscal_model extends CI_Model {
 
         if($ver_des_playera)
           $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
-        if($ver_des_otro)
-          $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
+        if($ver_des_otro){
+          $dataarr[] = MyString::formatoNumero(
+            floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key])
+            , 2, '$', false);
+        }
         $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
         if ($ver_trans != 0)
@@ -5515,7 +5541,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_infonavit     += $_POST['total_infonavit'][$key];
         $total_fondo         += $_POST['fondo_ahorro'][$key];
         $descuento_playeras  += $_POST['descuento_playeras'][$key];
-        $descuento_otros     += $_POST['descuento_otros'][$key];
+        $descuento_otros     += floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key]);
         $ttotal_pagar        += $total_pagar;
         $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
         $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
@@ -5530,7 +5556,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_infonavit1     += $_POST['total_infonavit'][$key];
         $total_fondo1         += $_POST['fondo_ahorro'][$key];
         $descuento_playeras1  += $_POST['descuento_playeras'][$key];
-        $descuento_otros1     += $_POST['descuento_otros'][$key];
+        $descuento_otros1     += floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key]);
         $ttotal_pagar1        += $total_pagar;
         $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
         $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
@@ -5544,6 +5570,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
+      $datatto[] = '';
       $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
       // $datatto[] = MyString::formatoNumero($premio_asistencia1, 2, '$', false);
       // $datatto[] = MyString::formatoNumero($despensa1, 2, '$', false);
@@ -5624,6 +5651,7 @@ class nomina_fiscal_model extends CI_Model {
       $dataarr = array();
       $dataarr[] = $numero_empleado;
       $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+      $dataarr[] = '';
       $dataarr[] = MyString::formatoNumero($empleado->total_percepcion, 2, '$', false);
       // $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       // $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
@@ -5691,6 +5719,7 @@ class nomina_fiscal_model extends CI_Model {
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
+    $datatto[] = '';
     $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
     // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
     // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
@@ -5774,6 +5803,7 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = '';
           $dataarr[] = $keyotss;
+          $dataarr[] = '';
           $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           // $datatto[] = MyString::formatoNumero('0', 2, '$', false);
           // $datatto[] = MyString::formatoNumero('0', 2, '$', false);
@@ -5814,6 +5844,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
+      $datatto[] = '';
       $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
       // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
       // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
@@ -5846,6 +5877,7 @@ class nomina_fiscal_model extends CI_Model {
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
+    $datatto[] = '';
     $datatto[] = MyString::formatoNumero($sueldo_semanal_real, 2, '$', false);
     // $datatto[] = MyString::formatoNumero($premio_asistencia, 2, '$', false);
     // $datatto[] = MyString::formatoNumero($despensa, 2, '$', false);
@@ -5999,8 +6031,9 @@ class nomina_fiscal_model extends CI_Model {
     //no mostrar algunas columnas
     $ver_des_otro = $ver_des_playera = false;
     foreach ($_POST['empleado_id'] as $key => $empleado){
-      if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
+      if($_POST['descuento_playeras'][$key]>0) $ver_des_otro = true;
       if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
+      if($_POST['descuento_cocina'][$key]>0) $ver_des_otro = true;
     }
 
     $empleados_sin_departamento = [];
@@ -6147,7 +6180,9 @@ class nomina_fiscal_model extends CI_Model {
           if($ver_des_playera)
             $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
           if($ver_des_otro)
-            $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero(
+              floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key])
+              , 2, '', false);
           $dataarr[] = MyString::formatoNumero($total_pagar, 2, '', false);
 
           if ($ver_trans != 0)
@@ -6289,7 +6324,9 @@ class nomina_fiscal_model extends CI_Model {
         if($ver_des_playera)
           $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
         if($ver_des_otro)
-          $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero(
+            floatval($_POST['descuento_otros'][$key]) + floatval($_POST['descuento_playeras'][$key]) + floatval($_POST['descuento_cocina'][$key])
+            , 2, '', false);
         $dataarr[] = MyString::formatoNumero($total_pagar, 2, '', false);
 
         if ($ver_trans != 0)

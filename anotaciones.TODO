@@ -40,14 +40,15 @@
  ✔ Agregar el catalogo de cultivos (áreas) al catalogo de trabajadores para poder asignar en cual área labora y separar los costos @done (18-11-07 09:46)
  ✔ En la caja chica y en la caja de bodega agregar apartado de traspaso de dinero, para poder enviar dinero entre cajas @done (18-11-07 15:59)
  ✔ En las ordenes de compra agregar original y copia @done (18-12-26 12:54)
- ☐ Fondo de 50 mil en la caja de tryana 2
- ☐ Crear caja 4 es igual a la de tryana es para la señora
- ☐ Poner folio (consecutivo id) de cada movimiento de ingreso, gasto en todas las cajas
+ ✔ Fondo de 50 mil en la caja de tryana 2 @done (19-01-12 12:37)
+ ✔ Crear caja 4 es igual a la de tryana es para la señora @done (19-01-12 12:37)
+ ✔ Poner folio (consecutivo id) de cada movimiento de ingreso, gasto en todas las cajas @done (19-01-12 15:18)
+ ✔ Cambios rpt Asistencias @done (19-01-13 21:14)
  ☐ En las fotos ver como esta el reporte de estado de resultado
  ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
  ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
  ☐ En los movimientos directos de poliza meter formato de cheques y de impresion de movimientos
- ☐ Que no puedan quitar abonos solo en ese dia al menos que tengan un privilegio
+ ✔ Que no puedan quitar abonos solo en ese dia al menos que tengan un privilegio @done (19-01-12 12:38)
  ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
  ✔ En la aplicacion de exritorio en la pestaña de limon y bascula poner la empresa @done (19-01-02 09:30)
  ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
