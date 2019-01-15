@@ -998,15 +998,14 @@ class banco_cuentas_model extends banco_model {
 
 	public function generaCheque($id_movimiento)
 	{
-		$data = $this->getMovimientoInfo($id_movimiento);
+		$data = $this->getMovimientoInfo($id_movimiento, false);
 		if(isset($data['info']->id_movimiento))
 		{
 			$cheque = new Cheque();
-			$cheque->{'generaCheque_'.$data['info']->id_banco}(
-						$data['info']->a_nombre_de,
-						$data['info']->monto,
-						substr($data['info']->fecha, 0, 10)
-						);
+			$cheque->generaCheque(null, $data);
+						// $data['info']->a_nombre_de,
+						// $data['info']->monto,
+						// substr($data['info']->fecha, 0, 10)
 		}else
 			echo "No se obtubo la informacion del cheque";
 	}
@@ -1033,6 +1032,7 @@ class banco_cuentas_model extends banco_model {
       $response['info']->es_ligado = count($response['bascula'])+count($response['compras'])+count($response['facturas']);
 
       $cuenta = $this->banco_cuentas_model->getCuentaInfo($response['info']->id_cuenta)['info'];
+      $response['cuenta'] = $cuenta;
 
       $this->load->model('empresas_model');
       $response['empresa'] = $this->empresas_model->getInfoEmpresa($cuenta->id_empresa, true);
@@ -1345,7 +1345,7 @@ class banco_cuentas_model extends banco_model {
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)
-										) AS saldo, bc.tipo
+										) AS saldo, bc.tipo, bc.formato_cheque
                  FROM banco_cuentas AS bc
                  		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
 										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
