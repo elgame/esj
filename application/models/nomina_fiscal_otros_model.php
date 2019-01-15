@@ -802,6 +802,27 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     );
                   }
                 }
+
+                // Agregamos las horas trabajadas
+                $this->db->where("id_empleado = {$empleado->id} AND id_empresa = {$_POST['id_empresa']} AND DATE(fecha) = '{$fecha}'");
+                $this->db->delete('nomina_asistencia_hrs'); // elimina las hrs del dia
+                if ($tipo !== 'f') {
+                  $hrs = 0;
+                  if (trim($datos[8]) != '') {
+                    $hhrr = explode(':', $datos[8]);
+                    $hrs = floatval($hhrr[0]);
+                    $hrs += floatval($hhrr[1])/60;
+                  }
+                  $this->db->insert('nomina_asistencia_hrs', [
+                    'id_empresa'  => $_POST['id_empresa'],
+                    'anio'        => $semana['anio'],
+                    'semana'      => $semana['semana'],
+                    'id_empleado' => $empleado->id,
+                    'fecha'       => $fecha,
+                    'hrs'         => $hrs,
+                  ]);
+                }
+
               }
             }
           }

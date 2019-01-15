@@ -1,5 +1,27 @@
 
- ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc
+ ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc|san
+     CREATE TABLE public.nomina_asistencia_hrs
+      (
+        id_empresa integer NOT NULL,
+        anio integer NOT NULL,
+        semana integer NOT NULL,
+        id_empleado bigint NOT NULL,
+        fecha date NOT NULL,
+        hrs double precision NOT NULL DEFAULT 0,
+        CONSTRAINT nomina_asistencia_hrs_pkey PRIMARY KEY (id_empresa, id_empleado, fecha),
+        CONSTRAINT nomina_asistencia_hrs_id_empleado_fkey FOREIGN KEY (id_empleado)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT nomina_asistencia_hrs_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE ); ALTER TABLE public.nomina_asistencia_hrs OWNER TO programa;
+ ✔ Caja chica 4 y de tryana @done (19-01-12 14:52) pcc|san
+    UPDATE public.cajachicas SET nombre='Caja general' WHERE id = 4;
+    UPDATE public.cajachicas SET presupuesto=50000 WHERE id = 2;
+    ALTER TABLE public.cajachica_ingresos ADD COLUMN folio bigint;
+    ALTER TABLE public.cajachica_gastos ADD COLUMN folio_sig bigint;
+ ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Saldar prestamos',410,FALSE,'caja_chica_prest/saldar_prestamos/','edit',FALSE);
  ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct
    CREATE TABLE public.nomina_trabajos_dia2
@@ -686,6 +708,7 @@
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('ARTICULOS DE LIMPIEZA Y ASEO', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MATERIAL Y HERRAMIENTAS DE TRABAJO', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RENTA DE MAQUINARIA', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('MAQUINARIA', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RENTA DE TERRENOS', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CUOTAS, SUBCRIPCIONES Y MEMBRESIAS', 'gasto');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('CAPACITACION Y ADIESTRAMIENTO', 'gasto');

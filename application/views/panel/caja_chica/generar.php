@@ -118,8 +118,10 @@
                           <thead>
                             <tr>
                               <th colspan="4">INGRESOS POR REPOSICION
+                                <?php if ($_GET['fno_caja'] == '4'): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
+                                <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>
                             </tr>
@@ -212,7 +214,7 @@
                             <tr>
                               <th colspan="4">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
-                                <?php if ($_GET['fno_caja'] !== '1'): ?>
+                                <?php if ($_GET['fno_caja'] == '4'): ?>
                                 <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
                                 <?php endif ?>
                               </th>
@@ -525,7 +527,9 @@
               </div>
               <!-- /Gastos -->
 
-              <?php if ($_GET['fno_caja'] == '2'): ?>
+              <?php
+              $totalTraspasos = 0;
+              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
               <!-- Traspasos -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -550,10 +554,9 @@
                               </thead>
                               <tbody>
                                 <?php
-                                  $totalTraspasos = 0;
                                   if (isset($_POST['traspaso_concepto'])) {
                                     foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
-                                      $totalTraspasos += floatval($_POST['traspaso_importe'][$key]); ?>
+                                      $totalTraspasos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
                                     <tr>
                                       <td>
                                         <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
@@ -572,7 +575,7 @@
                                 <?php }} else {
                                   if (isset($caja['traspasos']))
                                   foreach ($caja['traspasos'] as $traspaso) {
-                                    $totalTraspasos += floatval($traspaso->monto);
+                                    $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
                                   ?>
                                   <tr>
                                     <td>
@@ -649,6 +652,7 @@
                                               <option value="otros" <?php echo $_POST['deudor_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                               <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                              <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                             </select>
                                           </td>
                                           <td style="width: 200px;">
@@ -743,7 +747,7 @@
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2')) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4')) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -918,6 +922,10 @@
                               <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
+                              <td>TOTAL TRASPASOS:</td>
+                              <td><input type="text" name="" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                            </tr>
+                            <tr>
                               <td>TOTAL DEUDORES:</td>
                               <td><input type="text" name="" value="<?php echo ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
                             </tr>
@@ -927,8 +935,8 @@
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>
@@ -980,6 +988,7 @@
             <th>Fecha</th>
             <th>Folio</th>
             <th>Cliente</th>
+            <th>Empresa</th>
             <th>Total</th>
           </tr>
         </thead>
