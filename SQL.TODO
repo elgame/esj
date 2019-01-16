@@ -1,5 +1,5 @@
 
- ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc
+ ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc|san|lap
      CREATE TABLE public.nomina_asistencia_hrs
       (
         id_empresa integer NOT NULL,
@@ -16,14 +16,14 @@
             REFERENCES public.empresas (id_empresa) MATCH SIMPLE
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE ); ALTER TABLE public.nomina_asistencia_hrs OWNER TO programa;
- ✔ Caja chica 4 y de tryana @done (19-01-12 14:52) pcc
+ ✔ Caja chica 4 y de tryana @done (19-01-12 14:52) pcc|san|lap
     UPDATE public.cajachicas SET nombre='Caja general' WHERE id = 4;
     UPDATE public.cajachicas SET presupuesto=50000 WHERE id = 2;
     ALTER TABLE public.cajachica_ingresos ADD COLUMN folio bigint;
     ALTER TABLE public.cajachica_gastos ADD COLUMN folio_sig bigint;
- ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc
+ ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Saldar prestamos',410,FALSE,'caja_chica_prest/saldar_prestamos/','edit',FALSE);
- ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct|pcc
+ ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct|pcc|lap
    * INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Registro de actividades x trabajador 2',184,TRUE,'nomina_trabajos2/','briefcase',FALSE);
    CREATE TABLE public.nomina_trabajos_dia2
       (
@@ -95,7 +95,7 @@
       COMMENT ON COLUMN public.nomina_trabajos_dia2_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
 
 
- ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap|san|pct|pcc
+ ✔ Ordenes de compra impresion @done (18-12-26 12:39) lap|san|pct
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones smallint NOT NULL DEFAULT 0;
 
  ✔ New -> Labores de trabajo @done (18-12-12 15:43) pct|lap|san|pct
