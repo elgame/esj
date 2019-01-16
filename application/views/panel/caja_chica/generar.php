@@ -118,9 +118,11 @@
                           <thead>
                             <tr>
                               <th colspan="4">INGRESOS POR REPOSICION
-                                <?php if ($_GET['fno_caja'] == '4'): ?>
+                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2'): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
-                                <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
+                                <?php if ($_GET['fno_caja'] == '4'): ?>
+                                  <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
+                                <?php endif ?>
                                 <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>

@@ -1,4 +1,8 @@
 
+
+ ✔ Cambio en producto @done (19-01-16 16:02) pcc
+   ALTER TABLE public.productos ADD COLUMN tipo_apli character varying(5);
+   COMMENT ON COLUMN public.productos.tipo_apli IS 'n: nutricion, fs: fitosanidad';
  ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc|san|lap
      CREATE TABLE public.nomina_asistencia_hrs
       (

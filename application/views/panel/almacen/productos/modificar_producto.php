@@ -143,6 +143,17 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="ftipo_apli">Tipo</label>
+                  <div class="controls">
+                    <select name="ftipo_apli" id="ftipo_apli" class="span12">
+                      <option value=""></option>
+                      <option value="n" <?php echo set_select('ftipo_apli', 'n', false, (isset($data['info']->tipo_apli)? $data['info']->tipo_apli: '')); ?>>Nutrición</option>
+                      <option value="fs" <?php echo set_select('ftipo_apli', 'fs', false, (isset($data['info']->tipo_apli)? $data['info']->tipo_apli: '')); ?>>Fito sanidad</option>
+                    </select>
+                  </div>
+                </div>
+
                 <?php if ($data['familia']->tipo == 'a'): ?>
                 <div class="control-group">
                   <label class="control-label" for="ftipo_activo">Tipo activo</label>
