@@ -131,6 +131,17 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="ftipo_apli">Tipo</label>
+                <div class="controls">
+                  <select name="ftipo_apli" id="ftipo_apli" class="span12">
+                    <option value=""></option>
+                    <option value="n">Nutrición</option>
+                    <option value="fs">Fito sanidad</option>
+                  </select>
+                </div>
+              </div>
+
               <?php if ($familia['info']->tipo == 'a'): ?>
               <div class="control-group">
                 <label class="control-label" for="ftipo_activo">Tipo activo</label>
