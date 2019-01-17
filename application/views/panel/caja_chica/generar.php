@@ -118,7 +118,7 @@
                           <thead>
                             <tr>
                               <th colspan="4">INGRESOS POR REPOSICION
-                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2'): ?>
+                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '1'): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <?php if ($_GET['fno_caja'] == '4'): ?>
                                   <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
@@ -393,9 +393,9 @@
                               <thead>
                                 <tr>
                                   <th colspan="6">GASTOS DEL DIA
-                                    <?php if ($_GET['fno_caja'] !== '1'): ?>
+                                    <?php //if ($_GET['fno_caja'] !== '1'): ?>
                                     <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
-                                    <?php endif ?>
+                                    <?php //endif ?>
                                   </th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
