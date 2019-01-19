@@ -1,5 +1,8 @@
 
 
+ ✔ Cheques desde sistema @done (19-01-19 13:23) pct
+    ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;
+    COMMENT ON COLUMN public.banco_movimientos.abono_cuenta IS 'para los cheques abono a cuenta';
  ✔ Cambio en producto @done (19-01-16 16:02) pcc|san
    ALTER TABLE public.productos ADD COLUMN tipo_apli character varying(5);
    COMMENT ON COLUMN public.productos.tipo_apli IS 'n: nutricion, fs: fitosanidad';

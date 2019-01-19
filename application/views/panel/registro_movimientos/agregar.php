@@ -114,6 +114,11 @@
                             } ?>
                           </select>
                         </div>
+
+                        <div class="span2" id="divAbonoCuenta">
+                          Abono a cuenta
+                          <input type="checkbox" id="fabonoCuenta" value="true" class="sikey">
+                        </div>
                       </div>
 
                       <div class="span2">

@@ -155,6 +155,7 @@ class registro_movimientos_model extends CI_Model {
           'entransito'  => 'f',
           'metodo_pago' => $_POST['metodoPago'][$key],
           'a_nombre_de' => $_POST['cliente'][$key],
+          'abono_cuenta' => ($_POST['abonoCuenta'][$key]=='true')? 't': 'f',
         );
         if(is_numeric($_POST['idCliente'][$key]))
           $data['id_cliente'] = $_POST['idCliente'][$key];
@@ -170,10 +171,10 @@ class registro_movimientos_model extends CI_Model {
         // agrega el id del movimiento de banco para cuando se cancele la poliza cancelar en bancos
         if (isset($movBanco['id_movimiento']) && $movBanco['id_movimiento'] > 0) {
           $movimiento['id_movimiento'] = $movBanco['id_movimiento'];
-          // // si es cheque se agrega para mostrar la impresión
-          // if ($_POST['metodoPago'][$key] == 'cheque') {
-          //   $cheques[]
-          // }
+          // si es cheque se agrega para mostrar la impresión
+          if ($_POST['metodoPago'][$key] == 'cheque') {
+            $cheques[] = $movimiento['id_movimiento'];
+          }
         }
       }
 

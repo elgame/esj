@@ -46,34 +46,34 @@ class Cheque extends FPDF {
 	/**
 	 * Banorte 4
 	 */
-	public function generaCheque_4($nombre, $monto, $fecha=null, $moneda='M.N.', $abono_cuenta=0, $opc='I'){
-		parent::__construct($this->orientation, $this->unit, array(70, 165));
+	public function generaCheque_bnort1($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
 
-		$fecha = $fecha==null? date("Y-m-d"): $fecha;
-		$this->AddPage('P', array(70, 165));
-		$this->SetFont('Arial','B', 9);
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
 
-		$this->SetDrawColor(0, 0, 0);
-		$this->SetLineWidth(0.1);
-		// $this->Rect(0, 0, 70, 165, 'D');
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
 
-		$this->RotatedText(44, 64, MyString::fechaATexto($fecha), -90);
+    $this->RotatedText(44, 63, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
 
-		$this->SetFont('Arial','B', 10);
-		$this->RotatedText(44, 124, MyString::formatoNumero($monto, 2, ''), -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(42, 125, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
 
-		$this->SetFont('Arial','B', 9);
-		$this->RotatedText(38, 35, $nombre, -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(31, 37, $this->data['info']->a_nombre_de, -90);
 
-		$this->RotatedText(28, 8, MyString::num2letras($monto, $moneda), -90);
+    $this->RotatedText(23, 10, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
 
-		if($abono_cuenta == 1){
-			$this->SetFont('Arial','B', 8);
-			$this->RotatedText(55, 50, 'PARA ABONO EN CUENTA', -90);
-		}
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(60, 55, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(56, 55, "DEL BENEFICIARIO", -90);
+    // }
 
-		$this->Output('cheque.pdf', $opc);
-	}
+    $this->Output('cheque.pdf', $opc);
+  }
 
 	/**
 	 * Banamex 2
@@ -139,68 +139,162 @@ class Cheque extends FPDF {
 	/**
 	 * Banbajio 3
 	 */
-	public function generaCheque_3($nombre, $monto, $fecha=null, $moneda='M.N.', $abono_cuenta=0, $opc='I'){
-		parent::__construct($this->orientation, $this->unit, array(70, 165));
+	public function generaCheque_bajio1($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
 
-		$fecha = $fecha==null? date("Y-m-d"): $fecha;
-		$this->AddPage('P', array(70, 165));
-		$this->SetFont('Arial','B', 9);
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
 
-		$this->SetDrawColor(0, 0, 0);
-		$this->SetLineWidth(0.1);
-		// $this->Rect(0, 0, 70, 165, 'D');
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
 
-		$this->RotatedText(51, 79, MyString::fechaATexto($fecha), -90);
+    $this->RotatedText(50, 79, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
 
-		$this->SetFont('Arial','B', 10);
-		$this->RotatedText(39, 132, MyString::formatoNumero($monto, 2, ''), -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(39, 127, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
 
-		$this->SetFont('Arial','B', 9);
-		$this->RotatedText(44, 6, $nombre, -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(42, 10, $this->data['info']->a_nombre_de, -90);
 
-		$this->RotatedText(34, 6, MyString::num2letras($monto, $moneda), -90);
+    $this->RotatedText(33, 10, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
 
-		if($abono_cuenta == 1){
-			$this->SetFont('Arial','B', 7);
-			$this->RotatedText(13, 120, "PARA ABONO EN CUENTA", -90);
-			$this->RotatedText(9, 120, "DEL BENEFICIARIO", -90);
-		}
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(22, 45, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(18, 45, "DEL BENEFICIARIO", -90);
+    // }
 
-		$this->Output('cheque.pdf', $opc);
-	}
+    $this->Output('cheque.pdf', $opc);
+  }
 
 	/**
 	 * Afirme 1
 	 */
-	public function generaCheque_1($nombre, $monto, $fecha=null, $moneda='M.N.', $abono_cuenta=0, $opc='I'){
-		parent::__construct($this->orientation, $this->unit, array(70, 165));
+	public function generaCheque_afirm1($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
 
-		$fecha = $fecha==null? date("Y-m-d"): $fecha;
-		$this->AddPage('P', array(70, 165));
-		$this->SetFont('Arial','B', 9);
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
 
-		$this->SetDrawColor(0, 0, 0);
-		$this->SetLineWidth(0.1);
-		// $this->Rect(0, 0, 70, 165, 'D');
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
 
-		$this->RotatedText(54, 104, MyString::fechaATexto($fecha), -90);
+    $this->RotatedText(53, 105, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
 
-		$this->SetFont('Arial','B', 10);
-		$this->RotatedText(40, 123, MyString::formatoNumero($monto, 2, ''), -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(40, 122, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
 
-		$this->SetFont('Arial','B', 9);
-		$this->RotatedText(42, 8, $nombre, -90);
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(40, 10, $this->data['info']->a_nombre_de, -90);
 
-		$this->RotatedText(32, 8, MyString::num2letras($monto, $moneda), -90);
+    $this->RotatedText(30, 10, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
 
-		if($abono_cuenta == 1){
-			$this->SetFont('Arial','B', 7);
-			$this->RotatedText(13, 120, "PARA ABONO EN CUENTA", -90);
-			$this->RotatedText(9, 120, "DEL BENEFICIARIO", -90);
-		}
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(66, 126, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(62, 126, "DEL BENEFICIARIO", -90);
+    // }
 
-		$this->Output('cheque.pdf', $opc);
-	}
+    $this->Output('cheque.pdf', $opc);
+  }
+
+  /**
+   * Santander 1
+   */
+  public function generaCheque_santr1($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
+
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
+
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
+
+    $this->RotatedText(59, 95, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(42, 123, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(44, 12, $this->data['info']->a_nombre_de, -90);
+
+    $this->RotatedText(35, 12, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
+
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(30, 47, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(26, 47, "DEL BENEFICIARIO", -90);
+    // }
+
+    $this->Output('cheque.pdf', $opc);
+  }
+
+  /**
+   * Bancomer 1
+   */
+  public function generaCheque_bcmer1($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
+
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
+
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
+
+    $this->RotatedText(47, 91, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(40, 131, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(38, 15, $this->data['info']->a_nombre_de, -90);
+
+    $this->RotatedText(30, 15, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
+
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(65, 80, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(61, 80, "DEL BENEFICIARIO", -90);
+    // }
+
+    $this->Output('cheque.pdf', $opc);
+  }
+
+  /**
+   * Bancomer 2
+   */
+  public function generaCheque_bcmer2($opc='I'){
+    parent::__construct($this->orientation, $this->unit, array(70, 165));
+
+    $this->AddPage('P', array(70, 165));
+    $this->SetFont('Arial','B', 9);
+
+    $this->SetDrawColor(0, 0, 0);
+    $this->SetLineWidth(0.1);
+    // $this->Rect(0, 0, 70, 165, 'D');
+
+    $this->RotatedText(54, 115, MyString::fechaATexto(substr($this->data['info']->fecha, 0, 10)), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(41, 125, MyString::formatoNumero($this->data['info']->monto, 2, '', false), -90);
+
+    $this->SetFont('Arial','B', 9);
+    $this->RotatedText(40, 10, $this->data['info']->a_nombre_de, -90);
+
+    $this->RotatedText(30, 10, MyString::num2letras($this->data['info']->monto, $this->data['cuenta']->tipo), -90);
+
+    // if($abono_cuenta == 1){
+    //  $this->SetFont('Arial','B', 7);
+    //  $this->RotatedText(65, 60, "PARA ABONO EN CUENTA", -90);
+    //  $this->RotatedText(61, 60, "DEL BENEFICIARIO", -90);
+    // }
+
+    $this->Output('cheque.pdf', $opc);
+  }
 
 
 

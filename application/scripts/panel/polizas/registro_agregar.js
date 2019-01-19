@@ -100,6 +100,7 @@
 
         $('#grupoBanco').hide();
         if (ui.item.item.tipo == 'banco') {
+          $('#fmetodo_pago').val('transferencia').change();
           $('#grupoBanco').show();
         }
       }
@@ -130,6 +131,7 @@
           $cliente       = $('#cliente').css({'background-color': '#FFF'}),
           $didCliente   = $('#did_cliente').css({'background-color': '#FFF'}),
           $fmetodoPago  = $('#fmetodo_pago').css({'background-color': '#FFF'}),
+          $fabonoCuenta  = $('#fabonoCuenta').css({'background-color': '#FFF'}),
           campos         = [$fcantidad, $centroCosto],
           producto,
           error          = false,
@@ -187,6 +189,7 @@
           'cliente'       : $cliente.val(),
           'idCliente'     : $didCliente.val(),
           'metodoPago'    : $fmetodoPago.val(),
+          'abonoCuenta'   : $fabonoCuenta.is(':checked'),
         };
 
         addProducto(producto);
@@ -224,6 +227,13 @@
         }
       }
     });
+
+    $('#fmetodo_pago').on('change', function(event) {
+        $('#divAbonoCuenta').hide();
+      if ($(this).val() == 'cheque' && centroCostoSel && centroCostoSel.item.tipo == 'banco') {
+        $('#divAbonoCuenta').show();
+      }
+    });
   };
 
   /*
@@ -249,6 +259,7 @@
                     '<input type="hidden" name="cliente[]" value="'+producto.cliente+'" class="cliente">'+
                     '<input type="hidden" name="idCliente[]" value="'+producto.idCliente+'" class="idCliente">'+
                     '<input type="hidden" name="metodoPago[]" value="'+producto.metodoPago+'" class="metodoPago">'+
+                    '<input type="hidden" name="abonoCuenta[]" value="'+producto.abonoCuenta+'" class="abonoCuenta">'+
 
                     '<input type="hidden" name="centroCosto[]" value="'+producto.centroCosto+'" class="centroCosto">'+
                     '<input type="hidden" name="centroCostoId[]" value="'+(producto.centroCostoId||'0')+'" class="centroCostoId">'+
