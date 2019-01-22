@@ -107,7 +107,7 @@
 
           <!-- Ingresos -->
           <div class="row-fluid">
-            <div class="span6">
+            <div class="span12">
               <div class="row-fluid">
                 <div class="span12">
 
@@ -117,7 +117,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
                           <thead>
                             <tr>
-                              <th colspan="4">INGRESOS POR REPOSICION
+                              <th colspan="6">INGRESOS POR REPOSICION
                                 <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '1'): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <?php //if ($_GET['fno_caja'] == '4'): ?>
@@ -130,8 +130,10 @@
                             <tr>
                               <th>EMPRESA</th>
                               <th>NOM</th>
+                              <th>BANCO</th>
                               <th>POLIZA</th>
-                              <th>NOMBRE Y/O CONCEPTO</th>
+                              <th>NOMBRE</th>
+                              <th>CONCEPTO</th>
                               <th>ABONO</th>
                               <th></th>
                             </tr>
@@ -158,12 +160,16 @@
                                         <?php } ?>
                                       </select>
                                     </td>
-                                    <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $_POST['ingreso_poliza'][$key] ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly ?>></td>
+                                    <td style=""><input type="text" name="ingreso_banco[]" value="<?php echo $_POST['ingreso_banco'][$key] ?>" class="ingreso_banco span12" maxlength="50" placeholder="Banco" <?php echo $readonly ?>></td>
+                                    <td style=""><input type="text" name="ingreso_poliza[]" value="<?php echo $_POST['ingreso_poliza'][$key] ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="" <?php echo $readonly ?>></td>
+                                    <td>
+                                      <input type="text" name="ingreso_nombre[]" value="<?php echo $_POST['ingreso_nombre'][$key] ?>" class="ingreso-nombre span12" maxlength="130" placeholder="Nombre" required <?php echo $readonly ?>>
+                                    </td>
                                     <td>
                                       <input type="text" name="ingreso_concepto[]" value="<?php echo $concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                       <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $_POST['ingreso_concepto_id'][$key] ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
                                     </td>
-                                    <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $_POST['ingreso_monto'][$key] ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
+                                    <td style=""><input type="text" name="ingreso_monto[]" value="<?php echo $_POST['ingreso_monto'][$key] ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
                                     <td style="width: 30px;">
                                       <button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                     </td>
@@ -188,12 +194,16 @@
                                           <?php } ?>
                                         </select>
                                       </td>
-                                      <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $ingreso->poliza ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly.$mod_ing_readonly ?>></td>
+                                      <td style=""><input type="text" name="ingreso_banco[]" value="<?php echo $ingreso->banco ?>" class="ingreso_banco span12" maxlength="50" placeholder="Banco" <?php echo $readonly.$mod_ing_readonly ?>></td>
+                                      <td style=""><input type="text" name="ingreso_poliza[]" value="<?php echo $ingreso->poliza ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="" <?php echo $readonly.$mod_ing_readonly ?>></td>
+                                      <td>
+                                        <input type="text" name="ingreso_nombre[]" value="<?php echo $ingreso->nombre ?>" class="ingreso-nombre span12" maxlength="130" placeholder="Nombre" required <?php echo $readonly.$mod_ing_readonly ?>>
+                                      </td>
                                       <td>
                                         <input type="text" name="ingreso_concepto[]" value="<?php echo $ingreso->concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly.$mod_ing_readonly ?>>
                                         <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $ingreso->id_movimiento ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
                                       </td>
-                                      <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly.$mod_ing_readonly ?>></td>
+                                      <td style=""><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly.$mod_ing_readonly ?>></td>
                                       <td style="width: 30px;">
                                         <?php if ($modificar_ingresos): ?>
                                           <button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
@@ -212,13 +222,12 @@
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
+                          <?php if ($_GET['fno_caja'] == '4'): ?>
                           <thead>
                             <tr>
                               <th colspan="4">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
-                                <?php if ($_GET['fno_caja'] == '4'): ?>
                                 <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
-                                <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>
                             </tr>
@@ -231,8 +240,11 @@
                               <th></th>
                             </tr>
                           </thead>
+                          <?php endif ?>
                           <tbody>
                             <?php
+                            $totalIngresos = 0;
+                            if ($_GET['fno_caja'] == '4') {
                               if (isset($_POST['remision_concepto'])) {
                                 foreach ($_POST['remision_concepto'] as $key => $concepto) {
                                   // $totalIngresos += floatval($_POST['otros_monto'][$key]);
@@ -255,7 +267,7 @@
                                       <input type="hidden" name="remision_del[]" value="" id="remision_del">
                                     </td>
                                   </tr>
-                            <?php }} else {
+                              <?php }} else {
                                   foreach ($caja['remisiones'] as $remision) {
                                     // $totalIngresos += floatval($otro->monto);
                                   ?>
@@ -297,9 +309,11 @@
                               <td></td>
                             </tr>
 
+                          <?php } ?>
+
                             <tr>
-                              <td colspan="4"></td>
-                              <td style="width: 100px;">
+                              <td colspan="6"></td>
+                              <td style="">
                                 <?php $totalReporteCaja = $totalSaldoIngresos + $totalIngresos ?>
                                 <input type="text" name="tota_saldo_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalReporteCaja, 2, '')) ?>" class="span12" id="total-saldo-ingresos" maxlength="500" readonly style="text-align: right;">
                               </td>
@@ -311,7 +325,107 @@
                     </div>
                     <!--/ Ingresos Clientes-->
 
+                    <?php
+                    $totalTraspasos = 0;
+                    if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
+                    <!-- Traspasos -->
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="2">TRASPASOS <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                        <th colspan="1"></th>
+                                        <th colspan="2">IMPORTE</th>
+                                      </tr>
+                                      <tr>
+                                        <th>TIPO</th>
+                                        <th title="Afectar el fondo de la caja">AF. FONDO</th>
+                                        <th>CONCEPTO</th>
+                                        <th>CARGO</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                        if (isset($_POST['traspaso_concepto'])) {
+                                          foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
+                                            $totalTraspasos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
+                                          <tr>
+                                            <td>
+                                              <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                                <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                                <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                              </select>
+                                              <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
+                                              <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                            </td>
+                                            <td>
+                                              <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
+                                                <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
+                                                <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
+                                              </select>
+                                            </td>
+                                            <td style="">
+                                              <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                            </td>
+                                            <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                            <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                          </tr>
+                                      <?php }} else {
+                                        if (isset($caja['traspasos']))
+                                        foreach ($caja['traspasos'] as $traspaso) {
+                                          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                                        ?>
+                                        <tr>
+                                          <td>
+                                            <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                              <option value="t" <?php echo $traspaso->tipo == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                              <option value="f" <?php echo $traspaso->tipo == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                            </select>
+                                            <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
+                                            <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                          </td>
+                                          <td>
+                                            <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo" <?php echo $readonly ?>>
+                                              <option value="f" <?php echo $traspaso->afectar_fondo == 'f' ? 'selected' : '' ?>>No</option>
+                                              <option value="t" <?php echo $traspaso->afectar_fondo == 't' ? 'selected' : '' ?>>Si</option>
+                                            </select>
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                          <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                        </tr>
+                                      <?php }} ?>
+                                      <tr class="row-total">
+                                        <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td><input type="text" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                                        <td></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Traspasos -->
+                    <?php endif ?>
+
                     <!-- Boletas Pesadas -->
+                    <?php
+                    $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
+                    if ($_GET['fno_caja'] == '1'): ?>
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
                         <div class="row-fluid">
@@ -336,7 +450,6 @@
                                     </thead>
                                     <tbody>
                                       <?php
-                                        $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
                                         foreach ($caja['boletas'] as $key => $boleta) {
                                           $totalBoletas           += floatval($boleta->importe);
                                           $totalBoletasPagadas    += floatval($boleta->importe_pagada);
@@ -372,6 +485,7 @@
                         </div>
                       </div>
                     </div>
+                    <?php endif ?>
                     <!-- /Boletas Pesadas -->
 
                 </div>
@@ -528,89 +642,6 @@
                 </div>
               </div>
               <!-- /Gastos -->
-
-              <?php
-              $totalTraspasos = 0;
-              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
-              <!-- Traspasos -->
-              <div class="row-fluid" style="margin-top: 5px;">
-                <div class="span12">
-                  <div class="row-fluid">
-                    <div class="span12">
-                      <div class="row-fluid">
-                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
-                        <div class="row-fluid">
-                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
-                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
-                              <thead>
-                                <tr>
-                                  <th colspan="2">TRASPASOS <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
-                                  <th colspan="2">IMPORTE</th>
-                                </tr>
-                                <tr>
-                                  <th>TIPO</th>
-                                  <th>CONCEPTO</th>
-                                  <th>CARGO</th>
-                                  <th></th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <?php
-                                  if (isset($_POST['traspaso_concepto'])) {
-                                    foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
-                                      $totalTraspasos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
-                                    <tr>
-                                      <td>
-                                        <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
-                                          <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
-                                          <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
-                                        </select>
-                                        <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
-                                        <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                      </td>
-                                      <td style="">
-                                        <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                      </td>
-                                      <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                    </tr>
-                                <?php }} else {
-                                  if (isset($caja['traspasos']))
-                                  foreach ($caja['traspasos'] as $traspaso) {
-                                    $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
-                                  ?>
-                                  <tr>
-                                    <td>
-                                      <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
-                                        <option value="t" <?php echo $traspaso->tipo == 't' ? 'selected' : '' ?>>Ingreso</option>
-                                        <option value="f" <?php echo $traspaso->tipo == 'f' ? 'selected' : '' ?>>Egreso</option>
-                                      </select>
-                                      <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
-                                      <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
-                                    </td>
-                                    <td style="">
-                                      <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
-                                    </td>
-                                    <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
-                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                  </tr>
-                                <?php }} ?>
-                                <tr class="row-total">
-                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                  <td><input type="text" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
-                                  <td></td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /Traspasos -->
-              <?php endif ?>
 
               <!-- Deudores -->
               <div class="row-fluid" style="margin-top: 5px;">
@@ -1027,7 +1058,12 @@
         <tbody>
           <?php foreach ($movimientos as $movi) { ?>
             <tr>
-              <td><input type="checkbox" class="chk-movimiento" data-id="<?php echo $movi->id_movimiento ?>" data-total="<?php echo $movi->monto ?>" data-proveedor="<?php echo $movi->proveedor ?>" data-poliza="<?php echo $movi->numero_ref." ".$movi->banco ?>"></td>
+              <td><input type="checkbox" class="chk-movimiento"
+                data-id="<?php echo $movi->id_movimiento ?>" data-total="<?php echo $movi->monto ?>"
+                data-proveedor="<?php echo $movi->proveedor ?>"
+                data-poliza="<?php echo $movi->numero_ref ?>"
+                data-banco="<?php echo $movi->banco ?>"
+                ></td>
               <td style="width: 66px;"><?php echo $movi->fecha ?></td>
               <td class="search-field"><?php echo $movi->proveedor ?></td>
               <td><?php echo $movi->numero_ref." ".$movi->banco ?></td>

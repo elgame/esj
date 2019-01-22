@@ -1,14 +1,23 @@
 
- ✔ Otros cambios de caja chica @done (19-01-21 20:22) pcc
+ ✔ Otros cambios de caja chica @done (19-01-21 20:22) pcc|lap
     ALTER TABLE public.cajachica_remisiones ADD COLUMN status boolean NOT NULL DEFAULT true;
     UPDATE public.cajachica_remisiones SET folio=0 WHERE folio is null;
     ALTER TABLE public.cajachica_remisiones ALTER COLUMN folio SET NOT NULL;
     ALTER TABLE public.cajachica_remisiones DROP CONSTRAINT cajachica_remisiones_pkey;
     ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_pkey PRIMARY KEY(fecha, id_remision, folio, "row");
- ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc
+    ----- lap|
+    ALTER TABLE public.cajachica_traspasos ADD COLUMN afectar_fondo boolean NOT NULL DEFAULT false;
+    COMMENT ON COLUMN public.cajachica_traspasos.afectar_fondo IS 'true: afecta el fondo de la caja, false: no afecta';
+    ALTER TABLE public.cajachica_remisiones ADD COLUMN fecha_rem date;
+    COMMENT ON COLUMN public.cajachica_remisiones.fecha_rem IS 'fecha de remision';
+    ALTER TABLE public.cajachica_ingresos ADD COLUMN banco character varying(50);
+    ALTER TABLE public.cajachica_ingresos ADD COLUMN nombre character varying(130);
+    ALTER TABLE public.cajachica_ingresos ADD COLUMN status boolean NOT NULL DEFAULT true;
+
+ ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc|lap
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;
     COMMENT ON COLUMN public.banco_movimientos.abono_cuenta IS 'para los cheques abono a cuenta';
- ✔ Cambio en producto @done (19-01-16 16:02) pcc|san
+ ✔ Cambio en producto @done (19-01-16 16:02) pcc|san|lap
    ALTER TABLE public.productos ADD COLUMN tipo_apli character varying(5);
    COMMENT ON COLUMN public.productos.tipo_apli IS 'n: nutricion, fs: fitosanidad';
  ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc|san|lap

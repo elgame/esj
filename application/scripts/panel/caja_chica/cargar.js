@@ -96,11 +96,15 @@
   var agregarIngreso = function (movimiento) {
 
     var poliza = '', concepto = '', id = '', abono = '0';
+    banco    = '';
+    proveedor  = '';
     if (movimiento) {
-      poliza   = movimiento.poliza;
-      concepto = movimiento.proveedor;
-      id       = movimiento.id;
-      abono    = movimiento.total;
+      banco     = movimiento.banco;
+      proveedor = movimiento.proveedor;
+      poliza    = movimiento.poliza;
+      concepto  = '';
+      id        = movimiento.id;
+      abono     = movimiento.total;
     }
 
     var $table = $('#table-ingresos').find('tbody'),
@@ -116,12 +120,16 @@
                     $('#nomeclaturas_base').html() +
                   '</select>' +
                 '</td>' +
-                '<td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;"></td>' +
+                '<td style=""><input type="text" name="ingreso_banco[]" value="'+banco+'" class="ingreso_banco span12" maxlength="50" placeholder="Banco" style=""></td>' +
+                '<td style=""><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style=""></td>' +
+                '<td>' +
+                  '<input type="text" name="ingreso_nombre[]" value="'+proveedor+'" class="ingreso-nombre span12" maxlength="130" placeholder="Nombre" required>' +
+                '</td>' +
                 '<td>' +
                   '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
                   '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
                 '</td>' +
-                '<td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
+                '<td style=""><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
@@ -767,7 +775,11 @@
         $('.chk-movimiento:checked').each(function(index, el) {
           $this = $(this);
 
-          agregarIngreso({id: $this.attr('data-id'), total: $this.attr('data-total'), proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza')});
+          agregarIngreso({
+            id: $this.attr('data-id'), total: $this.attr('data-total'),
+            proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza'),
+            banco: $this.attr('data-banco')
+          });
         });
 
         calculaTotalIngresos();
@@ -921,6 +933,12 @@
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
                   '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+
+                '</td>'+
+                '<td>'+
+                  '<select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">'+
+                    '<option value="f">No</option>'+
+                    '<option value="t">Si</option>'+
+                  '</select>'+
                 '</td>'+
                 '<td style="">'+
                   '<input type="text" name="traspaso_concepto[]" value="" class="span12 traspaso-concepto">'+
