@@ -2,7 +2,7 @@
 
 class caja_chica_model extends CI_Model {
 
-  public function get($fecha, $noCaja)
+  public function get($fecha, $noCaja, $all = false)
   {
     $info = array(
       'saldo_inicial'         => 0,
@@ -78,22 +78,9 @@ class caja_chica_model extends CI_Model {
     //   $info['otros'] = $otros->result();
     // }
 
-    // remisiones
-    $remisiones = $this->db->query(
-      "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
-              COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
-              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja
-       FROM cajachica_remisiones cr
-       INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-       INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
-       LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
-       WHERE cr.fecha = '{$fecha}' AND cr.no_caja = {$noCaja}"
-    );
+    // Remisiones
+    $info['remisiones'] = $this->getCajaRemisiones($fecha, $noCaja, (!$all? " AND cr.status = 't'": ''));
 
-    if ($remisiones->num_rows() > 0)
-    {
-      $info['remisiones'] = $remisiones->result();
-    }
 
     // boletas
     if($noCaja == '1' || $noCaja == '3')
@@ -180,87 +167,7 @@ class caja_chica_model extends CI_Model {
     // Tryana y sra vianey
     if ($noCaja == '2' || $noCaja == '4') {
       // saldo de clientes
-      $empresas = $this->db->query("SELECT id_empresa, nombre_fiscal
-        FROM empresas WHERE status = 't'
-        ORDER BY nombre_fiscal ASC");
-      $empresas = $empresas->result();
-      foreach ($empresas as $key => $empresa) {
-        $empresa->clientes = [];
-        $sql = " AND f.id_empresa = '".$empresa->id_empresa."'";
-        $sql .= " AND f.is_factura = 'f'";
-        $saldo_clientes = $this->db->query(
-          "SELECT
-            id_cliente, show_saldo,
-            nombre_fiscal as nombre,
-            Sum(total) AS total,
-            Sum(iva) AS iva,
-            Sum(abonos) AS abonos,
-            Sum(saldo)::numeric(12, 2) AS saldo,
-            SUM(saldo_cambio) as saldo_cambio
-          FROM
-            (
-              SELECT
-                c.id_cliente, c.show_saldo,
-                c.nombre_fiscal,
-                Sum(f.total) AS total,
-                Sum(f.importe_iva) AS iva,
-                COALESCE(Sum(faa.abonos),0) as abonos,
-                COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-                (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
-              FROM
-                clientes AS c
-                INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-                LEFT JOIN (
-                  SELECT
-                    d.id_cliente,
-                    d.id_factura,
-                    Sum(d.abonos) AS abonos
-                  FROM
-                  (
-                    SELECT
-                      f.id_cliente,
-                      f.id_factura,
-                      Sum(fa.total) AS abonos
-                    FROM
-                      facturacion AS f
-                        INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
-                      AND Date(fa.fecha) >= '2017-01-01' AND Date(fa.fecha) <= '{$fecha}'{$sql}
-                    GROUP BY f.id_cliente, f.id_factura
-
-                    UNION
-
-                    SELECT
-                      f.id_cliente,
-                      f.id_nc AS id_factura,
-                      Sum(f.total) AS abonos
-                    FROM
-                      facturacion AS f
-                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
-                      AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
-                    GROUP BY f.id_cliente, f.id_factura
-                  ) AS d
-                  GROUP BY d.id_cliente, d.id_factura
-                ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-                LEFT JOIN (SELECT id_remision, id_factura, status
-                          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-                ) fh ON f.id_factura = fh.id_remision
-              WHERE f.status <> 'ca' AND f.status <> 'b' AND f.status <> 'pa'
-                 AND f.id_abono_factura IS NULL AND id_nc IS NULL
-                 AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
-                 AND COALESCE(fh.id_remision, 0) = 0
-              GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
-            ) AS sal
-          GROUP BY id_cliente, show_saldo, nombre_fiscal
-          HAVING Sum(saldo)::numeric(12, 2) > 0"
-        );
-
-        if ($saldo_clientes->num_rows() > 0)
-        {
-          $empresa->clientes = $saldo_clientes->result();
-        }
-      }
-      $info['saldo_clientes'] = $empresas;
+      $info['saldo_clientes'] = $this->getCajaSaldosClientes($fecha, $noCaja);
     }
 
     if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4') {
@@ -482,6 +389,116 @@ class caja_chica_model extends CI_Model {
     return $info;
   }
 
+  public function getCajaRemisiones($fecha, $noCaja, $sql = '')
+  {
+    $response = [];
+    // remisiones
+    $remisiones = $this->db->query(
+      "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
+              COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
+              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja, cr.status, cr.folio AS cfolio
+       FROM cajachica_remisiones cr
+       INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+       INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+       LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
+       WHERE cr.fecha = '{$fecha}' AND cr.no_caja = {$noCaja} {$sql}
+       ORDER BY cr.folio ASC"
+    );
+
+    if ($remisiones->num_rows() > 0)
+    {
+      $response = $remisiones->result();
+    }
+
+    return $response;
+  }
+
+  public function getCajaSaldosClientes($fecha, $noCaja, $sqlExt = " AND f.status <> 'pa'", $having = 'HAVING Sum(saldo)::numeric(12, 2) > 0')
+  {
+    // saldo de clientes
+    $empresas = $this->db->query("SELECT id_empresa, nombre_fiscal
+      FROM empresas WHERE status = 't'
+      ORDER BY nombre_fiscal ASC");
+    $empresas = $empresas->result();
+    foreach ($empresas as $key => $empresa) {
+      $empresa->clientes = [];
+      $sql = " AND f.id_empresa = '".$empresa->id_empresa."'";
+      $sql .= " AND f.is_factura = 'f'";
+      $saldo_clientes = $this->db->query(
+        "SELECT
+          id_cliente, show_saldo,
+          nombre_fiscal as nombre,
+          Sum(total) AS total,
+          Sum(iva) AS iva,
+          Sum(abonos) AS abonos,
+          Sum(saldo)::numeric(12, 2) AS saldo,
+          SUM(saldo_cambio) as saldo_cambio
+        FROM
+          (
+            SELECT
+              c.id_cliente, c.show_saldo,
+              c.nombre_fiscal,
+              Sum(f.total) AS total,
+              Sum(f.importe_iva) AS iva,
+              COALESCE(Sum(faa.abonos),0) as abonos,
+              COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+              (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
+            FROM
+              clientes AS c
+              INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+              LEFT JOIN (
+                SELECT
+                  d.id_cliente,
+                  d.id_factura,
+                  Sum(d.abonos) AS abonos
+                FROM
+                (
+                  SELECT
+                    f.id_cliente,
+                    f.id_factura,
+                    Sum(fa.total) AS abonos
+                  FROM
+                    facturacion AS f
+                      INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+                  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
+                    AND Date(fa.fecha) >= '2017-01-01' AND Date(fa.fecha) <= '{$fecha}'{$sql}
+                  GROUP BY f.id_cliente, f.id_factura
+
+                  UNION
+
+                  SELECT
+                    f.id_cliente,
+                    f.id_nc AS id_factura,
+                    Sum(f.total) AS abonos
+                  FROM
+                    facturacion AS f
+                  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
+                    AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
+                  GROUP BY f.id_cliente, f.id_factura
+                ) AS d
+                GROUP BY d.id_cliente, d.id_factura
+              ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+              LEFT JOIN (SELECT id_remision, id_factura, status
+                        FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+              ) fh ON f.id_factura = fh.id_remision
+            WHERE f.status <> 'ca' AND f.status <> 'b'
+               AND f.id_abono_factura IS NULL AND id_nc IS NULL
+               AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
+               AND COALESCE(fh.id_remision, 0) = 0 {$sqlExt}
+            GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
+          ) AS sal
+        GROUP BY id_cliente, show_saldo, nombre_fiscal
+        {$having}"
+      );
+
+      if ($saldo_clientes->num_rows() > 0)
+      {
+        $empresa->clientes = $saldo_clientes->result();
+      }
+    }
+    return $empresas;
+  }
+
   public function getTraspasos($fecha, $noCaja, $total=false)
   {
     if ($total) {
@@ -596,13 +613,6 @@ class caja_chica_model extends CI_Model {
     // Remisiones
     //Elimina los movimientos de banco y cuentas por cobrar si ya se cerro el corte
     $this->load->model('banco_cuentas_model');
-    // $corte_caja = $this->get($data['fecha_caja_chica'], $data['fno_caja']);
-    // foreach ($corte_caja['remisiones'] as $key => $value)
-    // {
-    //   if($value->id_movimiento != '')
-    //     $this->banco_cuentas_model->deleteMovimiento($value->id_movimiento);
-    // }
-    // $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['remision_concepto']))
     {
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_remisiones WHERE no_caja = {$data['fno_caja']} ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
@@ -617,10 +627,17 @@ class caja_chica_model extends CI_Model {
           $data_mov = $this->db->query("SELECT id_movimiento FROM cajachica_remisiones
                                      WHERE fecha = '{$data['fecha_caja_chica']}' AND id_remision = {$data['remision_id'][$key]}
                                       AND row = {$data['remision_row'][$key]} AND no_caja = {$data['fno_caja']}")->row();
-          if($data_mov->id_movimiento != '')
+
+          $this->db->update('cajachica_remisiones', ['status' => 'f', 'id_movimiento' => NULL],
+                          "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND
+                          id_remision = {$data['remision_id'][$key]} AND row = {$data['remision_row'][$key]}");
+          if($data_mov->id_movimiento != ''){
             $this->banco_cuentas_model->deleteMovimiento($data_mov->id_movimiento);
-          $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja'],
-                                                          'id_remision' => $data['remision_id'][$key], 'row' => $data['remision_row'][$key]));
+          }
+          // else {
+          //   $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja'],
+          //                                                   'id_remision' => $data['remision_id'][$key], 'row' => $data['remision_row'][$key]));
+          // }
         } elseif (isset($data['remision_row'][$key]) && $data['remision_row'][$key] == '') {
           $data_folio->folio += 1;
           $remisiones[] = array(
@@ -638,8 +655,10 @@ class caja_chica_model extends CI_Model {
         }
       }
 
-      if (count($remisiones) > 0)
+      if (count($remisiones) > 0){
         $this->db->insert_batch('cajachica_remisiones', $remisiones);
+        $this->aplicarPagosRemisiones($data['fecha_caja_chica'], $data['fno_caja']);
+      }
     }
 
     // Boletas
@@ -904,7 +923,7 @@ class caja_chica_model extends CI_Model {
        FROM facturacion f
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        INNER JOIN saldos_facturas_remisiones sfr ON f.id_factura = sfr.id_factura
-       LEFT JOIN cajachica_remisiones cr ON cr.id_remision = f.id_factura
+       LEFT JOIN cajachica_remisiones cr ON (cr.id_remision = f.id_factura AND cr.status = 't')
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
        LEFT JOIN (
         SELECT id_categoria, id_empresa, nombre
@@ -1309,15 +1328,22 @@ class caja_chica_model extends CI_Model {
     $this->db->update('cajachica_efectivo', array('status' => 'f'), array('id_efectivo' => $idCaja));
     $caja = $this->db->query("SELECT fecha FROM cajachica_efectivo WHERE id_efectivo = {$idCaja}")->row();
 
+    // $this->aplicarPagosRemisiones($caja->fecha, $noCajas);
+
+    return true;
+  }
+
+  public function aplicarPagosRemisiones($fecha, $noCajas)
+  {
     $this->load->model('cuentas_cobrar_model');
     $banco_cuenta = $this->db->query("SELECT id_cuenta FROM banco_cuentas WHERE UPPER(alias) LIKE '%PAGO REMISIONADO%'")->row();
-    $corte_caja = $this->get($caja->fecha, $noCajas);
-    foreach ($corte_caja['remisiones'] as $key => $value)
+    $remisiones = $this->getCajaRemisiones($fecha, $noCajas, " AND cr.id_movimiento IS NULL AND cr.status = 't'");
+    foreach ($remisiones as $key => $value)
     {
       if ($value->id_movimiento == '') {
         $_POST['fmetodo_pago'] = 'efectivo';
         $_GET['tipo'] = 'r';
-        $data = array('fecha'  => $caja->fecha,
+        $data = array('fecha'  => $fecha,
               'concepto'       => 'Pago en caja chica',
               'total'          => $value->monto, //$total,
               'id_cuenta'      => $banco_cuenta->id_cuenta,
@@ -1328,8 +1354,6 @@ class caja_chica_model extends CI_Model {
           "fecha = '{$value->fecha}' AND id_remision = {$value->id_remision} AND row = {$value->row}");
       }
     }
-
-    return true;
   }
 
   public function printCajaNomenclatura(&$pdf, $nomenclaturas)
@@ -1362,7 +1386,7 @@ class caja_chica_model extends CI_Model {
 
     $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/'.($noCajas==1? '': "caja{$noCajas}/"), true);
 
-    $caja = $this->get($fecha, $noCajas);
+    $caja = $this->get($fecha, $noCajas, true);
     $nomenclaturas = $this->nomenclaturas();
 
     $subtitulo = '';
@@ -1489,7 +1513,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
     $pdf->SetWidths(array(15, 15, 15, 39, 20));
-    $pdf->Row(array('EMPRESA', 'REM', 'FOLIO', 'NOMBRE', 'ABONO'), true, true);
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'REM', 'NOMBRE', 'ABONO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetWidths(array(15, 15, 15, 39, 20));
@@ -1501,15 +1525,22 @@ class caja_chica_model extends CI_Model {
 
       $pdf->SetAligns(array('L', 'R', 'R', 'L', 'R'));
 
+      $colortxt = [[0, 0, 0]];
+      if ($remision->status == 'f') {
+        $colortxt = [[100, 100, 100]];
+      }
       $pdf->Row(array(
+        $remision->cfolio,
         $remision->empresa,
         $remision->folio,
-        $remision->folio_factura,
         $remision->observacion,
-        MyString::formatoNumero($remision->monto, 2, '', false)), false, true);
+        MyString::formatoNumero($remision->monto, 2, '', false)), false, true, $colortxt);
 
-      $totalRemisiones += floatval($remision->monto);
+      if ($remision->status == 't') {
+        $totalRemisiones += floatval($remision->monto);
+      }
     }
+    $pdf->SetTextColor(0, 0, 0);
 
     $ttotalIngresos = $totalRemisiones + $totalIngresos + $caja['saldo_inicial'];
 
@@ -1930,7 +1961,7 @@ class caja_chica_model extends CI_Model {
     }
 
     $totalSaldoClientes = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 4) {
       // Saldo de clientes remisiones
       $pdf->SetLeftMargin(111);
       $pdf->SetFillColor(230, 230, 230);
@@ -2238,13 +2269,13 @@ class caja_chica_model extends CI_Model {
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
        LEFT JOIN usuarios u ON u.id = cr.id_usuario
-       WHERE cr.fecha = '{$fecha}' AND cr.id_remision = '{$id_remision}' AND cr.row = {$row} AND cr.no_caja = {$noCaja}"
+       WHERE cr.status = 't' AND cr.fecha = '{$fecha}' AND cr.id_remision = '{$id_remision}' AND cr.row = {$row} AND cr.no_caja = {$noCaja}"
     )->row();
 
-    $caja = $this->get($fecha, $noCaja );
-
-    $remisiones->caja_abierta = $caja['status'];
-    foreach ($caja['saldo_clientes'] as $key => $empresa) {
+    $saldo_clientes = $this->getCajaSaldosClientes($fecha, $noCaja, " AND c.id_cliente = {$remisiones->id_cliente}", '');
+    // $caja = $this->get($fecha, $noCaja );
+    // $remisiones->caja_abierta = $caja['status'];
+    foreach ($saldo_clientes as $key => $empresa) {
       foreach ($empresa->clientes as $key2 => $cliente) {
         if ($cliente->id_cliente === $remisiones->id_cliente) {
           $remisiones->saldo = $cliente;
@@ -2329,7 +2360,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(63));
     if (isset($remisiones->saldo) && $remisiones->saldo->show_saldo == 't') {
       $pdf->Line(0, $pdf->GetY(), 62, $pdf->GetY());
-      $saldo = $remisiones->saldo->saldo - ($remisiones->caja_abierta==='t'? $remisiones->monto: 0);
+      $saldo = $remisiones->saldo->saldo; // - ($remisiones->caja_abierta==='t'? $remisiones->monto: 0);
       $pdf->SetFont('helvetica','B', 8);
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(0, $pdf->GetY());
@@ -2885,7 +2916,7 @@ class caja_chica_model extends CI_Model {
           FROM cajachica_remisiones cr
             INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
             INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-          WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          WHERE cr.status = 't' AND cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             {$sql} {$sql3}
           ORDER BY id_categoria ASC, fecha ASC");
       $response['remisiones'] = $remisiones->result();
@@ -3175,7 +3206,7 @@ class caja_chica_model extends CI_Model {
           FROM cajachica_remisiones cr
             INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
             INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-          WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql2}
+          WHERE cr.status = 't' AND cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql2}
           UNION
           SELECT cg.id_gasto AS id, cc.id_categoria, cc.nombre AS categoria, 'gasto' AS tipo,
             cn.nombre AS otro, cg.concepto AS observacion, cg.monto, cg.fecha, cg.folio AS folio2,

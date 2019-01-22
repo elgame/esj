@@ -1,6 +1,11 @@
 
-
- ✔ Cheques desde sistema @done (19-01-19 13:23) pct
+ ✔ Otros cambios de caja chica @done (19-01-21 20:22) pcc
+    ALTER TABLE public.cajachica_remisiones ADD COLUMN status boolean NOT NULL DEFAULT true;
+    UPDATE public.cajachica_remisiones SET folio=0 WHERE folio is null;
+    ALTER TABLE public.cajachica_remisiones ALTER COLUMN folio SET NOT NULL;
+    ALTER TABLE public.cajachica_remisiones DROP CONSTRAINT cajachica_remisiones_pkey;
+    ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_pkey PRIMARY KEY(fecha, id_remision, folio, "row");
+ ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;
     COMMENT ON COLUMN public.banco_movimientos.abono_cuenta IS 'para los cheques abono a cuenta';
  ✔ Cambio en producto @done (19-01-16 16:02) pcc|san
