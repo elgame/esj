@@ -182,6 +182,9 @@ class centros_costos_model extends CI_Model {
         $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
     }
 
+    if ($this->input->get('id_area') !== false)
+      $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+
     if (!is_null($sqlX))
       $sql .= $sqlX;
 

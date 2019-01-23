@@ -1,5 +1,5 @@
 
- ✔ Bascula captura de piña @done (19-01-22 21:33) pcc
+ ✔ Bascula captura de piña @done (19-01-22 21:33) pcc|pct
     CREATE TABLE otros.bascula_salida_pina
         (
           id bigserial NOT NULL,
@@ -41,13 +41,13 @@
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE ); ALTER TABLE otros.bascula_salida_pina_estibas OWNER TO programa;
       COMMENT ON COLUMN otros.bascula_salida_pina_estibas.id_centro_costo IS 'id de la melga';
- ✔ Otros cambios de caja chica @done (19-01-21 20:22) pcc|lap
+ ✔ Otros cambios de caja chica @done (19-01-21 20:22) pcc|lap|pct
     ALTER TABLE public.cajachica_remisiones ADD COLUMN status boolean NOT NULL DEFAULT true;
     UPDATE public.cajachica_remisiones SET folio=0 WHERE folio is null;
     ALTER TABLE public.cajachica_remisiones ALTER COLUMN folio SET NOT NULL;
     ALTER TABLE public.cajachica_remisiones DROP CONSTRAINT cajachica_remisiones_pkey;
     ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_pkey PRIMARY KEY(fecha, id_remision, folio, "row");
-    ----- lap|pcc
+    ----- lap|pcc|pct
     ALTER TABLE public.cajachica_traspasos ADD COLUMN afectar_fondo boolean NOT NULL DEFAULT false;
     COMMENT ON COLUMN public.cajachica_traspasos.afectar_fondo IS 'true: afecta el fondo de la caja, false: no afecta';
     ALTER TABLE public.cajachica_remisiones ADD COLUMN fecha_rem date;
