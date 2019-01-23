@@ -527,7 +527,7 @@ class productos_model extends CI_Model {
       $sql .= " AND p.id_empresa in(".$this->input->get('did_empresa').")";
 
     $res = $this->db->query(
-        "SELECT p.id_producto, p.nombre, p.codigo, p.tipo
+        "SELECT p.id_producto, p.nombre, p.codigo, p.tipo, pf.nombre AS familia
         FROM productos p
           INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         WHERE pf.status = 'ac' AND p.status = 'ac'
@@ -539,10 +539,14 @@ class productos_model extends CI_Model {
     $response = array();
     if($res->num_rows() > 0){
       foreach($res->result() as $itm){
+        $nombre = $itm->nombre;
+        if ($this->input->get('con_fam') == 'true') {
+          $nombre = $itm->nombre.' - '.$itm->familia;
+        }
         $response[] = array(
             'id'    => $itm->id_producto,
-            'label' => $itm->nombre,
-            'value' => $itm->nombre,
+            'label' => $nombre,
+            'value' => $nombre,
             'item'  => $itm,
         );
       }
