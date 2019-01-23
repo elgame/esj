@@ -69,6 +69,8 @@
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre'); ?>" required placeholder="Nombre del producto" autofocus>
+
+                    <input type="hidden" id="did_empresa" value="<?php echo $familia['info']->id_empresa ?>">
                   </div>
                 </div>
 

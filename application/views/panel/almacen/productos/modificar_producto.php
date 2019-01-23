@@ -81,6 +81,8 @@
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
+
+                    <input type="hidden" id="did_empresa" value="<?php echo $data['familia']->id_empresa ?>">
                   </div>
                 </div>
 

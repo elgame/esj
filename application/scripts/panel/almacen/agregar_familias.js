@@ -2,7 +2,7 @@ $(function(){
 
   $.ajaxSetup({ cache: false });
 
-  
+
   // Autocomplete Empresas
   $("#fempresa").autocomplete({
     source: base_url + 'panel/bascula/ajax_get_empresas/',
@@ -62,14 +62,14 @@ var familias = (function($){
       }
       noty({"text":data.msg, "layout":"topRight", "type":data.ico});
     }).always(function() { loader.close(); });
-     
+
     return false;
   }
 
   function loadProductosFamilia($id_familia, pag){
     $("#boxproductos").show();
     $("#fid_familia").val($id_familia);
-    var addproducto = $("#addproducto"), url = addproducto.attr('href').split('?'); 
+    var addproducto = $("#addproducto"), url = addproducto.attr('href').split('?');
     addproducto.attr('href', url[0]+"?fid_familia="+$id_familia);
 
     productos.page(0);
@@ -96,6 +96,34 @@ var productos = (function($){
     });
 
     $("#tblproductosrow .prescantidad.vpositive").on('keypress', setEventRow);
+
+    autProducto();
+  }
+
+  function autProducto() {
+    $("input#fnombre").autocomplete({
+      source: function(request, response) {
+        $.ajax({
+            url: base_url+'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: {
+                term : request.term,
+                did_empresa : $("#did_empresa").val(),
+                con_fam : 'true'
+            },
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function(event, ui) {
+      }
+    }).keydown(function(event){
+      // if(event.which == 8 || event == 46) {
+      // }
+    });
   }
 
   function getProductos(pag){
@@ -154,7 +182,7 @@ var productos = (function($){
       }
       noty({"text":data.msg, "layout":"topRight", "type":data.ico});
     }).always(function() { loader.close(); });
-     
+
     return false;
   }
 
