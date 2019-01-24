@@ -160,7 +160,7 @@
     var $table = $('#table-remisiones').find('tbody .row-total'),
         tr;
 
-    var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '';
+    var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '', fecha = '';
     if (remision) {
       id           = remision.id;
       numRemision  = remision.numremision;
@@ -169,21 +169,22 @@
       concepto     = remision.concepto;
       idempresa    = remision.idempresa;
       empresa      = remision.empresa;
+      fecha        = remision.fecha;
     }
 
     tr =  '<tr>' +
-            '<td style="width: 100px;">' +
-              '<input type="text" name="remision_empresa[]" value="'+empresa+'" class="input-small gasto-cargo" style="width: 150px;" required>' +
+            '<td style="">' +
+              '<input type="text" name="remision_empresa[]" value="'+empresa+'" class="gasto-cargo" style="" required>' +
               '<input type="hidden" name="remision_empresa_id[]" value="'+idempresa+'" class="input-small vpositive gasto-cargo-id">' +
               '<input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">' +
             '</td>' +
-            '<td style="width: 70px;"><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;"></td>' +
-            '<td style="width: 100px;"><input type="text" name="remision_folio[]" value="'+foliofactura+'" class="remision_folio" placeholder="Folio" style="width: 100px;"></td>' +
-            '<td>' +
+            '<td style=""><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive" placeholder="" readonly style=""></td>' +
+            '<td style=""><input type="date" name="remision_fecha[]" value="'+fecha+'" class="remision_fecha" placeholder="Fecha" style=""></td>' +
+            '<td colspan="3">' +
               '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
               '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
             '</td>' +
-            '<td style="width: 100px;"><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive input-small" placeholder="Importe" required></td>' +
+            '<td style=""><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
             '<td style="width: 30px;">'+
               '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
               '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
@@ -251,6 +252,7 @@
             total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
             concepto: $this.attr('data-concepto'),
             idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
+            fecha: $this.attr('data-fecha')
           });
 
           // html += '<tr>' +
@@ -1017,9 +1019,10 @@
         for (var key in json) {
           html += '<tr>'+
               '<td><input type="checkbox" class="chk-remision" data-id="'+json[key].id_factura+'" '+
-                'data-numremision="'+json[key].folio+'" data-total="'+json[key].saldo+'" '+
+                'data-numremision="'+json[key].serie+json[key].folio+'" data-total="'+json[key].saldo+'" '+
                 'data-foliofactura="'+(json[key].folio_factura||'')+'" data-concepto="'+json[key].cliente+'" '+
-                'data-idempresa="'+json[key].id_empresa+'" data-empresa="'+json[key].empresa+'"></td>'+
+                'data-idempresa="'+json[key].id_empresa+'" data-empresa="'+json[key].empresa+'" '+
+                'data-fecha="'+json[key].fecha+'"></td>'+
               '<td style="width: 66px;">'+json[key].fecha+'</td>'+
               '<td>'+json[key].serie+json[key].folio+'</td>'+
               '<td>'+json[key].cliente+'</td>'+

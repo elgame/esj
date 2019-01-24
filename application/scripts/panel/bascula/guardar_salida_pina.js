@@ -5,9 +5,11 @@ var ppro_cont   = 0,
 $(function(){
 
   $.ajaxSetup({ cache: false });
-  $('#form').keyJump({
-    'next': 13,
-  });
+  setTimeout(function () {
+    $('#formPina').keyJump({
+      'next': 13,
+    });
+  }, 500);
 
   eventosEstibas();
   autocompleteRanchos();

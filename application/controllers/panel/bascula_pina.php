@@ -58,17 +58,14 @@ class bascula_pina extends MY_Controller {
     }
     else
     {
-      $bascula = $this->bascula_pina_model->addSalidaPina($_POST);
+      $res_mdl = $this->bascula_pina_model->addSalidaPina($_POST);
 
       if($res_mdl['passes'])
-        redirect(base_url('panel/bascula/show_view_guardar_pina/?'.MyString::getVarsLink(array('msg')).'&msg=15&close=1'));
+        redirect(base_url('panel/bascula_pina/show_view_guardar_pina/?'.MyString::getVarsLink(array('msg')).'&msg=3&close=1'));
     }
 
     $data = $this->bascula_model->getBasculaInfo($_GET['idb']);
     $params['pina'] = $this->bascula_pina_model->getInfo($_GET['idb'], "bsp.id_bascula");
-    echo "<pre>";
-      var_dump($params['pina']);
-    echo "</pre>";exit;
 
     $params['boleta'] = $data['info'][0];
 
@@ -156,7 +153,7 @@ class bascula_pina extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La empresa se agregó correctamente.';
+        $txt = 'Se guardo correctamente la salida de Piña.';
         $icono = 'success';
         break;
       case 4:
@@ -171,54 +168,6 @@ class bascula_pina extends MY_Controller {
         $txt = 'El camión se activó correctamente.';
         $icono = 'success';
         break;
-
-      case 7:
-        $txt = 'La entrada se agrego correctamente.';
-        $icono = 'success';
-        break;
-      case 8:
-        $txt = 'La bascula se cancelo correctamente.';
-        $icono = 'success';
-        break;
-
-      case 9:
-        $txt = 'La bascula se activo correctamente.';
-        $icono = 'success';
-        break;
-
-      case 10:
-        $txt = 'No existe el folio especificado.';
-        $icono = 'error';
-        break;
-      case 11:
-        $txt = 'El cliente se agregó correctamente.';
-        $icono = 'success';
-        break;
-      case 12:
-        $txt = 'La bonificación se agregó correctamente.';
-        $icono = 'success';
-        break;
-      case 13:
-        $txt = 'Especifique un Proveedor!';
-        $icono = 'error';
-        break;
-      case 14:
-        $txt = 'El pago se realizo correctamente!';
-        $icono = 'success';
-        break;
-      case 15:
-        $txt = 'El lote se agrego correctamente!';
-        $icono = 'success';
-        break;
-
-      case 30:
-        $txt = 'Las ordenes se ligaron correctamente!';
-        $icono = 'success';
-        break;
-
-      case 20:
-        $txt = 'Se modifico correctamente la compra!';
-        $icono = 'success';
         break;
     }
 

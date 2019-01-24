@@ -406,7 +406,7 @@ class caja_chica_model extends CI_Model {
     $remisiones = $this->db->query(
       "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
               COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
-              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja, cr.status, cr.folio AS cfolio
+              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja, cr.status, cr.folio AS cfolio, cr.fecha_rem
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
@@ -535,7 +535,7 @@ class caja_chica_model extends CI_Model {
   {
     $ingresos = array();
 
-    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja Venta de Contado'];
+    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General'];
     $anio = date('Y');
 
     // ingresos
@@ -666,7 +666,8 @@ class caja_chica_model extends CI_Model {
             'monto'         => $data['remision_importe'][$key],
             'row'           => $key,
             'id_categoria'  => $data['remision_empresa_id'][$key],
-            'folio_factura' => empty($data['remision_folio'][$key]) ? null : $data['remision_folio'][$key],
+            'fecha_rem'     => $data['remision_fecha'][$key],
+            'folio_factura' => empty($data['remision_folioremision_numero'][$key]) ? null : $data['remision_numero'][$key],
             'no_caja'       => $data['fno_caja'],
             'folio'         => $data_folio->folio,
             'id_usuario'    => $this->session->userdata('id_usuario'),
@@ -2302,7 +2303,7 @@ class caja_chica_model extends CI_Model {
               COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
               cr.id_movimiento, cr.row, cr.fecha, c.nombre_fiscal AS cliente, cc.nombre AS empresar, cr.folio AS folio_caja,
               cr.no_impresiones, cr.no_caja, cr.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
-              c.id_cliente
+              c.id_cliente, cr.fecha_rem
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
@@ -2374,12 +2375,13 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array("Cliente: {$remisiones->cliente}"), false, false);
 
     $pdf->SetFont('helvetica','', 8);
-    $pdf->SetWidths(array(20, 43));
-    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(20, 20, 23));
+    $pdf->SetAligns(array('L', 'C', 'R'));
     $pdf->SetX(0);
-    $pdf->Row(array('Folio', 'Cantidad'), false, false);
+    $pdf->Row(array('Folio', 'Fecha', 'Cantidad'), false, true);
     $pdf->SetX(0);
-    $pdf->Row(array($remisiones->folio, MyString::formatoNumero($remisiones->monto, 2, '$', false)), false, false);
+    $pdf->Row(array($remisiones->folio, MyString::fechaATexto($remisiones->fecha_rem, '/c'),
+        MyString::formatoNumero($remisiones->monto, 2, '$', false)), false, false);
 
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));

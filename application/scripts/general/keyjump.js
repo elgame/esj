@@ -28,7 +28,7 @@
                  })
                  .not('.nokey')
                  .toArray();
-
+    console.log('keyjump', fields);
     fields.forEach(function ($e, i) {
       $($e).on('keypress', function(event) {
 

@@ -30,7 +30,7 @@ class bascula_pina_model extends CI_Model {
 
     $this->addEstibas($id, $datos);
 
-    return array('passes'=>true);
+    return array('passes' => true);
   }
 
   public function addEstibas($id, $datos)
