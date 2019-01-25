@@ -55,6 +55,9 @@
     ALTER TABLE public.cajachica_ingresos ADD COLUMN banco character varying(50);
     ALTER TABLE public.cajachica_ingresos ADD COLUMN nombre character varying(130);
     ALTER TABLE public.cajachica_ingresos ADD COLUMN status boolean NOT NULL DEFAULT true;
+    ----- pcc
+    ALTER TABLE public.cajachica_traspasos ADD COLUMN folio bigint;
+    ALTER TABLE public.cajachica_traspasos ADD COLUMN status boolean NOT NULL DEFAULT true;
 
  ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc|lap
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;

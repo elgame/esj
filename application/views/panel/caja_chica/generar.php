@@ -142,6 +142,7 @@
                             <?php
                               $modificar_ingresos = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_ingresos/');
                               $mod_ing_readonly = !$modificar_ingresos && $readonly == ''? ' readonly': '';
+                              $totalIngresos = 0;
                               if (isset($_POST['ingreso_concepto'])) {
                                 foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
                                     $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
@@ -244,7 +245,6 @@
                           <?php endif ?>
                           <tbody>
                             <?php
-                            $totalIngresos = 0;
                             if ($_GET['fno_caja'] == '4') {
                               if (isset($_POST['remision_concepto'])) {
                                 foreach ($_POST['remision_concepto'] as $key => $concepto) {
@@ -493,7 +493,7 @@
               </div>
             </div>
 
-            <div class="span6">
+            <div class="span12" style="margin-left: 0px;">
 
               <!-- Gastos -->
               <div class="row-fluid" style="margin-top: 5px;">
