@@ -518,7 +518,8 @@
                                   <th>COD AREA</th>
                                   <th>EMPRESA</th>
                                   <th>NOM</th>
-                                  <th>FOLIO</th>
+                                  <!-- <th>FOLIO</th> -->
+                                  <th>NOMBRE</th>
                                   <th>CONCEPTO</th>
                                   <th>REP</th>
                                   <th>CARGO</th>
@@ -534,7 +535,7 @@
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
                                         <tr>
-                                          <td style="width: 60px;">
+                                          <td style="">
                                             <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                             <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
@@ -551,27 +552,30 @@
                                             <input type="hidden" name="activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
                                           </td>
-                                          <td style="width: 100px;">
+                                          <td style="">
                                             <input type="text" name="gasto_empresa[]" value="<?php echo $_POST['gasto_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
-                                            <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $_POST['gasto_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
+                                            <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $_POST['gasto_empresa_id'][$key] ?>" class="vpositive gasto-cargo-id">
                                           </td>
-                                          <td style="width: 40px;">
+                                          <td style="">
                                             <select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
                                               <?php foreach ($nomenclaturas as $n) { ?>
                                                 <option value="<?php echo $n->id ?>" <?php echo $_POST['gasto_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
                                               <?php } ?>
                                             </select>
                                           </td>
-                                          <td style="width: 40px;"><input type="text" name="gasto_folio[]" value="<?php echo $_POST['gasto_folio'][$key] ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td>
+                                          <!-- <td style=""><input type="text" name="gasto_folio[]" value="<?php echo $_POST['gasto_folio'][$key] ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td> -->
+                                          <td style="">
+                                            <input type="text" name="gasto_nombre[]" value="<?php echo $_POST['gasto_nombre'][$key] ?>" class="span12 gasto-nombre"  <?php echo $readonly ?>>
+                                          </td>
                                           <td style="">
                                             <input type="text" name="gasto_concepto[]" value="<?php echo $_POST['gasto_concepto'][$key] ?>" class="span12 gasto-concepto"  <?php echo $readonly ?>>
                                           </td>
-                                          <td style="width: 20px;">
+                                          <td style="">
                                             <input type="checkbox" value="si" class="gasto-reposicion" <?php echo $readonly; ?>>
                                             <input type="hidden" name="gasto_reposicion[]" value="<?php echo $_POST['gasto_reposicion'][$key] ?>" class="gasto-reposicionhid">
                                           </td>
-                                          <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
-                                          <td style="width: 30px;">
+                                          <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
+                                          <td style="">
                                             <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                             <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
                                           </td>
@@ -581,7 +585,7 @@
                                     $totalGastos += floatval($gasto->monto);
                                   ?>
                                   <tr>
-                                    <td style="width: 60px;">
+                                    <td style="">
                                       <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                       <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
@@ -600,27 +604,30 @@
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
-                                    <td style="width: 100px;">
+                                    <td style="">
                                       <input type="text" name="gasto_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $gasto->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
+                                      <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $gasto->id_categoria ?>" class=" vpositive gasto-cargo-id">
                                     </td>
-                                    <td style="width: 40px;">
+                                    <td style="">
                                       <select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly.$mod_gas_readonly ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $gasto->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
                                         <?php } ?>
                                       </select>
                                     </td>
-                                    <td style="width: 40px;"><input type="text" name="gasto_folio[]" value="<?php echo $gasto->folio ?>" class="span12 gasto-folio" <?php echo $readonly.$mod_gas_readonly ?>></td>
+                                    <!-- <td style=""><input type="text" name="gasto_folio[]" value="<?php echo $gasto->folio ?>" class="span12 gasto-folio" <?php echo $readonly.$mod_gas_readonly ?>></td> -->
+                                    <td style="">
+                                      <input type="text" name="gasto_nombre[]" value="<?php echo $gasto->nombre ?>" class="span12 gasto-nombre" <?php echo $readonly.$mod_gas_readonly ?>>
+                                    </td>
                                     <td style="">
                                       <input type="text" name="gasto_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto" <?php echo $readonly.$mod_gas_readonly ?>>
                                     </td>
-                                    <td style="width: 20px;">
+                                    <td style="">
                                       <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly; ?>>
                                       <input type="hidden" name="gasto_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
                                     </td>
-                                    <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly ?>></td>
-                                    <td style="width: 30px;">
+                                    <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly ?>></td>
+                                    <td style="">
                                       <?php if ($modificar_gasto): ?>
                                         <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                         <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
@@ -629,8 +636,8 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="6" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                  <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                  <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>
                               </tbody>

@@ -197,7 +197,7 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '1' || $noCaja == '2') {
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4') {
       $ddNoCaja = '1, 4';
       $ddTipo = 'caja_gastos';
       if ($noCaja == '1') {
@@ -324,34 +324,10 @@ class caja_chica_model extends CI_Model {
     }
 
     // gastos
-    $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
-          cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
-          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-          (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
-          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
-       FROM cajachica_gastos cg
-         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
-         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
-         LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
-         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
-         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
-         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
-         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
-       WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
-       ORDER BY cg.id_gasto ASC"
-    );
+    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't'": ''));
 
-    if ($gastos->num_rows() > 0)
-    {
-      $info['gastos'] = $gastos->result();
-    }
-
+    // Traspasos
     if ($noCaja == '2' || $noCaja == '4') {
-      // Traspasos
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
       if (count($traspasos) > 0)
       {
@@ -418,6 +394,39 @@ class caja_chica_model extends CI_Model {
     if ($remisiones->num_rows() > 0)
     {
       $response = $remisiones->result();
+    }
+
+    return $response;
+  }
+
+  public function getCajaGastos($fecha, $noCaja, $sql = '')
+  {
+    $response = [];
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
+          (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
+          cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          cg.nombre, cg.status, cg.folio_sig,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
+       FROM cajachica_gastos cg
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
+         LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
+       WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja} {$sql}
+       ORDER BY cg.id_gasto ASC"
+    );
+
+    if ($gastos->num_rows() > 0)
+    {
+      $response = $gastos->result();
     }
 
     return $response;
@@ -719,7 +728,9 @@ class caja_chica_model extends CI_Model {
     // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_concepto']))
     {
-      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos WHERE no_caja = {$data['fno_caja']} ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
       $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
       $gastos_udt = $gastos = array();
@@ -729,13 +740,15 @@ class caja_chica_model extends CI_Model {
           isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
 
-          $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f'], "id_gasto = ".$data['gasto_id_gasto'][$key]);
         } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
-            'folio'           => $data['gasto_folio'][$key],
+            // 'folio'           => $data['gasto_folio'][$key],
             'concepto'        => $gasto,
+            'nombre'          => $data['gasto_nombre'][$key],
             'monto'           => $data['gasto_importe'][$key],
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
@@ -765,8 +778,9 @@ class caja_chica_model extends CI_Model {
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_empresa_id'][$key],
             'id_nomenclatura'          => $data['gasto_nomenclatura'][$key],
-            'folio'                    => $data['gasto_folio'][$key],
+            'folio'                    => '', //$data['gasto_folio'][$key],
             'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_nombre'][$key],
             'monto'                    => $data['gasto_importe'][$key],
             'fecha'                    => $data['fecha_caja_chica'],
             'no_caja'                  => $data['fno_caja'],
@@ -1443,6 +1457,8 @@ class caja_chica_model extends CI_Model {
       $subtitulo = ' LIMON';
     elseif ($noCajas == 2)
       $subtitulo = ' GASTOS';
+    elseif ($noCajas == 4)
+      $subtitulo = ' GENERAL';
 
     // echo "<pre>";
     //   var_dump($caja);
@@ -1496,7 +1512,9 @@ class caja_chica_model extends CI_Model {
     $ttotalGastos = 0;
     foreach ($caja['gastos'] as $gasto)
     {
-      $ttotalGastos += floatval($gasto->monto);
+      if ($gasto->status == 't') {
+        $ttotalGastos += floatval($gasto->monto);
+      }
     }
 
     // Ingresos por reposicion
@@ -1709,20 +1727,20 @@ class caja_chica_model extends CI_Model {
     // $pdf->page = $pag_aux;
     // $pdf->SetY($pag_yaux);
     $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY()+3);
     $pdf->SetAligns(array('L', 'C'));
-    $pdf->SetWidths(array(83, 17));
+    $pdf->SetWidths(array(180, 25));
     $pdf->Row(array('GASTOS DEL DIA', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetX(111);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(25, 15, 7, 36, 17));
-    $pdf->Row(array('COD', 'EMPRESA', 'NOM', 'CONCEPTO', 'CARGO'), true, true);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-    $pdf->SetWidths(array(25, 15, 7, 36, 17));
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
 
     $codigoAreas = array();
     $totalGastos = 0;
@@ -1732,60 +1750,68 @@ class caja_chica_model extends CI_Model {
       {
         if (count($pdf->pages) > $pdf->page) {
           $pdf->page++;
-          $pdf->SetXY(111, 10);
+          $pdf->SetXY(6, 10);
         } else
           $pdf->AddPage();
         // // nomenclatura
         // $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
-        $pdf->SetXY(111, $pdf->GetY());
-        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-        $pdf->SetWidths(array(25, 15, 7, 36, 17));
-        $pdf->Row(array('COD', 'EMPRESA', 'NOM', 'CONCEPTO', 'CARGO'), true, true);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+        $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
+        $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
       }
 
-      $totalGastos += floatval($gasto->monto);
+      $colortxt = [[100, 100, 100]];
+      if ($gasto->status == 't') {
+        $totalGastos += floatval($gasto->monto);
+        $colortxt = [[0, 0, 0]];
+      }
 
-      $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R'));
-      $pdf->SetX(111);
+      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+      $pdf->SetX(6);
       $pdf->Row(array(
-        $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
+        $gasto->folio_sig,
         $gasto->empresa,
         $gasto->nomenclatura,
-        // $gasto->folio,
+        $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
+        $gasto->centro_costo,
         $gasto->concepto,
-        MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))), false, true);
+        $gasto->nombre,
+        MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+      ), false, true, $colortxt);
 
       // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
       //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
     }
 
+    $pdf->SetTextColor(0,0,0);
     $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetX(111);
+    $pdf->SetX(6);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
-    $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
+    $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+    $pdf->Row(array('', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
-    if ($noCajas == 2 || $noCajas == 1) {
+    if ($noCajas == 2 || $noCajas == 1 || $noCajas == 4) {
       // Deudores
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
       $pdf->SetFillColor(230, 230, 230);
-      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(83, 17));
+      $pdf->SetWidths(array(180, 25));
       $pdf->Row(array('DEUDORES', ''), true, true);
 
       $pdf->SetFont('Arial','', 6);
-      $pdf->SetX(111);
+      $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
       $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
 
       $codigoAreas = array();
       $totalDeudores = 0;
@@ -1795,22 +1821,22 @@ class caja_chica_model extends CI_Model {
         {
           if (count($pdf->pages) > $pdf->page) {
             $pdf->page++;
-            $pdf->SetXY(111, 10);
+            $pdf->SetXY(6, 10);
           } else
             $pdf->AddPage();
           // // nomenclatura
           // $this->printCajaNomenclatura($pdf, $nomenclaturas);
           $pdf->SetFont('Helvetica','B', 7);
-          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-          $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+          $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
           $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
         }
 
         $totalDeudores += floatval($deudor->saldo);
 
         $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetX(111);
+        $pdf->SetX(6);
         $pdf->Row(array(
           $deudor->fecha,
           $deudor->nombre,
@@ -1825,9 +1851,9 @@ class caja_chica_model extends CI_Model {
       }
 
       $pdf->SetFont('Arial', 'B', 6.4);
-      $pdf->SetX(111);
+      $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(34, 33, 33));
+      $pdf->SetWidths(array(43, 43, 43));
       $pdf->SetAligns(array('L', 'L', 'L'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
@@ -1835,23 +1861,23 @@ class caja_chica_model extends CI_Model {
     }
 
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if ($noCajas == 1 || $noCajas == 2) {
+    if ($noCajas == 1 || $noCajas == 2 || $noCajas == 4) {
       // Acreedores
       $pdf->SetFillColor(230, 230, 230);
-      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(83, 17));
-      $pdf->Row(array('ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': 'LIMON'), ''), true, true);
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')), ''), true, true);
 
       $pdf->SetFont('Arial','', 6);
-      $pdf->SetX(111);
+      $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
       $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
 
       $codigoAreas = array();
       foreach ($caja['acreedores'] as $key => $acreedor)
@@ -1860,22 +1886,22 @@ class caja_chica_model extends CI_Model {
         {
           if (count($pdf->pages) > $pdf->page) {
             $pdf->page++;
-            $pdf->SetXY(111, 10);
+            $pdf->SetXY(6, 10);
           } else
             $pdf->AddPage();
           // // nomenclatura
           // $this->printCajaNomenclatura($pdf, $nomenclaturas);
           $pdf->SetFont('Helvetica','B', 7);
-          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-          $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+          $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
           $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
         }
 
         $totalAcreedores += floatval($acreedor->saldo);
 
         $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetX(111);
+        $pdf->SetX(6);
         $pdf->Row(array(
           $acreedor->fecha,
           $acreedor->nombre,
@@ -1890,9 +1916,9 @@ class caja_chica_model extends CI_Model {
       }
 
       $pdf->SetFont('Arial', 'B', 6.4);
-      $pdf->SetX(111);
+      $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(34, 33, 33));
+      $pdf->SetWidths(array(43, 43, 43));
       $pdf->SetAligns(array('L', 'L', 'L'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
@@ -2155,7 +2181,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
+    $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
@@ -2227,7 +2253,7 @@ class caja_chica_model extends CI_Model {
     // echo "</pre>";exit;
 
     $this->load->library('mypdf');
-    // Creación del objeto de la clase heredada
+    // Creación del objeto de la clase heredada, gastos
     $pdf = new MYpdf('P', 'mm', array(63, 130));
     $pdf->limiteY = 50;
     $pdf->SetMargins(0, 0, 0);
@@ -2302,7 +2328,7 @@ class caja_chica_model extends CI_Model {
     // $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array( 'Impresión:', ($gastos->no_impresiones==0? 'ORIGINAL': 'COPIA '.$gastos->no_impresiones).
-                                    ' ('.MyString::fechaAT(date("Y-m-d")).')' ), false, false);
+                                    ' ('.MyString::fechaAT(date("Y-m-d")).' '.date("H:i:s").')' ), false, false);
 
     $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('cajachica_gastos');
 
