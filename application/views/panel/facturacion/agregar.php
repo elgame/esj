@@ -471,7 +471,7 @@
                                     <td>
                                         <select name="diva" id="diva" class="span12">
                                           <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : ''; ?>>0%</option>
-                                          <option value="11" <?php echo $_POST['prod_diva_porcent'][$k] == 11 ? 'selected' : ''; ?>>11%</option>
+                                          <option value="8" <?php echo $_POST['prod_diva_porcent'][$k] == 8 ? 'selected' : ''; ?>>8%</option>
                                           <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
                                         </select>
 
@@ -569,7 +569,7 @@
                               <td>
                                   <select name="diva" id="diva" class="span12">
                                     <option value="0">0%</option>
-                                    <option value="11">11%</option>
+                                    <option value="8">8%</option>
                                     <option value="16">16%</option>
                                   </select>
 
