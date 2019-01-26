@@ -708,7 +708,7 @@ function addProducto(unidades, prod) {
                 '<td>' +
                     '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                       '<option value="0"'+(ivaSelected == '0' ? 'selected' : '')+'>0%</option>' +
-                      '<option value="11"'+(ivaSelected == '11' ? 'selected' : '')+'>11%</option>' +
+                      '<option value="8"'+(ivaSelected == '8' ? 'selected' : '')+'>8%</option>' +
                       '<option value="16"'+(ivaSelected == '16' ? 'selected' : '')+'>16%</option>' +
                     '</select>' +
                     // '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
