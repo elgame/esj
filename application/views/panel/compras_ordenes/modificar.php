@@ -471,7 +471,7 @@
                       <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
                       <select class="span12" id="ftraslado">
                         <option value="0">0%</option>
-                        <option value="11">11%</option>
+                        <option value="8">8%</option>
                         <option value="16">16%</option>
                       </select>
                     </div><!--/span2 -->
@@ -564,7 +564,7 @@
                               <td style="width: 66px;">
                                   <select name="traslado[]" id="traslado" class="span12">
                                     <option value="0" <?php echo $_POST['traslado'][$key] === '0' ? 'selected' : '' ?>>0%</option>
-                                    <option value="11" <?php echo $_POST['traslado'][$key] === '11' ? 'selected' : ''?>>11%</option>
+                                    <option value="8" <?php echo $_POST['traslado'][$key] === '8' ? 'selected' : ''?>>11%</option>
                                     <option value="16" <?php echo $_POST['traslado'][$key] === '16' ? 'selected' : ''?>>16%</option>
                                   </select>
                                   <input type="hidden" name="trasladoTotal[]" value="<?php echo $_POST['trasladoTotal'][$key] ?>" id="trasladoTotal" class="span12">
