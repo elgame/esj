@@ -705,7 +705,7 @@
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                      <select name="traslado[]" id="traslado" class="span12" <?php echo $disabled.' '.$readonly ?>>
                                        <option value="0" <?php echo $prod->porcentaje_iva === '0' ? 'selected' : '' ?>>0%</option>
-                                       <option value="11" <?php echo $prod->porcentaje_iva === '11' ? 'selected' : ''?>>11%</option>
+                                       <option value="8" <?php echo $prod->porcentaje_iva === '8' ? 'selected' : ''?>>8%</option>
                                        <option value="16" <?php echo $prod->porcentaje_iva === '16' ? 'selected' : ''?>>16%</option>
                                      </select>
                                      <input type="hidden" name="trasladoTotal[]" value="<?php echo $prod->iva ?>" id="trasladoTotal" class="span12">

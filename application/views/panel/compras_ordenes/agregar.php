@@ -285,7 +285,7 @@
                       <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
                       <select class="span12" id="ftraslado">
                         <option value="0">0%</option>
-                        <option value="11">11%</option>
+                        <option value="8">8%</option>
                         <option value="16">16%</option>
                       </select>
                     </div><!--/span1 -->
