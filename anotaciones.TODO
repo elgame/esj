@@ -44,6 +44,8 @@
  ✔ Crear caja 4 es igual a la de tryana es para la señora @done (19-01-12 12:37)
  ✔ Poner folio (consecutivo id) de cada movimiento de ingreso, gasto en todas las cajas @done (19-01-12 15:18)
  ✔ Cambios rpt Asistencias @done (19-01-13 21:14)
+ ☐ Reacomodar las cajas chicas de Boletas, Gastos y General, agregar gastos x comprobar y poder cancelar sin eliminar los registros
+ ☐ En ordenes de compras (listado) meter filtro de busqueda x producto y que puedan previsualizar la orden sin entrar a ella
  ☐ En las fotos ver como esta el reporte de estado de resultado
  ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
  ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
