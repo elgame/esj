@@ -495,6 +495,167 @@
 
             <div class="span12" style="margin-left: 0px;">
 
+              <!-- Gastos x comprobar -->
+              <?php if ($_GET['fno_caja'] === '2'): ?>
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos-comprobar">
+                              <thead>
+                                <tr>
+                                  <th colspan="7">GASTOS POR COMPROBAR
+                                    <button type="button" class="btn btn-success" id="btn-add-gasto-comprobar" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                  </th>
+                                  <th colspan="2">IMPORTE</th>
+                                </tr>
+                                <tr>
+                                  <th>FECHA</th>
+                                  <th>COD AREA</th>
+                                  <th>EMPRESA</th>
+                                  <th>NOM</th>
+                                  <th>NOMBRE</th>
+                                  <th>CONCEPTO</th>
+                                  <th>REP</th>
+                                  <th>CARGO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                  $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
+                                  $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
+                                  $totalGastosComprobar = 0;
+                                  if (count($caja['gastos_comprobar']) == 0 && isset($_POST['gasto_comprobar_concepto']) && count($_POST['gasto_comprobar_concepto']) > 0) {
+                                    foreach ($_POST['gasto_comprobar_concepto'] as $key => $concepto) {
+                                      $totalGastosComprobar += floatval($_POST['gasto_comprobar_importe'][$key]); ?>
+                                        <tr>
+                                          <td>
+                                          </td>
+                                          <td style="">
+                                            <input type="hidden" name="gasto_comprobar_id_gasto[]" value="" id="gasto_id_gasto">
+                                            <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
+                                            <input type="text" name="comprobar_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
+                                            <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
+                                            <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                            <input type="hidden" name="comprobar_area[]" value="<?php echo $_POST['comprobar_area'][$key] ?>" class="area span12">
+                                            <input type="hidden" name="comprobar_areaId[]" value="<?php echo $_POST['comprobar_areaId'][$key] ?>" class="areaId span12">
+                                            <input type="hidden" name="comprobar_rancho[]" value="<?php echo $_POST['comprobar_rancho'][$key] ?>" class="rancho span12">
+                                            <input type="hidden" name="comprobar_ranchoId[]" value="<?php echo $_POST['comprobar_ranchoId'][$key] ?>" class="ranchoId span12">
+                                            <input type="hidden" name="comprobar_centroCosto[]" value="<?php echo $_POST['comprobar_centroCosto'][$key] ?>" class="centroCosto span12">
+                                            <input type="hidden" name="comprobar_centroCostoId[]" value="<?php echo $_POST['comprobar_centroCostoId'][$key] ?>" class="centroCostoId span12">
+                                            <input type="hidden" name="comprobar_activos[]" value="<?php echo $_POST['comprobar_activos'][$key] ?>" class="activos span12">
+                                            <input type="hidden" name="comprobar_activoId[]" value="<?php echo $_POST['comprobar_activoId'][$key] ?>" class="activoId span12">
+                                            <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $_POST['comprobar_empresaId'][$key] ?>" class="empresaId span12">
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="gasto_comprobar_empresa[]" value="<?php echo $_POST['gasto_comprobar_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
+                                            <input type="hidden" name="gasto_comprobar_empresa_id[]" value="<?php echo $_POST['gasto_comprobar_empresa_id'][$key] ?>" class="vpositive gasto-cargo-id">
+                                          </td>
+                                          <td style="">
+                                            <select name="gasto_comprobar_nomenclatura[]" class="span12 gasto_nomenclatura" <?php echo $readonly ?>>
+                                              <?php foreach ($nomenclaturas as $n) { ?>
+                                                <option value="<?php echo $n->id ?>" <?php echo $_POST['gasto_comprobar_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                              <?php } ?>
+                                            </select>
+                                          </td>
+                                          <!-- <td style=""><input type="text" name="gasto_folio[]" value="<?php echo $_POST['gasto_folio'][$key] ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td> -->
+                                          <td style="">
+                                            <input type="text" name="gasto_comprobar_nombre[]" value="<?php echo $_POST['gasto_comprobar_nombre'][$key] ?>" class="span12 gasto-nombre"  <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="gasto_comprobar_concepto[]" value="<?php echo $_POST['gasto_comprobar_concepto'][$key] ?>" class="span12 gasto-concepto"  <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="">
+                                            <input type="checkbox" value="si" class="gasto-reposicion" <?php echo $readonly; ?>>
+                                            <input type="hidden" name="gasto_comprobar_reposicion[]" value="<?php echo $_POST['gasto_comprobar_reposicion'][$key] ?>" class="gasto-reposicionhid">
+                                          </td>
+                                          <td style=""><input type="text" name="gasto_comprobar_importe[]" value="<?php echo $_POST['gasto_comprobar_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
+                                          <td style="">
+                                            <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
+                                          </td>
+                                        </tr>
+                                <?php }} else {
+                                  foreach ($caja['gastos_comprobar'] as $gasto) {
+                                    $totalGastosComprobar += floatval($gasto->monto);
+                                    $readonlygc = $gasto->fecha != $fecha? ' readonly': '';
+                                  ?>
+                                  <tr>
+                                    <td><?php echo $gasto->fecha ?></td>
+                                    <td style="">
+                                      <input type="hidden" name="gasto_comprobar_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
+                                      <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
+                                      <input type="text" name="comprobar_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                      <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
+                                      <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                      <input type="hidden" name="comprobar_area[]" value="<?php echo $gasto->area ?>" class="area span12">
+                                      <input type="hidden" name="comprobar_areaId[]" value="<?php echo $gasto->id_areac ?>" class="areaId span12">
+                                      <input type="hidden" name="comprobar_rancho[]" value="<?php echo $gasto->rancho ?>" class="rancho span12">
+                                      <input type="hidden" name="comprobar_ranchoId[]" value="<?php echo $gasto->id_rancho ?>" class="ranchoId span12">
+                                      <input type="hidden" name="comprobar_centroCosto[]" value="<?php echo $gasto->centro_costo ?>" class="centroCosto span12">
+                                      <input type="hidden" name="comprobar_centroCostoId[]" value="<?php echo $gasto->id_centro_costo ?>" class="centroCostoId span12">
+                                      <input type="hidden" name="comprobar_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
+                                      <input type="hidden" name="comprobar_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
+                                      <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <!-- <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a> -->
+                                    </td>
+                                    <td style="">
+                                      <input type="text" name="gasto_comprobar_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                      <input type="hidden" name="gasto_comprobar_empresa_id[]" value="<?php echo $gasto->id_categoria ?>" class=" vpositive gasto-cargo-id">
+                                    </td>
+                                    <td style="">
+                                      <select name="gasto_comprobar_nomenclatura[]" class="span12 gasto_nomenclatura" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                        <?php foreach ($nomenclaturas as $n) { ?>
+                                          <option value="<?php echo $n->id ?>" <?php echo $gasto->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                        <?php } ?>
+                                      </select>
+                                    </td>
+                                    <!-- <td style=""><input type="text" name="gasto_folio[]" value="<?php echo $gasto->folio ?>" class="span12 gasto-folio" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>></td> -->
+                                    <td style="">
+                                      <input type="text" name="gasto_comprobar_nombre[]" value="<?php echo $gasto->nombre ?>" class="span12 gasto-nombre" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                    </td>
+                                    <td style="">
+                                      <input type="text" name="gasto_comprobar_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                    </td>
+                                    <td style="">
+                                      <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly.$readonlygc; ?>>
+                                      <input type="hidden" name="gasto_comprobar_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
+                                    </td>
+                                    <td style=""><input type="text" name="gasto_comprobar_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>></td>
+                                    <td style="width: 50px">
+                                      <?php if ($modificar_gasto): ?>
+                                        <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
+                                        <button type="button" class="btn btn-info btn-show-comp-gasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
+                                      <?php endif ?>
+                                    </td>
+                                  </tr>
+                                <?php }} ?>
+                                <tr class="row-total">
+                                  <td colspan="6" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobar ?>" class="vpositive" id="ttotal-gastos-comprobar" style="text-align: right;" readonly></td>
+                                  <td></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <?php endif ?>
+              <!-- /Gastos x comprobar -->
+
               <!-- Gastos -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -507,7 +668,7 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="6">GASTOS DEL DIA
+                                  <th colspan="6">GASTOS GENERALES
                                     <?php //if ($_GET['fno_caja'] !== '1'): ?>
                                     <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                     <?php //endif ?>
@@ -1145,6 +1306,7 @@
       <div class="row-fluid">
         <div class="span6">
           <input type="hidden" id="accion_catalogos" value="true">
+          <input type="hidden" id="accion_catalogos_tipo" value="gasto">
           <div class="control-group">
             <label class="control-label" for="dempresa">Empresa</label>
             <div class="controls">
@@ -1204,6 +1366,40 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
       <button class="btn btn-primary" id="btnModalCatalogosSel">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalCompGastos" class="modal modal-w40 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalCatalogosLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalCatalogosLavel">Comprobar gasto</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+        <div class="">
+          <input type="hidden" id="compGasto_id_gasto" value="">
+          <div class="control-group">
+            <label class="control-label" for="compGastoMonto">Monto</label>
+            <div class="controls" id="compGasto_importe"></div>
+          </div>
+        </div>
+
+        <div class="">
+          <div class="control-group">
+            <label class="control-label" for="compGastoMonto">Nuevo Monto</label>
+            <div class="controls">
+              <input type="text" name="compGastoMonto" class="span11 vpositive" id="compGastoMonto" value="" size="">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalCompGasto">Guardar</button>
     </div>
   </div>
 

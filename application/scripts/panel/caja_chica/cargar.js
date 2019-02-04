@@ -349,6 +349,7 @@
   var btnAddGasto = function () {
     $('#btn-add-gasto').on('click', function(event) {
       $('#accion_catalogos').val('true');
+      $('#accion_catalogos_tipo').val('gasto');
       $('#modalCatalogos').modal('show');
       $('#area').val('');
       $('#areaId').val('');
@@ -363,23 +364,9 @@
       $('#did_categoria').val('');
     });
 
-    $('#btnModalCatalogosSel').on('click', function(event) {
-      if ($('#accion_catalogos').val() == 'true') {
-        agregarGasto();
-      } else { // Edita
-        $trGastoCat.find('.area').val($('#area').val());
-        $trGastoCat.find('.areaId').val($('#areaId').val());
-        $trGastoCat.find('.rancho').val($('#rancho').val());
-        $trGastoCat.find('.ranchoId').val($('#ranchoId').val());
-        $trGastoCat.find('.centroCosto').val($('#centroCosto').val());
-        $trGastoCat.find('.centroCostoId').val($('#centroCostoId').val());
-        $trGastoCat.find('.activos').val($('#activos').val());
-        $trGastoCat.find('.activoId').val($('#activoId').val());
-        $trGastoCat.find('.gasto-cargo').val($('#dempresa').val());
-        $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
-        $('#modalCatalogos').modal('hide');
-      }
-    });
+    $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+    btnAddGastoComprobar();
+    btnShowCompGasto();
 
     autocompleteEmpresa();
     autocompleteCultivo();
@@ -389,6 +376,8 @@
   };
 
   var agregarGasto = function () {
+    var tabla_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? '#table-gastos-comprobar': '#table-gastos';
+    var prefix_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? 'comprobar_': '';
     var area = $('#area').val();
     var areaId = $('#areaId').val();
     var rancho = $('#rancho').val();
@@ -402,46 +391,47 @@
     var empresaId = $('#did_empresa').val();
 
     if (areaId != '' && ranchoId != '' && centroCostoId != '' && empresaId != '') {
-      var $table = $('#table-gastos').find('tbody .row-total'),
+      var $table = $(tabla_gastos).find('tbody .row-total'),
           tr =  '<tr>' +
-                  '<td style="width: 60px;">'+
-                    '<input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">'+
-                    '<input type="hidden" name="gasto_del[]" value="" id="gasto_del">'+
-                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
-                    '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
-                    '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
+                  (prefix_gastos!=''? '<td></td>': '')+
+                  '<td style="">'+
+                    '<input type="hidden" name="gasto_'+prefix_gastos+'id_gasto[]" value="" id="gasto_id_gasto">'+
+                    '<input type="hidden" name="gasto_'+prefix_gastos+'del[]" value="" id="gasto_del">'+
+                    '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
+                    '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                    '<input type="hidden" name="'+prefix_gastos+'codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
                     '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
-                    '<input type="hidden" name="area[]" value="'+ area +'" class="area span12">'+
-                    '<input type="hidden" name="areaId[]" value="'+ areaId +'" class="areaId span12">'+
-                    '<input type="hidden" name="rancho[]" value="'+ rancho +'" class="rancho span12">'+
-                    '<input type="hidden" name="ranchoId[]" value="'+ ranchoId +'" class="ranchoId span12">'+
-                    '<input type="hidden" name="centroCosto[]" value="'+ centroCosto +'" class="centroCosto span12">'+
-                    '<input type="hidden" name="centroCostoId[]" value="'+ centroCostoId +'" class="centroCostoId span12">'+
-                    '<input type="hidden" name="activos[]" value="'+ activos +'" class="activos span12">'+
-                    '<input type="hidden" name="activoId[]" value="'+ activoId +'" class="activoId span12">'+
-                    '<input type="hidden" name="empresaId[]" value="'+ empresaId +'" class="empresaId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'area[]" value="'+ area +'" class="area span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'areaId[]" value="'+ areaId +'" class="areaId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'rancho[]" value="'+ rancho +'" class="rancho span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'ranchoId[]" value="'+ ranchoId +'" class="ranchoId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'centroCosto[]" value="'+ centroCosto +'" class="centroCosto span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'centroCostoId[]" value="'+ centroCostoId +'" class="centroCostoId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'activos[]" value="'+ activos +'" class="activos span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'activoId[]" value="'+ activoId +'" class="activoId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'empresaId[]" value="'+ empresaId +'" class="empresaId span12">'+
                   '</td>'+
-                  '<td style="width: 100px;">' +
-                    '<input type="text" name="gasto_empresa[]" value="'+ dempresa +'" class="span12 gasto-cargo" readonly>' +
-                    '<input type="hidden" name="gasto_empresa_id[]" value="'+ did_categoria +'" class="input-small vpositive gasto-cargo-id">' +
+                  '<td style="">' +
+                    '<input type="text" name="gasto_'+prefix_gastos+'empresa[]" value="'+ dempresa +'" class="span12 gasto-cargo" readonly>' +
+                    '<input type="hidden" name="gasto_'+prefix_gastos+'empresa_id[]" value="'+ did_categoria +'" class="input-small vpositive gasto-cargo-id">' +
                   '</td>' +
-                  '<td style="width: 40px;">' +
-                    '<select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura">' +
+                  '<td style="">' +
+                    '<select name="gasto_'+prefix_gastos+'nomenclatura[]" class="span12 ingreso_nomenclatura">' +
                       $('#nomeclaturas_base').html() +
                     '</select>' +
                   '</td>' +
-                  // '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
+                  // '<td style=""><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
                   '<td style="">' +
-                    '<input type="text" name="gasto_nombre[]" value="" class="span12 gasto-nombre">' +
+                    '<input type="text" name="gasto_'+prefix_gastos+'nombre[]" value="" class="span12 gasto-nombre">' +
                   '</td>' +
                   '<td style="">' +
-                    '<input type="text" name="gasto_concepto[]" value="" class="span12 gasto-concepto">' +
+                    '<input type="text" name="gasto_'+prefix_gastos+'concepto[]" value="" class="span12 gasto-concepto">' +
                   '</td>' +
-                  '<td style="width: 20px;">'+
+                  '<td style="">'+
                     '<input type="checkbox" value="si" class="gasto-reposicion">'+
-                    '<input type="hidden" name="gasto_reposicion[]" value="f" class="gasto-reposicionhid">'+
+                    '<input type="hidden" name="gasto_'+prefix_gastos+'reposicion[]" value="f" class="gasto-reposicionhid">'+
                   '</td>'+
-                  '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
+                  '<td style=""><input type="text" name="gasto_'+prefix_gastos+'importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
                   '<td style="width: 30px;">'+
                     '<button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
                     '<button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>'+
@@ -457,7 +447,7 @@
   };
 
   var btnDelGasto = function () {
-    $('#table-gastos').on('click', '.btn-del-gasto', function(event) {
+    $('#table-gastos, #table-gastos-comprobar').on('click', '.btn-del-gasto', function(event) {
       var $tr = $(this).parents('tr'),
           id = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
@@ -480,6 +470,7 @@
       $totalRepo.val(total.toFixed(2));
 
       calculaTotalGastos();
+      calculaTotalGastosComprobar();
       calculaCorte();
     });
 
@@ -490,9 +481,48 @@
     });
   };
 
+  var btnModalCatalogosSel = function(event) {
+    if ($('#accion_catalogos').val() == 'true') {
+      agregarGasto();
+    } else { // Edita
+      $trGastoCat.find('.area').val($('#area').val());
+      $trGastoCat.find('.areaId').val($('#areaId').val());
+      $trGastoCat.find('.rancho').val($('#rancho').val());
+      $trGastoCat.find('.ranchoId').val($('#ranchoId').val());
+      $trGastoCat.find('.centroCosto').val($('#centroCosto').val());
+      $trGastoCat.find('.centroCostoId').val($('#centroCostoId').val());
+      $trGastoCat.find('.activos').val($('#activos').val());
+      $trGastoCat.find('.activoId').val($('#activoId').val());
+      $trGastoCat.find('.gasto-cargo').val($('#dempresa').val());
+      $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
+      $('#modalCatalogos').modal('hide');
+    }
+  };
+
+  var btnAddGastoComprobar = function () {
+    $('#btn-add-gasto-comprobar').on('click', function(event) {
+      $('#accion_catalogos').val('true');
+      $('#accion_catalogos_tipo').val('gasto_comp');
+      $('#modalCatalogos').modal('show');
+      $('#area').val('');
+      $('#areaId').val('');
+      $('#rancho').val('');
+      $('#ranchoId').val('');
+      $('#centroCosto').val('');
+      $('#centroCostoId').val('');
+      $('#activos').val('');
+      $('#activoId').val('');
+      $('#dempresa').val('');
+      $('#did_empresa').val('');
+      $('#did_categoria').val('');
+    });
+
+    // $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+  };
+
   var $trGastoCat;
   var btnShowGastoCat = function () {
-    $('#table-gastos').on('click', '.btn-show-cat', function(event) {
+    var setDataGastos = function (event) {
       $trGastoCat = $(this).parents('tr');
       $('#area').val($trGastoCat.find('.area').val());
       $('#areaId').val($trGastoCat.find('.areaId').val());
@@ -507,6 +537,43 @@
       $('#did_categoria').val($trGastoCat.find('.gasto-cargo-id').val());
       $('#accion_catalogos').val('false');
       $('#modalCatalogos').modal('show');
+    }
+
+    $('#table-gastos').on('click', '.btn-show-cat', setDataGastos);
+    $('#table-gastos-comprobar').on('click', '.btn-show-cat', setDataGastos);
+  };
+
+  var btnShowCompGasto = function () {
+    var $trGasto;
+
+    $('#table-gastos-comprobar').on('click', '.btn-show-comp-gasto', function(event) {
+      $trGasto = $(this).parents('tr');
+      $('#modalCompGastos').modal('show');
+      $('#compGasto_id_gasto').val($trGasto.find('#gasto_id_gasto').val());
+      $('#compGasto_importe').text($trGasto.find('.gasto-importe').val());
+      $('#compGastoMonto').val($trGasto.find('.gasto-importe').val());
+    });
+    $('#modalCompGastos').on('shown', function () {
+      $('#compGastoMonto').focus();
+    });
+
+    $('#btnModalCompGasto').on('click', function(event) {
+      if ((parseFloat($('#compGastoMonto').val())||0) > 0) {
+        var params = {
+          'id_gasto': $('#compGasto_id_gasto').val(),
+          'importe_old': $('#compGasto_importe').text(),
+          'importe': $('#compGastoMonto').val(),
+          'fno_caja': $('#fno_caja').val(),
+          'fecha_caja': $('#fecha_caja').val()
+        };
+        $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+          console.log(json, textStatus);
+          $('#modalCompGastos').modal('hide');
+          $trGasto.remove();
+        });
+      } else {
+        noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
+      }
     });
   };
 
@@ -747,6 +814,7 @@
         $totalRepo.val(total.toFixed(2));
 
         calculaTotalGastos();
+        calculaTotalGastosComprobar();
         calculaCorte();
       }
     });
@@ -754,12 +822,21 @@
 
   var calculaTotalGastos = function () {
     var total = 0;
-    $('.gasto-importe').each(function(index, el) {
+    $('#table-gastos .gasto-importe').each(function(index, el) {
       total += parseFloat($(this).val() || 0);
     });
 
     $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
     $('input#ttotal-gastos').val(total.toFixed(2));
+  };
+
+  var calculaTotalGastosComprobar = function () {
+    var total = 0;
+    $('#table-gastos-comprobar .gasto-importe').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+    alert(total);
+    $('input#ttotal-gastos-comprobar').val(total.toFixed(2));
   };
 
   var calculaCorte = function () {

@@ -58,9 +58,12 @@
     ----- pcc|pct
     ALTER TABLE public.cajachica_traspasos ADD COLUMN folio bigint;
     ALTER TABLE public.cajachica_traspasos ADD COLUMN status boolean NOT NULL DEFAULT true;
-    ----- pct
+    ----- pct|pcc
     ALTER TABLE public.cajachica_gastos ADD COLUMN status boolean NOT NULL DEFAULT true;
     ALTER TABLE public.cajachica_gastos ADD COLUMN nombre character varying(130);
+    ----- pcc
+    ALTER TABLE public.cajachica_gastos ADD COLUMN tipo character varying(5) NOT NULL DEFAULT 'g'::character varying;
+    COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar';
 
  ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc|lap
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;

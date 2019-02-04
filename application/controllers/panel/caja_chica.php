@@ -23,6 +23,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/ajax_get_remisiones/',
     'caja_chica/ajax_get_deudores/',
     'caja_chica/agregar_abono_deudor/',
+    'caja_chica/ajax_registra_gasto_comp/',
   );
 
   public function _remap($method)
@@ -723,6 +724,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     echo json_encode($this->caja_chica_model->ajaxDeudores());
+  }
+
+  public function ajax_registra_gasto_comp()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->ajaxRegGastosComprobar($_GET));
   }
 
 

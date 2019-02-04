@@ -16,6 +16,7 @@ class caja_chica_model extends CI_Model {
       'saldo_clientes'        => array(),
       'denominaciones'        => array(),
       'gastos'                => array(),
+      'gastos_comprobar'      => array(),
       'traspasos'             => array(),
       'deudores'              => array(),
       'acreedores'            => array(),
@@ -323,8 +324,13 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // gastos por comprobar
+    if ($noCaja == '2') {
+      $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'gc'": " AND cg.tipo = 'gc'"));
+    }
+
     // gastos
-    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't'": ''));
+    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'g'": " AND cg.tipo = 'g'"));
 
     // Traspasos
     if ($noCaja == '2' || $noCaja == '4') {
@@ -401,6 +407,11 @@ class caja_chica_model extends CI_Model {
 
   public function getCajaGastos($fecha, $noCaja, $sql = '')
   {
+    if (is_array($fecha) && $fecha[0] === 'gc') {
+      $sql .= " AND cg.fecha <= '{$fecha[1]}'";
+    } else
+      $sql .= " AND cg.fecha = '{$fecha}'";
+
     $response = [];
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
@@ -420,7 +431,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
          LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
          LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
-       WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja} {$sql}
+       WHERE cg.no_caja = {$noCaja} {$sql}
        ORDER BY cg.id_gasto ASC"
     );
 
@@ -812,6 +823,95 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Gastos x comprobar
+    // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    if (isset($data['gasto_comprobar_concepto']))
+    {
+      // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+      //   WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+      //   ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['gasto_comprobar_concepto'] as $key => $gasto)
+      {
+        if (isset($data['gasto_comprobar_del'][$key]) && $data['gasto_comprobar_del'][$key] == 'true' &&
+          isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
+
+          // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f'], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+        } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
+            'id_nomenclatura' => $data['gasto_comprobar_nomenclatura'][$key],
+            // 'folio'           => $data['gasto_comprobar_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['gasto_comprobar_nombre'][$key],
+            'monto'           => $data['gasto_comprobar_importe'][$key],
+            // 'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            $data['comprobar_codigoCampo'][$key] => (isset($data['comprobar_codigoAreaId'][$key]{0})? $data['comprobar_codigoAreaId'][$key]: NULL),
+            'reposicion'      => ($data['gasto_comprobar_reposicion'][$key]=='t'? 't': 'f'),
+            'id_areac'        => (!empty($data['comprobar_areaId'][$key])? $data['comprobar_areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['comprobar_ranchoId'][$key])? $data['comprobar_ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['comprobar_centroCostoId'][$key])? $data['comprobar_centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['comprobar_activoId'][$key])? $data['comprobar_activoId'][$key]: NULL),
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_comprobar_id_gasto'][$key], $gastos_udt,
+                          array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_gasto',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+        } else {
+          // $data_folio->folio += 1;
+          $gastos = array(
+            // 'folio_sig'                => $data_folio->folio,
+            'id_categoria'             => $data['gasto_comprobar_empresa_id'][$key],
+            'id_nomenclatura'          => $data['gasto_comprobar_nomenclatura'][$key],
+            'folio'                    => '', //$data['gasto_folio'][$key],
+            'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_comprobar_nombre'][$key],
+            'monto'                    => $data['gasto_comprobar_importe'][$key],
+            'fecha'                    => $data['fecha_caja_chica'],
+            'no_caja'                  => $data['fno_caja'],
+            'tipo'                     => 'gc',
+            // 'id_area'               => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            $data['comprobar_codigoCampo'][$key] => (isset($data['comprobar_codigoAreaId'][$key]{0})? $data['comprobar_codigoAreaId'][$key]: NULL),
+            'reposicion'               => ($data['gasto_comprobar_reposicion'][$key]=='t'? 't': 'f'),
+            'id_usuario'               => $this->session->userdata('id_usuario'),
+            'id_areac'                 => (!empty($data['comprobar_areaId'][$key])? $data['comprobar_areaId'][$key]: NULL),
+            'id_rancho'                => (!empty($data['comprobar_ranchoId'][$key])? $data['comprobar_ranchoId'][$key]: NULL),
+            'id_centro_costo'          => (!empty($data['comprobar_centroCostoId'][$key])? $data['comprobar_centroCostoId'][$key]: NULL),
+            'id_activo'                => (!empty($data['comprobar_activoId'][$key])? $data['comprobar_activoId'][$key]: NULL),
+          );
+          $this->db->insert('cajachica_gastos', $gastos);
+          $gastooidd = $this->db->insert_id();
+          $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                        array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$gasto} | Monto: {$data['gasto_comprobar_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
+
+      if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+        $this->enviarEmail($gastos_ids);
+        // $this->db->insert_batch('cajachica_gastos', $gastos);
+      }
+    }
+
     // Traspasos
     if (isset($data['traspaso_concepto']))
     {
@@ -1124,6 +1224,44 @@ class caja_chica_model extends CI_Model {
     $this->db->update('cajachica_categorias', array('status' => 'f'), array('id_categoria' => $categoriaId));
 
     return true;
+  }
+
+  public function ajaxRegGastosComprobar($data)
+  {
+    $this->db->update('cajachica_gastos', [
+      'tipo'  => 'g',
+      'monto' => $data['importe'],
+    ], "id_gasto = ".$data['id_gasto']);
+
+    if ($data['importe_old'] > $data['importe']) {
+      $anio = date('Y');
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
+        WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
+
+      $data_folio->folio += 1;
+      $ingresos = array(
+        'folio'           => $data_folio->folio,
+        'concepto'        => 'DEVOLUCION DE GASTO',
+        'monto'           => ($data['importe_old'] - $data['importe']),
+        'fecha'           => $data['fecha_caja'],
+        'otro'            => 'f',
+        'id_categoria'    => $data_gasto->id_categoria,
+        'id_nomenclatura' => 10, // ingresos x gastos
+        'poliza'          => null,
+        'id_movimiento'   => null,
+        'no_caja'         => $data['fno_caja'],
+        'banco'           => 'EFECTIVO',
+        'nombre'          => $data_gasto->nombre,
+        'id_usuario'      => $this->session->userdata('id_usuario'),
+      );
+
+      $this->db->insert('cajachica_ingresos', $ingresos);
+    }
+
+    return ['result' => true];
   }
 
   public function ajaxCategorias()
@@ -1526,7 +1664,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(6, 32);
     $pdf->SetAligns(array('L', 'C'));
     $pdf->SetWidths(array(180, 25));
-    $pdf->Row(array('INGRESOS POR REPOSICION', 'IMPORTE'), true, true);
+    $pdf->Row(array('INGRESOS '.($noCajas == 4? 'DE CAJA': 'POR REPOSICION'), 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetX(6);
@@ -1722,6 +1860,83 @@ class caja_chica_model extends CI_Model {
       ), false, true);
     }
 
+    $totalGastosComprobarTot = $totalGastosComprobar = 0;
+    if ($noCajas == 2) {
+      // Gastos del Dia
+      // $pag_aux2 = $pdf->page;
+      // $pdf->page = $pag_aux;
+      // $pdf->SetY($pag_yaux);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('GASTOS POR COMPROBAR', 'IMPORTE'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+      $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+
+      $codigoAreas = array();
+      foreach ($caja['gastos_comprobar'] as $key => $gasto)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+          $pdf->Row(array('FECHA', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
+        }
+
+        $colortxt = [[100, 100, 100]];
+        if ($gasto->status == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalGastosComprobar += floatval($gasto->monto);
+          }
+
+          $totalGastosComprobarTot += floatval($gasto->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+
+        $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $gasto->fecha,
+          $gasto->empresa,
+          $gasto->nomenclatura,
+          $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
+          $gasto->centro_costo,
+          $gasto->concepto,
+          $gasto->nombre,
+          MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+        ), false, true, $colortxt);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+      $pdf->Row(array('', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false),
+        'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), true, true);
+    }
+
     // Gastos del Dia
     // $pag_aux2 = $pdf->page;
     // $pdf->page = $pag_aux;
@@ -1730,17 +1945,17 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY()+3);
     $pdf->SetAligns(array('L', 'C'));
     $pdf->SetWidths(array(180, 25));
-    $pdf->Row(array('GASTOS DEL DIA', 'IMPORTE'), true, true);
+    $pdf->Row(array('GASTOS GENERALES', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
+    $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
     $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
+    $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
 
     $codigoAreas = array();
     $totalGastos = 0;
@@ -1758,7 +1973,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-        $pdf->SetWidths(array(15, 25, 15, 25, 25, 40, 35, 25));
+        $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
         $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
       }
 
@@ -2176,6 +2391,8 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+    $pdf->SetX(168);
+    $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
