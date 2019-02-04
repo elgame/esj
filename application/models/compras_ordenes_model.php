@@ -58,6 +58,13 @@ class compras_ordenes_model extends CI_Model {
 
     $sql .= $regresa_product ? " AND co.regresa_product = 't'" : " AND co.status <> 'n'";
 
+    $sql_fil_prod = '';
+    if ($this->input->get('fconceptoId') > 0) {
+      $sql_fil_prod = "INNER JOIN (
+          SELECT id_orden FROM compras_productos WHERE id_producto = {$this->input->get('fconceptoId')} GROUP BY id_orden
+        ) cp ON co.id_orden = cp.id_orden";
+    }
+
     $query = BDUtil::pagination(
         "SELECT co.id_orden,
                 co.id_empresa, e.nombre_fiscal AS empresa,
@@ -75,6 +82,7 @@ class compras_ordenes_model extends CI_Model {
                   (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden AND id_compra IS NULL)
                 ) as prod_sincompras
         FROM compras_ordenes AS co
+        {$sql_fil_prod}
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento

@@ -53,6 +53,10 @@
                   </select>
                 <?php } ?>
 
+                <br>
+                <input type="text" name="fconcepto" value="<?php echo set_value_get('fconcepto'); ?>" id="fconcepto" class="input-xlarge search-query" placeholder="Producto / Descripción" style="margin-top: 15px;">
+                <input type="hidden" name="fconceptoId" id="fconceptoId" value="<?php echo set_value_get('fconceptoId'); ?>">
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
@@ -95,7 +99,10 @@
                     <?php } ?>
                   </td>
                   <td><?php echo substr($orden->fecha, 0, 10); ?></td>
-                  <td><span class="label"><?php echo $orden->folio; ?></span></td>
+                  <td><span class="label">
+                    <a href="#modalOrden" data-toggle="modal" data-idOrden="<?php echo $orden->id_orden ?>"
+                      data-tipo="<?php echo ($orden->status === 'a'? 'modificar': '') ?>" class="linkOrdenView" style="color: #fff;"><?php echo $orden->folio; ?></a>
+                    </span></td>
                   <td><?php echo $orden->proveedor; ?></td>
                   <td><?php echo $orden->empresa; ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></td>
@@ -231,6 +238,14 @@
 
       </div><!--/row-->
 
+
+      <!-- Modal -->
+      <div id="modalOrden" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" style="width: 80%;left: 25%;top: 40%;height: 600px;">
+        <div class="modal-body" style="max-height: 1500px;">
+          <iframe id="frmOrdenView" src="" style="width: 100%;height: 800px;"></iframe>
+        </div>
+      </div>
 
 
 
