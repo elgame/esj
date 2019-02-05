@@ -114,10 +114,10 @@ var autocompleteRanchos = function () {
   $("#rancho").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
-      if(parseInt($("#did_empresa").val()) > 0)
-        params.did_empresa = $("#did_empresa").val();
-      if(parseInt($("#areaId").val()) > 0)
-        params.area = $("#areaId").val();
+      // if(parseInt($("#did_empresa").val()) > 0)
+      //   params.did_empresa = $("#did_empresa").val();
+      if(parseInt(window.parent.$("#parea").val()) > 0)
+        params.area = window.parent.$("#parea").val();
       $.ajax({
           url: base_url + 'panel/ranchos/ajax_get_ranchos/',
           dataType: "json",

@@ -48,7 +48,7 @@ class bascula_pina extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar Salida de Piña'
+      'titulo' => 'Agregar Entrada de Piña'
     );
 
     $this->configAddSalidaPina();

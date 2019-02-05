@@ -73,7 +73,7 @@
         <?php if ($accion !== 'n' && $accion !== 'en' && isset($_POST['pcajas'])) { ?>
           <a href="<?php echo base_url('panel/bascula/show_view_agregar_lote/?idb='.$_GET['idb']) ?>" class="btn btn-warning" rel="superbox-40x480">Agregar Lote</a>
           <?php if (isset($_POST['parea_nom']) && $_POST['parea_nom'] == 'PIÑA MIEL'): ?>
-            <a href="<?php echo base_url('panel/bascula_pina/show_view_guardar_pina/?idb='.$_GET['idb']) ?>" class="btn" rel="superbox-60x500">Agregar Salida Piña</a>
+            <a href="<?php echo base_url('panel/bascula_pina/show_view_guardar_pina/?idb='.$_GET['idb']) ?>" class="btn" rel="superbox-80x500">Agregar Entrada Piña</a>
           <?php endif ?>
         <?php } ?>
 
