@@ -1064,7 +1064,7 @@
                   '<td style="width: 66px;">' +
                       '<select name="traslado[]" id="traslado" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                         '<option value="0" '+(producto.traslado === '0' ? "selected" : "")+'>0%</option>' +
-                        '<option value="11" '+(producto.traslado === '11' ? "selected" : "")+'>11%</option>' +
+                        '<option value="8" '+(producto.traslado === '8' ? "selected" : "")+'>8%</option>' +
                         '<option value="16" '+(producto.traslado === '16' ? "selected" : "")+'>16%</option>' +
                       '</select>' +
                       '<input type="hidden" name="trasladoTotal[]" value="" id="trasladoTotal" class="span12">' +
