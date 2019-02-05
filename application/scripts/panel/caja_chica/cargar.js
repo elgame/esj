@@ -835,7 +835,6 @@
     $('#table-gastos-comprobar .gasto-importe').each(function(index, el) {
       total += parseFloat($(this).val() || 0);
     });
-    alert(total);
     $('input#ttotal-gastos-comprobar').val(total.toFixed(2));
   };
 

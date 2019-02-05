@@ -496,7 +496,9 @@
             <div class="span12" style="margin-left: 0px;">
 
               <!-- Gastos x comprobar -->
-              <?php if ($_GET['fno_caja'] === '2'): ?>
+              <?php
+              $totalGastosComprobarTot = $totalGastosComprobar = 0;
+              if ($_GET['fno_caja'] === '2'): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -529,10 +531,9 @@
                                 <?php
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
-                                  $totalGastosComprobar = 0;
                                   if (count($caja['gastos_comprobar']) == 0 && isset($_POST['gasto_comprobar_concepto']) && count($_POST['gasto_comprobar_concepto']) > 0) {
                                     foreach ($_POST['gasto_comprobar_concepto'] as $key => $concepto) {
-                                      $totalGastosComprobar += floatval($_POST['gasto_comprobar_importe'][$key]); ?>
+                                      $totalGastosComprobarTot += floatval($_POST['gasto_comprobar_importe'][$key]); ?>
                                         <tr>
                                           <td>
                                           </td>
@@ -583,7 +584,10 @@
                                         </tr>
                                 <?php }} else {
                                   foreach ($caja['gastos_comprobar'] as $gasto) {
-                                    $totalGastosComprobar += floatval($gasto->monto);
+                                    if ($gasto->fecha == $fecha) {
+                                      $totalGastosComprobar += floatval($gasto->monto);
+                                    }
+                                    $totalGastosComprobarTot += floatval($gasto->monto);
                                     $readonlygc = $gasto->fecha != $fecha? ' readonly': '';
                                   ?>
                                   <tr>
@@ -640,7 +644,10 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="6" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td></td>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobarTot ?>" class="vpositive" id="ttotal-gastos-comprobar" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobar ?>" class="vpositive" id="ttotal-gastos-comprobar" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>
@@ -1124,6 +1131,10 @@
                               <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
+                              <td>TOTAL GASTOS X COMP:</td>
+                              <td><input type="text" name="" value="<?php echo $totalGastosComprobar ?>" class="input-small vpositive" id="ttotal-gastos-compp" style="text-align: right;" readonly></td>
+                            </tr>
+                            <tr>
                               <td>TOTAL TRASPASOS:</td>
                               <td><input type="text" name="" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
                             </tr>
@@ -1137,8 +1148,8 @@
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $totalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>

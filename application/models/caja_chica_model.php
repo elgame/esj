@@ -1229,11 +1229,12 @@ class caja_chica_model extends CI_Model {
   public function ajaxRegGastosComprobar($data)
   {
     $this->db->update('cajachica_gastos', [
+      'fecha'  => $data['fecha_caja'],
       'tipo'  => 'g',
       'monto' => $data['importe'],
     ], "id_gasto = ".$data['id_gasto']);
 
-    if ($data['importe_old'] > $data['importe']) {
+    // if ($data['importe_old'] > $data['importe']) {
       $anio = date('Y');
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
         WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
@@ -1245,7 +1246,7 @@ class caja_chica_model extends CI_Model {
       $ingresos = array(
         'folio'           => $data_folio->folio,
         'concepto'        => 'DEVOLUCION DE GASTO',
-        'monto'           => ($data['importe_old'] - $data['importe']),
+        'monto'           => $data['importe_old'],
         'fecha'           => $data['fecha_caja'],
         'otro'            => 'f',
         'id_categoria'    => $data_gasto->id_categoria,
@@ -1259,7 +1260,7 @@ class caja_chica_model extends CI_Model {
       );
 
       $this->db->insert('cajachica_ingresos', $ingresos);
-    }
+    // }
 
     return ['result' => true];
   }
@@ -2373,7 +2374,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
     $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -2402,7 +2403,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
