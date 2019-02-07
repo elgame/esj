@@ -5908,14 +5908,14 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'L'));
     $pdf->SetWidths(array(50, 50, 50));
 
-    if ($empresa['info']->rfc === 'ESJ97052763A')
-    {
+    // if ($empresa['info']->rfc === 'ESJ97052763A')
+    // {
       $pdf->Row(array(
         'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '$', false),
         'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '$', false),
         'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
         ), false, true, null, 2, 1);
-    }
+    // }
 
     //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
     if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
@@ -6662,15 +6662,15 @@ class nomina_fiscal_model extends CI_Model {
     $html .= $this->rowXls(array(''));
 
 
-    if ($empresa['info']->rfc === 'ESJ97052763A')
-    {
+    // if ($empresa['info']->rfc === 'ESJ97052763A')
+    // {
       $html .= $this->rowXls(array(
         'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
         'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '', false),
         'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
         ), 'style="font-weight:bold;font-size:14px;"');
       $html .= $this->rowXls(array(''));
-    }
+    // }
 
     //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
     if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
