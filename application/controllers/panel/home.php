@@ -35,6 +35,10 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
+    // $db2 = $this->load->database('firebird', TRUE);
+    // $data = $db2->query("SELECT * FROM DEPARTAMENTOS")->result();
+    // var_dump($data);
+
 		// $result = $this->db->query("SELECT *
 		//                            FROM proveedores
 		//                            WHERE id_empresa = 4");

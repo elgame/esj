@@ -47,6 +47,9 @@
  ✔ Reacomodar las cajas chicas de Boletas, Gastos y General, agregar gastos x comprobar y poder cancelar sin eliminar los registros @done (19-02-04 13:41)
  ✔ Formato de captura piña en las boletas de bascula @done (19-02-04 13:41)
  ✔ En ordenes de compras (listado) meter filtro de busqueda x producto y que puedan previsualizar la orden sin entrar a ella @done (19-02-04 15:25)
+ ☐ Conectar con la BD del checador (https://dbeaver.io/download/, https://help.ubuntu.com/community/Firebird2.5)
+     sudo apt-get install php7.0-interbase
+     sudo service apache2 restart
  ☐ En las fotos ver como esta el reporte de estado de resultado
  ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
  ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
