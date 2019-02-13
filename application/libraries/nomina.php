@@ -1003,11 +1003,16 @@ class nomina
       // Recorre los rangos de la tabla semanal de los subsidios para determinar en que
       // limites se encuentra la suma de los importes gravados.
       $isr = 0;
+      $subsidio = 0.01;
       foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
       {
         if ($sumaImporteGravados >= floatval($rango->de) && $sumaImporteGravados <= floatval($rango->hasta))
         {
-          $isr = abs($isrAntesSubsidio - floatval($rango->subsidio));
+          $isr = $isrAntesSubsidio - floatval($rango->subsidio);
+          if ($isr <= 0) {
+            $subsidio = abs($isr);
+            $isr = 0;
+          }
           break;
         }
       }
@@ -1018,8 +1023,8 @@ class nomina
         'Clave'            => $this->clavesPatron['subsidio'],
         'Concepto'         => 'Subsidio para el empleo',
         'ImporteGravado'   => 0,
-        'ImporteExcento'   => round($rango->subsidio, 2),
-        'total'            => round($rango->subsidio, 2) + 0,
+        'ImporteExcento'   => round($subsidio, 2),
+        'total'            => round($subsidio, 2) + 0,
         'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) ),
         'ApiKey'           => 'top_subsidio_empleo_',
       );
