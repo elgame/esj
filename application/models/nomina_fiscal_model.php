@@ -692,13 +692,13 @@ class nomina_fiscal_model extends CI_Model {
     // Obtiene la informacion de la empresa.
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
-    // Obtiene el certificado.
-    $certificado = $this->cfdi->obtenCertificado($this->db
-      ->select('cer')
-      ->from("empresas")
-      ->where("id_empresa", $empresaId)
-      ->get()->row()->cer
-    );
+    // // Obtiene el certificado.
+    // $certificado = $this->cfdi->obtenCertificado($this->db
+    //   ->select('cer')
+    //   ->from("empresas")
+    //   ->where("id_empresa", $empresaId)
+    //   ->get()->row()->cer
+    // );
 
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
@@ -719,269 +719,121 @@ class nomina_fiscal_model extends CI_Model {
     $errorTimbrar = false;
 
     // Recorre los empleados para agregar y timbrar sus nominas.
-    // foreach ($datos['empleado_id'] as $key => $empleadoId)
-    // {
-      // Si la nomina del empleado no se ha generado entonces entra.
-      $existe_nomina = $this->db->from("nomina_fiscal")
-        ->select('id_empleado, uuid')
-        ->where("id_empresa", $empresaId)
-        ->where("id_empleado", $empleadoId)
-        ->where("anio", $datos['anio'])
-        ->where("semana", $datos['numSemana'])->get()->row();
-      if ($datos['esta_asegurado'] == 't') {
-        $existe_nomina = (isset($existe_nomina->uuid) && $existe_nomina->uuid != '')? true: false;
-      } else {
-        $existe_nomina = (isset($existe_nomina->id_empleado) && $existe_nomina->id_empleado > 0)? true: false;
-      }
+    // Si la nomina del empleado no se ha generado entonces entra.
+    $existe_nomina = $this->db->from("nomina_fiscal")
+      ->select('id_empleado, uuid')
+      ->where("id_empresa", $empresaId)
+      ->where("id_empleado", $empleadoId)
+      ->where("anio", $datos['anio'])
+      ->where("semana", $datos['numSemana'])->get()->row();
+    if ($datos['esta_asegurado'] == 't') {
+      $existe_nomina = (isset($existe_nomina->uuid) && $existe_nomina->uuid != '')? true: false;
+    } else {
+      $existe_nomina = (isset($existe_nomina->id_empleado) && $existe_nomina->id_empleado > 0)? true: false;
+    }
 
-      $msg = '';
-      if ($datos['generar_nomina'] === '1' && !$existe_nomina)
+    $msg = '';
+    if ($datos['generar_nomina'] === '1' && !$existe_nomina)
+    {
+      // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+      $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+
+      $empleadoNomina = $this->nomina(
+        $configuraciones,
+        array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
+              'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+              'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
+              ),
+        $empleadoId,
+        $datos['horas_extras'],
+        $datos['descuento_playeras'],
+        $datos['subsidio'],
+        $datos['isr'],
+        $datos['utilidad_empresa'],
+        $datos['descuento_otros'],
+        null,
+        ['subsidioCausado' => $datos['subsidioCausado']]
+      );
+
+      $empleadoNomina[0]->folio = $datos['anio'].''.$datos['numSemana'];
+
+      $result = array('xml' => '', 'uuid' => '');
+      if($datos['esta_asegurado'] == 't')
       {
-        // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
-        $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+        // Obtiene los datos para la cadena original.
+        // $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
+        $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
 
-        $empleadoNomina = $this->nomina(
-          $configuraciones,
-          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
-                'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
-                'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
-                ),
-          $empleadoId,
-          $datos['horas_extras'],
-          $datos['descuento_playeras'],
-          $datos['subsidio'],
-          $datos['isr'],
-          $datos['utilidad_empresa'],
-          $datos['descuento_otros'],
-          null,
-          ['subsidioCausado' => $datos['subsidioCausado']]
-        );
+        // Timbrado de la factura.
+        // log_message('error', "nomina");
+        // log_message('error', json_encode($datosApi));
+        // $result = $this->timbrar($datosApi);
+        // $result = $this->timbrar($archivo['pathXML']);
+        // echo "<pre>";
+        //   var_dump($result, $empleadoNomina);
+        // echo "</pre>";exit;
 
-        $empleadoNomina[0]->folio = $datos['anio'].''.$datos['numSemana'];
+        // Si la nomina se timbro entonces agrega al array nominas la nomina del
+        // empleado para despues insertarla en la bdd.
+        // if (isset($result['result']->status) && $result['result']->status)
+        // {
+          $vacaciones = isset($empleadoNomina[0]->nomina->percepciones['vacaciones'])
+            ? $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteGravado'] +
+              $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteExcento']
+            : 0;
 
-        $result = array('xml' => '', 'uuid' => '');
-        if($datos['esta_asegurado'] == 't')
-        {
-          // Obtiene los datos para la cadena original.
-          $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
-          // $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
-          // $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
-          // // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
-          // // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
-          $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
-          // $datosCadenaOriginal['total'] = $total;
+          $primaVacacionalGravable = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
+            ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado']
+            : 0;
 
-          // // Concepto de la nomina.
-          // $concepto = array(array(
-          //   'cantidad'        => 1,
-          //   'unidad'          => 'ACT',
-          //   'descripcion'     => 'Pago de nómina',
-          //   'valorUnitario'   => $datosCadenaOriginal['subTotal'],
-          //   'importe'         => $datosCadenaOriginal['subTotal'],
-          //   'idClasificacion' => null,
-          // ));
+          $primaVacacionalExcento = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
+            ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
+            : 0;
 
-          // $datosCadenaOriginal['concepto'] = $concepto;
+          $primaVacacional = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
+            ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado'] +
+              $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
+            : 0;
 
-          // echo "<pre>";
-          //   var_dump($datosCadenaOriginal, $empleadoNomina);
-          // echo "</pre>";exit;
+          $aguinaldoGravable = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
+            ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado']
+            : 0;
 
+          $aguinaldoExcento = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
+            ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
+            : 0;
 
-          // // Obtiene la cadena original para la nomina.
-          // $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadenaOriginal, true, $empleadoNomina);
+          $aguinaldo = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
+            ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado'] +
+              $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
+            : 0;
 
-          // // Genera el sello en base a la cadena original.
-          // $sello = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-          // log_message('error', $cadenaOriginal['cadenaOriginal']);
+          $imss = $empleadoNomina[0]->nomina->deducciones['imss']['ImporteGravado'] +
+                  $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'];
 
-          // // Construye los datos para el xml.
-          // $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-          // // $datosXML['concepto'] = $concepto;
+          $rcv = $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteGravado'] +
+                  $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteExcento'];
 
-          // $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana);
+          $infonavit = $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteGravado'] +
+                       $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteExcento'];
 
-          // Timbrado de la factura.
-          log_message('error', "nomina");
-          log_message('error', json_encode($datosApi));
-          $result = $this->timbrar($datosApi);
-          // $result = $this->timbrar($archivo['pathXML']);
-          // echo "<pre>";
-          //   var_dump($result, $empleadoNomina);
-          // echo "</pre>";exit;
+          $ptuGravado = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
+            ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado']
+            : 0;
 
-          // Si la nomina se timbro entonces agrega al array nominas la nomina del
-          // empleado para despues insertarla en la bdd.
-          if (isset($result['result']->status) && $result['result']->status)
-          {
-            $vacaciones = isset($empleadoNomina[0]->nomina->percepciones['vacaciones'])
-              ? $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteGravado'] +
-                $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteExcento']
-              : 0;
+          $ptuExcento = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
+            ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento']
+            : 0;
 
-            $primaVacacionalGravable = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-              ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado']
-              : 0;
+          $ptu = $ptuGravado + $ptuExcento;
 
-            $primaVacacionalExcento = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-              ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
-              : 0;
+          $premioAsistencia = isset($empleadoNomina[0]->nomina->percepciones['premio_asistencia'])
+            ? $empleadoNomina[0]->nomina->percepciones['premio_asistencia']['ImporteGravado']
+            : 0;
+          $despensa = isset($empleadoNomina[0]->nomina->percepciones['despensa'])
+            ? $empleadoNomina[0]->nomina->percepciones['despensa']['ImporteExcento']
+            : 0;
 
-            $primaVacacional = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-              ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado'] +
-                $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
-              : 0;
-
-            $aguinaldoGravable = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-              ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado']
-              : 0;
-
-            $aguinaldoExcento = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-              ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
-              : 0;
-
-            $aguinaldo = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-              ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado'] +
-                $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
-              : 0;
-
-            $imss = $empleadoNomina[0]->nomina->deducciones['imss']['ImporteGravado'] +
-                    $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'];
-
-            $rcv = $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteGravado'] +
-                    $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteExcento'];
-
-            $infonavit = $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteGravado'] +
-                         $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteExcento'];
-
-            $ptuGravado = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
-              ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado']
-              : 0;
-
-            $ptuExcento = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
-              ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento']
-              : 0;
-
-            $ptu = $ptuGravado + $ptuExcento;
-
-            $premioAsistencia = isset($empleadoNomina[0]->nomina->percepciones['premio_asistencia'])
-              ? $empleadoNomina[0]->nomina->percepciones['premio_asistencia']['ImporteGravado']
-              : 0;
-            $despensa = isset($empleadoNomina[0]->nomina->percepciones['despensa'])
-              ? $empleadoNomina[0]->nomina->percepciones['despensa']['ImporteExcento']
-              : 0;
-
-            $totalPrestamos = 0;
-            // Recorre los prestamos del empleado para
-            foreach ($empleadoNomina[0]->prestamos as $prestamo)
-            {
-              $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
-
-              $prestamosEmpleados[] = array(
-                'id_empleado' => $empleadoId,
-                'id_empresa' => $empresaId,
-                'anio' => date('Y'),
-                'semana' => $datos['numSemana'],
-                'id_prestamo' => $prestamo['id_prestamo'],
-                'monto' => $prestamo['pago_semana_descontar'],
-                'fecha' => $fechasSemana['fecha_final'],
-
-                'prestamo' => $prestamo
-              );
-
-              // // Suma lo que lleva pagado mas lo que se esta abonando.
-              // $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
-
-              // // Si ya termino de pagar el prestamo entonces le cambia el status.
-              // if ($totalAbonado >= floatval($prestamo['prestado']))
-              // {
-              //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
-              // }
-            }
-
-            $totalNoFiscal = floatval($datos['total_no_fiscal']);
-
-            $datosApi['timbre'] = [
-              "cadenaOriginal" => $result['result']->data->cadenaOriginal,
-              "sello"          => $result['result']->data->sello,
-              "certificado"    => $result['result']->data->certificado,
-            ];
-
-            $nominasEmpleados[] = array(
-              'id_empleado'               => $empleadoId,
-              'id_empresa'                => $empresaId,
-              'anio'                      => $fechasSemana['anio'],
-              'semana'                    => $datos['numSemana'],
-              'fecha_inicio'              => $fechasSemana['fecha_inicio'],
-              'fecha_final'               => $fechasSemana['fecha_final'],
-              'dias_trabajados'           => $empleadoNomina[0]->dias_trabajados,
-              'salario_diario'            => $empleadoNomina[0]->salario_diario,
-              'salario_integral'          => $empleadoNomina[0]->nomina->salario_diario_integrado,
-              'subsidio'                  => $datos['subsidio'],
-              'subsidio_pagado'           => $empleadoNomina[0]->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'],
-              'sueldo_semanal'            => $empleadoNomina[0]->nomina->percepciones['sueldo']['ImporteGravado'],
-              'bonos'                     => $empleadoNomina[0]->bonos,
-              'otros'                     => $empleadoNomina[0]->otros,
-              'vacaciones'                => $vacaciones,
-              'prima_vacacional_grabable' => $primaVacacionalGravable,
-              'prima_vacacional_exento'   => $primaVacacionalExcento,
-              'prima_vacacional'          => $primaVacacional,
-              'aguinaldo_grabable'        => $aguinaldoGravable,
-              'aguinaldo_exento'          => $aguinaldoExcento,
-              'aguinaldo'                 => $aguinaldo,
-              'total_percepcion'          => $empleadoNomina[0]->nomina->subtotal,
-              'imss'                      => $imss,
-              'vejez'                     => $rcv,
-              'isr'                       => $empleadoNomina[0]->nomina->isr,
-              'infonavit'                 => $infonavit,
-              'subsidio_cobrado'          => 0,
-              'prestamos'                 => $totalPrestamos,
-              'total_deduccion'           => $empleadoNomina[0]->nomina->TotalDeducciones,
-              'total_neto'                => $total,
-              'id_empleado_creador'       => $this->session->userdata('id_usuario'),
-              'ptu_exento'                => $ptuExcento,
-              'ptu_grabable'              => $ptuGravado,
-              'ptu'                       => $ptu,
-              'id_puesto'                 => $empleadoNomina[0]->id_puesto,
-              'salario_real'              => $empleadoNomina[0]->salario_diario_real,
-              'sueldo_real'               => $empleadoNomina[0]->salario_diario_real * $empleadoNomina[0]->dias_trabajados,
-              'total_no_fiscal'           => $totalNoFiscal,
-              'horas_extras'              => $empleadoNomina[0]->horas_extras_dinero,
-              'horas_extras_grabable'     => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteGravado'],
-              'horas_extras_excento'      => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteExcento'],
-              'descuento_playeras'        => $datos['descuento_playeras'],
-              'descuento_otros'           => $datos['descuento_otros'],
-              'descuento_cocina'          => $datos['descuento_cocina'],
-              'xml'                       => $result['result']->data->xml,
-              'uuid'                      => $result['result']->data->uuid,
-              'utilidad_empresa'          => $empleadoNomina[0]->utilidad_empresa,
-              'domingo'                   => $empleadoNomina[0]->domingo,
-              'esta_asegurado'            => $datos['esta_asegurado'],
-              'fondo_ahorro'              => $empleadoNomina[0]->fondo_ahorro,
-              'pasistencia'               => $premioAsistencia,
-              'despensa'                  => $despensa,
-              'cfdi_ext'                  => json_encode($datosApi),
-            );
-
-            $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
-
-            $msg = $result['result']->mensaje;
-          }
-          else
-          {
-            $errorTimbrar = true;
-            $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
-          }
-
-          // echo "<pre>";
-          //   var_dump($datosXML, $archivo);
-          // echo "</pre>";exit;
-
-          // echo "<pre>";
-          //   var_dump($empleado, $cadenaOriginal, $sello, $certificado);
-          // echo "</pre>";exit;
-        }else
-        {
           $totalPrestamos = 0;
           // Recorre los prestamos del empleado para
           foreach ($empleadoNomina[0]->prestamos as $prestamo)
@@ -991,7 +843,7 @@ class nomina_fiscal_model extends CI_Model {
             $prestamosEmpleados[] = array(
               'id_empleado' => $empleadoId,
               'id_empresa' => $empresaId,
-              'anio' => $fechasSemana['anio'],
+              'anio' => date('Y'),
               'semana' => $datos['numSemana'],
               'id_prestamo' => $prestamo['id_prestamo'],
               'monto' => $prestamo['pago_semana_descontar'],
@@ -1012,66 +864,177 @@ class nomina_fiscal_model extends CI_Model {
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
 
-          $nominasEmpleados[] = array(
-              'id_empleado' => $empleadoId,
-              'id_empresa' => $empresaId,
-              'anio' => $fechasSemana['anio'],
-              'semana' => $datos['numSemana'],
-              'fecha_inicio' => $fechasSemana['fecha_inicio'],
-              'fecha_final' => $fechasSemana['fecha_final'],
-              'dias_trabajados' => $empleadoNomina[0]->dias_trabajados-1,
-              'salario_diario' => $empleadoNomina[0]->salario_diario_real,
-              'salario_integral' => 0,
-              'subsidio' => 0,
-              'sueldo_semanal' => ($empleadoNomina[0]->salario_diario_real*($empleadoNomina[0]->dias_trabajados-1)),
-              'bonos' => $empleadoNomina[0]->bonos,
-              'otros' => $empleadoNomina[0]->otros,
-              'subsidio_pagado' => 0,
-              'vacaciones' => 0,
-              'prima_vacacional_grabable' => 0,
-              'prima_vacacional_exento' => 0,
-              'prima_vacacional' => 0,
-              'aguinaldo_grabable' => 0,
-              'aguinaldo_exento' => 0,
-              'aguinaldo' => 0,
-              'total_percepcion' => 0,
-              'imss' => 0,
-              'vejez' => 0,
-              'isr' => 0,
-              'infonavit' => 0,
-              'subsidio_cobrado' => 0,
-              'prestamos' => $totalPrestamos,
-              'total_deduccion' => 0,
-              'total_neto' => 0,
-              'id_empleado_creador' => $this->session->userdata('id_usuario'),
-              'ptu_exento' => 0,
-              'ptu_grabable' => 0,
-              'ptu' => 0,
-              'id_puesto' => $empleadoNomina[0]->id_puesto,
-              'salario_real' => $empleadoNomina[0]->salario_diario_real,
-              'sueldo_real' => $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
-              'total_no_fiscal' => $totalNoFiscal,
-              'horas_extras' => 0,
-              'horas_extras_grabable' => 0,
-              'horas_extras_excento' => 0,
-              'descuento_playeras' => $datos['descuento_playeras'],
-              'descuento_otros' => $datos['descuento_otros'],
-              'descuento_cocina' => $datos['descuento_cocina'],
-              'xml' => '',
-              'uuid' => '',
-              'utilidad_empresa' => $empleadoNomina[0]->utilidad_empresa,
-              'domingo' => $empleadoNomina[0]->domingo,
-              'esta_asegurado' => $datos['esta_asegurado'],
-              'fondo_ahorro' => $empleadoNomina[0]->fondo_ahorro,
-              'pasistencia' => 0,
-              'despensa' => 0,
-            );
+          // $datosApi['timbre'] = [
+          //   "cadenaOriginal" => $result['result']->data->cadenaOriginal,
+          //   "sello"          => $result['result']->data->sello,
+          //   "certificado"    => $result['result']->data->certificado,
+          // ];
 
-          $msg = 'Registrado, no asegurado.';
+          $nominasEmpleados[] = array(
+            'id_empleado'               => $empleadoId,
+            'id_empresa'                => $empresaId,
+            'anio'                      => $fechasSemana['anio'],
+            'semana'                    => $datos['numSemana'],
+            'fecha_inicio'              => $fechasSemana['fecha_inicio'],
+            'fecha_final'               => $fechasSemana['fecha_final'],
+            'dias_trabajados'           => $empleadoNomina[0]->dias_trabajados,
+            'salario_diario'            => $empleadoNomina[0]->salario_diario,
+            'salario_integral'          => $empleadoNomina[0]->nomina->salario_diario_integrado,
+            'subsidio'                  => $datos['subsidio'],
+            'subsidio_pagado'           => $empleadoNomina[0]->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'],
+            'sueldo_semanal'            => $empleadoNomina[0]->nomina->percepciones['sueldo']['ImporteGravado'],
+            'bonos'                     => $empleadoNomina[0]->bonos,
+            'otros'                     => $empleadoNomina[0]->otros,
+            'vacaciones'                => $vacaciones,
+            'prima_vacacional_grabable' => $primaVacacionalGravable,
+            'prima_vacacional_exento'   => $primaVacacionalExcento,
+            'prima_vacacional'          => $primaVacacional,
+            'aguinaldo_grabable'        => $aguinaldoGravable,
+            'aguinaldo_exento'          => $aguinaldoExcento,
+            'aguinaldo'                 => $aguinaldo,
+            'total_percepcion'          => $empleadoNomina[0]->nomina->subtotal,
+            'imss'                      => $imss,
+            'vejez'                     => $rcv,
+            'isr'                       => $empleadoNomina[0]->nomina->isr,
+            'infonavit'                 => $infonavit,
+            'subsidio_cobrado'          => 0,
+            'prestamos'                 => $totalPrestamos,
+            'total_deduccion'           => $empleadoNomina[0]->nomina->TotalDeducciones,
+            'total_neto'                => $total,
+            'id_empleado_creador'       => $this->session->userdata('id_usuario'),
+            'ptu_exento'                => $ptuExcento,
+            'ptu_grabable'              => $ptuGravado,
+            'ptu'                       => $ptu,
+            'id_puesto'                 => $empleadoNomina[0]->id_puesto,
+            'salario_real'              => $empleadoNomina[0]->salario_diario_real,
+            'sueldo_real'               => $empleadoNomina[0]->salario_diario_real * $empleadoNomina[0]->dias_trabajados,
+            'total_no_fiscal'           => $totalNoFiscal,
+            'horas_extras'              => $empleadoNomina[0]->horas_extras_dinero,
+            'horas_extras_grabable'     => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteGravado'],
+            'horas_extras_excento'      => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteExcento'],
+            'descuento_playeras'        => $datos['descuento_playeras'],
+            'descuento_otros'           => $datos['descuento_otros'],
+            'descuento_cocina'          => $datos['descuento_cocina'],
+            // 'xml'                       => $result['result']->data->xml,
+            // 'uuid'                      => $result['result']->data->uuid,
+            'utilidad_empresa'          => $empleadoNomina[0]->utilidad_empresa,
+            'domingo'                   => $empleadoNomina[0]->domingo,
+            'esta_asegurado'            => $datos['esta_asegurado'],
+            'fondo_ahorro'              => $empleadoNomina[0]->fondo_ahorro,
+            'pasistencia'               => $premioAsistencia,
+            'despensa'                  => $despensa,
+            // 'cfdi_ext'                  => json_encode($datosApi),
+          );
+
+          // $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
+
+          // $msg = $result['result']->mensaje;
+          $msg = 'Registro asegurado, guardado';
+        // }
+        // else
+        // {
+        //   $errorTimbrar = true;
+        //   $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
+        // }
+
+        // echo "<pre>";
+        //   var_dump($datosXML, $archivo);
+        // echo "</pre>";exit;
+
+        // echo "<pre>";
+        //   var_dump($empleado, $cadenaOriginal, $sello, $certificado);
+        // echo "</pre>";exit;
+      }else
+      {
+        $totalPrestamos = 0;
+        // Recorre los prestamos del empleado para
+        foreach ($empleadoNomina[0]->prestamos as $prestamo)
+        {
+          $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
+
+          $prestamosEmpleados[] = array(
+            'id_empleado' => $empleadoId,
+            'id_empresa' => $empresaId,
+            'anio' => $fechasSemana['anio'],
+            'semana' => $datos['numSemana'],
+            'id_prestamo' => $prestamo['id_prestamo'],
+            'monto' => $prestamo['pago_semana_descontar'],
+            'fecha' => $fechasSemana['fecha_final'],
+
+            'prestamo' => $prestamo
+          );
+
+          // // Suma lo que lleva pagado mas lo que se esta abonando.
+          // $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
+
+          // // Si ya termino de pagar el prestamo entonces le cambia el status.
+          // if ($totalAbonado >= floatval($prestamo['prestado']))
+          // {
+          //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
+          // }
         }
 
+        $totalNoFiscal = floatval($datos['total_no_fiscal']);
+
+        $nominasEmpleados[] = array(
+            'id_empleado' => $empleadoId,
+            'id_empresa' => $empresaId,
+            'anio' => $fechasSemana['anio'],
+            'semana' => $datos['numSemana'],
+            'fecha_inicio' => $fechasSemana['fecha_inicio'],
+            'fecha_final' => $fechasSemana['fecha_final'],
+            'dias_trabajados' => $empleadoNomina[0]->dias_trabajados-1,
+            'salario_diario' => $empleadoNomina[0]->salario_diario_real,
+            'salario_integral' => 0,
+            'subsidio' => 0,
+            'sueldo_semanal' => ($empleadoNomina[0]->salario_diario_real*($empleadoNomina[0]->dias_trabajados-1)),
+            'bonos' => $empleadoNomina[0]->bonos,
+            'otros' => $empleadoNomina[0]->otros,
+            'subsidio_pagado' => 0,
+            'vacaciones' => 0,
+            'prima_vacacional_grabable' => 0,
+            'prima_vacacional_exento' => 0,
+            'prima_vacacional' => 0,
+            'aguinaldo_grabable' => 0,
+            'aguinaldo_exento' => 0,
+            'aguinaldo' => 0,
+            'total_percepcion' => 0,
+            'imss' => 0,
+            'vejez' => 0,
+            'isr' => 0,
+            'infonavit' => 0,
+            'subsidio_cobrado' => 0,
+            'prestamos' => $totalPrestamos,
+            'total_deduccion' => 0,
+            'total_neto' => 0,
+            'id_empleado_creador' => $this->session->userdata('id_usuario'),
+            'ptu_exento' => 0,
+            'ptu_grabable' => 0,
+            'ptu' => 0,
+            'id_puesto' => $empleadoNomina[0]->id_puesto,
+            'salario_real' => $empleadoNomina[0]->salario_diario_real,
+            'sueldo_real' => $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
+            'total_no_fiscal' => $totalNoFiscal,
+            'horas_extras' => 0,
+            'horas_extras_grabable' => 0,
+            'horas_extras_excento' => 0,
+            'descuento_playeras' => $datos['descuento_playeras'],
+            'descuento_otros' => $datos['descuento_otros'],
+            'descuento_cocina' => $datos['descuento_cocina'],
+            'xml' => '',
+            'uuid' => '',
+            'utilidad_empresa' => $empleadoNomina[0]->utilidad_empresa,
+            'domingo' => $empleadoNomina[0]->domingo,
+            'esta_asegurado' => $datos['esta_asegurado'],
+            'fondo_ahorro' => $empleadoNomina[0]->fondo_ahorro,
+            'pasistencia' => 0,
+            'despensa' => 0,
+          );
+
+        $msg = 'Registrado, no asegurado.';
       }
-    // }
+
+    }
 
     // Inserta las nominas.
     if (count($nominasEmpleados) > 0)
@@ -1107,14 +1070,146 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 
-    // $endTime = new DateTime(date('Y-m-d H:i:s'));
+    return array('errorTimbrar' => $errorTimbrar, 'msg' => $msg, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
+  }
 
+  public function add_nominas_timbrar($datos, $empresaId, $empleadoId)
+  {
     // echo "<pre>";
-    //   var_dump($startTime->diff($endTime)->format('%H:%I:%S'));
+    //   var_dump($datos, $empresaId, $empleadoId);
     // echo "</pre>";exit;
+    // $startTime = new DateTime(date('Y-m-d H:i:s'));
+
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    // Obtiene la informacion de la empresa.
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+
+    // Obtiene el certificado.
+    $certificado = $this->cfdi->obtenCertificado($this->db
+      ->select('cer')
+      ->from("empresas")
+      ->where("id_empresa", $empresaId)
+      ->get()->row()->cer
+    );
+
+    // Obtiene las configuraciones.
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    $configuraciones = $this->configuraciones();
+
+    // Almacenara los datos de las nominas de cada empleado para despues
+    // insertarlas.
+    $nominasEmpleados = array();
+
+    // Almacenara los datos de los prestamos de cada empleado para despues
+    // insertarlos.
+    $prestamosEmpleados = array();
+
+    // Obtiene el rango de fechas de la semana.
+    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana'], $datos['anio'], $empresa['info']->dia_inicia_semana );
+
+    // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
+    $errorTimbrar = false;
+
+    // Recorre los empleados para agregar y timbrar sus nominas.
+    // Si la nomina del empleado no se ha generado entonces entra.
+    $existe_nomina = $this->db->from("nomina_fiscal")
+      ->select('id_empleado, uuid')
+      ->where("id_empresa", $empresaId)
+      ->where("id_empleado", $empleadoId)
+      ->where("anio", $datos['anio'])
+      ->where("semana", $datos['numSemana'])->get()->row();
+    if ($datos['esta_asegurado'] == 't') {
+      $existe_nomina = (isset($existe_nomina->uuid) && $existe_nomina->uuid != '')? true: false;
+    } else {
+      $existe_nomina = (isset($existe_nomina->id_empleado) && $existe_nomina->id_empleado > 0)? true: false;
+    }
+
+    $msg = '';
+    if ($datos['generar_nomina'] === '1' && !$existe_nomina)
+    {
+      // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+      $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+
+      $empleadoNomina = $this->nomina(
+        $configuraciones,
+        array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
+              'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+              'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
+              ),
+        $empleadoId,
+        $datos['horas_extras'],
+        $datos['descuento_playeras'],
+        $datos['subsidio'],
+        $datos['isr'],
+        $datos['utilidad_empresa'],
+        $datos['descuento_otros'],
+        null,
+        ['subsidioCausado' => $datos['subsidioCausado']]
+      );
+
+      $empleadoNomina[0]->folio = $datos['anio'].''.$datos['numSemana'];
+
+      $result = array('xml' => '', 'uuid' => '');
+      if($datos['esta_asegurado'] == 't')
+      {
+        // Obtiene los datos para la cadena original.
+        $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
+        $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
+        // $datosCadenaOriginal['total'] = $total;
+
+        // Timbrado de la factura.
+        log_message('error', "nomina");
+        log_message('error', json_encode($datosApi));
+        $result = $this->timbrar($datosApi);
+        // $result = $this->timbrar($archivo['pathXML']);
+        // echo "<pre>";
+        //   var_dump($result, $empleadoNomina);
+        // echo "</pre>";exit;
+
+        // Si la nomina se timbro entonces agrega al array nominas la nomina del
+        // empleado para despues insertarla en la bdd.
+        if (isset($result['result']->status) && $result['result']->status)
+        {
+          $datosApi['timbre'] = [
+            "cadenaOriginal" => $result['result']->data->cadenaOriginal,
+            "sello"          => $result['result']->data->sello,
+            "certificado"    => $result['result']->data->certificado,
+          ];
+
+          $nominasEmpleados = array(
+            'xml'      => $result['result']->data->xml,
+            'uuid'     => $result['result']->data->uuid,
+            'cfdi_ext' => json_encode($datosApi),
+          );
+          $this->db->update('nomina_fiscal', $nominasEmpleados,
+            "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$fechasSemana['anio']} AND semana = {$datos['numSemana']}");
+
+          $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
+
+          $msg = $result['result']->mensaje;
+        }
+        else
+        {
+          $errorTimbrar = true;
+          $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
+        }
+
+        // echo "<pre>";
+        //   var_dump($datosXML, $archivo);
+        // echo "</pre>";exit;
+
+        // echo "<pre>";
+        //   var_dump($empleado, $cadenaOriginal, $sello, $certificado);
+        // echo "</pre>";exit;
+      }
+
+    }
 
     return array('errorTimbrar' => $errorTimbrar, 'msg' => $msg, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
   }

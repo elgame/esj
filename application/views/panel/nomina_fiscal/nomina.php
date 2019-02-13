@@ -96,7 +96,11 @@
                   </div>
 
                   <?php if ( ! $nominas_finalizadas){ ?>
+                    <?php if ($nominas_generadas): ?>
+                    <button type="button" name="timbrar" class="btn btn-success" style="float: right;" id="timbrarNomina">Timbrar</button>
+                    <?php else: ?>
                     <button type="button" name="guardar" class="btn btn-success" style="float: right;" id="guardarNomina">Guardar</button>
+                    <?php endif ?>
                   <?php } else { ?>
                     <span class="label label-success" style="font-size: 1.3em;">Nominas generadas</span>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>

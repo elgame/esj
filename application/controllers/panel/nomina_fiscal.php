@@ -15,6 +15,7 @@ class nomina_fiscal extends MY_Controller {
 
     'nomina_fiscal/add_nomina/',
     'nomina_fiscal/ajax_add_nomina_empleado/',
+    'nomina_fiscal/ajax_timbrar_nomina_empleado/',
     'nomina_fiscal/ajax_get_empleado/',
     'nomina_fiscal/add_finiquito/',
     'nomina_fiscal/ajax_add_prenomina_empleado/',
@@ -958,6 +959,18 @@ class nomina_fiscal extends MY_Controller {
     $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
 
     $result = $this->nomina_fiscal_model->add_nominas($_POST, $empresaId, $_POST['empleado_id']);
+
+    echo json_encode($result);
+  }
+  public function ajax_timbrar_nomina_empleado()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $empresaDefault = $this->empresas_model->getDefaultEmpresa();
+    $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
+
+    $result = $this->nomina_fiscal_model->add_nominas_timbrar($_POST, $empresaId, $_POST['empleado_id']);
 
     echo json_encode($result);
   }
