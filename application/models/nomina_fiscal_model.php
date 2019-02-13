@@ -40,8 +40,10 @@ class nomina_fiscal_model extends CI_Model {
   }
 
   public function nomina($configuraciones, array $filtros = array(), $empleadoId = null, $horasExtrasDinero = null, $descuentoPlayeras = null,
-                         $subsidio = null, $isr = null, $utilidadEmpresa = null, $descuentoOtros = null, $tipo = null)
+                         $subsidio = null, $isr = null, $utilidadEmpresa = null, $descuentoOtros = null, $tipo = null, $extras = null)
   {
+    // $extras = ['subsidioCausado' => 0]
+
     $this->load->library('nomina');
 
     $filtros = array_merge(array(
@@ -172,6 +174,7 @@ class nomina_fiscal_model extends CI_Model {
                 COALESCE(nf.vacaciones, 0) as nomina_fiscal_vacaciones,
                 COALESCE(nf.aguinaldo, 0) as nomina_fiscal_aguinaldo,
                 COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
+                COALESCE(nf.subsidio_pagado, 0) as nomina_fiscal_subsidio_causado,
                 COALESCE(nf.isr, 0) as nomina_fiscal_isr,
                 -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
                 COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
@@ -261,6 +264,7 @@ class nomina_fiscal_model extends CI_Model {
                 COALESCE(nf.vacaciones, 0) as nomina_fiscal_vacaciones,
                 COALESCE(nf.aguinaldo, 0) as nomina_fiscal_aguinaldo,
                 COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
+                COALESCE(nf.subsidio_pagado, 0) as nomina_fiscal_subsidio_causado,
                 COALESCE(nf.isr, 0) as nomina_fiscal_isr,
                 -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
                 COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
@@ -632,7 +636,7 @@ class nomina_fiscal_model extends CI_Model {
         ->setSalariosZonas($configuraciones['salarios_zonas'][0])
         ->setClavesPatron($configuraciones['cuentas_contpaq'])
         ->setTablasIsr($configuraciones['tablas_isr'])
-        ->setSubsidioIsr($subsidio, $isr)
+        ->setSubsidioIsr($subsidio, $isr, (isset($extras['subsidioCausado'])? $extras['subsidioCausado']: 0) )
         ->procesar();
 
       if (floatval($empleado->nomina->TotalPercepciones) == 0 &&
@@ -748,7 +752,9 @@ class nomina_fiscal_model extends CI_Model {
           $datos['subsidio'],
           $datos['isr'],
           $datos['utilidad_empresa'],
-          $datos['descuento_otros']
+          $datos['descuento_otros'],
+          null,
+          ['subsidioCausado' => $datos['subsidioCausado']]
         );
 
         $empleadoNomina[0]->folio = $datos['anio'].''.$datos['numSemana'];
@@ -916,7 +922,6 @@ class nomina_fiscal_model extends CI_Model {
               'sueldo_semanal'            => $empleadoNomina[0]->nomina->percepciones['sueldo']['ImporteGravado'],
               'bonos'                     => $empleadoNomina[0]->bonos,
               'otros'                     => $empleadoNomina[0]->otros,
-              'subsidio_pagado'           => 0,
               'vacaciones'                => $vacaciones,
               'prima_vacacional_grabable' => $primaVacacionalGravable,
               'prima_vacacional_exento'   => $primaVacacionalExcento,

@@ -54,6 +54,8 @@ class nomina
 
   public $isr = null;
 
+  public $subsidioCausado = null;
+
   /*
    |------------------------------------------------------------------------
    | Setters
@@ -179,10 +181,11 @@ class nomina
    *
    * @param array $config
    */
-  public function setSubsidioIsr($subsidio, $isr)
+  public function setSubsidioIsr($subsidio, $isr, $subsidioCausado = 0)
   {
-    $this->subsidio = $subsidio;
-    $this->isr = $isr;
+    $this->subsidio        = $subsidio;
+    $this->isr             = $isr;
+    $this->subsidioCausado = $subsidioCausado;
     return $this;
   }
 
@@ -918,7 +921,7 @@ class nomina
         'ImporteGravado'   => 0,
         'ImporteExcento'   => round($this->subsidio, 2),
         'total'            => round($this->subsidio, 2) + 0,
-        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) ),
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidioCausado, 2) + 0) ),
         'ApiKey'           => 'top_subsidio_empleo_',
       );
 
@@ -1002,20 +1005,11 @@ class nomina
 
       // Recorre los rangos de la tabla semanal de los subsidios para determinar en que
       // limites se encuentra la suma de los importes gravados.
-      $isr = 0;
-      $this->subsidio = 0.01;
-      foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
-      {
-        if ($sumaImporteGravados >= floatval($rango->de) && $sumaImporteGravados <= floatval($rango->hasta))
-        {
-          $isr = $isrAntesSubsidio - floatval($rango->subsidio);
-          if ($isr <= 0) {
-            $this->subsidio = abs($isr);
-            $isr = 0;
-          }
-          break;
-        }
-      }
+      $subsidioIsr = $this->getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio);
+      $isr = $subsidioIsr['isr'];
+      $this->subsidio = $subsidioIsr['subsidio'];
+      $subsidioCausado = $subsidioIsr['subsidioCausado'];
+
       // var_dump ($this->subsidio, $isr);
       // die();
       // Agrega la percepcion subsidio a la nomina.
@@ -1026,7 +1020,7 @@ class nomina
         'ImporteGravado'   => 0,
         'ImporteExcento'   => round($this->subsidio, 2),
         'total'            => round($this->subsidio, 2) + 0,
-        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($rango->subsidio, 2) + 0) ),
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($subsidioCausado, 2) + 0) ),
         'ApiKey'           => 'top_subsidio_empleo_',
       );
 
@@ -1219,6 +1213,28 @@ class nomina
       $dias_anio_vacaciones = 365;
 
     return $dias_anio_vacaciones;
+  }
+
+  private function getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio)
+  {
+    $isr = 0;
+    $subsidio = 0.01;
+    $causado = 0.0;
+    foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
+    {
+      if ($sumaImporteGravados >= floatval($rango->de) && $sumaImporteGravados <= floatval($rango->hasta))
+      {
+        $causado = floatval($rango->subsidio);
+        $isr = $isrAntesSubsidio - floatval($rango->subsidio);
+        if ($isr <= 0) {
+          $subsidio = abs($isr);
+          $isr = 0;
+        }
+        break;
+      }
+    }
+
+    return ['isr' => $isr, 'subsidio' => $subsidio, 'subsidioCausado' => $causado];
   }
 
 }

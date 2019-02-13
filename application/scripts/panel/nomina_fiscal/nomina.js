@@ -520,6 +520,7 @@
         descuento_otros: $tr.find('.descuento-otros').val(),
         descuento_cocina: $tr.find('.descuento-cocina').val(),
         subsidio: $tr.find('.subsidio').val(),
+        subsidioCausado: $tr.find('.subsidioCausado').val(),
         isr: $tr.find('.isr').val(),
         utilidad_empresa: $('#ptu').val(),
         con_vacaciones: $tr.find('.con-vacaciones').val(),

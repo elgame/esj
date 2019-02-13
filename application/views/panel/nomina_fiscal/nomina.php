@@ -230,6 +230,7 @@
                         $generarNomina = '1';
 
                         $subsidioEmpleado = $e->nomina->otrosPagos['subsidio']['total'];
+                        $subsidioEmpleadoCausado = $e->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'];
                         $isrEmpleado = $e->nomina->deducciones['isr']['total'];
                         // $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
                         $ptuEmpleado = 0;
@@ -241,6 +242,7 @@
                           $disabled = 'disabled';
                           $generarNomina = '0';
                           $subsidioEmpleado = $e->nomina_fiscal_subsidio;
+                          $subsidioEmpleadoCausado = $e->nomina_fiscal_subsidio_causado;
                           $isrEmpleado = $e->nomina_fiscal_isr;
                           // $ptuEmpleado = $e->nomina_fiscal_ptu;
                         }
@@ -358,6 +360,7 @@
                         <td id="td-subsidio" style="<?php echo $bgColor ?>">
                           <span class="subsidio-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$subsidioEmpleado) ?></span>
                           <input type="hidden" name="subsidio[]" value="<?php echo $e->esta_asegurado=='f'?0:$subsidioEmpleado ?>" class="span12 subsidio">
+                          <input type="hidden" name="subsidioCausado[]" value="<?php echo $e->esta_asegurado=='f'?0:$subsidioEmpleadoCausado ?>" class="span12 subsidioCausado">
                         </td>
                         <td id="td-ptu" style="display: none; <?php echo $bgColor ?>">
                           <span class="ptu-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$ptuEmpleado) ?></span>
