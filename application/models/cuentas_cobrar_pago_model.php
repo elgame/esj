@@ -133,7 +133,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
             LEFT JOIN (
               SELECT id_factura, id_abono, (CASE WHEN tipo = 's' THEN total ELSE -1*total END) AS total FROM facturacion_abonos_otros
             ) fao ON v.id_factura = fao.id_factura AND caf.id_abono = fao.id_abono
-           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2 AND v.is_factura = 't'"
+           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float >= 3.2 AND v.is_factura = 't'"
         );
 
       if ($id_cuenta_cliente > 0) {

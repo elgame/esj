@@ -1125,7 +1125,7 @@ class cfdi{
       'cuentaOrd'         => $cuentaCliente? $cuentaCliente->cuenta : '',
       'fechaPago'         => str_replace(' ', 'T', substr($data[0]->fecha, 0, 19)),
       'formaDePago'       => $formaDePago,
-      'moneda'            => $cfdi_ext->moneda,
+      'moneda'            => (isset($cfdi_ext->moneda)? $cfdi_ext->moneda: 'MXN'),
       'monto'             => $data[0]->pago,
       'nombreBancoOrdExt' => $nombreBancoOrdExt,
       'numOperacion'      => "1",
@@ -1133,13 +1133,13 @@ class cfdi{
       'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
       'selloPago'         => "",
       'tipoCadPago'       => "",
-      'tipoCambio'        => $cfdi_ext->tipoCambio,
+      'tipoCambio'        => (isset($cfdi_ext->tipoCambio)? $cfdi_ext->tipoCambio: 1),
       'doctoRelacionado'  => []
     ];
     $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
     $monto = 0;
     foreach ($data as $key => $pago) {
-      if (floatval($pago->version) > 3.2) {
+      if (floatval($pago->version) >= 3.2) {
         if ($firstCfdiRel) { // cuando es la primera ves
           $cfdiRel['cfdiRelacionado'][] = array(
             'uuid' => $pago->uuid,
@@ -1161,9 +1161,9 @@ class cfdi{
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
-          "moneda"         => $pago->moneda,
+          "moneda"         => (floatval($pago->version) > 3.2? $pago->moneda: 'MXN'),
           "tipoCambio"     => number_format($pago->tipo_cambio, 2, '.', ''),
-          "metodoDePago"   => $metodoDePago,
+          "metodoDePago"   => (floatval($pago->version) > 3.2? $metodoDePago: 'PUE'),
           "numParcialidad" => $pago->parcialidades,
           "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
           "importePagado"  => $pagado,
