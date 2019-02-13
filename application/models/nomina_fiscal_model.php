@@ -11891,18 +11891,20 @@ class nomina_fiscal_model extends CI_Model {
     // Carga los datos fiscales de la empresa dentro de la lib CFDI.
     $this->cfdi->cargaDatosFiscales($query->id_empresa);
 
-    // Parametros que necesita el webservice para la cancelacion.
-    $params = array(
-      'rfc'   => $query->rfc,
-      'uuids' => $query->uuid,
-      'cer'   => $this->cfdi->obtenCer(),
-      'key'   => $this->cfdi->obtenKey(),
-    );
+    if ($query->uuid != '') {
+      // Parametros que necesita el webservice para la cancelacion.
+      $params = array(
+        'rfc'   => $query->rfc,
+        'uuids' => $query->uuid,
+        'cer'   => $this->cfdi->obtenCer(),
+        'key'   => $this->cfdi->obtenKey(),
+      );
 
-    // Lama el metodo cancelar para que realiza la peticion al webservice.
-    $result = $this->facturartebarato_api->cancelar($params);
+      // Llama el metodo cancelar para que realiza la peticion al webservice.
+      $result = $this->facturartebarato_api->cancelar($params);
+    }
     $cancelada = false;
-    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    if ((isset($result) && ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')) || $query->uuid == '')
     {
       $this->db->delete('nomina_fiscal', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
       $query1 = $this->db->query("SELECT id_prestamo
