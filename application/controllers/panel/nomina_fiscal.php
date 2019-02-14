@@ -149,16 +149,21 @@ class nomina_fiscal extends MY_Controller {
     //    WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana['semana']}"
     // )->result();
 
+
+    $data_nom_guar = $this->db->query("SELECT Count(*) AS num
+      FROM nomina_fiscal_guardadas
+      WHERE id_empresa = {$filtros['empresaId']} AND anio = {$filtros['anio']}
+        AND semana = {$filtros['semana']} AND tipo = 'se'")->row();
+    $params['nominas_generadas'] = $data_nom_guar->num > 0? true: false;
+
     // Total de nominas de los empleados generadas.
     $totalGeneradas = 0;
-
-    $params['nominas_generadas'] = false;
     foreach ($params['empleados'] as $empleado)
     {
       if ($empleado->esta_generada !== 'false')
       {
         $totalGeneradas++;
-        $params['nominas_generadas'] = true;
+        // $params['nominas_generadas'] = true;
       }
     }
 
@@ -1136,10 +1141,10 @@ class nomina_fiscal extends MY_Controller {
       $this->load->model('nomina_fiscal_model');
       $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
 
-      if ($response['cancelada']) {
-        $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $_GET['empresaId'], 'anio' => $_GET['anio'],
-          'semana' => $_GET['semana'], 'tipo' => 'se'));
-      }
+      // if ($response['cancelada']) {
+      //   $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $_GET['empresaId'], 'anio' => $_GET['anio'],
+      //     'semana' => $_GET['semana'], 'tipo' => 'se'));
+      // }
 
       redirect(base_url("panel/nomina_fiscal/?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
     }

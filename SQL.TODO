@@ -1,4 +1,29 @@
 
+ ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct
+    CREATE TABLE public.nomina_fiscal_canceladas
+      (
+        id_empleado bigint NOT NULL,
+        id_empresa integer NOT NULL,
+        anio integer NOT NULL DEFAULT 0,
+        semana integer NOT NULL DEFAULT 0,
+        "row" integer NOT NULL DEFAULT 0,
+        tipo character varying(2) NOT NULL DEFAULT 'se'::character varying, -- se: semana, pt: ptu
+        xml text,
+        uuid character varying(50),
+        cfdi_ext json,
+        CONSTRAINT nomina_fiscal_canceladas_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, "row", tipo),
+        CONSTRAINT nomina_fiscal_canceladas_id_empleado_fkey FOREIGN KEY (id_empleado)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT nomina_fiscal_canceladas_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.nomina_fiscal_canceladas OWNER TO programa;
+      COMMENT ON COLUMN public.nomina_fiscal_canceladas.tipo IS 'se: semana, pt: ptu';
  ✔ Bascula captura de piña @done (19-01-22 21:33) pcc|pct|lap|san
     CREATE TABLE otros.bascula_salida_pina
         (
