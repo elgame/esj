@@ -290,18 +290,21 @@
                     ?>
                       <tr class="tr-empleado" id="empleado<?php echo $e->id ?>">
                         <td style="position: absolute;background-color: #eee; z-index: 100; <?php echo $bgColor ?>">
-                          <?php if($nominas_finalizadas){
-                              if ($e->esta_generada !== 'false') {
+                          <?php if($nominas_finalizadas || $nominas_generadas){
+                              // if ($e->esta_generada !== 'false') {
                           ?>
                             <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
                               onclick="if(confirm('Seguro de cancelar el comprobante de nomina?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
                               <br>
                           <?php
-                              }
+                              // }
+                              if ($nominas_finalizadas) {
                           ?>
                             <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
-                          <?php } ?>
-                          <input type="checkbox" class="check-vacaciones <?php echo ($nominas_finalizadas? 'hide': '') ?>" <?php echo $disabled ?>>
+                          <?php
+                              }
+                          } ?>
+                          <input type="checkbox" class="check-vacaciones <?php echo ($nominas_finalizadas || $nominas_generadas? 'hide': '') ?>" <?php echo $disabled ?>>
                           <input type="hidden" name="con_vacaciones[]" value="0" class="span12 con-vacaciones">
                           <input type="hidden" name="generar_nomina[]" value="<?php echo $generarNomina ?>" class="span12 generar-nomina">
                           <input type="hidden" name="hrs_trabajadas[]" value="<?php echo $e->hrs ?>" class="span12 generar-nomina">

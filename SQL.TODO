@@ -83,14 +83,13 @@
     ALTER TABLE public.cajachica_traspasos ADD COLUMN status boolean NOT NULL DEFAULT true;
     ALTER TABLE public.cajachica_gastos ADD COLUMN status boolean NOT NULL DEFAULT true;
     ALTER TABLE public.cajachica_gastos ADD COLUMN nombre character varying(130);
-    ----- pcc|lap|san
     ALTER TABLE public.cajachica_gastos ADD COLUMN tipo character varying(5) NOT NULL DEFAULT 'g'::character varying;
     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar';
 
  ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc|lap|san
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;
     COMMENT ON COLUMN public.banco_movimientos.abono_cuenta IS 'para los cheques abono a cuenta';
- ✔ Cambio en producto @done (19-01-16 16:02) pcc|san|lap
+ ✔ Cambio en producto @done (19-01-16 16:02) pcc|san|lap|pct
    ALTER TABLE public.productos ADD COLUMN tipo_apli character varying(5);
    COMMENT ON COLUMN public.productos.tipo_apli IS 'n: nutricion, fs: fitosanidad';
  ✔ Cambios rpt Asistencias @done (19-01-13 20:44) pcc|san|lap|pct

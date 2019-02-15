@@ -11966,7 +11966,7 @@ class nomina_fiscal_model extends CI_Model {
 
       // Si se eliminaron entonces borra la nomina guardada para que recalcule
       $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $idEmpresa, 'anio' => $anio, 'semana' => $semana, 'tipo' => 'se'));
-      return array('msg' => 'Eliminada la nomina', 'empresa' => '', 'cancelada' => true);
+      return array('msg' => 201, 'empresa' => '', 'cancelada' => true);
     }
   }
 

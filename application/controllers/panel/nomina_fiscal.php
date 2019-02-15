@@ -133,6 +133,7 @@ class nomina_fiscal extends MY_Controller {
     // Determina cual es la semana que dejara seleccionada en la vista.
     $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
     $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+    $filtros['semana'] = $filtros['semana'] != ''? $filtros['semana'] : $semanaActual['semana'];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
