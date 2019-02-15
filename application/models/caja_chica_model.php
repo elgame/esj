@@ -741,6 +741,7 @@ class caja_chica_model extends CI_Model {
     {
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
         WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'g'
         ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
       $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
@@ -827,9 +828,10 @@ class caja_chica_model extends CI_Model {
     // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_comprobar_concepto']))
     {
-      // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
-      //   WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-      //   ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'gc'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
       $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
       $gastos_udt = $gastos = array();
@@ -872,9 +874,9 @@ class caja_chica_model extends CI_Model {
 
           $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } else {
-          // $data_folio->folio += 1;
+          $data_folio->folio += 1;
           $gastos = array(
-            // 'folio_sig'                => $data_folio->folio,
+            'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_comprobar_empresa_id'][$key],
             'id_nomenclatura'          => $data['gasto_comprobar_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_folio'][$key],
@@ -1228,7 +1230,17 @@ class caja_chica_model extends CI_Model {
 
   public function ajaxRegGastosComprobar($data)
   {
+    $anio = date('Y');
+    $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
+
+    $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'g'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+    $data_folio->folio += 1;
     $this->db->update('cajachica_gastos', [
+      'folio_sig' => $data_folio->folio,
       'fecha'  => $data['fecha_caja'],
       'tipo'  => 'g',
       'monto' => $data['importe'],
@@ -1240,12 +1252,10 @@ class caja_chica_model extends CI_Model {
         WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
         ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
 
-      $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
-
       $data_folio->folio += 1;
       $ingresos = array(
         'folio'           => $data_folio->folio,
-        'concepto'        => 'DEVOLUCION DE GASTO',
+        'concepto'        => "DEVOLUCION DE GASTO POR COMPROBAR ({$data_gasto->folio_sig})",
         'monto'           => $data['importe_old'],
         'fecha'           => $data['fecha_caja'],
         'otro'            => 'f',
@@ -2445,7 +2455,8 @@ class caja_chica_model extends CI_Model {
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo, cg.folio_sig,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+          cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
+          cg.tipo
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -2489,7 +2500,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
-    $pdf->Row(array('VALE PROVISIONAL DE CAJA'), false, false);
+    $pdf->Row(array(($gastos->tipo=='g'? 'VALE DE GASTO EN CAJA': 'GASTO POR COMPROBAR')), false, false);
 
     $pdf->SetAligns(array('L'));
     // $pdf->SetWidths(array(63));
