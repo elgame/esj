@@ -408,7 +408,7 @@ class caja_chica_model extends CI_Model {
   public function getCajaGastos($fecha, $noCaja, $sql = '')
   {
     if (is_array($fecha) && $fecha[0] === 'gc') {
-      $sql .= " AND cg.fecha <= '{$fecha[1]}'";
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND cg.fecha_cancelado >= '{$fecha[1]}'";
     } else
       $sql .= " AND cg.fecha = '{$fecha}'";
 
@@ -753,7 +753,7 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f'], "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['gasto_id_gasto'][$key]);
         } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
@@ -842,7 +842,7 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f'], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
@@ -1246,7 +1246,7 @@ class caja_chica_model extends CI_Model {
       'monto' => $data['importe'],
     ], "id_gasto = ".$data['id_gasto']);
 
-    // if ($data['importe_old'] > $data['importe']) {
+    if ($data['fecha_caja'] != $data_gasto->fecha) {
       $anio = date('Y');
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
         WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
@@ -1270,7 +1270,7 @@ class caja_chica_model extends CI_Model {
       );
 
       $this->db->insert('cajachica_ingresos', $ingresos);
-    // }
+    }
 
     return ['result' => true];
   }
@@ -1705,14 +1705,18 @@ class caja_chica_model extends CI_Model {
         $ingreso->banco,
         $ingreso->poliza,
         $ingreso->nombre,
-        $ingreso->concepto,
-        MyString::formatoNumero($ingreso->monto, 2, '', false)), false, true, $colortxt);
+        ($ingreso->status == 't'? $ingreso->concepto: 'CANCELADO'),
+        MyString::formatoNumero(
+          ($ingreso->status == 't'? $ingreso->monto: 0)
+          , 2, '', false)), false, true, $colortxt);
 
       if ($ingreso->status == 't') {
         $totalIngresos += floatval($ingreso->monto);
       }
     }
     $ttotalIngresos += $totalIngresos;
+
+    $pdf->SetTextColor(0, 0, 0);
 
     $totalRemisiones = 0;
     if ($noCajas == 4) {
@@ -1748,8 +1752,10 @@ class caja_chica_model extends CI_Model {
           $remision->empresa,
           $remision->folio,
           MyString::fechaAT($remision->fecha_rem),
-          $remision->observacion,
-          MyString::formatoNumero($remision->monto, 2, '', false)), false, true, $colortxt);
+          ($remision->status == 't'? $remision->observacion: 'CANCELADO'),
+          MyString::formatoNumero(
+            ($remision->status == 't'? $remision->monto: 0),
+            2, '', false)), false, true, $colortxt);
 
         if ($remision->status == 't') {
           $totalRemisiones += floatval($remision->monto);
@@ -1759,6 +1765,7 @@ class caja_chica_model extends CI_Model {
       $ttotalIngresos += $totalRemisiones;
     }
 
+    $pdf->SetTextColor(0, 0, 0);
     $pdf->SetX(6);
     $pdf->Row(array('', '', '', '', '', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '', false)), false, true);
 
@@ -1800,10 +1807,13 @@ class caja_chica_model extends CI_Model {
         $traspaso->folio,
         ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
         ($traspaso->tipo=='t'? 'Si': 'No'),
-        $traspaso->concepto,
-        MyString::float(MyString::formatoNumero($traspaso->monto, 2, '', false))), false, true, $colortxt);
+        ($traspaso->status == 't'? $traspaso->concepto: 0),
+        MyString::float(MyString::formatoNumero(
+          ($traspaso->status == 't'? $traspaso->monto: 0),
+          2, '', false))), false, true, $colortxt);
     }
 
+    $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetFillColor(255, 255, 255);
@@ -1930,9 +1940,11 @@ class caja_chica_model extends CI_Model {
           $gasto->nomenclatura,
           $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           $gasto->centro_costo,
-          $gasto->concepto,
+          ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+          MyString::float(MyString::formatoNumero(
+            ($gasto->status == 't'? $gasto->monto: 0),
+            2, '', false))
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2002,9 +2014,11 @@ class caja_chica_model extends CI_Model {
         $gasto->nomenclatura,
         $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
         $gasto->centro_costo,
-        $gasto->concepto,
+        ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
         $gasto->nombre,
-        MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+        MyString::float(MyString::formatoNumero(
+          ($gasto->status == 't'? $gasto->monto: 0),
+          2, '', false))
       ), false, true, $colortxt);
 
       // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))

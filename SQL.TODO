@@ -61,6 +61,9 @@
     ----- pcc|lap|san
     ALTER TABLE public.cajachica_gastos ADD COLUMN tipo character varying(5) NOT NULL DEFAULT 'g'::character varying;
     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar';
+    ----- pct
+    ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_cancelado date;
+    UPDATE cajachica_gastos SET fecha_cancelado = fecha WHERE status = 'f' AND fecha_cancelado IS NULL;
 
  ✔ Cheques desde sistema @done (19-01-19 13:23) pct|pcc|lap|san
     ALTER TABLE public.banco_movimientos ADD COLUMN abono_cuenta boolean;
