@@ -55,6 +55,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/asistencia_pdf/',
     'nomina_fiscal/cancelar/',
     'nomina_fiscal/cancelar_ptu/',
+    'nomina_fiscal/cancelar_aguinaldo/',
     'nomina_fiscal/rpt_dim/',
 
     'nomina_fiscal/show_import_asistencias/',
@@ -1159,6 +1160,17 @@ class nomina_fiscal extends MY_Controller {
       $response = $this->nomina_fiscal_model->cancelaPtu($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
 
       redirect(base_url("panel/nomina_fiscal/ptu?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
+    }
+  }
+
+  public function cancelar_aguinaldo()
+  {
+    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}))
+    {
+      $this->load->model('nomina_fiscal_model');
+      $response = $this->nomina_fiscal_model->cancelaAguinaldo($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
+
+      redirect(base_url("panel/nomina_fiscal/aguinaldo?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
     }
   }
 
