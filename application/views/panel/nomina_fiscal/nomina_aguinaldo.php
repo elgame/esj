@@ -277,6 +277,8 @@
                         <td style="<?php echo $bgColor ?> width: 20px;">
                           <?php if($nominas_finalizadas){ ?>
                           <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_aguinaldo_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                          <a href="<?php echo base_url('panel/nomina_fiscal/cancelar_aguinaldo/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
+                              onclick="if(confirm('Seguro de cancelar el comprobante de nomina?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
                           <?php } ?>
                         </td>
                         <td style="display: none;<?php echo $bgColor ?>">

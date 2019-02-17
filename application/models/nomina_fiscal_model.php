@@ -1660,8 +1660,12 @@ class nomina_fiscal_model extends CI_Model {
 
     $noCertificado = $this->cfdi->obtenNoCertificado();
     $diasPago = ceil($nomina[0]->dias_trabajados);
+    $tipoCan = 'se';
     if ($tipo === 'aguinaldo') {
       $diasPago = $nomina[0]->nomina->NumDiasPagados;
+      $tipoCan = 'ag';
+    } elseif ($tipo === 'ptu') {
+      $tipoCan = 'pt';
     }
 
     // Array con los datos necesarios para generar la cadena original.
@@ -1709,7 +1713,7 @@ class nomina_fiscal_model extends CI_Model {
     if (isset($empleado['info'][0]->datosNomCancel)) {
       $data_cancel_nom = $this->db->query("SELECT uuid
         FROM nomina_fiscal_canceladas
-        WHERE id_empresa = {$empresa['info']->id_empresa} AND id_empleado = {$empleado['info'][0]->id}
+        WHERE tipo = '{$tipoCan}' AND id_empresa = {$empresa['info']->id_empresa} AND id_empleado = {$empleado['info'][0]->id}
           AND anio = {$empleado['info'][0]->datosNomCancel['anio']} AND semana = {$empleado['info'][0]->datosNomCancel['semana']}
         ORDER BY row DESC LIMIT 1")->row();
 
@@ -1746,7 +1750,7 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
     foreach ($nomina[0]->nomina->otrosPagos as $key => $value) {
-      if (floatval($value['total']) > 0) {
+      if (floatval($value['total']) > 0.01) {
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
         $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
@@ -9727,6 +9731,11 @@ class nomina_fiscal_model extends CI_Model {
       {
         // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
         $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+        $empleado['info'][0]->datosNomCancel = [
+          'empresaId' => $empresaId,
+          'semana'    => $datos['numSemana'],
+          'anio'      => $datos['anio']
+        ];
 
         $empleadoNomina = $this->nomina(
           $configuraciones,
@@ -9874,7 +9883,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('documentos_model');
 
     // Obtenemos la info de la factura a cancelar.
-    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext
                                FROM nomina_ptu AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
                                WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
@@ -9895,6 +9904,23 @@ class nomina_fiscal_model extends CI_Model {
 
     if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
     {
+      $data_cancelnom = $this->db->query("SELECT Count(*) AS num
+                               FROM nomina_fiscal_canceladas
+                               WHERE tipo = 'pt' AND id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa}
+                                AND anio = '{$anio}' AND semana = '{$semana}'")->row();
+      $this->db->insert('nomina_fiscal_canceladas', [
+        'id_empleado' => $idEmpleado,
+        'id_empresa'  => $idEmpresa,
+        'anio'        => $anio,
+        'semana'      => $semana,
+        'row'         => $data_cancelnom->num,
+        'tipo'        => 'pt',
+        'xml'         => $query->xml,
+        'uuid'        => $query->uuid,
+        'cfdi_ext'    => $query->cfdi_ext,
+      ]);
+
+      // slimina reg
       $this->db->delete('nomina_ptu', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
 
       $query = $this->db->query("SELECT Count(*) AS num
@@ -11726,6 +11752,11 @@ class nomina_fiscal_model extends CI_Model {
       {
         // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
         $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+        $empleado['info'][0]->datosNomCancel = [
+          'empresaId' => $empresaId,
+          'semana'    => $datos['numSemana'],
+          'anio'      => $datos['anio']
+        ];
 
         $empleadoNomina = $this->nomina(
           $configuraciones,
@@ -11889,6 +11920,63 @@ class nomina_fiscal_model extends CI_Model {
     return array('errorTimbrar' => $errorTimbrar, 'msg' => $msg, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
   }
 
+  public function cancelaAguinaldo($idEmpleado, $anio, $semana, $idEmpresa)
+  {
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('documentos_model');
+
+    // Obtenemos la info de la factura a cancelar.
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext
+                               FROM nomina_aguinaldo AS nf
+                                INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
+                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+
+    // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+    $this->cfdi->cargaDatosFiscales($query->id_empresa);
+
+    // Parametros que necesita el webservice para la cancelacion.
+    $params = array(
+      'rfc'   => $query->rfc,
+      'uuids' => $query->uuid,
+      'cer'   => $this->cfdi->obtenCer(),
+      'key'   => $this->cfdi->obtenKey(),
+    );
+
+    // Lama el metodo cancelar para que realiza la peticion al webservice.
+    $result = $this->facturartebarato_api->cancelar($params);
+
+    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    {
+      $data_cancelnom = $this->db->query("SELECT Count(*) AS num
+                               FROM nomina_fiscal_canceladas
+                               WHERE tipo = 'ag' AND id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa}
+                                AND anio = '{$anio}' AND semana = '{$semana}'")->row();
+      $this->db->insert('nomina_fiscal_canceladas', [
+        'id_empleado' => $idEmpleado,
+        'id_empresa'  => $idEmpresa,
+        'anio'        => $anio,
+        'semana'      => $semana,
+        'row'         => $data_cancelnom->num,
+        'tipo'        => 'ag',
+        'xml'         => $query->xml,
+        'uuid'        => $query->uuid,
+        'cfdi_ext'    => $query->cfdi_ext,
+      ]);
+
+      // elimina el reg
+      $this->db->delete('nomina_aguinaldo', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
+
+      $query = $this->db->query("SELECT Count(*) AS num
+                               FROM nomina_aguinaldo AS nf
+                               WHERE nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+      if($query->num == 0)
+        $this->db->delete('nomina_fiscal_guardadas', "tipo = 'ag' AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
+    }
+
+    return array('msg' => $result->data->status_uuid, 'empresa' => $query->nombre_fiscal);
+  }
+
   /**
    * Cancela una factura. Cambia el status a 'ca'.
    *
@@ -11928,7 +12016,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
-                               WHERE id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa}
+                               WHERE tipo = 'se' AND id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa}
                                 AND anio = '{$anio}' AND semana = '{$semana}'")->row();
         $this->db->insert('nomina_fiscal_canceladas', [
           'id_empleado' => $idEmpleado,
@@ -11966,7 +12054,7 @@ class nomina_fiscal_model extends CI_Model {
 
       // Si se eliminaron entonces borra la nomina guardada para que recalcule
       $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $idEmpresa, 'anio' => $anio, 'semana' => $semana, 'tipo' => 'se'));
-      return array('msg' => 'Eliminada la nomina', 'empresa' => '', 'cancelada' => true);
+      return array('msg' => 201, 'empresa' => '', 'cancelada' => true);
     }
   }
 
