@@ -408,7 +408,7 @@ class caja_chica_model extends CI_Model {
   public function getCajaGastos($fecha, $noCaja, $sql = '')
   {
     if (is_array($fecha) && $fecha[0] === 'gc') {
-      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND cg.fecha_cancelado >= '{$fecha[1]}'";
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
     } else
       $sql .= " AND cg.fecha = '{$fecha}'";
 
