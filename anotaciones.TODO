@@ -19,10 +19,28 @@
  ☐ Actividades de mantenimiento, quien solicito, a que se aplico, cuanto costo
 
 
- ☐ Correciones de nomina para el timbrado correcto
+ ☐ Reacomodar las cajas chicas
+   - Al comprobar los gastos que pueda capturar remisiones (Folio, Proveedor y monto) y poder ligar facturas de gasto directos
+   - Cuando se guarde, registraria las remisiones como gastos generales y las facturas en gastos por reponer fiscal (esas facturas que se registre en automantico el pago en cuentas x pagar)
+   - En gastos por reponer fiscal que arrastre el saldo de las pendientes y cuando las marquen como repuestas que inserte un ingreso por reposicion.
+   checar los archivos de la señora
  ☐ Crear Balance general
  ☐ Reporte estado de resultados
  ☐ Poliza de nominas que se guenere por trabajador las percepcion y deduccion
+ ☐ Conectar con la BD del checador (https://dbeaver.io/download/, https://help.ubuntu.com/community/Firebird2.5)
+     sudo apt-get install php7.0-interbase
+     sudo service apache2 restart
+ ☐ En las fotos ver como esta el reporte de estado de resultado
+ ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
+ ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
+ ☐ En los movimientos directos de poliza meter formato de cheques y de impresion de movimientos
+ ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
+ ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
+ ☐ Ligar las actividades a la nomina
+ ☐ Generar los recibos de nómina por actividad
+ ☐ Capturar las recetas de producción
+ ☐ En caja chica de tryana cargar las nóminas por fuera de las actividades registradas y que puedan abonar, restaría la caja
+ ✔ Correciones de nomina para el timbrado correcto @done (19-02-19 16:49)
  ✔ Crear familias de tipo Activos en los productos @done (18-09-26 20:54)
  ✔ Agregar a los productos el tipo de color para distinguir para cultivos orgánicos @done (18-09-26 20:54)
  ✔ Crear catalogo de ranchos @done (18-10-01 10:19)
@@ -48,21 +66,8 @@
  ✔ Reacomodar las cajas chicas de Boletas, Gastos y General, agregar gastos x comprobar y poder cancelar sin eliminar los registros @done (19-02-04 13:41)
  ✔ Formato de captura piña en las boletas de bascula @done (19-02-04 13:41)
  ✔ En ordenes de compras (listado) meter filtro de busqueda x producto y que puedan previsualizar la orden sin entrar a ella @done (19-02-04 15:25)
- ☐ Conectar con la BD del checador (https://dbeaver.io/download/, https://help.ubuntu.com/community/Firebird2.5)
-     sudo apt-get install php7.0-interbase
-     sudo service apache2 restart
- ☐ En las fotos ver como esta el reporte de estado de resultado
- ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
- ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
- ☐ En los movimientos directos de poliza meter formato de cheques y de impresion de movimientos
  ✔ Que no puedan quitar abonos solo en ese dia al menos que tengan un privilegio @done (19-01-12 12:38)
- ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
  ✔ En la aplicacion de exritorio en la pestaña de limon y bascula poner la empresa @done (19-01-02 09:30)
- ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
- ☐ Ligar las actividades a la nomina
- ☐ Generar los recibos de nómina por actividad
- ☐ Capturar las recetas de producción
- ☐ En caja chica de tryana cargar las nóminas por fuera de las actividades registradas y que puedan abonar, restaría la caja
  ✔ Caja tryana Agregar los tipos de órdenes a los gastos de caja para validar los campos cuáles son obligatorios @done (18-11-27 14:37)
  ✔ Caja tryana, poner select para indicar que es caja de Rosy y le salga en su caja @done (18-11-27 14:14)
  ✔ Agregar los centros de costo (catalogo de rodrigo y de melgas) @done (18-11-08 12:22)
