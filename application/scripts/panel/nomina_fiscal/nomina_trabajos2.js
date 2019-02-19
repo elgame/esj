@@ -28,6 +28,7 @@
     $('#addTrabajador').click(function(event) {
       ajaxSave();
     });
+    ajaxDelAct();
 
     $("#davance").keyup(function(event) {
       calculaTotales();
@@ -318,7 +319,56 @@
       $.post(base_url + 'panel/nomina_trabajos2/ajax_save/', postData, function(data) {
 
         if (data.passess) {
+          var ranchos = '', centros_costos = '';
+
+          if (data.data.ranchos.length > 0) {
+            for (key in data.data.ranchos) {
+              ranchos += data.data.ranchos[key].nombre;
+              ranchos += (key < data.data.ranchos.length? '<br>': '');
+            }
+          }
+
+          if (data.data.centros_costos.length > 0) {
+            for (key in data.data.centros_costos) {
+              centros_costos += data.data.centros_costos[key].nombre;
+              centros_costos += (key < data.data.centros_costos.length? '<br>': '');
+            }
+          }
+
+          $('#actividades_tra tbody').prepend(
+            '<tr>'+
+              '<td>'+data.data.trabajador+'</td>'+
+              '<td>'+data.data.labor+'</td>'+
+              '<td>'+data.data.cultivo+'</td>'+
+              '<td>'+
+                ranchos+
+              '</td>'+
+              '<td>'+
+                centros_costos+
+              '</td>'+
+              '<td>'+data.data.costo+'</td>'+
+              '<td>'+data.data.avance+'</td>'+
+              '<td>'+data.data.importe+'</td>'+
+              '<td>'+
+                '<a class="btn btn-danger btnDelAct" '+
+                  'data-params="rows='+data.data.rows+'&id_usuario='+data.data.id_usuario+'&empresa='+data.data.empresa+'&empresaId='+data.data.id_empresa+'&ffecha='+data.data.fecha+'">'+
+                  '<i class="icon-ban-circle icon-white"></i>'+
+                '</a>'+
+              '</td>'+
+            '</tr>'
+          );
           noty({"text": 'Se guardo', "layout":"topRight", "type": 'success'});
+
+          $('#dempleadoId').val('');
+          $('#dlabor').val('');
+          $('#dlaborId').val('');
+          $('#dcosto').val('');
+          $('#davance').val('');
+          $('#dimporte').val('');
+          $('#area').val('');
+          $('#areaId').val('');
+          $('#tagsRanchoIds').html('');
+          $('#tagsCCIds').html('');
         }
       }, "json");
     } else {
@@ -353,6 +403,23 @@
     }
 
     return [isValid, msg];
+  };
+
+  var ajaxDelAct = function () {
+    $('#actividades_tra').on('click', '.btnDelAct', function(event) {
+      var $this = $(this), $tr = $(this).parent().parent();
+      msb.confirm('Estas seguro de eliminar la Actividad?', 'labores', this, function () {
+        var postData = $this.attr('data-params');
+        $.post(base_url + 'panel/nomina_trabajos2/ajax_del/', postData, function(data) {
+
+          if (data.passess) {
+            $tr.remove();
+            noty({"text": 'Se elimino correctamente', "layout":"topRight", "type": 'success'});
+          }
+        }, "json");
+        console.log('test');
+      });
+    });
   };
 
 });

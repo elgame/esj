@@ -110,17 +110,48 @@
                 <thead>
                   <tr>
                     <th style="width:18%;">Nombre</th>
+                    <th style="width:10%;">Labor</th>
+                    <th style="width:9%;">Cultivo</th>
+                    <th style="width:10%;">Ranchos</th>
                     <th style="width:10%;">Centro Costo</th>
-                    <th style="width:10%;">Labor(s)</th>
-                    <th style="width:9%;">Horas</th>
-                    <th style="width:10%;">Hrs Extras</th>
-                    <!-- <th style="width:10%;">Asis</th> -->
-                    <th style="width:10%;">Descripcion</th>
                     <th style="width:8%;">Costo</th>
-                    <th style="width:5%;"></th>
+                    <th style="width:8%;">Avance</th>
+                    <th style="width:8%;">Importe</th>
+                    <th style="width:3%;"></th>
                   </tr>
                 </thead>
                 <tbody>
+                  <?php foreach ($tareas_dia as $key => $tarea): ?>
+                    <tr>
+                      <td><?php echo $tarea->trabajador ?></td>
+                      <td><?php echo $tarea->labor ?></td>
+                      <td><?php echo $tarea->cultivo ?></td>
+                      <td>
+                        <?php foreach ($tarea->ranchos as $key1 => $value): ?>
+                        <?php
+                          echo $value->nombre;
+                          echo ($key1 < count($tarea->ranchos)? '<br>': '');
+                        ?>
+                        <?php endforeach ?>
+                      </td>
+                      <td>
+                        <?php foreach ($tarea->centros_costos as $key1 => $value): ?>
+                        <?php
+                          echo $value->nombre;
+                          echo ($key1 < count($tarea->centros_costos)? '<br>': '');
+                        ?>
+                        <?php endforeach ?>
+                      </td>
+                      <td><?php echo $tarea->costo ?></td>
+                      <td><?php echo $tarea->avance ?></td>
+                      <td><?php echo $tarea->importe ?></td>
+                      <td>
+                        <a class="btn btn-danger btnDelAct" data-params="<?php echo 'rows='.$tarea->rows.'&id_usuario='.$tarea->id_usuario.'&'.MyString::getVarsLink(array('msg')); ?>">
+                          <i class="icon-ban-circle icon-white"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  <?php endforeach ?>
                 </tbody>
               </table>
             </div>

@@ -7,6 +7,7 @@ class nomina_trabajos2 extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_trabajos2/ajax_save/',
+    'nomina_trabajos2/ajax_del/',
     'nomina_trabajos2/nomina_fiscal_ticket/',
   );
 
@@ -45,12 +46,12 @@ class nomina_trabajos2 extends MY_Controller {
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
     $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
-    $params['seo']            = array('titulo' => 'Nomina Fiscal - Asistencia');
+    $params['seo']            = array('titulo' => 'Nomina Fiscal - Actividades');
 
-    $this->load->model('nomina_fiscal_model');
+    // $this->load->model('nomina_fiscal_model');
     $this->load->model('empresas_model');
     $this->load->model('nomina_trabajos2_model');
-    $this->load->model('usuarios_departamentos_model');
+    // $this->load->model('usuarios_departamentos_model');
 
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
     $params['fecha'] = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
@@ -76,6 +77,8 @@ class nomina_trabajos2 extends MY_Controller {
     $semana = MyString::obtenerSemanaDeFecha($params['fecha'], $filtros['dia_inicia_semana']);
     $params['filtros'] = array_merge($filtros, $semana);
 
+    $params['tareas_dia'] = $this->nomina_trabajos2_model->getActividades($params['fecha'], $filtros['empresaId'], $params['filtros']);
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -95,6 +98,12 @@ class nomina_trabajos2 extends MY_Controller {
   {
     $this->load->model('nomina_trabajos2_model');
     echo json_encode($this->nomina_trabajos2_model->save($_POST));
+  }
+
+  public function ajax_del()
+  {
+    $this->load->model('nomina_trabajos2_model');
+    echo json_encode($this->nomina_trabajos2_model->delete($_POST));
   }
 
 

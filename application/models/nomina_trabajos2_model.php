@@ -68,37 +68,50 @@ class nomina_trabajos2_model extends CI_Model {
       }
     }
 
-    return array('passess' => false);
+    return array('passess' => true, 'data' => $this->getActividad($data));
   }
 
   /**
-   * Elimina una clasificacion de la BDD.
+   * Elimina una actividad de la BDD.
    *
    * @return array
    */
   public function delete($datos)
   {
-    $this->db->delete('compras_salidas_combustible', "id_combustible = {$datos['id_combustible']}");
+    $this->db->delete('nomina_trabajos_dia2', "id_empresa = {$datos['empresaId']}
+      AND id_usuario = {$datos['id_usuario']} AND fecha = '{$datos['ffecha']}'
+      AND rows = '{$datos['rows']}'");
+    $this->db->delete('nomina_trabajos_dia2_centro_costo', "id_empresa = {$datos['empresaId']}
+      AND id_usuario = {$datos['id_usuario']} AND fecha = '{$datos['ffecha']}'
+      AND rows = '{$datos['rows']}'");
+    $this->db->delete('nomina_trabajos_dia2_rancho', "id_empresa = {$datos['empresaId']}
+      AND id_usuario = {$datos['id_usuario']} AND fecha = '{$datos['ffecha']}'
+      AND rows = '{$datos['rows']}'");
 
     return array('passess' => true);
   }
 
-  public function info($fecha, $id_empresa)
+  public function getActividades($fecha, $id_empresa, $filtros = [])
   {
     $data = array();
 
+    $sql_str = '';
+    if (isset($filtros['id_trabajador']) && $filtros['id_trabajador'] > 0) {
+      $sql_str .= " AND u.id = {$filtros['id_trabajador']}";
+    }
+
     $sql = $this->db->query(
-      "SELECT ntd.id_usuario, ntd.fecha, cca.id_cat_codigos AS id_area, ntd.horas AS total_horas, ntd.hrs_extra, ntd.descripcion,
-        ntd.importe, ntd.sueldo_diario, ntd.id_empresa, ntd.importe_trabajo, ntd.importe_extra,
-        cca.nombre AS area, cca.codigo AS codigo_fin, e.nombre_fiscal, ntdl.id_labor, csl.nombre AS labor, ntdl.horas,
-        ntd.tipo_asistencia
-      FROM nomina_trabajos_dia ntd
-        INNER JOIN empresas e ON e.id_empresa = ntd.id_empresa
-        LEFT JOIN nomina_trabajos_dia_labores ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdl.fecha AND ntd.id_empresa = ntdl.id_empresa)
-        LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = ntdl.id_area
-        LEFT JOIN compras_salidas_labores csl ON csl.id_labor = ntdl.id_labor
-      WHERE ntd.fecha = '{$fecha}' AND e.id_empresa = {$id_empresa}
-      ORDER BY ntd.id_usuario ASC, cca.id_cat_codigos ASC
+      "SELECT nt2.id_empresa, e.nombre_fiscal AS empresa, nt2.id_usuario,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        nt2.fecha, nt2.rows, nt2.id_labor, l.nombre AS labor, nt2.id_area, a.nombre AS cultivo,
+        nt2.anio, nt2.semana, nt2.costo, nt2.avance, nt2.importe
+      FROM nomina_trabajos_dia2 nt2
+        INNER JOIN empresas e ON e.id_empresa = nt2.id_empresa
+        INNER JOIN usuarios u ON u.id = nt2.id_usuario
+        INNER JOIN compras_salidas_labores l ON l.id_labor = nt2.id_labor
+        LEFT JOIN areas a ON a.id_area = nt2.id_area
+      WHERE e.id_empresa = {$id_empresa} AND nt2.fecha = '{$fecha}' {$sql_str}
+      ORDER BY trabajador ASC, rows ASC
       ");
 
     $response = array();
@@ -107,31 +120,80 @@ class nomina_trabajos2_model extends CI_Model {
       $aux = '';
       $aux_area = '';
       foreach ($sql->result() as $key => $value) {
-        if ($aux != $value->id_usuario) {
-          $response[$value->id_usuario] = array();
-          // $response[$value->id_usuario]['info'] = $value;
-          $response[$value->id_usuario][$value->id_area] = $value;
-          $response[$value->id_usuario][$value->id_area]->labores = array();
+        $value->centros_costos = $this->db->query(
+          "SELECT cc.id_centro_costo, cc.nombre, ntd.num
+          FROM nomina_trabajos_dia2_centro_costo ntd
+            INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = ntd.id_centro_costo
+          WHERE ntd.id_empresa = {$id_empresa} AND ntd.id_usuario = {$value->id_usuario}
+            AND ntd.fecha = '{$fecha}' AND ntd.rows = '{$value->rows}'
+          ORDER BY nombre ASC
+          ")->result();
 
-          $response[$value->id_usuario]['hrs_extra'] = $this->db->query(
-            "SELECT ntd.id_usuario, ntd.fecha, ntd.id_empresa, cca.id_cat_codigos AS id_area, ntdl.horas, ntdl.importe,
-              cca.nombre AS area, cca.codigo AS codigo_fin
-            FROM nomina_trabajos_dia ntd
-              LEFT JOIN nomina_trabajos_dia_hrsext ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdl.fecha AND ntd.id_empresa = ntdl.id_empresa)
-              LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = ntdl.id_area
-            WHERE ntd.id_usuario = {$value->id_usuario} AND ntd.fecha = '{$fecha}' AND ntd.id_empresa = {$id_empresa}
-            ORDER BY ntd.id_usuario ASC, cca.id_cat_codigos ASC
-            ")->result();
+        $value->ranchos = $this->db->query(
+          "SELECT r.id_rancho, r.nombre, ntd.num
+          FROM nomina_trabajos_dia2_rancho ntd
+            INNER JOIN otros.ranchos r ON r.id_rancho = ntd.id_rancho
+          WHERE ntd.id_empresa = {$id_empresa} AND ntd.id_usuario = {$value->id_usuario}
+            AND ntd.fecha = '{$fecha}' AND ntd.rows = '{$value->rows}'
+          ORDER BY nombre ASC
+          ")->result();
 
-          $aux = $value->id_usuario;
-        }elseif ($aux_area != $value->id_area) {
-          $response[$value->id_usuario][$value->id_area] = $value;
-          $response[$value->id_usuario][$value->id_area]->labores = array();
-        }
-        $aux_area = $value->id_area;
-
-        $response[$value->id_usuario][$value->id_area]->labores[] = array('id_labor' => $value->id_labor, 'labor' => $value->labor, 'horas' => $value->horas);
+        $response[] = $value;
       }
+    }
+
+    return $response;
+  }
+
+  /**
+   * [getActividad description]
+   * @param  array(
+      'id_empresa',
+      'id_usuario',
+      'fecha',
+      'rows'
+    )
+   * @return [type]             [description]
+   */
+  public function getActividad($params)
+  {
+    $data = array();
+
+    $sql = $this->db->query(
+      "SELECT nt2.id_empresa, e.nombre_fiscal AS empresa, nt2.id_usuario,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        nt2.fecha, nt2.rows, nt2.id_labor, l.nombre AS labor, nt2.id_area, a.nombre AS cultivo,
+        nt2.anio, nt2.semana, nt2.costo, nt2.avance, nt2.importe
+      FROM nomina_trabajos_dia2 nt2
+        INNER JOIN empresas e ON e.id_empresa = nt2.id_empresa
+        INNER JOIN usuarios u ON u.id = nt2.id_usuario
+        INNER JOIN compras_salidas_labores l ON l.id_labor = nt2.id_labor
+        LEFT JOIN areas a ON a.id_area = nt2.id_area
+      WHERE e.id_empresa = {$params['id_empresa']} AND nt2.fecha = '{$params['fecha']}'
+        AND u.id = {$params['id_usuario']} AND nt2.rows = '{$params['rows']}'
+      ");
+
+    $response = new stdClass();
+    if ($sql->num_rows() > 0) {
+      $response = $sql->row();
+
+      $response->centros_costos = $this->db->query(
+        "SELECT cc.id_centro_costo, cc.nombre, ntd.num
+        FROM nomina_trabajos_dia2_centro_costo ntd
+          INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = ntd.id_centro_costo
+        WHERE ntd.id_empresa = {$params['id_empresa']} AND ntd.id_usuario = {$params['id_usuario']}
+          AND ntd.fecha = '{$params['fecha']}' AND ntd.rows = '{$params['rows']}'
+        ORDER BY nombre ASC
+        ")->result();
+
+      $response->ranchos = $this->db->query(
+        "SELECT r.id_rancho, r.nombre, ntd.num
+        FROM nomina_trabajos_dia2_rancho ntd
+          INNER JOIN otros.ranchos r ON r.id_rancho = ntd.id_rancho
+        WHERE ntd.id_empresa = {$params['id_empresa']} AND ntd.id_usuario = {$params['id_usuario']}
+          AND ntd.fecha = '{$params['fecha']}' AND ntd.rows = '{$params['rows']}'
+        ORDER BY nombre ASC
+        ")->result();
     }
 
     return $response;
