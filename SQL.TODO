@@ -1,5 +1,5 @@
 
- ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct
+ ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct|lap|san
     CREATE TABLE public.nomina_fiscal_canceladas
       (
         id_empleado bigint NOT NULL,
@@ -85,7 +85,6 @@
     ALTER TABLE public.cajachica_gastos ADD COLUMN nombre character varying(130);
     ALTER TABLE public.cajachica_gastos ADD COLUMN tipo character varying(5) NOT NULL DEFAULT 'g'::character varying;
     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar';
-    ----- pct|san|pcc
     ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_cancelado date;
     UPDATE cajachica_gastos SET fecha_cancelado = fecha WHERE status = 'f' AND fecha_cancelado IS NULL;
 
@@ -119,8 +118,8 @@
     ALTER TABLE public.cajachica_gastos ADD COLUMN folio_sig bigint;
  ✔ Saldar prestamos caja chica @done (19-01-09 21:40) pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Saldar prestamos',410,FALSE,'caja_chica_prest/saldar_prestamos/','edit',FALSE);
- ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct|pcc|lap
-   * INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Registro de actividades x trabajador 2',184,TRUE,'nomina_trabajos2/','briefcase',FALSE);
+ ✔ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina @done (19-01-02 20:43) pct|pcc|lap|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Registro de actividades x trabajador 2',184,TRUE,'nomina_trabajos2/','briefcase',FALSE);
    CREATE TABLE public.nomina_trabajos_dia2
       (
         id_empresa integer NOT NULL,
