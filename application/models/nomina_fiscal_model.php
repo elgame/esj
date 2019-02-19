@@ -8917,17 +8917,22 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetFont('Helvetica','', 8);
         $pdf->SetXY(6, $pdf->GetY());
 
-        // if($empleado->fecha_ultima!='')
-        // {
-        //   $fecha_aux = explode('-', $empleado->fecha_entrada);
-        //   $fecha_aux[0] = date("Y", strtotime("{$empleado->fecha_ultima} +1 year"));
-        //   $fecha_entrada = implode('-', $fecha_aux);
-        // }else{
-          $fecha_entrada = strtotime("{$empleado->fecha_entrada} +1 year");
-          if(date("Y", $fecha_entrada) < date("Y") )
-            $fecha_entrada = strtotime( date("Y").'-'.date("m-d", $fecha_entrada). " +1 year");
-          $fecha_entrada = date("Y-m-d", $fecha_entrada);
-        // }
+        // // if($empleado->fecha_ultima!='')
+        // // {
+        // //   $fecha_aux = explode('-', $empleado->fecha_entrada);
+        // //   $fecha_aux[0] = date("Y", strtotime("{$empleado->fecha_ultima} +1 year"));
+        // //   $fecha_entrada = implode('-', $fecha_aux);
+        // // }else{
+        //   $fecha_entrada = strtotime("{$empleado->fecha_entrada} +1 year");
+        //   if(date("Y", $fecha_entrada) < date("Y") )
+        //     $fecha_entrada = strtotime( date("Y").'-'.date("m-d", $fecha_entrada). " +1 year");
+        //   $fecha_entrada = date("Y-m-d", $fecha_entrada);
+        // // }
+
+        $fecha_entrada = strtotime( date("Y").'-'.date("m-d", strtotime("{$empleado->fecha_entrada}")) );
+        if($fecha_entrada < strtotime("now"))
+          $fecha_entrada = strtotime( date("Y-m-d", $fecha_entrada). " +1 year");
+        $fecha_entrada = date("Y-m-d", $fecha_entrada);
 
         $cumpleanios = strtotime( date("Y").'-'.date("m-d", strtotime("{$empleado->fecha_nacimiento}")) );
         if($cumpleanios < strtotime("now"))
@@ -8935,7 +8940,7 @@ class nomina_fiscal_model extends CI_Model {
         $cumpleanios = date("Y-m-d", $cumpleanios);
 
         $dataarr = array(
-          $empleado->nombre,
+          $empleado->nombre.'='.$empleado->fecha_entrada,
           ($empleado->fecha_ultima!=''? MyString::fechaATexto($empleado->fecha_ultima, '/c'): 'No a tenido'),
           MyString::fechaATexto($fecha_entrada, '/c'),
           $nomina->diasVacacionesCorresponden($anios_trabajados_empleado),

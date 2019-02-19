@@ -1240,7 +1240,8 @@ class bascula_model extends CI_Model {
             {$campos}
             b.folio,
             b.accion AS pagado,
-            Date(b.{$fecha_compara}) AS fecha
+            Date(b.{$fecha_compara}) AS fecha,
+            b.id_bonificacion
           FROM bascula_compra AS bc
           INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
           {$table_ms}
