@@ -1,0 +1,4 @@
+localhost
+sysdba
+masterkey
+3050
