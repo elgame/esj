@@ -1371,6 +1371,7 @@ class bascula_model extends CI_Model {
       $gtotalNoPagado  = 0;
       $gtotalCancelado = 0;
       $gtotalImporte   = 0;
+      $first_header = true;
 
       foreach($data as $keya => $row)
       {
@@ -1389,7 +1390,7 @@ class bascula_model extends CI_Model {
 
         foreach($row['rde'] as $key => $calidad)
         {
-          if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+          if($pdf->GetY() >= $pdf->limiteY || $first_header) //salta de pagina si exede el max
           {
             if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
@@ -1402,6 +1403,7 @@ class bascula_model extends CI_Model {
             $pdf->SetAligns($aligns);
             $pdf->SetWidths($widths);
             $pdf->Row($header, false);
+            $first_header = false;
           }
 
           $pdf->SetFont('helvetica','', 9);
@@ -1421,8 +1423,81 @@ class bascula_model extends CI_Model {
           $kilos    = 0;
           $precio   = 0;
           $importe  = 0;
+          $bonificaciones = [];
 
           foreach ($calidad['cajas'] as $caja)
+          {
+            if (intval($caja->id_bonificacion) > 0) {
+              $bonificaciones[] = $caja;
+            } else {
+              if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+              {
+                $pdf->AddPage();
+
+                $pdf->SetFont('helvetica','B', 8);
+                $pdf->SetTextColor(0,0,0);
+                $pdf->SetFillColor(160,160,160);
+                $pdf->SetY($pdf->GetY()-2);
+                $pdf->SetX(6);
+                $pdf->SetAligns($aligns);
+                $pdf->SetWidths($widths);
+                $pdf->Row($header, false);
+              }
+
+              $pdf->SetFont('helvetica','',8);
+              $pdf->SetTextColor(0,0,0);
+
+              $promedio += $caja->promedio;
+              $cajas    += $caja->cajas;
+              $kilos    += $caja->kilos;
+              $precio   += $caja->precio;
+              $importe  += $caja->importe;
+
+              if ($caja->pagado === 'p' || $caja->pagado === 'b')
+                $totalPagado += $caja->importe;
+              else
+                $totalNoPagado += $caja->importe;
+
+              $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
+                             MyString::fechaAT($caja->fecha),
+                             $caja->folio,
+                             substr($caja->proveedor, 0, 28),
+                             MyString::formatoNumero($caja->promedio, 2, '', false),
+                             MyString::formatoNumero($caja->cajas, 2, '', false),
+                             MyString::formatoNumero($caja->kilos, 2, '', false),
+                             MyString::formatoNumero($caja->precio, 2, '$', false),
+                             MyString::formatoNumero($caja->importe, 2, '$', false));
+
+              $pdf->SetY($pdf->GetY()-2);
+              $pdf->SetX(6);
+              $pdf->SetAligns($aligns1);
+              $pdf->SetWidths($widths);
+              $pdf->Row($datos, false, false);
+            }
+          }
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetY($pdf->GetY()-1);
+          $pdf->SetX(6);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
+          $pdf->Row(array(
+            'TOTALES',
+            MyString::formatoNumero($kilos/$cajas, 2, '', false),
+            MyString::formatoNumero($cajas, 2, '', false),
+            MyString::formatoNumero($kilos, 2, '', false),
+            MyString::formatoNumero($importe/$kilos, 2, '$', false),
+            MyString::formatoNumero($importe, 2, '$', false)), false, false);
+
+
+          // Bonificaciones
+          $promedio = 0;
+          $cajas    = 0;
+          $kilos    = 0;
+          $precio   = 0;
+          $importe  = 0;
+
+          foreach ($bonificaciones as $caja)
           {
             if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
             {
@@ -1457,8 +1532,8 @@ class bascula_model extends CI_Model {
                            $caja->folio,
                            substr($caja->proveedor, 0, 28),
                            MyString::formatoNumero($caja->promedio, 2, '', false),
-                           $caja->cajas,
-                           $caja->kilos,
+                           MyString::formatoNumero($caja->cajas, 2, '', false),
+                           MyString::formatoNumero($caja->kilos, 2, '', false),
                            MyString::formatoNumero($caja->precio, 2, '$', false),
                            MyString::formatoNumero($caja->importe, 2, '$', false));
 
@@ -1469,15 +1544,16 @@ class bascula_model extends CI_Model {
             $pdf->Row($datos, false, false);
           }
 
+          $pdf->SetFont('helvetica','B',8);
           $pdf->SetY($pdf->GetY()-1);
           $pdf->SetX(6);
           $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
           $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
           $pdf->Row(array(
-            'TOTALES',
+            'TOTAL BONIFICACIONES',
             MyString::formatoNumero($kilos/$cajas, 2, '', false),
-            $cajas,
-            $kilos,
+            MyString::formatoNumero($cajas, 2, '', false),
+            MyString::formatoNumero($kilos, 2, '', false),
             MyString::formatoNumero($importe/$kilos, 2, '$', false),
             MyString::formatoNumero($importe, 2, '$', false)), false, false);
 
