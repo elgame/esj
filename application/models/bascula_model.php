@@ -1483,10 +1483,10 @@ class bascula_model extends CI_Model {
           $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
           $pdf->Row(array(
             'TOTALES',
-            MyString::formatoNumero($kilos/$cajas, 2, '', false),
+            MyString::formatoNumero($kilos/($cajas>0? $cajas: 1), 2, '', false),
             MyString::formatoNumero($cajas, 2, '', false),
             MyString::formatoNumero($kilos, 2, '', false),
-            MyString::formatoNumero($importe/$kilos, 2, '$', false),
+            MyString::formatoNumero($importe/($kilos>0? $kilos: 1), 2, '$', false),
             MyString::formatoNumero($importe, 2, '$', false)), false, false);
 
 
@@ -1551,10 +1551,10 @@ class bascula_model extends CI_Model {
           $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
           $pdf->Row(array(
             'TOTAL BONIFICACIONES',
-            MyString::formatoNumero($kilos/$cajas, 2, '', false),
+            MyString::formatoNumero($kilos/($cajas>0? $cajas: 1), 2, '', false),
             MyString::formatoNumero($cajas, 2, '', false),
             MyString::formatoNumero($kilos, 2, '', false),
-            MyString::formatoNumero($importe/$kilos, 2, '$', false),
+            MyString::formatoNumero($importe/($kilos>0? $kilos: 1), 2, '$', false),
             MyString::formatoNumero($importe, 2, '$', false)), false, false);
 
         }
