@@ -132,7 +132,7 @@ class facturacion extends MY_Controller {
     $params['seo'] = array('titulo' => 'Complementos de Pago (Pago en parcialidades o Diferido)');
 
     //obtenemos las notas de credito
-    if (isset($_POST['ftipo']) && $_POST['ftipo'] == 'parcial') {
+    if (isset($_GET['ftipo']) && $_GET['ftipo'] == 'parcial') {
       $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_abono_factura IS NOT NULL");
     } else
       $params['datos_cp'] = $this->cuentas_cobrar_pago_model->getComPagoData();
