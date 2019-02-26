@@ -1750,7 +1750,7 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
     foreach ($nomina[0]->nomina->otrosPagos as $key => $value) {
-      if (floatval($value['total']) > 0.01) {
+      if (floatval($value['total']) >= 0.01) {
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
         $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
