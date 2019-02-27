@@ -549,12 +549,14 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         "id_empleado = {$nomina->id_empleado} AND id_empresa = {$nomina->id_empresa} AND anio = {$nomina->anio} AND semana = {$nomina->semana}");
     }
     echo "ok";
+    exit;
   }
 
   public function data_calc_anual($empresaId, $anio)
   {
     $result = $this->db->query("SELECT t.id, t.nombre, t.apellido_paterno, t.apellido_materno, t.rfc, t.curp, max(semana_max) AS mes_max,
-            min(semana_min) AS mes_min, Sum(t.dias) AS dias, Sum(t.subsidio) AS subsidio, Sum(t.sueldo_semanal) AS sueldo_semanal,
+            min(semana_min) AS mes_min, Sum(t.dias) AS dias, Sum(t.subsidio) AS subsidio, Sum(t.subsidio_causado) AS subsidio_causado,
+            Sum(t.sueldo_semanal) AS sueldo_semanal,
             Sum(t.isr) AS isr, Sum(t.aguinaldo) AS aguinaldo, Sum(t.aguinaldo_grabable) AS aguinaldo_grabable, Sum(t.aguinaldo_exento) AS aguinaldo_exento,
             Sum(t.ptu) AS ptu, Sum(t.ptu_exento) AS ptu_exento, Sum(t.ptu_grabable) AS ptu_grabable,
             Sum(t.vacaciones) AS vacaciones, Sum(t.prima_vacacional_grabable) AS prima_vacacional_grabable,
@@ -563,7 +565,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       FROM
       (
             SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
-                  min(date_part('month', nf.fecha_inicio)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio, Sum(nf.sueldo_semanal) AS sueldo_semanal,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio,
+                  Sum(nf.subsidio_pagado) AS subsidio_causado, Sum(nf.sueldo_semanal) AS sueldo_semanal,
                   Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                   Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
                   Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
@@ -575,7 +578,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
             GROUP BY u.id
             UNION
             SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
-                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS subsidio_causado, 0 AS sueldo_semanal,
                   Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                   0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
                   0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
@@ -585,7 +588,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
             GROUP BY u.id
             UNION
             SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
-                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS subsidio_causado, 0 AS sueldo_semanal,
                   Sum(nf.isr) AS isr, 0 AS aguinaldo, 0 AS aguinaldo_grabable, 0 AS aguinaldo_exento,
                   Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
                   0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
@@ -595,7 +598,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
             GROUP BY u.id
             UNION
             SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_salida)) AS semana_max,
-                  min(date_part('month', nf.fecha_salida)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio, Sum(nf.sueldo_semanal) AS sueldo_semanal,
+                  min(date_part('month', nf.fecha_salida)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio,
+                  0 AS subsidio_causado, Sum(nf.sueldo_semanal) AS sueldo_semanal,
                   Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                   0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
                   Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
@@ -608,10 +612,24 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       GROUP BY t.id, t.nombre, t.apellido_paterno, t.apellido_materno, t.rfc, t.curp
       HAVING max(semana_max) = 12 AND min(semana_min) = 1
       ");
-    foreach ($result->result() as $key => $value) {
+    $trabajadores = $result->result();
+    foreach ($trabajadores as $key => $value) {
       // ingresos_gravados/365 eso buscar en la tabla los limites
-      //
+      $total_gravado = $value->sueldo_semanal + $value->aguinaldo_grabable + $value->ptu_grabable + $value->prima_vacacional_grabable;
+      $gravado_diario = ($total_gravado/365);
+      $rango_isr = $this->db->query("SELECT id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje
+                                 FROM nomina_diaria_art_113
+                                 WHERE lim_inferior <= {$gravado_diario} AND lim_superior >= {$gravado_diario} LIMIT 1")->row();
+      $calculo_isr = ((($gravado_diario - $rango_isr->lim_inferior) * ($rango_isr->porcentaje / 100)) + $rango_isr->cuota_fija) * 365;
+      $total_isr_sub = $calculo_isr - $value->subsidio_causado;
+      $value->total_isr_sub = $total_isr_sub;
+      $value->total_isr = $value->isr;
+      $value->total_sub = $value->subsidio;
     }
+    echo "<pre>";
+      var_dump($trabajadores);
+    echo "</pre>";exit;
+    return $trabajadores;
   }
 
   public function rpt_dim()
