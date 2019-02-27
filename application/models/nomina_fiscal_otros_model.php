@@ -528,6 +528,92 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   }
 
 
+  public function setSubsidioCausado()
+  {
+    $this->load->library('nomina');
+
+    $configuraciones = $this->configuraciones();
+    $this->nomina
+        ->setEmpresaConfig($configuraciones['nomina'][0])
+        ->setVacacionesConfig($configuraciones['vacaciones'])
+        ->setSalariosZonas($configuraciones['salarios_zonas'][0])
+        ->setClavesPatron($configuraciones['cuentas_contpaq'])
+        ->setTablasIsr($configuraciones['tablas_isr']);
+
+    $result = $this->db->query("SELECT id_empleado, id_empresa, anio, semana, (sueldo_semanal+prima_vacacional_grabable+aguinaldo_grabable+ptu_grabable+horas_extras_grabable) AS total_gravado
+      FROM nomina_fiscal
+      WHERE id_empresa = 2 AND uuid <> '' and anio = 2018");
+    foreach ($result->result() as $key => $nomina) {
+      $subsidio = $this->nomina->getSubsidioIsr($nomina->total_gravado, 0);
+      $this->db->update('nomina_fiscal', ['subsidio_pagado' => $subsidio['subsidioCausado']],
+        "id_empleado = {$nomina->id_empleado} AND id_empresa = {$nomina->id_empresa} AND anio = {$nomina->anio} AND semana = {$nomina->semana}");
+    }
+    echo "ok";
+  }
+
+  public function data_calc_anual($empresaId, $anio)
+  {
+    $result = $this->db->query("SELECT t.id, t.nombre, t.apellido_paterno, t.apellido_materno, t.rfc, t.curp, max(semana_max) AS mes_max,
+            min(semana_min) AS mes_min, Sum(t.dias) AS dias, Sum(t.subsidio) AS subsidio, Sum(t.sueldo_semanal) AS sueldo_semanal,
+            Sum(t.isr) AS isr, Sum(t.aguinaldo) AS aguinaldo, Sum(t.aguinaldo_grabable) AS aguinaldo_grabable, Sum(t.aguinaldo_exento) AS aguinaldo_exento,
+            Sum(t.ptu) AS ptu, Sum(t.ptu_exento) AS ptu_exento, Sum(t.ptu_grabable) AS ptu_grabable,
+            Sum(t.vacaciones) AS vacaciones, Sum(t.prima_vacacional_grabable) AS prima_vacacional_grabable,
+            Sum(t.prima_vacacional_exento) AS prima_vacacional_exento, Sum(t.prima_vacacional) AS prima_vacacional, Sum(t.anios) AS anios,
+            Sum(t.pasistencia) AS pasistencia, Sum(t.fondo_ahorro) AS fondo_ahorro
+      FROM
+      (
+            SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio, Sum(nf.sueldo_semanal) AS sueldo_semanal,
+                  Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
+                  Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
+                  Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
+                  Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional,
+                  date_part('years', age(COALESCE(u.fecha_salida, now()), COALESCE(u.fecha_imss, u.fecha_entrada))) AS anios,
+                  Sum(nf.pasistencia) AS pasistencia, Sum(nf.fondo_ahorro) AS fondo_ahorro
+            FROM nomina_fiscal nf INNER JOIN usuarios u ON u.id = nf.id_empleado
+            WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
+            GROUP BY u.id
+            UNION
+            SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
+                  Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
+                  0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
+                  0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
+                  0 AS pasistencia, 0 AS fondo_ahorro
+            FROM nomina_aguinaldo nf INNER JOIN usuarios u ON u.id = nf.id_empleado
+            WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
+            GROUP BY u.id
+            UNION
+            SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
+                  min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
+                  Sum(nf.isr) AS isr, 0 AS aguinaldo, 0 AS aguinaldo_grabable, 0 AS aguinaldo_exento,
+                  Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
+                  0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
+                  0 AS pasistencia, 0 AS fondo_ahorro
+            FROM nomina_ptu nf INNER JOIN usuarios u ON u.id = nf.id_empleado
+            WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
+            GROUP BY u.id
+            UNION
+            SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_salida)) AS semana_max,
+                  min(date_part('month', nf.fecha_salida)) AS semana_min, Sum(nf.dias_trabajados) AS dias, Sum(nf.subsidio) AS subsidio, Sum(nf.sueldo_semanal) AS sueldo_semanal,
+                  Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
+                  0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
+                  Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
+                  Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional, 0 AS anios,
+                  0 AS pasistencia, 0 AS fondo_ahorro
+            FROM finiquito nf INNER JOIN usuarios u ON u.id = nf.id_empleado
+            WHERE nf.id_empresa = {$empresaId} AND Date(nf.fecha_salida) BETWEEN '{$anio}-01-01' AND '{$anio}-12-31'
+            GROUP BY u.id
+      ) t
+      GROUP BY t.id, t.nombre, t.apellido_paterno, t.apellido_materno, t.rfc, t.curp
+      HAVING max(semana_max) = 12 AND min(semana_min) = 1
+      ");
+    foreach ($result->result() as $key => $value) {
+      // ingresos_gravados/365 eso buscar en la tabla los limites
+      //
+    }
+  }
+
   public function rpt_dim()
   {
       if (!isset($_GET['empresaId']{0}) || !isset($_GET['anio']{0}))

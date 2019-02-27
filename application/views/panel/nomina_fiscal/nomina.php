@@ -56,6 +56,7 @@
                 </select> -->
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
+                  <a rel="superbox-80x450" href="<?php echo base_url('panel/nomina_fiscal/calc_anual/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success pull-right" title="Calculo Anual" id="calculoAnual">Calculo Anual</a>
                 <?php if ( $nominas_finalizadas){ ?>
                   <a class="btn btn-success pull-right" href="<?php echo base_url('panel/nomina_fiscal/rpt_dim/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="DIM">
                     DIM</a>

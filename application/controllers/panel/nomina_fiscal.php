@@ -57,6 +57,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/cancelar_ptu/',
     'nomina_fiscal/cancelar_aguinaldo/',
     'nomina_fiscal/rpt_dim/',
+    'nomina_fiscal/calc_anual/',
 
     'nomina_fiscal/show_import_asistencias/',
   );
@@ -80,6 +81,39 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_otros_model');
     $this->nomina_fiscal_otros_model->rpt_dim();
+  }
+
+  public function calc_anual()
+  {
+    // $this->load->model('nomina_fiscal_otros_model');
+    // $this->nomina_fiscal_otros_model->setSubsidioCausado();
+
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      // array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Fiscal - Calculo anual');
+
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
+    $empresaId = isset($_GET['empresaId'])? $_GET['empresaId']: 0;
+
+    $this->load->model('nomina_fiscal_otros_model');
+    $params['calculo'] = $this->nomina_fiscal_otros_model->data_calc_anual($empresaId, $anio);
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '3')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/nomina_fiscal/bonos_otros', $params);
   }
 
   public function index()

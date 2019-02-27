@@ -17,6 +17,7 @@
     eventOnSubmitForm();
     eventOnClickButtonPtu();
     eventOnKeyPressUtilidadEmpresas();
+    // calculoAnual();
 
     if (parseFloat($('#totales-ptu-input').val()) > 0) {
       $('#ptu').val($('#totales-ptu-input').val());
@@ -634,6 +635,13 @@
           html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
         }
         $('#semanas').html(html);
+    });
+  };
+
+
+  var calculoAnual = function () {
+    $('#calculoAnual').on('click', function(event) {
+
     });
   };
 

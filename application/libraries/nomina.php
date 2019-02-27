@@ -1215,7 +1215,7 @@ class nomina
     return $dias_anio_vacaciones;
   }
 
-  private function getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio)
+  public function getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio)
   {
     $isr = 0;
     $subsidio = 0.01;
