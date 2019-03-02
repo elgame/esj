@@ -1754,8 +1754,12 @@ class nomina_fiscal_model extends CI_Model {
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
         $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
-        if ($value['ApiKey'] === 'top_subsidio_empleo_') {
-          $datosApi['data'][0]["{$value['ApiKey']}causado"]  = $value['SubsidioAlEmpleo']['SubsidioCausado'];
+        if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] > 0) {
+          $datosApi['data'][0]["{$value['ApiKey']}causado"] = $value['SubsidioAlEmpleo']['SubsidioCausado'];
+        } else if ($value['ApiKey'] === 'top_subsidio_empleo_') {
+          unset($datosApi['data'][0]["{$value['ApiKey']}clave"]   ,
+          $datosApi['data'][0]["{$value['ApiKey']}concepto"],
+          $datosApi['data'][0]["{$value['ApiKey']}importe"]);
         }
       }
     }
