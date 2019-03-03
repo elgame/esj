@@ -1092,7 +1092,7 @@ class nomina
   {
     $otros = 0; //floatval($this->empleado->descuento_playeras);
 
-    if ($this->empleado->esta_generada != 'false') {
+    if ($this->empleado->esta_generada != 'false' || floatval($this->empleado->nomina_fiscal_prestamos) > 0) {
       $otros += floatval($this->empleado->nomina_fiscal_prestamos);
     } else {
       foreach ($this->empleado->prestamos as $prestamo)
