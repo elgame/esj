@@ -95,16 +95,16 @@ class nomina_fiscal extends MY_Controller {
       $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
     }
 
-    $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
-      ORDER BY f.id_empresa ASC")->result();
-    $auxempresa = 0;
-    foreach ($nominas as $key => $value) {
-      if ($auxempresa != $value->id_empresa) {
-        $this->cfdi->cargaDatosFiscales($value->id_empresa);
-        $auxempresa = $value->id_empresa;
-      }
-      $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
-    }
+    // $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
+    //   ORDER BY f.id_empresa ASC")->result();
+    // $auxempresa = 0;
+    // foreach ($nominas as $key => $value) {
+    //   if ($auxempresa != $value->id_empresa) {
+    //     $this->cfdi->cargaDatosFiscales($value->id_empresa);
+    //     $auxempresa = $value->id_empresa;
+    //   }
+    //   $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    // }
   }
 
   public function rpt_dim()
