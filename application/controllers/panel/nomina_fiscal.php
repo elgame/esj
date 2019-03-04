@@ -60,6 +60,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/calc_anual/',
 
     'nomina_fiscal/show_import_asistencias/',
+    'nomina_fiscal/parcheGeneraXML/',
   );
 
   public function _remap($method)
@@ -75,6 +76,35 @@ class nomina_fiscal extends MY_Controller {
         redirect(base_url('panel/home?msg=1'));
     }else
       redirect(base_url('panel/home'));
+  }
+
+  public function parcheGeneraXML()
+  {
+    $nominas = $this->db->query("SELECT nf.*, u.rfc FROM nomina_fiscal nf
+      INNER JOIN usuarios u ON u.id = nf.id_empleado WHERE nf.anio = 2019 AND nf.uuid <> ''
+      ORDER BY nf.id_empresa ASC")->result();
+    $this->load->library('cfdi');
+    $auxempresa = 0;
+    foreach ($nominas as $key => $value) {
+      if ($auxempresa != $value->id_empresa) {
+        $this->cfdi->cargaDatosFiscales($value->id_empresa);
+        $auxempresa = $value->id_empresa;
+      }
+      $this->cfdi->anio = $value->anio;
+      $this->cfdi->semana = $value->semana;
+      $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
+    }
+
+    $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
+      ORDER BY f.id_empresa ASC")->result();
+    $auxempresa = 0;
+    foreach ($nominas as $key => $value) {
+      if ($auxempresa != $value->id_empresa) {
+        $this->cfdi->cargaDatosFiscales($value->id_empresa);
+        $auxempresa = $value->id_empresa;
+      }
+      $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    }
   }
 
   public function rpt_dim()

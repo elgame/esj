@@ -8,7 +8,7 @@ class cfdi{
 
 	public $version = '3.3';
 
-  private $rfc            = 'NEDR620710H76';
+  public $rfc            = 'NEDR620710H76';
   private $razon_social   = 'ROBERTO NEVAREZ DOMINGUEZ';
   private $regimen_fiscal = 'Actividad empresarial, régimen general de ley'; //'Actividad empresarial y profesional, Régimen de honorarios';
   private $calle          = 'Pista Aérea';
@@ -22,8 +22,8 @@ class cfdi{
   private $cp             = '60800';
 
   private $isNomina = false;
-  private $anio     = '2013'; // variable util para las nominas.
-  private $semana   = '1'; // variable util para las nominas.
+  public $anio     = '2013'; // variable util para las nominas.
+  public $semana   = '1'; // variable util para las nominas.
 
 	public $default_id_empresa = 3; //informacion fiscal guardada en la bd
 
@@ -1543,6 +1543,28 @@ class cfdi{
 
     return $path_guardar;
 	}
+
+  public function guardarXMLFactura($xml, $rfc, $serie, $folio, $fechaFactura)
+  {
+    $fecha    = $this->obtenFechaMes($fechaFactura);
+    $dir_anio = $fecha[0];
+    $dir_mes  = $this->mesToString($fecha[1]);
+
+    if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'))
+      $this->crearFolder(APPPATH.'media/cfdi/facturasXML/', $dir_anio.'/');
+
+    if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'))
+      $this->crearFolder(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/', $dir_mes.'/');
+
+    $path_guardar = APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'.
+      $rfc.'-'.$serie.'-'.$this->acomodarFolio($folio).'.xml';
+
+    $fp = fopen($path_guardar, 'w');
+    fwrite($fp, $xml);
+    fclose($fp);
+
+    return $path_guardar;
+  }
 
   /**
    * Guarda el XML en capertas especificas AÑO/MES.
