@@ -1575,8 +1575,7 @@ class cfdi{
    */
   public function guardarXMLNomina($xml, $nameAppend)
   {
-    // $vers = str_replace('.', '_', $this->version);
-    // $xml  = $this->{'generarXML'.$vers}($data, true);
+    $this->isNomina = true;
 
     $empresa = $this->validaDir('empresa', 'NominasXML/');
     $dir_anio = $this->validaDir('anio', 'NominasXML/'.$empresa.'/');
