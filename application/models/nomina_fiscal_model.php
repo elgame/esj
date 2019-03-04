@@ -1087,6 +1087,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
 
+    $this->cfdi->cargaDatosFiscales($empresaId);
     // Obtiene la informacion de la empresa.
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
@@ -1195,6 +1196,8 @@ class nomina_fiscal_model extends CI_Model {
           $this->db->update('nomina_fiscal', $nominasEmpleados,
             "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$fechasSemana['anio']} AND semana = {$datos['numSemana']}");
 
+          $this->cfdi->anio = $datos['anio'];
+          $this->cfdi->semana = $datos['numSemana'];
           $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
 
           $msg = $result['result']->mensaje;
@@ -9855,6 +9858,8 @@ class nomina_fiscal_model extends CI_Model {
               'cfdi_ext'            => json_encode($datosApi),
             );
 
+            $this->cfdi->anio = $datos['anio'];
+            $this->cfdi->semana = $datos['numSemana'];
             $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
 
             $msg = $result['result']->mensaje;
@@ -11874,6 +11879,8 @@ class nomina_fiscal_model extends CI_Model {
               'cfdi_ext'            => json_encode($datosApi),
             );
 
+            $this->cfdi->anio = $datos['anio'];
+            $this->cfdi->semana = $datos['numSemana'];
             $archivo = $this->cfdi->guardarXMLNomina($result['result']->data->xml, $datosApi['data'][0]['rfc']);
 
             $msg = $result['result']->mensaje;

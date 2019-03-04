@@ -5230,6 +5230,7 @@ class facturacion_model extends privilegios_model{
       $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
       $file = $factura['info']->cfdi_ext->emisor->rfc.'-'.$factura['info']->serie.$folio;
       file_put_contents($path."{$file}.xml", $factura['info']->xml);
+      $this->cfdi->guardarXMLFactura($factura['info']->xml, $factura['info']->cfdi_ext->emisor->rfc, $factura['info']->serie, $factura['info']->folio, $factura['info']->fecha);
       $pdf->Output($path."{$file}.pdf", 'F');
     } else {
       // Actualiza el # de impresion
