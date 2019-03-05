@@ -388,7 +388,7 @@ class caja_chica_model extends CI_Model {
     $remisiones = $this->db->query(
       "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
               COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
-              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja, cr.status, cr.folio AS cfolio, cr.fecha_rem
+              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja, cr.status, cr.folio AS cfolio, cr.fecha_rem, cr.id_nomenclatura
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
@@ -680,17 +680,18 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['remision_row'][$key]) && $data['remision_row'][$key] == '') {
           $data_folio->folio += 1;
           $remisiones[] = array(
-            'observacion'   => $concepto,
-            'id_remision'   => $data['remision_id'][$key],
-            'fecha'         => $data['fecha_caja_chica'],
-            'monto'         => $data['remision_importe'][$key],
-            'row'           => $key,
-            'id_categoria'  => $data['remision_empresa_id'][$key],
-            'fecha_rem'     => $data['remision_fecha'][$key],
-            'folio_factura' => empty($data['remision_folioremision_numero'][$key]) ? null : $data['remision_numero'][$key],
-            'no_caja'       => $data['fno_caja'],
-            'folio'         => $data_folio->folio,
-            'id_usuario'    => $this->session->userdata('id_usuario'),
+            'observacion'     => $concepto,
+            'id_remision'     => $data['remision_id'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'monto'           => $data['remision_importe'][$key],
+            'row'             => $key,
+            'id_categoria'    => $data['remision_empresa_id'][$key],
+            'fecha_rem'       => $data['remision_fecha'][$key],
+            'folio_factura'   => empty($data['remision_folioremision_numero'][$key]) ? null : $data['remision_numero'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'folio'           => $data_folio->folio,
+            'id_nomenclatura' => $data['remision_nomenclatura'][$key],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
           );
         }
       }
@@ -1120,12 +1121,14 @@ class caja_chica_model extends CI_Model {
 
     $movimientos = $this->db->query(
       "SELECT bm.id_movimiento, COALESCE(p.nombre_fiscal, bm.a_nombre_de) as proveedor,
-          bm.numero_ref, ba.nombre as banco, bm.monto, DATE(bm.fecha) as fecha
+          bm.numero_ref, ba.nombre as banco, bm.monto, DATE(bm.fecha) as fecha, bm.concepto,
+          bm.metodo_pago, cc.id_categoria, cc.abreviatura AS empresa
        FROM banco_movimientos bm
-       INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
-       LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
-       INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
-       LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
+         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
+         INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
+         LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
+         LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
+         LEFT JOIN cajachica_categorias cc ON cc.id_empresa = bc.id_empresa
        WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0
         AND DATE(bm.fecha) > (Now() - interval '3 months')
        ORDER BY bm.fecha ASC, ci.id_ingresos ASC

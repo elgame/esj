@@ -226,7 +226,7 @@
                           <?php if ($_GET['fno_caja'] == '4'): ?>
                           <thead>
                             <tr>
-                              <th colspan="6">INGRESOS CLIENTES
+                              <th colspan="7">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
                                 <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
                               </th>
@@ -236,7 +236,7 @@
                               <th>EMPRESA</th>
                               <th>REMISION</th>
                               <th>FECHA REM</th>
-                              <!-- <th>FOLIO</th> -->
+                              <th>NOM</th>
                               <th colspan="3">NOMBRE</th>
                               <th>ABONO</th>
                               <th></th>
@@ -258,6 +258,13 @@
                                     </td>
                                     <td style=""><input type="text" name="remision_numero[]" value="<?php echo $_POST['remision_numero'][$key] ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
                                     <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $_POST['remision_fecha'][$key] ?>" class="remision_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
+                                    <td style="width: 40px;">
+                                      <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
+                                        <?php foreach ($nomenclaturas as $n) { ?>
+                                          <option value="<?php echo $n->id ?>" <?php echo $_POST['remision_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                        <?php } ?>
+                                      </select>
+                                    </td>
                                     <td colspan="3">
                                       <input type="text" name="remision_concepto[]" value="<?php echo $concepto ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                       <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
@@ -282,6 +289,13 @@
                                       </td>
                                       <td style=""><input type="text" name="remision_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
                                       <td style=""><input type="date" name="remision_fecha[]" value="<?php echo $remision->fecha_rem ?>" class="remision_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
+                                      <td style="width: 40px;">
+                                        <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly.$mod_ing_readonly ?>>
+                                          <?php foreach ($nomenclaturas as $n) { ?>
+                                            <option value="<?php echo $n->id ?>" <?php echo $remision->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php } ?>
+                                        </select>
+                                      </td>
                                       <td colspan="3">
                                         <input type="text" name="remision_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                         <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
@@ -305,7 +319,7 @@
                             <?php }} ?>
 
                             <tr class='row-total'>
-                              <td colspan="6"></td>
+                              <td colspan="7"></td>
                               <td style=""><input type="text" name="total_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
                               <td></td>
                             </tr>
@@ -313,7 +327,7 @@
                           <?php } ?>
 
                             <tr>
-                              <td colspan="6"></td>
+                              <td colspan="7"></td>
                               <td style="">
                                 <?php $totalReporteCaja = $totalSaldoIngresos + $totalIngresos ?>
                                 <input type="text" name="tota_saldo_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalReporteCaja, 2, '')) ?>" class="span12" id="total-saldo-ingresos" maxlength="500" readonly style="text-align: right;">
@@ -346,7 +360,7 @@
                                         <th colspan="2">IMPORTE</th>
                                       </tr>
                                       <tr>
-                                        <th>TIPO</th>
+                                        <th>TRASPASAR A</th>
                                         <th title="Afectar el fondo de la caja">AF. FONDO</th>
                                         <th>CONCEPTO</th>
                                         <th>CARGO</th>
@@ -360,9 +374,15 @@
                                             $totalTraspasos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
                                           <tr>
                                             <td>
-                                              <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                              <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
                                                 <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
                                                 <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                              </select> -->
+                                              <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
+                                                <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                                <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                                <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                                <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                               </select>
                                               <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
                                               <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
@@ -1241,8 +1261,11 @@
               <td><input type="checkbox" class="chk-movimiento"
                 data-id="<?php echo $movi->id_movimiento ?>" data-total="<?php echo $movi->monto ?>"
                 data-proveedor="<?php echo $movi->proveedor ?>"
-                data-poliza="<?php echo $movi->numero_ref ?>"
+                data-poliza="<?php echo ucfirst(substr($movi->metodo_pago, 0, 4)).' - '.$movi->numero_ref ?>"
                 data-banco="<?php echo $movi->banco ?>"
+                data-concepto="<?php echo $movi->concepto ?>"
+                data-idcategoria="<?php echo $movi->id_categoria ?>"
+                data-empresa="<?php echo $movi->empresa ?>"
                 ></td>
               <td style="width: 66px;"><?php echo $movi->fecha ?></td>
               <td class="search-field"><?php echo $movi->proveedor ?></td>

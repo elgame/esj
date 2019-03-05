@@ -94,47 +94,55 @@
   };
 
   var agregarIngreso = function (movimiento) {
+    var add_band = true;
 
-    var poliza = '', concepto = '', id = '', abono = '0';
-    banco    = '';
-    proveedor  = '';
-    if (movimiento) {
-      banco     = movimiento.banco;
-      proveedor = movimiento.proveedor;
-      poliza    = movimiento.poliza;
-      concepto  = '';
-      id        = movimiento.id;
-      abono     = movimiento.total;
+    if (movimiento && $('#table-ingresos').find('.ingreso_concepto_id[value='+movimiento.id+']').length > 0) {
+      add_band = confirm("Ya esta agregado el ingreso "+movimiento.poliza+" estas seguro de agregarlo de nuevo?");
     }
+    if (add_band) {
+      var poliza = '', concepto = '', id = '', abono = '0', idcategoria = '', empresa = '';
+      banco    = '';
+      proveedor  = '';
+      if (movimiento) {
+        banco       = movimiento.banco;
+        proveedor   = movimiento.proveedor;
+        poliza      = movimiento.poliza;
+        concepto    = movimiento.concepto;
+        id          = movimiento.id;
+        abono       = movimiento.total;
+        idcategoria = movimiento.idcategoria;
+        empresa     = movimiento.empresa;
+      }
 
-    var $table = $('#table-ingresos').find('tbody'),
-        tr =  '<tr>' +
-                '<td style="width: 100px;">' +
-                  '<input type="hidden" name="ingreso_id_ingresos[]" value="" id="ingreso_id_ingresos">'+
-                  '<input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">'+
-                  '<input type="text" name="ingreso_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
-                  '<input type="hidden" name="ingreso_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
-                '</td>' +
-                '<td style="width: 40px;">' +
-                  '<select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
-                    $('#nomeclaturas_base').html() +
-                  '</select>' +
-                '</td>' +
-                '<td style=""><input type="text" name="ingreso_banco[]" value="'+banco+'" class="ingreso_banco span12" maxlength="50" placeholder="Banco" style=""></td>' +
-                '<td style=""><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style=""></td>' +
-                '<td>' +
-                  '<input type="text" name="ingreso_nombre[]" value="'+proveedor+'" class="ingreso-nombre span12" maxlength="130" placeholder="Nombre" required>' +
-                '</td>' +
-                '<td>' +
-                  '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
-                  '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
-                '</td>' +
-                '<td style=""><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
-                '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
-              '</tr>';
+      var $table = $('#table-ingresos').find('tbody'),
+          tr =  '<tr>' +
+                  '<td style="width: 100px;">' +
+                    '<input type="hidden" name="ingreso_id_ingresos[]" value="" id="ingreso_id_ingresos">'+
+                    '<input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">'+
+                    '<input type="text" name="ingreso_empresa[]" value="'+empresa+'" class="input-small gasto-cargo" style="width: 150px;" required>' +
+                    '<input type="hidden" name="ingreso_empresa_id[]" value="'+idcategoria+'" class="input-small vpositive gasto-cargo-id">' +
+                  '</td>' +
+                  '<td style="width: 40px;">' +
+                    '<select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
+                      $('#nomeclaturas_base').html() +
+                    '</select>' +
+                  '</td>' +
+                  '<td style=""><input type="text" name="ingreso_banco[]" value="'+banco+'" class="ingreso_banco span12" maxlength="50" placeholder="Banco" style=""></td>' +
+                  '<td style=""><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style=""></td>' +
+                  '<td>' +
+                    '<input type="text" name="ingreso_nombre[]" value="'+proveedor+'" class="ingreso-nombre span12" maxlength="130" placeholder="Nombre" required>' +
+                  '</td>' +
+                  '<td>' +
+                    '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
+                    '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
+                  '</td>' +
+                  '<td style=""><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
+                  '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+                '</tr>';
 
-    $(tr).appendTo($table);
-    $(".vpositive").numeric({ negative: false }); //Numero positivo
+      $(tr).appendTo($table);
+      $(".vpositive").numeric({ negative: false }); //Numero positivo
+    }
   };
 
   var btnAddOtros = function () {
@@ -184,6 +192,11 @@
               '</td>' +
               '<td style=""><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive" placeholder="" readonly style=""></td>' +
               '<td style=""><input type="date" name="remision_fecha[]" value="'+fecha+'" class="remision_fecha" placeholder="Fecha" style=""></td>' +
+              '<td style="width: 40px;">' +
+                '<select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;">' +
+                  $('#nomeclaturas_base').html() +
+                '</select>' +
+              '</td>' +
               '<td colspan="3">' +
                 '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
                 '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
@@ -864,7 +877,9 @@
           agregarIngreso({
             id: $this.attr('data-id'), total: $this.attr('data-total'),
             proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza'),
-            banco: $this.attr('data-banco')
+            banco: $this.attr('data-banco'), concepto: $this.attr('data-concepto'),
+            idcategoria: $this.attr('data-idcategoria'),
+            empresa: $this.attr('data-empresa'),
           });
         });
 
@@ -1013,9 +1028,15 @@
     var $table = $('#table-traspasos').find('tbody .row-total'),
         tr = '<tr>'+
                 '<td>'+
-                  '<select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura">'+
-                    '<option value="t">Ingreso</option>'+
-                    '<option value="f">Egreso</option>'+
+                  // '<select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura">'+
+                  //   '<option value="t">Ingreso</option>'+
+                  //   '<option value="f">Egreso</option>'+
+                  // '</select>'+
+                  '<select name="traspaso_tipo[]" class="span12 traspaso_tipo">'+
+                    '<option value="otros">Otros</option>'+
+                    '<option value="caja_limon">Caja limón</option>'+
+                    '<option value="caja_gastos">Caja gastos</option>'+
+                    '<option value="caja_general">Caja gastos</option>'+
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
                   '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+
