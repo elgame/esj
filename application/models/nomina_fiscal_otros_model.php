@@ -561,7 +561,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
             Sum(t.ptu) AS ptu, Sum(t.ptu_exento) AS ptu_exento, Sum(t.ptu_grabable) AS ptu_grabable,
             Sum(t.vacaciones) AS vacaciones, Sum(t.prima_vacacional_grabable) AS prima_vacacional_grabable,
             Sum(t.prima_vacacional_exento) AS prima_vacacional_exento, Sum(t.prima_vacacional) AS prima_vacacional, Sum(t.anios) AS anios,
-            Sum(t.pasistencia) AS pasistencia, Sum(t.fondo_ahorro) AS fondo_ahorro
+            Sum(t.pasistencia) AS pasistencia, Sum(t.fondo_ahorro) AS fondo_ahorro, max(t.dias_anio) AS dias_anio
       FROM
       (
             SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
@@ -572,7 +572,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                   Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
                   Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional,
                   date_part('years', age(COALESCE(u.fecha_salida, now()), COALESCE(u.fecha_imss, u.fecha_entrada))) AS anios,
-                  Sum(nf.pasistencia) AS pasistencia, Sum(nf.fondo_ahorro) AS fondo_ahorro
+                  Sum(nf.pasistencia) AS pasistencia, Sum(nf.fondo_ahorro) AS fondo_ahorro,
+                  DATE_PART('day', max(nf.fecha_final) - min(nf.fecha_inicio)) AS dias_anio
             FROM nomina_fiscal nf INNER JOIN usuarios u ON u.id = nf.id_empleado
             WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
             GROUP BY u.id
@@ -582,7 +583,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                   Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                   0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
                   0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
-                  0 AS pasistencia, 0 AS fondo_ahorro
+                  0 AS pasistencia, 0 AS fondo_ahorro, 0 AS dias_anio
             FROM nomina_aguinaldo nf INNER JOIN usuarios u ON u.id = nf.id_empleado
             WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
             GROUP BY u.id
@@ -592,7 +593,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                   Sum(nf.isr) AS isr, 0 AS aguinaldo, 0 AS aguinaldo_grabable, 0 AS aguinaldo_exento,
                   Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
                   0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
-                  0 AS pasistencia, 0 AS fondo_ahorro
+                  0 AS pasistencia, 0 AS fondo_ahorro, 0 AS dias_anio
             FROM nomina_ptu nf INNER JOIN usuarios u ON u.id = nf.id_empleado
             WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.esta_asegurado = 't'
             GROUP BY u.id
@@ -604,7 +605,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                   0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
                   Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
                   Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional, 0 AS anios,
-                  0 AS pasistencia, 0 AS fondo_ahorro
+                  0 AS pasistencia, 0 AS fondo_ahorro, 0 AS dias_anio
             FROM finiquito nf INNER JOIN usuarios u ON u.id = nf.id_empleado
             WHERE nf.id_empresa = {$empresaId} AND Date(nf.fecha_salida) BETWEEN '{$anio}-01-01' AND '{$anio}-12-31'
             GROUP BY u.id
@@ -613,14 +614,15 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       HAVING max(semana_max) = 12 AND min(semana_min) = 1
       ");
     $trabajadores = $result->result();
+    $dias_anio = max(array_column($trabajadores, 'dias_anio'));
     foreach ($trabajadores as $key => $value) {
       // ingresos_gravados/365 eso buscar en la tabla los limites
       $total_gravado = $value->sueldo_semanal + $value->aguinaldo_grabable + $value->ptu_grabable + $value->prima_vacacional_grabable;
-      $gravado_diario = ($total_gravado/365);
+      $gravado_diario = ($total_gravado/$dias_anio);
       $rango_isr = $this->db->query("SELECT id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje
                                  FROM nomina_diaria_art_113
                                  WHERE lim_inferior <= {$gravado_diario} AND lim_superior >= {$gravado_diario} LIMIT 1")->row();
-      $calculo_isr = ((($gravado_diario - $rango_isr->lim_inferior) * ($rango_isr->porcentaje / 100)) + $rango_isr->cuota_fija) * 365;
+      $calculo_isr = ((($gravado_diario - $rango_isr->lim_inferior) * ($rango_isr->porcentaje / 100)) + $rango_isr->cuota_fija) * $dias_anio;
       $total_isr_sub = $calculo_isr - $value->subsidio_causado;
       $value->total_isr_sub = $total_isr_sub;
       $value->total_isr = $value->isr;

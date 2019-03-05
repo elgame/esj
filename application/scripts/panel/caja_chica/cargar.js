@@ -158,41 +158,46 @@
 
   var agregarRemisiones = function (remision) {
     var $table = $('#table-remisiones').find('tbody .row-total'),
-        tr;
+        tr, add_band = true;
 
-    var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '', fecha = '';
-    if (remision) {
-      id           = remision.id;
-      numRemision  = remision.numremision;
-      abono        = remision.total;
-      foliofactura = remision.foliofactura;
-      concepto     = remision.concepto;
-      idempresa    = remision.idempresa;
-      empresa      = remision.empresa;
-      fecha        = remision.fecha;
+    if ($('#table-remisiones').find('.remision-id[value='+remision.id+']').length > 0) {
+      add_band = confirm("Ya esta agregada la remisión "+remision.numremision+" estas seguro de agregarla de nuevo?");
     }
+    if (add_band) {
+      var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '', fecha = '';
+      if (remision) {
+        id           = remision.id;
+        numRemision  = remision.numremision;
+        abono        = remision.total;
+        foliofactura = remision.foliofactura;
+        concepto     = remision.concepto;
+        idempresa    = remision.idempresa;
+        empresa      = remision.empresa;
+        fecha        = remision.fecha;
+      }
 
-    tr =  '<tr>' +
-            '<td style="">' +
-              '<input type="text" name="remision_empresa[]" value="'+empresa+'" class="gasto-cargo" style="" required>' +
-              '<input type="hidden" name="remision_empresa_id[]" value="'+idempresa+'" class="input-small vpositive gasto-cargo-id">' +
-              '<input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">' +
-            '</td>' +
-            '<td style=""><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive" placeholder="" readonly style=""></td>' +
-            '<td style=""><input type="date" name="remision_fecha[]" value="'+fecha+'" class="remision_fecha" placeholder="Fecha" style=""></td>' +
-            '<td colspan="3">' +
-              '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
-              '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
-            '</td>' +
-            '<td style=""><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
-            '<td style="width: 30px;">'+
-              '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
-              '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
-            '</td>' +
-          '</tr>';
+      tr =  '<tr>' +
+              '<td style="">' +
+                '<input type="text" name="remision_empresa[]" value="'+empresa+'" class="gasto-cargo" style="" required>' +
+                '<input type="hidden" name="remision_empresa_id[]" value="'+idempresa+'" class="input-small vpositive gasto-cargo-id">' +
+                '<input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">' +
+              '</td>' +
+              '<td style=""><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive" placeholder="" readonly style=""></td>' +
+              '<td style=""><input type="date" name="remision_fecha[]" value="'+fecha+'" class="remision_fecha" placeholder="Fecha" style=""></td>' +
+              '<td colspan="3">' +
+                '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
+                '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
+              '</td>' +
+              '<td style=""><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
+              '<td style="width: 30px;">'+
+                '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+                '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
+              '</td>' +
+            '</tr>';
 
-    $(tr).insertBefore($table);
-    $(".vpositive").numeric({ negative: false }); //Numero positivo
+      $(tr).insertBefore($table);
+      $(".vpositive").numeric({ negative: false }); //Numero positivo
+    }
   };
 
   var calculaTotalIngresos = function () {
