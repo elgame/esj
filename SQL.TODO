@@ -5,6 +5,12 @@
       REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      ALTER TABLE public.cajachica_traspasos ADD COLUMN tipo_caja character varying(30) NOT NULL DEFAULT 'otros'::character varying;
      COMMENT ON COLUMN public.cajachica_traspasos.tipo_caja IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
+     -- pct
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_compra bigint;
+     COMMENT ON COLUMN public.cajachica_gastos.id_compra IS 'id del gasto ligado, este tipo de gasto (de caja) no se tomaria en cuenta para los reportes';
+     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+
  ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct|lap|san
     CREATE TABLE public.nomina_fiscal_canceladas
       (
