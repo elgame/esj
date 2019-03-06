@@ -333,7 +333,7 @@ class caja_chica_model extends CI_Model {
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'g'": " AND cg.tipo = 'g'"));
 
     // Traspasos
-    if ($noCaja == '2' || $noCaja == '4') {
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4') {
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
       if (count($traspasos) > 0)
       {
@@ -540,11 +540,22 @@ class caja_chica_model extends CI_Model {
       return $traspaso->monto;
     }
 
+    $tno_caja = '';
+    if ($noCaja == 1) {
+      $tno_caja = 'caja_limon';
+    } elseif ($noCaja == 2) {
+      $tno_caja = 'caja_gastos';
+    } elseif ($noCaja == 4) {
+      $tno_caja = 'caja_general';
+    }
+
     $traspaso = $this->db->query(
       "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones,
-        bt.id_usuario, bt.fecha_creacion, bt.tipo, bt.afectar_fondo, bt.folio, bt.status
+        bt.id_usuario, bt.fecha_creacion, bt.afectar_fondo, bt.folio, bt.status,
+        (CASE bt.no_caja WHEN {$noCaja} THEN bt.tipo ELSE (NOT bt.tipo) END) AS tipo,
+        (CASE bt.no_caja WHEN {$noCaja} THEN true ELSE false END) AS guardado, bt.tipo_caja
        FROM public.cajachica_traspasos bt
-       WHERE bt.fecha = '{$fecha}' AND bt.no_caja = {$noCaja} {$sql}
+       WHERE bt.fecha = '{$fecha}' AND (bt.no_caja = {$noCaja} OR bt.tipo_caja = '{$tno_caja}') {$sql}
        ORDER BY bt.folio ASC"
     );
 
@@ -934,11 +945,24 @@ class caja_chica_model extends CI_Model {
           // $this->db->delete('public.cajachica_traspasos', "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
           $data_traspp = $this->db->query("SELECT * FROM public.cajachica_traspasos WHERE id_traspaso = {$data['traspaso_id_traspaso'][$key]}")->row();
           if ($data_traspp->afectar_fondo == 't') {
-            $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$data_traspp->no_caja}'")->row();
-            $monto = ($data_traspp->tipo == 'f'? 1: -1) * floatval($data_traspp->monto);
-            $this->db->update('cajachicas',
-              ['presupuesto' => $cajaData->presupuesto + $monto],
-              "no_caja = '{$data_traspp->no_caja}'");
+            $tno_caja = 0;
+
+            if ($data_traspp->tipo_caja == 'caja_limon') {
+              $tno_caja = 1;
+            } elseif ($data_traspp->tipo_caja == 'caja_gastos') {
+              $tno_caja = 2;
+            } elseif ($data_traspp->tipo_caja == 'caja_general') {
+              $tno_caja = 4;
+            }
+
+            if ($tno_caja > 0) {
+              $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$tno_caja}'")->row();
+              // $monto = ($data_traspp->tipo == 'f'? 1: -1) * floatval($data_traspp->monto);
+              $monto = -1 * floatval($data_traspp->monto);
+              $this->db->update('cajachicas',
+                ['presupuesto' => $cajaData->presupuesto + $monto],
+                "no_caja = '{$tno_caja}'");
+            }
           }
 
           $this->db->update('public.cajachica_traspasos', ['status' => 'f'], "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
@@ -946,7 +970,7 @@ class caja_chica_model extends CI_Model {
           $gastos_udt = array(
             'concepto' => $concepto,
             'monto'    => $data['traspaso_importe'][$key],
-            'tipo'     => $data['traspaso_tipo'][$key],
+            // 'tipo'     => $data['traspaso_tipo'][$key],
           );
 
           $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
@@ -955,7 +979,8 @@ class caja_chica_model extends CI_Model {
           $traspaso = array(
             'concepto'      => $concepto,
             'monto'         => $data['traspaso_importe'][$key],
-            'tipo'          => $data['traspaso_tipo'][$key],
+            'tipo'          => 'f',
+            'tipo_caja'     => $data['traspaso_tipo'][$key],
             'fecha'         => $data['fecha_caja_chica'],
             'no_caja'       => $data['fno_caja'],
             'afectar_fondo' => $data['traspaso_afectar_fondo'][$key],
@@ -967,11 +992,24 @@ class caja_chica_model extends CI_Model {
 
           // Afecta el saldo de la caja
           if ($data['traspaso_afectar_fondo'][$key] == 't') {
-            $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$data['fno_caja']}'")->row();
-            $monto = ($data['traspaso_tipo'][$key] == 'f'? -1: 1) * floatval($data['traspaso_importe'][$key]);
-            $this->db->update('cajachicas',
-              ['presupuesto' => $cajaData->presupuesto + $monto],
-              "no_caja = '{$data['fno_caja']}'");
+            $tno_caja = 0;
+
+            if ($data['traspaso_tipo'][$key] == 'caja_limon') {
+              $tno_caja = 1;
+            } elseif ($data['traspaso_tipo'][$key] == 'caja_gastos') {
+              $tno_caja = 2;
+            } elseif ($data['traspaso_tipo'][$key] == 'caja_general') {
+              $tno_caja = 4;
+            }
+
+            if ($tno_caja > 0) {
+              $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$data['fno_caja']}'")->row();
+              // $monto = ($traspaso['tipo'] == 'f'? -1: 1) * floatval($data['traspaso_importe'][$key]);
+              $monto = floatval($data['traspaso_importe'][$key]);
+              $this->db->update('cajachicas',
+                ['presupuesto' => $cajaData->presupuesto + $monto],
+                "no_caja = '{$tno_caja}'");
+            }
           }
         }
       }

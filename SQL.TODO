@@ -1,10 +1,10 @@
 
- ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct
+ ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;
      ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
       REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      ALTER TABLE public.cajachica_traspasos ADD COLUMN tipo_caja character varying(30) NOT NULL DEFAULT 'otros'::character varying;
-     COMMENT ON COLUMN public.cajachica_traspasos.tipo IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
+     COMMENT ON COLUMN public.cajachica_traspasos.tipo_caja IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
  ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct|lap|san
     CREATE TABLE public.nomina_fiscal_canceladas
       (

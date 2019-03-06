@@ -342,7 +342,7 @@
 
                     <?php
                     $totalTraspasos = 0;
-                    if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
+                    if ($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
                     <!-- Traspasos -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
@@ -355,12 +355,17 @@
                                   <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
                                     <thead>
                                       <tr>
-                                        <th colspan="2">TRASPASOS <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
-                                        <th colspan="1"></th>
+                                        <th colspan="2">TRASPASOS
+                                          <?php if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
+                                          <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                          <?php endif ?>
+                                        </th>
+                                        <th colspan="2"></th>
                                         <th colspan="2">IMPORTE</th>
                                       </tr>
                                       <tr>
                                         <th>TRASPASAR A</th>
+                                        <th>TIPO</th>
                                         <th title="Afectar el fondo de la caja">AF. FONDO</th>
                                         <th>CONCEPTO</th>
                                         <th>CARGO</th>
@@ -382,11 +387,12 @@
                                                 <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
                                                 <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                                 <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
-                                                <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                                <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
                                               </select>
                                               <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
                                               <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
                                             </td>
+                                            <td></td>
                                             <td>
                                               <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
                                                 <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
@@ -406,30 +412,40 @@
                                         ?>
                                         <tr>
                                           <td>
-                                            <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
-                                              <option value="t" <?php echo $traspaso->tipo == 't' ? 'selected' : '' ?>>Ingreso</option>
-                                              <option value="f" <?php echo $traspaso->tipo == 'f' ? 'selected' : '' ?>>Egreso</option>
-                                            </select>
+                                            <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
+                                            <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
                                             <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
                                             <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
                                           </td>
+                                          <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
                                           <td>
-                                            <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo" <?php echo $readonly ?>>
-                                              <option value="f" <?php echo $traspaso->afectar_fondo == 'f' ? 'selected' : '' ?>>No</option>
-                                              <option value="t" <?php echo $traspaso->afectar_fondo == 't' ? 'selected' : '' ?>>Si</option>
-                                            </select>
+                                            <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No' ?>
                                           </td>
                                           <td style="">
+                                            <?php if ($traspaso->guardado == 't'): ?>
                                             <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                            <?php else: ?>
+                                              <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
+                                            <?php endif ?>
                                           </td>
-                                          <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
-                                          <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                          <td style="width: 60px;">
+                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
+                                            <?php else: ?>
+                                              <?php echo $traspaso->monto ?>
+                                            <?php endif ?>
+                                          </td>
+                                          <td style="width: 30px;">
+                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <?php endif ?>
+                                          </td>
                                         </tr>
                                       <?php }} ?>
                                       <tr class="row-total">
                                         <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                         <td><input type="text" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
-                                        <td></td>
+                                        <td colspan="3"></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -881,7 +897,7 @@
                                               <option value="otros" <?php echo $_POST['deudor_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                               <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
-                                              <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                              <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
                                             </select>
                                           </td>
                                           <td style="width: 200px;">

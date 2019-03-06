@@ -911,7 +911,7 @@
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
-                    '<option value="caja_general">Caja general</option>'+
+                    '<option value="caja_general">Caja Distribuidora</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 200px;">'+
@@ -1036,11 +1036,12 @@
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
-                    '<option value="caja_general">Caja gastos</option>'+
+                    '<option value="caja_general">Caja Distribuidora</option>'+
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
                   '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+
                 '</td>'+
+                '<td></td>'+
                 '<td>'+
                   '<select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">'+
                     '<option value="f">No</option>'+
