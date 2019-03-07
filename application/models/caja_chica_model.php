@@ -1150,6 +1150,51 @@ class caja_chica_model extends CI_Model {
     return $response;
   }
 
+  public function getGastosDirectos()
+  {
+    $sql = '';
+    if ($this->input->get('idEmpresa') > 0) {
+      $sql = " AND cc.id_categoria = {$_GET['idEmpresa']}";
+    }
+
+    $gastos = $this->db->query(
+      "SELECT c.id_compra, DATE(c.fecha) as fecha, (c.serie || c.folio) AS folio, c.total,
+        p.id_proveedor, p.nombre_fiscal as proveedor,
+        cc.abreviatura AS empresa, cc.id_categoria AS id_empresa, a.nombre AS area, a.id_area,
+        ac.nombre AS activo, ac.id_producto AS id_activo,
+        string_agg(ccc.nombre, '|') AS centros_costos, string_agg(ccc.id_centro_costo::text, '|') AS centros_costos_id,
+        string_agg(ra.nombre, '|') AS ranchos, string_agg(ra.id_rancho::text, '|') AS ranchos_id
+      FROM compras c
+        INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+        LEFT JOIN (
+          SELECT id_categoria, id_empresa, abreviatura
+          FROM cajachica_categorias
+          WHERE status = 't' AND id_empresa IS NOT NULL
+             ) cc ON cc.id_empresa = c.id_empresa
+             INNER JOIN areas a ON a.id_area = c.id_area
+             INNER JOIN (
+          SELECT cc.id_centro_costo, cc.nombre, ccc.id_compra, ccc.num
+          FROM otros.centro_costo cc
+            INNER JOIN compras_centro_costo ccc ON cc.id_centro_costo = ccc.id_centro_costo
+          ORDER BY cc.id_centro_costo ASC
+             ) ccc ON ccc.id_compra = c.id_compra
+             INNER JOIN (
+          SELECT r.id_rancho, r.nombre, cr.id_compra, cr.num
+          FROM otros.ranchos r
+            INNER JOIN compras_rancho cr ON r.id_rancho = cr.id_rancho
+          ORDER BY r.id_rancho ASC
+             ) ra ON ra.id_compra = c.id_compra
+             LEFT JOIN productos ac ON ac.id_producto = c.id_activo
+      WHERE c.isgasto = 't' {$sql} AND c.status = 'p' AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
+      GROUP BY c.id_compra, p.id_proveedor, cc.abreviatura, cc.id_categoria, a.id_area, ac.id_producto
+      ORDER BY (c.fecha, c.serie, c.folio) DESC"
+    );
+
+    $response = $gastos->result();
+
+    return $response;
+  }
+
   public function getMovimientos()
   {
     $this->load->model('empresas_model');

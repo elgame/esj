@@ -1,3 +1,8 @@
 ul.ui-autocomplete {
   z-index: 1051 !important;
 }
+
+.modal-w70 {
+  width: 70%;
+  left: 30%;
+}

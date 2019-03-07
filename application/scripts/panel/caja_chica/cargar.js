@@ -567,6 +567,7 @@
     $('#table-gastos-comprobar').on('click', '.btn-show-comp-gasto', function(event) {
       $trGasto = $(this).parents('tr');
       $('#modalCompGastos').modal('show');
+      $('#compGasto_id_empresa').val($trGasto.find('.gasto-cargo-id').val());
       $('#compGasto_id_gasto').val($trGasto.find('#gasto_id_gasto').val());
       $('#compGasto_importe').text($trGasto.find('.gasto-importe').val());
       $('#compGastoMonto').val($trGasto.find('.gasto-importe').val());
@@ -1141,6 +1142,194 @@
         $("#lista_remisiones_modal").filterTable();
       });
     });
+  };
+
+});
+
+
+
+
+// Modal de comprobar gastos
+(function (closure) {
+  closure(jQuery, window);
+})(function ($, window) {
+  $(function () {
+
+    submitForm();
+    btnAddRemisiones();
+    btnDelRemisiones();
+
+    modalBuscarGastosDirectos();
+  });
+
+  var submitForm = function () {
+    // $('#frmcajachica').submit(function(event) {
+    //   if ($('#btnGuardar').length == 0) {
+    //     event.preventDefault();
+    //   }
+    // });
+  }
+
+  var btnAddRemisiones = function () {
+    $('#compGastoFrmAddRem').on('click', function(event) {
+      var datos = {
+        folio: $('#compGastoFrmFolio').val(),
+        total: $('#compGastoFrmMonto').val(),
+        proveedor: $('#compGastoFrmProveedor').val(),
+      };
+
+      var trhtml =
+      '<tr>'+
+        '<td>'+$('#compGastoFrmProveedor').val()+
+          '<input type="hidden" class="compGastoProveedor" value="'+$('#compGastoFrmProveedor').val()+'">'+
+          '<input type="hidden" class="compGastoAll" value="'+encodeURIComponent(JSON.stringify(datos))+'">'+
+        '</td>'+
+        '<td>'+$('#compGastoFrmFolio').val()+
+          '<input type="hidden" class="compGastoFolio" value="'+$('#compGastoFrmFolio').val()+'">'+
+        '</td>'+
+        '<td>'+$('#compGastoFrmMonto').val()+
+          '<input type="hidden" class="compGastoMonto" value="'+$('#compGastoFrmMonto').val()+'">'+
+        '</td>'+
+        '<td><button type="button" class="btn compGastoFrmRemRem"><i class="icon-remove"></i></button></td>'+
+      '</tr>';
+      $('#tableComGastoRemisiones tbody').append(trhtml);
+      calculaTotalRemisiones();
+    });
+  };
+
+  var btnDelRemisiones = function () {
+    $('#tableComGastoRemisiones').on('click', '.compGastoFrmRemRem', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.remove();
+
+      calculaTotalRemisiones();
+    });
+  };
+
+  var modalBuscarGastosDirectos = function () {
+    // btn buscar
+    $('#btnBuscarGastosDirectos').on('click', function(event) {
+      $('#modal-gastosdirectos').modal('show');
+    });
+
+    // Al abrir el modal carga los gastos
+    $('#modal-gastosdirectos').on('show', function () {
+      var params = {idEmpresa: $('#compGasto_id_empresa').val()};
+      $.getJSON(base_url+'panel/caja_chica/ajax_get_gastosdirectos', params, function(json, textStatus) {
+        var html = '';
+        for (var key in json) {
+          html += '<tr>'+
+              '<td><input type="checkbox" class="chk-gastos" data-id="'+json[key].id_compra+'" '+
+                'data-folio="'+json[key].folio+'" data-total="'+json[key].total+'" '+
+                'data-proveedor="'+json[key].proveedor+'" '+
+                'data-idproveedor="'+json[key].id_proveedor+'" '+
+                'data-idempresa="'+json[key].id_empresa+'" data-empresa="'+json[key].empresa+'" '+
+                'data-fecha="'+json[key].fecha+'" '+
+                'data-area="'+json[key].area+'" '+
+                'data-id_area="'+json[key].id_area+'" '+
+                'data-activo="'+json[key].activo+'" '+
+                'data-id_activo="'+json[key].id_activo+'" '+
+                'data-centros_costos="'+json[key].centros_costos+'" '+
+                'data-centros_costos_id="'+json[key].centros_costos_id+'" '+
+                'data-ranchos="'+json[key].ranchos+'" '+
+                'data-ranchos_id="'+json[key].ranchos_id+'" /></td>'+
+              '<td style="width: 66px;">'+json[key].fecha+'</td>'+
+              '<td>'+json[key].folio+'</td>'+
+              '<td>'+json[key].proveedor+'</td>'+
+              '<td>'+json[key].empresa+'</td>'+
+              '<td style="text-align: right;">'+json[key].total+'</td>'+
+            '</tr>';
+        }
+
+        $('#modal-gastosdirectos #lista_gastosdirectos_modal tbody').html(html);
+        $("#lista_gastosdirectos_modal").filterTable();
+      });
+    });
+
+    // Cargar los gastos marcados a la comprobación
+    $('#carga-gastosdirectos').on('click', function(event) {
+      var $table = $('#tableComGastoGastos tbody'),
+          html = '',
+          $this;
+
+      if ($('.chk-gastos:checked').length > 0) {
+        $('.chk-gastos:checked').each(function(index, el) {
+          $this = $(this);
+
+          var datos = {
+            id: $this.attr('data-id'),
+            folio: $this.attr('data-folio'),
+            total: $this.attr('data-total'),
+            proveedor: $this.attr('data-proveedor'),
+            idproveedor: $this.attr('data-idproveedor'),
+            idempresa: $this.attr('data-idempresa'),
+            empresa: $this.attr('data-empresa'),
+            fecha: $this.attr('data-fecha'),
+            area: $this.attr('data-area'),
+            id_area: $this.attr('data-id_area'),
+            activo: $this.attr('data-activo'),
+            id_activo: $this.attr('data-id_activo'),
+            centros_costos: $this.attr('data-centros_costos'),
+            centros_costos_id: $this.attr('data-centros_costos_id'),
+            ranchos: $this.attr('data-ranchos'),
+            ranchos_id: $this.attr('data-ranchos_id'),
+          };
+
+          html +=
+          '<tr>'+
+            '<td>'+datos.proveedor+
+              '<input type="hidden" class="compGastoGProveedor" value="'+datos.proveedor+'">'+
+              '<input type="hidden" class="compGastoGProveedorId" value="'+datos.idproveedor+'">'+
+              '<input type="hidden" class="compGastoGAll" value="'+encodeURIComponent(JSON.stringify(datos))+'">'+
+            '</td>'+
+            '<td>'+datos.folio+
+              '<input type="hidden" class="compGastoGFolio" value="'+datos.folio+'">'+
+            '</td>'+
+            '<td>'+datos.total+
+              '<input type="hidden" class="compGastoGMonto" value="'+datos.total+'">'+
+            '</td>'+
+            '<td><button type="button" class="btn compGastoGFrmRemRem"><i class="icon-remove"></i></button></td>'+
+          '</tr>';
+        });
+
+        $(html).appendTo($table);
+        calculaTotalGastos();
+
+        $('#modal-gastosdirectos').modal('hide');
+      } else {
+        noty({"text": 'Seleccione al menos un gasto.', "layout":"topRight", "type": 'error'});
+      }
+    });
+
+    // Eliminar un gasto directo
+    $('#tableComGastoGastos').on('click', '.compGastoGFrmRemRem', function(event) {
+      $(this).parents('tr').remove();
+      calculaTotalGastos();
+    });
+  };
+
+  var calculaTotalRemisiones = function () {
+    var total = 0;
+    $('#tableComGastoRemisiones .compGastoMonto').each(function(index, el) {
+      total += (parseFloat($(this).val())||0);
+    });
+    $('#compGastoTotalRemision').text(total);
+    calculaTotalComprobacion();
+  };
+
+  var calculaTotalGastos = function () {
+    var total = 0;
+    $('#tableComGastoGastos .compGastoGMonto').each(function(index, el) {
+      total += (parseFloat($(this).val())||0);
+    });
+    $('#compGastoTotalGastos').text(total);
+    calculaTotalComprobacion();
+  };
+
+  var calculaTotalComprobacion = function () {
+    var total = (parseFloat($('#compGastoTotalRemision').text())||0) +
+      (parseFloat($('#compGastoTotalGastos').text())||0);
+    $('#compGastoMonto').val(total);
   };
 
 });

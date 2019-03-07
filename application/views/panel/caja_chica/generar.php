@@ -1420,7 +1420,7 @@
   </div>
 
   <!-- Modal -->
-  <div id="modalCompGastos" class="modal modal-w40 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalCatalogosLavel" aria-hidden="true">
+  <div id="modalCompGastos" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalCatalogosLavel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h3 id="modalCatalogosLavel">Comprobar gasto</h3>
@@ -1428,13 +1428,77 @@
     <div class="modal-body">
 
       <div class="row-fluid">
-        <div class="">
+        <div style="text-align: right;">
           <input type="hidden" id="compGasto_id_gasto" value="">
-          <div class="control-group">
-            <label class="control-label" for="compGastoMonto">Monto</label>
-            <div class="controls" id="compGasto_importe"></div>
-          </div>
+          <input type="hidden" id="compGasto_id_empresa" value=""> <!-- id_empresa = id_categoria -->
+          <label style="display: inline;font-size: 17px;font-weight: 500;">Monto a comprobar: </label>
+          <span id="compGasto_importe" style="display: inline;font-size: 17px;font-weight: 500;"></span>
         </div>
+
+        <fieldset>
+          <legend>Remisiones</legend>
+          <div class="control-group span3" style="margin-top: 0px;">
+            <label class="control-label" for="compGastoFrmProveedor">Proveedor</label>
+            <div class="controls">
+              <input type="text" name="compGastoFrmProveedor" class="span11" id="compGastoFrmProveedor" value="" size="">
+            </div>
+          </div>
+          <div class="control-group span3">
+            <label class="control-label" for="compGastoFrmFolio">Folio</label>
+            <div class="controls">
+              <input type="text" name="compGastoFrmFolio" class="span11" id="compGastoFrmFolio" value="" size="">
+            </div>
+          </div>
+          <div class="control-group span3">
+            <label class="control-label" for="compGastoFrmMonto">Folio</label>
+            <div class="controls">
+              <input type="text" name="compGastoFrmMonto" class="span11 vpositive" id="compGastoFrmMonto" value="" size="">
+            </div>
+          </div>
+          <div class="control-group span1">
+            <button type="button" class="btn" id="compGastoFrmAddRem">Agregar</button>
+          </div>
+
+          <table class="table" id="tableComGastoRemisiones">
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Folio</th>
+                <th>Monto</th>
+                <th style="width: 70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" id="compGastoTotalRemision" style="text-align: left;"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </fieldset>
+
+        <fieldset>
+          <legend>Gastos <button type="button" class="btn" id="btnBuscarGastosDirectos">Buscar</button></legend>
+
+          <table class="table" id="tableComGastoGastos">
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Folio</th>
+                <th>Monto</th>
+                <th style="width: 70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" id="compGastoTotalGastos" style="text-align: left;"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </fieldset>
 
         <div class="">
           <div class="control-group">
@@ -1450,6 +1514,35 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
       <button class="btn btn-primary" id="btnModalCompGasto">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal Buscar gastos directos -->
+  <div id="modal-gastosdirectos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Gastos directos</h3>
+    </div>
+    <div class="modal-body" style="max-height: 370px;">
+      <table id="lista_gastosdirectos_modal" class="table table-striped table-bordered table-hover table-condensed">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Fecha</th>
+            <th>Folio</th>
+            <th>Proveedor</th>
+            <th>Empresa</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="carga-gastosdirectos">Cargar</button>
     </div>
   </div>
 

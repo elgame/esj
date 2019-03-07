@@ -5,7 +5,7 @@
       REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      ALTER TABLE public.cajachica_traspasos ADD COLUMN tipo_caja character varying(30) NOT NULL DEFAULT 'otros'::character varying;
      COMMENT ON COLUMN public.cajachica_traspasos.tipo_caja IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
-     -- pct
+     -- pct|pcc
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_compra bigint;
      COMMENT ON COLUMN public.cajachica_gastos.id_compra IS 'id del gasto ligado, este tipo de gasto (de caja) no se tomaria en cuenta para los reportes';
      COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';

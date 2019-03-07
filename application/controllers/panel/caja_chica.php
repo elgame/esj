@@ -21,6 +21,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
+    'caja_chica/ajax_get_gastosdirectos/',
     'caja_chica/ajax_get_deudores/',
     'caja_chica/agregar_abono_deudor/',
     'caja_chica/ajax_registra_gasto_comp/',
@@ -718,6 +719,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     echo json_encode($this->caja_chica_model->getRemisiones());
+  }
+
+  public function ajax_get_gastosdirectos()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->getGastosDirectos());
   }
 
   public function ajax_get_deudores()
