@@ -597,11 +597,11 @@
           'gastos'      : gastos
         };
         console.log(params);
-        // $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
-        //   console.log(json, textStatus);
-        //   $('#modalCompGastos').modal('hide');
-        //   $trGasto.remove();
-        // });
+        $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+          console.log(json, textStatus);
+          $('#modalCompGastos').modal('hide');
+          $trGasto.remove();
+        });
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
       }
