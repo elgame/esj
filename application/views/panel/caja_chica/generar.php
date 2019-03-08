@@ -1472,7 +1472,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="4" id="compGastoTotalRemision" style="text-align: left;"></td>
+                <td colspan="4" id="compGastoTotalRemision" style="text-align: right;font-weight: bold;"></td>
               </tr>
             </tfoot>
           </table>
@@ -1494,7 +1494,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="4" id="compGastoTotalGastos" style="text-align: left;"></td>
+                <td colspan="4" id="compGastoTotalGastos" style="text-align: right;font-weight: bold;"></td>
               </tr>
             </tfoot>
           </table>
@@ -1502,9 +1502,9 @@
 
         <div class="">
           <div class="control-group">
-            <label class="control-label" for="compGastoMonto">Nuevo Monto</label>
+            <label class="control-label" for="compGastoMonto"><strong>Monto comprobado</strong></label>
             <div class="controls">
-              <input type="text" name="compGastoMonto" class="span11 vpositive" id="compGastoMonto" value="" size="">
+              <input type="text" name="compGastoMonto" class="vpositive" id="compGastoMonto" value="" size="" readonly>
             </div>
           </div>
         </div>

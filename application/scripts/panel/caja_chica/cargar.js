@@ -578,18 +578,30 @@
 
     $('#btnModalCompGasto').on('click', function(event) {
       if ((parseFloat($('#compGastoMonto').val())||0) > 0) {
-        var params = {
-          'id_gasto': $('#compGasto_id_gasto').val(),
-          'importe_old': $('#compGasto_importe').text(),
-          'importe': $('#compGastoMonto').val(),
-          'fno_caja': $('#fno_caja').val(),
-          'fecha_caja': $('#fecha_caja').val()
-        };
-        $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
-          console.log(json, textStatus);
-          $('#modalCompGastos').modal('hide');
-          $trGasto.remove();
+        var remisiones = [], gastos = [];
+        $('#tableComGastoRemisiones .compGastoAll').each(function(index, el) {
+          remisiones.push( JSON.parse(decodeURIComponent($(this).val())) );
         });
+        $('#tableComGastoGastos .compGastoGAll').each(function(index, el) {
+          gastos.push( JSON.parse(decodeURIComponent($(this).val())) );
+        });
+
+        var params = {
+          'id_gasto'    : $('#compGasto_id_gasto').val(),
+          'id_empresa'  : $('#compGasto_id_empresa').val(),
+          'importe_old' : $('#compGasto_importe').text(),
+          'importe'     : $('#compGastoMonto').val(),
+          'fno_caja'    : $('#fno_caja').val(),
+          'fecha_caja'  : $('#fecha_caja').val(),
+          'remisiones'  : remisiones,
+          'gastos'      : gastos
+        };
+        console.log(params);
+        // $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+        //   console.log(json, textStatus);
+        //   $('#modalCompGastos').modal('hide');
+        //   $trGasto.remove();
+        // });
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
       }
