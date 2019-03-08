@@ -158,12 +158,9 @@
 
   var agregarRemisiones = function (remision) {
     var $table = $('#table-remisiones').find('tbody .row-total'),
-        tr, add_band = true;
+        tr;
 
-    if ($('#table-remisiones').find('.remision-id[value='+remision.id+']').length > 0) {
-      add_band = confirm("Ya esta agregada la remisión "+remision.numremision+" estas seguro de agregarla de nuevo?");
-    }
-    if (add_band) {
+    if ($('#table-remisiones').find('.remision-id[value='+remision.id+']').length == 0) {
       var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '', fecha = '';
       if (remision) {
         id           = remision.id;
@@ -197,6 +194,8 @@
 
       $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
+    } else {
+      alert("Ya esta agregada la remisión "+remision.numremision+" no puedes agregarla en el mismo corte.");
     }
   };
 

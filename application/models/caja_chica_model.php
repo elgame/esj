@@ -657,6 +657,7 @@ class caja_chica_model extends CI_Model {
         ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
       $remisiones = array();
 
+      $rowKey = 0;
       foreach ($data['remision_concepto'] as $key => $concepto)
       {
         if (isset($data['remision_del'][$key]) && $data['remision_del'][$key] == 'true' &&
@@ -684,7 +685,7 @@ class caja_chica_model extends CI_Model {
             'id_remision'   => $data['remision_id'][$key],
             'fecha'         => $data['fecha_caja_chica'],
             'monto'         => $data['remision_importe'][$key],
-            'row'           => $key,
+            'row'           => $rowKey,
             'id_categoria'  => $data['remision_empresa_id'][$key],
             'fecha_rem'     => $data['remision_fecha'][$key],
             'folio_factura' => empty($data['remision_folioremision_numero'][$key]) ? null : $data['remision_numero'][$key],
@@ -692,6 +693,8 @@ class caja_chica_model extends CI_Model {
             'folio'         => $data_folio->folio,
             'id_usuario'    => $this->session->userdata('id_usuario'),
           );
+
+          $rowKey++;
         }
       }
 
@@ -1086,7 +1089,7 @@ class caja_chica_model extends CI_Model {
        FROM facturacion f
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        INNER JOIN saldos_facturas_remisiones sfr ON f.id_factura = sfr.id_factura
-       LEFT JOIN cajachica_remisiones cr ON (cr.id_remision = f.id_factura AND cr.status = 't')
+       -- LEFT JOIN cajachica_remisiones cr ON (cr.id_remision = f.id_factura AND cr.status = 't')
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
        LEFT JOIN (
         SELECT id_categoria, id_empresa, nombre
