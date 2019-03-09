@@ -736,7 +736,7 @@ class caja_chica extends MY_Controller {
   public function ajax_registra_gasto_comp()
   {
     $this->load->model('caja_chica_model');
-    echo json_encode($this->caja_chica_model->ajaxRegGastosComprobar($_GET));
+    echo json_encode($this->caja_chica_model->ajaxRegGastosComprobar($_POST));
   }
 
 

@@ -166,12 +166,9 @@
 
   var agregarRemisiones = function (remision) {
     var $table = $('#table-remisiones').find('tbody .row-total'),
-        tr, add_band = true;
+        tr;
 
-    if ($('#table-remisiones').find('.remision-id[value='+remision.id+']').length > 0) {
-      add_band = confirm("Ya esta agregada la remisión "+remision.numremision+" estas seguro de agregarla de nuevo?");
-    }
-    if (add_band) {
+    if ($('#table-remisiones').find('.remision-id[value='+remision.id+']').length == 0) {
       var numRemision = '', folio = '', id = '', abono = '0', concepto = '', idempresa = '', empresa = '', fecha = '';
       if (remision) {
         id           = remision.id;
@@ -210,6 +207,8 @@
 
       $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
+    } else {
+      alert("Ya esta agregada la remisión "+remision.numremision+" no puedes agregarla en el mismo corte.");
     }
   };
 
@@ -597,11 +596,11 @@
           'gastos'      : gastos
         };
         console.log(params);
-        $.getJSON(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+        $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
           console.log(json, textStatus);
           $('#modalCompGastos').modal('hide');
           $trGasto.remove();
-        });
+        }, 'json');
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
       }

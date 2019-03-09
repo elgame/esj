@@ -668,6 +668,7 @@ class caja_chica_model extends CI_Model {
         ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
       $remisiones = array();
 
+      $rowKey = 0;
       foreach ($data['remision_concepto'] as $key => $concepto)
       {
         if (isset($data['remision_del'][$key]) && $data['remision_del'][$key] == 'true' &&
@@ -704,6 +705,8 @@ class caja_chica_model extends CI_Model {
             'id_nomenclatura' => $data['remision_nomenclatura'][$key],
             'id_usuario'      => $this->session->userdata('id_usuario'),
           );
+
+          $rowKey++;
         }
       }
 
@@ -1125,7 +1128,7 @@ class caja_chica_model extends CI_Model {
        FROM facturacion f
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        INNER JOIN saldos_facturas_remisiones sfr ON f.id_factura = sfr.id_factura
-       LEFT JOIN cajachica_remisiones cr ON (cr.id_remision = f.id_factura AND cr.status = 't')
+       -- LEFT JOIN cajachica_remisiones cr ON (cr.id_remision = f.id_factura AND cr.status = 't')
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
        LEFT JOIN (
         SELECT id_categoria, id_empresa, nombre
@@ -1319,19 +1322,22 @@ class caja_chica_model extends CI_Model {
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
-    $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
-        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-          AND tipo = 'g'
-        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+    // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+    //     WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+    //       AND tipo = 'g'
+    //     ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
-    $data_folio->folio += 1;
+    // $data_folio->folio += 1;
     $this->db->update('cajachica_gastos', [
-      'folio_sig' => $data_folio->folio,
-      'fecha'  => $data['fecha_caja'],
-      'tipo'  => 'g',
-      'monto' => $data['importe'],
+      // 'folio_sig' => $data_folio->folio,
+      // 'fecha'  => $data['fecha_caja'],
+      // 'tipo'  => 'g',
+      // 'monto' => $data['importe'],
+      'status' => 'f',
+      'concepto' => "GASTO COMPROBADO ({$data['importe']})"
     ], "id_gasto = ".$data['id_gasto']);
 
+    // cuando es diferente fecha regresa el dinero para registrar los gastos en el dia
     if ($data['fecha_caja'] != $data_gasto->fecha) {
       $anio = date('Y');
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
@@ -1356,6 +1362,89 @@ class caja_chica_model extends CI_Model {
       );
 
       $this->db->insert('cajachica_ingresos', $ingresos);
+    }
+
+    // Agrega las remisiones (gastos del dia)
+    if (isset($data['remisiones']) && count($data['remisiones']) > 0) {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+          WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+            AND tipo = 'g'
+          ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['remisiones'] as $key => $remm) {
+        $data_folio->folio += 1;
+        $gastos = array(
+          'folio_sig'       => $data_folio->folio,
+          'id_categoria'    => $data['id_empresa'],
+          'id_nomenclatura' => $data_gasto->id_nomenclatura,
+          'folio'           => $remm['folio'],
+          'concepto'        => $remm['proveedor'],
+          'nombre'          => $data_gasto->nombre,
+          'monto'           => $remm['total'],
+          'fecha'           => $data['fecha_caja'],
+          'no_caja'         => $data['fno_caja'],
+          // 'id_area'      => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+          'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+          'reposicion'      => $data_gasto->reposicion,
+          'id_usuario'      => $this->session->userdata('id_usuario'),
+          'id_areac'        => $data_gasto->id_areac,
+          'id_rancho'       => $data_gasto->id_rancho,
+          'id_centro_costo' => $data_gasto->id_centro_costo,
+          'id_activo'       => $data_gasto->id_activo,
+        );
+        $this->db->insert('cajachica_gastos', $gastos);
+        $gastooidd = $this->db->insert_id();
+
+        // Bitacora
+        $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                      array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
+                            ':folio'     => "Concepto: {$gastos['concepto']} {$gastos['folio']} | Monto: {$gastos['monto']}",
+                            // ':id_empresa' => $datosFactura['id_empresa'],
+                            ':empresa'   => ''));
+      }
+    }
+
+    // Agrega las reposiciones de gastos (gastos directos ligados)
+    if (isset($data['gastos']) && count($data['gastos']) > 0) {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+          WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+            AND tipo = 'rg'
+          ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['gastos'] as $key => $gastoo) {
+        $centros_costos = (!empty($gastoo['centros_costos_id'])? explode('|', $gastoo['centros_costos_id']): [NULL]);
+        $ranchos = (!empty($gastoo['ranchos_id'])? explode('|', $gastoo['ranchos_id']): [NULL]);
+
+        $data_folio->folio += 1;
+        $gastos = array(
+          'folio_sig'       => $data_folio->folio,
+          'id_categoria'    => $gastoo['idempresa'],
+          'id_nomenclatura' => $data_gasto->id_nomenclatura,
+          'folio'           => $gastoo['folio'],
+          'concepto'        => $gastoo['proveedor'],
+          'nombre'          => $data_gasto->nombre,
+          'monto'           => $gastoo['total'],
+          'fecha'           => $data['fecha_caja'],
+          'no_caja'         => $data['fno_caja'],
+          'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+          'reposicion'      => $data_gasto->reposicion,
+          'id_usuario'      => $this->session->userdata('id_usuario'),
+          'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
+          'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
+          'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
+          'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
+          'tipo'            => 'rg',
+        );
+        $this->db->insert('cajachica_gastos', $gastos);
+        $gastooidd = $this->db->insert_id();
+
+        // Bitacora
+        $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                      array(':accion'    => 'la reposición de gasto', ':seccion' => 'caja chica',
+                            ':folio'     => "Concepto: {$gastos['concepto']} {$gastos['folio']} | Monto: {$gastos['monto']}",
+                            // ':id_empresa' => $datosFactura['id_empresa'],
+                            ':empresa'   => ''));
+      }
     }
 
     return ['result' => true];
