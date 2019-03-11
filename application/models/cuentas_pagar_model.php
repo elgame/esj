@@ -1090,26 +1090,33 @@ class cuentas_pagar_model extends privilegios_model{
 
 	public function addAbono($data=null, $id=null, $masivo=false)
 	{
-		$id = $id==null? $this->input->get('id') : $id; //id factura o nota de venta
+    $id = $id==null? $this->input->get('id') : $id; //id factura o nota de venta
+		$tipo = (isset($data['tipo']) && $data['tipo'] == 'f')? $data['tipo'] : $this->input->get('tipo');
 
-		if ($this->input->get('tipo') == 'f') {
+		if ($tipo == 'f') {
 			$camps = array('id_compra', 'compras_abonos', 'compras');
+
+      if ((isset($data['tipo']) && $data['tipo'] == 'f')) {
+        unset($data['tipo']);
+      }
 		}else{
 			// $camps = array('id_venta', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision');
 		}
 
 		if ($data == null) {
-			$data = array('fecha'  => $this->input->post('dfecha'),
-						'concepto'       => $this->input->post('dconcepto'),
-						'total'          => $this->input->post('dmonto'),
-            'total_bc'       => $this->input->post('dmonto'),
-						'id_cuenta'      => $this->input->post('dcuenta'),
-						'ref_movimiento' => $this->input->post('dreferencia'),
-						'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL) );
+			$data = array(
+            'fecha'               => $this->input->post('dfecha'),
+            'concepto'            => $this->input->post('dconcepto'),
+            'total'               => $this->input->post('dmonto'),
+            'total_bc'            => $this->input->post('dmonto'),
+            'id_cuenta'           => $this->input->post('dcuenta'),
+            'ref_movimiento'      => $this->input->post('dreferencia'),
+            'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL)
+          );
 		}
 
 		$pagada = false;
-		$inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id);
+		$inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id, $tipo);
 		if ($inf_factura['saldo'] <= $data['total']){ //se ajusta
 			$data['total'] -= $data['total']-$inf_factura['saldo'];
 			$pagada = true;

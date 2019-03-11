@@ -17,6 +17,7 @@ class caja_chica_model extends CI_Model {
       'denominaciones'        => array(),
       'gastos'                => array(),
       'gastos_comprobar'      => array(),
+      'reposicion_gastos'     => array(),
       'traspasos'             => array(),
       'deudores'              => array(),
       'acreedores'            => array(),
@@ -332,6 +333,11 @@ class caja_chica_model extends CI_Model {
     // gastos
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'g'": " AND cg.tipo = 'g'"));
 
+    // reposición de gastos
+    if ($noCaja == '2') {
+      $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'rg'": " AND cg.tipo = 'rg'"));
+    }
+
     // Traspasos
     if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4') {
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
@@ -408,6 +414,8 @@ class caja_chica_model extends CI_Model {
   public function getCajaGastos($fecha, $noCaja, $sql = '')
   {
     if (is_array($fecha) && $fecha[0] === 'gc') {
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+    } elseif (is_array($fecha) && $fecha[0] === 'rg') {
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
     } else
       $sql .= " AND cg.fecha = '{$fecha}'";
@@ -929,6 +937,68 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Reposición de gastos
+    // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    if (isset($data['reposicionGasto_concepto']))
+    {
+      $this->load->model('cuentas_pagar_model');
+
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'rg'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['reposicionGasto_concepto'] as $key => $gasto)
+      {
+        if (isset($data['reposicionGasto_del'][$key]) && $data['reposicionGasto_del'][$key] == 'true' &&
+          isset($data['reposicionGasto_id_gasto'][$key]) && floatval($data['reposicionGasto_id_gasto'][$key]) > 0) {
+          $data_gastoo = $this->getDataGasto($data['reposicionGasto_id_gasto'][$key]);
+
+          if (intval($data_gastoo->id_compra) > 0) {
+            $info_abano = $this->db->query("SELECT * FROM compras_abonos WHERE id_compra = {$data_gastoo->id_compra} AND concepto LIKE '%Pago generado de caja chica%'")->row();
+            if (isset($info_abano->id_abono)) {
+              $this->cuentas_pagar_model->removeAbono($data_gastoo->id_compra, 'compra', $info_abano->id_abono);
+            }
+          }
+
+          // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
+        } elseif (isset($data['reposicionGasto_id_gasto'][$key]) && floatval($data['reposicionGasto_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            'id_categoria'    => $data['reposicionGasto_empresa_id'][$key],
+            'id_nomenclatura' => $data['reposicionGasto_nomenclatura'][$key],
+            // 'folio'           => $data['gasto_comprobar_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['reposicionGasto_nombre'][$key],
+            'monto'           => $data['reposicionGasto_importe'][$key],
+            // 'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            $data['reposicionGasto_codigoCampo'][$key] => (isset($data['reposicionGasto_codigoAreaId'][$key]{0})? $data['reposicionGasto_codigoAreaId'][$key]: NULL),
+            'reposicion'      => ($data['reposicionGasto_reposicion'][$key]=='t'? 't': 'f'),
+            'id_areac'        => (!empty($data['reposicionGasto_areaId'][$key])? $data['reposicionGasto_areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['reposicionGasto_ranchoId'][$key])? $data['reposicionGasto_ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['reposicionGasto_centroCostoId'][$key])? $data['reposicionGasto_centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['reposicionGasto_activoId'][$key])? $data['reposicionGasto_activoId'][$key]: NULL),
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['reposicionGasto_id_gasto'][$key], $gastos_udt,
+                          array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_gasto',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
+        }
+      }
+    }
+
     // Traspasos
     if (isset($data['traspaso_concepto']))
     {
@@ -1334,6 +1404,7 @@ class caja_chica_model extends CI_Model {
       // 'tipo'  => 'g',
       // 'monto' => $data['importe'],
       'status' => 'f',
+      'fecha_cancelado' => $data['fecha_caja'],
       'concepto' => "GASTO COMPROBADO ({$data['importe']})"
     ], "id_gasto = ".$data['id_gasto']);
 
@@ -1411,6 +1482,7 @@ class caja_chica_model extends CI_Model {
             AND tipo = 'rg'
           ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
+      $this->load->model('cuentas_pagar_model');
       foreach ($data['gastos'] as $key => $gastoo) {
         $centros_costos = (!empty($gastoo['centros_costos_id'])? explode('|', $gastoo['centros_costos_id']): [NULL]);
         $ranchos = (!empty($gastoo['ranchos_id'])? explode('|', $gastoo['ranchos_id']): [NULL]);
@@ -1429,6 +1501,7 @@ class caja_chica_model extends CI_Model {
           'id_cat_codigos'  => $data_gasto->id_cat_codigos,
           'reposicion'      => $data_gasto->reposicion,
           'id_usuario'      => $this->session->userdata('id_usuario'),
+          'id_compra'       => $gastoo['id'],
           'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
           'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
           'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
@@ -1444,6 +1517,19 @@ class caja_chica_model extends CI_Model {
                             ':folio'     => "Concepto: {$gastos['concepto']} {$gastos['folio']} | Monto: {$gastos['monto']}",
                             // ':id_empresa' => $datosFactura['id_empresa'],
                             ':empresa'   => ''));
+
+        $datosPago = [
+          'tipo'               => 'f',
+
+          'fecha'               => $data['fecha_caja'],
+          'concepto'            => 'Pago generado de caja chica #'.$data['fno_caja'],
+          'total'               => $gastoo['total'],
+          'total_bc'            => $gastoo['total'],
+          'id_cuenta'           => 16, // id de la cuenta caja chica
+          'ref_movimiento'      => 'Caja',
+          'id_cuenta_proveedor' => NULL
+        ];
+        $this->cuentas_pagar_model->addAbono($datosPago, $gastoo['id']);
       }
     }
 
@@ -2645,7 +2731,7 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
-          cg.tipo
+          cg.tipo, cg.id_compra
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura

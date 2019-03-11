@@ -359,6 +359,7 @@
     $('#total-efectivo-den').text(util.darFormatoNum(total.toFixed(2)));
 
     var totalCorte = parseFloat($('#ttotal-corte').val());
+    console.log(total, totalCorte);
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum((parseFloat(total) - totalCorte).toFixed(2)));
   };
@@ -464,7 +465,7 @@
   };
 
   var btnDelGasto = function () {
-    $('#table-gastos, #table-gastos-comprobar').on('click', '.btn-del-gasto', function(event) {
+    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos').on('click', '.btn-del-gasto', function(event) {
       var $tr = $(this).parents('tr'),
           id = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
@@ -488,6 +489,7 @@
 
       calculaTotalGastos();
       calculaTotalGastosComprobar();
+      calculaTotalReposicionGastos();
       calculaCorte();
     });
 
@@ -558,6 +560,7 @@
 
     $('#table-gastos').on('click', '.btn-show-cat', setDataGastos);
     $('#table-gastos-comprobar').on('click', '.btn-show-cat', setDataGastos);
+    $('#table-reposicionGastos').on('click', '.btn-show-cat', setDataGastos);
   };
 
   var btnShowCompGasto = function () {
@@ -595,11 +598,13 @@
           'remisiones'  : remisiones,
           'gastos'      : gastos
         };
-        console.log(params);
+
         $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
-          console.log(json, textStatus);
           $('#modalCompGastos').modal('hide');
           $trGasto.remove();
+
+          var iframe = parent.document.getElementById('iframe-reporte');
+          iframe.src = iframe.src;
         }, 'json');
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
@@ -868,11 +873,22 @@
     $('input#ttotal-gastos-comprobar').val(total.toFixed(2));
   };
 
+  var calculaTotalReposicionGastos = function () {
+    var total = 0;
+    $('#table-reposicionGastos .reposiciong-importe').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+    $('input#ttotal-reposicionGastos').val(total.toFixed(2));
+  };
+
   var calculaCorte = function () {
     var total = 0;
 
     total = parseFloat($('#total-saldo-ingresos').val() || 0) + parseFloat($('#ttotal-acreedores').val() || 0) -
-      parseFloat($('#total-boletas').val() || 0) - (parseFloat($('#ttotal-gastos').val() || 0)) - (parseFloat($('#ttotal-deudores').val())||0);
+      parseFloat($('#total-boletas').val() || 0) - (parseFloat($('#ttotal-gastos').val()) || 0) -
+      (parseFloat($('#ttotal-gastos-comprobar-dia').val()) || 0) -
+      (parseFloat($('#ttotal-reposicionGastos').val()) || 0) -
+      (parseFloat($('#ttotal-deudores').val())||0);
     $('#ttotal-corte').val(total.toFixed(2));
   };
 
