@@ -866,6 +866,7 @@
               <?php if ($_GET['fno_caja'] == '2'):
 
                 $totalReposicionGastos = 0;
+                $totalReposicionGastosAnt = 0;
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -952,7 +953,11 @@
                                         </tr>
                                 <?php }} else {
                                   foreach ($caja['reposicion_gastos'] as $reposiciong) {
-                                    $totalReposicionGastos += floatval($reposiciong->monto);
+                                    if ($reposiciong->fecha == $fecha) {
+                                      $totalReposicionGastos += floatval($reposiciong->monto);
+                                    } else {
+                                      $totalReposicionGastosAnt += floatval($reposiciong->monto);
+                                    }
                                   ?>
                                   <tr>
                                     <td style="">
@@ -1006,7 +1011,9 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastosAnt ?>" class="vpositive" id="ttotal-reposicionGastosAnt" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastos ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>

@@ -2034,10 +2034,6 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->Row(array('', '', '', '', 'TOTAL', MyString::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
 
-    // if ($comprasY >= $pdf->GetY())
-    // {
-    //   $pdf->SetY($comprasY);
-    // }
 
     // Traspasos
     $pdf->SetFont('Arial','B', 7);
@@ -2082,8 +2078,74 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(180, 25));
     $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
 
-    // Boletas
 
+    // Acreedores
+    $totalAcreedores = $totalAcreedoresHoy = 0;
+    if ($noCajas == 1 || $noCajas == 2 || $noCajas == 4) {
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')), ''), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
+      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
+
+      $codigoAreas = array();
+      foreach ($caja['acreedores'] as $key => $acreedor)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
+          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+        }
+
+        $totalAcreedores += floatval($acreedor->saldo);
+
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $acreedor->fecha,
+          $acreedor->nombre,
+          $acreedor->concepto,
+          MyString::formatoNumero($acreedor->monto, 2, '$', false),
+          MyString::formatoNumero($acreedor->abonos, 2, '$', false),
+          MyString::formatoNumero($acreedor->saldo, 2, '$', false)
+        ), false, true);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetFont('Arial', 'B', 6.4);
+      $pdf->SetX(6);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetWidths(array(43, 43, 43));
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false),
+        'ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
+        'TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false)), true, true);
+    }
+
+
+    // Boletas
     // $caja['boletas'] = array_merge($caja['boletas'], $caja['boletas']);
 
     // $pdf->SetFont('Arial','', 7);
@@ -2142,9 +2204,10 @@ class caja_chica_model extends CI_Model {
       ), false, true);
     }
 
+
+    // Gastos x comprobar
     $totalGastosComprobarTot = $totalGastosComprobar = 0;
     if ($noCajas == 2) {
-      // Gastos del Dia
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2221,6 +2284,7 @@ class caja_chica_model extends CI_Model {
         'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), true, true);
     }
 
+
     // Gastos del Dia
     // $pag_aux2 = $pdf->page;
     // $pdf->page = $pag_aux;
@@ -2293,8 +2357,89 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
     $pdf->Row(array('', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
+
+    // Reposición de gastos
+    $totalReposicionGastosAnt = $totalReposicionGastos = 0;
+    if ($noCajas == 2) {
+      // $pag_aux2 = $pdf->page;
+      // $pdf->page = $pag_aux;
+      // $pdf->SetY($pag_yaux);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('REPOSICION DE GASTOS', 'IMPORTE'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+      $pdf->Row(array('FOLIO', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+
+      $codigoAreas = array();
+      foreach ($caja['reposicion_gastos'] as $key => $gasto)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(15, 25, 10, 27, 27, 40, 36, 25));
+          $pdf->Row(array('FECHA', 'EMPRESA', 'NOM', 'COD', 'C COSTO', 'CONCEPTO', 'NOMBRE', 'CARGO'), true, true);
+        }
+
+        $colortxt = [[100, 100, 100]];
+        if ($gasto->status == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalReposicionGastos += floatval($gasto->monto);
+          }
+
+          $totalReposicionGastosAnt += floatval($gasto->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+
+        $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $gasto->fecha,
+          $gasto->empresa,
+          $gasto->nomenclatura,
+          $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
+          $gasto->centro_costo,
+          ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
+          $gasto->nombre,
+          MyString::float(MyString::formatoNumero(
+            ($gasto->status == 't'? $gasto->monto: 0),
+            2, '', false))
+        ), false, true, $colortxt);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
+      $pdf->Row(array('', '', '', '', 'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false),
+        'TOTAL DIA', MyString::formatoNumero($totalReposicionGastos, 2, '$', false)), true, true);
+    }
+
+
+    // Deudores
     if ($noCajas == 2 || $noCajas == 1 || $noCajas == 4) {
-      // Deudores
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2359,71 +2504,6 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
-    }
-
-    $totalAcreedores = $totalAcreedoresHoy = 0;
-    if ($noCajas == 1 || $noCajas == 2 || $noCajas == 4) {
-      // Acreedores
-      $pdf->SetFillColor(230, 230, 230);
-      $pdf->SetXY(6, $pdf->GetY()+3);
-      $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(180, 25));
-      $pdf->Row(array('ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')), ''), true, true);
-
-      $pdf->SetFont('Arial','', 6);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
-      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
-
-      $pdf->SetFont('Arial','', 6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
-
-      $codigoAreas = array();
-      foreach ($caja['acreedores'] as $key => $acreedor)
-      {
-        if ($pdf->GetY() >= $pdf->limiteY)
-        {
-          if (count($pdf->pages) > $pdf->page) {
-            $pdf->page++;
-            $pdf->SetXY(6, 10);
-          } else
-            $pdf->AddPage();
-          // // nomenclatura
-          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
-          $pdf->SetFont('Helvetica','B', 7);
-          $pdf->SetXY(6, $pdf->GetY());
-          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-          $pdf->SetWidths(array(15, 55, 60, 25, 25, 25));
-          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
-        }
-
-        $totalAcreedores += floatval($acreedor->saldo);
-
-        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
-        $pdf->SetX(6);
-        $pdf->Row(array(
-          $acreedor->fecha,
-          $acreedor->nombre,
-          $acreedor->concepto,
-          MyString::formatoNumero($acreedor->monto, 2, '$', false),
-          MyString::formatoNumero($acreedor->abonos, 2, '$', false),
-          MyString::formatoNumero($acreedor->saldo, 2, '$', false)
-        ), false, true);
-
-        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
-        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
-      }
-
-      $pdf->SetFont('Arial', 'B', 6.4);
-      $pdf->SetX(6);
-      $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(43, 43, 43));
-      $pdf->SetAligns(array('L', 'L', 'L'));
-      $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false),
-        'ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
-        'TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false)), true, true);
     }
 
     // Boletas pendientes x recuperar
@@ -2611,7 +2691,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(210, 210, 210);
-    $pdf->SetXY(111, $pdf->GetY() + 5);
+    $pdf->SetXY(90, $pdf->GetY() + 5);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(56));
     $pdf->Row(array('TABULACION DE EFECTIVO'), true, true);
@@ -2620,7 +2700,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(255, 255, 255);
     // $pdf->SetXY(131, $boletasY - 5.4);
-    $pdf->SetXY(111, $pdf->GetY());
+    $pdf->SetXY(90, $pdf->GetY());
     $pdf->SetAligns(array('C', 'C', 'C'));
     $pdf->SetWidths(array(15, 16, 25));
     $pdf->Row(array('NUMERO', 'DENOMIN.', 'TOTAL'), true, true);
@@ -2636,13 +2716,13 @@ class caja_chica_model extends CI_Model {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
           $pdf->page++;
-          $pdf->SetXY(111, 10);
+          $pdf->SetXY(90, 10);
         } else
           $pdf->AddPage();
       }
 
       // $pdf->SetFont('Helvetica','', 7);
-      $pdf->SetX(111);
+      $pdf->SetX(90);
 
       $pdf->Row(array(
         $denominacion['cantidad'],
@@ -2653,13 +2733,17 @@ class caja_chica_model extends CI_Model {
     }
 
     $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetX(111);
+    $pdf->SetX(90);
     $pdf->SetAligns(array('C', 'R'));
     $pdf->SetWidths(array(31, 25));
     $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
-    $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
+    $saldoCorteCaja = $caja['saldo_inicial'] + $totalRemisiones + $totalIngresos +
+                      ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                      $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar - $totalReposicionGastos +
+                      $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']);
+    $pdf->SetX(90);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - $saldoCorteCaja , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -2668,28 +2752,31 @@ class caja_chica_model extends CI_Model {
     $pdf->SetY($y_aux);
 
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(168, $pdf->GetY() );
+    $pdf->SetXY(148, $pdf->GetY() );
     $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetWidths(array(25, 19));
+    $pdf->SetWidths(array(40, 21));
     $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
-
-    $pdf->SetX(168);
-    $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
-    $pdf->SetX(168);
+    $pdf->SetX(148);
+    $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('TOTAL INGRESOS REM', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, false);
+    $pdf->SetX(148);
     $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']), 2, '$', false)), false, false);
-    $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) - $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar + $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
-    $pdf->SetX(168);
+    $pdf->SetX(148);
+    $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('TOTAL REPOSICION GASTOS', MyString::formatoNumero($totalReposicionGastos, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
+    $pdf->SetX(148);
+    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($saldoCorteCaja, 2, '$', false)), false, false);
+    $pdf->SetX(148);
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
     // $page_aux = $pdf->page;
