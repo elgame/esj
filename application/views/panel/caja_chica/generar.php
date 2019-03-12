@@ -488,8 +488,8 @@
                                         <!-- <th>FOLIO</th> -->
                                         <th>FACTURADOR</th>
                                         <th>SUPERVISOR</th>
-                                        <th>PAGADO</th>
-                                        <th>PENDIENTE</th>
+                                        <th>CREDITO</th>
+                                        <th>EFECTIVO</th>
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -508,16 +508,16 @@
                                           <!-- <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td> -->
                                           <td><?php echo $boleta->proveedor ?></td>
                                           <td><?php echo $boleta->productor ?></td>
-                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($boleta->importe_pagada, 2, '$') ?></td>
                                           <td style="text-align: right;"><?php echo MyString::formatoNumero($boleta->importe_pendiente, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($boleta->importe_pagada, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>
                                     </tbody>
                                     <tbody>
                                       <tr>
                                         <td colspan="4"><input type="hidden" value="<?php echo $totalBoletasPagadas ?>" id="total-boletas"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalBoletasPagadas, 2, '$') ?></td>
                                         <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalBoletasPendientes, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalBoletasPagadas, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -863,10 +863,10 @@
               <!-- /Gastos -->
 
               <!-- Reposición de gastos -->
-              <?php if ($_GET['fno_caja'] == '2'):
-
-                $totalReposicionGastos = 0;
-                $totalReposicionGastosAnt = 0;
+              <?php
+              $totalReposicionGastos = 0;
+              $totalReposicionGastosAnt = 0;
+              if ($_GET['fno_caja'] == '2'):
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
