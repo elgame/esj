@@ -608,7 +608,7 @@ class finiquito
     if (floatval($this->empleado->horas_extras_dinero) !== 0)
     {
       // $horasExtras = floatval($this->empleado->horas_extras_dinero) / $sueldoPorHora;
-      $topeExcento = 5 * $this->salariosZonasConfig->zona_b;
+      $topeExcento = 5 * $this->salariosZonasConfig->zona_a;
       $gravado = $excento = $this->empleado->horas_extras_dinero / 2;
 
       if ($excento > $topeExcento)
@@ -636,7 +636,7 @@ class finiquito
    */
   public function pAguinaldo()
   {
-    $topeExcento = 30 * floatval($this->salariosZonasConfig->zona_b);
+    $topeExcento = 30 * floatval($this->salariosZonasConfig->zona_a);
 
     // Si los que se le dara de aguinaldo al empleado excede el tope excento.
     if ($this->empleado->nomina->aguinaldo > $topeExcento)
@@ -686,7 +686,7 @@ class finiquito
    */
   public function pPrimaVacacional()
   {
-    $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_b);
+    $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_a);
 
     // Si los que se le dara de aguinaldo al empleado excede el tope excento.
     if ($this->empleado->nomina->prima_vacacional > $topeExcento)
@@ -768,7 +768,7 @@ class finiquito
       $ptuTrabajador = $percepciones + $dias;
 
       // 15 * 61.38 = 920.7
-      $topeExcento = 15 * $this->salariosZonasConfig->zona_b;
+      $topeExcento = 15 * $this->salariosZonasConfig->zona_a;
 
       if ($ptuTrabajador > $topeExcento)
       {
