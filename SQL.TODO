@@ -1,4 +1,66 @@
 
+ ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc
+     ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;
+     ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
+      REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+     ALTER TABLE public.cajachica_traspasos ADD COLUMN tipo_caja character varying(30) NOT NULL DEFAULT 'otros'::character varying;
+     COMMENT ON COLUMN public.cajachica_traspasos.tipo_caja IS 'otros: cualquier otro deudor, caja_limon: caja de rosy';
+     -- pct|pcc
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_compra bigint;
+     COMMENT ON COLUMN public.cajachica_gastos.id_compra IS 'id del gasto ligado, este tipo de gasto (de caja) no se tomaria en cuenta para los reportes';
+     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+
+ ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=0.01, lim_superior=19.03, cuota_fija=0.0, porcentaje=1.92 WHERE id_art_113=1;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=19.04, lim_superior=161.52, cuota_fija=0.37, porcentaje=6.4 WHERE id_art_113=2;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=161.53, lim_superior=283.86, cuota_fija=9.48, porcentaje=10.88 WHERE id_art_113=3;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=283.87, lim_superior=329.97, cuota_fija=22.79, porcentaje=16 WHERE id_art_113=4;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=329.98, lim_superior=395.06, cuota_fija=30.17, porcentaje=17.92 WHERE id_art_113=5;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=395.07, lim_superior=796.79, cuota_fija=41.84, porcentaje=21.36 WHERE id_art_113=6;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=796.8, lim_superior=1255.85, cuota_fija=127.65, porcentaje=23.52 WHERE id_art_113=7;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=1255.86, lim_superior=2397.62, cuota_fija=235.62, porcentaje=30 WHERE id_art_113=8;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=2397.63, lim_superior=3196.82, cuota_fija=578.15, porcentaje=32 WHERE id_art_113=9;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=3196.83, lim_superior=9590.46, cuota_fija=833.89, porcentaje=34 WHERE id_art_113=10;
+    UPDATE public.nomina_diaria_art_113 SET lim_inferior=9590.47, lim_superior=999999.0, cuota_fija=3007.73, porcentaje=35 WHERE id_art_113=11;
+
+    UPDATE public.nomina_diaria_subsidios SET de=0.01, hasta=58.19, subsidio=13.39 WHERE id_subsidio=1;
+    UPDATE public.nomina_diaria_subsidios SET de=58.2, hasta=87.28, subsidio=13.38 WHERE id_subsidio=2;
+    UPDATE public.nomina_diaria_subsidios SET de=87.29, hasta=114.24, subsidio=13.38 WHERE id_subsidio=3;
+    UPDATE public.nomina_diaria_subsidios SET de=114.25, hasta=116.38, subsidio=12.92 WHERE id_subsidio=4;
+    UPDATE public.nomina_diaria_subsidios SET de=116.39, hasta=146.25, subsidio=12.58 WHERE id_subsidio=5;
+    UPDATE public.nomina_diaria_subsidios SET de=146.26, hasta=155.17, subsidio=11.65 WHERE id_subsidio=6;
+    UPDATE public.nomina_diaria_subsidios SET de=155.18, hasta=175.51, subsidio=10.69 WHERE id_subsidio=7;
+    UPDATE public.nomina_diaria_subsidios SET de=175.52, hasta=204.76, subsidio=9.69 WHERE id_subsidio=8;
+    UPDATE public.nomina_diaria_subsidios SET de=204.77, hasta=234.01, subsidio=8.34 WHERE id_subsidio=9;
+    UPDATE public.nomina_diaria_subsidios SET de=234.02, hasta=242.84, subsidio=7.16 WHERE id_subsidio=10;
+    UPDATE public.nomina_diaria_subsidios SET de=242.85, hasta=999999.0, subsidio=0.0 WHERE id_subsidio=11;
+
+
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=0.01, lim_superior=133.21, cuota_fija=0.0, porcentaje=1.92 WHERE id_art_113=1;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=133.22, lim_superior=1130.64, cuota_fija=2.59, porcentaje=6.4 WHERE id_art_113=2;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=1130.65, lim_superior=1987.02, cuota_fija=66.36, porcentaje=10.88 WHERE id_art_113=3;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=1987.03, lim_superior=2309.79, cuota_fija=159.53, porcentaje=16 WHERE id_art_113=4;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2309.8, lim_superior=2765.42, cuota_fija=211.19, porcentaje=17.92 WHERE id_art_113=5;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=2765.43, lim_superior=5577.53, cuota_fija=292.88, porcentaje=21.36 WHERE id_art_113=6;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=5577.54, lim_superior=8790.95, cuota_fija=893.55, porcentaje=23.52 WHERE id_art_113=7;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=8790.96, lim_superior=16783.34, cuota_fija=1649.34, porcentaje=30 WHERE id_art_113=8;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=16783.35, lim_superior=22377.74, cuota_fija=4047.05, porcentaje=32 WHERE id_art_113=9;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=22377.75, lim_superior=67133.22, cuota_fija=5837.23, porcentaje=34 WHERE id_art_113=10;
+    UPDATE public.nomina_semanal_art_113 SET lim_inferior=67133.23, lim_superior=999999.0, cuota_fija=21054.11, porcentaje=35 WHERE id_art_113=11;
+
+    UPDATE public.nomina_diaria_subsidios SET de=0.01, hasta=407.33, subsidio=93.73 WHERE id_subsidio=1;
+    UPDATE public.nomina_diaria_subsidios SET de=407.34, hasta=610.96, subsidio=93.66 WHERE id_subsidio=2;
+    UPDATE public.nomina_diaria_subsidios SET de=610.97, hasta=799.68, subsidio=93.66 WHERE id_subsidio=3;
+    UPDATE public.nomina_diaria_subsidios SET de=799.69, hasta=814.66, subsidio=90.44 WHERE id_subsidio=4;
+    UPDATE public.nomina_diaria_subsidios SET de=814.67, hasta=1023.75, subsidio=88.06 WHERE id_subsidio=5;
+    UPDATE public.nomina_diaria_subsidios SET de=1023.76, hasta=1086.19, subsidio=81.55 WHERE id_subsidio=6;
+    UPDATE public.nomina_diaria_subsidios SET de=1086.2, hasta=1228.57, subsidio=74.83 WHERE id_subsidio=7;
+    UPDATE public.nomina_diaria_subsidios SET de=1228.58, hasta=1433.32, subsidio=67.83 WHERE id_subsidio=8;
+    UPDATE public.nomina_diaria_subsidios SET de=1433.33, hasta=1638.07, subsidio=58.38 WHERE id_subsidio=9;
+    UPDATE public.nomina_diaria_subsidios SET de=1638.08, hasta=1699.88, subsidio=50.12 WHERE id_subsidio=10;
+    UPDATE public.nomina_diaria_subsidios SET de=1699.89, hasta=999999.0, subsidio=0.0 WHERE id_subsidio=11;
+
  ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct|lap|san
     CREATE TABLE public.nomina_fiscal_canceladas
       (

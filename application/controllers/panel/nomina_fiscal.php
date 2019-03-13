@@ -116,7 +116,7 @@ class nomina_fiscal extends MY_Controller {
   public function calc_anual()
   {
     // $this->load->model('nomina_fiscal_otros_model');
-    // $this->nomina_fiscal_otros_model->setSubsidioCausado();
+    // $this->nomina_fiscal_otros_model->setSubsidioCausado(2018, 2);
 
     $this->carabiner->js(array(
       array('libs/jquery.numeric.js'),
