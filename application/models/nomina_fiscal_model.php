@@ -176,6 +176,7 @@ class nomina_fiscal_model extends CI_Model {
                 COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
                 COALESCE(nf.subsidio_pagado, 0) as nomina_fiscal_subsidio_causado,
                 COALESCE(nf.isr, 0) as nomina_fiscal_isr,
+                0 AS base_semana_ord_gravada,
                 -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
                 COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
                 COALESCE(nf.total_deduccion, 0) as nomina_fiscal_total_deducciones,
@@ -266,6 +267,7 @@ class nomina_fiscal_model extends CI_Model {
                 COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
                 COALESCE(nf.subsidio_pagado, 0) as nomina_fiscal_subsidio_causado,
                 COALESCE(nf.isr, 0) as nomina_fiscal_isr,
+                COALESCE(acum_sem.base_semana_ord_gravada, 0) AS base_semana_ord_gravada,
                 -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
                 COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
                 COALESCE(nf.total_deduccion, 0) as nomina_fiscal_total_deducciones,
@@ -303,6 +305,13 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
          LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+         LEFT JOIN (
+          SELECT id_empleado,
+            (Sum(sueldo_semanal)/COALESCE(Sum(dias_trabajados), 1))+(Sum(horas_extras_grabable)/COALESCE(Sum(dias_trabajados), 1))+(Sum(pasistencia)/COALESCE(Sum(dias_trabajados), 1)) AS base_semana_ord_gravada
+          FROM nomina_fiscal
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']}
+          GROUP BY id_empleado
+         ) acum_sem ON u.id = acum_sem.id_empleado
          LEFT JOIN (
           SELECT id_empleado, Sum(hrs) AS hrs
           FROM nomina_asistencia_hrs
@@ -354,6 +363,7 @@ class nomina_fiscal_model extends CI_Model {
             0 as nomina_fiscal_aguinaldo,
             0 as nomina_fiscal_subsidio,
             0 as nomina_fiscal_isr,
+            COALESCE(acum_sem.base_semana_ord_gravada, 0) AS base_semana_ord_gravada,
             -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
             0 as nomina_fiscal_total_percepciones,
             0 as nomina_fiscal_total_deducciones,
@@ -390,12 +400,19 @@ class nomina_fiscal_model extends CI_Model {
 
             (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
         FROM nomina_fiscal nf
-            INNER JOIN usuarios u ON u.id = nf.id_empleado
-            LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
+          INNER JOIN usuarios u ON u.id = nf.id_empleado
+          LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
+          LEFT JOIN (
+            SELECT id_empleado,
+              (Sum(sueldo_semanal)/COALESCE(Sum(dias_trabajados), 1))+(Sum(horas_extras_grabable)/COALESCE(Sum(dias_trabajados), 1))+(Sum(pasistencia)/COALESCE(Sum(dias_trabajados), 1)) AS base_semana_ord_gravada
+            FROM nomina_fiscal
+            WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anioPtu}
+            GROUP BY id_empleado
+          ) acum_sem ON u.id = acum_sem.id_empleado
             -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
             (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0
-        GROUP BY u.id, up.nombre, nf.esta_asegurado
+        GROUP BY u.id, up.nombre, nf.esta_asegurado, acum_sem.base_semana_ord_gravada
         ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC";
         //{$sqle_id}
       }

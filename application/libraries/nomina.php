@@ -422,8 +422,9 @@ class nomina
       }
 
       if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1') ||
-         ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ag' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1'))
+         ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ag' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1')) {
         $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
+      }
 
       if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_vacaciones'] == '1') ) {
         $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
@@ -979,8 +980,8 @@ class nomina
 
       // Si se tomara en cuenta la percepcion aguinaldo.
       $aguinaldoGravadoDiario = 0;
-      if (isset($_POST['con_aguinaldo']) && $_POST['con_aguinaldo'] === '1' && isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'se')
-      {
+      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1') ||
+         ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ag' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1')) {
         $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 365, 4);
       }
 
@@ -1004,29 +1005,12 @@ class nomina
       }
 
 
-      // // Si es el puro aguinaldo saca la tabla de diarios
-      // $isrAguinaldo = 0;
-      // if (isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'ag') {
-      //   $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 365, 4);
-      //   $isrAuxConOtros = 0;
-      //   $isrAuxSinOtros = 0;
-      //   foreach ($this->tablasIsr['diaria']['art113'] as $rango)
-      //   {
-      //     if ($aguinaldoGravadoDiario >= floatval($rango->lim_inferior) && $aguinaldoGravadoDiario <= floatval($rango->lim_superior))
-      //     {
-      //       $isrAguinaldo = round((($aguinaldoGravadoDiario - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 4);
-      //       break;
-      //     }
-      //   }
-      //   $isrAguinaldo = round($isrAguinaldo * 365, 2);
-      // }
-
-
       // Suma todos los gravados diarios con aguinaldo, prima vacacional y ptu.
-      $sumaImporteGravadosDiariosConOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $premioAsistenciaGravadoDiario + $aguinaldoGravadoDiario + $ptuGravadoDiario + $primaVacacionalGravadoDiario;
+      // base_semana_ord_gravada = sueldo+hrse+premAsistencia
+      $sumaImporteGravadosDiariosConOtros = $this->empleado->base_semana_ord_gravada + $aguinaldoGravadoDiario + $ptuGravadoDiario + $primaVacacionalGravadoDiario;
 
       // Suma todos los gravados diarios sin aguinaldo, prima vacacional y ptu.
-      $sumaImporteGravadosDiariosSinOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $premioAsistenciaGravadoDiario;
+      $sumaImporteGravadosDiariosSinOtros = $this->empleado->base_semana_ord_gravada;
 
       // Recorre los rangos de la tabla diaria de ISR para determinar en que
       // limites se encuentra la suma de los importes gravados diarios con
@@ -1035,7 +1019,7 @@ class nomina
       // y ptu.
       $isrAuxConOtros = 0;
       $isrAuxSinOtros = 0;
-      if (isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'ptu') {
+      // if (isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'ptu') {
         foreach ($this->tablasIsr['diaria']['art113'] as $rango)
         {
           if ($sumaImporteGravadosDiariosConOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosConOtros <= floatval($rango->lim_superior))
@@ -1048,13 +1032,20 @@ class nomina
             $isrAuxSinOtros = round((($sumaImporteGravadosDiariosSinOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
           }
         }
-      }
+      // }
       $isrAguinaldoPrimaPtu = round(($isrAuxConOtros - $isrAuxSinOtros) * 365, 2);
 
 
       $isrAntesSubsidio += $isrAguinaldoPrimaPtu;
       // Obtiene el subsidio de acuerdo a a las persepciones gravadas
-      $subsidioIsr = $this->getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio);
+      $subsidioIsr = $this->getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio, $this->nominaFiltros['tipo_nomina']['tipo']);
+      if ($this->empleado->id == 1481) {
+        echo "<pre>";
+          var_dump ($isrAuxConOtros, $isrAuxSinOtros);
+          var_dump ($this->empleado->base_semana_ord_gravada, $ptuGravadoDiario, $this->empleado->nomina->percepciones['ptu']);
+          var_dump($isrAntesSubsidio, $isrAguinaldoPrimaPtu, $sumaImporteGravados, $subsidioIsr);
+        echo "</pre>";exit;
+      }
       $isrTotal              = $subsidioIsr['isr']; // isr semana
       $this->subsidio        = $subsidioIsr['subsidio'];
       $this->subsidioCausado = $subsidioIsr['subsidioCausado'];
@@ -1216,7 +1207,7 @@ class nomina
     return $dias_anio_vacaciones;
   }
 
-  public function getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio)
+  public function getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio, $tipo='se')
   {
     $isr = 0;
     $subsidio = 0.01;
@@ -1233,6 +1224,11 @@ class nomina
         }
         break;
       }
+    }
+
+    if ($tipo != 'se' && $isr == 0 && $causado == 0) {
+      $isr = $isrAntesSubsidio;
+      $subsidio = 0;
     }
 
     return ['isr' => $isr, 'subsidio' => $subsidio, 'subsidioCausado' => $causado];
