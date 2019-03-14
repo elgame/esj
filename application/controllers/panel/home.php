@@ -254,6 +254,8 @@ class home extends MY_Controller {
 			'titulo' => 'Modificar usuario'
 		);
 
+    $_GET['anio'] = $this->input->get('anio')>0? $this->input->get('anio'): date('Y');
+
 		$this->config_configs('modificar');
 		if ($this->form_validation->run() == FALSE)
 		{
@@ -264,10 +266,10 @@ class home extends MY_Controller {
 			$res_mdl = $this->configuraciones_model->modificarConfiguracion();
 
 			if($res_mdl['error'] == FALSE)
-				redirect(base_url('panel/home/configuraciones/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
+				redirect(base_url('panel/home/configuraciones/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4&anio='.$_GET['anio']));
 		}
 
-		$params['data'] = $this->configuraciones_model->getConfiguraciones();
+		$params['data'] = $this->configuraciones_model->getConfiguraciones($_GET['anio']);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -390,11 +392,14 @@ class home extends MY_Controller {
 						'rules' => 'required|numeric'),
 
 			array('field' => 'dzona_a',
-						'label' => 'Despensa',
+						'label' => 'UMA',
 						'rules' => 'required|numeric'),
 			array('field' => 'dzona_b',
-						'label' => 'Despensa',
+						'label' => 'Salario min',
 						'rules' => 'required|numeric'),
+      array('field' => 'dzona_anio',
+            'label' => 'Año',
+            'rules' => 'required|numeric'),
 		);
 
 		$this->form_validation->set_rules($rules);

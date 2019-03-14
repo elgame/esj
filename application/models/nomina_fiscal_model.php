@@ -2,11 +2,13 @@
 
 class nomina_fiscal_model extends CI_Model {
 
-  public function configuraciones()
+  public function configuraciones($anio='')
   {
+    $anio = $anio===''? date('Y'): $anio;
+
     $configuraciones['nomina'] = $this->getConfigNomina();
     $configuraciones['vacaciones'] = $this->getConfigNominaVacaciones();
-    $configuraciones['salarios_zonas'] = $this->getConfigSalariosZonas();
+    $configuraciones['salarios_zonas'] = $this->getConfigSalariosZonas($anio);
 
     $configuraciones['cuentas_contpaq'] =  array(
       // 'despensa'          => $this->getDespensaContpaq(),
@@ -34,7 +36,7 @@ class nomina_fiscal_model extends CI_Model {
       'subsidio'          => $this->getSubsidioCuentaContpaq(),
       'isr'               => $this->getIsrCuentaContpaq(),
     );
-    $configuraciones['tablas_isr'] = $this->getTablasIsr();
+    $configuraciones['tablas_isr'] = $this->getTablasIsr($anio);
 
     return $configuraciones;
   }
@@ -719,7 +721,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($datos['anio']);
 
     // Almacenara los datos de las nominas de cada empleado para despues
     // insertarlas.
@@ -1118,7 +1120,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($datos['anio']);
 
     // Almacenara los datos de las nominas de cada empleado para despues
     // insertarlas.
@@ -1365,7 +1367,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $vacacionesAnios = $this->getConfigNominaVacaciones();
     $configNomina = $this->getConfigNomina();
-    $salariosZonas = $this->getConfigSalariosZonas();
+    $salariosZonas = $this->getConfigSalariosZonas($anio);
 
     $cuentasContpaq = array(
       'sueldo1'            => $this->getSueldoCuentaContpaq($empleado[0]->id_empresa, 1),
@@ -1395,7 +1397,7 @@ class nomina_fiscal_model extends CI_Model {
       // 'despensa'          => $this->getDespensaContpaq(),
     );
 
-    $tablas = $this->getTablasIsr();
+    $tablas = $this->getTablasIsr($anio);
 
     //Dias trabajados en el año en que entro
     $fecha_entrada = explode('-', $empleado[0]->fecha_entrada);
@@ -1881,11 +1883,14 @@ class nomina_fiscal_model extends CI_Model {
    *
    * @return array
    */
-  public function getConfigSalariosZonas()
+  public function getConfigSalariosZonas($anio = '')
   {
+    $anio = $anio===''? date('Y'): $anio;
+
     $config = $this->db->query(
-      "SELECT zona_a, zona_b
-       FROM nomina_salarios_minimos")->result();
+      "SELECT zona_a, zona_b, anio
+       FROM nomina_salarios_minimos
+       WHERE anio = {$anio}")->result();
     return $config;
   }
 
@@ -2927,13 +2932,15 @@ class nomina_fiscal_model extends CI_Model {
    *
    * @return array
    */
-  public function getTablasIsr()
+  public function getTablasIsr($anio='')
   {
+    $anio = $anio===''? date('Y'): $anio;
+
     $tablas = array();
-    $tablas['diaria']['art113'] = $this->db->query("SELECT * FROM nomina_diaria_art_113")->result();
-    $tablas['diaria']['subsidios'] = $this->db->query("SELECT * FROM nomina_diaria_subsidios")->result();
-    $tablas['semanal']['art113'] = $this->db->query("SELECT * FROM nomina_semanal_art_113")->result();
-    $tablas['semanal']['subsidios'] = $this->db->query("SELECT * FROM nomina_semanal_subsidios")->result();
+    $tablas['diaria']['art113'] = $this->db->query("SELECT * FROM nomina_diaria_art_113 WHERE anio = {$anio}")->result();
+    $tablas['diaria']['subsidios'] = $this->db->query("SELECT * FROM nomina_diaria_subsidios WHERE anio = {$anio}")->result();
+    $tablas['semanal']['art113'] = $this->db->query("SELECT * FROM nomina_semanal_art_113 WHERE anio = {$anio}")->result();
+    $tablas['semanal']['subsidios'] = $this->db->query("SELECT * FROM nomina_semanal_subsidios WHERE anio = {$anio}")->result();
 
     return $tablas;
   }
@@ -3039,7 +3046,7 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
 
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -3213,7 +3220,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC");
     $empleados = $this->nomina($configuraciones, $filtros);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
@@ -5064,9 +5071,12 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
 
+    // Obtiene el rango de fechas de la semana.
+    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana']);
+
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($fechasSemana['anio']);
 
     // Almacenara los datos de las nominas de cada empleado para despues
     // insertarlas.
@@ -5075,9 +5085,6 @@ class nomina_fiscal_model extends CI_Model {
     // Almacenara los datos de los prestamos de cada empleado para despues
     // insertarlos.
     $prestamosEmpleados = array();
-
-    // Obtiene el rango de fechas de la semana.
-    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana']);
 
     // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
     $errorTimbrar = false;
@@ -6909,7 +6916,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'ordenar' => " ORDER BY u.id ASC", 'anio' => $anio);
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -6943,7 +6950,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
@@ -7494,7 +7501,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
@@ -8062,7 +8069,7 @@ class nomina_fiscal_model extends CI_Model {
       if (isset($xml[0]['Version'])) {
         $this->pdfReciboNominaFiscalFiniquito33($empleadoId, $semanaa, $anio, $empresaId, $pdf);
       } else {
-        $configuraciones = $this->configuraciones();
+        $configuraciones = $this->configuraciones($anio);
         $finiquitos = $this->nomina
             ->setEmpresaConfig($configuraciones['nomina'][0])
             ->setVacacionesConfig($configuraciones['vacaciones'])
@@ -8478,7 +8485,7 @@ class nomina_fiscal_model extends CI_Model {
         AND f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->row();
 
     if (isset($finiquitos->id_empresa)) {
-      $configuraciones = $this->configuraciones();
+      $configuraciones = $this->configuraciones($anio);
       $finiquitos = $this->nomina
           ->setEmpresaConfig($configuraciones['nomina'][0])
           ->setVacacionesConfig($configuraciones['vacaciones'])
@@ -9372,7 +9379,8 @@ class nomina_fiscal_model extends CI_Model {
       $_GET['cid_empresa'] = $empleado['info'][0]->id_empresa;
 
       $this->load->library('nomina');
-      $configuraciones = $this->configuraciones();
+      $anioss = explode('-', $filtros['ffecha2']);
+      $configuraciones = $this->configuraciones($anioss[0]);
 
       $empleado['info'][0]->fecha_entrada = $filtros['ffecha1'];
       $empleado['info'][0]->fecha_salida = $filtros['ffecha2'];
@@ -9732,7 +9740,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($datos['anio']);
 
     // Almacenara los datos de las nominas de cada empleado para despues
     // insertarlas.
@@ -9975,7 +9983,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
@@ -10333,7 +10341,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
@@ -10682,7 +10690,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio']);
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
 
@@ -10710,7 +10718,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC", 'anio' => $semana['anio']);
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
@@ -11644,7 +11652,7 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
 
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
               'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado' => true);
@@ -11758,7 +11766,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene las configuraciones.
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($datos['anio']);
 
     // Almacenara los datos de las nominas de cada empleado para despues
     // insertarlas.
@@ -12102,7 +12110,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
                 'dia_inicia_semana' => $dia,
                 'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
@@ -12473,7 +12481,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
@@ -12823,7 +12831,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
                 'dia_inicia_semana' => $dia,
                 'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
@@ -12860,7 +12868,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
       'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC", 'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
@@ -13551,7 +13559,7 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
 
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio']);
     $empleados = $this->nomina($configuraciones, $filtros);

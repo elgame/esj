@@ -187,7 +187,7 @@ class nomina_fiscal extends MY_Controller {
 
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     // Datos para la vista.
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
@@ -296,7 +296,7 @@ class nomina_fiscal extends MY_Controller {
     // Datos para la vista.
     $this->load->model('nomina_fiscal_model');
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, $params['ptu'], null, 'ptu');
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
@@ -402,7 +402,7 @@ class nomina_fiscal extends MY_Controller {
     // Datos para la vista.
     $this->load->model('nomina_fiscal_model');
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
@@ -1085,7 +1085,7 @@ class nomina_fiscal extends MY_Controller {
 
     $this->load->model('nomina_fiscal_model');
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $empleado = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, $_POST['empleado_id'], $_POST['horas_extras'], null, null, null, $_POST['ptu']);
     echo json_encode($empleado);
   }

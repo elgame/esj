@@ -532,7 +532,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   {
     $this->load->library('nomina');
 
-    $configuraciones = $this->configuraciones();
+    $configuraciones = $this->configuraciones($anio);
     $this->nomina
         ->setEmpresaConfig($configuraciones['nomina'][0])
         ->setVacacionesConfig($configuraciones['vacaciones'])

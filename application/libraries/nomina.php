@@ -1039,13 +1039,13 @@ class nomina
       $isrAntesSubsidio += $isrAguinaldoPrimaPtu;
       // Obtiene el subsidio de acuerdo a a las persepciones gravadas
       $subsidioIsr = $this->getSubsidioIsr($sumaImporteGravados, $isrAntesSubsidio, $this->nominaFiltros['tipo_nomina']['tipo']);
-      if ($this->empleado->id == 1481) {
-        echo "<pre>";
-          var_dump ($isrAuxConOtros, $isrAuxSinOtros);
-          var_dump ($this->empleado->base_semana_ord_gravada, $ptuGravadoDiario, $this->empleado->nomina->percepciones['ptu']);
-          var_dump($isrAntesSubsidio, $isrAguinaldoPrimaPtu, $sumaImporteGravados, $subsidioIsr);
-        echo "</pre>";exit;
-      }
+      // if ($this->empleado->id == 1481) {
+      //   echo "<pre>";
+      //     var_dump ($isrAuxConOtros, $isrAuxSinOtros);
+      //     var_dump ($this->empleado->base_semana_ord_gravada, $ptuGravadoDiario, $this->empleado->nomina->percepciones['ptu']);
+      //     var_dump($isrAntesSubsidio, $isrAguinaldoPrimaPtu, $sumaImporteGravados, $subsidioIsr);
+      //   echo "</pre>";exit;
+      // }
       $isrTotal              = $subsidioIsr['isr']; // isr semana
       $this->subsidio        = $subsidioIsr['subsidio'];
       $this->subsidioCausado = $subsidioIsr['subsidioCausado'];
@@ -1212,17 +1212,19 @@ class nomina
     $isr = 0;
     $subsidio = 0.01;
     $causado = 0.0;
-    foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
-    {
-      if ($sumaImporteGravados >= floatval($rango->de) && $sumaImporteGravados <= floatval($rango->hasta))
+    if ($tipo == 'se') {
+      foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
       {
-        $causado = floatval($rango->subsidio);
-        $isr = $isrAntesSubsidio - floatval($rango->subsidio);
-        if ($isr <= 0) {
-          $subsidio = abs($isr);
-          $isr = 0;
+        if ($sumaImporteGravados >= floatval($rango->de) && $sumaImporteGravados <= floatval($rango->hasta))
+        {
+          $causado = floatval($rango->subsidio);
+          $isr = $isrAntesSubsidio - floatval($rango->subsidio);
+          if ($isr <= 0) {
+            $subsidio = abs($isr);
+            $isr = 0;
+          }
+          break;
         }
-        break;
       }
     }
 
