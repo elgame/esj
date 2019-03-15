@@ -9471,6 +9471,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $empleado['info'][0]->dias_vacaciones = $empleado['info'][0]->dias_vacaciones==0? 6: $empleado['info'][0]->dias_vacaciones;
       $diasProporcionVacaciones = round(($empleado['info'][0]->dias_anio_vacaciones / 365) * $empleado['info'][0]->dias_vacaciones, 2);
+      $diasProporcionVacaciones = $diasProporcionVacaciones > $empleado['info'][0]->dias_vacaciones? $empleado['info'][0]->dias_vacaciones: $diasProporcionVacaciones;
 
       $indemnisaciones = 0;
       if ($despido) {
