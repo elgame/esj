@@ -255,7 +255,6 @@ class empleados extends MY_Controller {
       $this->load->model('nomina_fiscal_model');
       $data = $this->usuarios_model->getUsuariosAjax();
       $_GET['cid_empresa'] = $_GET['did_empresa'];
-      $configuraciones = $this->nomina_fiscal_model->configuraciones();
       $filtros = array(
         'semana'            => '',
         'anio'              => date("Y"),
@@ -263,6 +262,7 @@ class empleados extends MY_Controller {
         'puestoId'          => '',
         'dia_inicia_semana' => '4',
       );
+      $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
       foreach ($data as $key => $value)
       {
         $data[$key]['nomina'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, $value['id']);
@@ -331,7 +331,7 @@ class empleados extends MY_Controller {
     $filtros['dia_inicia_semana'] = $dia;
 
     $_GET['cid_empresa'] = $filtros['empresaId'];
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
 
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
 

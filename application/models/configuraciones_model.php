@@ -31,39 +31,79 @@ class configuraciones_model extends CI_Model {
 			$this->db->update('nomina_configuracion_vacaciones', $data, array('anio1' => $anio1, 'anio2' => $anio2));
 		}
 
-		$data = array(
-			'zona_a' => $this->input->post('dzona_a'),
-			'zona_b' => $this->input->post('dzona_b'),
-			'zona_c' => $this->input->post('dzona_b'),
-			);
-		$this->db->update('nomina_salarios_minimos', $data, array('id' => '1'));
+    // salarios minimos
+		$sql_res = $this->db->select("id, zona_a, zona_b, zona_c, anio" )
+              ->from("nomina_salarios_minimos")->where("anio", $this->input->post('dzona_anio'))->get();
+    $data = array(
+      'zona_a' => $this->input->post('dzona_a'),
+      'zona_b' => $this->input->post('dzona_b'),
+      'zona_c' => $this->input->post('dzona_b'),
+      'anio'   => $this->input->post('dzona_anio'),
+		);
+    if ($sql_res->num_rows() > 0) {
+		  $this->db->update('nomina_salarios_minimos', $data, array('anio' => $data['anio']));
+    } else {
+      $this->db->insert('nomina_salarios_minimos', $data);
+    }
 
 		//Tablas de ISR
-		foreach ($this->input->post('sem_id') as $key => $sem_id)
+		$sql_res = $this->db->select("anio")->from("nomina_semanal_art_113")->where("anio", $this->input->post('dzona_anio'))->get();
+    foreach ($this->input->post('sem_id') as $key => $sem_id)
 		{
-			$data = array('lim_inferior' => $_POST['sem_lim_inferior'][$key], 'lim_superior' => $_POST['sem_lim_superior'][$key],
-						'cuota_fija' => $_POST['sem_cuota_fija'][$key], 'porcentaje' => $_POST['sem_porcentaje'][$key]);
-			$this->db->update('nomina_semanal_art_113', $data, array('id_art_113' => $sem_id));
+      if ($sql_res->num_rows() > 0) {
+  			$data = array('lim_inferior' => $_POST['sem_lim_inferior'][$key], 'lim_superior' => $_POST['sem_lim_superior'][$key],
+  						'cuota_fija' => $_POST['sem_cuota_fija'][$key], 'porcentaje' => $_POST['sem_porcentaje'][$key]);
+        $this->db->update('nomina_semanal_art_113', $data, array('id_art_113' => $sem_id));
+      } else {
+        $data = array('lim_inferior' => $_POST['sem_lim_inferior'][$key], 'lim_superior' => $_POST['sem_lim_superior'][$key],
+              'cuota_fija' => $_POST['sem_cuota_fija'][$key], 'porcentaje' => $_POST['sem_porcentaje'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+  			$this->db->insert('nomina_semanal_art_113', $data);
+      }
 		}
+    $sql_res = $this->db->select("anio")->from("nomina_diaria_art_113")->where("anio", $this->input->post('dzona_anio'))->get();
 		foreach ($this->input->post('dia_id') as $key => $dia_id)
 		{
-			$data = array('lim_inferior' => $_POST['dia_lim_inferior'][$key], 'lim_superior' => $_POST['dia_lim_superior'][$key],
-						'cuota_fija' => $_POST['dia_cuota_fija'][$key], 'porcentaje' => $_POST['dia_porcentaje'][$key]);
-			$this->db->update('nomina_diaria_art_113', $data, array('id_art_113' => $dia_id));
+      if ($sql_res->num_rows() > 0) {
+        $data = array('lim_inferior' => $_POST['dia_lim_inferior'][$key], 'lim_superior' => $_POST['dia_lim_superior'][$key],
+              'cuota_fija' => $_POST['dia_cuota_fija'][$key], 'porcentaje' => $_POST['dia_porcentaje'][$key]);
+        $this->db->update('nomina_diaria_art_113', $data, array('id_art_113' => $dia_id));
+      } else {
+        $data = array('lim_inferior' => $_POST['dia_lim_inferior'][$key], 'lim_superior' => $_POST['dia_lim_superior'][$key],
+              'cuota_fija' => $_POST['dia_cuota_fija'][$key], 'porcentaje' => $_POST['dia_porcentaje'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+        $this->db->insert('nomina_diaria_art_113', $data);
+      }
 		}
 
 		//Tablas de Subsidios
-		foreach ($this->input->post('sub_sem_id') as $key => $sub_sem_id)
+		$sql_res = $this->db->select("anio")->from("nomina_semanal_subsidios")->where("anio", $this->input->post('dzona_anio'))->get();
+    foreach ($this->input->post('sub_sem_id') as $key => $sub_sem_id)
 		{
-			$data = array('de' => $_POST['sub_sem_lim_inferior'][$key], 'hasta' => $_POST['sub_sem_lim_superior'][$key],
-						'subsidio' => $_POST['sub_sem_subsidio'][$key]);
-			$this->db->update('nomina_semanal_subsidios', $data, array('id_subsidio' => $sub_sem_id));
+      if ($sql_res->num_rows() > 0) {
+        $data = array('de' => $_POST['sub_sem_lim_inferior'][$key], 'hasta' => $_POST['sub_sem_lim_superior'][$key],
+              'subsidio' => $_POST['sub_sem_subsidio'][$key]);
+        $this->db->update('nomina_semanal_subsidios', $data, array('id_subsidio' => $sub_sem_id));
+      } else {
+        $data = array('de' => $_POST['sub_sem_lim_inferior'][$key], 'hasta' => $_POST['sub_sem_lim_superior'][$key],
+              'subsidio' => $_POST['sub_sem_subsidio'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+        $this->db->insert('nomina_semanal_subsidios', $data);
+      }
 		}
+    $sql_res = $this->db->select("anio")->from("nomina_diaria_subsidios")->where("anio", $this->input->post('dzona_anio'))->get();
 		foreach ($this->input->post('sub_dia_id') as $key => $sub_dia_id)
 		{
-			$data = array('de' => $_POST['sub_dia_lim_inferior'][$key], 'hasta' => $_POST['sub_dia_lim_superior'][$key],
-						'subsidio' => $_POST['sub_dia_subsidio'][$key]);
-			$this->db->update('nomina_diaria_subsidios', $data, array('id_subsidio' => $sub_dia_id));
+      if ($sql_res->num_rows() > 0) {
+        $data = array('de' => $_POST['sub_dia_lim_inferior'][$key], 'hasta' => $_POST['sub_dia_lim_superior'][$key],
+              'subsidio' => $_POST['sub_dia_subsidio'][$key]);
+        $this->db->update('nomina_diaria_subsidios', $data, array('id_subsidio' => $sub_dia_id));
+      } else {
+        $data = array('de' => $_POST['sub_dia_lim_inferior'][$key], 'hasta' => $_POST['sub_dia_lim_superior'][$key],
+              'subsidio' => $_POST['sub_dia_subsidio'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+        $this->db->insert('nomina_diaria_subsidios', $data);
+      }
 		}
 
 		return array('error' => FALSE);
@@ -75,7 +115,7 @@ class configuraciones_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getConfiguraciones()
+	public function getConfiguraciones($anio)
 	{
 		$data['conf']              = array();
 		$data['conf_vacaciones']   = array();
@@ -99,34 +139,34 @@ class configuraciones_model extends CI_Model {
 			$data['conf_vacaciones']	= $sql_res->result();
 		$sql_res->free_result();
 
-		$sql_res = $this->db->select("id, zona_a, zona_b, zona_c" )
+		$sql_res = $this->db->select("id, zona_a, zona_b, zona_c, anio" )
 							->from("nomina_salarios_minimos")
-							->where("id", '1')->get();
+							->where("anio", $anio)->get();
 		if ($sql_res->num_rows() > 0)
 			$data['salarios_minimos']	= $sql_res->row();
 		$sql_res->free_result();
 
 
 		$sql_res = $this->db->select("id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje" )
-							->from("nomina_semanal_art_113")->get();
+							->from("nomina_semanal_art_113")->where("anio", $anio)->get();
 		if ($sql_res->num_rows() > 0)
 			$data['semanal_art113']	= $sql_res->result();
 		$sql_res->free_result();
 
 		$sql_res = $this->db->select("id_subsidio, de, hasta, subsidio" )
-							->from("nomina_semanal_subsidios")->get();
+							->from("nomina_semanal_subsidios")->where("anio", $anio)->get();
 		if ($sql_res->num_rows() > 0)
 			$data['semanal_subsidios']	= $sql_res->result();
 		$sql_res->free_result();
 
 		$sql_res = $this->db->select("id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje" )
-							->from("nomina_diaria_art_113")->get();
+							->from("nomina_diaria_art_113")->where("anio", $anio)->get();
 		if ($sql_res->num_rows() > 0)
 			$data['diaria_art113']	= $sql_res->result();
 		$sql_res->free_result();
 
 		$sql_res = $this->db->select("id_subsidio, de, hasta, subsidio" )
-							->from("nomina_diaria_subsidios")->get();
+							->from("nomina_diaria_subsidios")->where("anio", $anio)->get();
 		if ($sql_res->num_rows() > 0)
 			$data['diaria_subsidios']	= $sql_res->result();
 		$sql_res->free_result();

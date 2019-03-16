@@ -68,7 +68,11 @@
                     </div>
                     <form action="<?php echo base_url('panel/nomina_fiscal/ptu/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
                       <div class="span8">
-                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo count($empleados) > 0 ? ($empleados[0]->ptu_generado === 'false' ? $ptu : $empleados[0]->utilidad_empresa_ptu) : '' ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
+                        <?php
+                        $keyfirst = array_keys($empleados);
+                        $keyfirst = array_shift($keyfirst);
+                        ?>
+                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo count($empleados) > 0 ? ($empleados[$keyfirst]->ptu_generado === 'false' ? $ptu : $empleados[$keyfirst]->utilidad_empresa_ptu) : '' ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
                         <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
                       </div>
                     </form>

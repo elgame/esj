@@ -11,7 +11,12 @@
      COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
- ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|
+ ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|
+    ALTER TABLE public.nomina_salarios_minimos ADD COLUMN anio bigint;
+    ALTER TABLE public.nomina_diaria_art_113 ADD COLUMN anio integer DEFAULT 2018;
+    ALTER TABLE public.nomina_diaria_subsidios ADD COLUMN anio integer DEFAULT 2018;
+    ALTER TABLE public.nomina_semanal_art_113 ADD COLUMN anio integer DEFAULT 2018;
+    ALTER TABLE public.nomina_semanal_subsidios ADD COLUMN anio integer DEFAULT 2018;
     UPDATE public.nomina_diaria_art_113 SET lim_inferior=0.01, lim_superior=19.03, cuota_fija=0.0, porcentaje=1.92 WHERE id_art_113=1;
     UPDATE public.nomina_diaria_art_113 SET lim_inferior=19.04, lim_superior=161.52, cuota_fija=0.37, porcentaje=6.4 WHERE id_art_113=2;
     UPDATE public.nomina_diaria_art_113 SET lim_inferior=161.53, lim_superior=283.86, cuota_fija=9.48, porcentaje=10.88 WHERE id_art_113=3;
