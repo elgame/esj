@@ -637,8 +637,26 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       HAVING Sum(t.semanas) > 50 --max(semana_max) = 12 AND min(semana_min) = 1
       ");
     $trabajadores = $result->result();
+
+    $this->load->model('nomina_fiscal_model');
+    $configuracion = $this->nomina_fiscal_model->configuraciones($anio);
+
     $dias_anio = 365; //max(array_column($trabajadores, 'dias_anio'));
     foreach ($trabajadores as $key => $value) {
+
+      $topeExcento = 15 * $configuracion['salarios_zonas'][0]->zona_a;
+      if ($value->ptu > $topeExcento)
+      {
+        $ptuGravado = $value->ptu - $topeExcento;
+        $ptuExcento = $topeExcento;
+      }
+      else
+      {
+        $ptuGravado = 0;
+        $ptuExcento = $value->ptu;
+      }
+      // var_dump($ptuGravado, $value->ptu_grabable);
+
       // ingresos_gravados/365 eso buscar en la tabla los limites
       $total_gravado = $value->sueldo_semanal + $value->aguinaldo_grabable + $value->ptu_grabable + $value->prima_vacacional_grabable + $value->pasistencia;
       $value->total_gravado = $total_gravado;
