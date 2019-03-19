@@ -10,6 +10,8 @@
      COMMENT ON COLUMN public.cajachica_gastos.id_compra IS 'id del gasto ligado, este tipo de gasto (de caja) no se tomaria en cuenta para los reportes';
      COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     -- pct
+     INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES (5, 'Fletes', 40000);
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|
     -- pcc
