@@ -552,13 +552,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     exit;
   }
 
-  public function data_calc_anual($empresaId, $anio)
+  public function data_calc_anual($empresaId, $anio, $tipo='tabla')
   {
-    header("Content-type: text/csv");
-    header("Content-Disposition: attachment; filename=file.csv");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
     $result = $this->db->query("SELECT t.id, t.nombre, t.apellido_paterno, t.apellido_materno, t.rfc, t.curp,
             max(t.mes_max) AS mes_max, min(t.mes_min) AS mes_min,
             max(t.semana_max) AS semana_max, min(t.semana_min) AS semana_min,
@@ -642,6 +637,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     $configuracion = $this->nomina_fiscal_model->configuraciones($anio);
 
     $dias_anio = 365; //max(array_column($trabajadores, 'dias_anio'));
+    $rows_xls = '';
     foreach ($trabajadores as $key => $value) {
       // PTU
       $topeExcento = 15 * $configuracion['salarios_zonas'][0]->zona_a;
@@ -702,16 +698,34 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
 
 
       if ($key == 0) {
-        echo implode(',', array_keys((array)$value))."\n";
+        $rows_xls .= implode(',', array_keys((array)$value))."\n";
       }
-      echo implode(',', array_values((array)$value))."\n";
+      $rows_xls .= implode(',', array_values((array)$value))."\n";
     }
 
-    // echo "<pre>";
-    //   var_dump($trabajadores);
-    // echo "</pre>";
-    exit;
-    return $trabajadores;
+    if ($tipo === 'tabla') {
+      return $trabajadores;
+    } elseif ($tipo === 'descargar') {
+      header("Content-type: text/csv");
+      header("Content-Disposition: attachment; filename=file.csv");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+      echo $rows_xls;
+      exit;
+    } elseif ($tipo === 'guardar') {
+      $inserts = [];
+      foreach ($trabajadores as $key => $value) {
+        $inserts[] = [
+          'id_empleado' => $value->id,
+          'id_empresa'  => $empresaId,
+          'anio'        => $anio,
+          'monto'       => round(abs($value->total_isr_sub), 2),
+          'aplicado'    => 0,
+          'tipo'        => ($value->total_isr_sub >= 0? 'f': 't'),
+        ];
+      }
+      $this->db->insert_batch('nomina_calculo_anual', $inserts);
+    }
   }
 
   public function rpt_dim()

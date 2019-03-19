@@ -130,8 +130,20 @@ class nomina_fiscal extends MY_Controller {
     $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
     $empresaId = isset($_GET['empresaId'])? $_GET['empresaId']: 0;
 
+    $tipo = 'tabla';
+    if (isset($_POST['guardar'])) {
+      $tipo = 'guardar';
+    } elseif (isset($_POST['descargar'])) {
+      $tipo = 'descargar';
+    }
+
     $this->load->model('nomina_fiscal_otros_model');
-    $params['calculo'] = $this->nomina_fiscal_otros_model->data_calc_anual($empresaId, $anio);
+    $datos = $this->db->query("SELECT Count(*) AS numeros FROM nomina_calculo_anual WHERE anio = {$anio}")->row();
+    $params['calculo'] = $this->nomina_fiscal_otros_model->data_calc_anual($empresaId, $anio, $tipo);
+    $params['guardado'] = $datos->numeros;
+    if ($tipo === 'guardar') {
+      redirect(base_url('panel/nomina_fiscal/calc_anual?'.MyString::getVarsLink(array('msg')).'&'));
+    }
 
     if(isset($_GET['msg']{0}))
     {
@@ -143,7 +155,7 @@ class nomina_fiscal extends MY_Controller {
       }
     }
 
-    $this->load->view('panel/nomina_fiscal/bonos_otros', $params);
+    $this->load->view('panel/nomina_fiscal/calculo_anual', $params);
   }
 
   public function index()
