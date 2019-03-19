@@ -219,12 +219,30 @@ class nomina
     $this->empleado->nomina->prima_vacacional = $this->primaVacacional();
     $this->empleado->nomina->salario_diario_integrado = $this->sdi();
 
-    $this->datosNomina();
+    $this->calculoNominaTotaltes();
+
+    if (isset($this->empleado->calculo_anual) && $this->empleado->esta_asegurado === 't') {
+      $this->setCalculoAnual();
+    } elseif ($this->empleado->otros_datos != 'false' && $this->empleado->esta_asegurado === 't') {
+      $this->setCalculoAnual(true);
+    }
+
+    $this->calculoNominaTotaltes(false);
+
+    $this->emisor();
+    $this->receptor();
+
+    return $this->empleado;
+  }
+
+  private function calculoNominaTotaltes($resetAll=true)
+  {
+    $this->datosNomina($resetAll);
 
     $this->confPercepciones();
 
     // Otros
-    $this->empleado->nomina->otrosPagos = array();
+    // $this->empleado->nomina->otrosPagos = array();
 
     $this->confDeducciones();
 
@@ -293,24 +311,20 @@ class nomina
 
     // Totales Deducciones
     foreach ($this->empleado->nomina->deducciones as $keyp => $deducc) {
-      if ($deducc['TipoDeduccion'] == '002')
+      if ($deducc['TipoDeduccion'] == '002') //  || $deducc['TipoDeduccion'] == '101'
         $this->empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos']   += $deducc['total'];
       else
         $this->empleado->nomina->deduccionesTotales['TotalOtrasDeducciones']   += $deducc['total'];
     }
+
     // Si es cualquier deduccion menos el isr entonces el importe se lo suma al descuento.
     // Si la deduccion es el ISR  no se lo suma al descuento ya que el isr ira en la parte de retenciones.
     $this->empleado->nomina->TotalDeducciones = $this->empleado->nomina->deduccionesTotales['TotalOtrasDeducciones'] + $this->empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'];
     $this->empleado->nomina->descuento        = $this->empleado->nomina->TotalDeducciones;
     $this->empleado->nomina->isr              = $this->empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'];
-
-    $this->emisor();
-    $this->receptor();
-
-    return $this->empleado;
   }
 
-  public function datosNomina()
+  public function datosNomina($resetAll=true)
   {
     $this->empleado->nomina->Version           = '1.2';
     $this->empleado->nomina->TipoNomina        = $this->empleado->tipo_nomina;
@@ -325,13 +339,15 @@ class nomina
     $this->empleado->nomina->descuento         = 0;
     $this->empleado->nomina->isr               = 0;
 
-    $this->empleado->nomina->percepciones                        = [];
-    $this->empleado->nomina->percepcionesJubilacionPensionRetiro = [];
-    $this->empleado->nomina->percepcionesSeparacionIndemnizacion = [];
+    if ($resetAll) {
+      $this->empleado->nomina->percepciones                        = [];
+      $this->empleado->nomina->deducciones                         = [];
+      $this->empleado->nomina->otrosPagos                          = [];
+      $this->empleado->nomina->percepcionesJubilacionPensionRetiro = [];
+      $this->empleado->nomina->percepcionesSeparacionIndemnizacion = [];
+    }
     $this->empleado->nomina->percepcionesTotales                 = ['TotalGravado' => 0, 'TotalExento' => 0];
-    $this->empleado->nomina->deducciones                         = [];
     $this->empleado->nomina->deduccionesTotales                  = ['TotalOtrasDeducciones' => 0, 'TotalImpuestosRetenidos' => 0];
-    $this->empleado->nomina->otrosPagos                          = [];
   }
 
   public function emisor()
@@ -1109,6 +1125,80 @@ class nomina
       'ApiKey'         => 'de_otros_',
     );
   }
+
+
+  /*
+   |------------------------------------------------------------------------
+   | Deducciones
+   |------------------------------------------------------------------------
+   */
+  public function setCalculoAnual($set=false)
+  {
+    if ($set) {
+      $calculo_anual = json_decode($this->empleado->otros_datos);
+      $calculo_anual = $calculo_anual->calculoAnual;
+      if ($calculo_anual->tipo === 't') { // isr a pagar
+        $this->empleado->nomina->deducciones['isrAnual'] = array(
+          'TipoDeduccion'  => '101',
+          'Clave'          => $this->clavesPatron['isr'],
+          'Concepto'       => 'ISR Retenido de ejercicio anterior',
+          'ImporteGravado' => 0,
+          'ImporteExcento' => round($calculo_anual->desc_abon, 2),
+          'total'          => round($calculo_anual->desc_abon, 2) + 0,
+          'ApiKey'         => 'de_isr_retenido_ejercicio_anterior_',
+        );
+      } else { // subsidio a pagar
+        $this->empleado->nomina->otrosPagos['subsidioAnual'] = array(
+          'TipoOtroPago'     => '004',
+          'Clave'            => $this->clavesPatron['subsidio'],
+          'Concepto'         => 'Saldo favor compensación anual',
+          'ImporteGravado'   => 0,
+          'ImporteExcento'   => round($calculo_anual->desc_abon, 2),
+          'total'            => round($calculo_anual->desc_abon, 2) + 0,
+          'ApiKey'           => 'top_saldo_favor_compensacion_',
+        );
+      }
+    } else {
+      if ($this->empleado->calculo_anual->tipo === 't') { // isr a pagar
+        $importe_pagar = $this->empleado->nomina->TotalPercepciones - $this->empleado->nomina->TotalDeducciones + $this->empleado->nomina->TotalOtrosPagos;
+        $descuento_isr = $this->empleado->calculo_anual->saldo;
+        if ($importe_pagar < $this->empleado->calculo_anual->saldo) {
+          $descuento_isr = $importe_pagar;
+        }
+        $this->empleado->calculo_anual->desc_abon = $descuento_isr;
+
+        $this->empleado->nomina->deducciones['isrAnual'] = array(
+          'TipoDeduccion'  => '101',
+          'Clave'          => $this->clavesPatron['isr'],
+          'Concepto'       => 'ISR Retenido de ejercicio anterior',
+          'ImporteGravado' => 0,
+          'ImporteExcento' => round($descuento_isr, 2),
+          'total'          => round($descuento_isr, 2) + 0,
+          'ApiKey'         => 'de_isr_retenido_ejercicio_anterior_',
+        );
+        // echo "<pre>";
+        //   var_dump($this->empleado);
+        // echo "</pre>";exit;
+      } else { // subsidio a pagar
+        $this->empleado->calculo_anual->desc_abon = $this->empleado->calculo_anual->saldo;
+        $remanenteSalFav = $this->empleado->calculo_anual->saldo - $this->empleado->calculo_anual->saldo;
+
+        $this->empleado->nomina->otrosPagos['subsidioAnual'] = array(
+          'TipoOtroPago'    => '004',
+          'Clave'           => $this->clavesPatron['subsidio'],
+          'Concepto'        => 'Saldo favor compensación anual',
+          'ImporteGravado'  => 0,
+          'ImporteExcento'  => round($this->empleado->calculo_anual->saldo, 2),
+          'total'           => round($this->empleado->calculo_anual->saldo, 2) + 0,
+          'saldoAFavor'     => round($this->empleado->calculo_anual->monto, 2) + 0,
+          'año'             => round($this->empleado->calculo_anual->anio, 2) + 0,
+          'remanenteSalFav' => round($remanenteSalFav, 2) + 0,
+          'ApiKey'          => 'top_saldo_favor_compensacion_',
+        );
+      }
+    }
+  }
+
 
   /*
    |------------------------------------------------------------------------

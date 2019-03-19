@@ -12,6 +12,31 @@
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|
+    -- pcc
+    CREATE TABLE public.nomina_calculo_anual
+        (
+          id_empleado bigint NOT NULL,
+          id_empresa integer NOT NULL,
+          anio integer NOT NULL,
+          monto double precision NOT NULL DEFAULT 0,
+          aplicado double precision NOT NULL DEFAULT 0,
+          tipo boolean NOT NULL DEFAULT true, -- true: isr a pagar, false: subsidio a favor
+          CONSTRAINT nomina_calculo_anual_pkey PRIMARY KEY (id_empleado, id_empresa, anio),
+          CONSTRAINT nomina_calculo_anual_id_empleado_fkey FOREIGN KEY (id_empleado)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT nomina_calculo_anual_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE public.nomina_calculo_anual
+          OWNER TO programa;
+        COMMENT ON COLUMN public.nomina_calculo_anual.tipo IS 'true: isr a pagar, false: subsidio a favor';
+    ALTER TABLE public.nomina_fiscal ADD COLUMN otros_datos jsonb;
+    -- lap|pcc
     ALTER TABLE public.nomina_salarios_minimos ADD COLUMN anio bigint;
     ALTER TABLE public.nomina_diaria_art_113 ADD COLUMN anio integer DEFAULT 2018;
     ALTER TABLE public.nomina_diaria_subsidios ADD COLUMN anio integer DEFAULT 2018;
