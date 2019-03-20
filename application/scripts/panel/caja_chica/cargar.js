@@ -17,6 +17,7 @@
     btnDelRemision();
     onChangeTotalRemisiones();
     obtenRemisionesAjax();
+    obtenMovimientosAjax();
 
     onChanceDenominacionNum();
     onChanceTotalDenominacion();
@@ -43,7 +44,7 @@
     cargaMovimientos();
     searchModalMovimientos();
 
-    $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
+    // $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
 
     var preventClickCerrar = false;
     if ($(".btnCerrarCaja").length > 0)
@@ -939,6 +940,7 @@
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
+                    '<option value="caja_fletes">Caja fletes</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
                   '</select>'+
                 '</td>'+
@@ -1064,6 +1066,7 @@
                     '<option value="otros">Otros</option>'+
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
+                    '<option value="caja_fletes">Caja fletes</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
@@ -1168,6 +1171,59 @@
         $('#modal-remisiones #lista_remisiones_modal tbody').html(html);
         $("#lista_remisiones_modal").filterTable();
       });
+    });
+  };
+
+  var obtenMovimientosAjax = function () {
+    $('#modal-movimientos').on('show', function () {
+      getMovimientos();
+    });
+
+    $("#modal-movimientos .movimientosEmpresa").autocomplete({
+      source: base_url+'panel/caja_chica/ajax_get_categorias/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#modal-movimientos .movimientosEmpresaId").val(ui.item.id);
+        $(this).css("background-color", "#B0FFB0");
+        getMovimientos();
+      }
+    }).on("keydown", function(event){
+        if(event.which == 8 || event == 46){
+          $("#modal-movimientos .movimientosEmpresaId").val("");
+          $(this).val("").css("background-color", "#FFD9B3");
+        }
+    });
+  };
+
+  var getMovimientos = function () {
+    var params = {};
+    if ($("#modal-movimientos .movimientosEmpresaId").val() != '') {
+      params['categoriaId'] = $("#modal-movimientos .movimientosEmpresaId").val();
+    }
+    $.getJSON(base_url+'panel/caja_chica/ajax_get_movimientos', params, function(json, textStatus) {
+      var html = '';
+      for (var key in json) {
+        html +=
+          '<tr>'+
+            '<td><input type="checkbox" class="chk-movimiento" '+
+              'data-id="'+json[key].id_movimiento+'" data-total="'+json[key].monto+'" '+
+              'data-proveedor="'+json[key].proveedor+'" '+
+              'data-poliza="'+json[key].metodo_pago+' - '+json[key].numero_ref+'" '+
+              'data-banco="'+json[key].banco+'" '+
+              'data-concepto="'+json[key].concepto+'" '+
+              'data-idcategoria="'+json[key].id_categoria+'" '+
+              'data-empresa="'+json[key].empresa+'" '+
+              '></td> '+
+            '<td style="width: 66px;">'+json[key].fecha+'</td> '+
+            '<td class="search-field">'+json[key].proveedor+'</td> '+
+            '<td>'+json[key].numero_ref+" "+json[key].banco+'</td> '+
+            '<td style="text-align: right;">'+json[key].monto+'</td> '+
+          '</tr>';
+      }
+
+      $('#modal-movimientos #lista_movimientos_modal tbody').html(html);
+      $("#lista_movimientos_modal").filterTable();
     });
   };
 

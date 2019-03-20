@@ -71,7 +71,10 @@
           <div class="span12" style="margin: 10px 0 0 0;">
             <div class="row-fluid">
               <div class="span4" style="text-align: center;">
-                <img alt="logo" src="<?php echo base_url(); ?>/application/images/logo.png" height="54">
+                <?php
+                $logo = $_GET['fno_caja']==5? '/application/images/transporte.png': '/application/images/logo.png';
+                ?>
+                <img alt="logo" src="<?php echo base_url().$logo; ?>" height="54">
               </div>
               <div class="span2" style="text-align: right;">
                 <div class="row-fluid">
@@ -118,7 +121,7 @@
                           <thead>
                             <tr>
                               <th colspan="6">INGRESOS POR REPOSICION
-                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '1'): ?>
+                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '1'): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <?php //if ($_GET['fno_caja'] == '4'): ?>
                                   <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
@@ -349,7 +352,7 @@
 
                     <?php
                     $totalTraspasos = 0;
-                    if ($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
+                    if ($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4'): ?>
                     <!-- Traspasos -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
@@ -394,6 +397,7 @@
                                                 <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
                                                 <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                                 <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                                <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
                                                 <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
                                               </select>
                                               <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
@@ -541,7 +545,7 @@
               <!-- Gastos x comprobar -->
               <?php
               $totalGastosComprobarTot = $totalGastosComprobar = 0;
-              if ($_GET['fno_caja'] === '2'): ?>
+              if ($_GET['fno_caja'] === '2' || $_GET['fno_caja'] === '5'): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -866,7 +870,7 @@
               <?php
               $totalReposicionGastos = 0;
               $totalReposicionGastosAnt = 0;
-              if ($_GET['fno_caja'] == '2'):
+              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5'):
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1166,7 +1170,7 @@
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4')) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4')) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1452,6 +1456,9 @@
       <h3 id="myModalLabel">Movimientos <!-- <input type="text" id="search-movimientos" placeholder="filtro"></input> --></h3>
     </div>
     <div class="modal-body" style="max-height: 370px;">
+      <input type="text" value="EMPSNJO" class="movimientosEmpresa" style="float: left;" required="" placeholder="Empresa">
+      <input type="hidden" value="1" class="movimientosEmpresaId" placeholder="Empresa">
+
       <table id="lista_movimientos_modal" class="table table-striped table-bordered table-hover table-condensed" id="table-modal-movimientos">
         <caption></caption>
         <thead>
@@ -1464,8 +1471,8 @@
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($movimientos as $movi) { ?>
-            <tr>
+          <?php // foreach ($movimientos as $movi) { ?>
+            <!-- <tr>
               <td><input type="checkbox" class="chk-movimiento"
                 data-id="<?php echo $movi->id_movimiento ?>" data-total="<?php echo $movi->monto ?>"
                 data-proveedor="<?php echo $movi->proveedor ?>"
@@ -1479,8 +1486,8 @@
               <td class="search-field"><?php echo $movi->proveedor ?></td>
               <td><?php echo $movi->numero_ref." ".$movi->banco ?></td>
               <td style="text-align: right;"><?php echo MyString::formatoNumero(MyString::float($movi->monto), 2, '$') ?></td>
-            </tr>
-          <?php } ?>
+            </tr> -->
+          <?php // } ?>
         </tbody>
       </table>
     </div>

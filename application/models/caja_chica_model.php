@@ -209,7 +209,7 @@ class caja_chica_model extends CI_Model {
       $info['saldo_clientes'] = $this->getCajaSaldosClientes($fecha, $noCaja);
     }
 
-    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4') {
+    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4' || $noCaja == '5') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -246,16 +246,20 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4') {
-      $ddNoCaja = '1, 4';
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
+      $ddNoCaja = '1, 4, 5';
       $ddTipo = 'caja_gastos';
       if ($noCaja == '1') {
-        $ddNoCaja = "2, 4";
+        $ddNoCaja = "2, 4, 5";
         $ddTipo = 'caja_limon';
       } elseif ($noCaja == '4') {
-        $ddNoCaja = "2, 1";
+        $ddNoCaja = "2, 1, 5";
         $ddTipo = 'caja_general';
+      } elseif ($noCaja == '5') {
+        $ddNoCaja = "2, 1, 4";
+        $ddTipo = 'caja_fletes';
       }
+
       // acreedores
       $acreedores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -373,7 +377,7 @@ class caja_chica_model extends CI_Model {
     }
 
     // gastos por comprobar
-    if ($noCaja == '2') {
+    if ($noCaja == '2' || $noCaja == '5') {
       $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'gc'": " AND cg.tipo = 'gc'"));
     }
 
@@ -381,12 +385,12 @@ class caja_chica_model extends CI_Model {
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'g'": " AND cg.tipo = 'g'"));
 
     // reposición de gastos
-    if ($noCaja == '2') {
+    if ($noCaja == '2' || $noCaja == '5') {
       $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'rg'": " AND cg.tipo = 'rg'"));
     }
 
     // Traspasos
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4') {
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
       if (count($traspasos) > 0)
       {
@@ -602,6 +606,8 @@ class caja_chica_model extends CI_Model {
       $tno_caja = 'caja_gastos';
     } elseif ($noCaja == 4) {
       $tno_caja = 'caja_general';
+    } elseif ($noCaja == 5) {
+      $tno_caja = 'caja_fletes';
     }
 
     $traspaso = $this->db->query(
@@ -1073,6 +1079,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 2;
             } elseif ($data_traspp->tipo_caja == 'caja_general') {
               $tno_caja = 4;
+            } elseif ($data_traspp->tipo_caja == 'caja_fletes') {
+              $tno_caja = 5;
             }
 
             if ($tno_caja > 0) {
@@ -1120,6 +1128,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 2;
             } elseif ($data['traspaso_tipo'][$key] == 'caja_general') {
               $tno_caja = 4;
+            } elseif ($data['traspaso_tipo'][$key] == 'caja_fletes') {
+              $tno_caja = 5;
             }
 
             if ($tno_caja > 0) {
@@ -1319,8 +1329,12 @@ class caja_chica_model extends CI_Model {
   {
     $this->load->model('empresas_model');
 
-    $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
+    // $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
     //  AND bc.id_empresa = {$defaultEmpresa->id_empresa}
+    $sql = '';
+    if (isset($_GET['categoriaId'])) {
+      $sql = " AND cc.id_categoria = {$_GET['categoriaId']}";
+    }
 
     $movimientos = $this->db->query(
       "SELECT bm.id_movimiento, COALESCE(p.nombre_fiscal, bm.a_nombre_de) as proveedor,
@@ -1333,7 +1347,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
          LEFT JOIN cajachica_categorias cc ON cc.id_empresa = bc.id_empresa
        WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0
-        AND DATE(bm.fecha) > (Now() - interval '3 months')
+        AND DATE(bm.fecha) > (Now() - interval '3 months') {$sql}
        ORDER BY bm.fecha ASC, ci.id_ingresos ASC
     ");
 
@@ -1910,12 +1924,17 @@ class caja_chica_model extends CI_Model {
     $nomenclaturas = $this->nomenclaturas();
 
     $subtitulo = '';
+    $logo = '/images/logo.png';
     if ($noCajas == 1)
       $subtitulo = ' LIMON';
     elseif ($noCajas == 2)
       $subtitulo = ' GASTOS';
     elseif ($noCajas == 4)
       $subtitulo = ' GENERAL';
+    elseif ($noCajas == 5){
+      $subtitulo = ' FLETES';
+      $logo = '/images/transporte.png';
+    }
 
     // echo "<pre>";
     //   var_dump($caja);
@@ -1944,7 +1963,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(104));
     $pdf->Row(array(mb_strtoupper($privilegio->nombre.$subtitulo, 'UTF-8')), true, true, null, 3);
 
-    $pdf->Image(APPPATH.(str_replace(APPPATH, '', '/images/logo.png')), 6, 15, 50);
+    $pdf->Image(APPPATH.(str_replace(APPPATH, '', $logo)), 6, 15, 50);
     $pdf->Ln(20);
 
     $pdf->SetFont('Arial','B', 8);
@@ -2117,7 +2136,7 @@ class caja_chica_model extends CI_Model {
         $pdf->Row(array(
           $traspaso->folio,
           ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
-          ($traspaso->tipo=='t'? 'Si': 'No'),
+          ($traspaso->afectar_fondo=='t'? 'Si': 'No'),
           ($traspaso->status == 't'? $traspaso->concepto: 0),
           MyString::float(MyString::formatoNumero(
             ($traspaso->status == 't'? $traspaso->monto: 0),
@@ -2136,7 +2155,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5) && count($caja['acreedores']) > 0) {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
@@ -2272,7 +2291,7 @@ class caja_chica_model extends CI_Model {
 
     // Gastos x comprobar
     $totalGastosComprobarTot = $totalGastosComprobar = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 5) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2435,7 +2454,7 @@ class caja_chica_model extends CI_Model {
 
     // Reposición de gastos
     $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 5) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2519,7 +2538,7 @@ class caja_chica_model extends CI_Model {
 
     // Deudores
     $totalDeudores = 0;
-    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4) && count($caja['deudores']) > 0) {
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5) && count($caja['deudores']) > 0) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);

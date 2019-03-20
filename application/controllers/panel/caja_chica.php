@@ -21,6 +21,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
+    'caja_chica/ajax_get_movimientos/',
     'caja_chica/ajax_get_gastosdirectos/',
     'caja_chica/ajax_get_deudores/',
     'caja_chica/agregar_abono_deudor/',
@@ -131,6 +132,27 @@ class caja_chica extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
+  public function caja5()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja5/', true);
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => $privilegio->nombre);
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index5',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
   public function cargar()
   {
     $this->carabiner->js(array(
@@ -179,7 +201,7 @@ class caja_chica extends MY_Controller {
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     // $params['remisiones'] = $this->caja_chica_model->getRemisiones();
-    $params['movimientos'] = $this->caja_chica_model->getMovimientos();
+    // $params['movimientos'] = $this->caja_chica_model->getMovimientos();
     $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
 
     // echo "<pre>";
@@ -719,6 +741,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     echo json_encode($this->caja_chica_model->getRemisiones());
+  }
+
+  public function ajax_get_movimientos()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->getMovimientos());
   }
 
   public function ajax_get_gastosdirectos()
