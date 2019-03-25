@@ -105,7 +105,8 @@ class almacenes_model extends CI_Model {
 	{
 		$id_almacen = ($id_almacen!==FALSE)? $id_almacen: $_GET['id'];
 
-		$sql_res = $this->db->select("id_almacen, nombre, status" )
+		$sql_res = $this->db->select("id_almacen, nombre, status, calle, no_exterior, no_interior, colonia,
+                                  localidad, municipio, estado, pais, cp, telefono" )
 												->from("compras_almacenes")
 												->where("id_almacen", $id_almacen)
 												->get();

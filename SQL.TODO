@@ -1,4 +1,16 @@
 
+ ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct
+      ALTER TABLE public.compras_almacenes ADD COLUMN calle character varying(60);
+      ALTER TABLE public.compras_almacenes ADD COLUMN no_exterior character varying(8);
+      ALTER TABLE public.compras_almacenes ADD COLUMN no_interior character varying(8);
+      ALTER TABLE public.compras_almacenes ADD COLUMN colonia character varying(60);
+      ALTER TABLE public.compras_almacenes ADD COLUMN localidad character varying(60);
+      ALTER TABLE public.compras_almacenes ADD COLUMN municipio character varying(60);
+      ALTER TABLE public.compras_almacenes ADD COLUMN estado character varying(60);
+      ALTER TABLE public.compras_almacenes ADD COLUMN pais character varying(60) DEFAULT 'MEXICO'::character varying;
+      ALTER TABLE public.compras_almacenes ADD COLUMN cp character varying(12);
+      ALTER TABLE public.compras_almacenes ADD COLUMN telefono character varying(15);
+
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;
      ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
@@ -10,11 +22,10 @@
      COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos';
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES (5, 'Fletes', 40000);
-     -- pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 5',247,TRUE,'caja_chica/caja5/','usd',TRUE);
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|
-    -- pcc
+    -- pcc|pct
     CREATE TABLE public.nomina_calculo_anual
         (
           id_empleado bigint NOT NULL,
