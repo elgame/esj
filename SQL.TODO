@@ -1,5 +1,5 @@
 
- ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct|pcc
+ ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct|pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN calle character varying(60);
       ALTER TABLE public.compras_almacenes ADD COLUMN no_exterior character varying(8);
       ALTER TABLE public.compras_almacenes ADD COLUMN no_interior character varying(8);
@@ -10,10 +10,10 @@
       ALTER TABLE public.compras_almacenes ADD COLUMN pais character varying(60) DEFAULT 'MEXICO'::character varying;
       ALTER TABLE public.compras_almacenes ADD COLUMN cp character varying(12);
       ALTER TABLE public.compras_almacenes ADD COLUMN telefono character varying(15);
-      -- pcc
+      -- pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN horario character varying(100);
 
- ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc
+ ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc|lap|san
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;
      ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
       REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
@@ -26,8 +26,8 @@
      INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES (5, 'Fletes', 40000);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 5',247,TRUE,'caja_chica/caja5/','usd',TRUE);
 
- ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|
-    -- pcc|pct
+ ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san
+    -- pcc|pct|lap|san
     CREATE TABLE public.nomina_calculo_anual
         (
           id_empleado bigint NOT NULL,
@@ -51,7 +51,7 @@
           OWNER TO programa;
         COMMENT ON COLUMN public.nomina_calculo_anual.tipo IS 'true: isr a pagar, false: subsidio a favor';
     ALTER TABLE public.nomina_fiscal ADD COLUMN otros_datos jsonb;
-    -- lap|pcc
+    -- lap|pcc|san
     ALTER TABLE public.nomina_salarios_minimos ADD COLUMN anio bigint;
     ALTER TABLE public.nomina_diaria_art_113 ADD COLUMN anio integer DEFAULT 2018;
     ALTER TABLE public.nomina_diaria_subsidios ADD COLUMN anio integer DEFAULT 2018;
@@ -94,17 +94,17 @@
     UPDATE public.nomina_semanal_art_113 SET lim_inferior=22377.75, lim_superior=67133.22, cuota_fija=5837.23, porcentaje=34 WHERE id_art_113=10;
     UPDATE public.nomina_semanal_art_113 SET lim_inferior=67133.23, lim_superior=999999.0, cuota_fija=21054.11, porcentaje=35 WHERE id_art_113=11;
 
-    UPDATE public.nomina_diaria_subsidios SET de=0.01, hasta=407.33, subsidio=93.73 WHERE id_subsidio=1;
-    UPDATE public.nomina_diaria_subsidios SET de=407.34, hasta=610.96, subsidio=93.66 WHERE id_subsidio=2;
-    UPDATE public.nomina_diaria_subsidios SET de=610.97, hasta=799.68, subsidio=93.66 WHERE id_subsidio=3;
-    UPDATE public.nomina_diaria_subsidios SET de=799.69, hasta=814.66, subsidio=90.44 WHERE id_subsidio=4;
-    UPDATE public.nomina_diaria_subsidios SET de=814.67, hasta=1023.75, subsidio=88.06 WHERE id_subsidio=5;
-    UPDATE public.nomina_diaria_subsidios SET de=1023.76, hasta=1086.19, subsidio=81.55 WHERE id_subsidio=6;
-    UPDATE public.nomina_diaria_subsidios SET de=1086.2, hasta=1228.57, subsidio=74.83 WHERE id_subsidio=7;
-    UPDATE public.nomina_diaria_subsidios SET de=1228.58, hasta=1433.32, subsidio=67.83 WHERE id_subsidio=8;
-    UPDATE public.nomina_diaria_subsidios SET de=1433.33, hasta=1638.07, subsidio=58.38 WHERE id_subsidio=9;
-    UPDATE public.nomina_diaria_subsidios SET de=1638.08, hasta=1699.88, subsidio=50.12 WHERE id_subsidio=10;
-    UPDATE public.nomina_diaria_subsidios SET de=1699.89, hasta=999999.0, subsidio=0.0 WHERE id_subsidio=11;
+    UPDATE public.nomina_semanal_subsidios SET de=0.01, hasta=407.33, subsidio=93.73 WHERE id_subsidio=1;
+    UPDATE public.nomina_semanal_subsidios SET de=407.34, hasta=610.96, subsidio=93.66 WHERE id_subsidio=2;
+    UPDATE public.nomina_semanal_subsidios SET de=610.97, hasta=799.68, subsidio=93.66 WHERE id_subsidio=3;
+    UPDATE public.nomina_semanal_subsidios SET de=799.69, hasta=814.66, subsidio=90.44 WHERE id_subsidio=4;
+    UPDATE public.nomina_semanal_subsidios SET de=814.67, hasta=1023.75, subsidio=88.06 WHERE id_subsidio=5;
+    UPDATE public.nomina_semanal_subsidios SET de=1023.76, hasta=1086.19, subsidio=81.55 WHERE id_subsidio=6;
+    UPDATE public.nomina_semanal_subsidios SET de=1086.2, hasta=1228.57, subsidio=74.83 WHERE id_subsidio=7;
+    UPDATE public.nomina_semanal_subsidios SET de=1228.58, hasta=1433.32, subsidio=67.83 WHERE id_subsidio=8;
+    UPDATE public.nomina_semanal_subsidios SET de=1433.33, hasta=1638.07, subsidio=58.38 WHERE id_subsidio=9;
+    UPDATE public.nomina_semanal_subsidios SET de=1638.08, hasta=1699.88, subsidio=50.12 WHERE id_subsidio=10;
+    UPDATE public.nomina_semanal_subsidios SET de=1699.89, hasta=999999.0, subsidio=0.0 WHERE id_subsidio=11;
 
  ✔ Correciones de nomina timbrado correcto @done (19-02-13 21:07) pcc|pct|lap|san
     CREATE TABLE public.nomina_fiscal_canceladas
