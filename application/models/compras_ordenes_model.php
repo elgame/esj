@@ -1438,8 +1438,13 @@ class compras_ordenes_model extends CI_Model {
    {
       $this->load->model('compras_areas_model');
       $this->load->model('catalogos_sft_model');
+      $this->load->model('proveedores_model');
+      $this->load->model('almacenes_model');
 
       $orden = $this->info($ordenId, true);
+      $almacen = $this->almacenes_model->getAlmacenInfo($orden['info'][0]->id_almacen);
+      $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
+      $proveedor_cuentas = $this->proveedores_model->getCuentas($orden['info'][0]->id_proveedor);
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
@@ -1457,28 +1462,129 @@ class compras_ordenes_model extends CI_Model {
       // $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
       // $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->folio;
 
-      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
-
       $pdf->AliasNbPages();
+      $pdf->limiteY = 235;
+      $pdf->show_head = false;
       $pdf->AddPage();
 
-      $pdf->Text(182, 15, 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones));
+      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+      if($pdf->logo != '')
+        $pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), 6, 5, 50);
 
-      $pdf->SetXY(6, $pdf->GetY()-10);
-
+      $pdf->SetXY(150, $pdf->GetY());
+      $pdf->SetFillColor(160,160,160);
       $pdf->SetFont('helvetica','B', 10);
-      $pdf->SetAligns(array('L', 'R'));
-      $pdf->SetWidths(array(150, 50));
-      $pdf->Row(array(
-        $tipo_orden,
-        'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
-      ), false, false);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(60));
+      $pdf->Row(array($tipo_orden), true, true);
+      $pdf->SetXY(150, $pdf->GetY());
+      $pdf->Row(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, '').
+        "\n".MyString::fechaATexto($orden['info'][0]->fecha, '/c', true)), false, true);
+      $pdf->SetXY(150, $pdf->GetY());
+      $pdf->Row(array(), false, true);
+
+      $pdf->SetFont('helvetica','', 9);
+      $pdf->SetXY(80, $pdf->GetY()-20);
+      $pdf->Row(array('Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones).
+        "\n".MyString::fechaATexto(date("Y-m-d H:i:s"), '/c', true)), false, false);
+
+      $pdf->SetXY(95, $pdf->GetY()+4);
+      $aux_y1 = $pdf->getY();
+
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array('Modo de Facturación'), false, false);
       $pdf->SetFont('helvetica','', 8);
-      $pdf->SetX(6);
-      $pdf->Row(array(
-        'PROVEEDOR: ' . $orden['info'][0]->proveedor,
-        MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
-      ), false, false);
+      $pdf->SetWidths(array(30, 50));
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Condiciones:', ($proveedor['info']->condicion_pago=='cr'? 'Contado': "Crédito {$proveedor['info']->dias_credito} DIAS")), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Forma de Pago:', "99 (Por Definir)"), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Uso del CFDI:', "G03 (Gastos en General)"), false, false);
+
+      $pdf->SetXY(95, $pdf->GetY()+3);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array('Complementos de Pago'), false, false);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetWidths(array(30, 40));
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Método de Pago:', 'Transferencia'), false, false);
+      $pdf->SetWidths(array(30, 40, 40));
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Cta. Ordenante:', "Banamex", "Banamex"), false, false);
+      if (count($proveedor_cuentas) > 0) {
+        $pdf->SetXY(95, $pdf->GetY()-1.5);
+        $pdf->Row(array('Cta. Beneficiario:', $proveedor_cuentas[0]->banco, $proveedor_cuentas[0]->cuenta), false, false);
+        $pdf->SetWidths(array(30, 40));
+        $pdf->SetXY(95, $pdf->GetY()-1.5);
+        $pdf->Row(array('Ref Bancaria:', $proveedor_cuentas[0]->referencia), false, false);
+      }
+
+      $pdf->SetXY(95, $pdf->GetY()+3);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array('Requisitos para la Entrega de Mercancía'), false, false);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('[ ] Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('[ ] Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
+
+      $aux_y2 = $pdf->GetY();
+
+      $pdf->SetXY(5, $aux_y1+15);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(90));
+      $pdf->Row(array('Proveedor / Beneficiario'), false, false);
+      $pdf->SetFont('helvetica', '', 8);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $pdf->Row(array($proveedor['info']->nombre_fiscal), false, false);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $direccion = ($proveedor['info']->calle!=''? $proveedor['info']->calle: '').
+        ($proveedor['info']->no_exterior!=''? " No {$proveedor['info']->no_exterior}": '').
+        ($proveedor['info']->no_interior!=''? " {$proveedor['info']->no_interior}": '').
+        ($proveedor['info']->cp!=''? ", CP {$proveedor['info']->cp}": '').
+        ($proveedor['info']->colonia!=''? ", Col. {$proveedor['info']->colonia}": '').
+        ($proveedor['info']->municipio!=''? " {$proveedor['info']->municipio}": '').
+        ($proveedor['info']->estado!=''? " {$proveedor['info']->estado}": '');
+      $pdf->Row(array($direccion), false, false);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $pdf->Row(array("RFC {$proveedor['info']->rfc} / Tel. {$proveedor['info']->telefono}"), false, false);
+
+      $pdf->SetXY(5, $pdf->GetY()+3);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(90));
+      $pdf->Row(array('Dirección de Entrega'), false, false);
+      $pdf->SetFont('helvetica', '', 8);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $pdf->Row(array($proveedor['info']->nombre_fiscal), false, false);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $direccion = ($almacen['info']->calle!=''? $almacen['info']->calle: '').
+        ($almacen['info']->no_exterior!=''? " No {$almacen['info']->no_exterior}": '').
+        ($almacen['info']->no_interior!=''? " {$almacen['info']->no_interior}": '').
+        ($almacen['info']->cp!=''? ", CP {$almacen['info']->cp}": '').
+        ($almacen['info']->colonia!=''? ", Col. {$almacen['info']->colonia}": '').
+        ($almacen['info']->municipio!=''? " {$almacen['info']->municipio}": '').
+        ($almacen['info']->estado!=''? " {$almacen['info']->estado}": '');
+      $pdf->Row(array($direccion), false, false);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetXY(5, $pdf->GetY()-1.5);
+      $pdf->Row(array("Horario de Entrega: {$almacen['info']->horario}"), false, false);
+
+      if ($aux_y2 > $pdf->getY()) {
+        $pdf->SetY($aux_y2);
+      }
+
+      $pdf->SetY($pdf->getY()+5);
 
       $aligns = array('C', 'C', 'L', 'R', 'R');
       $widths = array(25, 35, 76, 18, 25, 25);

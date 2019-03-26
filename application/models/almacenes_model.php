@@ -64,7 +64,17 @@ class almacenes_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-        'nombre'  => $this->input->post('nombre')
+        'nombre'      => $this->input->post('nombre'),
+        'calle'       => $this->input->post('dcalle'),
+        'no_exterior' => $this->input->post('dno_exterior'),
+        'no_interior' => $this->input->post('dno_interior'),
+        'colonia'     => $this->input->post('dcolonia'),
+        'localidad'   => $this->input->post('dlocalidad'),
+        'municipio'   => $this->input->post('dmunicipio'),
+        'estado'      => $this->input->post('destado'),
+        'cp'          => $this->input->post('dcp'),
+        'telefono'    => $this->input->post('dtelefono'),
+        'horario'     => $this->input->post('dhorario'),
 			);
 		}
 
@@ -86,7 +96,17 @@ class almacenes_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-			 'nombre' => $this->input->post('nombre')
+        'nombre'      => $this->input->post('nombre'),
+        'calle'       => $this->input->post('dcalle'),
+        'no_exterior' => $this->input->post('dno_exterior'),
+        'no_interior' => $this->input->post('dno_interior'),
+        'colonia'     => $this->input->post('dcolonia'),
+        'localidad'   => $this->input->post('dlocalidad'),
+        'municipio'   => $this->input->post('dmunicipio'),
+        'estado'      => $this->input->post('destado'),
+        'cp'          => $this->input->post('dcp'),
+        'telefono'    => $this->input->post('dtelefono'),
+        'horario'     => $this->input->post('dhorario'),
 			);
 		}
 
@@ -106,7 +126,7 @@ class almacenes_model extends CI_Model {
 		$id_almacen = ($id_almacen!==FALSE)? $id_almacen: $_GET['id'];
 
 		$sql_res = $this->db->select("id_almacen, nombre, status, calle, no_exterior, no_interior, colonia,
-                                  localidad, municipio, estado, pais, cp, telefono" )
+                                  localidad, municipio, estado, pais, cp, telefono, horario" )
 												->from("compras_almacenes")
 												->where("id_almacen", $id_almacen)
 												->get();

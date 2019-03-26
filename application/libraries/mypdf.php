@@ -40,7 +40,7 @@ class MYpdf extends FPDF {
     public function Header() {
     	if($this->show_head){
 	        // Logo
-            if($this->logo != '')
+        if($this->logo != '')
 		      $this->Image(APPPATH.(str_replace(APPPATH, '', $this->logo)), 6, 5, 20);
 		    $this->SetFont('Arial','',5);
 		    //$this->Text(6, 15, 'EXTINTORES Y SISTEMAS CONTRA INCENDIOS');
@@ -51,7 +51,7 @@ class MYpdf extends FPDF {
 		    $this->Ln(20);
     	}
 
-        $this->auxy = 0;
+      $this->auxy = 0;
     }
 
     // Page footer

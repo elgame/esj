@@ -1,5 +1,5 @@
 
- ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct
+ ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct|pcc
       ALTER TABLE public.compras_almacenes ADD COLUMN calle character varying(60);
       ALTER TABLE public.compras_almacenes ADD COLUMN no_exterior character varying(8);
       ALTER TABLE public.compras_almacenes ADD COLUMN no_interior character varying(8);
@@ -10,6 +10,8 @@
       ALTER TABLE public.compras_almacenes ADD COLUMN pais character varying(60) DEFAULT 'MEXICO'::character varying;
       ALTER TABLE public.compras_almacenes ADD COLUMN cp character varying(12);
       ALTER TABLE public.compras_almacenes ADD COLUMN telefono character varying(15);
+      -- pcc
+      ALTER TABLE public.compras_almacenes ADD COLUMN horario character varying(100);
 
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;

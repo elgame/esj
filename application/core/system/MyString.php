@@ -484,7 +484,7 @@ class MyString {
    * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'in')
    * @return  string  fecha_en_formato_texto
    */
-  public static function fechaATexto($fecha, $formato = 'c') {
+  public static function fechaATexto($fecha, $formato = 'c', $conHr = false) {
 
     // Validamos que la cadena satisfaga el formato deseado y almacenamos las partes
     if (preg_match("/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $fecha, $partes)) {
@@ -492,10 +492,16 @@ class MyString {
       // $partes[1] contiene el año
       // $partes[2] contiene el número de mes
       // $partes[3] contiene el número del día
+
+      $hr = '';
+      if ($conHr) {
+        $hr = ' | '.substr($fecha, 11, 8);
+      }
+
       if($formato == '/c')
-        return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1];
+        return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1] . $hr;
       elseif($formato == 'in')
-        return $partes[3] .'/'. $partes[2] .'/'. $partes[1];
+        return $partes[3] .'/'. $partes[2] .'/'. $partes[1] . $hr;
       else{
         $mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
         if ($formato == 'u') {
@@ -503,7 +509,7 @@ class MyString {
         } elseif ($formato == 'l') {
           $mes = strtolower($mes);
         }
-        return $partes[3] . $mes . $partes[1];
+        return $partes[3] . $mes . $partes[1] . $hr;
       }
 
     } else {
