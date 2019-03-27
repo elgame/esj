@@ -137,6 +137,20 @@ class compras_requisicion_model extends CI_Model {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
     }
+    // Si trae datos extras
+    $data['otros_datos'] = [];
+    if ($this->input->post('infRecogerProv') != false) {
+      $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+      $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+    }
+    if ($this->input->post('infPasarBascula') != false) {
+      $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+    }
+    if ($this->input->post('infEntOrdenCom') != false) {
+      $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+    }
+    $data['otros_datos'] = json_encode($data['otros_datos']);
+
     $this->db->insert('compras_requisicion', $data);
     $ordenId = $this->db->insert_id();
 
@@ -374,6 +388,20 @@ class compras_requisicion_model extends CI_Model {
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       }
 
+      // Si trae datos extras
+      $data['otros_datos'] = [];
+      if ($this->input->post('infRecogerProv') != false) {
+        $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+        $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+      }
+      if ($this->input->post('infPasarBascula') != false) {
+        $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+      }
+      if ($this->input->post('infEntOrdenCom') != false) {
+        $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+      }
+      $data['otros_datos'] = json_encode($data['otros_datos']);
+
       // Bitacora
       $id_bitacora = $this->bitacora_model->_update('compras_requisicion', $idOrden, $data,
                                 array(':accion'       => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
@@ -589,6 +617,14 @@ class compras_requisicion_model extends CI_Model {
             );
           }
         }
+
+        // Si trae datos extras
+        $dataOrden['otros_datos'] = [];
+        if (isset($data->otros_datos->infRecogerProv) || isset($data->otros_datos->infPasarBascula) ||
+            isset($data->otros_datos->infEntOrdenCom)) {
+          $dataOrden['otros_datos'] = $data->otros_datos;
+        }
+        $dataOrden['otros_datos'] = json_encode($dataOrden['otros_datos']);
 
         $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
         $id_orden = $res['id_orden'];
@@ -821,7 +857,8 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
               co.flete_de, co.id_almacen,
-              co.id_area, co.id_activo
+              co.id_area, co.id_activo,
+              otros_datos
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
@@ -835,6 +872,8 @@ class compras_requisicion_model extends CI_Model {
     if ($query->num_rows() > 0)
     {
       $data['info'] = $query->result();
+
+      $data['info'][0]->otros_datos = json_decode($data['info'][0]->otros_datos);
 
       $query->free_result();
       if ($full)

@@ -703,7 +703,8 @@ class compras_ordenes_model extends CI_Model {
               co.id_almacen, ca.nombre AS almacen,
               co.cont_x_dia,
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
-              co.id_area, co.id_activo
+              co.id_area, co.id_activo,
+              otros_datos
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -720,6 +721,8 @@ class compras_ordenes_model extends CI_Model {
     if ($query->num_rows() > 0)
     {
       $data['info'] = $query->result();
+
+      $data['info'][0]->otros_datos = json_decode($data['info'][0]->otros_datos);
 
       $query->free_result();
       if ($full)
@@ -1478,10 +1481,12 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetWidths(array(60));
       $pdf->Row(array($tipo_orden), true, true);
       $pdf->SetXY(150, $pdf->GetY());
-      $pdf->Row(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, '').
-        "\n".MyString::fechaATexto($orden['info'][0]->fecha, '/c', true)), false, true);
+      $pdf->Row(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, '')."\n \n "), false, true);
+      $pdf->SetFont('helvetica','B', 8.5);
+      $pdf->SetXY(150, $pdf->GetY()-8);
+      $pdf->Row(array(MyString::fechaATexto($orden['info'][0]->fecha, '/c', true)), false, false);
+      $pdf->SetFont('helvetica','B', 10);
       $pdf->SetXY(150, $pdf->GetY());
-      $pdf->Row(array(), false, true);
 
       $pdf->SetFont('helvetica','', 9);
       $pdf->SetXY(80, $pdf->GetY()-20);

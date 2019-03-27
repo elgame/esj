@@ -288,6 +288,46 @@
             </div>
           </div>
 
+          <div class="row-fluid" id="groupInfoExt">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Información extra</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span12">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="infRecogerProv">Recoger con el proveedor </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="checkbox" data-uniform="false" name="infRecogerProv" id="infRecogerProv" value="si" <?php echo set_checkbox('infRecogerProv', 'si', isset($orden['info'][0]->otros_datos->infRecogerProv) ? true : false) ?>>
+                          <input type="text" name="infRecogerProvNom" class="span11" id="infRecogerProvNom" value="<?php echo set_value('infRecogerProvNom', isset($orden['info'][0]->otros_datos->infRecogerProvNom) ? $orden['info'][0]->otros_datos->infRecogerProvNom : '') ?>" placeholder="Nombre quien recoge">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Requisitos para la entrega de mercancias </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <label id="infPasarBascula"><input type="checkbox" data-uniform="false" name="infPasarBascula" id="infPasarBascula" value="si" <?php echo set_checkbox('infPasarBascula', 'si', isset($orden['info'][0]->otros_datos->infPasarBascula) ? true : false) ?>>
+                          Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.</label>
+                          <label id="infEntOrdenCom"><input type="checkbox" data-uniform="false" name="infEntOrdenCom" id="infEntOrdenCom" value="si" <?php echo set_checkbox('infEntOrdenCom', 'si', isset($orden['info'][0]->otros_datos->infEntOrdenCom) ? true : false) ?>>
+                          Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura</label>
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
           <!-- Box Productos -->
           <div class="row-fluid" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : ($orden['info'][0]->id_vehiculo > 0 ? 'block' : 'none') ?>;">
             <div class="box span12">

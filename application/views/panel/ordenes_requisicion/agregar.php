@@ -265,6 +265,46 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
+          <div class="row-fluid" id="groupInfoExt">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Información extra</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span12">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="infRecogerProv">Recoger con el proveedor </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="checkbox" data-uniform="false" name="infRecogerProv" id="infRecogerProv" value="si" <?php echo set_value('infRecogerProv') ?>>
+                          <input type="text" name="infRecogerProvNom" class="span11" id="infRecogerProvNom" value="" placeholder="Nombre quien recoge">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Requisitos para la entrega de mercancias </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <label><input type="checkbox" data-uniform="false" name="infPasarBascula" id="infPasarBascula" value="si" <?php echo set_value('infPasarBascula') ?>>
+                          Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.</label>
+                          <label><input type="checkbox" data-uniform="false" name="infEntOrdenCom" id="infEntOrdenCom" value="si" <?php echo set_value('infEntOrdenCom') ?>>
+                          Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura</label>
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
           <div class="row-fluid" id="groupCatalogos" style="display: <?php echo isset($_POST['tipoOrden']) ? ($_POST['tipoOrden'] !== 'p' ? 'block' : 'none') : 'none' ?>;">  <!-- Box catalogos-->
             <div class="box span12">
               <div class="box-header well" data-original-title>
