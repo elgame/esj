@@ -353,6 +353,24 @@ class compras_ordenes_model extends CI_Model {
         $data['ids_facrem'] = $_POST['remfacs'];
       }
 
+      // Si trae datos extras
+      $data['otros_datos'] = [];
+      if ($this->input->post('infRecogerProv') != false) {
+        $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+        $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+      }
+      if ($this->input->post('infPasarBascula') != false) {
+        $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+      }
+      if ($this->input->post('infEntOrdenCom') != false) {
+        $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+      }
+      if ($this->input->post('infCotizacion') != false) {
+        $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+      }
+      $data['otros_datos'] = json_encode($data['otros_datos']);
+
+
       // Bitacora
       $id_bitacora = $this->bitacora_model->_update('compras_ordenes', $idOrden, $data,
                                 array(':accion'       => ($data['status']=='a'? 'acepto ': 'modifico ').'la orden de compra', ':seccion' => 'ordenes de compra',
@@ -1120,6 +1138,24 @@ class compras_ordenes_model extends CI_Model {
       $data['id_vehiculo'] = null;
     }
 
+    // Si trae datos extras
+    $data['otros_datos'] = [];
+    if ($this->input->post('infRecogerProv') != false) {
+      $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+      $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+    }
+    if ($this->input->post('infPasarBascula') != false) {
+      $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+    }
+    if ($this->input->post('infEntOrdenCom') != false) {
+      $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+    }
+    if ($this->input->post('infCotizacion') != false) {
+      $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+    }
+    $data['otros_datos'] = json_encode($data['otros_datos']);
+
+
     $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     $this->actualizar($idOrden, $data, $productos);
@@ -1443,8 +1479,10 @@ class compras_ordenes_model extends CI_Model {
       $this->load->model('catalogos_sft_model');
       $this->load->model('proveedores_model');
       $this->load->model('almacenes_model');
+      $this->load->model('banco_cuentas_model');
 
       $orden = $this->info($ordenId, true);
+      $emp_cuenta = $this->banco_cuentas_model->getCuentaConcentradora($orden['info'][0]->id_empresa);
       $almacen = $this->almacenes_model->getAlmacenInfo($orden['info'][0]->id_almacen);
       $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
       $proveedor_cuentas = $this->proveedores_model->getCuentas($orden['info'][0]->id_proveedor);
@@ -1521,8 +1559,10 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Método de Pago:', 'Transferencia'), false, false);
       $pdf->SetWidths(array(30, 40, 40));
-      $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('Cta. Ordenante:', "Banamex", "Banamex"), false, false);
+      if (isset($emp_cuenta['info']->id_cuenta)) {
+        $pdf->SetXY(95, $pdf->GetY()-1.5);
+        $pdf->Row(array('Cta. Ordenante:', $emp_cuenta['info']->banco, $emp_cuenta['info']->cuenta), false, false);
+      }
       if (count($proveedor_cuentas) > 0) {
         $pdf->SetXY(95, $pdf->GetY()-1.5);
         $pdf->Row(array('Cta. Beneficiario:', $proveedor_cuentas[0]->banco, $proveedor_cuentas[0]->cuenta), false, false);
@@ -1538,9 +1578,9 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('Requisitos para la Entrega de Mercancía'), false, false);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('[ ] Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
+      $pdf->Row(array('['.(isset($orden['info'][0]->otros_datos->infPasarBascula)? 'Si': 'No').'] Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('[ ] Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
+      $pdf->Row(array('['.(isset($orden['info'][0]->otros_datos->infEntOrdenCom)? 'Si': 'No').'] Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
 
       $aux_y2 = $pdf->GetY();
 
@@ -1573,17 +1613,21 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetXY(5, $pdf->GetY()-1.5);
       $pdf->Row(array($proveedor['info']->nombre_fiscal), false, false);
       $pdf->SetXY(5, $pdf->GetY()-1.5);
-      $direccion = ($almacen['info']->calle!=''? $almacen['info']->calle: '').
-        ($almacen['info']->no_exterior!=''? " No {$almacen['info']->no_exterior}": '').
-        ($almacen['info']->no_interior!=''? " {$almacen['info']->no_interior}": '').
-        ($almacen['info']->cp!=''? ", CP {$almacen['info']->cp}": '').
-        ($almacen['info']->colonia!=''? ", Col. {$almacen['info']->colonia}": '').
-        ($almacen['info']->municipio!=''? " {$almacen['info']->municipio}": '').
-        ($almacen['info']->estado!=''? " {$almacen['info']->estado}": '');
-      $pdf->Row(array($direccion), false, false);
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->SetXY(5, $pdf->GetY()-1.5);
-      $pdf->Row(array("Horario de Entrega: {$almacen['info']->horario}"), false, false);
+      if (isset($orden['info'][0]->otros_datos->infRecogerProv)) {
+        $pdf->Row(array("Entregar la mercancía a: \n{$orden['info'][0]->otros_datos->infRecogerProvNom}"), false, false);
+      } else {
+        $direccion = ($almacen['info']->calle!=''? $almacen['info']->calle: '').
+          ($almacen['info']->no_exterior!=''? " No {$almacen['info']->no_exterior}": '').
+          ($almacen['info']->no_interior!=''? " {$almacen['info']->no_interior}": '').
+          ($almacen['info']->cp!=''? ", CP {$almacen['info']->cp}": '').
+          ($almacen['info']->colonia!=''? ", Col. {$almacen['info']->colonia}": '').
+          ($almacen['info']->municipio!=''? " {$almacen['info']->municipio}": '').
+          ($almacen['info']->estado!=''? " {$almacen['info']->estado}": '');
+        $pdf->Row(array($direccion), false, false);
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetXY(5, $pdf->GetY()-1.5);
+        $pdf->Row(array("Horario de Entrega: {$almacen['info']->horario}"), false, false);
+      }
 
       if ($aux_y2 > $pdf->getY()) {
         $pdf->SetY($aux_y2);

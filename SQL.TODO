@@ -12,9 +12,11 @@
       ALTER TABLE public.compras_almacenes ADD COLUMN telefono character varying(15);
       -- pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN horario character varying(100);
-      -- lap|san
       ALTER TABLE compras_requisicion ADD COLUMN otros_datos json;
       ALTER TABLE compras_ordenes ADD COLUMN otros_datos json;
+      -- pcc
+      ALTER TABLE public.banco_cuentas ADD COLUMN es_concentradora boolean NOT NULL DEFAULT false;
+      COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
 
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc|lap|san
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;

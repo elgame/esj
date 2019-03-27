@@ -1285,14 +1285,15 @@ class banco_cuentas_model extends banco_model {
 		if ($data==NULL)
 		{
 			$data = array(
-            'id_empresa' => $this->input->post('did_empresa'),
-            'id_banco'   => $this->input->post('fbanco'),
-            'numero'     => $this->input->post('fnumero'),
-            'alias'      => $this->input->post('falias'),
-            'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
-            'sucursal'   => $this->input->post('fsucursal'),
-            'tipo'       => $this->input->post('ftipo'),
-						);
+        'id_empresa'       => $this->input->post('did_empresa'),
+        'id_banco'         => $this->input->post('fbanco'),
+        'numero'           => $this->input->post('fnumero'),
+        'alias'            => $this->input->post('falias'),
+        'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
+        'sucursal'         => $this->input->post('fsucursal'),
+        'tipo'             => $this->input->post('ftipo'),
+        'es_concentradora' => ($this->input->post('fes_concentradora')=='si'? 't': 'f'),
+      );
 		}
 
 		$this->db->insert('banco_cuentas', $data);
@@ -1313,15 +1314,16 @@ class banco_cuentas_model extends banco_model {
 		if ($data==NULL)
 		{
 			$data = array(
-            'id_empresa'    => $this->input->post('did_empresa'),
-            'id_banco'      => $this->input->post('fbanco'),
-            'numero'        => $this->input->post('fnumero'),
-            'alias'         => $this->input->post('falias'),
-            'cuenta_cpi'    => $this->input->post('fcuenta_cpi'),
-            'sucursal'      => $this->input->post('fsucursal'),
-            'numero_cheque' => $this->input->post('fnumero_cheque'),
-            'tipo'          => $this->input->post('ftipo'),
-						);
+        'id_empresa'       => $this->input->post('did_empresa'),
+        'id_banco'         => $this->input->post('fbanco'),
+        'numero'           => $this->input->post('fnumero'),
+        'alias'            => $this->input->post('falias'),
+        'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
+        'sucursal'         => $this->input->post('fsucursal'),
+        'numero_cheque'    => $this->input->post('fnumero_cheque'),
+        'tipo'             => $this->input->post('ftipo'),
+        'es_concentradora' => ($this->input->post('fes_concentradora')=='si'? 't': 'f'),
+      );
 		}
 
 		$this->db->update('banco_cuentas', $data, array('id_cuenta' => $id_cuenta));
@@ -1345,7 +1347,7 @@ class banco_cuentas_model extends banco_model {
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)
-										) AS saldo, bc.tipo, bc.formato_cheque
+										) AS saldo, bc.tipo, bc.formato_cheque, bc.es_concentradora
                  FROM banco_cuentas AS bc
                  		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
 										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
@@ -1358,6 +1360,22 @@ class banco_cuentas_model extends banco_model {
 
 		return $data;
 	}
+
+  public function getCuentaConcentradora($id_empresa)
+  {
+    $sql_res = $this->db->query(
+                "SELECT bc.id_cuenta, bb.id_banco, bb.nombre AS banco, bc.alias, bc.numero AS cuenta, bc.sucursal
+                 FROM banco_cuentas AS bc
+                    INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
+                 WHERE bc.id_empresa = {$id_empresa} AND bc.es_concentradora = 't' LIMIT 1");
+    $data['info'] = array();
+
+    if ($sql_res->num_rows() > 0)
+      $data['info'] = $sql_res->row();
+    $sql_res->free_result();
+
+    return $data;
+  }
 
 	// /**
 	//  * Obtiene el listado de proveedores para usar ajax

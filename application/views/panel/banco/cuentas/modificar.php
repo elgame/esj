@@ -102,6 +102,13 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fes_concentradora">Cuenta Concentradora </label>
+                  <div class="controls">
+                    <input type="checkbox" name="fes_concentradora" id="fes_concentradora" value="si" <?php echo set_checkbox('fes_concentradora', 'si', ($data->es_concentradora=='t'? true: false)); ?> data-uniform="false">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
                   <a href="<?php echo base_url('panel/banco/cuentas/'); ?>" class="btn">Cancelar</a>
