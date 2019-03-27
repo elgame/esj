@@ -10,11 +10,10 @@
       ALTER TABLE public.compras_almacenes ADD COLUMN pais character varying(60) DEFAULT 'MEXICO'::character varying;
       ALTER TABLE public.compras_almacenes ADD COLUMN cp character varying(12);
       ALTER TABLE public.compras_almacenes ADD COLUMN telefono character varying(15);
-      -- pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN horario character varying(100);
       ALTER TABLE compras_requisicion ADD COLUMN otros_datos json;
       ALTER TABLE compras_ordenes ADD COLUMN otros_datos json;
-      -- pcc
+      -- pcc|pct
       ALTER TABLE public.banco_cuentas ADD COLUMN es_concentradora boolean NOT NULL DEFAULT false;
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
 
@@ -31,8 +30,7 @@
      INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES (5, 'Fletes', 40000);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 5',247,TRUE,'caja_chica/caja5/','usd',TRUE);
 
- ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san
-    -- pcc|pct|lap|san
+ ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san|pct
     CREATE TABLE public.nomina_calculo_anual
         (
           id_empleado bigint NOT NULL,
@@ -56,7 +54,6 @@
           OWNER TO programa;
         COMMENT ON COLUMN public.nomina_calculo_anual.tipo IS 'true: isr a pagar, false: subsidio a favor';
     ALTER TABLE public.nomina_fiscal ADD COLUMN otros_datos jsonb;
-    -- lap|pcc|san
     ALTER TABLE public.nomina_salarios_minimos ADD COLUMN anio bigint;
     ALTER TABLE public.nomina_diaria_art_113 ADD COLUMN anio integer DEFAULT 2018;
     ALTER TABLE public.nomina_diaria_subsidios ADD COLUMN anio integer DEFAULT 2018;

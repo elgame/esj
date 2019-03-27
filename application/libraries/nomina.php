@@ -1180,17 +1180,21 @@ class nomina
         //   var_dump($this->empleado);
         // echo "</pre>";exit;
       } else { // subsidio a pagar
-        $this->empleado->calculo_anual->desc_abon = $this->empleado->calculo_anual->saldo;
-        $remanenteSalFav = $this->empleado->calculo_anual->saldo - $this->empleado->calculo_anual->saldo;
+        $subsidio = $this->empleado->calculo_anual->saldo;
+        if ($this->empleado->calculo_anual->saldo > $this->empleado->nomina->isr) {
+          $subsidio = $this->empleado->nomina->isr;
+        }
+        $this->empleado->calculo_anual->desc_abon = $subsidio;
+        $remanenteSalFav = $this->empleado->calculo_anual->saldo - $subsidio;
 
         $this->empleado->nomina->otrosPagos['subsidioAnual'] = array(
           'TipoOtroPago'    => '004',
           'Clave'           => $this->clavesPatron['subsidio'],
           'Concepto'        => 'Saldo favor compensación anual',
           'ImporteGravado'  => 0,
-          'ImporteExcento'  => round($this->empleado->calculo_anual->saldo, 2),
-          'total'           => round($this->empleado->calculo_anual->saldo, 2) + 0,
-          'saldoAFavor'     => round($this->empleado->calculo_anual->monto, 2) + 0,
+          'ImporteExcento'  => round($subsidio, 2),
+          'total'           => round($subsidio, 2) + 0,
+          'saldoAFavor'     => round($this->empleado->calculo_anual->saldo, 2) + 0,
           'año'             => round($this->empleado->calculo_anual->anio, 2) + 0,
           'remanenteSalFav' => round($remanenteSalFav, 2) + 0,
           'ApiKey'          => 'top_saldo_favor_compensacion_',
