@@ -33,6 +33,7 @@
 
     eventLigarFacturas();
     eventLigarBoletas();
+    eventLigarBoletasEntrada();
 
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
@@ -710,6 +711,7 @@
 
       getBoletas();
       $("#modal-boletas").modal('show');
+      $("#modal-boletas #BtnAddBoleta").removeClass('entrada');
     });
 
     // $(".filTipoFacturas").on('change', function(event) {
@@ -718,26 +720,56 @@
     $("#filBoleta").on('change', function(event) {
       getBoletas();
     });
+    setBoletasSel();
+    $("#boletasLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var setBoletasSel = function () {
     $("#BtnAddBoleta").on('click', function(event) {
       var selected = $(".radioBoleta:checked"), facts = '', folios = '';
+
       selected.each(function(index, el) {
         var $this = $(this);
         facts += $this.val()+'|';
         folios += $this.attr("data-folio")+' | ';
       });
 
-      $("#boletasLigada").html(folios+' <input type="hidden" name="boletas" value="'+facts+'"><input type="hidden" name="boletas_folio" value="'+folios+'">');
+      if ($("#BtnAddBoleta").is('.entrada')) {
+        $("#boletasEntrada").html(folios+' <input type="hidden" name="boletasEntradaId" value="'+facts+'"><input type="hidden" name="boletasEntradaFolio" value="'+folios+'">');
+      } else {
+        $("#boletasLigada").html(folios+' <input type="hidden" name="boletas" value="'+facts+'"><input type="hidden" name="boletas_folio" value="'+folios+'">');
+      }
+
       $("#modal-boletas").modal('hide');
     });
-    $("#boletasLigada").on('click', function(event) {
+  };
+
+  // Datos extras
+  var eventLigarBoletasEntrada = function () {
+    $("#show-boletasEntrada").on('click', function(event) {
+      // $(".filTipoFacturas").removeAttr('checked');
+      // $(".filTipoFacturas:first").attr('checked', 'checked');
+      $("#filBoleta").val("");
+
+      getBoletas(['en', 'sa', 'p', 'b']);
+      $("#modal-boletas").modal('show');
+      $("#modal-boletas #BtnAddBoleta").addClass('entrada');
+    });
+
+    $("#filBoleta").on('change', function(event) {
+      getBoletas(['en', 'sa', 'p', 'b']);
+    });
+    $("#boletasEntrada").on('click', function(event) {
       $(this).html("");
     });
   };
 
-  var getBoletas = function(tipo){
+  var getBoletas = function(accion){
     var params = {
       // clienteId: $("#clienteId").val(),
-      // tipo: (tipo? tipo: 'f'),
+      accion: (accion? accion: ['en', 'p', 'b']),
       filtro: $("#filBoleta").val()
     };
     $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
@@ -748,6 +780,7 @@
         '  <td>'+json[i].fecha+'</td>'+
         '  <td>'+json[i].folio+'</td>'+
         '  <td>'+json[i].proveedor+'</td>'+
+        '  <td>'+json[i].area+'</td>'+
         '</tr>';
       }
       $("#table-boletas tbody").html(html);
