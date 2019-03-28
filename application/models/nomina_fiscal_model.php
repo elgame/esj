@@ -313,7 +313,7 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
          LEFT JOIN (
           SELECT id_empleado,
-            (Sum(sueldo_semanal)/COALESCE(Sum(dias_trabajados), 1))+(Sum(horas_extras_grabable)/COALESCE(Sum(dias_trabajados), 1))+(Sum(pasistencia)/COALESCE(Sum(dias_trabajados), 1)) AS base_semana_ord_gravada
+            (Sum(sueldo_semanal)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1))+(Sum(horas_extras_grabable)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1))+(Sum(pasistencia)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1)) AS base_semana_ord_gravada
           FROM nomina_fiscal
           WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']}
           GROUP BY id_empleado
@@ -411,7 +411,7 @@ class nomina_fiscal_model extends CI_Model {
           LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
           LEFT JOIN (
             SELECT id_empleado,
-              (Sum(sueldo_semanal)/COALESCE(Sum(dias_trabajados), 1))+(Sum(horas_extras_grabable)/COALESCE(Sum(dias_trabajados), 1))+(Sum(pasistencia)/COALESCE(Sum(dias_trabajados), 1)) AS base_semana_ord_gravada
+              (Sum(sueldo_semanal)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1))+(Sum(horas_extras_grabable)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1))+(Sum(pasistencia)/COALESCE(NULLIF(Sum(dias_trabajados), 0), 1)) AS base_semana_ord_gravada
             FROM nomina_fiscal
             WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anioPtu}
             GROUP BY id_empleado
