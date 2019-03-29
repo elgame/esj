@@ -1860,7 +1860,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetWidths(array(205));
       $pdf->SetFont('Arial', 'B', 8);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array('ESTIMADO PROVEEDOR: PARA QUE PROCEDA SU PAGO, LE SOLICITAMOS REALIZAR SU FACTURA CON LAS ESPECIFICACIONES ARRIBA SEÑALADAS Y ENVIARLA AL CORREO: compras@empaquesanjorge.com'), true, true);
+      $pdf->Row(array('ESTIMADO PROVEEDOR: PARA QUE PROCEDA SU PAGO, LE SOLICITAMOS REALIZAR SU FACTURA CON LAS ESPECIFICACIONES ARRIBA SEÑALADAS, CUMPLIENDO CON LOS REQUISITOS DE ENTREGA Y ENVIARLA AL CORREO: compras@empaquesanjorge.com'), true, true);
 
       $y_compras = $pdf->GetY();
 
