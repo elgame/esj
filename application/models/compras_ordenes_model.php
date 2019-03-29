@@ -1541,7 +1541,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetWidths(array(30, 50));
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('Condiciones:', ($proveedor['info']->condicion_pago=='cr'? 'Contado': "Crédito {$proveedor['info']->dias_credito} DIAS")), false, false);
+      $pdf->Row(array('Condiciones:', ($proveedor['info']->condicion_pago=='co'? 'Contado': "Crédito {$proveedor['info']->dias_credito} DIAS")), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Forma de Pago:', "99 (Por Definir)"), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
@@ -1578,9 +1578,9 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('Requisitos para la Entrega de Mercancía'), false, false);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('['.(isset($orden['info'][0]->otros_datos->infPasarBascula)? 'Si': 'No').'] Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
+      $pdf->Row(array('( '.(isset($orden['info'][0]->otros_datos->infPasarBascula)? 'Si': 'No').' ) Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('['.(isset($orden['info'][0]->otros_datos->infEntOrdenCom)? 'Si': 'No').'] Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
+      $pdf->Row(array('( '.(isset($orden['info'][0]->otros_datos->infEntOrdenCom)? 'Si': 'No').' ) Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
 
       $aux_y2 = $pdf->GetY();
 
