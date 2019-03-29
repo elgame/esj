@@ -318,7 +318,7 @@
                       </div>
                     </div><!--/control-group -->
 
-                    <div class="control-group span12">
+                    <div class="control-group span7">
                       <label class="control-label" for="rancho">Requisitos para la entrega de mercancias </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -329,6 +329,28 @@
                         </div>
                       </div>
                     </div><!--/control-group -->
+
+                    <div class="control-group span4">
+                      <label class="control-label" for="infBoletasEntrada">Boletas entrada </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <button type="button" class="btn btn-info" id="show-boletasEntrada">Buscar</button>
+                          <span id="boletasEntrada" style="cursor:pointer;">
+                            <?php
+                            $boletasEntFolios = '';
+                            $boletasEntIds = '';
+                            foreach ($orden['info'][0]->boletas_lig as $key => $value)
+                            {
+                              $boletasEntFolios .= $value->folio.' | ';
+                              $boletasEntIds .= $value->id_bascula.'|';
+                            }
+                            echo $boletasEntFolios.' <input type="hidden" name="boletasEntradaId" value="'.$boletasEntIds.'"><input type="hidden" name="boletasEntradaFolio" value="'.$boletasEntFolios.'">';
+                            ?>
+                          </span>
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
                   </div>
 
                 </div>
@@ -964,6 +986,7 @@
               <th style="width:70px;">Fecha</th>
               <th># Folio</th>
               <th>Proveedor</th>
+              <th>Área</th>
             </tr>
           </thead>
           <tbody>

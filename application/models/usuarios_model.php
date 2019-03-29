@@ -463,10 +463,11 @@ class Usuarios_model extends privilegios_model {
 		if ($fun_res != FALSE)
 		{
 			$user_data = array(
-					'id_usuario'      => $fun_res[0]->id,
-					'usuario' => $fun_res[0]->usuario,
-					'email'   => $fun_res[0]->email,
-					'tipo'    => $fun_res[0]->tipo,
+          'id_usuario' => $fun_res[0]->id,
+          'usuario'    => $fun_res[0]->usuario,
+          'nombre'     => $fun_res[0]->nombre,
+          'email'      => $fun_res[0]->email,
+          'tipo'       => $fun_res[0]->tipo,
 					'idunico' => uniqid('l', true));
 				$this->crea_session($user_data);
 		}
