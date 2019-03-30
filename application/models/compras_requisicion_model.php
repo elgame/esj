@@ -554,6 +554,7 @@ class compras_requisicion_model extends CI_Model {
           'descripcion'        => $data->descripcion,
           'id_autorizo'        => $data->id_autorizo,
           'id_almacen'         => $data->id_almacen,
+          'id_requisicion'     => $idOrden
         );
 
         // Si es un gasto son requeridos los campos de catálogos

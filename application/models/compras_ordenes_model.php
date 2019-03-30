@@ -962,6 +962,23 @@ class compras_ordenes_model extends CI_Model {
     }
   }
 
+  public function getFolioEntradaAlmacen($idOrden)
+  {
+    $orden = $this->db->query("SELECT id_empresa
+      FROM compras_ordenes
+      WHERE id_orden = {$idOrden}")->row();
+
+    $anio = Date('Y');
+    $orden = $this->db->query("SELECT Coalesce(Max(cp.folio_aceptacion), 1) AS folio_aceptacion
+      FROM compras_ordenes co
+        INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+      WHERE co.id_empresa = {$orden->id_empresa} AND Date(cp.fecha_aceptacion) BETWEEN '{$anio}-01-01' AND '{$anio}-12-31'
+      GROUP BY cp.folio_aceptacion
+      LIMIT 1")->row();
+
+    return isset($orden->folio_aceptacion)? $orden->folio_aceptacion: 1;
+  }
+
   public function entrada($idOrden)
   {
     $ordenRechazada = false;
@@ -975,6 +992,8 @@ class compras_ordenes_model extends CI_Model {
     }
 
     $this->load->model('productos_model');
+
+    $folioEntrada = $this->getFolioEntradaAlmacen($idOrden);
 
     $almacen = array();
     $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
@@ -1033,6 +1052,10 @@ class compras_ordenes_model extends CI_Model {
         'retencion_isr'        => $_POST['ret_isrTotal'][$key],
         'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
       );
+
+      if ($statusp === 'a') {
+        $productos[count($productos)-1]['folio_aceptacion'] = $folioEntrada;
+      }
 
       if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
         if (!isset($idsProductos[$_POST['productoId'][$key]])) {
