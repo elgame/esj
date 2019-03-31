@@ -16,7 +16,6 @@
       -- pcc|pct
       ALTER TABLE public.banco_cuentas ADD COLUMN es_concentradora boolean NOT NULL DEFAULT false;
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
-      -- pct
       ALTER TABLE public.compras_ordenes ADD COLUMN id_requisicion bigint;
       ALTER TABLE public.compras_productos ADD COLUMN folio_aceptacion integer;
 
