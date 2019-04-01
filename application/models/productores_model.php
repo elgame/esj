@@ -104,13 +104,13 @@ class productores_model extends CI_Model {
             'pais'              => $this->input->post('fpais'),
             'tipo'              => $this->input->post('ftipo'),
             'no_coeplim'        => $this->input->post('no_coeplim'),
-            'hectareas'         => $this->input->post('hectareas'),
+            'hectareas'         => floatval($this->input->post('hectareas')),
             'pequena_propiedad' => $this->input->post('pequena_propiedad'),
             'propietario'       => $this->input->post('propietario'),
-						);
+					);
 		}
-
 		$this->db->insert('otros.productor', $data);
+
 		$id_productor = $this->db->insert_id('otros.productor', 'id_productor');
 
 		// Bitacora

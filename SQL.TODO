@@ -13,7 +13,7 @@
       ALTER TABLE public.compras_almacenes ADD COLUMN horario character varying(100);
       ALTER TABLE compras_requisicion ADD COLUMN otros_datos json;
       ALTER TABLE compras_ordenes ADD COLUMN otros_datos json;
-      -- pcc|pct
+      -- pcc|pct|san
       ALTER TABLE public.banco_cuentas ADD COLUMN es_concentradora boolean NOT NULL DEFAULT false;
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
       ALTER TABLE public.compras_ordenes ADD COLUMN id_requisicion bigint;
