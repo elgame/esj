@@ -445,6 +445,10 @@ class nomina
       if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_vacaciones'] == '1') ) {
         $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
         $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
+      } elseif ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->empleado->nomina_guardada == 't' &&
+          $this->empleado->nomina_fiscal_vacaciones > 0) ) {
+        $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
+        $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
       }
 
       if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ptu') )
