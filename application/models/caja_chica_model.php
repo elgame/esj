@@ -2889,6 +2889,13 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(153);
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
+    $pdf->SetX(153);
+    $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt - $totalDeudores;
+    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
+    $pdf->SetX(153);
+    $totalFondoCaja = $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores - $totalAcreedores;
+    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
+
     // $page_aux = $pdf->page;
     $pdf->page = 1;
     $pdf->SetFont('Arial','B', 8);
