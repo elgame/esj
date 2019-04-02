@@ -1388,7 +1388,7 @@
 
                         <div class="span12" style="margin-left: 0;"> <br>
                           <?php if ($show && !$cajas_cerradas){ ?>
-                            <div class="span5"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
+                            <div class="span5"><input type="submit" id="btnGuardar2" class="btn btn-success btn-large span12" value="Guardar"></div>
                           <?php } ?>
 
                           <?php if (isset($caja['status']) && $caja['status'] === 't' && !$cajas_cerradas){ ?>

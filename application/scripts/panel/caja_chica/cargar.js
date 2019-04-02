@@ -50,6 +50,7 @@
     if ($(".btnCerrarCaja").length > 0)
     {
       $(".btnCerrarCaja").click(function (e) {
+        $(this).attr('disabled', 'disabled');
         if (!preventClickCerrar) {
           preventClickCerrar = true;
         } else {
@@ -61,6 +62,8 @@
 
   var submitForm = function () {
     $('#frmcajachica').submit(function(event) {
+      $('#btnGuardar').attr('disabled', 'disabled');
+      $('#btnGuardar2').attr('disabled', 'disabled');
       if ($('#btnGuardar').length == 0) {
         event.preventDefault();
       }
