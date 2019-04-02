@@ -1342,7 +1342,7 @@
                             </tr>
                             <tr>
                               <td>TOTAL ACREEDORES:</td>
-                              <td><input type="text" name="" value="<?php echo ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo ($totalAcreedores) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
                             </tr>
 
                             <tr>
@@ -1355,33 +1355,42 @@
                             </tr>
                             <tr>
                               <td>TOTAL GASTOS X COMP:</td>
-                              <td><input type="text" name="" value="<?php echo $totalGastosComprobar ?>" class="input-small vpositive" id="ttotal-gastos-compp" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $totalGastosComprobarTot ?>" class="input-small vpositive" id="ttotal-gastos-compp" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>TOTAL REPOSICION GASTOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalReposicionGastos ?>" class="input-small vpositive" id="ttotal-gastos-reposicion" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $totalReposicionGastosAnt ?>" class="input-small vpositive" id="ttotal-gastos-reposicion" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>TOTAL DEUDORES:</td>
-                              <td><input type="text" name="" value="<?php echo ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo ($totalDeudores) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>TOTAL TRASPASOS:</td>
                               <td><input type="text" name="" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
                             </tr>
+                            <?php if ($_GET['fno_caja'] == '1'): ?>
+                            <tr>
+                              <td>SALDOS X RECUP:</td>
+                              <td><input type="text" name="" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
+                            </tr>
+                            <?php endif ?>
 
                             <tr>
-                              <td>SALDO DEL CORTE:</td>
+                              <td>EFECT. DEL CORTE:</td>
+                              <?php
+                                $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos - $totalReposicionGastosAnt - $totalDeudores - $caja['boletas_arecuperar_total'];
+                                $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $totalGastos + $totalReposicionGastosAnt + $caja['boletas_arecuperar_total'] + $totalDeudores - $totalAcreedores;
+                              ?>
                               <td><input type="text" name="saldo_corte"
-                                value="<?php echo $totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-                                                  $totalBoletasPagadas - $totalGastos - $totalGastosComprobar - $totalReposicionGastos + $totalTraspasos -
-                                                  ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])
-                                      ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                                value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                               <input type="hidden" name="total_diferencia"
-                                value="<?php echo $totalEfectivo - ($totalReporteCaja + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-                                                  $totalBoletasPagadas - $totalGastos - $totalGastosComprobar - $totalReposicionGastos + $totalTraspasos -
-                                                  ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']))
-                                      ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                                value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                            </tr>
+                            <tr>
+                              <td>FONDO DE CAJA:</td>
+                              <td><input type="text" name="fondo_caja_cal"
+                                value="<?php echo $totalFondoCaja ?>" class="input-small vpositive" id="ttotal-fondoCaja" style="text-align: right;" readonly></td>
                             </tr>
                           </tbody>
                         </table>

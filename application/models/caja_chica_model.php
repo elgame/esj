@@ -5,27 +5,28 @@ class caja_chica_model extends CI_Model {
   public function get($fecha, $noCaja, $all = false)
   {
     $info = array(
-      'saldo_inicial'         => 0,
-      'fondo_caja'            => 0,
-      'ingresos'              => array(),
-      'otros'                 => array(),
-      'remisiones'            => array(),
-      'boletas'               => array(),
-      'boletas_arecuperar'    => array(),
-      'boletas_ch_entransito' => array(),
-      'saldo_clientes'        => array(),
-      'denominaciones'        => array(),
-      'gastos'                => array(),
-      'gastos_comprobar'      => array(),
-      'reposicion_gastos'     => array(),
-      'traspasos'             => array(),
-      'deudores'              => array(),
-      'acreedores'            => array(),
-      'categorias'            => array(),
-      'deudores_prest_dia'    => 0,
-      'deudores_abonos_dia'   => 0,
-      'acreedor_prest_dia'    => 0,
-      'acreedor_abonos_dia'   => 0,
+      'saldo_inicial'            => 0,
+      'fondo_caja'               => 0,
+      'ingresos'                 => array(),
+      'otros'                    => array(),
+      'remisiones'               => array(),
+      'boletas'                  => array(),
+      'boletas_arecuperar'       => array(),
+      'boletas_arecuperar_total' => 0,
+      'boletas_ch_entransito'    => array(),
+      'saldo_clientes'           => array(),
+      'denominaciones'           => array(),
+      'gastos'                   => array(),
+      'gastos_comprobar'         => array(),
+      'reposicion_gastos'        => array(),
+      'traspasos'                => array(),
+      'deudores'                 => array(),
+      'acreedores'               => array(),
+      'categorias'               => array(),
+      'deudores_prest_dia'       => 0,
+      'deudores_abonos_dia'      => 0,
+      'acreedor_prest_dia'       => 0,
+      'acreedor_abonos_dia'      => 0,
     );
 
     // Obtiene el saldo incial.
@@ -181,6 +182,9 @@ class caja_chica_model extends CI_Model {
       if ($boletas->num_rows() > 0)
       {
         $info['boletas_arecuperar'] = $boletas->result();
+        foreach ($info['boletas_arecuperar'] as $key => $value) {
+          $info['boletas_arecuperar_total'] += $value->importe;
+        }
       }
 
       // Cheques de bletas en transito
@@ -1133,7 +1137,7 @@ class caja_chica_model extends CI_Model {
             }
 
             if ($tno_caja > 0) {
-              $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$data['fno_caja']}'")->row();
+              $cajaData = $this->db->query("SELECT * FROM cajachicas WHERE no_caja = '{$tno_caja}'")->row();
               // $monto = ($traspaso['tipo'] == 'f'? -1: 1) * floatval($data['traspaso_importe'][$key]);
               $monto = floatval($data['traspaso_importe'][$key]);
               $this->db->update('cajachicas',
@@ -2866,34 +2870,53 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(37, 21));
     $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL INGRESOS REM', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']), 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL REPOSICION GASTOS', MyString::formatoNumero($totalReposicionGastos, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($saldoCorteCaja, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
-
+    if ($totalIngresos > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+    }
+    if ($totalRemisiones > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL INGRESOS REM', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, false);
+    }
+    if ($totalAcreedores > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+    }
+    if ($totalBoletasPagadas > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+    }
+    if ($totalGastosComprobarTot > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), false, false);
+    }
+    if ($ttotalGastos > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
+    }
+    if ($totalReposicionGastosAnt > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL REPOSICION GASTOS', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), false, false);
+    }
+    if ($totalDeudores > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
+    }
+    if ($totalTraspasos > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
+    }
+    if ($noCajas == 1 && $caja['boletas_arecuperar_total'] > 0) {
+      $pdf->SetX(153);
+      $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
+    }
+    // $pdf->SetX(153);
+    // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
     $pdf->SetX(153);
     $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt - $totalDeudores;
     $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
     $pdf->SetX(153);
-    $totalFondoCaja = $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores - $totalAcreedores;
+    $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores - $totalAcreedores;
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
 
     // $page_aux = $pdf->page;
