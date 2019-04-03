@@ -31,6 +31,8 @@
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_compra_fkey FOREIGN KEY (id_compra) REFERENCES public.compras (id_compra) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES (5, 'Fletes', 40000);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 5',247,TRUE,'caja_chica/caja5/','usd',TRUE);
+     -- pcc
+     ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_boletas_arecuperar double precision NOT NULL  DEFAULT 0;
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san|pct
     CREATE TABLE public.nomina_calculo_anual

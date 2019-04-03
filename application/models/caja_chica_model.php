@@ -55,6 +55,83 @@ class caja_chica_model extends CI_Model {
       $info['saldo_inicial'] = $ultimoSaldo->result()[0]->saldo;
     }
 
+    // Denominaciones
+    $denominaciones = $this->db->query(
+      "SELECT *
+       FROM cajachica_efectivo
+       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
+    );
+    if ($denominaciones->num_rows() === 0)
+    {
+      $denominaciones = new StdClass;
+      $denominaciones->den_05 = 0;
+      $denominaciones->den_1 = 0;
+      $denominaciones->den_2 = 0;
+      $denominaciones->den_5 = 0;
+      $denominaciones->den_10 = 0;
+      $denominaciones->den_20 = 0;
+      $denominaciones->den_50 = 0;
+      $denominaciones->den_100 = 0;
+      $denominaciones->den_200 = 0;
+      $denominaciones->den_500 = 0;
+      $denominaciones->den_1000 = 0;
+    }
+    else
+    {
+      $denominaciones = $denominaciones->result()[0];
+      $info['status'] = $denominaciones->status;
+      $info['id'] = $denominaciones->id_efectivo;
+    }
+    foreach ($denominaciones as $den => $cantidad)
+    {
+      if (strrpos($den, 'den_') !== false)
+      {
+        switch ($den)
+        {
+          case 'den_05':
+            $denominacion = '0.50';
+            break;
+          case 'den_1':
+            $denominacion = '1.00';
+            break;
+          case 'den_2':
+            $denominacion = '2.00';
+            break;
+          case 'den_5':
+            $denominacion = '5.00';
+            break;
+          case 'den_10':
+            $denominacion = '10.00';
+            break;
+          case 'den_20':
+            $denominacion = '20.00';
+            break;
+          case 'den_50':
+            $denominacion = '50.00';
+            break;
+          case 'den_100':
+            $denominacion = '100.00';
+            break;
+          case 'den_200':
+            $denominacion = '200.00';
+            break;
+          case 'den_500':
+            $denominacion = '500.00';
+            break;
+          case 'den_1000':
+            $denominacion = '1000.00';
+            break;
+        }
+
+        $info['denominaciones'][] = array(
+          'denominacion' => $denominacion,
+          'cantidad'     => $cantidad,
+          'total'        => floatval($denominacion) * $cantidad,
+          'denom_abrev'  => $den,
+        );
+      }
+    }
+
     // Ingresos
     $info['ingresos'] = $this->getCajaIngresos($fecha, $noCaja, (!$all? " AND ci.status = 't'": ''));
 
@@ -182,8 +259,13 @@ class caja_chica_model extends CI_Model {
       if ($boletas->num_rows() > 0)
       {
         $info['boletas_arecuperar'] = $boletas->result();
-        foreach ($info['boletas_arecuperar'] as $key => $value) {
-          $info['boletas_arecuperar_total'] += $value->importe;
+
+        if (isset($denominaciones->status) && $denominaciones->status === 'f') {
+          $info['boletas_arecuperar_total'] = $denominaciones->saldo_boletas_arecuperar;
+        } else {
+          foreach ($info['boletas_arecuperar'] as $key => $value) {
+            $info['boletas_arecuperar_total'] += $value->importe;
+          }
         }
       }
 
@@ -298,85 +380,6 @@ class caja_chica_model extends CI_Model {
       )->row();
       if (isset($acreedores->abonos)) {
         $info['acreedor_abonos_dia'] = $acreedores->abonos;
-      }
-    }
-
-    // denominaciones
-    $denominaciones = $this->db->query(
-      "SELECT *
-       FROM cajachica_efectivo
-       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
-    );
-
-    if ($denominaciones->num_rows() === 0)
-    {
-      $denominaciones = new StdClass;
-      $denominaciones->den_05 = 0;
-      $denominaciones->den_1 = 0;
-      $denominaciones->den_2 = 0;
-      $denominaciones->den_5 = 0;
-      $denominaciones->den_10 = 0;
-      $denominaciones->den_20 = 0;
-      $denominaciones->den_50 = 0;
-      $denominaciones->den_100 = 0;
-      $denominaciones->den_200 = 0;
-      $denominaciones->den_500 = 0;
-      $denominaciones->den_1000 = 0;
-    }
-    else
-    {
-      $denominaciones = $denominaciones->result()[0];
-      $info['status'] = $denominaciones->status;
-      $info['id'] = $denominaciones->id_efectivo;
-    }
-
-    foreach ($denominaciones as $den => $cantidad)
-    {
-      if (strrpos($den, 'den_') !== false)
-      {
-        switch ($den)
-        {
-          case 'den_05':
-            $denominacion = '0.50';
-            break;
-          case 'den_1':
-            $denominacion = '1.00';
-            break;
-          case 'den_2':
-            $denominacion = '2.00';
-            break;
-          case 'den_5':
-            $denominacion = '5.00';
-            break;
-          case 'den_10':
-            $denominacion = '10.00';
-            break;
-          case 'den_20':
-            $denominacion = '20.00';
-            break;
-          case 'den_50':
-            $denominacion = '50.00';
-            break;
-          case 'den_100':
-            $denominacion = '100.00';
-            break;
-          case 'den_200':
-            $denominacion = '200.00';
-            break;
-          case 'den_500':
-            $denominacion = '500.00';
-            break;
-          case 'den_1000':
-            $denominacion = '1000.00';
-            break;
-        }
-
-        $info['denominaciones'][] = array(
-          'denominacion' => $denominacion,
-          'cantidad'     => $cantidad,
-          'total'        => floatval($denominacion) * $cantidad,
-          'denom_abrev'  => $den,
-        );
       }
     }
 
@@ -809,10 +812,10 @@ class caja_chica_model extends CI_Model {
       $efectivo[$denominacion] = $data['denominacion_cantidad'][$key];
     }
 
-    $efectivo['fecha']   = $data['fecha_caja_chica'];
-    $efectivo['saldo']   = $data['saldo_corte'];
-    $efectivo['no_caja'] = $data['fno_caja'];
-
+    $efectivo['fecha']                    = $data['fecha_caja_chica'];
+    $efectivo['saldo']                    = $data['saldo_corte'];
+    $efectivo['saldo_boletas_arecuperar'] = empty($data['boletas_arecuperar_total'])? 0: $data['boletas_arecuperar_total'];
+    $efectivo['no_caja']                  = $data['fno_caja'];
     $this->db->insert('cajachica_efectivo', $efectivo);
 
     // Gastos del dia
@@ -2912,12 +2915,26 @@ class caja_chica_model extends CI_Model {
     }
     // $pdf->SetX(153);
     // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
+
+    if ($noCajas == 4) {
+      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+        $caja['boletas_arecuperar_total'] + $totalTraspasos;
+
+      $totalFondoCaja = false;
+    } else {
+      $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
+        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'];
+
+      $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
+         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] - $totalAcreedores;
+    }
     $pdf->SetX(153);
-    $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt - $totalDeudores;
     $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
-    $pdf->SetX(153);
-    $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores - $totalAcreedores;
-    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
+    if ($totalFondoCaja !== false) {
+      $pdf->SetX(153);
+      $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
+    }
 
     // $page_aux = $pdf->page;
     $pdf->page = 1;

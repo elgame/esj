@@ -1372,26 +1372,40 @@
                             <?php if ($_GET['fno_caja'] == '1'): ?>
                             <tr>
                               <td>SALDOS X RECUP:</td>
-                              <td><input type="text" name="" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="boletas_arecuperar_total" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
                             </tr>
                             <?php endif ?>
 
                             <tr>
                               <td>EFECT. DEL CORTE:</td>
                               <?php
-                                $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos - $totalReposicionGastosAnt - $totalDeudores - $caja['boletas_arecuperar_total'];
-                                $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $totalGastos + $totalReposicionGastosAnt + $caja['boletas_arecuperar_total'] + $totalDeudores - $totalAcreedores;
+
+                              if ($_GET['fno_caja'] === '4') {
+                                $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+                                  $totalGastosComprobar - $totalGastos - $totalReposicionGastos - ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                  $caja['boletas_arecuperar_total'] + $totalTraspasos;
+
+                                $totalFondoCaja = false;
+                              } else {
+                                $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
+                                  $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'];
+
+                                $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $totalGastos + $totalReposicionGastosAnt +
+                                  $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $totalDeudores - $totalAcreedores;
+                              }
                               ?>
                               <td><input type="text" name="saldo_corte"
                                 value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                               <input type="hidden" name="total_diferencia"
                                 value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
+                            <?php if ($totalFondoCaja !== false): ?>
                             <tr>
                               <td>FONDO DE CAJA:</td>
                               <td><input type="text" name="fondo_caja_cal"
                                 value="<?php echo $totalFondoCaja ?>" class="input-small vpositive" id="ttotal-fondoCaja" style="text-align: right;" readonly></td>
                             </tr>
+                            <?php endif ?>
                           </tbody>
                         </table>
 
