@@ -289,7 +289,8 @@ class compras_ordenes_model extends CI_Model {
       );
 
       // Si es un gasto son requeridos los campos de catálogos
-      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+          || $_POST['tipoOrden'] == 'p') {
         $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
         // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
         // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
@@ -888,7 +889,7 @@ class compras_ordenes_model extends CI_Model {
   public function infoPago($idOrden)
   {
     $query = $this->db->query(
-      "SELECT c.serie, c.folio, Date(ca.fecha) AS fecha, ca.concepto, ca.total, bc.alias
+      "SELECT c.serie, c.folio, Date(ca.fecha) AS fecha, ca.concepto, ca.total, bc.alias, c.status
       FROM compras_ordenes co
         INNER JOIN compras_facturas cf ON co.id_orden = cf.id_orden
         INNER JOIN compras c ON c.id_compra = cf.id_compra
@@ -1571,7 +1572,7 @@ class compras_ordenes_model extends CI_Model {
       //   var_dump($orden);
       // echo "</pre>";exit;
 
-      $orientacion = ($orden['info'][0]->status == 'a' || $orden['info'][0]->status == 'f')? 'L': 'P';
+      $orientacion = ($orden['info'][0]->status == 'f')? 'L': 'P'; // $orden['info'][0]->status == 'a' ||
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf($orientacion, 'mm', 'Letter');
@@ -1722,6 +1723,12 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('helvetica','B', 8);
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(55));
+
+        if ($ordenPago[0]->status == 'pa') {
+          $pdf->Row(array('Orden Cerrada'), true, true);
+          $pdf->SetXY(215, $pdf->GetY());
+        }
+
         $pdf->Row(array('Datos del Pago'), false, false);
         $pdf->SetFont('helvetica', '', 8);
         // $pdf->SetWidths(array(20, 25));
@@ -1764,7 +1771,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetY($pdf->getY()+5);
 
       $aligns = array('C', 'L', 'C', 'R', 'R', 'C', 'C');
-      $widths = array(35, 76, 18, 25, 25, 25, 25, 25);
+      $widths = array(35, 101, 18, 25, 25, 25, 25, 25);
       $header = array('CODIGO', 'DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
       if ($orientacion === 'L') {
         $header[] = 'FECHA';
@@ -1956,50 +1963,53 @@ class compras_ordenes_model extends CI_Model {
 
       $y_compras = $pdf->GetY();
 
-      // El dato de la requisicion
-      if (!empty($orden['info'][0]->folio_requisicion)) {
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetXY(5, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
-      }
-      if (!empty($orden['info'][0]->area)) {
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetXY(5, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $pdf->Row(array('Cultivo / Actividad / Producto', $orden['info'][0]->area->nombre), false, true);
-      }
-      if (!empty($orden['info'][0]->rancho)) {
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetXY(5, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $ranchos = [];
-        foreach ($orden['info'][0]->rancho as $key => $value) {
-          $ranchos[] = $value->nombre;
+      if ($orden['info'][0]->no_impresiones > 0) {
+        // El dato de la requisicion
+        if (!empty($orden['info'][0]->folio_requisicion)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
         }
-        $pdf->Row(array('Areas / Ranchos / Lineas', implode(' | ', $ranchos)), false, true);
-      }
-      if (!empty($orden['info'][0]->centroCosto)) {
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetXY(5, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $centroCosto = [];
-        foreach ($orden['info'][0]->centroCosto as $key => $value) {
-          $centroCosto[] = $value->nombre;
+        if (!empty($orden['info'][0]->area)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $pdf->Row(array('Cultivo / Actividad / Producto', $orden['info'][0]->area->nombre), false, true);
         }
-        $pdf->Row(array('Centro de costo', implode(' | ', $centroCosto)), false, true);
+        if (!empty($orden['info'][0]->rancho)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $ranchos = [];
+          foreach ($orden['info'][0]->rancho as $key => $value) {
+            $ranchos[] = $value->nombre;
+          }
+          $pdf->Row(array('Areas / Ranchos / Lineas', implode(' | ', $ranchos)), false, true);
+        }
+        if (!empty($orden['info'][0]->centroCosto)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $centroCosto = [];
+          foreach ($orden['info'][0]->centroCosto as $key => $value) {
+            $centroCosto[] = $value->nombre;
+          }
+          $pdf->Row(array('Centro de costo', implode(' | ', $centroCosto)), false, true);
+        }
+        if (!empty($orden['info'][0]->activo)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $pdf->Row(array('Activo', $orden['info'][0]->activo->nombre), false, true);
+        }
       }
-      if (!empty($orden['info'][0]->activo)) {
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetXY(5, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $pdf->Row(array('Activo', $orden['info'][0]->activo->nombre), false, true);
-      }
+
 
       //a si es flete
       if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){
