@@ -276,7 +276,7 @@
               <div class="box-content">
                 <div class="row-fluid">
                   <div class="span12">
-                    <div class="control-group" id="cultivosGrup">
+                    <div class="control-group span6">
                       <label class="control-label" for="infRecogerProv">Recoger con el proveedor </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -286,7 +286,16 @@
                       </div>
                     </div><!--/control-group -->
 
-                    <div class="control-group" id="ranchosGrup">
+                    <div class="control-group span6">
+                      <label class="control-label" for="infCotizacion">No cotización </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="infCotizacion" class="span11" id="infCotizacion" value="<?php echo set_value('infCotizacion') ?>">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group span10">
                       <label class="control-label" for="rancho">Requisitos para la entrega de mercancias </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -305,7 +314,7 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
-          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo isset($_POST['tipoOrden']) ? ($_POST['tipoOrden'] !== 'p' ? 'block' : 'none') : 'none' ?>;">  <!-- Box catalogos-->
+          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo isset($_POST['tipoOrden']) ? ($_POST['tipoOrden'] !== 'a' ? 'block' : 'none') : 'block' ?>;">  <!-- Box catalogos-->
             <div class="box span12">
               <div class="box-header well" data-original-title>
                 <h2><i class="icon-truck"></i> Catálogos</h2>
