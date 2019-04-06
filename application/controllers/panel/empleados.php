@@ -261,6 +261,7 @@ class empleados extends MY_Controller {
         'empresaId'         => $_GET['did_empresa'],
         'puestoId'          => '',
         'dia_inicia_semana' => '4',
+        'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
       );
       $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
       foreach ($data as $key => $value)
@@ -319,10 +320,11 @@ class empleados extends MY_Controller {
 
     // Se obtienen los trabajadores de la empresa
     $filtros = array(
-      'semana'            => '',
-      'anio'              => date("Y"),
-      'empresaId'         => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
-      'puestoId'          => '',
+      'semana'      => '',
+      'anio'        => date("Y"),
+      'empresaId'   => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
+      'puestoId'    => '',
+      'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;

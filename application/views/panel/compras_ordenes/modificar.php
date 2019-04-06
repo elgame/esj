@@ -415,7 +415,7 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
-          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'p' && $orden['info'][0]->tipo_orden !== 'a' ? 'block' : 'none') ?>;">  <!-- Box catalogos-->
+          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'a' && $orden['info'][0]->tipo_orden !== 'a' ? 'block' : 'block') ?>;">  <!-- Box catalogos-->
             <div class="box span12">
               <div class="box-header well" data-original-title>
                 <h2><i class="icon-truck"></i> Catálogos</h2>

@@ -115,7 +115,8 @@ class compras_requisicion_model extends CI_Model {
     );
 
     // Si es un gasto son requeridos los campos de catálogos
-    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+        || $_POST['tipoOrden'] == 'p') {
       $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
       // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
       // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
@@ -149,6 +150,9 @@ class compras_requisicion_model extends CI_Model {
     if ($this->input->post('infEntOrdenCom') != false) {
       $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
     }
+    if ($this->input->post('infCotizacion') != false) {
+      $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+    }
     $data['otros_datos'] = json_encode($data['otros_datos']);
 
     $this->db->insert('compras_requisicion', $data);
@@ -162,7 +166,8 @@ class compras_requisicion_model extends CI_Model {
                                           ':empresa'    => 'en '.$this->input->post('empresa')));
 
     // Si es un gasto son requeridos los campos de catálogos
-    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+        || $_POST['tipoOrden'] == 'p') {
       // Inserta los ranchos
       if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
         foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
@@ -320,7 +325,8 @@ class compras_requisicion_model extends CI_Model {
       );
 
       // Si es un gasto son requeridos los campos de catálogos
-      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
+      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+          || $_POST['tipoOrden'] == 'p') {
         $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
         // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
         // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
@@ -399,6 +405,9 @@ class compras_requisicion_model extends CI_Model {
       }
       if ($this->input->post('infEntOrdenCom') != false) {
         $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+      }
+      if ($this->input->post('infCotizacion') != false) {
+        $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
       }
       $data['otros_datos'] = json_encode($data['otros_datos']);
 
@@ -558,7 +567,8 @@ class compras_requisicion_model extends CI_Model {
         );
 
         // Si es un gasto son requeridos los campos de catálogos
-        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a') {
+        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
+            || $data->tipo_orden == 'p') {
           $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
           // $dataOrden['id_rancho']       = !empty($data->id_rancho)? $data->id_rancho: NULL;
           // $dataOrden['id_centro_costo'] = !empty($data->id_centro_costo)? $data->id_centro_costo: NULL;

@@ -161,7 +161,7 @@
             $("#verVehiculoChk").hide();
 
           $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
-          if (tipoOrderActual != 'p' && tipoOrderActual != 'a') {
+          if (tipoOrderActual != 'a') {
             $('#groupCatalogos').show();
             $('#ranchosGrup, #centrosCostosGrup, #activosGrup, #cultivosGrup').show();
 
