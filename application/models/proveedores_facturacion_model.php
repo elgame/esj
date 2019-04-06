@@ -321,7 +321,7 @@ class proveedores_facturacion_model extends privilegios_model{
           'importe_iva'         => $this->input->post('total_iva'),
           'total'               => $this->input->post('total_totfac'),
           'total_letra'         => $this->input->post('dttotal_letra'),
-          'no_aprobacion'       => $this->input->post('dno_aprobacion'),
+          'no_aprobacion'       => intval($this->input->post('dno_aprobacion')),
           'ano_aprobacion'      => $anoAprobacion[0],
           'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
           'forma_pago'          => $formaPago,
@@ -342,7 +342,6 @@ class proveedores_facturacion_model extends privilegios_model{
         // Si el tipo de comprobante es "egreso" o una nota de credito.
         if ($_POST['dtipo_comprobante'] === 'egreso')
           $datosFactura['id_nc'] = $_GET['id'];
-
         // Inserta los datos de la factura y obtiene el Id.
         $this->db->insert('proveedores_facturacion', $datosFactura);
         $idFactura = $this->db->insert_id();
@@ -401,15 +400,15 @@ class proveedores_facturacion_model extends privilegios_model{
         // Obtiene los datos para la cadena original
         $datosCadOrig = $this->datosCadenaOriginal();
 
-        // Si es un ingreso o una factura.
-        if ($_POST['dtipo_comprobante'] === 'ingreso')
-        {
-          $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
-        }
-        else
-        {
-          $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
-        }
+        // // Si es un ingreso o una factura.
+        // if ($_POST['dtipo_comprobante'] === 'ingreso')
+        // {
+        //   $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
+        // }
+        // else
+        // {
+        //   $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
+        // }
 
         $dataEmpresa = array(
           'id_factura'  => $idFactura,
@@ -428,124 +427,104 @@ class proveedores_facturacion_model extends privilegios_model{
         // Inserta los datos del cliente.
         $this->db->insert('proveedores_facturacion_empresa', $dataEmpresa);
 
-        // Asignamos los productos o conceptos a los datos de la cadena original.
-        $datosCadOrig['concepto']  = $productosCadOri;
+        // // Asignamos los productos o conceptos a los datos de la cadena original.
+        // $datosCadOrig['concepto']  = $productosCadOri;
 
-        // Asignamos las retenciones a los datos de la cadena original.
-         $impuestosRetencion = array(
-          'impuesto' => 'IVA',
-          'importe'  => '0',
-        );
+        // // Asignamos las retenciones a los datos de la cadena original.
+        //  $impuestosRetencion = array(
+        //   'impuesto' => 'IVA',
+        //   'importe'  => '0',
+        // );
 
-        $datosCadOrig['retencion'][] = $impuestosRetencion;
-        $datosCadOrig['totalImpuestosRetenidos'] = '0';
+        // $datosCadOrig['retencion'][] = $impuestosRetencion;
+        // $datosCadOrig['totalImpuestosRetenidos'] = '0';
 
-        // Si hay conceptos con traslado 0% lo agrega.
-        if ($traslado0 && $traslado11 === 0 && $traslado16 === 0)
-        {
-            $impuestosTraslados[] = array(
-                'Impuesto' => 'IVA',
-                'tasa'     => '0',
-                'importe'  => '0',
-            );
-        }
-
-        // Si hay conceptos con traslado 11% lo agrega.
-        // if ($traslado11 !== 0)
+        // // Si hay conceptos con traslado 0% lo agrega.
+        // if ($traslado0 && $traslado11 === 0 && $traslado16 === 0)
         // {
-        //   $impuestosTraslados[] = array(
-        //     'Impuesto' => 'IVA',
-        //     'tasa'     => '11',
-        //     'importe'  => $traslado11,
-        //   );
+        //     $impuestosTraslados[] = array(
+        //         'Impuesto' => 'IVA',
+        //         'tasa'     => '0',
+        //         'importe'  => '0',
+        //     );
         // }
 
-        // // Si hay conceptos con traslado 16% lo agrega.
-        // if ($traslado16 !== 0)
+        // // Asigna los impuestos traslados.
+        // $datosCadOrig['traslado']  = $impuestosTraslados;
+        // $datosCadOrig['totalImpuestosTrasladados'] = '0';
+
+        // // Genera la cadena original y el sello.
+        // $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
+        // $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
+
+        // // Obtiene el contentido del certificado.
+        // $certificado = $this->cfdi->obtenCertificado($this->db
+        //   ->select('cer')
+        //   ->from("proveedores")
+        //   ->where("id_proveedor", $_POST['did_proveedor'])
+        //   ->get()->row()->cer
+        // );
+
+        // // Datos que actualizara de la factura
+        // $updateFactura = array(
+        //   'cadena_original' => $cadenaOriginal['cadenaOriginal'],
+        //   'sello'           => $sello,
+        //   'certificado'     => $certificado,
+        // );
+        // $this->db->update('proveedores_facturacion', $updateFactura, array('id_factura' => $idFactura));
+
+        // // Datos para el XML3.2
+        // $datosXML               = $cadenaOriginal['datos'];
+        // $datosXML['id']         = $this->input->post('did_proveedor');
+        // $datosXML['table']      = 'proveedores';
+        // $datosXML['comprobante']['serie']         = $this->input->post('dserie');
+        // $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
+        // $datosXML['comprobante']['sello']         = $sello;
+        // $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
+        // $datosXML['comprobante']['certificado']   = $certificado;
+        // $datosXML['concepto']                     = $productosCadOri;
+
+        // $datosXML['domicilio']['calle']        = $dataEmpresa['calle'];
+        // $datosXML['domicilio']['noExterior']   = $dataEmpresa['no_exterior'];
+        // $datosXML['domicilio']['noInterior']   = $dataEmpresa['no_interior'];
+        // $datosXML['domicilio']['colonia']      = $dataEmpresa['colonia'];
+        // $datosXML['domicilio']['localidad']    = $dataEmpresa['localidad'];
+        // $datosXML['domicilio']['municipio']    = $dataEmpresa['municipio'];
+        // $datosXML['domicilio']['estado']       = $dataEmpresa['estado'];
+        // $datosXML['domicilio']['pais']         = $dataEmpresa['pais'];
+        // $datosXML['domicilio']['codigoPostal'] = $dataEmpresa['cp'];
+
+        // $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
+        // $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+
+        // $datosXML['retencion'] = $impuestosRetencion;
+        // $datosXML['traslado']  = $impuestosTraslados;
+
+        // // Genera el archivo XML y lo guarda en disco.
+        // $archivos = $this->cfdi->generaArchivos($datosXML);
+
+        // // Timbrado de la factura.
+        // $result = $this->timbrar($archivos['pathXML'], $idFactura);
+
+        // if ($result['passes'])
         // {
-        //   $impuestosTraslados[] = array(
-        //     'Impuesto' => 'IVA',
-        //     'tasa'     => '16',
-        //     'importe'  => $traslado16,
-        //   );
+        //   $this->generaFacturaPdf($idFactura, $pathDocs);
+
+        //   $xmlName = explode('/', $archivos['pathXML']);
+
+        //   copy($archivos['pathXML'], $pathDocs.end($xmlName));
+
+        //   if (isset($_GET['id']))
+        //     $this->db->delete('proveedores_facturacion', array('id_factura' => $_GET['id']));
         // }
+        // else rmdir($pathDocs);
 
-        // Asigna los impuestos traslados.
-        $datosCadOrig['traslado']  = $impuestosTraslados;
-        $datosCadOrig['totalImpuestosTrasladados'] = '0';
+        // // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
+        // // echo "<pre>";
+        // //   var_dump($datosXML);
+        // // echo "</pre>";exit;
 
-        // Genera la cadena original y el sello.
-        $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
-        $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-
-        // Obtiene el contentido del certificado.
-        $certificado = $this->cfdi->obtenCertificado($this->db
-          ->select('cer')
-          ->from("proveedores")
-          ->where("id_proveedor", $_POST['did_proveedor'])
-          ->get()->row()->cer
-        );
-
-        // Datos que actualizara de la factura
-        $updateFactura = array(
-          'cadena_original' => $cadenaOriginal['cadenaOriginal'],
-          'sello'           => $sello,
-          'certificado'     => $certificado,
-        );
-        $this->db->update('proveedores_facturacion', $updateFactura, array('id_factura' => $idFactura));
-
-        // Datos para el XML3.2
-        $datosXML               = $cadenaOriginal['datos'];
-        $datosXML['id']         = $this->input->post('did_proveedor');
-        $datosXML['table']      = 'proveedores';
-        $datosXML['comprobante']['serie']         = $this->input->post('dserie');
-        $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
-        $datosXML['comprobante']['sello']         = $sello;
-        $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
-        $datosXML['comprobante']['certificado']   = $certificado;
-        $datosXML['concepto']                     = $productosCadOri;
-
-        $datosXML['domicilio']['calle']        = $dataEmpresa['calle'];
-        $datosXML['domicilio']['noExterior']   = $dataEmpresa['no_exterior'];
-        $datosXML['domicilio']['noInterior']   = $dataEmpresa['no_interior'];
-        $datosXML['domicilio']['colonia']      = $dataEmpresa['colonia'];
-        $datosXML['domicilio']['localidad']    = $dataEmpresa['localidad'];
-        $datosXML['domicilio']['municipio']    = $dataEmpresa['municipio'];
-        $datosXML['domicilio']['estado']       = $dataEmpresa['estado'];
-        $datosXML['domicilio']['pais']         = $dataEmpresa['pais'];
-        $datosXML['domicilio']['codigoPostal'] = $dataEmpresa['cp'];
-
-        $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
-        $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
-
-        $datosXML['retencion'] = $impuestosRetencion;
-        $datosXML['traslado']  = $impuestosTraslados;
-
-        // Genera el archivo XML y lo guarda en disco.
-        $archivos = $this->cfdi->generaArchivos($datosXML);
-
-        // Timbrado de la factura.
-        $result = $this->timbrar($archivos['pathXML'], $idFactura);
-
-        if ($result['passes'])
-        {
-          $this->generaFacturaPdf($idFactura, $pathDocs);
-
-          $xmlName = explode('/', $archivos['pathXML']);
-
-          copy($archivos['pathXML'], $pathDocs.end($xmlName));
-
-          if (isset($_GET['id']))
-            $this->db->delete('proveedores_facturacion', array('id_factura' => $_GET['id']));
-        }
-        else rmdir($pathDocs);
-
-        // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
-        // echo "<pre>";
-        //   var_dump($datosXML);
-        // echo "</pre>";exit;
-
-        return $result;
+        return ['passes' => true];
   }
 
     /**
@@ -673,42 +652,42 @@ class proveedores_facturacion_model extends privilegios_model{
     $this->load->library('facturartebarato_api');
     $this->load->model('documentos_model');
 
-    // Obtenemos la info de la factura a cancelar.
-    $factura = $this->getInfoFactura($idFactura);
+    // // Obtenemos la info de la factura a cancelar.
+    // $factura = $this->getInfoFactura($idFactura);
 
-    // Carga los datos fiscales de la empresa dentro de la lib CFDI.
-    $this->cfdi->cargaDatosFiscales($factura['info']->id_proveedor, 'proveedores');
+    // // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+    // $this->cfdi->cargaDatosFiscales($factura['info']->id_proveedor, 'proveedores');
 
-    // Parametros que necesita el webservice para la cancelacion.
-    $params = array(
-      'rfc'   => $factura['info']->proveedor->rfc,
-      'uuids' => $factura['info']->uuid,
-      'cer'   => $this->cfdi->obtenCer(),
-      'key'   => $this->cfdi->obtenKey(),
-    );
+    // // Parametros que necesita el webservice para la cancelacion.
+    // $params = array(
+    //   'rfc'   => $factura['info']->proveedor->rfc,
+    //   'uuids' => $factura['info']->uuid,
+    //   'cer'   => $this->cfdi->obtenCer(),
+    //   'key'   => $this->cfdi->obtenKey(),
+    // );
 
-    // Lama el metodo cancelar para que realiza la peticion al webservice.
-    $result = $this->facturartebarato_api->cancelar($params);
+    // // Lama el metodo cancelar para que realiza la peticion al webservice.
+    // $result = $this->facturartebarato_api->cancelar($params);
 
-    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
-    {
+    // if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    // {
       $this->db->update('proveedores_facturacion',
         array('status' => 'ca', 'status_timbrado' => 'ca'),
         "id_factura = {$idFactura}"
       );
 
-      // Regenera el PDF de la factura.
-      // $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->empresa->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
-      $pathDocs = $this->creaDirectorio($factura['info']->id_proveedor, $factura['info']->serie, $factura['info']->folio);
-      $this->generaFacturaPdf($idFactura, $pathDocs);
+    //   // Regenera el PDF de la factura.
+    //   // $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->empresa->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    //   $pathDocs = $this->creaDirectorio($factura['info']->id_proveedor, $factura['info']->serie, $factura['info']->folio);
+    //   $this->generaFacturaPdf($idFactura, $pathDocs);
 
-      $this->enviarEmail($idFactura);
-    }else
-    {
-      $result->data->status_uuid = 'error';
-    }
+    //   $this->enviarEmail($idFactura);
+    // }else
+    // {
+    //   $result->data->status_uuid = 'error';
+    // }
 
-    return array('msg' => $result->data->status_uuid);
+    return array('msg' => '201');
   }
 
    /**
@@ -1479,19 +1458,6 @@ class proveedores_facturacion_model extends privilegios_model{
             SELECT p.id_proveedor, p.nombre_fiscal, p.cer_caduca, p.cfdi_version, p.cer_org
             FROM proveedores AS p
             WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
-                  rfc != '' AND
-                  calle != '' AND
-                  no_exterior != '' AND
-                  colonia != '' AND
-                  localidad != '' AND
-                  municipio != '' AND
-                  estado != '' AND
-                  regimen_fiscal != '' AND
-                  cer_org != '' AND
-                  cer != '' AND
-                  key_path != '' AND
-                  pass != '' AND
-                  cfdi_version != '' AND
                   status = 'ac'
             ORDER BY nombre_fiscal ASC
             LIMIT 20");

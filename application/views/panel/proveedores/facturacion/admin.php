@@ -157,19 +157,19 @@
                       //   );
                       // }
 
-                      if ($fact->status_timbrado === 't')
-                      {
-                        echo '<a class="btn" href="'.base_url('panel/proveedores_facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
-                      }
+                      // if ($fact->status_timbrado === 't')
+                      // {
+                      //   echo '<a class="btn" href="'.base_url('panel/proveedores_facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                      // }
 
-                      if ($fact->id_nc === null)
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/enviar_documentos/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('rel' => 'superbox-50x450'))
-                        );
-                      }
+                      // if ($fact->id_nc === null)
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/enviar_documentos/', array(
+                      //     'params'   => 'id='.$fact->id_factura,
+                      //     'btn_type' => 'btn-success',
+                      //     'attrs' => array('rel' => 'superbox-50x450'))
+                      //   );
+                      // }
                     ?>
                   </td>
                 </tr>

@@ -15,7 +15,7 @@ $(function(){
 
       $('#dno_certificado').val(ui.item.item.no_certificado);
 
-      loadSerieFolio(ui.item.id);
+      // loadSerieFolio(ui.item.id);
     }
   }).on("keydown", function(event){
     if(event.which == 8 || event == 46) {
@@ -56,7 +56,7 @@ $(function(){
   // autocompleteClasifiLive();
 
   if ($('#did_proveedor').val() !== '') {
-    loadSerieFolio($('#did_proveedor').val());
+    // loadSerieFolio($('#did_proveedor').val());
   }
 
   if ($('#did_empresa').val() === '') {

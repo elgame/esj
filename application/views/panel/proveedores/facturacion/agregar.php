@@ -43,20 +43,21 @@
               <div class="control-group">
                 <label class="control-label" for="dserie">Serie</label>
                 <div class="controls">
-                  <select name="dserie" class="span9" id="dserie">
-                     <option value=""></option>
+                  <input type="text" name="dserie" class="span9" id="dserie" value="<?php echo set_value('dserie'); ?>" size="15">
+                  <!-- <select name="dserie" class="span9" id="dserie">
+                     <option value=""></option> -->
                      <?php // foreach($series['series'] as $ser){ ?>
                           <!-- <option value="<?php // echo $ser->serie; ?>" <?php // echo set_select('dserie', $ser->serie); ?>> -->
                             <?php // echo $ser->serie.($ser->leyenda!=''? '-'.$ser->leyenda: ''); ?></option>
                       <?php // } ?>
-                  </select>
+                  <!-- </select> -->
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dfolio">Folio</label>
                 <div class="controls">
-                  <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo set_value('dfolio', (isset($folio)? $folio[0]: '')); ?>" size="15" readonly>
+                  <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo set_value('dfolio', (isset($folio)? $folio[0]: '')); ?>" size="15">
 
                   <input type="hidden" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
                   <!-- <input type="hidden" name="dimg_cbb" id="dimg_cbb" value="<?php //echo set_value('dimg_cbb'); ?>"> -->
