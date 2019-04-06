@@ -51,8 +51,11 @@ class proveedores_facturacion extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Facturas');
 
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = !empty($_GET['did_empresa'])? $_GET['did_empresa']: $params['empresa']->id_empresa;
     $_GET['ffecha1']    = (isset($_GET['ffecha1']{8})? $_GET['ffecha1']: date("Y-m-d"));
     $params['datos_s'] = $this->proveedores_facturacion_model->getProveedores( $_GET['ffecha1'] );
+
 
     // if(isset($_GET['id_mov']{0}))
     //   $params['id_mov'] = $_GET['id_mov'];
@@ -173,6 +176,8 @@ class proveedores_facturacion extends MY_Controller {
       $params['getId'] = 'id='.$idBorrador;
 
       $params['borrador'] = $this->proveedores_facturacion_model->getInfoFactura($idBorrador);
+    } elseif($this->input->get('fid_proveedor') > 0 && $this->input->get('did_empresa') > 0) {
+      $params['borrador'] = $this->proveedores_facturacion_model->getInfoPredatosFactura($this->input->get('fid_proveedor'), $this->input->get('did_empresa'));
     }
 
     // echo "<pre>";

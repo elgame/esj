@@ -63,7 +63,7 @@
 
             <?php
             echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/agregar/', array(
-                    'params'   => '',
+                    'params'   => MyString::getVarsLink(['ffecha1']),
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )
                 );

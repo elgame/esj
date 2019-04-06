@@ -27,6 +27,10 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha</label>
                 <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
 
+                <label for="dempresa">Empresa</label>
+                <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
+                <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
+
                 <label for="dproveedor">Proveedor</label>
                 <input type="text" name="fnombre" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('fnombre'); ?>" size="73">
                 <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>">
@@ -73,7 +77,8 @@
                 'per_page'      => $datos_s['items_per_page'],
                 'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],
                 'page_query_string' => TRUE,
-                'num_links'     => 1,
+                'num_links'     => 5,
+                'uri_segment'   => 3,
                 'anchor_class'  => 'pags corner-all',
                 'num_tag_open'  => '<li>',
                 'num_tag_close' => '</li>',

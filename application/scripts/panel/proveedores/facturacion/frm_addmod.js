@@ -3,7 +3,19 @@ $(function(){
   $('#form').keyJump();
 
   $("#dproveedor").autocomplete({
-    source: base_url+'panel/proveedores_facturacion/ajax_get_proveedor_fac/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+        url: base_url+'panel/proveedores_facturacion/ajax_get_proveedor_fac/',
+        dataType: "json",
+        data: params,
+        success: function(data) {
+          response(data);
+        }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -64,25 +76,25 @@ $(function(){
   }
 
   //Carga el folio para la serie seleccionada
-  $("#dserie").on('change', function(){
-    loader.create();
-    $.getJSON(base_url+'panel/proveedores_facturacion/get_folio/?serie='+$(this).val()+'&idp='+$('#did_proveedor').val(),
-    function(res){
-      if(res.msg == 'ok'){
-        $("#dfolio").val(res.data.folio);
-        $("#dno_aprobacion").val(res.data.no_aprobacion);
-        $("#dano_aprobacion").val(res.data.ano_aprobacion);
-        $("#dimg_cbb").val(res.data.imagen);
-      }else{
-        $("#dfolio").val('');
-        $("#dno_aprobacion").val('');
-        $("#dano_aprobacion").val('');
-        $("#dimg_cbb").val('');
-        noty({"text":res.msg, "layout":"topRight", "type":res.ico});
-      }
-      loader.close();
-    });
-  });
+  // $("#dserie").on('change', function(){
+  //   loader.create();
+  //   $.getJSON(base_url+'panel/proveedores_facturacion/get_folio/?serie='+$(this).val()+'&idp='+$('#did_proveedor').val(),
+  //   function(res){
+  //     if(res.msg == 'ok'){
+  //       $("#dfolio").val(res.data.folio);
+  //       $("#dno_aprobacion").val(res.data.no_aprobacion);
+  //       $("#dano_aprobacion").val(res.data.ano_aprobacion);
+  //       $("#dimg_cbb").val(res.data.imagen);
+  //     }else{
+  //       $("#dfolio").val('');
+  //       $("#dno_aprobacion").val('');
+  //       $("#dano_aprobacion").val('');
+  //       $("#dimg_cbb").val('');
+  //       noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+  //     }
+  //     loader.close();
+  //   });
+  // });
 
   // $('#addProducto').on('click', function(event) {
   //   if (!valida_agregar())

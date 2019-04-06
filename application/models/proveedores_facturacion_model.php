@@ -34,7 +34,7 @@ class proveedores_facturacion_model extends privilegios_model{
 
   public function getLimiteProveedores($id_proveedor, $anio, $fecha='')
   {
-    $data_salario = $this->db->query("SELECT zona_c AS salario FROM nomina_salarios_minimos WHERE id = 1")->row();
+    $data_salario = $this->db->query("SELECT zona_c AS salario FROM nomina_salarios_minimos WHERE anio = {$anio}")->row();
     $response['limite'] = $data_salario->salario * 40 * 365;
 
     $sql_fecha = $fecha!=''? " AND Date(fecha) <= '{$fecha}'": '';
@@ -157,6 +157,27 @@ class proveedores_facturacion_model extends privilegios_model{
       }
 
       $response['productos'] = $productos;
+
+      return $response;
+    }else
+      return false;
+  }
+
+  public function getInfoPredatosFactura($id_proveedor, $id_empresa)
+  {
+    if($id_proveedor > 0 && $id_empresa > 0)
+    {
+      $response['info'] = new stdClass;
+
+      // Carga la info del proveedor.
+      $this->load->model('proveedores_model');
+      $prov = $this->proveedores_model->getProveedorInfo($id_proveedor);
+      $response['info']->proveedor = $prov['info'];
+
+      // Carga la info de la empresa.
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($id_empresa);
+      $response['info']->empresa = $empresa['info'];
 
       return $response;
     }else
@@ -1454,11 +1475,16 @@ class proveedores_facturacion_model extends privilegios_model{
     public function getFacProveedoresAjax()
     {
         $sql = '';
+
+        if ($this->input->get('did_empresa')) {
+          $sql .= " AND id_empresa = {$_GET['did_empresa']}";
+        }
+
         $res = $this->db->query("
             SELECT p.id_proveedor, p.nombre_fiscal, p.cer_caduca, p.cfdi_version, p.cer_org
             FROM proveedores AS p
             WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
-                  status = 'ac'
+                  status = 'ac' {$sql}
             ORDER BY nombre_fiscal ASC
             LIMIT 20");
 
