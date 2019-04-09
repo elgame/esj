@@ -175,7 +175,7 @@ class caja_chica_model extends CI_Model {
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
         WHERE a.tipo = 'fr' AND (DATE(b.fecha_pago) = '{$fecha}' OR DATE(b.fecha_bruto) = '{$fecha}') AND
           -- (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b'))
-          (b.accion = 'p' OR (b.metodo_pago = 'co' AND cb.id_bascula IS NOT NULL))
+          (b.accion = 'p' OR (b.metodo_pago = 'co' AND (b.accion <> 'b' OR cb.id_bascula IS NOT NULL)))
           {$sql}
         ORDER BY (b.folio) ASC"
       );
