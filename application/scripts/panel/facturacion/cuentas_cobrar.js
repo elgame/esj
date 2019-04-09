@@ -146,9 +146,10 @@ var abonom = (function($){
     if ($("#btnGuardarAbono").length > 0)
     {
       $("#form").on('submit', function () {
-        setTimeout(function () {
-          $("#btnGuardarAbono").prop('disabled', true);
-        }, 100);
+        $("#btnGuardarAbono").prop('disabled', true);
+        // setTimeout(function () {
+        //   $("#btnGuardarAbono").prop('disabled', true);
+        // }, 100);
       });
     }
   }
