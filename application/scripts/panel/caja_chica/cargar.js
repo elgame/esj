@@ -39,7 +39,8 @@
     onChanceImporteGastos();
     onChanceImporteTraspaso();
 
-    $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
+    calculaTotalDenominaciones();
+    // $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
     cargaMovimientos();
     searchModalMovimientos();

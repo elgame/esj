@@ -2877,12 +2877,27 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(31, 25));
     $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
-    $saldoCorteCaja = $caja['saldo_inicial'] + $totalRemisiones + $totalIngresos +
-                      ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-                      $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar - $totalReposicionGastos +
-                      $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']);
+    // $saldoCorteCaja = $caja['saldo_inicial'] + $totalRemisiones + $totalIngresos +
+    //                   ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+    //                   $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar - $totalReposicionGastos +
+    //                   $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']);
+    // TOTALESSSS
+    if ($noCajas == 4) {
+      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+        $caja['boletas_arecuperar_total'] + $totalTraspasos;
+
+      $totalFondoCaja = false;
+    } else {
+      $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
+        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'];
+
+      $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
+         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] - $totalAcreedores;
+    }
+
     $pdf->SetX(98);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - $saldoCorteCaja , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - $totalEfectivoCorte , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -2938,19 +2953,6 @@ class caja_chica_model extends CI_Model {
     // $pdf->SetX(153);
     // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
-    if ($noCajas == 4) {
-      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-        $caja['boletas_arecuperar_total'] + $totalTraspasos;
-
-      $totalFondoCaja = false;
-    } else {
-      $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
-        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'];
-
-      $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
-         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] - $totalAcreedores;
-    }
     $pdf->SetX(153);
     $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
     if ($totalFondoCaja !== false) {
