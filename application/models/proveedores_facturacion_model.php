@@ -34,8 +34,8 @@ class proveedores_facturacion_model extends privilegios_model{
 
   public function getLimiteProveedores($id_proveedor, $anio, $fecha='')
   {
-    $data_salario = $this->db->query("SELECT zona_c AS salario FROM nomina_salarios_minimos WHERE anio = {$anio}")->row();
-    $response['limite'] = $data_salario->salario * 40 * 365;
+    $data_salario = $this->db->query("SELECT zona_a AS salario FROM nomina_salarios_minimos WHERE anio = {$anio}")->row();
+    $response['limite'] = $data_salario->salario * 40 * 30.4 * 12;
 
     $sql_fecha = $fecha!=''? " AND Date(fecha) <= '{$fecha}'": '';
     $data_saldo = $this->db->query("SELECT Sum(total) AS total
