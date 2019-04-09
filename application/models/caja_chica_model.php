@@ -494,8 +494,8 @@ class caja_chica_model extends CI_Model {
       $fecha1 = $fecha;
     }
 
+    $sql_status2 = str_replace('{fecha}', $fecha1, $sql_status2);
     if (!$all) {
-      $sql_status2 = str_replace('{fecha}', $fecha1, $sql_status2);
       $sql .= " AND {$sql_status2} = 't'";
     }
 
