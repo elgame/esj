@@ -51,10 +51,10 @@
                   <label class="control-label" for="dfecha">Fecha</label>
                   <div class="controls">
                     <?php echo isset($fecha)? $fecha: '' ?>
-                    <input type="hide" name="id" value="<?php echo $this->input->get('id') ?>">
-                    <input type="hide" name="fecha" value="<?php echo $this->input->get('fecha') ?>">
-                    <input type="hide" name="no_caja" value="<?php echo $this->input->get('no_caja') ?>">
-                    <input type="hide" name="monto" value="<?php echo $this->input->get('monto') ?>">
+                    <input type="hidden" name="id" value="<?php echo $this->input->get('id') ?>">
+                    <input type="hidden" name="fecha" value="<?php echo $this->input->get('fecha') ?>">
+                    <input type="hidden" name="no_caja" value="<?php echo $this->input->get('no_caja') ?>">
+                    <input type="hidden" name="monto" value="<?php echo $this->input->get('monto') ?>">
                   </div>
                 </div>
 

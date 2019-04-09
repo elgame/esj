@@ -388,15 +388,15 @@ class caja_chica_model extends CI_Model {
 
     // gastos por comprobar
     if ($noCaja == '2' || $noCaja == '5') {
-      $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'gc'": " AND cg.tipo = 'gc'"));
+      $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
     }
 
     // gastos
-    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'g'": " AND cg.tipo = 'g'"));
+    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, $all);
 
     // reposición de gastos
     if ($noCaja == '2' || $noCaja == '5') {
-      $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, (!$all? " AND cg.status = 't' AND cg.tipo = 'rg'": " AND cg.tipo = 'rg'"));
+      $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, $all);
     }
 
     // Traspasos
@@ -472,14 +472,32 @@ class caja_chica_model extends CI_Model {
     return $response;
   }
 
-  public function getCajaGastos($fecha, $noCaja, $sql = '')
+  public function getCajaGastos($fecha, $noCaja, $all)
   {
+    $sql = '';
+    $sql_status2 = "(CASE WHEN cg.fecha_cancelado IS NULL THEN true
+      WHEN cg.fecha_cancelado > '{fecha}' THEN true
+      ELSE false END)";
+    $fecha1 = '';
+
     if (is_array($fecha) && $fecha[0] === 'gc') {
+      $sql .= " AND cg.tipo = 'gc'";
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+      $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
+      $sql .= " AND cg.tipo = 'rg'";
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
-    } else
+      $fecha1 = $fecha[1];
+    } else {
+      $sql .= " AND cg.tipo = 'g'";
       $sql .= " AND cg.fecha = '{$fecha}'";
+      $fecha1 = $fecha;
+    }
+
+    if (!$all) {
+      $sql_status2 = str_replace('{fecha}', $fecha1, $sql_status2);
+      $sql .= " AND {$sql_status2} = 't'";
+    }
 
     $response = [];
     $gastos = $this->db->query(
@@ -490,7 +508,8 @@ class caja_chica_model extends CI_Model {
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
           cg.nombre, cg.status, cg.folio_sig,
-          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
+          {$sql_status2} AS status2
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
