@@ -2381,10 +2381,10 @@ class caja_chica_model extends CI_Model {
           $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
+          ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
           MyString::float(MyString::formatoNumero(
-            ($gasto->status == 't'? $gasto->monto: 0),
+            ($gasto->status2 == 't'? $gasto->monto: 0),
             2, '', false))
         ), false, true, $colortxt);
 
@@ -2461,10 +2461,10 @@ class caja_chica_model extends CI_Model {
           $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
+          ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
           MyString::float(MyString::formatoNumero(
-            ($gasto->status == 't'? $gasto->monto: 0),
+            ($gasto->status2 == 't'? $gasto->monto: 0),
             2, '', false))
         ), false, true, $colortxt);
 
@@ -2523,7 +2523,7 @@ class caja_chica_model extends CI_Model {
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status == 't') {
+        if ($gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
           }
@@ -2544,10 +2544,10 @@ class caja_chica_model extends CI_Model {
           $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status == 't'? $gasto->concepto: 'CANCELADO'),
+          ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
           MyString::float(MyString::formatoNumero(
-            ($gasto->status == 't'? $gasto->monto: 0),
+            ($gasto->status2 == 't'? $gasto->monto: 0),
             2, '', false))
         ), false, true, $colortxt);
 
