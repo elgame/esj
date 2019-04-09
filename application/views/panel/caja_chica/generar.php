@@ -1381,8 +1381,8 @@
                               <?php
 
                               if ($_GET['fno_caja'] === '4') {
-                                $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-                                  $totalGastosComprobar - $totalGastos - $totalReposicionGastos - ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                  $totalGastosComprobar - $totalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
                                   $caja['boletas_arecuperar_total'] + $totalTraspasos;
 
                                 $totalFondoCaja = false;
