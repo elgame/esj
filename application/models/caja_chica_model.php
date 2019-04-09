@@ -173,7 +173,8 @@ class caja_chica_model extends CI_Model {
           INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
           LEFT JOIN cajachica_boletas cb ON (cb.id_bascula = b.id_bascula AND Date(cb.fecha) = '{$fecha}')
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
-        WHERE a.tipo = 'fr' AND (DATE(b.fecha_pago) = '{$fecha}' OR DATE(b.fecha_bruto) = '{$fecha}') AND
+        WHERE a.tipo = 'fr' AND (DATE(b.fecha_pago) = '{$fecha}' OR DATE(b.fecha_bruto) = '{$fecha}')
+          -- AND
           -- (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b'))
           -- (b.accion = 'p' OR (b.metodo_pago = 'co' AND (b.accion <> 'b' OR cb.id_bascula IS NOT NULL)))
           {$sql}
