@@ -2360,7 +2360,7 @@ class caja_chica_model extends CI_Model {
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status == 't') {
+        if ($gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalGastosComprobar += floatval($gasto->monto);
           }
@@ -2444,7 +2444,7 @@ class caja_chica_model extends CI_Model {
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status == 't') {
+        if ($gasto->status2 == 't') {
           $totalGastos += floatval($gasto->monto);
           $colortxt = [[0, 0, 0]];
         }
