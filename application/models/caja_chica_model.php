@@ -2917,8 +2917,8 @@ class caja_chica_model extends CI_Model {
     // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
     if ($noCajas == 4) {
-      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
         $caja['boletas_arecuperar_total'] + $totalTraspasos;
 
       $totalFondoCaja = false;
