@@ -295,7 +295,7 @@ class caja_chica_model extends CI_Model {
           $info['cheques_transito_total'] = $denominaciones->saldo_cheques_transito;
         } else {
           foreach ($info['boletas_ch_entransito'] as $key => $value) {
-            $info['cheques_transito_total'] += $value->importe;
+            $info['cheques_transito_total'] += $value->monto;
           }
         }
       }
