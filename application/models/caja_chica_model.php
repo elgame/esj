@@ -14,6 +14,7 @@ class caja_chica_model extends CI_Model {
       'boletas_arecuperar'       => array(),
       'boletas_arecuperar_total' => 0,
       'boletas_ch_entransito'    => array(),
+      'cheques_transito_total'   => 0,
       'saldo_clientes'           => array(),
       'denominaciones'           => array(),
       'gastos'                   => array(),
@@ -289,6 +290,14 @@ class caja_chica_model extends CI_Model {
       if ($boletas->num_rows() > 0)
       {
         $info['boletas_ch_entransito'] = $boletas->result();
+
+        if (isset($denominaciones->status) && $denominaciones->status === 'f') {
+          $info['cheques_transito_total'] = $denominaciones->saldo_cheques_transito;
+        } else {
+          foreach ($info['boletas_ch_entransito'] as $key => $value) {
+            $info['cheques_transito_total'] += $value->importe;
+          }
+        }
       }
     }
 
@@ -837,6 +846,7 @@ class caja_chica_model extends CI_Model {
     $efectivo['fecha']                    = $data['fecha_caja_chica'];
     $efectivo['saldo']                    = $data['saldo_corte'];
     $efectivo['saldo_boletas_arecuperar'] = empty($data['boletas_arecuperar_total'])? 0: $data['boletas_arecuperar_total'];
+    $efectivo['saldo_cheques_transito']   = empty($data['cheques_transito_total'])? 0: $data['cheques_transito_total'];
     $efectivo['no_caja']                  = $data['fno_caja'];
     $this->db->insert('cajachica_efectivo', $efectivo);
 
@@ -2885,15 +2895,15 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 4) {
       $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
         $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-        $caja['boletas_arecuperar_total'] + $totalTraspasos;
+        $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
 
       $totalFondoCaja = false;
     } else {
       $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
-        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'];
+        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'];
 
       $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
-         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] - $totalAcreedores;
+         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] - $totalAcreedores;
     }
 
     $pdf->SetX(98);
@@ -2946,9 +2956,11 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(153);
       $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
     }
-    if ($noCajas == 1 && $caja['boletas_arecuperar_total'] > 0) {
+    if ($noCajas == 1 && ($caja['boletas_arecuperar_total'] > 0 || $caja['cheques_transito_total'] > 0)) {
       $pdf->SetX(153);
       $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
+      $pdf->SetX(153);
+      $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
     }
     // $pdf->SetX(153);
     // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
