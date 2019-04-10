@@ -959,9 +959,8 @@
                                   foreach ($caja['reposicion_gastos'] as $reposiciong) {
                                     if ($reposiciong->fecha == $fecha) {
                                       $totalReposicionGastos += floatval($reposiciong->monto);
-                                    } else {
-                                      $totalReposicionGastosAnt += floatval($reposiciong->monto);
                                     }
+                                    $totalReposicionGastosAnt += floatval($reposiciong->monto);
                                   ?>
                                   <tr>
                                     <td style="">

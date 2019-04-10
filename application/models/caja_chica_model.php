@@ -868,7 +868,7 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_id_gasto'][$key]);
         } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
@@ -957,7 +957,7 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
@@ -1056,7 +1056,7 @@ class caja_chica_model extends CI_Model {
           }
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => date("Y-m-d")], "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['reposicionGasto_id_gasto'][$key]);
         } elseif (isset($data['reposicionGasto_id_gasto'][$key]) && floatval($data['reposicionGasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['reposicionGasto_empresa_id'][$key],
@@ -2137,12 +2137,12 @@ class caja_chica_model extends CI_Model {
 
     if (($totalRemisiones + $totalIngresos) > 0) {
       $pdf->SetTextColor(0, 0, 0);
-      $pdf->SetX(6);
-      $pdf->Row(array('', '', '', '', '', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '', false)), false, true);
 
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(105, 50, 50));
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(6);
-      $pdf->Row(array('', '', '', '', 'TOTAL', MyString::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
+      $pdf->Row(array('', 'ACUMULADO: '.MyString::formatoNumero($ttotalIngresos, 2, '$', false), 'TOTAL: '.MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, true);
     }
 
 
@@ -2250,8 +2250,8 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 6.4);
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(43, 43, 43));
-      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false)), true, true);
@@ -2407,8 +2407,9 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false),
-        'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false)), true, true);
+      $pdf->Row(array('', '', '', '', '', '',
+        'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false),
+        'TOTAL', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), true, true);
     }
 
 
@@ -2570,8 +2571,9 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false),
-        'TOTAL DIA', MyString::formatoNumero($totalReposicionGastos, 2, '$', false)), true, true);
+      $pdf->Row(array('', '', '', '', '', '',
+        'TOTAL DIA', MyString::formatoNumero($totalReposicionGastos, 2, '$', false),
+        'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), true, true);
     }
 
 
@@ -2636,8 +2638,8 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 6.4);
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
-      $pdf->SetWidths(array(43, 43, 43));
-      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
