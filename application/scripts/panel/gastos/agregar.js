@@ -186,19 +186,19 @@
         $("#group_gasolina").hide();
     });
 
-    $('#condicionPago').on('change', function(event) {
-      var $this = $(this);
-      if ($this.val() == 'cr')
-      {
-        $("#grup_plazo_credito").show();
-        $("#group_pago_contado").hide();
-      }
-      else
-      {
-        $("#grup_plazo_credito").hide();
-        $("#group_pago_contado").show();
-      }
-    });
+    // $('#condicionPago').on('change', function(event) {
+    //   var $this = $(this);
+    //   if ($this.val() == 'cr')
+    //   {
+    //     $("#grup_plazo_credito").show();
+    //     $("#group_pago_contado").hide();
+    //   }
+    //   else
+    //   {
+    //     $("#grup_plazo_credito").hide();
+    //     $("#group_pago_contado").show();
+    //   }
+    // });
 
 
     /**

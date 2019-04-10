@@ -92,14 +92,14 @@
                   </div>
                 </div>
 
-                <div class="control-group" style="display: none;">
+                <div class="control-group" style="">
                   <label class="control-label" for="condicionPago">Condición de Pago</label>
                   <div class="controls">
-                    <input type="text" name="condicionPago" class="span9" id="condicionPago" value="<?php echo set_value('condicionPago', '0'); ?>">
-                    <!-- <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
+                    <!-- <input type="text" name="condicionPago" class="span9" id="condicionPago" value="<?php echo set_value('condicionPago', '0'); ?>"> -->
+                    <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
                       <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                       <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
-                    </select> -->
+                    </select>
                   </div>
                 </div>
 
