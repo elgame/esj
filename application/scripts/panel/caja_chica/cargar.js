@@ -608,8 +608,10 @@
           $('#modalCompGastos').modal('hide');
           $trGasto.remove();
 
-          var iframe = parent.document.getElementById('iframe-reporte');
-          iframe.src = iframe.src;
+          setTimeout(function () {
+            var iframe = parent.document.getElementById('iframe-reporte');
+            iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
+          }, 300);
         }, 'json');
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
