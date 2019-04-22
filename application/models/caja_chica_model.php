@@ -850,6 +850,9 @@ class caja_chica_model extends CI_Model {
     $efectivo['saldo_boletas_arecuperar'] = empty($data['boletas_arecuperar_total'])? 0: $data['boletas_arecuperar_total'];
     $efectivo['saldo_cheques_transito']   = empty($data['cheques_transito_total'])? 0: $data['cheques_transito_total'];
     $efectivo['no_caja']                  = $data['fno_caja'];
+    if (!empty($data['statusCaja']) && $data['statusCaja'] == 'f') {
+      $efectivo['status']                 = $data['statusCaja'];
+    }
     $this->db->insert('cajachica_efectivo', $efectivo);
 
     // Gastos del dia
