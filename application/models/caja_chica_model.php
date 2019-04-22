@@ -340,7 +340,9 @@ class caja_chica_model extends CI_Model {
         WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
       )->row();
       if (isset($deudores->abonos)) {
-        $info['deudores_abonos_dia'] = $deudores->abonos;
+        if (!($noCaja == '4' && $fecha == '2019-04-08')) {
+          $info['deudores_abonos_dia'] = $deudores->abonos;
+        }
       }
     }
 
