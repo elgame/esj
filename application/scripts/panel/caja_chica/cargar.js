@@ -590,7 +590,10 @@
           remisiones.push( JSON.parse(decodeURIComponent($(this).val())) );
         });
         $('#tableComGastoGastos .compGastoGAll').each(function(index, el) {
-          gastos.push( JSON.parse(decodeURIComponent($(this).val())) );
+          $tr = $(this).parent().parent();
+          $json = JSON.parse(decodeURIComponent($(this).val()));
+          $json.total = $tr.find('.compGastoGMonto').val();
+          gastos.push( $json );
         });
 
         var params = {
@@ -604,18 +607,27 @@
           'gastos'      : gastos
         };
 
-        $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
-          $('#modalCompGastos').modal('hide');
-          $trGasto.remove();
+        // $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+        //   $('#modalCompGastos').modal('hide');
+        //   $trGasto.remove();
 
-          setTimeout(function () {
-            var iframe = parent.document.getElementById('iframe-reporte');
-            iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
-          }, 300);
-        }, 'json');
+        //   setTimeout(function () {
+        //     var iframe = parent.document.getElementById('iframe-reporte');
+        //     iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
+        //   }, 300);
+        // }, 'json');
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
       }
+    });
+
+    $('#tableComGastoGastos').on('change', '.compGastoGMonto', function(event) {
+      $tr = $(this).parent().parent();
+      console.log('test', 'ddddddd');
+      calculaTotalGastosModal();
+      // $json = JSON.parse(decodeURIComponent($(this).val()));
+      // $json.total = $tr.find('.compGastoGMonto').val();
+      // gastos.push( $json );
     });
   };
 
@@ -1374,15 +1386,15 @@
             '<td>'+datos.folio+
               '<input type="hidden" class="compGastoGFolio" value="'+datos.folio+'">'+
             '</td>'+
-            '<td>'+datos.total+
-              '<input type="hidden" class="compGastoGMonto" value="'+datos.total+'">'+
+            '<td>'+
+              '<input type="number" class="compGastoGMonto" value="'+datos.total+'">'+
             '</td>'+
             '<td><button type="button" class="btn compGastoGFrmRemRem"><i class="icon-remove"></i></button></td>'+
           '</tr>';
         });
 
         $(html).appendTo($table);
-        calculaTotalGastos();
+        calculaTotalGastosModal();
 
         $('#modal-gastosdirectos').modal('hide');
       } else {
@@ -1393,7 +1405,7 @@
     // Eliminar un gasto directo
     $('#tableComGastoGastos').on('click', '.compGastoGFrmRemRem', function(event) {
       $(this).parents('tr').remove();
-      calculaTotalGastos();
+      calculaTotalGastosModal();
     });
   };
 
@@ -1406,7 +1418,8 @@
     calculaTotalComprobacion();
   };
 
-  var calculaTotalGastos = function () {
+  var calculaTotalGastosModal = function () {
+    console.log('calculaTotalGastos');
     var total = 0;
     $('#tableComGastoGastos .compGastoGMonto').each(function(index, el) {
       total += (parseFloat($(this).val())||0);

@@ -165,6 +165,15 @@ class caja_chica_model extends CI_Model {
         $sql .= " AND b.status = 't'";
       }
 
+      $last_folio = $this->db->query(
+        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_bruto) as fecha
+        FROM bascula b
+          INNER JOIN areas a ON a.id_area = b.id_area
+        WHERE a.tipo = 'fr' AND (DATE(b.fecha_pago) < '{$fecha}' OR DATE(b.fecha_bruto) < '{$fecha}')
+          {$sql}
+        ORDER BY (b.folio) DESC
+        LIMIT 1"
+      )->row();
       $boletas = $this->db->query(
         "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_bruto) as fecha, pr.nombre_fiscal as proveedor,
           b.importe, cb.folio as folio_caja_chica, p.nombre_fiscal as productor,
@@ -186,7 +195,7 @@ class caja_chica_model extends CI_Model {
       {
         $boletas = $boletas->result();
         $boletasRes = [];
-        $folio_sig = $boletas[0]->boleta;
+        $folio_sig = (isset($last_folio->boleta) && ($boletas[0]->boleta - $last_folio->boleta) < 11? $last_folio->boleta: $boletas[0]->boleta);
         foreach ($boletas as $key => $boleta) {
           if ($all && $key > 0) {
             ++$folio_sig;
@@ -254,7 +263,7 @@ class caja_chica_model extends CI_Model {
           -- LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
           LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
-        WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
+        WHERE DATE(b.fecha_pago) < '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
           AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL{$sql}
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
@@ -1344,21 +1353,21 @@ class caja_chica_model extends CI_Model {
           SELECT id_categoria, id_empresa, abreviatura
           FROM cajachica_categorias
           WHERE status = 't' AND id_empresa IS NOT NULL
-             ) cc ON cc.id_empresa = c.id_empresa
-             INNER JOIN areas a ON a.id_area = c.id_area
-             INNER JOIN (
+        ) cc ON cc.id_empresa = c.id_empresa
+        INNER JOIN areas a ON a.id_area = c.id_area
+        INNER JOIN (
           SELECT cc.id_centro_costo, cc.nombre, ccc.id_compra, ccc.num
           FROM otros.centro_costo cc
             INNER JOIN compras_centro_costo ccc ON cc.id_centro_costo = ccc.id_centro_costo
           ORDER BY cc.id_centro_costo ASC
-             ) ccc ON ccc.id_compra = c.id_compra
-             INNER JOIN (
+        ) ccc ON ccc.id_compra = c.id_compra
+        INNER JOIN (
           SELECT r.id_rancho, r.nombre, cr.id_compra, cr.num
           FROM otros.ranchos r
             INNER JOIN compras_rancho cr ON r.id_rancho = cr.id_rancho
           ORDER BY r.id_rancho ASC
-             ) ra ON ra.id_compra = c.id_compra
-             LEFT JOIN productos ac ON ac.id_producto = c.id_activo
+        ) ra ON ra.id_compra = c.id_compra
+        LEFT JOIN productos ac ON ac.id_producto = c.id_activo
       WHERE c.isgasto = 't' {$sql} AND c.status = 'p' AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
       GROUP BY c.id_compra, p.id_proveedor, cc.abreviatura, cc.id_categoria, a.id_area, ac.id_producto
       ORDER BY (c.fecha, c.serie, c.folio) DESC"
@@ -1627,7 +1636,7 @@ class caja_chica_model extends CI_Model {
           'tipo'               => 'f',
 
           'fecha'               => $data['fecha_caja'],
-          'concepto'            => 'Pago generado de caja chica #'.$data['fno_caja'],
+          'concepto'            => 'Pago/Abono generado de caja chica #'.$data['fno_caja'],
           'total'               => $gastoo['total'],
           'total_bc'            => $gastoo['total'],
           'id_cuenta'           => 16, // id de la cuenta caja chica
