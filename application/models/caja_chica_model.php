@@ -254,7 +254,7 @@ class caja_chica_model extends CI_Model {
           -- LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
           LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
-        WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
+        WHERE DATE(b.fecha_pago) < '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
           AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL{$sql}
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
