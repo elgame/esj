@@ -1771,8 +1771,19 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetY($pdf->getY()+5);
 
       $aligns = array('C', 'L', 'C', 'R', 'R', 'C', 'C');
-      $widths = array(35, 101, 18, 25, 25, 25, 25, 25);
-      $header = array('CODIGO', 'DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
+      $ultima_compra = false;
+      if ($orden['info'][0]->no_impresiones > 0) {
+        $widths = array(95, 18, 25, 25, 25, 25, 25);
+        $header = array('DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
+
+        $aligns2 = array('R', 'C');
+        $widths2 = array(25, 25);
+        $header2 = array('PRECIO', 'ULTIMA/COMP');
+        $ultima_compra = true;
+      } else {
+        $widths = array(35, 101, 18, 25, 25, 25, 25, 25);
+        $header = array('CODIGO', 'DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
+      }
       if ($orientacion === 'L') {
         $header[] = 'FECHA';
         $header[] = 'FOLIO';
@@ -1799,22 +1810,40 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','B',8);
           // $pdf->SetTextColor(255,255,255);
           $pdf->SetFillColor(200,200,200);
+
           $pdf->SetX(6);
+          if ($ultima_compra) {
+            $pdf->SetAligns($aligns2);
+            $pdf->SetWidths($widths2);
+            $pdf->Row($header2, true);
+            $pdf->SetX(45);
+            $pdf->SetY($pdf->GetY()-10);
+          }
+
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
           $pdf->Row($header, true);
         }
 
+        $ultcompra = null;
+        if ($ultima_compra) {
+          $ultcompra = $this->getUltimaCompra($prod->id_producto);
+        }
+
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
-        $datos = array(
-          $prod->codigo.'/'.$prod->codigo_fin,
+        $datos = array();
+          (
+            $ultima_compra && $ultcompra?
+            MyString::formatoNumero($ultcompra->precio_unitario, 2, '$', false):
+            $prod->codigo.'/'.$prod->codigo_fin
+          ),
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
           // $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
           $prod->cantidad.' '.$prod->abreviatura,
           MyString::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
           MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false)
-        );
+
         if ($orientacion === 'L') {
           $datos[] = $prod->fecha_aceptacion;
           $datos[] = $prod->folio_aceptacion; //cont_x_dia
@@ -1946,8 +1975,6 @@ class compras_ordenes_model extends CI_Model {
       }
       // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
 
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
       if($orden['info'][0]->tipo_orden == 'f'){
         $pdf->SetWidths(array(205));
         $pdf->SetX(6);
@@ -1964,6 +1991,11 @@ class compras_ordenes_model extends CI_Model {
       $y_compras = $pdf->GetY();
 
       if ($orden['info'][0]->no_impresiones > 0) {
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+
+        $pdf->SetFont('Arial', 'B', 8);
         // El dato de la requisicion
         if (!empty($orden['info'][0]->folio_requisicion)) {
           $pdf->SetFont('Arial','',8);
@@ -2358,8 +2390,9 @@ class compras_ordenes_model extends CI_Model {
     $query = null;
     if ($id_producto > 0) {
       $query = $this->db->query("SELECT *
-                                 FROM compras_productos
-                                 WHERE id_producto = {$id_producto}")->row();
+        FROM compras_productos
+        WHERE id_producto = {$id_producto}
+        ORDER BY Date(fecha_aceptacion) DESC")->row();
     }
     return $query;
   }
