@@ -88,11 +88,16 @@
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
-                  <?php if ($cajas_cerradas) { ?>
+                  <?php
+                  $readonlyCC = '';
+                  if ($cajas_cerradas) { ?>
                     <div>Para modificar la caja no tiene que haber días cerrados mayores a esta fecha</div>
-                  <?php } ?>
+                    <input type="hidden" name="statusCaja" value="<?php echo (isset($caja['status'])? $caja['status']: '') ?>">
+                  <?php
+                      $readonlyCC = ' readonly';
+                  } ?>
 
-                  <?php if ($show && !$cajas_cerradas){ ?>
+                  <?php if ($show){ ?>
                     <div class="span4"><input type="submit" id="btnGuardar" class="btn btn-success btn-large span12" value="Guardar"></div>
                   <?php } ?>
 
@@ -121,7 +126,7 @@
                           <thead>
                             <tr>
                               <th colspan="6">INGRESOS POR REPOSICION
-                                <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '1'): ?>
+                                <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '1')): ?>
                                 <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <?php //if ($_GET['fno_caja'] == '4'): ?>
                                   <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
@@ -207,9 +212,9 @@
                                         <input type="text" name="ingreso_concepto[]" value="<?php echo $ingreso->concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly.$mod_ing_readonly ?>>
                                         <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $ingreso->id_movimiento ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
                                       </td>
-                                      <td style=""><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly.$mod_ing_readonly ?>></td>
+                                      <td style=""><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly.$mod_ing_readonly.$readonlyCC ?>></td>
                                       <td style="width: 30px;">
-                                        <?php if ($modificar_ingresos): ?>
+                                        <?php if (!$cajas_cerradas && $modificar_ingresos): ?>
                                           <button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                         <?php endif ?>
                                       </td>
@@ -238,7 +243,9 @@
                             <tr>
                               <th colspan="7">INGRESOS CLIENTES
                                 <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
-                                <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
+                                <?php if (!$cajas_cerradas): ?>
+                                  <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
+                                <?php endif ?>
                               </th>
                               <th colspan="2">IMPORTE</th>
                             </tr>
@@ -310,9 +317,11 @@
                                         <input type="text" name="remision_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                         <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
                                       </td>
-                                      <td style=""><input type="text" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly ?>></td>
+                                      <td style=""><input type="text" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
                                       <td style="width: 30px;">
-                                        <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php if (!$cajas_cerradas): ?>
+                                          <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php endif ?>
                                         <input type="hidden" name="remision_del[]" value="" id="remision_del">
                                       </td>
                                     </tr>
@@ -366,7 +375,7 @@
                                     <thead>
                                       <tr>
                                         <th colspan="2">TRASPASOS
-                                          <?php if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4'): ?>
+                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4')): ?>
                                           <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                           <?php endif ?>
                                         </th>
@@ -441,13 +450,13 @@
                                           </td>
                                           <td style="width: 60px;">
                                             <?php if ($traspaso->guardado == 't'): ?>
-                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
+                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
                                             <?php else: ?>
                                               <?php echo $traspaso->monto ?>
                                             <?php endif ?>
                                           </td>
                                           <td style="width: 30px;">
-                                            <?php if ($traspaso->guardado == 't'): ?>
+                                            <?php if (!$cajas_cerradas && $traspaso->guardado == 't'): ?>
                                             <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                             <?php endif ?>
                                           </td>
@@ -558,7 +567,9 @@
                               <thead>
                                 <tr>
                                   <th colspan="7">GASTOS POR COMPROBAR
-                                    <button type="button" class="btn btn-success" id="btn-add-gasto-comprobar" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php if (!$cajas_cerradas): ?>
+                                      <button type="button" class="btn btn-success" id="btn-add-gasto-comprobar" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php endif ?>
                                   </th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
@@ -680,12 +691,14 @@
                                       <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly.$readonlygc; ?>>
                                       <input type="hidden" name="gasto_comprobar_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
                                     </td>
-                                    <td style=""><input type="text" name="gasto_comprobar_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>></td>
+                                    <td style=""><input type="text" name="gasto_comprobar_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlygc.$readonlyCC ?>></td>
                                     <td style="width: 50px">
                                       <?php if ($modificar_gasto): ?>
-                                        <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php if (!$cajas_cerradas): ?>
+                                          <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                          <button type="button" class="btn btn-info btn-show-comp-gasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
+                                        <?php endif ?>
                                         <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
-                                        <button type="button" class="btn btn-info btn-show-comp-gasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
                                       <?php endif ?>
                                     </td>
                                   </tr>
@@ -723,9 +736,9 @@
                               <thead>
                                 <tr>
                                   <th colspan="6">GASTOS GENERALES
-                                    <?php //if ($_GET['fno_caja'] !== '1'): ?>
+                                    <?php if (!$cajas_cerradas): ?>
                                     <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
-                                    <?php //endif ?>
+                                    <?php endif ?>
                                   </th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
@@ -841,10 +854,12 @@
                                       <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly; ?>>
                                       <input type="hidden" name="gasto_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
                                     </td>
-                                    <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly ?>></td>
+                                    <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
                                     <td style="">
                                       <?php if ($modificar_gasto): ?>
-                                        <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php if (!$cajas_cerradas): ?>
+                                          <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php endif ?>
                                         <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
                                       <?php endif ?>
                                     </td>
@@ -1004,10 +1019,12 @@
                                       <input type="checkbox" value="si" class="reposiciong-reposicion" <?php echo ($reposiciong->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly; ?>>
                                       <input type="hidden" name="reposicionGasto_reposicion[]" value="<?php echo $reposiciong->reposicion ?>" class="reposiciong-reposicionhid">
                                     </td>
-                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly ?>></td>
+                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
                                     <td style="">
                                       <?php if ($modificar_gasto): ?>
-                                        <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php if (!$cajas_cerradas): ?>
+                                          <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <?php endif ?>
                                         <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
                                       <?php endif ?>
                                     </td>
@@ -1044,7 +1061,11 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-deudor">
                               <thead>
                                 <tr>
-                                  <th colspan="8">DEUDORES <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="8">DEUDORES
+                                    <?php if (!$cajas_cerradas): ?>
+                                      <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php endif ?>
+                                  </th>
                                 </tr>
                                 <tr>
                                   <th>FECHA</th>
@@ -1128,7 +1149,7 @@
                                       <?php echo $deudor->abonos ?>
                                     </td>
                                     <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>" data-mismo="<?php echo $deudor->mismo_dia ?>">
-                                      <?php if (!isset($caja['status']) || $caja['status'] === 't'): ?>
+                                      <?php if ((!isset($caja['status']) || $caja['status'] === 't') && !$cajas_cerradas): ?>
                                       <a class="btn_abonos_deudores" href="<?php echo base_url('panel/caja_chica/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$_GET['fno_caja']}&monto={$deudor->saldo}" ?>" style="" rel="superbox-50x500" title="Abonar">
                                         <?php echo $deudor->saldo ?></a>
                                       <?php else: ?>
@@ -1136,7 +1157,7 @@
                                       <?php endif ?>
                                     </td>
                                     <td style="width: 30px;">
-                                      <?php if ($modificar_gasto && $deudor->mismo_dia == ''): ?>
+                                      <?php if ($modificar_gasto && $deudor->mismo_dia == '' && !$cajas_cerradas): ?>
                                         <button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                       <?php endif ?>
                                     </td>
@@ -1295,12 +1316,12 @@
                           ?>
                           <tr>
                             <td>
-                              <input type="text" name="denominacion_cantidad[]" value="<?php echo $denominacion['cantidad'] ?>" class="input-small vpositive denom-num" data-denominacion="<?php echo $denominacion['denominacion'] ?>" <?php echo $readonly ?>>
-                              <input type="hidden" name="denominacion_denom[]" value="<?php echo $denominacion['denominacion'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
-                              <input type="hidden" name="denom_abrev[]" value="<?php echo $denominacion['denom_abrev'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
+                              <input type="text" name="denominacion_cantidad[]" value="<?php echo $denominacion['cantidad'] ?>" class="input-small vpositive denom-num" data-denominacion="<?php echo $denominacion['denominacion'] ?>" <?php echo $readonly.$readonlyCC ?>>
+                              <input type="hidden" name="denominacion_denom[]" value="<?php echo $denominacion['denominacion'] ?>" class="input-small vpositive denom-num" <?php echo $readonly.$readonlyCC ?>>
+                              <input type="hidden" name="denom_abrev[]" value="<?php echo $denominacion['denom_abrev'] ?>" class="input-small vpositive denom-num" <?php echo $readonly.$readonlyCC ?>>
                             </td>
                             <td style="text-align: right;"><?php echo MyString::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
-                            <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
+                            <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly.$readonlyCC ?>></td>
                           </tr>
                         <?php }} ?>
                         <tbody>
