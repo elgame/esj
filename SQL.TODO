@@ -17,6 +17,42 @@
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
       ALTER TABLE public.compras_ordenes ADD COLUMN id_requisicion bigint;
       ALTER TABLE public.compras_productos ADD COLUMN folio_aceptacion integer;
+      -- pcc
+      CREATE TABLE public.compras_ordenes_hist_imp
+        (
+          id_orden bigint NOT NULL,
+          fecha timestamp with time zone NOT NULL,
+          no_impresiones smallint NOT NULL DEFAULT 0,
+          CONSTRAINT compras_ordenes_hist_imp_pkey PRIMARY KEY (id_orden, no_impresiones),
+          CONSTRAINT compras_ordenes_hist_imp_id_orden_fkey FOREIGN KEY (id_orden)
+              REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE public.compras_ordenes_hist_imp OWNER TO postgres;
+        COMMENT ON TABLE public.compras_ordenes_hist_imp IS 'historial de impreciones';
+      CREATE OR REPLACE FUNCTION public.insert_hist_ordenes_impre()
+            RETURNS trigger AS
+            $BODY$
+              BEGIN
+                IF NEW.no_impresiones <> OLD.no_impresiones AND TG_OP = 'UPDATE' THEN
+                  INSERT INTO public.compras_ordenes_hist_imp (id_orden, fecha, no_impresiones) VALUES (NEW.id_orden, Now(), OLD.no_impresiones);
+                ELSIF TG_OP = 'INSERT' THEN
+                END IF;
+                return null;
+              END;
+            $BODY$
+            LANGUAGE plpgsql VOLATILE
+            COST 100;
+          ALTER FUNCTION public.insert_hist_ordenes_impre()
+            OWNER TO programa;
+      CREATE TRIGGER tg_insert_hist_ordenes_impre
+          AFTER UPDATE
+          ON public.compras_ordenes
+          FOR EACH ROW
+          EXECUTE PROCEDURE public.insert_hist_ordenes_impre();
 
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc|lap|san
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;

@@ -901,6 +901,16 @@ class compras_ordenes_model extends CI_Model {
     return $data;
   }
 
+  public function infoHistNoImpreciones($ordenId)
+  {
+    $query = $this->db->query("SELECT *
+                               FROM compras_ordenes_hist_imp
+                               WHERE id_orden = {$ordenId}");
+    $data = $query->result();
+
+    return $data;
+  }
+
   public function folioDia($fecha)
   {
     $res = $this->db->select('cont_x_dia')
@@ -1564,6 +1574,7 @@ class compras_ordenes_model extends CI_Model {
 
       $orden = $this->info($ordenId, true);
       $ordenPago = $this->infoPago($ordenId);
+      $ordenHistImp = $this->infoHistNoImpreciones($ordenId);
       $emp_cuenta = $this->banco_cuentas_model->getCuentaConcentradora($orden['info'][0]->id_empresa);
       $almacen = $this->almacenes_model->getAlmacenInfo($orden['info'][0]->id_almacen);
       $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
@@ -1615,7 +1626,7 @@ class compras_ordenes_model extends CI_Model {
 
       $pdf->SetFont('helvetica','', 9);
       $pdf->SetXY(80, $pdf->GetY()-20);
-      $pdf->Row(array('Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones).
+      $pdf->Row(array('Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': ($orden['info'][0]->no_impresiones==1? 'COPIA ARCHIVO': 'COPIA '.$orden['info'][0]->no_impresiones)).
         "\n".MyString::fechaATexto(date("Y-m-d H:i:s"), '/c', true)), false, false);
 
       $pdf->SetXY(95, $pdf->GetY()+4);
@@ -1773,11 +1784,11 @@ class compras_ordenes_model extends CI_Model {
       $aligns = array('C', 'L', 'C', 'R', 'R', 'C', 'C');
       $ultima_compra = false;
       if ($orden['info'][0]->no_impresiones > 0) {
-        $widths = array(95, 18, 25, 25, 25, 25, 25);
+        $widths = array(93, 18, 25, 25, 25, 25, 25);
         $header = array('DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
 
         $aligns2 = array('R', 'C');
-        $widths2 = array(25, 25);
+        $widths2 = array(20, 22);
         $header2 = array('PRECIO', 'ULTIMA/COMP');
         $ultima_compra = true;
       } else {
@@ -1816,40 +1827,50 @@ class compras_ordenes_model extends CI_Model {
             $pdf->SetAligns($aligns2);
             $pdf->SetWidths($widths2);
             $pdf->Row($header2, true);
-            $pdf->SetX(45);
-            $pdf->SetY($pdf->GetY()-10);
+            $pdf->SetY($pdf->GetY()-5.8);
+            $pdf->SetX(49);
           }
 
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
           $pdf->Row($header, true);
-        }
-
-        $ultcompra = null;
-        if ($ultima_compra) {
-          $ultcompra = $this->getUltimaCompra($prod->id_producto);
+          // $pdf->Output('dd.pdf', 'I');
         }
 
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
+
+        $ultcompra = null;
         $datos = array();
-          (
-            $ultima_compra && $ultcompra?
-            MyString::formatoNumero($ultcompra->precio_unitario, 2, '$', false):
-            $prod->codigo.'/'.$prod->codigo_fin
-          ),
-          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          // $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
-          $prod->cantidad.' '.$prod->abreviatura,
-          MyString::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
-          MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false)
+
+        $pdf->SetX(6);
+        if ($ultima_compra) {
+          $ultcompra = $this->getUltimaCompra($prod->id_producto);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row([
+            MyString::formatoNumero($ultcompra->precio_unitario, 2, '$', false),
+            substr($ultcompra->fecha_aceptacion, 0, 10)
+          ], false);
+
+          $pdf->SetY($pdf->GetY()-5.8);
+          $pdf->SetX(49);
+        } else {
+          $datos[] = $prod->codigo.'/'.$prod->codigo_fin;
+        }
+        $datos[] = $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '');
+        // $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
+        $datos[] = $prod->cantidad.' '.$prod->abreviatura;
+        $datos[] = MyString::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false);
+        $datos[] = MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false);
 
         if ($orientacion === 'L') {
           $datos[] = $prod->fecha_aceptacion;
           $datos[] = $prod->folio_aceptacion; //cont_x_dia
         }
 
-        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
         $pdf->Row($datos, false);
 
         $subtotal  += floatval($prod->importe/$tipoCambio);
@@ -1884,6 +1905,22 @@ class compras_ordenes_model extends CI_Model {
       }
       $pdf->SetX(160);
       $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+
+      // Historial de impreciones
+      if (count($ordenHistImp) > 0 && $orientacion === 'L') {
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(45));
+        $pdf->SetXY(221, $pdf->GetY()-10);
+        $pdf->Row(array('Historial Re Impresiones'), false, false);
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->SetWidths(array(50));
+        foreach ($ordenHistImp as $key => $value) {
+          $pdf->SetXY(221, $pdf->GetY());
+          $noImpresion = ' / '.($value->no_impresiones==0? 'ORIGINAL': ($value->no_impresiones==1? 'COPIA ARCHIVO': 'COPIA '.$value->no_impresiones));
+          $pdf->Row(array(str_replace(' ', ' / ', substr($value->fecha, 0, 19)).$noImpresion), false, true);
+        }
+      }
 
       //Otros datos
       $pdf->SetXY(6, $yy);
