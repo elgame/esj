@@ -1410,6 +1410,11 @@
                                   $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
 
                                 $totalFondoCaja = false;
+                              // } elseif ($_GET['fno_caja'] === '1') {
+                              //   $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalAcreedores + $totalTraspasos
+                              //    - $totalDeudores - $totalBoletasPagadas;
+
+                              //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
                               } else {
                                 $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
                                   $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] -

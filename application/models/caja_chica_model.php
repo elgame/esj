@@ -273,13 +273,15 @@ class caja_chica_model extends CI_Model {
       {
         $info['boletas_arecuperar'] = $boletas->result();
 
-        if (isset($denominaciones->status) && $denominaciones->status === 'f') {
+        if (isset($denominaciones->status) && $denominaciones->status == 'f') {
           $info['boletas_arecuperar_total'] = $denominaciones->saldo_boletas_arecuperar;
         } else {
           foreach ($info['boletas_arecuperar'] as $key => $value) {
             $info['boletas_arecuperar_total'] += $value->importe;
           }
         }
+      } elseif (isset($denominaciones->status) && $denominaciones->status == 'f') {
+        $info['boletas_arecuperar_total'] = $denominaciones->saldo_boletas_arecuperar;
       }
 
       // Cheques de bletas en transito
@@ -307,6 +309,8 @@ class caja_chica_model extends CI_Model {
             $info['cheques_transito_total'] += $value->monto;
           }
         }
+      } elseif (isset($denominaciones->status) && $denominaciones->status === 'f') {
+        $info['cheques_transito_total'] = $denominaciones->saldo_cheques_transito;
       }
     }
 
