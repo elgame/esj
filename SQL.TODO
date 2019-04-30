@@ -69,6 +69,20 @@
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_boletas_arecuperar double precision NOT NULL  DEFAULT 0;
      -- pcc|san|pct
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_cheques_transito double precision NOT NULL DEFAULT 0;
+     -- pcc
+     CREATE TABLE public.cajachica_gastos_comprobar
+        (
+          id_gasto bigint NOT NULL,
+          rows integer NOT NULL,
+          fecha date NOT NULL,
+          abono double precision NOT NULL DEFAULT 0,
+          CONSTRAINT cajachica_gastos_comprobar_pkey PRIMARY KEY (id_gasto, rows),
+          CONSTRAINT cajachica_gastos_comprobar_id_gasto_fkey FOREIGN KEY (id_gasto)
+              REFERENCES public.cajachica_gastos (id_gasto) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH ( OIDS=FALSE );
+        ALTER TABLE public.cajachica_gastos_comprobar OWNER TO programa;
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san|pct
     CREATE TABLE public.nomina_calculo_anual

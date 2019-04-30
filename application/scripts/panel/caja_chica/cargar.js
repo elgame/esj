@@ -606,16 +606,17 @@
           'remisiones'  : remisiones,
           'gastos'      : gastos
         };
+        // console.log('test', params);
 
-        // $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
-        //   $('#modalCompGastos').modal('hide');
-        //   $trGasto.remove();
+        $.post(base_url+'panel/caja_chica/ajax_registra_gasto_comp/', params, function(json, textStatus) {
+          $('#modalCompGastos').modal('hide');
+          $trGasto.remove();
 
-        //   setTimeout(function () {
-        //     var iframe = parent.document.getElementById('iframe-reporte');
-        //     iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
-        //   }, 300);
-        // }, 'json');
+          setTimeout(function () {
+            var iframe = parent.document.getElementById('iframe-reporte');
+            iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
+          }, 300);
+        }, 'json');
       } else {
         noty({"text": 'El monto es requerido.', "layout":"topRight", "type": 'error'});
       }

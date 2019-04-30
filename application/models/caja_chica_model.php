@@ -507,6 +507,7 @@ class caja_chica_model extends CI_Model {
     if (is_array($fecha) && $fecha[0] === 'gc') {
       $sql .= " AND cg.tipo = 'gc'";
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+      $sql .= " AND cg.monto > Coalesce(cga.abonos, 0)";
       $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
       $sql .= " AND cg.tipo = 'rg'";
@@ -525,7 +526,7 @@ class caja_chica_model extends CI_Model {
 
     $response = [];
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, Coalesce(cg.monto - cga.abonos, cg.monto) AS monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
@@ -533,7 +534,7 @@ class caja_chica_model extends CI_Model {
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
           cg.nombre, cg.status, cg.folio_sig,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
-          {$sql_status2} AS status2
+          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -543,6 +544,13 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
          LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
          LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
+
+         LEFT JOIN (
+          SELECT id_gasto, Sum(abono) AS abonos
+          FROM cajachica_gastos_comprobar
+          WHERE fecha <= '{$fecha1}'
+          GROUP BY id_gasto
+         ) cga ON cga.id_gasto = cg.id_gasto
        WHERE cg.no_caja = {$noCaja} {$sql}
        ORDER BY cg.id_gasto ASC"
     );
@@ -1516,15 +1524,18 @@ class caja_chica_model extends CI_Model {
     //     ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
     // $data_folio->folio += 1;
-    $this->db->update('cajachica_gastos', [
+    $datos_gasto_com = [
       // 'folio_sig' => $data_folio->folio,
       // 'fecha'  => $data['fecha_caja'],
       // 'tipo'  => 'g',
       // 'monto' => $data['importe'],
       'status' => 'f',
-      'fecha_cancelado' => $data['fecha_caja'],
       'concepto' => "GASTO COMPROBADO ({$data['importe']})"
-    ], "id_gasto = ".$data['id_gasto']);
+    ];
+    if ($data['importe'] >= $data['importe_old']) {
+      $datos_gasto_com['fecha_cancelado'] = $data['fecha_caja'];
+    }
+    $this->db->update('cajachica_gastos', $datos_gasto_com, "id_gasto = ".$data['id_gasto']);
 
     // cuando es diferente fecha regresa el dinero para registrar los gastos en el dia
     // if ($data['fecha_caja'] != $data_gasto->fecha) {
@@ -1584,6 +1595,14 @@ class caja_chica_model extends CI_Model {
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id();
 
+        // historial comprobaciones
+        $this->db->insert('cajachica_gastos_comprobar', [
+          'id_gasto' => $data_gasto->id_gasto,
+          'rows' => rand(1, 99999),
+          'fecha' => $data['fecha_caja'],
+          'abono' => $remm['total'],
+        ]);
+
         // Bitacora
         $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
                       array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
@@ -1628,6 +1647,14 @@ class caja_chica_model extends CI_Model {
         );
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id();
+
+        // historial comprobaciones
+        $this->db->insert('cajachica_gastos_comprobar', [
+          'id_gasto' => $data_gasto->id_gasto,
+          'rows' => rand(1, 99999),
+          'fecha' => $data['fecha_caja'],
+          'abono' => $gastoo['total'],
+        ]);
 
         // Bitacora
         $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
