@@ -68,9 +68,9 @@ class compras_requisicion_model extends CI_Model {
                 co.autorizado
         FROM compras_requisicion AS co
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
-        INNER JOIN compras_requisicion_productos AS crp ON co.id_requisicion = crp.id_requisicion
-        INNER JOIN proveedores AS p ON p.id_proveedor = crp.id_proveedor
+        LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
+        LEFT JOIN compras_requisicion_productos AS crp ON co.id_requisicion = crp.id_requisicion
+        LEFT JOIN proveedores AS p ON p.id_proveedor = crp.id_proveedor
         INNER JOIN usuarios AS u ON u.id = co.id_empleado
         LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
         WHERE co.status <> 'n'  {$sql}
@@ -102,7 +102,7 @@ class compras_requisicion_model extends CI_Model {
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
       // 'id_proveedor' => $_POST['proveedorId'],
-      'id_departamento' => $_POST['departamento'],
+      'id_departamento' => (is_numeric($_POST['departamento'])? $_POST['departamento']: NULL),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $_POST['folio'],
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
@@ -111,7 +111,7 @@ class compras_requisicion_model extends CI_Model {
       'solicito'        => $_POST['solicito'],
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       'descripcion'     => $_POST['descripcion'],
-      'id_almacen'      => $_POST['id_almacen'],
+      'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
     );
 
     // Si es un gasto son requeridos los campos de catálogos

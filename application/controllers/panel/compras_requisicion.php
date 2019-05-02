@@ -147,7 +147,7 @@ class compras_requisicion extends MY_Controller {
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
-    $this->configAddOrden();
+    $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -527,7 +527,7 @@ class compras_requisicion extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddOrden()
+  public function configAddOrden($prereq = false)
   {
     $this->load->library('form_validation');
 
@@ -549,11 +549,11 @@ class compras_requisicion extends MY_Controller {
             'rules' => ''),
       array('field' => 'id_almacen',
             'label' => 'Almacen',
-            'rules' => 'required'),
+            'rules' => ($prereq? '': 'required')),
 
       array('field' => 'proveedorId1',
             'label' => 'Proveedor',
-            'rules' => 'callback_val_proveedor|callback_val_proveedor2'),
+            'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
       array('field' => 'proveedorId2',
             'label' => 'Proveedor',
             'rules' => ''),
@@ -583,7 +583,7 @@ class compras_requisicion extends MY_Controller {
 
       array('field' => 'departamento',
             'label' => 'Departamento',
-            'rules' => 'required'),
+            'rules' => ($prereq? '': 'required')),
 
       array('field' => 'descripcion',
             'label' => 'Observacion',

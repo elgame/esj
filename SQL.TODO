@@ -17,7 +17,7 @@
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
       ALTER TABLE public.compras_ordenes ADD COLUMN id_requisicion bigint;
       ALTER TABLE public.compras_productos ADD COLUMN folio_aceptacion integer;
-      -- pcc
+      -- pcc|lap
       CREATE TABLE public.compras_ordenes_hist_imp
         (
           id_orden bigint NOT NULL,
@@ -53,6 +53,8 @@
           ON public.compras_ordenes
           FOR EACH ROW
           EXECUTE PROCEDURE public.insert_hist_ordenes_impre();
+      -- lap
+      ALTER TABLE compras_requisicion ALTER COLUMN id_departamento DROP NOT NULL;
 
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc|lap|san
      ALTER TABLE public.cajachica_remisiones ADD COLUMN id_nomenclatura integer;
@@ -69,7 +71,7 @@
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_boletas_arecuperar double precision NOT NULL  DEFAULT 0;
      -- pcc|san|pct
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_cheques_transito double precision NOT NULL DEFAULT 0;
-     -- pcc
+     -- pcc|lap
      CREATE TABLE public.cajachica_gastos_comprobar
         (
           id_gasto bigint NOT NULL,
