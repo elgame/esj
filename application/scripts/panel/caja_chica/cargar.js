@@ -503,6 +503,12 @@
       $tr.find('.gasto-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
       console.log($tr.find('.gasto-reposicionhid').val());
     });
+
+    $('#table-reposicionGastos').on('change', '.reposiciong-reposicion', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.find('.reposiciong-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
+      console.log($tr.find('.reposiciong-reposicionhid').val());
+    });
   };
 
   var btnModalCatalogosSel = function(event) {

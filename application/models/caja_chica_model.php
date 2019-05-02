@@ -515,7 +515,8 @@ class caja_chica_model extends CI_Model {
       $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
       $sql .= " AND cg.tipo = 'rg'";
-      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')
+        AND (cg.fecha_compro_gasto IS NULL OR cg.fecha_compro_gasto >= '{$fecha[1]}')";
       $fecha1 = $fecha[1];
     } else {
       $sql .= " AND cg.tipo = 'g'";
@@ -538,7 +539,7 @@ class caja_chica_model extends CI_Model {
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
           cg.nombre, cg.status, cg.folio_sig,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
-          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo
+          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo, cg.fecha_compro_gasto
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -1185,6 +1186,9 @@ class caja_chica_model extends CI_Model {
             'id_rancho'       => (!empty($data['reposicionGasto_ranchoId'][$key])? $data['reposicionGasto_ranchoId'][$key]: NULL),
             'id_centro_costo' => (!empty($data['reposicionGasto_centroCostoId'][$key])? $data['reposicionGasto_centroCostoId'][$key]: NULL),
             'id_activo'       => (!empty($data['reposicionGasto_activoId'][$key])? $data['reposicionGasto_activoId'][$key]: NULL),
+            'fecha_compro_gasto' => (!empty($data['reposicionGasto_fechaComproGasto'][$key])?
+                                      $data['reposicionGasto_fechaComproGasto'][$key]:
+                                      ($data['reposicionGasto_reposicion'][$key]=='t'? $data['fecha_caja_chica']: NULL)),
           );
 
           // Bitacora

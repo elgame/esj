@@ -963,6 +963,7 @@
                                           <td style="">
                                             <input type="checkbox" value="si" class="reposiciong-reposicion" <?php echo $readonly; ?>>
                                             <input type="hidden" name="reposicionGasto_reposicion[]" value="<?php echo $_POST['reposicionGasto_reposicion'][$key] ?>" class="reposiciong-reposicionhid">
+                                            <input type="hidden" name="reposicionGasto_fechaComproGasto[]" value="<?php echo $_POST['reposicionGasto_fechaComproGasto'][$key] ?>" class="reposiciong-fechaComproGasto">
                                           </td>
                                           <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $_POST['reposicionGasto_importe'][$key] ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly ?>></td>
                                           <td style="">
@@ -1018,6 +1019,7 @@
                                     <td style="">
                                       <input type="checkbox" value="si" class="reposiciong-reposicion" <?php echo ($reposiciong->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly; ?>>
                                       <input type="hidden" name="reposicionGasto_reposicion[]" value="<?php echo $reposiciong->reposicion ?>" class="reposiciong-reposicionhid">
+                                      <input type="hidden" name="reposicionGasto_fechaComproGasto[]" value="<?php echo $reposiciong->fecha_compro_gasto ?>" class="reposiciong-fechaComproGasto">
                                     </td>
                                     <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
                                     <td style="">
