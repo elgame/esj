@@ -5893,6 +5893,8 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       if($ver_des_otro)
         $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
+      if($ver_des_cocina)
+        $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
       if ($ver_trans != 0)
