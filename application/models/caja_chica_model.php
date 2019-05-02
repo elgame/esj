@@ -419,8 +419,12 @@ class caja_chica_model extends CI_Model {
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, $all);
 
     // reposición de gastos
-    if ($noCaja == '2' || $noCaja == '5') {
+    if ($noCaja == '2') {
       $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, $all);
+    }
+    // reposición de gastos caja de transporte
+    if ($noCaja == '5') {
+      $info['reposicion_gastos'] = $this->getCajaGastosTransporte(['rg', $fecha], $noCaja, $all);
     }
 
     // Traspasos
@@ -551,6 +555,77 @@ class caja_chica_model extends CI_Model {
           WHERE fecha <= '{$fecha1}'
           GROUP BY id_gasto
          ) cga ON cga.id_gasto = cg.id_gasto
+       WHERE cg.no_caja = {$noCaja} {$sql}
+       ORDER BY cg.id_gasto ASC"
+    );
+
+    if ($gastos->num_rows() > 0)
+    {
+      $response = $gastos->result();
+    }
+
+    return $response;
+  }
+
+  public function getCajaGastosTransporte($fecha, $noCaja, $all)
+  {
+    $sql = '';
+    $sql_status2 = "(CASE WHEN cg.fecha_cancelado IS NULL THEN true
+      WHEN cg.fecha_cancelado > '{fecha}' THEN true
+      ELSE false END)";
+    $fecha1 = '';
+
+    $sql .= " AND cg.tipo = 'rg'";
+    $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+    $fecha1 = $fecha[1];
+
+    $sql_status2 = str_replace('{fecha}', $fecha1, $sql_status2);
+    if (!$all) {
+      $sql .= " AND {$sql_status2} = 't'";
+    }
+
+    $response = [];
+    echo "<pre>";
+      var_dump("SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cc.id_categoria, cc.abreviatura as empresa,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
+          (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
+          cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          cg.nombre, cg.status, cg.folio_sig,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
+          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo
+       FROM cajachica_gastos cg
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
+         LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
+       WHERE cg.no_caja = {$noCaja} {$sql}
+       ORDER BY cg.id_gasto ASC");
+    echo "</pre>";exit;
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cc.id_categoria, cc.abreviatura as empresa,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
+          (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
+          cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          cg.nombre, cg.status, cg.folio_sig,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
+          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo
+       FROM cajachica_gastos cg
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
+         LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
        WHERE cg.no_caja = {$noCaja} {$sql}
        ORDER BY cg.id_gasto ASC"
     );
@@ -704,6 +779,11 @@ class caja_chica_model extends CI_Model {
 
           // $this->db->delete('cajachica_ingresos', "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
           $this->db->update('cajachica_ingresos', ['status' => 'f', 'id_movimiento' => NULL], "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
+
+          // Si es un movimiento pone en transito
+          if (is_numeric($data['ingreso_concepto_id'][$key])) {
+            $this->db->update('banco_movimientos', ['entransito' => 't'], "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
+          }
         } elseif (isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
           $ingreso_udt = array(
             'concepto'        => $ingreso,
@@ -756,6 +836,11 @@ class caja_chica_model extends CI_Model {
                               ':folio'     => "Concepto: {$ingreso} | Monto: {$data['ingreso_monto'][$key]}",
                               // ':id_empresa' => $datosFactura['id_empresa'],
                               ':empresa'   => ''));
+
+          // Si es un movimiento quita el transito
+          if (is_numeric($data['ingreso_concepto_id'][$key])) {
+            $this->db->update('banco_movimientos', ['entransito' => 'f'], "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
+          }
         }
       }
     }
