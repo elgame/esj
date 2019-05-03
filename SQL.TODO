@@ -53,7 +53,6 @@
           ON public.compras_ordenes
           FOR EACH ROW
           EXECUTE PROCEDURE public.insert_hist_ordenes_impre();
-      -- lap|san
       ALTER TABLE compras_requisicion ALTER COLUMN id_departamento DROP NOT NULL;
 
  ✔ Nuevos cmabios de caja chica @done (19-03-05 14:49) pct|pcc|lap|san
@@ -84,7 +83,6 @@
         )
         WITH ( OIDS=FALSE );
         ALTER TABLE public.cajachica_gastos_comprobar OWNER TO programa;
-     -- lap|san
      ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_compro_gasto date;
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san|pct

@@ -1,5 +1,5 @@
  ✔ En la imprecion de las ordenes la obserbacion ponerla abajo y que solo salga en la ultima copia, tambien en la ultima copia quitar el codigo de la tabla y poner fecha y precio de la ultima compra, poner la empresa en los codigos al final @done (19-04-29 22:24)
- ☐ En las ordenes de requisicion que puedan imprimir en blanco y queden registrado el folio y despues la puedan capturar (pre requisicion cuando se imprima y si es directa es orden de requisicion), saldria al final los codigos que salen en la orden
+ ✔ En las ordenes de requisicion que puedan imprimir en blanco y queden registrado el folio y despues la puedan capturar (pre requisicion cuando se imprima y si es directa es orden de requisicion), saldria al final los codigos que salen en la orden @done (19-05-02 22:30)
  ☐ Crear programas de actividades anuales de trabajos, verificar si cumple con las actividades de ese dia y si no poner porque no cumplieron
    Lunes ver als actividades de la semana, Los ingeniero programan las actividades adicionales aparte del programa.
    Poner bloqueo en las actividades para que esa actividad no se puede cumplir hasta que se terminen las actividades

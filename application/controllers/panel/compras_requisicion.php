@@ -245,7 +245,7 @@ class compras_requisicion extends MY_Controller {
 
     // if ( ! isset($_GET['m']))
     // {
-      $this->configAddOrden();
+      $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));

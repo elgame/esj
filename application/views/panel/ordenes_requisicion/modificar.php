@@ -212,6 +212,7 @@
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                      <button type="submit" name="guardarprereq" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar Pre Req</button>
                 <?php if ($autorizar_active){ ?>
                       <br><br><button type="button" id="btnAutorizar" class="btn btn-info btn-large btn-block" style="width:100%;">Autorizar - Crear O. Compras</button>
                       <input type="hidden" name="txtBtnAutorizar" id="txtBtnAutorizar" value="false">
@@ -502,20 +503,20 @@
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
                           <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
                             <div class="input-append span12">
-                              <input type="text" name="proveedor1" class="span10" id="proveedor1" value="<?php echo set_value('proveedor1', $orden['info'][0]->proveedores[0]['nombre_fiscal']) ?>" placeholder="Proveedor 1"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                              <input type="hidden" name="proveedorId1" id="proveedorId1" value="<?php echo set_value('proveedorId1', $orden['info'][0]->proveedores[0]['id_proveedor']) ?>">
+                              <input type="text" name="proveedor1" class="span10" id="proveedor1" value="<?php echo set_value('proveedor1', (isset($orden['info'][0]->proveedores[0]['nombre_fiscal'])? $orden['info'][0]->proveedores[0]['nombre_fiscal']: '')) ?>" placeholder="Proveedor 1"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId1" id="proveedorId1" value="<?php echo set_value('proveedorId1', (isset($orden['info'][0]->proveedores[0]['id_proveedor'])? $orden['info'][0]->proveedores[0]['id_proveedor']: '')) ?>">
                             </div>
                           </th>
                           <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
                             <div class="input-append span12">
-                              <input type="text" name="proveedor2" class="span10" id="proveedor2" value="<?php echo set_value('proveedor2', $orden['info'][0]->proveedores[1]['nombre_fiscal']) ?>" placeholder="Proveedor 2"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                              <input type="hidden" name="proveedorId2" id="proveedorId2" value="<?php echo set_value('proveedorId2', $orden['info'][0]->proveedores[1]['id_proveedor']) ?>">
+                              <input type="text" name="proveedor2" class="span10" id="proveedor2" value="<?php echo set_value('proveedor2', (isset($orden['info'][0]->proveedores[1]['nombre_fiscal'])? $orden['info'][0]->proveedores[1]['nombre_fiscal']: '')) ?>" placeholder="Proveedor 2"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId2" id="proveedorId2" value="<?php echo set_value('proveedorId2', (isset($orden['info'][0]->proveedores[1]['id_proveedor'])? $orden['info'][0]->proveedores[1]['id_proveedor']: '')) ?>">
                             </div>
                           </th>
                           <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
                             <div class="input-append span12">
-                              <input type="text" name="proveedor3" class="span10" id="proveedor3" value="<?php echo set_value('proveedor3', $orden['info'][0]->proveedores[2]['nombre_fiscal']) ?>" placeholder="Proveedor 3"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                              <input type="hidden" name="proveedorId3" id="proveedorId3" value="<?php echo set_value('proveedorId3', $orden['info'][0]->proveedores[2]['id_proveedor']) ?>">
+                              <input type="text" name="proveedor3" class="span10" id="proveedor3" value="<?php echo set_value('proveedor3', (isset($orden['info'][0]->proveedores[2]['nombre_fiscal'])? $orden['info'][0]->proveedores[2]['nombre_fiscal']: '')) ?>" placeholder="Proveedor 3"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId3" id="proveedorId3" value="<?php echo set_value('proveedorId3', (isset($orden['info'][0]->proveedores[2]['id_proveedor'])? $orden['info'][0]->proveedores[2]['id_proveedor']: '')) ?>">
                             </div>
                           </th>
                           <th></th>
@@ -531,7 +532,7 @@
                         </tr>
                       </thead>
                       <tbody class="bodyproducs">
-                        <?php if (isset($orden['info'][0]->productos)) {
+                        <?php if (isset($orden['info'][0]->productos) && count($orden['info'][0]->productos) > 0) {
                               foreach ($orden['info'][0]->productos as $key => $concepto) { ?>
 
 

@@ -872,8 +872,8 @@ class compras_requisicion_model extends CI_Model {
               otros_datos
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-       INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
+       LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
@@ -1449,7 +1449,10 @@ class compras_requisicion_model extends CI_Model {
       $pdf = new MYpdf('L', 'mm', 'Letter');
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
-      $tipo_orden = 'ORDEN DE REQUISICION';
+
+      $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
+
+      $tipo_orden = $tipo_requisicion? 'ORDEN DE REQUISICION': 'PRE REQUISICION';
 
 
       $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
@@ -1468,125 +1471,178 @@ class compras_requisicion_model extends CI_Model {
         'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
       ), false, false);
 
-      $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
-      $widths2 = array(43, 43, 43);
-      $widths = array(15, 10, 18, 30, 65, 18, 25, 18, 25, 18, 25);
-      $header = array('AREA', 'PROD', 'CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
-
       $subtotal = $iva = $total = $retencion = 0;
-      foreach ($orden['info'][0]->proveedores as $keypp => $value)
-      {
-        $orden['info'][0]->proveedores[$keypp]['subtotal']  = 0;
-        $orden['info'][0]->proveedores[$keypp]['iva']       = 0;
-        $orden['info'][0]->proveedores[$keypp]['ieps']      = 0;
-        $orden['info'][0]->proveedores[$keypp]['total']     = 0;
-        $orden['info'][0]->proveedores[$keypp]['retencion'] = 0;
-      }
 
-      $tipoCambio = 0;
-      $first = true;
-      $pdf->SetXY(6, $pdf->GetY()+2);
-      foreach ($orden['info'][0]->productos as $key => $prod)
-      {
-        $tipoCambio = 1;
-        if ($prod->tipo_cambio != 0)
-        {
-          $tipoCambio = $prod->tipo_cambio;
-        }
-
-        $band_head = false;
-        if($pdf->GetY() >= $pdf->limiteY || $first) { //salta de pagina si exede el max
-          $first = false;
-          if($pdf->GetY()+5 >= $pdf->limiteY)
-            $pdf->AddPage();
-          $pdf->SetFont('Arial','B',7);
-          // $pdf->SetTextColor(255,255,255);
-          // $pdf->SetFillColor(160,160,160);
-
-          $pdf->SetX(144);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths2);
-          $pdf->Row(array($orden['info'][0]->proveedores[0]['nombre_fiscal'],
-                          $orden['info'][0]->proveedores[1]['nombre_fiscal'],
-                          $orden['info'][0]->proveedores[2]['nombre_fiscal']), false);
-
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, false);
-        }
-
-
-        $precio_unitario1 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
-        $precio_unitario2 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
-        $precio_unitario3 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
-
-        $pdf->SetFont('Arial','',7);
-        $pdf->SetTextColor(0,0,0);
-        $datos = array(
-          $prod->codigo_fin,
-          $prod->codigo,
-          ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)),
-          ($prod->presentacion==''? $prod->unidad: $prod->presentacion),
-          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          MyString::formatoNumero($precio_unitario1, 2, '$', false),
-          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          MyString::formatoNumero($precio_unitario2, 2, '$', false),
-          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          MyString::formatoNumero($precio_unitario3, 2, '$', false),
-          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
-        );
-
-        $pdf->SetX(6);
-        $pdf->SetWidths($widths);
-        $pdf->Row($datos, false);
+      if ($tipo_requisicion) {
+        $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+        $widths2 = array(43, 43, 43);
+        $widths = array(15, 10, 18, 30, 65, 18, 25, 18, 25, 18, 25);
+        $header = array('AREA', 'PROD', 'CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
 
         foreach ($orden['info'][0]->proveedores as $keypp => $value)
         {
-          $orden['info'][0]->proveedores[$keypp]['subtotal']  += floatval($prod->{'importe'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
-          $orden['info'][0]->proveedores[$keypp]['iva']       += floatval($prod->{'iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
-          $orden['info'][0]->proveedores[$keypp]['ieps']      += floatval($prod->{'ieps'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
-          $orden['info'][0]->proveedores[$keypp]['total']     += floatval($prod->{'total'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
-          $orden['info'][0]->proveedores[$keypp]['retencion'] += floatval($prod->{'retencion_iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+          $orden['info'][0]->proveedores[$keypp]['subtotal']  = 0;
+          $orden['info'][0]->proveedores[$keypp]['iva']       = 0;
+          $orden['info'][0]->proveedores[$keypp]['ieps']      = 0;
+          $orden['info'][0]->proveedores[$keypp]['total']     = 0;
+          $orden['info'][0]->proveedores[$keypp]['retencion'] = 0;
         }
-      }
 
-      //Totales
-      $pdf->SetFont('Arial','B',7);
-      $pdf->SetX(79);
-      $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(65, 43, 43, 43));
-      $pdf->Row(array('SUB-TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['subtotal'], 2, '$', false),
-                                  MyString::formatoNumero($orden['info'][0]->proveedores[1]['subtotal'], 2, '$', false),
-                                  MyString::formatoNumero($orden['info'][0]->proveedores[2]['subtotal'], 2, '$', false)), false, true);
-      $pdf->SetX(79);
-      $pdf->Row(array('IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['iva'], 2, '$', false),
-                            MyString::formatoNumero($orden['info'][0]->proveedores[1]['iva'], 2, '$', false),
-                            MyString::formatoNumero($orden['info'][0]->proveedores[2]['iva'], 2, '$', false)), false, true);
-      if ($orden['info'][0]->proveedores[0]['ieps'] > 0)
-      {
-        $pdf->SetX(79);
-        $pdf->Row(array('IEPS', MyString::formatoNumero($orden['info'][0]->proveedores[0]['ieps'], 2, '$', false),
-                                    MyString::formatoNumero($orden['info'][0]->proveedores[1]['ieps'], 2, '$', false),
-                                    MyString::formatoNumero($orden['info'][0]->proveedores[2]['ieps'], 2, '$', false)), false, true);
-      }
-      if ($orden['info'][0]->proveedores[0]['retencion'] > 0)
-      {
-        $pdf->SetX(79);
-        $pdf->Row(array('Ret. IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['retencion'], 2, '$', false),
-                                    MyString::formatoNumero($orden['info'][0]->proveedores[1]['retencion'], 2, '$', false),
-                                    MyString::formatoNumero($orden['info'][0]->proveedores[2]['retencion'], 2, '$', false)), false, true);
-      }
-      $pdf->SetX(79);
-      $pdf->Row(array('TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['total'], 2, '$', false),
-                              MyString::formatoNumero($orden['info'][0]->proveedores[1]['total'], 2, '$', false),
-                              MyString::formatoNumero($orden['info'][0]->proveedores[2]['total'], 2, '$', false)), false, true);
+        $tipoCambio = 0;
+        $first = true;
+        $pdf->SetXY(6, $pdf->GetY()+2);
+        foreach ($orden['info'][0]->productos as $key => $prod)
+        {
+          $tipoCambio = 1;
+          if ($prod->tipo_cambio != 0)
+          {
+            $tipoCambio = $prod->tipo_cambio;
+          }
 
+          $band_head = false;
+          if($pdf->GetY() >= $pdf->limiteY || $first) { //salta de pagina si exede el max
+            $first = false;
+            if($pdf->GetY()+5 >= $pdf->limiteY)
+              $pdf->AddPage();
+            $pdf->SetFont('Arial','B',7);
+            // $pdf->SetTextColor(255,255,255);
+            // $pdf->SetFillColor(160,160,160);
+
+            $pdf->SetX(144);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths2);
+            $pdf->Row(array($orden['info'][0]->proveedores[0]['nombre_fiscal'],
+                            $orden['info'][0]->proveedores[1]['nombre_fiscal'],
+                            $orden['info'][0]->proveedores[2]['nombre_fiscal']), false);
+
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, false);
+          }
+
+
+          $precio_unitario1 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+          $precio_unitario2 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+          $precio_unitario3 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+
+          $pdf->SetFont('Arial','',7);
+          $pdf->SetTextColor(0,0,0);
+          $datos = array(
+            $prod->codigo_fin,
+            $prod->codigo,
+            ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)),
+            ($prod->presentacion==''? $prod->unidad: $prod->presentacion),
+            $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+            MyString::formatoNumero($precio_unitario1, 2, '$', false),
+            MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
+            MyString::formatoNumero($precio_unitario2, 2, '$', false),
+            MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
+            MyString::formatoNumero($precio_unitario3, 2, '$', false),
+            MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          );
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
+
+          foreach ($orden['info'][0]->proveedores as $keypp => $value)
+          {
+            $orden['info'][0]->proveedores[$keypp]['subtotal']  += floatval($prod->{'importe'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+            $orden['info'][0]->proveedores[$keypp]['iva']       += floatval($prod->{'iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+            $orden['info'][0]->proveedores[$keypp]['ieps']      += floatval($prod->{'ieps'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+            $orden['info'][0]->proveedores[$keypp]['total']     += floatval($prod->{'total'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+            $orden['info'][0]->proveedores[$keypp]['retencion'] += floatval($prod->{'retencion_iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+          }
+        }
+
+        // Totales
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(79);
+        $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(65, 43, 43, 43));
+        $pdf->Row(array('SUB-TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['subtotal'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[1]['subtotal'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[2]['subtotal'], 2, '$', false)), false, true);
+        $pdf->SetX(79);
+        $pdf->Row(array('IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['iva'], 2, '$', false),
+                              MyString::formatoNumero($orden['info'][0]->proveedores[1]['iva'], 2, '$', false),
+                              MyString::formatoNumero($orden['info'][0]->proveedores[2]['iva'], 2, '$', false)), false, true);
+        if ($orden['info'][0]->proveedores[0]['ieps'] > 0)
+        {
+          $pdf->SetX(79);
+          $pdf->Row(array('IEPS', MyString::formatoNumero($orden['info'][0]->proveedores[0]['ieps'], 2, '$', false),
+                                      MyString::formatoNumero($orden['info'][0]->proveedores[1]['ieps'], 2, '$', false),
+                                      MyString::formatoNumero($orden['info'][0]->proveedores[2]['ieps'], 2, '$', false)), false, true);
+        }
+        if ($orden['info'][0]->proveedores[0]['retencion'] > 0)
+        {
+          $pdf->SetX(79);
+          $pdf->Row(array('Ret. IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['retencion'], 2, '$', false),
+                                      MyString::formatoNumero($orden['info'][0]->proveedores[1]['retencion'], 2, '$', false),
+                                      MyString::formatoNumero($orden['info'][0]->proveedores[2]['retencion'], 2, '$', false)), false, true);
+        }
+        $pdf->SetX(79);
+        $pdf->Row(array('TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['total'], 2, '$', false),
+                                MyString::formatoNumero($orden['info'][0]->proveedores[1]['total'], 2, '$', false),
+                                MyString::formatoNumero($orden['info'][0]->proveedores[2]['total'], 2, '$', false)), false, true);
+      } else { // *********** cuando es una pre requisición
+        $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+        $aligns2 = array('R', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+        $widths2 = array(20, 51, 51, 51);
+        $widths = array(18, 30, 65, 21, 30, 21, 30, 21, 30);
+        $header = array('CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
+
+        for ($i=0; $i < 15; $i++) {
+          if($pdf->GetY() >= $pdf->limiteY || $i === 0) { //salta de pagina si exede el max
+            if($pdf->GetY()+5 >= $pdf->limiteY)
+              $pdf->AddPage();
+
+            $pdf->SetXY(6, $pdf->GetY()+3);
+            $pdf->SetFont('Arial','B',7);
+            // $pdf->SetTextColor(255,255,255);
+            // $pdf->SetFillColor(160,160,160);
+
+            $pdf->SetX(99);
+            $pdf->SetAligns($aligns2);
+            $pdf->SetWidths($widths2);
+            $pdf->Row(array('Cotizaciones:', '', '', ''), false);
+            $pdf->SetX(99);
+            $pdf->Row(array('Proveedores:', '', '', ''), false, true, null, 6);
+
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, false);
+          }
+
+          $pdf->SetFont('Arial','',7);
+          $pdf->SetTextColor(0,0,0);
+          $datos = array('','','','','','','','','');
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
+        }
+
+        // Totales
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(99);
+        $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(20, 51, 51, 51));
+        $pdf->Row(array('SUB-TOTAL', '', '', ''), false, true);
+        $pdf->SetX(99);
+        $pdf->Row(array('IVA', '', '', ''), false, true);
+        $pdf->SetX(99);
+        $pdf->Row(array('TOTAL', '', '', ''), false, true);
+
+        $tipoCambio = '';
+      }
 
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(60, 50));
       $pdf->SetXY(6, $pdf->GetY()-15);
-      $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+      $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : ($tipoCambio==''? 'TIPO DE CAMBIO: ': '')) ), false, false);
 
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(75));
@@ -1605,10 +1661,63 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetWidths(array(250));
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+      $pdf->SetXY(6, $pdf->GetY()+4);
 
-      $pdf->SetWidths(array(250));
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+      // if ($tipo_requisicion) {
+      //   $pdf->SetWidths(array(250));
+      //   $pdf->SetXY(6, $pdf->GetY());
+      //   $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+      // } else {
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+
+        // El dato de la requisicion
+        // if (!empty($orden['info'][0]->folio_requisicion)) {
+        //   $pdf->SetFont('Arial','',8);
+        //   $pdf->SetXY(5, $pdf->GetY());
+        //   $pdf->SetAligns(array('L', 'L'));
+        //   $pdf->SetWidths(array(25, 80));
+        //   $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
+        // }
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('Cultivo / Actividad / Producto',
+          (!empty($orden['info'][0]->area)? $orden['info'][0]->area->nombre: '')), false, true);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $ranchos = [];
+        foreach ($orden['info'][0]->rancho as $key => $value) {
+          $ranchos[] = $value->nombre;
+        }
+        $pdf->Row(array('Areas / Ranchos / Lineas',
+          (!empty($orden['info'][0]->rancho)? implode(' | ', $ranchos): '')), false, true);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $centroCosto = [];
+        foreach ($orden['info'][0]->centroCosto as $key => $value) {
+          $centroCosto[] = $value->nombre;
+        }
+        $pdf->Row(array('Centro de costo',
+          (!empty($orden['info'][0]->centroCosto)? implode(' | ', $centroCosto): '')), false, true);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('Activo',
+          (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+      // }
 
 
       if ($path)

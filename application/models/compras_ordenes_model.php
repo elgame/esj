@@ -2033,6 +2033,13 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
 
         $pdf->SetFont('Arial', 'B', 8);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 50));
+        $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+
         // El dato de la requisicion
         if (!empty($orden['info'][0]->folio_requisicion)) {
           $pdf->SetFont('Arial','',8);
