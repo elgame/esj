@@ -607,6 +607,7 @@
           'id_empresa'  : $('#compGasto_id_empresa').val(),
           'importe_old' : $('#compGasto_importe').text(),
           'importe'     : $('#compGastoMonto').val(),
+          'saldarMont'  : $('#compSaldarMont').is(':checked'),
           'fno_caja'    : $('#fno_caja').val(),
           'fecha_caja'  : $('#fecha_caja').val(),
           'remisiones'  : remisiones,

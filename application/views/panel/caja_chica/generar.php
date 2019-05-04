@@ -1755,10 +1755,16 @@
         </fieldset>
 
         <div class="">
-          <div class="control-group">
+          <div class="span3">
             <label class="control-label" for="compGastoMonto"><strong>Monto comprobado</strong></label>
             <div class="controls">
               <input type="text" name="compGastoMonto" class="vpositive" id="compGastoMonto" value="" size="" readonly>
+            </div>
+          </div>
+          <div class="span2">
+            <label class="control-label" for="compSaldarMont"><strong>Saldar Monto</strong></label>
+            <div class="controls">
+              <input type="checkbox" name="compSaldarMont" id="compSaldarMont" value="si">
             </div>
           </div>
         </div>

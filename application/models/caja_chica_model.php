@@ -1621,7 +1621,7 @@ class caja_chica_model extends CI_Model {
       'status' => 'f',
       'concepto' => "GASTO COMPROBADO ({$data['importe']})"
     ];
-    if ($data['importe'] >= $data['importe_old']) {
+    if ($data['importe'] >= $data['importe_old'] || $data['saldarMont'] == 'true') {
       $datos_gasto_com['fecha_cancelado'] = $data['fecha_caja'];
     }
     $this->db->update('cajachica_gastos', $datos_gasto_com, "id_gasto = ".$data['id_gasto']);
