@@ -17,7 +17,6 @@
       COMMENT ON COLUMN public.banco_cuentas.es_concentradora IS 'si es true es la cuenta que se mostrara en las ordenes de compra';
       ALTER TABLE public.compras_ordenes ADD COLUMN id_requisicion bigint;
       ALTER TABLE public.compras_productos ADD COLUMN folio_aceptacion integer;
-      -- pcc|lap|san
       CREATE TABLE public.compras_ordenes_hist_imp
         (
           id_orden bigint NOT NULL,
@@ -69,7 +68,6 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 5',247,TRUE,'caja_chica/caja5/','usd',TRUE);
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_boletas_arecuperar double precision NOT NULL  DEFAULT 0;
      ALTER TABLE public.cajachica_efectivo ADD COLUMN saldo_cheques_transito double precision NOT NULL DEFAULT 0;
-     -- pcc|lap|san
      CREATE TABLE public.cajachica_gastos_comprobar
         (
           id_gasto bigint NOT NULL,
@@ -84,6 +82,37 @@
         WITH ( OIDS=FALSE );
         ALTER TABLE public.cajachica_gastos_comprobar OWNER TO programa;
      ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_compro_gasto date;
+     -- pct
+      ALTER TABLE public.cajachica_nomenclaturas ADD COLUMN tipo boolean NOT NULL DEFAULT true;
+      COMMENT ON COLUMN public.cajachica_nomenclaturas.tipo IS 'true: ingreso, false: egreso';
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB COMPRA' WHERE id=1;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB GTOS GRALES' WHERE id=2;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB PRESTAMO' WHERE id=3;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB SUELDOS' WHERE id=4;
+      UPDATE public.cajachica_nomenclaturas SET nombre='OTROS INGRESOS' WHERE id=5;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB MOV INTANG' WHERE id=6;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB GTO X INVERS' WHERE id=7;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB MAT-INSUMO' WHERE id=8;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB GTO FINANC' WHERE id=9;
+      UPDATE public.cajachica_nomenclaturas SET nombre='INCREM F-CAJA' WHERE id=10;
+      UPDATE public.cajachica_nomenclaturas SET nombre='REMB INTANGIBLE' WHERE id=11;
+      UPDATE public.cajachica_nomenclaturas SET nombre='COMPRA MP', tipo = 'f', nomenclatura=1 WHERE id=12;
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('GASTOS GRALES', 2, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('PRESTAMO', 3, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('SUELDOS', 4, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('OTROS GASTOS', 5, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('MOV INTANGIBLE', 6, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('GTO X INVERSION', 7, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('MAT E INSUMOS', 8, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('GTO FINANCIERO', 9, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('RETIRO F-CAJA', 10, 't', 'f');
+      INSERT INTO public.cajachica_nomenclaturas (nombre, nomenclatura, status, tipo) VALUES ('INTANGIBLE', 11, 't', 'f');
+      ALTER TABLE public.cajachica_deudores ADD COLUMN folio bigint;
+      ALTER TABLE public.cajachica_deudores ADD COLUMN id_nomenclatura integer;
+      ALTER TABLE public.cajachica_deudores
+        ADD CONSTRAINT cajachica_deudores_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
+            REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE;
 
  ✔ Cambio de tablas de isr y subsidio @done (19-03-12 11:38) lap|pcc|san|pct
     CREATE TABLE public.nomina_calculo_anual

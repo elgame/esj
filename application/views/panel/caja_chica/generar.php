@@ -61,7 +61,16 @@
 
         <select id="nomeclaturas_base" style="display: none;">
           <?php foreach ($nomenclaturas as $n) { ?>
+            <?php if ($n->tipo === 't'): ?>
             <option value="<?php echo $n->id ?>"><?php echo $n->nomenclatura ?></option>
+            <?php endif ?>
+          <?php } ?>
+        </select>
+        <select id="nomeclaturas_base_egreso" style="display: none;">
+          <?php foreach ($nomenclaturas as $n) { ?>
+            <?php if ($n->tipo === 'f'): ?>
+            <option value="<?php echo $n->id ?>"><?php echo $n->nomenclatura ?></option>
+            <?php endif ?>
           <?php } ?>
         </select>
 
@@ -139,7 +148,7 @@
                               <th>EMPRESA</th>
                               <th>NOM</th>
                               <th>BANCO</th>
-                              <th>POLIZA</th>
+                              <th>REFERENCIA</th>
                               <th>NOMBRE</th>
                               <th>CONCEPTO</th>
                               <th>ABONO</th>
@@ -165,7 +174,9 @@
                                     <td style="width: 40px;">
                                       <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 't'): ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $_POST['ingreso_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
                                         <?php } ?>
                                       </select>
                                     </td>
@@ -199,7 +210,9 @@
                                       <td style="width: 40px;">
                                         <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly.$mod_ing_readonly ?>>
                                           <?php foreach ($nomenclaturas as $n) { ?>
+                                            <?php if ($n->tipo === 't'): ?>
                                             <option value="<?php echo $n->id ?>" <?php echo $ingreso->nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                            <?php endif ?>
                                           <?php } ?>
                                         </select>
                                       </td>
@@ -278,7 +291,9 @@
                                     <td style="width: 40px;">
                                       <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 't'): ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $_POST['remision_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
                                         <?php } ?>
                                       </select>
                                     </td>
@@ -309,7 +324,9 @@
                                       <td style="width: 40px;">
                                         <select name="remision_nomenclatura[]" class="remision_nomenclatura" style="width: 70px;" <?php echo $readonly.$mod_ing_readonly ?>>
                                           <?php foreach ($nomenclaturas as $n) { ?>
+                                            <?php if ($n->tipo === 't'): ?>
                                             <option value="<?php echo $n->id ?>" <?php echo $remision->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                            <?php endif ?>
                                           <?php } ?>
                                         </select>
                                       </td>
@@ -619,7 +636,9 @@
                                           <td style="">
                                             <select name="gasto_comprobar_nomenclatura[]" class="span12 gasto_nomenclatura" <?php echo $readonly ?>>
                                               <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
                                                 <option value="<?php echo $n->id ?>" <?php echo $_POST['gasto_comprobar_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
                                               <?php } ?>
                                             </select>
                                           </td>
@@ -676,7 +695,9 @@
                                     <td style="">
                                       <select name="gasto_comprobar_nomenclatura[]" class="span12 gasto_nomenclatura" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 'f'): ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $gasto->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
                                         <?php } ?>
                                       </select>
                                     </td>
@@ -787,7 +808,9 @@
                                           <td style="">
                                             <select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
                                               <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
                                                 <option value="<?php echo $n->id ?>" <?php echo $_POST['gasto_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
                                               <?php } ?>
                                             </select>
                                           </td>
@@ -839,7 +862,9 @@
                                     <td style="">
                                       <select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly.$mod_gas_readonly ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 'f'): ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $gasto->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
                                         <?php } ?>
                                       </select>
                                     </td>
@@ -949,7 +974,9 @@
                                           <td style="">
                                             <select name="reposicionGasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
                                               <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
                                                 <option value="<?php echo $n->id ?>" <?php echo $_POST['reposicionGasto_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
                                               <?php } ?>
                                             </select>
                                           </td>
@@ -1005,7 +1032,9 @@
                                     <td style="">
                                       <select name="reposicionGasto_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly.$mod_gas_readonly ?>>
                                         <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 'f'): ?>
                                           <option value="<?php echo $n->id ?>" <?php echo $reposiciong->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
                                         <?php } ?>
                                       </select>
                                     </td>
@@ -1063,7 +1092,7 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-deudor">
                               <thead>
                                 <tr>
-                                  <th colspan="8">DEUDORES
+                                  <th colspan="9">DEUDORES
                                     <?php if (!$cajas_cerradas): ?>
                                       <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                     <?php endif ?>
@@ -1072,6 +1101,7 @@
                                 <tr>
                                   <th>FECHA</th>
                                   <th>TIPO</th>
+                                  <th>NOM</th>
                                   <th>NOMBRE</th>
                                   <th>CONCEPTO</th>
                                   <th>PRESTADO</th>
@@ -1098,6 +1128,15 @@
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                               <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                               <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                            </select>
+                                          </td>
+                                          <td style="">
+                                            <select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura" <?php echo $readonly ?>>
+                                              <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
+                                                <option value="<?php echo $n->id ?>" <?php echo $_POST['deudor_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
+                                              <?php } ?>
                                             </select>
                                           </td>
                                           <td style="width: 200px;">
@@ -1134,6 +1173,15 @@
                                       <?php echo str_replace('_', ' ', $deudor->tipo); ?>
                                       <input type="hidden" name="deudor_tipo[]" value="<?php echo $deudor->tipo ?>">
                                     </td>
+                                    <td style="width: 80px;">
+                                      <select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura" <?php echo $readonly ?>>
+                                        <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 'f'): ?>
+                                          <option value="<?php echo $n->id ?>" <?php echo $deudor->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
+                                        <?php } ?>
+                                      </select>
+                                    </td>
                                     <td style="width: 200px;">
                                       <input type="text" name="deudor_nombre[]" value="<?php echo $deudor->nombre ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
                                       <input type="hidden" name="deudor_id_deudor[]" value="<?php echo $deudor->id_deudor ?>" id="deudor_id_gasto">
@@ -1166,7 +1214,7 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td></td>
+                                  <td colspan="2"></td>
                                   <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
                                   <td style="text-align: right; font-weight: bolder;">
                                     <input type="text" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="total-deudores-pres-dia" style="text-align: right;" readonly>

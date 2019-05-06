@@ -202,7 +202,7 @@ class caja_chica extends MY_Controller {
 
     // $params['remisiones'] = $this->caja_chica_model->getRemisiones();
     // $params['movimientos'] = $this->caja_chica_model->getMovimientos();
-    $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
+    $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas($no_caja);
 
     // echo "<pre>";
     //   var_dump($params['remisiones']);

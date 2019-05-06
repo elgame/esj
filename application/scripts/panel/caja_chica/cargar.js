@@ -145,7 +145,7 @@
                   '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
                 '</tr>';
 
-      $(tr).appendTo($table);
+      $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
     }
   };
@@ -440,7 +440,7 @@
                   '</td>' +
                   '<td style="">' +
                     '<select name="gasto_'+prefix_gastos+'nomenclatura[]" class="span12 ingreso_nomenclatura">' +
-                      $('#nomeclaturas_base').html() +
+                      $('#nomeclaturas_base_egreso').html() +
                     '</select>' +
                   '</td>' +
                   // '<td style=""><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
@@ -931,7 +931,7 @@
 
           agregarIngreso({
             id: $this.attr('data-id'), total: $this.attr('data-total'),
-            proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza'),
+            proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-numeroref'),
             banco: $this.attr('data-banco'), concepto: $this.attr('data-concepto'),
             idcategoria: $this.attr('data-idcategoria'),
             empresa: $this.attr('data-empresa'),
@@ -1236,6 +1236,7 @@
               'data-id="'+json[key].id_movimiento+'" data-total="'+json[key].monto+'" '+
               'data-proveedor="'+json[key].proveedor+'" '+
               'data-poliza="'+json[key].metodo_pago+' - '+json[key].numero_ref+'" '+
+              'data-numeroref="'+json[key].numero_ref+'" '+
               'data-banco="'+json[key].banco+'" '+
               'data-concepto="'+json[key].concepto+'" '+
               'data-idcategoria="'+json[key].id_categoria+'" '+
