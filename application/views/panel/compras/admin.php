@@ -118,14 +118,13 @@
                   <td><?php echo $compra->observaciones; ?></td>
                   <td class="center">
                     <?php
-
-                      if ($compra->id_nc != '')
+                      if ($compra->status != 'ca')
                       {
-                        $nota = ($compra->status === 'pa'? '<br>Nota: La compra esta pagada, antes de cancelar comprueba que el saldo en cuentas por pagar sea '.MyString::formatoNumero($compra->total, 2, '$', false): '');
+                        $nota = ($compra->status === 'pa'? '<br><strong>Nota: La compra esta pagada, antes de cancelar comprueba que el saldo en cuentas por pagar sea '.MyString::formatoNumero($compra->total, 2, '$', false).'</strong>': '');
                         echo $this->usuarios_model->getLinkPrivSm('compras/cancelar/', array(
                           'params'   => 'id='.$compra->id_compra,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la compra?'.$nota, 'Compras', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la compra?{$nota}', 'Compras', this); return false;"))
                         );
                       }
 

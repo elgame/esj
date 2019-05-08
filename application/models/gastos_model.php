@@ -29,7 +29,7 @@ class gastos_model extends privilegios_model{
       'total'           => $data['total'],
       'concepto'        => $data['concepto'],
       'isgasto'         => 't',
-      'status'          => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'status'          => $data['condicionPago'] ===  'co' ? 'p' : 'p',
       'retencion_iva'   => $data['ret_iva'],
       'retencion_isr'   => $data['ret_isr'],
       'id_area'         => ($data['areaId']? $data['areaId']: NULL),

@@ -48,7 +48,7 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = 'localhost';
+$db['default']['hostname'] = '192.168.1.35';
 $db['default']['username'] = 'programa'; //
 $db['default']['password'] = 'sophia_indie'; //
 $db['default']['database'] = 'sanjorge'; //
