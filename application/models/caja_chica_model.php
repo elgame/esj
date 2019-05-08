@@ -755,7 +755,9 @@ class caja_chica_model extends CI_Model {
 
           // Si es un movimiento pone en transito
           if (is_numeric($data['ingreso_concepto_id'][$key])) {
-            $this->db->update('banco_movimientos', ['entransito' => 't'], "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
+            $this->db->update('banco_movimientos',
+              ['entransito' => 't', 'entransito_fecha_quito' => NULL]],
+              "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
           }
         } elseif (isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
           $ingreso_udt = array(
@@ -812,7 +814,9 @@ class caja_chica_model extends CI_Model {
 
           // Si es un movimiento quita el transito
           if (is_numeric($data['ingreso_concepto_id'][$key])) {
-            $this->db->update('banco_movimientos', ['entransito' => 'f'], "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
+            $this->db->update('banco_movimientos',
+              ['entransito' => 'f', 'entransito_fecha_quito' => $data['fecha_caja_chica']],
+              "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
           }
         }
       }

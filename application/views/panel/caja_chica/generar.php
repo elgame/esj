@@ -1398,93 +1398,119 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td>SALDO INICIAL:</td>
-                              <td><input type="text" name="" value="<?php echo $caja['saldo_inicial'] ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL INGRESOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalIngresos ?>" class="input-small vpositive" id="total-saldo-ingresos" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL INGRESOS REM:</td>
-                              <td><input type="text" name="" value="<?php echo $totalIngresosRemisiones ?>" class="input-small vpositive" id="total-saldo-ingresosRem" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL ACREEDORES:</td>
-                              <td><input type="text" name="" value="<?php echo ($totalAcreedores) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
-                            </tr>
-
-                            <tr>
-                              <td>PAGO TOTAL LIMON:</td>
-                              <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>PAGO TOTAL GASTOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL GASTOS X COMP:</td>
-                              <td><input type="text" name="" value="<?php echo $totalGastosComprobarTot ?>" class="input-small vpositive" id="ttotal-gastos-compp" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL REPOSICION GASTOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalReposicionGastosAnt ?>" class="input-small vpositive" id="ttotal-gastos-reposicion" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL DEUDORES:</td>
-                              <td><input type="text" name="" value="<?php echo ($totalDeudores) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL TRASPASOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
-                            </tr>
                             <?php if ($_GET['fno_caja'] == '1'): ?>
-                            <tr>
-                              <td>SALDOS X RECUP:</td>
-                              <td><input type="text" name="boletas_arecuperar_total" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>CHEQUES EN TRANSITO:</td>
-                              <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
-                            </tr>
-                            <?php endif ?>
+                              <tr>
+                                <td>SALDOS X RECUP:</td>
+                                <td><input type="text" name="boletas_arecuperar_total" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>CHEQUES EN TRANSITO:</td>
+                                <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL EFECTIVO:</td> <!-- lo que esta tabulado -->
+                                <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL PARCIAL:</td>
+                                <td><input type="text" name="ttotal_parcial" value="<?php echo ($caja['cheques_transito_total'] + $caja['cheques_transito_total'] + $totalEfectivo) ?>" class="input-small vpositive" id="ttotal-ttotal_parcial" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td colspan="2"><hr></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL ACREEDORES:</td>
+                                <td><input type="text" name="" value="<?php echo ($totalAcreedores) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
+                              </tr>
+                            <?php else: ?>
+                              <tr>
+                                <td>SALDO INICIAL:</td>
+                                <td><input type="text" name="" value="<?php echo $caja['saldo_inicial'] ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL INGRESOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalIngresos ?>" class="input-small vpositive" id="total-saldo-ingresos" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL INGRESOS REM:</td>
+                                <td><input type="text" name="" value="<?php echo $totalIngresosRemisiones ?>" class="input-small vpositive" id="total-saldo-ingresosRem" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL ACREEDORES:</td>
+                                <td><input type="text" name="" value="<?php echo ($totalAcreedores) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
+                              </tr>
 
-                            <tr>
-                              <td>EFECT. DEL CORTE:</td>
-                              <?php
+                              <tr>
+                                <td>PAGO TOTAL LIMON:</td>
+                                <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>PAGO TOTAL GASTOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL GASTOS X COMP:</td>
+                                <td><input type="text" name="" value="<?php echo $totalGastosComprobarTot ?>" class="input-small vpositive" id="ttotal-gastos-compp" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL REPOSICION GASTOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalReposicionGastosAnt ?>" class="input-small vpositive" id="ttotal-gastos-reposicion" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL DEUDORES:</td>
+                                <td><input type="text" name="" value="<?php echo ($totalDeudores) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL TRASPASOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalTraspasos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                              </tr>
+                              <?php if ($_GET['fno_caja'] == '1'): ?>
+                              <tr>
+                                <td>SALDOS X RECUP:</td>
+                                <td><input type="text" name="boletas_arecuperar_total" value="<?php echo $caja['boletas_arecuperar_total'] ?>" class="input-small vpositive" id="ttotal-boletas_arecuperar_total" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>CHEQUES EN TRANSITO:</td>
+                                <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
+                              </tr>
+                              <?php endif ?>
 
-                              if ($_GET['fno_caja'] === '4') {
-                                $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-                                  $totalGastosComprobar - $totalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-                                  $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+                              <tr>
+                                <td>EFECT. DEL CORTE:</td>
+                                <?php
 
-                                $totalFondoCaja = false;
-                              // } elseif ($_GET['fno_caja'] === '1') {
-                              //   $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalAcreedores + $totalTraspasos
-                              //    - $totalDeudores - $totalBoletasPagadas;
+                                if ($_GET['fno_caja'] === '4') {
+                                  $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                    $totalGastosComprobar - $totalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+                                    $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
 
-                              //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
-                              } else {
-                                $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
-                                  $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] -
-                                  $caja['cheques_transito_total'];
+                                  $totalFondoCaja = false;
+                                // } elseif ($_GET['fno_caja'] === '1') {
+                                //   $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalAcreedores + $totalTraspasos
+                                //    - $totalDeudores - $totalBoletasPagadas;
 
-                                $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $totalGastos + $totalReposicionGastosAnt +
-                                  $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalDeudores - $totalAcreedores;
-                              }
-                              ?>
-                              <td><input type="text" name="saldo_corte"
-                                value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia"
-                                value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
-                            </tr>
-                            <?php if ($totalFondoCaja !== false): ?>
-                            <tr>
-                              <td>FONDO DE CAJA:</td>
-                              <td><input type="text" name="fondo_caja_cal"
-                                value="<?php echo $totalFondoCaja ?>" class="input-small vpositive" id="ttotal-fondoCaja" style="text-align: right;" readonly></td>
-                            </tr>
+                                //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
+                                } else {
+                                  $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
+                                    $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] -
+                                    $caja['cheques_transito_total'];
+
+                                  $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $totalGastos + $totalReposicionGastosAnt +
+                                    $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalDeudores - $totalAcreedores;
+                                }
+                                ?>
+                                <td><input type="text" name="saldo_corte"
+                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                                <input type="hidden" name="total_diferencia"
+                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              </tr>
+                              <?php if ($totalFondoCaja !== false): ?>
+                              <tr>
+                                <td>FONDO DE CAJA:</td>
+                                <td><input type="text" name="fondo_caja_cal"
+                                  value="<?php echo $totalFondoCaja ?>" class="input-small vpositive" id="ttotal-fondoCaja" style="text-align: right;" readonly></td>
+                              </tr>
+                              <?php endif ?>
                             <?php endif ?>
                           </tbody>
                         </table>
