@@ -40,7 +40,6 @@
     onChanceImporteTraspaso();
 
     calculaTotalDenominaciones();
-    // $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
     cargaMovimientos();
     searchModalMovimientos();
@@ -58,6 +57,10 @@
           e.preventDefault();
         }
       });
+    }
+
+    if ($('#fno_caja').val() === '1') {
+      $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
     }
   });
 
@@ -365,6 +368,10 @@
 
     var totalCorte = parseFloat($('#ttotal-corte').val());
     console.log(total, totalCorte);
+
+    if ($('#fno_caja').val() === '1') {
+      totalCorte += parseFloat($('#ttotal-efectivo_tab_total').val());
+    }
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum((parseFloat(total) - totalCorte).toFixed(2)));
   };

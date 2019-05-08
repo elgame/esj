@@ -118,7 +118,7 @@
                   <td><?php echo $compra->observaciones; ?></td>
                   <td class="center">
                     <?php
-                      if ($compra->status != 'ca')
+                      if ($compra->status === 'p' || $compra->id_nc != '')
                       {
                         $nota = ($compra->status === 'pa'? '<br><strong>Nota: La compra esta pagada, antes de cancelar comprueba que el saldo en cuentas por pagar sea '.MyString::formatoNumero($compra->total, 2, '$', false).'</strong>': '');
                         echo $this->usuarios_model->getLinkPrivSm('compras/cancelar/', array(

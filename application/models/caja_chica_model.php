@@ -263,7 +263,7 @@ class caja_chica_model extends CI_Model {
           -- LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
           LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
-        WHERE DATE(b.fecha_pago) < '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
+        WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
           AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL{$sql}
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
@@ -756,7 +756,7 @@ class caja_chica_model extends CI_Model {
           // Si es un movimiento pone en transito
           if (is_numeric($data['ingreso_concepto_id'][$key])) {
             $this->db->update('banco_movimientos',
-              ['entransito' => 't', 'entransito_fecha_quito' => NULL]],
+              ['entransito' => 't', 'entransito_fecha_quito' => NULL],
               "id_movimiento = {$data['ingreso_concepto_id'][$key]}");
           }
         } elseif (isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
@@ -929,7 +929,7 @@ class caja_chica_model extends CI_Model {
     }
 
     $efectivo['fecha']                    = $data['fecha_caja_chica'];
-    $efectivo['saldo']                    = $data['saldo_corte'];
+    $efectivo['saldo']                    = ($data['fno_caja']==='1'? $data['efectivo_tab_total']: $data['saldo_corte']);
     $efectivo['saldo_boletas_arecuperar'] = empty($data['boletas_arecuperar_total'])? 0: $data['boletas_arecuperar_total'];
     $efectivo['saldo_cheques_transito']   = empty($data['cheques_transito_total'])? 0: $data['cheques_transito_total'];
     $efectivo['no_caja']                  = $data['fno_caja'];
@@ -3106,22 +3106,32 @@ class caja_chica_model extends CI_Model {
     //                   $totalBoletasPagadas - $ttotalGastos - $totalGastosComprobar - $totalReposicionGastos +
     //                   $totalTraspasos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']);
     // TOTALESSSS
-    if ($noCajas == 4) {
-      $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-        $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
-        $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
 
+    if ($noCajas == 1) {
+      $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
+      $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
       $totalFondoCaja = false;
+      $pdf->SetX(98);
+      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivoCorte , 2, '$', false)), false, false);
     } else {
-      $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
-        $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'];
+      if ($noCajas == 4) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+          $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
 
-      $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
-         $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] - $totalAcreedores;
+        $totalFondoCaja = false;
+      } else {
+        $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
+          $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'];
+
+        $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
+           $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] - $totalAcreedores;
+      }
+      $pdf->SetX(98);
+      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - $totalEfectivoCorte , 2, '$', false)), false, false);
     }
 
-    $pdf->SetX(98);
-    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - $totalEfectivoCorte , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -3129,71 +3139,122 @@ class caja_chica_model extends CI_Model {
     }
     $pdf->SetY($y_aux);
 
-    $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(153, $pdf->GetY() );
-    $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetWidths(array(37, 21));
-    $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
-    if ($totalIngresos > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
-    }
-    if ($totalRemisiones > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL INGRESOS REM', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, false);
-    }
-    if ($totalAcreedores > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
-    }
-    if ($totalBoletasPagadas > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
-    }
-    if ($totalGastosComprobarTot > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), false, false);
-    }
-    if ($ttotalGastos > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
-    }
-    if ($totalReposicionGastosAnt > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL REPOSICION GASTOS', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), false, false);
-    }
-    if ($totalDeudores > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
-    }
-    if ($totalTraspasos > 0) {
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
-    }
-    if ($noCajas == 1 && ($caja['boletas_arecuperar_total'] > 0 || $caja['cheques_transito_total'] > 0)) {
+    if ($noCajas == 1) {
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetXY(153, $pdf->GetY() );
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(37, 21));
+
       $pdf->SetX(153);
       $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
       $pdf->SetX(153);
       $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
-    }
-    // $pdf->SetX(153);
-    // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
-
-    $pdf->SetX(153);
-    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
-    if ($totalFondoCaja !== false) {
       $pdf->SetX(153);
-      $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
-    }
+      $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
 
-    // $page_aux = $pdf->page;
-    $pdf->page = 1;
-    $pdf->SetFont('Arial','B', 8);
-    $pdf->SetXY(110, 26.5);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(104));
-    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($caja['fondo_caja'] , 2, '$', false)), false, false);
-    $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
+      $pdf->SetX(153);
+      $pdf->Line($pdf->GetX()+10, $pdf->GetY(), $pdf->GetX()+60, $pdf->GetY());
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL PARCIAL', MyString::formatoNumero($ttotal_parcial, 2, '$', false)), false, false);
+
+      if ($totalAcreedores > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+      }
+      if ($totalDeudores > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
+      }
+
+      $pdf->SetX(153);
+      $pdf->Line($pdf->GetX()+10, $pdf->GetY(), $pdf->GetX()+60, $pdf->GetY());
+      $pdf->SetX(153);
+      $pdf->Row(array('TOTAL CAJA ASIGNADA', MyString::formatoNumero($ttotal_caja_asignada, 2, '$', false)), false, false);
+
+      $pdf->SetY($pdf->GetY()+5);
+      if ($totalIngresos > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+      }
+      if ($totalBoletasPagadas > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('PAGO LIMON EF', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+      }
+      if ($totalBoletasPendientes > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('PAGO LIMON CR', MyString::formatoNumero($totalBoletasPendientes, 2, '$', false)), false, false);
+      }
+
+      $pdf->SetX(153);
+      $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
+
+    } else {
+      $pdf->SetFont('Arial', 'B', 6);
+      $pdf->SetXY(153, $pdf->GetY() );
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(37, 21));
+      $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+      if ($totalIngresos > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, false);
+      }
+      if ($totalRemisiones > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL INGRESOS REM', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, false);
+      }
+      if ($totalAcreedores > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+      }
+      if ($totalBoletasPagadas > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+      }
+      if ($totalGastosComprobarTot > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('PAGO GASTOS COM', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), false, false);
+      }
+      if ($ttotalGastos > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
+      }
+      if ($totalReposicionGastosAnt > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL REPOSICION GASTOS', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), false, false);
+      }
+      if ($totalDeudores > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
+      }
+      if ($totalTraspasos > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL TRASPASOS', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
+      }
+      if ($noCajas == 1 && ($caja['boletas_arecuperar_total'] > 0 || $caja['cheques_transito_total'] > 0)) {
+        $pdf->SetX(153);
+        $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
+        $pdf->SetX(153);
+        $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
+      }
+      // $pdf->SetX(153);
+      // $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
+
+      $pdf->SetX(153);
+      $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
+      if ($totalFondoCaja !== false) {
+        $pdf->SetX(153);
+        $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalFondoCaja, 2, '$', false)), false, false);
+      }
+
+      // $page_aux = $pdf->page;
+      $pdf->page = 1;
+      $pdf->SetFont('Arial','B', 8);
+      $pdf->SetXY(110, 26.5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(104));
+      $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($caja['fondo_caja'] , 2, '$', false)), false, false);
+      $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
+    }
 
     // if(count($codigoAreas) > 0){
     //   $pdf->SetFont('Arial', '', 6);

@@ -1412,17 +1412,67 @@
                                 <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
-                                <td>TOTAL PARCIAL:</td>
-                                <td><input type="text" name="ttotal_parcial" value="<?php echo ($caja['cheques_transito_total'] + $caja['cheques_transito_total'] + $totalEfectivo) ?>" class="input-small vpositive" id="ttotal-ttotal_parcial" style="text-align: right;" readonly></td>
+                                <td colspan="2"><hr></td>
                               </tr>
                               <tr>
-                                <td colspan="2"><hr></td>
+                                <td>TOTAL PARCIAL:</td>
+                                <?php $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo); ?>
+                                <td><input type="text" name="ttotal_parcial" value="<?php echo $ttotal_parcial ?>" class="input-small vpositive" id="ttotal-ttotal_parcial" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td>TOTAL ACREEDORES:</td>
                                 <td><input type="text" name="" value="<?php echo ($totalAcreedores) ?>" class="input-small vpositive" id="ttotal-acreedores" style="text-align: right;" readonly></td>
                               </tr>
+                              <tr>
+                                <td>TOTAL DEUDORES:</td>
+                                <td><input type="text" name="" value="<?php echo ($totalDeudores) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td colspan="2"><hr></td>
+                              </tr>
+                              <tr>
+                                <td>TOTAL CAJA ASIGNADA:</td>
+                                <?php $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores); ?>
+                                <td><input type="text" name="ttotal_caja_asignada"
+                                  value="<?php echo $ttotal_caja_asignada ?>" class="input-small vpositive" id="ttotal-ttotal_caja_asignada" style="text-align: right;" readonly></td>
+                              </tr>
+
+
+                              <tr>
+                                <td>TOTAL INGRESOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalIngresos ?>" class="input-small vpositive" id="total-saldo-ingresos" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>PAGO TOTAL LIMON:</td>
+                                <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>PAGO TOTAL PENDIENTE:</td>
+                                <td><input type="text" name="" value="<?php echo $totalBoletasPendientes ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              </tr>
+
+                              <tr>
+                                <td>EFECT. DEL CORTE:</td>
+                                <?php
+                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+
+                                $totalFondoCaja = false;
+                                ?>
+                                <td><input type="text" name="saldo_corte"
+                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                                <input type="hidden" name="total_diferencia"
+                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              </tr>
+                              <?php if ($totalFondoCaja !== false): ?>
+                              <tr>
+                                <td>FONDO DE CAJA:</td>
+                                <td><input type="text" name="fondo_caja_cal"
+                                  value="<?php echo $totalFondoCaja ?>" class="input-small vpositive" id="ttotal-fondoCaja" style="text-align: right;" readonly></td>
+                              </tr>
+                              <?php endif ?>
+
                             <?php else: ?>
+
                               <tr>
                                 <td>SALDO INICIAL:</td>
                                 <td><input type="text" name="" value="<?php echo $caja['saldo_inicial'] ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
