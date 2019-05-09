@@ -3726,7 +3726,7 @@ class caja_chica_model extends CI_Model {
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
           LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
-        WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        WHERE cg.tipo <> 'gc' AND cg.status = 't' AND cg.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql}
         ORDER BY id_categoria ASC, fecha ASC");
     }
@@ -4374,7 +4374,7 @@ class caja_chica_model extends CI_Model {
             INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
             LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
             LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
-          WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql3}
+          WHERE cg.tipo <> 'gc' AND cg.status = 't' AND cg.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql3}
         ) AS t
         ORDER BY fecha ASC, ingreso DESC");
     }
