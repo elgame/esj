@@ -2320,7 +2320,7 @@ class polizas_model extends CI_Model {
             INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
             INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
-          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
+          WHERE bc.contable = 't' AND f.status <> 'ca' AND fa.poliza_egreso = 'f'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio
@@ -2340,7 +2340,7 @@ class polizas_model extends CI_Model {
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
             LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
-          WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
+          WHERE bc.contable = 't' AND bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
             bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
           HAVING Count(bmc.id_movimiento) = 0

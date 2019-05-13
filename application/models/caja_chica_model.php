@@ -156,7 +156,7 @@ class caja_chica_model extends CI_Model {
     // boletas
     if($noCaja == '1' || $noCaja == '3')
     {
-      $sql = " AND b.id_area <> 7";
+      $sql = " AND b.id_area = 2";
       if ($noCaja == '3') { // Caja de coco
         $sql = " AND b.id_area = 7";
       }
