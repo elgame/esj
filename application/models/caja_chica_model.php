@@ -1744,7 +1744,7 @@ class caja_chica_model extends CI_Model {
           'concepto'            => 'Pago/Abono generado de caja chica #'.$data['fno_caja'],
           'total'               => $gastoo['total'],
           'total_bc'            => $gastoo['total'],
-          'id_cuenta'           => 16, // id de la cuenta caja chica
+          'id_cuenta'           => $this->getCuentaCajaChicaEmp($gastoo['idempresa']), // id de la cuenta caja chica
           'ref_movimiento'      => 'Caja',
           'id_cuenta_proveedor' => NULL
         ];
@@ -1753,6 +1753,18 @@ class caja_chica_model extends CI_Model {
     }
 
     return ['result' => true];
+  }
+
+  public function getCuentaCajaChicaEmp($id_categoria)
+  {
+    $cuenta = $this->db->query("
+        SELECT bc.id_cuenta, bc.alias
+        FROM cajachica_categorias cc
+          INNER JOIN banco_cuentas bc ON bc.id_empresa = cc.id_empresa
+        WHERE cc.id_categoria = {$id_categoria} AND lower(bc.alias) LIKE '%caja chica%'
+        ORDER BY bc.id_cuenta ASC
+        LIMIT 1")->row();
+    return (isset($cuenta->id_cuenta)? $cuenta->id_cuenta: 16);
   }
 
   public function ajaxCategorias()
