@@ -1,3 +1,5 @@
+ ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct
+      ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
 
  ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct|pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN calle character varying(60);
@@ -113,7 +115,7 @@
         ADD CONSTRAINT cajachica_deudores_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
             REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE
             ON UPDATE CASCADE ON DELETE CASCADE;
-      -- lap|san
+      -- lap|san|pct
       ALTER TABLE public.banco_movimientos ADD COLUMN entransito_fecha_quito date;
       COMMENT ON COLUMN public.banco_movimientos.entransito_fecha_quito IS 'la fecha cuando se quito de transito ';
 

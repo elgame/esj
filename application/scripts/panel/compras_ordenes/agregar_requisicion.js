@@ -160,6 +160,13 @@
           else
             $("#verVehiculoChk").hide();
 
+          if (tipoOrderActual == 'p') {
+            $('.grpes_receta').show();
+          } else {
+            $('.grpes_receta').hide();
+            $('#es_receta').attr("checked", false);
+          }
+
           $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
           if (tipoOrderActual != 'a') {
             $('#groupCatalogos').show();

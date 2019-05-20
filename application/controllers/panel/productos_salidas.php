@@ -421,8 +421,8 @@ class productos_salidas extends MY_Controller {
       foreach ($_POST['productoId'] as $key => $value) {
         if ($_POST['tipoProducto'][$key] == 'p') {
           // id_almacen
-          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
-          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'), true);
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
           if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
           }

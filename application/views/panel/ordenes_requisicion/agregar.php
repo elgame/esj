@@ -122,6 +122,15 @@
                 </div>
               </div>
 
+              <div class="control-group grpes_receta" <?php echo ((set_select('tipoOrden', 'p')==' selected="selected"' || !isset($_POST['tipoOrden']))? '': 'style="display:none;"'); ?>>
+                <label class="control-label" for="es_receta">Es receta</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="checkbox" name="es_receta" id="es_receta" value="true" data-uniform="false">
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">

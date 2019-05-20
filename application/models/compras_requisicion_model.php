@@ -126,6 +126,12 @@ class compras_requisicion_model extends CI_Model {
       }
     }
 
+    //si es una receta
+    if (isset($_POST['es_receta']))
+    {
+      $data['es_receta'] = $_POST['es_receta'];
+    }
+
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
     {
@@ -375,6 +381,13 @@ class compras_requisicion_model extends CI_Model {
       //   $data['status']      = 'p';
       // //   $data['autorizado']  = 'f';
       // }
+
+      //si es una receta
+      $data['es_receta'] = 'f';
+      if (isset($_POST['es_receta']))
+      {
+        $data['es_receta'] = 't';
+      }
 
       //si se registra a un vehiculo
       if (isset($_POST['es_vehiculo']))
@@ -862,6 +875,7 @@ class compras_requisicion_model extends CI_Model {
               co.solicito as empleado_solicito, co.descripcion,
               co.id_vehiculo,
               co.tipo_vehiculo,
+              co.es_receta,
               COALESCE(cv.placa, null) as placa,
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,

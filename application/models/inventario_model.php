@@ -1033,9 +1033,9 @@ class inventario_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getEPUData($id_producto=null, $id_almacen=null)
+	public function getEPUData($id_producto=null, $id_almacen=null, $con_req=false)
   {
-		$sql_com = $sql_sal = $sql = '';
+		$sql_com = $sql_sal = $sql_req = $sql = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -1070,12 +1070,30 @@ class inventario_model extends privilegios_model{
     if ($id_almacen > 0) {
       $sql_com .= " AND co.id_almacen = ".$id_almacen;
       $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
+      $sql_req .= " AND cr.id_almacen = ".$id_almacen;
+    }
+
+    $sql_con_req = '';
+    $sql_con_req_f = '';
+    if ($con_req) {
+      $sql_con_req_f = ', con_req.cantidad AS con_req';
+      $sql_con_req = "LEFT JOIN
+      (
+        SELECT crq.id_producto, Sum(crq.cantidad) AS cantidad
+        FROM compras_requisicion cr
+          INNER JOIN compras_requisicion_productos crq ON cr.id_requisicion = crq.id_requisicion
+        WHERE cr.status = 'p' AND cr.tipo_orden = 'p' AND cr.autorizado = 'f' AND cr.id_autorizo IS NULL
+          AND cr.es_receta = 't' AND crq.importe > 0
+          {$sql_req}
+        GROUP BY crq.id_producto
+      ) AS con_req ON con_req.id_producto = p.id_producto";
     }
 
 		$res = $this->db->query(
 			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
         COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
 				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
+        {$sql_con_req_f}
 			FROM productos AS p
 			INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 			INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
@@ -1119,6 +1137,7 @@ class inventario_model extends privilegios_model{
           {$sql_sal}
 				GROUP BY sp.id_producto
 			) AS sal_sa ON sal_sa.id_producto = p.id_producto
+      {$sql_con_req}
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
 			ORDER BY nombre, nombre_producto ASC
 			");

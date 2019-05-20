@@ -550,6 +550,9 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => ($prereq? '': 'required')),
+      array('field' => 'es_receta',
+            'label' => 'Es receta',
+            'rules' => ''),
 
       array('field' => 'proveedorId1',
             'label' => 'Proveedor',
