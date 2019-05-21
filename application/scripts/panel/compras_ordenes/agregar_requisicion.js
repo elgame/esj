@@ -405,6 +405,8 @@
         params.tipo = ['gasto'];
         if ($('#tipoOrden').find('option:selected').val() == 'd') {
           params.tipo = ['servicio'];
+        } else if ($('#tipoOrden').find('option:selected').val() == 'p') {
+          params.tipo = ['gasto', 'melga', 'tabla', 'seccion'];
         }
 
         $.ajax({
