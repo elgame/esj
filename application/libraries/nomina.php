@@ -779,7 +779,7 @@ class nomina
 
     // echo "<pre>";
     //   var_dump($this->empleado->utilidad_empresa_ptu);
-    // echo "</pre>";
+    // echo "</pre>";exit;
 
     if ($this->empleado->utilidad_empresa_ptu > 0 && $this->empleado->ptu_percepciones_empleados > 0 && $this->empleado->ptu_dias_trabajados_empleados > 0)
     {

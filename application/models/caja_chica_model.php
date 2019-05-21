@@ -929,7 +929,7 @@ class caja_chica_model extends CI_Model {
     }
 
     $efectivo['fecha']                    = $data['fecha_caja_chica'];
-    $efectivo['saldo']                    = ($data['fno_caja']==='1'? $data['efectivo_tab_total']: $data['saldo_corte']);
+    $efectivo['saldo']                    = ($data['fno_caja']==='1'? $data['saldo_efetivo_tab_total']: $data['saldo_corte']);
     $efectivo['saldo_boletas_arecuperar'] = empty($data['boletas_arecuperar_total'])? 0: $data['boletas_arecuperar_total'];
     $efectivo['saldo_cheques_transito']   = empty($data['cheques_transito_total'])? 0: $data['cheques_transito_total'];
     $efectivo['no_caja']                  = $data['fno_caja'];
@@ -3158,30 +3158,23 @@ class caja_chica_model extends CI_Model {
       $pdf->SetWidths(array(37, 21));
 
       $pdf->SetX(153);
+      $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
+
+      $pdf->SetX(153);
       $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
       $pdf->SetX(153);
       $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
-
-      $pdf->SetX(153);
-      $pdf->Line($pdf->GetX()+10, $pdf->GetY(), $pdf->GetX()+60, $pdf->GetY());
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL PARCIAL', MyString::formatoNumero($ttotal_parcial, 2, '$', false)), false, false);
-
-      if ($totalAcreedores > 0) {
-        $pdf->SetX(153);
-        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
-      }
       if ($totalDeudores > 0) {
         $pdf->SetX(153);
         $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
       }
-
+      if ($totalAcreedores > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+      }
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
       $pdf->SetX(153);
-      $pdf->Line($pdf->GetX()+10, $pdf->GetY(), $pdf->GetX()+60, $pdf->GetY());
-      $pdf->SetX(153);
-      $pdf->Row(array('TOTAL CAJA ASIGNADA', MyString::formatoNumero($ttotal_caja_asignada, 2, '$', false)), false, false);
+      $pdf->Row(array('SALDO EFECTIVO', MyString::formatoNumero($saldoEfectivo, 2, '$', false)), false, false);
 
       $pdf->SetY($pdf->GetY()+5);
       if ($totalIngresos > 0) {
@@ -3197,8 +3190,8 @@ class caja_chica_model extends CI_Model {
         $pdf->Row(array('PAGO LIMON CR', MyString::formatoNumero($totalBoletasPendientes, 2, '$', false)), false, false);
       }
 
-      $pdf->SetX(153);
-      $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
+      // $pdf->SetX(153);
+      // $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($totalEfectivoCorte, 2, '$', false)), false, false);
 
     } else {
       $pdf->SetFont('Arial', 'B', 6);

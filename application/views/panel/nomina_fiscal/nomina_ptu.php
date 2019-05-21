@@ -242,6 +242,14 @@
                             $ptuEmpleado = $e->nomina_fiscal_ptu;
                           }
 
+                          // Si es nueva (no esta guardada) el ptu se divide
+                          if ($e->nomina_guardada === 'f') {
+                            $e->ptu_empleado_dias = $e->ptu_empleado_dias/2;
+                            $e->ptu_empleado_percepciones = $e->ptu_empleado_percepciones/2;
+                            $ptuEmpleado = $ptuEmpleado/2;
+                            $isrEmpleado = $isrEmpleado/2;
+                          }
+
                           if ($nominas_generadas && $e->ptu_generado == 'false')
                           {
                             $bgColor = 'background-color: #EEBCBC;';
