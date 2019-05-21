@@ -35,8 +35,7 @@
               <thead>
                 <tr>
                   <th></th>
-                  <th>Fecha</th>
-                  <th>Folio</th>
+                  <th>Requisición(s)</th>
                   <th>Proveedor</th>
                   <th>Producto</th>
                   <th>Faltante</th>
@@ -46,7 +45,6 @@
             <?php foreach($productos as $producto) { ?>
                 <tr>
                   <td></td>
-                  <td><?php echo $producto->fecha_creacion ?></td>
                   <td><?php echo $producto->folio ?></td>
                   <td><?php echo $producto->proveedor ?></td>
                   <td><?php echo $producto->producto ?></td>

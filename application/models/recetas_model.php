@@ -22,19 +22,18 @@ class recetas_model extends CI_Model {
       $sql .= " AND cr.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
-    $res = $this->db->query("SELECT cr.id_requisicion, p.id_producto, cr.id_almacen, cr.id_empresa, e.nombre_fiscal AS empresa,
-        cr.fecha_creacion, cr.folio, p.nombre AS producto, cr.tipo_orden, crq.id_proveedor, pr.nombre_fiscal AS proveedor,
-        crq.cantidad, pu.abreviatura AS unidad, crq.precio_unitario, crq.importe
+    $res = $this->db->query("SELECT string_agg(cr.id_requisicion::text, ', ') AS ids_requisicion, p.id_producto, cr.id_almacen, cr.id_empresa,
+        string_agg(cr.folio::text, ', ') AS folio, p.nombre AS producto, string_agg(crq.num_row::text, ', ') AS num_rows,
+        pr.id_proveedor, pr.nombre_fiscal AS proveedor, Sum(crq.cantidad) AS cantidad, pu.abreviatura AS unidad
       FROM compras_requisicion cr
         INNER JOIN compras_requisicion_productos crq ON cr.id_requisicion = crq.id_requisicion
         INNER JOIN productos p ON p.id_producto = crq.id_producto
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
-        INNER JOIN empresas e ON e.id_empresa = cr.id_empresa
         INNER JOIN proveedores pr ON pr.id_proveedor = crq.id_proveedor
       WHERE cr.status = 'p' AND cr.tipo_orden = 'p' AND cr.autorizado = 'f' AND cr.id_autorizo IS NULL
         AND cr.es_receta = 't' AND crq.importe > 0
         {$sql}
-      ORDER BY cr.folio ASC
+      GROUP BY p.id_producto, cr.id_almacen, cr.id_empresa, pr.id_proveedor, pu.id_unidad
     ");
 
     $productos = array();

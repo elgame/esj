@@ -1,5 +1,27 @@
- ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct
+ ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc
       ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
+      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Faltantes de productos',136,TRUE,'recetas/faltantes_productos/','question-sign',FALSE);
+      -- pcc
+        CREATE TABLE public.compras_ordenes_requisiciones
+            (
+              id_orden bigint NOT NULL,
+              id_requisicion bigint NOT NULL,
+              num_row integer NOT NULL,
+              CONSTRAINT compras_ordenes_requisiciones_pkey PRIMARY KEY (id_orden, id_requisicion, num_row),
+              CONSTRAINT compras_ordenes_requisiciones_id_orden_fkey FOREIGN KEY (id_orden)
+                  REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+                  ON UPDATE CASCADE ON DELETE CASCADE,
+              CONSTRAINT compras_ordenes_requisiciones_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+                  REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
+                  ON UPDATE CASCADE ON DELETE CASCADE
+            )
+            WITH (
+              OIDS=FALSE
+            );
+            ALTER TABLE public.compras_ordenes_requisiciones
+              OWNER TO programa;
+            COMMENT ON TABLE public.compras_ordenes_requisiciones
+              IS 'Se registra la relacion de la orden con la o las requisiciones que se ligan a la orden';
 
  ✔ Cambios formato de ordenes de compra @done (19-03-25 14:42) pct|pcc|lap|san
       ALTER TABLE public.compras_almacenes ADD COLUMN calle character varying(60);
@@ -84,7 +106,6 @@
         WITH ( OIDS=FALSE );
         ALTER TABLE public.cajachica_gastos_comprobar OWNER TO programa;
      ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_compro_gasto date;
-     -- pct|lap|san
       ALTER TABLE public.cajachica_nomenclaturas ADD COLUMN tipo boolean NOT NULL DEFAULT true;
       COMMENT ON COLUMN public.cajachica_nomenclaturas.tipo IS 'true: ingreso, false: egreso';
       UPDATE public.cajachica_nomenclaturas SET nombre='REMB COMPRA' WHERE id=1;
@@ -115,7 +136,6 @@
         ADD CONSTRAINT cajachica_deudores_id_nomenclatura_fkey FOREIGN KEY (id_nomenclatura)
             REFERENCES public.cajachica_nomenclaturas (id) MATCH SIMPLE
             ON UPDATE CASCADE ON DELETE CASCADE;
-      -- lap|san|pct
       ALTER TABLE public.banco_movimientos ADD COLUMN entransito_fecha_quito date;
       COMMENT ON COLUMN public.banco_movimientos.entransito_fecha_quito IS 'la fecha cuando se quito de transito ';
 
