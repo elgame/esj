@@ -456,7 +456,8 @@
                                           </td>
                                           <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
                                           <td>
-                                            <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No' ?>
+                                            <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
+                                            <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
                                           </td>
                                           <td style="">
                                             <?php if ($traspaso->guardado == 't'): ?>
