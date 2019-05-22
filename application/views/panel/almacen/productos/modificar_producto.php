@@ -250,7 +250,8 @@
                         {
                     ?>
                     <tr class="rowprod">
-                      <td><input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Presentacion">
+                      <td>
+                        <input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Presentacion">
                         <input type="hidden" name="pidpresentacion[]" value="<?php echo $value->id_pieza; ?>"></td>
                       <td><input type="text" name="pcantidad[]" value="<?php echo $value->cantidad; ?>" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
                       <td><label for="pquitar<?php echo $value->id_pieza; ?>">
