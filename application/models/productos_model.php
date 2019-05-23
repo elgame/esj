@@ -320,18 +320,26 @@ class productos_model extends CI_Model {
 				{
 					if ($_POST['pidpresentacion'][$key] != '')
 					{
-					  $this->db->update($tabla_insert, array(
-							'nombre'    => $value,
-							'cantidad'  => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
-							'status'    => (isset($_POST['pquitar'.$_POST['pidpresentacion'][$key]])? 'e': 'ac'),
-						), "{$field_where} = ".$_POST['pidpresentacion'][$key]);
+            $datos = array(
+              'nombre'    => $value,
+              'cantidad'  => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
+              'status'    => (isset($_POST['pquitar'.$_POST['pidpresentacion'][$key]])? 'e': 'ac'),
+            );
+            if ($this->input->post('tipo_familia') == 'a' && !empty($_POST['pidproducto'][$key])) {
+              $datos['id_producto_pieza'] = $_POST['pidproducto'][$key];
+            }
+					  $this->db->update($tabla_insert, $datos, "{$field_where} = ".$_POST['pidpresentacion'][$key]);
 					}else
 					{
-						$this->db->insert($tabla_insert, array(
-							'id_producto' => $id_producto,
-							'nombre'      => $value,
-							'cantidad'    => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
-						));
+            $datos = array(
+              'id_producto' => $id_producto,
+              'nombre'      => $value,
+              'cantidad'    => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
+            );
+            if ($this->input->post('tipo_familia') == 'a' && !empty($_POST['pidproducto'][$key])) {
+              $datos['id_producto_pieza'] = $_POST['pidproducto'][$key];
+            }
+						$this->db->insert($tabla_insert, $datos);
 					}
 				}
 			}
@@ -457,7 +465,7 @@ class productos_model extends CI_Model {
   public function getPiezas($id_producto)
   {
     $str_query = "
-        SELECT id_pieza, id_producto, nombre, cantidad, status
+        SELECT id_pieza, id_producto, nombre, cantidad, status, id_producto_pieza
         FROM productos_piezas
         WHERE status = 'ac' AND id_producto = {$id_producto}
         ORDER BY nombre ASC

@@ -23,7 +23,7 @@
             COMMENT ON TABLE public.compras_ordenes_requisiciones
               IS 'Se registra la relacion de la orden con la o las requisiciones que se ligan a la orden';
 
- ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct
+ ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct|pcc
      ALTER TABLE public.productos_piezas ADD COLUMN id_producto_pieza bigint;
      ALTER TABLE public.productos_piezas ADD CONSTRAINT productos_piezas_id_producto_pieza_fkey FOREIGN KEY (id_producto_pieza)
       REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;

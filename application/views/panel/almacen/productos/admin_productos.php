@@ -13,9 +13,9 @@
                 <td><?php echo $producto->codigo; ?></td>
                 <td><?php echo $producto->nombre; ?></td>
                 <td class="center">
-                    <?php 
+                    <?php
                     echo $this->usuarios_model->getLinkPrivSm('productos/modificar/', array(
-                        'params'   => 'id='.$producto->id_producto."&fid_familia=".$this->input->get('fid_familia'),
+                        'params'   => 'id='.$producto->id_producto."&fid_familia=".$this->input->get('fid_familia')."&ide={$producto->id_empresa}",
                         'btn_type' => 'btn-success', 'text_link' => 'hide',
                         'attrs'    => array('rel' => 'superbox-40x500') )
                     );
@@ -32,7 +32,7 @@
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el area?', 'productos', this); return false;"))
                       );
                     }
-                    
+
                     ?>
                 </td>
               </tr>

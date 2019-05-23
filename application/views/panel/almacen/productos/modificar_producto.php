@@ -133,18 +133,19 @@
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label" for="ftipo">Tipo lista</label>
-                    <div class="controls">
-                      <select name="ftipo" id="ftipo" class="span12">
-                        <option value=""></option>
-                        <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
-                        <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
-                        <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
-                      </select>
-                    </div>
+                  <label class="control-label" for="ftipo">Tipo lista</label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" class="span12">
+                      <option value=""></option>
+                      <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
+                      <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
+                      <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
+              <div class="span6">
                 <div class="control-group">
                   <label class="control-label" for="ftipo_apli">Tipo</label>
                   <div class="controls">
@@ -231,8 +232,8 @@
 
               <?php if ($data['familia']->tipo == 'a'): ?>
               <div class="row-fluid">
-                <a href="#" onclick="productos.add(); return false;" title="Agregar Piezas">Agregar Piezas</a>
-                <table class="table table-condensed">
+                <a href="#" onclick="productos.add('pz'); return false;" title="Agregar Piezas">Agregar Piezas</a>
+                <table class="table table-condensed" id="tblPiezasProductos">
                   <thead>
                     <tr>
                       <th>Nombre</th>
@@ -251,8 +252,10 @@
                     ?>
                     <tr class="rowprod">
                       <td>
-                        <input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Presentacion">
-                        <input type="hidden" name="pidpresentacion[]" value="<?php echo $value->id_pieza; ?>"></td>
+                        <input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Productos (Partes)">
+                        <input type="hidden" name="pidpresentacion[]" value="<?php echo $value->id_pieza; ?>">
+                        <input type="hidden" name="pidproducto[]" value="<?php echo $value->id_producto_pieza; ?>" class="pidproducto">
+                      </td>
                       <td><input type="text" name="pcantidad[]" value="<?php echo $value->cantidad; ?>" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
                       <td><label for="pquitar<?php echo $value->id_pieza; ?>">
                           <input type="checkbox" name="pquitar<?php echo $value->id_pieza; ?>"
@@ -263,8 +266,10 @@
                       }
                     } ?>
                     <tr class="rowprod">
-                      <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Presentacion">
-                        <input type="hidden" name="pidpresentacion[]" value=""></td>
+                      <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Productos (Partes)">
+                        <input type="hidden" name="pidpresentacion[]" value="">
+                        <input type="hidden" name="pidproducto[]" value="" class="pidproducto">
+                      </td>
                       <td><input type="text" name="pcantidad[]" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
                       <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">
                         <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>
