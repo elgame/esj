@@ -66,11 +66,11 @@ var familias = (function($){
     return false;
   }
 
-  function loadProductosFamilia($id_familia, pag){
+  function loadProductosFamilia($id_familia, $id_empresa){
     $("#boxproductos").show();
     $("#fid_familia").val($id_familia);
     var addproducto = $("#addproducto"), url = addproducto.attr('href').split('?');
-    addproducto.attr('href', url[0]+"?fid_familia="+$id_familia);
+    addproducto.attr('href', url[0]+"?fid_familia="+$id_familia+"&ide="+$id_empresa);
 
     productos.page(0);
 
@@ -98,6 +98,7 @@ var productos = (function($){
     $("#tblproductosrow .prescantidad.vpositive").on('keypress', setEventRow);
 
     autProducto();
+    autocompleteConcepto();
   }
 
   function autProducto() {
@@ -147,10 +148,17 @@ var productos = (function($){
     getProductos( (pag? pag: 0) );
   }
 
-  function add () {
+  function add (tipo='pr') { // pr: presentacion, pz: piezas partes
+    var placeholder = 'Presentacion', input = '';
+    if (tipo === 'pz') {
+      placeholder = 'Productos (Partes)';
+      input = '<input type="hidden" name="pidproducto[]" value="" class="pidproducto">';
+    }
     var obj = $("#tblproductosrow").append('<tr class="rowprod">'+
-    '  <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Presentacion">'+
-    '      <input type="hidden" name="pidpresentacion[]" value=""></td>'+
+    '  <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="'+placeholder+'">'+
+    '      <input type="hidden" name="pidpresentacion[]" value="">'+
+    input+
+    '  </td>'+
     '  <td><input type="text" name="pcantidad[]" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>'+
     '  <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">'+
     '    <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>'+
@@ -184,6 +192,54 @@ var productos = (function($){
     }).always(function() { loader.close(); });
 
     return false;
+  }
+
+  // Autocomplete para el codigo.
+  function autocompleteConcepto() {
+    $("#tblPiezasProductos").on('focus', '.presnombre', function(event) {
+      var $this = $(this);
+      $this.autocomplete({
+        source: function (request, response) {
+          var ide = $('#did_empresa').val();
+          if (ide != '') {
+            $.ajax({
+              url: base_url + 'panel/compras_ordenes/ajax_producto/',
+              dataType: 'json',
+              data: {
+                term: request.term,
+                ide:  ide,
+                tipo: 'p',
+              },
+              success: function (data) {
+                response(data);
+              }
+            });
+          } else {
+            noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+          }
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $fconcepto = $(this),
+          $td            = $fconcepto.parent(),
+          $pidproducto   = $td.find('.pidproducto');
+
+
+          $fconcepto.css("background-color", "#B6E7FF");
+          $pidproducto.val(ui.item.id);
+        }
+      }).on("keydown", function(event) {
+        if(event.which == 8 || event.which == 46) {
+          var $fconcepto = $(this),
+          $td            = $fconcepto.parent(),
+          $pidproducto   = $td.find('.pidproducto');
+
+          $fconcepto.css("background-color", "#FDFC9A");
+          $pidproducto.val('');
+        }
+      });
+    });
   }
 
   objr.init = init;
