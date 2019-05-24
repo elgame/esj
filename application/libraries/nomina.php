@@ -1329,6 +1329,8 @@ class nomina
     if ($tipo != 'se' && $isr == 0 && $causado == 0) {
       $isr = $isrAntesSubsidio;
       $subsidio = 0;
+    } elseif ($tipo === 'se' && $this->empleado->dias_trabajados == 0) {
+      $subsidio = 0;
     }
 
     return ['isr' => $isr, 'subsidio' => $subsidio, 'subsidioCausado' => $causado];
