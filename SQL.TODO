@@ -22,6 +22,53 @@
               OWNER TO programa;
             COMMENT ON TABLE public.compras_ordenes_requisiciones
               IS 'Se registra la relacion de la orden con la o las requisiciones que se ligan a la orden';
+        CREATE TABLE public.compras_ordenes_areas
+          (
+            id_area bigint NOT NULL,
+            id_orden bigint NOT NULL,
+            num integer NOT NULL DEFAULT 1, -- numero de area (cultivo) asignados a la orden de compra
+            CONSTRAINT compras_ordenes_areas_pkey PRIMARY KEY (id_area, id_orden),
+            CONSTRAINT compras_ordenes_areas_id_area_fkey FOREIGN KEY (id_area)
+                REFERENCES public.areas (id_area) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            CONSTRAINT compras_ordenes_areas_id_orden_fkey FOREIGN KEY (id_orden)
+                REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE
+          )
+          WITH (
+            OIDS=FALSE
+          );
+          ALTER TABLE public.compras_ordenes_areas
+            OWNER TO programa;
+          COMMENT ON TABLE public.compras_ordenes_areas
+            IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
+          COMMENT ON COLUMN public.compras_ordenes_areas.num IS 'numero de area (cultivo) asignados a la orden de compra';
+        CREATE TABLE public.compras_ordenes_activos
+          (
+            id_activo bigint NOT NULL,
+            id_orden bigint NOT NULL,
+            num integer NOT NULL DEFAULT 1, -- numero de activo (productos) asignados a la orden de compra
+            CONSTRAINT compras_ordenes_activos_pkey PRIMARY KEY (id_activo, id_orden),
+            CONSTRAINT compras_ordenes_activos_id_activo_fkey FOREIGN KEY (id_activo)
+                REFERENCES public.productos (id_producto) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            CONSTRAINT compras_ordenes_activos_id_orden_fkey FOREIGN KEY (id_orden)
+                REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE
+          )
+          WITH (
+            OIDS=FALSE
+          );
+          ALTER TABLE public.compras_ordenes_activos
+            OWNER TO programa;
+          COMMENT ON TABLE public.compras_ordenes_activos
+            IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
+          COMMENT ON COLUMN public.compras_ordenes_activos.num IS 'numero de area (cultivo) asignados a la orden de compra';
+        INSERT INTO compras_ordenes_areas (id_area, id_orden, num) (SELECT id_area, id_orden, 1 FROM compras_ordenes WHERE id_area IS NOT NULL)
+        INSERT INTO compras_ordenes_activos (id_activo, id_orden, num) (SELECT id_activo, id_orden, 1 FROM compras_ordenes WHERE id_activo IS NOT NULL)
+
+        ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
+        ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
 
  ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct|pcc
      ALTER TABLE public.productos_piezas ADD COLUMN id_producto_pieza bigint;

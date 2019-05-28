@@ -25,8 +25,8 @@
             <form action="<?php echo base_url('panel/recetas/faltantes_productos/'.$method); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="dempresa">Empresa</label>
-                <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa', $empresa_default->nombre_fiscal) ?>" size="73">
-                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa', $empresa_default->id_empresa) ?>">
+                <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa', (isset($empresa_default->nombre_fiscal)? $empresa_default->nombre_fiscal: '') ) ?>" size="73">
+                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa', (isset($empresa_default->id_empresa)? $empresa_default->id_empresa: '') ) ?>">
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
@@ -34,7 +34,7 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-                  <th></th>
+                  <th>Empresa</th>
                   <th>Requisición(s)</th>
                   <th>Proveedor</th>
                   <th>Producto</th>
@@ -44,7 +44,7 @@
               <tbody>
             <?php foreach($productos as $producto) { ?>
                 <tr>
-                  <td></td>
+                  <td><?php echo $producto->empresa ?></td>
                   <td><?php echo $producto->folio ?></td>
                   <td><?php echo $producto->proveedor ?></td>
                   <td><?php echo $producto->producto ?></td>

@@ -1033,7 +1033,7 @@ class inventario_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getEPUData($id_producto=null, $id_almacen=null, $con_req=false)
+	public function getEPUData($id_producto=null, $id_almacen=null, $con_req=false, $extras = [])
   {
 		$sql_com = $sql_sal = $sql_req = $sql = '';
 
@@ -1053,12 +1053,14 @@ class inventario_model extends privilegios_model{
       $_GET['did_empresa'] = $res_prod->id_empresa;
     }
 
-    $this->load->model('empresas_model');
-    $client_default = $this->empresas_model->getDefaultEmpresa();
-    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
-    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-    if($this->input->get('did_empresa') != ''){
-      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    if (!isset($extras['empresa'])) {
+      $this->load->model('empresas_model');
+      $client_default = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+      $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
     }
 
     if ($this->input->get('did_empresa') == 3) { // gomez gudiño
@@ -1075,7 +1077,7 @@ class inventario_model extends privilegios_model{
 
     $sql_con_req = '';
     $sql_con_req_f = '';
-    if ($con_req) {
+    if ($con_req) { // toma en cuenta la existencia de las requisición pendientes
       $sql_con_req_f = ', con_req.cantidad AS con_req';
       $sql_con_req = "LEFT JOIN
       (
@@ -1148,6 +1150,7 @@ class inventario_model extends privilegios_model{
 
 		return $response;
 	}
+
 	/**
 	 * Reporte existencias por unidad pdf
 	 */

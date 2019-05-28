@@ -291,9 +291,17 @@ class compras_ordenes_model extends CI_Model {
       // Si es un gasto son requeridos los campos de catálogos
       if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
           || $_POST['tipoOrden'] == 'p') {
-        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
-        // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
-        // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+        // Inserta las areas
+        $this->db->delete('compras_ordenes_areas', ['id_orden' => $idOrden]);
+        if (isset($_POST['areaId']) && count($_POST['areaId']) > 0) {
+          foreach ($_POST['areaId'] as $keyr => $id_area) {
+            $this->db->insert('compras_ordenes_areas', [
+              'id_area'  => $id_area,
+              'id_orden' => $idOrden,
+              'num'      => count($_POST['areaId'])
+            ]);
+          }
+        }
 
         // Inserta los ranchos
         $this->db->delete('compras_ordenes_rancho', ['id_orden' => $idOrden]);
@@ -320,7 +328,17 @@ class compras_ordenes_model extends CI_Model {
         }
 
         if ($_POST['tipoOrden'] !== 'a') {
-          $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
+          // Inserta los activos
+          $this->db->delete('compras_ordenes_activos', ['id_orden' => $idOrden]);
+          if (isset($_POST['activoId']) && count($_POST['activoId']) > 0) {
+            foreach ($_POST['activoId'] as $keyr => $id_activo) {
+              $this->db->insert('compras_ordenes_activos', [
+                'id_activo' => $id_activo,
+                'id_orden'  => $idOrden,
+                'num'       => count($_POST['activoId'])
+              ]);
+            }
+          }
         }
       }
 
@@ -741,7 +759,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_almacen, ca.nombre AS almacen,
               co.cont_x_dia,
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
-              co.id_area, co.id_activo,
+              -- co.id_area, co.id_activo,
               co.otros_datos,
               cr.folio AS folio_requisicion
        FROM compras_ordenes AS co
@@ -858,12 +876,11 @@ class compras_ordenes_model extends CI_Model {
         $data['info'][0]->entrada_almacen = array();
         $data['info'][0]->entrada_almacen = $this->getInfoEntrada(0,0, $data['info'][0]->id_orden);
 
-        $data['info'][0]->area = null;
-        if ($data['info'][0]->id_area)
-        {
-          $this->load->model('areas_model');
-          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
-        }
+        // Codigos nuevos
+        $data['info'][0]->area = $this->db->query("SELECT a.id_area, a.nombre, csa.num
+                                   FROM compras_ordenes_areas csa
+                                    INNER JOIN areas a ON a.id_area = csa.id_area
+                                   WHERE csa.id_orden = {$data['info'][0]->id_orden}")->result();
 
         $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
                                    FROM compras_ordenes_rancho csr
@@ -875,12 +892,10 @@ class compras_ordenes_model extends CI_Model {
                                     INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
                                    WHERE cscc.id_orden = {$data['info'][0]->id_orden}")->result();
 
-        $data['info'][0]->activo = null;
-        if ($data['info'][0]->id_activo)
-        {
-          $this->load->model('productos_model');
-          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
-        }
+        $data['info'][0]->activo = $this->db->query("SELECT p.id_producto, p.nombre, csa.num
+                                   FROM compras_ordenes_activos csa
+                                    INNER JOIN productos p ON p.id_producto = csa.id_activo
+                                   WHERE csa.id_orden = {$data['info'][0]->id_orden}")->result();
       }
     }
     return $data;
@@ -2053,7 +2068,11 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(25, 50));
-          $pdf->Row(array('Cultivo / Actividad / Producto', $orden['info'][0]->area->nombre), false, true);
+          $areas = [];
+          foreach ($orden['info'][0]->area as $key => $value) {
+            $areas[] = $value->nombre;
+          }
+          $pdf->Row(array('Cultivo / Actividad / Producto', implode(' | ', $areas)), false, true);
         }
         if (!empty($orden['info'][0]->rancho)) {
           $pdf->SetFont('Arial','',8);
@@ -2082,7 +2101,11 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(25, 50));
-          $pdf->Row(array('Activo', $orden['info'][0]->activo->nombre), false, true);
+          $activos = [];
+          foreach ($orden['info'][0]->activo as $key => $value) {
+            $activos[] = $value->nombre;
+          }
+          $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
         }
       }
 

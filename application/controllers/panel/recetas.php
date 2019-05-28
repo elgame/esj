@@ -87,9 +87,9 @@ class recetas extends MY_Controller {
 
     // Obtiene los datos de la empresa predeterminada.
     $this->load->model('empresas_model');
-    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    if(intval($this->input->get('did_empresa')) < 1)
-      $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
+    $params['empresa_default'] = []; //$this->empresas_model->getDefaultEmpresa();
+    // if(intval($this->input->get('did_empresa')) < 1)
+    //   $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
 
     $this->load->model('recetas_model');
     $params['productos'] = $this->recetas_model->getProductosFaltantes();

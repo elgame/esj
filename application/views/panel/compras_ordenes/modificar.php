@@ -430,10 +430,18 @@
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña" <?php echo $readonlyCat ?>>
+                          <input type="text" name="area" class="span11" id="area" value="" placeholder="Limon, Piña">
                         </div>
-                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($orden['info'][0]->area->id_area) ? $orden['info'][0]->area->id_area : '') ?>">
                       </div>
+                      <ul class="tags" id="tagsAreaIds">
+                      <?php if (isset($orden['info'][0]->area)) {
+                        foreach ($orden['info'][0]->area as $key => $area) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $area->nombre ?></span>
+                            <input type="hidden" name="areaId[]" class="areaId" value="<?php echo $area->id_area ?>">
+                            <input type="hidden" name="areaText[]" class="areaText" value="<?php echo $area->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
 
                     <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
@@ -478,10 +486,18 @@
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($orden['info'][0]->activo->nombre) ? $orden['info'][0]->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" <?php echo $readonlyCat ?>>
+                          <input type="text" name="activos" class="span11" id="activos" value="" placeholder="Nissan FRX, Maquina limon">
                         </div>
-                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($orden['info'][0]->activo->id_producto) ? $orden['info'][0]->activo->id_producto : '') ?>">
                       </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($orden['info'][0]->activo)) {
+                        foreach ($orden['info'][0]->activo as $key => $activo) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $activo->nombre ?></span>
+                            <input type="hidden" name="activoId[]" class="activoId" value="<?php echo $activo->id_activo ?>">
+                            <input type="hidden" name="activoText[]" class="activoText" value="<?php echo $activo->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
                     </div><!--/control-group -->
                   </div>
 
