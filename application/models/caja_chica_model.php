@@ -533,7 +533,7 @@ class caja_chica_model extends CI_Model {
 
     $response = [];
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, Coalesce(cg.monto - cga.abonos, cg.monto) AS monto, cc.id_categoria, cc.abreviatura as empresa,
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
@@ -1381,6 +1381,27 @@ class caja_chica_model extends CI_Model {
     }
   }
 
+  public function getInfoDeudor($id)
+  {
+    $deudor = $this->db->query(
+      "SELECT id_deudor, fecha, nombre, concepto, monto, no_caja, no_impresiones,
+        id_usuario, fecha_creacion, tipo, folio, id_nomenclatura
+       FROM cajachica_deudores
+       WHERE id_deudor = {$id}
+       ORDER BY fecha ASC, id_deudor ASC"
+    )->row();
+    if (count($deudor) > 0) {
+      $deudor->abonos = $this->db->query(
+        "SELECT id_deudor, fecha_creacion, fecha, monto, no_caja, id_usuario
+         FROM cajachica_deudores_pagos
+         WHERE id_deudor = {$id}
+         ORDER BY fecha ASC, id_deudor ASC"
+      )->result();
+    }
+
+    return $deudor;
+  }
+
   public function getRemisiones()
   {
     $this->load->model('cuentas_cobrar_model');
@@ -1592,17 +1613,12 @@ class caja_chica_model extends CI_Model {
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
-    // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
-    //     WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-    //       AND tipo = 'g'
-    //     ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
-
     // $data_folio->folio += 1;
     $datos_gasto_com = [
       // 'folio_sig' => $data_folio->folio,
       // 'fecha'  => $data['fecha_caja'],
       // 'tipo'  => 'g',
-      // 'monto' => $data['importe'],
+      'monto' => $data_gasto->monto - $data['importe'],
       'status' => 'f',
       'concepto' => "GASTO COMPROBADO ({$data['importe']})"
     ];

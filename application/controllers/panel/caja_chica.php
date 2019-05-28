@@ -25,6 +25,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/ajax_get_gastosdirectos/',
     'caja_chica/ajax_get_deudores/',
     'caja_chica/agregar_abono_deudor/',
+    'caja_chica/quitar_abono_deudor/',
     'caja_chica/ajax_registra_gasto_comp/',
   );
 
@@ -536,13 +537,48 @@ class caja_chica extends MY_Controller {
         $params['closeModal'] = true;
         $params['frm_errors'] = $this->showMsgs(4);
       }
+
+      $params['deudor'] = $this->caja_chica_model->getInfoDeudor($params['id']);
+
     }else
       $_GET['msg'] = 1;
+
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/caja_chica/agregar_abonos_deudor', $params);
+  }
+
+  public function quitar_abono_deudor() {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Agregar abonos');
+
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
+    {
+      $params['id']      = $_GET['id'];
+      $params['fecha']   = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto']   = $_GET['monto'];
+
+      $this->db->delete('cajachica_deudores_pagos', ["id_deudor" => $_GET['id'], "fecha_creacion" => $_GET['fecha_creacion']]);
+      $this->agregar_abono_deudor();
+    } else
+      $_GET['msg'] = 1;
   }
 
   public function configAddAbonoDeudor()
