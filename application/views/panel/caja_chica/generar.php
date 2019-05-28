@@ -1131,7 +1131,7 @@
                                               <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
                                             </select>
                                           </td>
-                                          <td style="">
+                                          <td style="width: 80px;">
                                             <select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura" <?php echo $readonly ?>>
                                               <?php foreach ($nomenclaturas as $n) { ?>
                                                 <?php if ($n->tipo === 'f'): ?>
@@ -1832,7 +1832,7 @@
             </div>
           </div>
           <div class="control-group span3">
-            <label class="control-label" for="compGastoFrmMonto">Folio</label>
+            <label class="control-label" for="compGastoFrmMonto">Monto</label>
             <div class="controls">
               <input type="text" name="compGastoFrmMonto" class="span11 vpositive" id="compGastoFrmMonto" value="" size="">
             </div>

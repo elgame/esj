@@ -982,6 +982,11 @@
                     '<option value="caja_general">Caja Distribuidora</option>'+
                   '</select>'+
                 '</td>'+
+                '<td style="width: 80px;">'+
+                  '<select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura">'+
+                    $('#nomeclaturas_base').html() +
+                  '</select>'+
+                '</td>'+
                 '<td style="width: 200px;">'+
                   '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor_nombre" required autocomplete="off">'+
                   '<input type="hidden" name="deudor_id_deudor[]" value="" id="deudor_id_deudor">'+

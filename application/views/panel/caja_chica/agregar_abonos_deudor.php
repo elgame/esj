@@ -72,6 +72,32 @@
 
           </form>
 
+          <?php if (count($deudor->abonos) > 0): ?>
+            <h3>Abonos</h3>
+            <table class="table table-striped table-bordered table-hover table-condensed" id="table-deudor">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Monto</th>
+                  <th>Opc</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($deudor->abonos as $key => $abono): ?>
+                  <tr>
+                    <td><?php echo $abono->fecha ?></td>
+                    <td><?php echo MyString::formatoNumero($abono->monto, 2, '$') ?></td>
+                    <td>
+                      <?php if ($this->input->get('fecha') === $abono->fecha): ?>
+                      <a href="<?php echo base_url('panel/caja_chica/quitar_abono_deudor?'.MyString::getVarsLink(array('fecha_creacion'))."&fecha_creacion={$abono->fecha_creacion}"); ?>">Quitar</a>
+                      <?php endif ?>
+                    </td>
+                  </tr>
+                <?php endforeach ?>
+              </tbody>
+            </table>
+          <?php endif ?>
+
         </div><!--/span-->
       </div><!--/row-->
     </div><!--/row-->
