@@ -11463,8 +11463,9 @@ class nomina_fiscal_model extends CI_Model {
 
   public function pdfRptNominaPtu($semana, $empresaId, $anio)
   {
-    // var_dump($_POST);
-    // exit();
+    echo "<pre>";
+      var_dump($_POST['ptu']);
+    echo "</pre>";exit;
     // $empleados = $this->pdfRptDataNominaFiscal($_POST, $empresaId);
     $this->load->model('usuarios_model');
     $this->load->model('empresas_model');
@@ -11576,13 +11577,14 @@ class nomina_fiscal_model extends CI_Model {
 
           $dataarr[] = MyString::formatoNumero($_POST['ptu'][$key], 2, '$', false);
           $dataarr[] = MyString::formatoNumero($_POST['isr'][$key], 2, '$', false);
-          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          $total_pagarr = (isset($_POST['all_efectivo']) && $_POST['all_efectivo'] == '1'? $_POST['total_percepciones'][$key] - $_POST['total_deducciones'][$key]: $_POST['ttotal_nomina'][$key]);
+          $dataarr[] = MyString::formatoNumero($total_pagarr, 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
 
           $ptuTotal     += $_POST['ptu'][$key];
           $isrTotal     += $_POST['isr'][$key];
-          $ttotal_pagar += $_POST['ttotal_nomina'][$key];
+          $ttotal_pagar += $total_pagarr;
           $tdias        += $_POST['ptu_dias_trabajados_empleado'][$key];
           $ptu_dias     += $_POST['ptu_empleado_dias'][$key];
           $tsueldos     += $_POST['ptu_percepciones_empleado'][$key];

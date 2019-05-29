@@ -108,6 +108,7 @@
               </div>
 
               <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
+              <input type="hidden" value="<?php echo $all_efectivo?>" name="all_efectivo">
                 <table class="table table-striped">
                   <thead>
                     <tr>
