@@ -492,6 +492,7 @@
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
         esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),
+        all_efectivo: $tr.find('#en_efectivo').is(':checked'),
       },
     })
     .done(function(result) {

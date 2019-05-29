@@ -73,7 +73,8 @@
                         $keyfirst = array_shift($keyfirst);
                         ?>
                         PTU <input type="text" name="ptu" id="ptu" value="<?php echo count($empleados) > 0 ? ($empleados[$keyfirst]->ptu_generado === 'false' ? $ptu : $empleados[$keyfirst]->utilidad_empresa_ptu) : '' ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
-                        <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
+                        | En Efectivo: <input type="checkbox" name="en_efectivo" id="en_efectivo" value="true" <?php echo ($all_efectivo? 'checked': '') ?>>
+                        | <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
                       </div>
                     </form>
 
@@ -428,7 +429,7 @@
                           <span class="total-nomina-span"><?php
                             $ttotal_nomina = $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
                             $ttotal_nomina_cheques = 0;
-                            if($e->cuenta_banco == ''){
+                            if($e->cuenta_banco == '' || $all_efectivo){
                               $ttotal_nomina_cheques = $ttotal_nomina;
                               $ttotal_nomina = 0;
                             }
