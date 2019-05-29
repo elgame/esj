@@ -11463,9 +11463,9 @@ class nomina_fiscal_model extends CI_Model {
 
   public function pdfRptNominaPtu($semana, $empresaId, $anio)
   {
-    echo "<pre>";
-      var_dump($_POST['ptu']);
-    echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($_POST['ptu']);
+    // echo "</pre>";exit;
     // $empleados = $this->pdfRptDataNominaFiscal($_POST, $empresaId);
     $this->load->model('usuarios_model');
     $this->load->model('empresas_model');
