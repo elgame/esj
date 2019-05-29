@@ -310,6 +310,7 @@ class nomina_fiscal extends MY_Controller {
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, $params['ptu'], null, 'ptu');
+    $params['all_efectivo'] = isset($_POST['en_efectivo']{0}) ? true : false; // que se pague todo en efectivo
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();

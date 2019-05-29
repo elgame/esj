@@ -10027,6 +10027,9 @@ class nomina_fiscal_model extends CI_Model {
               "sello"          => $result['result']->data->sello,
               "certificado"    => $result['result']->data->certificado,
             ];
+            $datosApi['otros'] = [
+              "all_efectivo" => $datos['all_efectivo'],
+            ];
 
             $nominasEmpleados[] = array(
               'id_empleado'         => $empleadoId,
