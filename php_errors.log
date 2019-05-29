@@ -1,4 +1,0 @@
-[03-Sep-2018 20:52:35 America/Mexico_City] PHP Fatal error:  Maximum execution time of 300 seconds exceeded in /home/elgame/www/sanjorge/application/models/inventario_model.php on line 1597
-[12-Sep-2018 19:07:13 America/Mexico_City] PHP Fatal error:  Call to undefined method caja_chica::configAddAbono() in /home/elgame/www/sanjorge/application/controllers/panel/caja_chica.php on line 446
-[12-Sep-2018 19:10:29 America/Mexico_City] PHP Parse error:  syntax error, unexpected '}' in /home/elgame/www/sanjorge/application/views/panel/caja_chica/agregar_abonos_deudor.php on line 67
-[27-May-2019 22:58:01 America/Mexico_City] PHP Fatal error:  Call to a member function num_rows() on boolean in /home/elgame/www/sanjorge/application/models/compras_ordenes_model.php on line 761
