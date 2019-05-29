@@ -139,7 +139,7 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
-	$('#proveedor').val('');
+        $('#proveedor').val('');
         $('#proveedorId').val('');
         $('#groupCatalogos').show();
         $('#area').val('');
@@ -153,7 +153,7 @@
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
-	$('#proveedor').val('');
+        $('#proveedor').val('');
         $('#proveedorId').val('');
         $('#area').val('');
         $('#areaId').val('');
@@ -258,9 +258,13 @@
       select: function( event, ui ) {
         var $area =  $(this);
 
-        $area.val(ui.item.id);
-        $("#areaId").val(ui.item.id);
-        $area.css("background-color", "#A1F57A");
+        // $area.val(ui.item.id);
+        // $("#areaId").val(ui.item.id);
+        // $area.css("background-color", "#A1F57A");
+        addAreaTag(ui.item);
+        setTimeout(function () {
+          $area.val('');
+        }, 200);
 
         $("#rancho").val('').css("background-color", "#FFD071");
         $('#tagsRanchoIds').html('');
@@ -268,12 +272,32 @@
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
-        $("#area").css("background-color", "#FFD071");
-        $("#areaId").val('');
-        $("#rancho").val('').css("background-color", "#FFD071");
-        $('#tagsRanchoIds').html('');
-        // $("#ranchoId").val('');
+        // $("#area").css("background-color", "#FFD071");
+        // $("#areaId").val('');
+        // $("#rancho").val('').css("background-color", "#FFD071");
+        // $('#tagsRanchoIds').html('');
+        // // $("#ranchoId").val('');
       }
+    });
+
+    function addAreaTag(item) {
+      $('#tagsAreaIds').html('');
+      if ($('#tagsAreaIds .areaId[value="'+item.id+'"]').length === 0) {
+        $('#tagsAreaIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="areaId[]" class="areaId" value="'+item.id+'">'+
+          '<input type="hidden" name="areaText[]" class="areaText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsAreaIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+      $("#area").css("background-color", "#FFD071");
+      $("#areaId").val('');
+      $("#rancho").val('').css("background-color", "#FFD071");
+      $('#tagsRanchoIds').html('');
     });
   };
 
@@ -283,8 +307,9 @@
         var params = {term : request.term};
         if(parseInt($("#empresaId").val()) > 0)
           params.did_empresa = $("#empresaId").val();
-        if(parseInt($("#areaId").val()) > 0)
-          params.area = $("#areaId").val();
+
+        if(parseInt($('#tagsAreaIds .areaId').first().val()) > 0)
+          params.area = $('#tagsAreaIds .areaId').first().val();
         $.ajax({
             url: base_url + 'panel/ranchos/ajax_get_ranchos/',
             dataType: "json",

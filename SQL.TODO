@@ -64,9 +64,11 @@
           COMMENT ON TABLE public.compras_ordenes_activos
             IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
           COMMENT ON COLUMN public.compras_ordenes_activos.num IS 'numero de area (cultivo) asignados a la orden de compra';
-        INSERT INTO compras_ordenes_areas (id_area, id_orden, num) (SELECT id_area, id_orden, 1 FROM compras_ordenes WHERE id_area IS NOT NULL)
-        INSERT INTO compras_ordenes_activos (id_activo, id_orden, num) (SELECT id_activo, id_orden, 1 FROM compras_ordenes WHERE id_activo IS NOT NULL)
+        INSERT INTO compras_ordenes_requisiciones (id_requisicion, id_orden, num_row) (SELECT id_requisicion, id_orden, 0 FROM compras_ordenes WHERE id_requisicion IS NOT NULL);
+        INSERT INTO compras_ordenes_areas (id_area, id_orden, num) (SELECT id_area, id_orden, 1 FROM compras_ordenes WHERE id_area IS NOT NULL);
+        INSERT INTO compras_ordenes_activos (id_activo, id_orden, num) (SELECT id_activo, id_orden, 1 FROM compras_ordenes WHERE id_activo IS NOT NULL);
 
+        ALTER TABLE public.compras_ordenes DROP COLUMN id_requisicion;
         ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
         ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
 

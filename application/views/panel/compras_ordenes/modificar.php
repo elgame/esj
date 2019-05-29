@@ -493,7 +493,7 @@
                       <?php if (isset($orden['info'][0]->activo)) {
                         foreach ($orden['info'][0]->activo as $key => $activo) { ?>
                           <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $activo->nombre ?></span>
-                            <input type="hidden" name="activoId[]" class="activoId" value="<?php echo $activo->id_activo ?>">
+                            <input type="hidden" name="activoId[]" class="activoId" value="<?php echo $activo->id_producto ?>">
                             <input type="hidden" name="activoText[]" class="activoText" value="<?php echo $activo->nombre ?>">
                           </li>
                        <?php }} ?>

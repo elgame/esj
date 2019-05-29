@@ -567,7 +567,7 @@ class compras_requisicion_model extends CI_Model {
           'status'             => 'p',
           'autorizado'         => 't',
           'fecha_autorizacion' => $data->fecha_autorizacion,
-          'fecha_aceptacion'   => $data->fecha_aceptacion,
+          'fecha_aceptacion'   => substr($data->fecha_aceptacion, 0, 19),
           'fecha_creacion'     => $data->fecha,
           'tipo_pago'          => $data->tipo_pago,
           'tipo_orden'         => $data->tipo_orden,
@@ -576,15 +576,26 @@ class compras_requisicion_model extends CI_Model {
           'descripcion'        => $data->descripcion,
           'id_autorizo'        => $data->id_autorizo,
           'id_almacen'         => $data->id_almacen,
-          'id_requisicion'     => $idOrden
         );
+
+        $dataOrdenCats['requisiciones'][] = [
+          'id_requisicion' => $idOrden,
+          'id_orden'       => '',
+          'num_row'        => 0
+        ];
 
         // Si es un gasto son requeridos los campos de catálogos
         if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
             || $data->tipo_orden == 'p') {
-          $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
-          // $dataOrden['id_rancho']       = !empty($data->id_rancho)? $data->id_rancho: NULL;
-          // $dataOrden['id_centro_costo'] = !empty($data->id_centro_costo)? $data->id_centro_costo: NULL;
+          // $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+          // Inserta las areas
+          if (isset($data->id_area) && $data->id_area > 0) {
+            $dataOrdenCats['area'][] = [
+              'id_area' => $data->id_area,
+              'id_orden'  => '',
+              'num'       => 1
+            ];
+          }
 
           // Inserta los ranchos
           if (isset($data->rancho) && count($data->rancho) > 0) {
@@ -609,7 +620,15 @@ class compras_requisicion_model extends CI_Model {
           }
 
           if ($data->tipo_orden !== 'a') {
-            $dataOrden['id_activo'] = !empty($data->id_activo)? $data->id_activo: NULL;
+            // Inserta los activos
+            if (isset($data->id_activo) && $data->id_activo > 0) {
+              $dataOrdenCats['activo'][] = [
+                'id_activo' => $data->id_activo,
+                'id_orden'  => '',
+                'num'       => 1
+              ];
+            }
+            // $dataOrden['id_activo'] = !empty($data->id_activo)? $data->id_activo: NULL;
           }
         }
 

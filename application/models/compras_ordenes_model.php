@@ -212,7 +212,21 @@ class compras_ordenes_model extends CI_Model {
       $this->db->insert('compras_vehiculos_gasolina', $dataVeiculo);
     }
 
+    // liga las requisiciones
+    if(isset($dataOrdenCats['requisiciones']) && count($dataOrdenCats['requisiciones']) > 0) {
+      foreach ($dataOrdenCats['requisiciones'] as $keyr => $requiss) {
+        $requiss['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_requisiciones', $requiss);
+      }
+    }
+
     // Si es un gasto son requeridos los campos de catálogos
+    if(isset($dataOrdenCats['area']) && count($dataOrdenCats['area']) > 0) {
+      foreach ($dataOrdenCats['area'] as $keyr => $area) {
+        $area['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_areas', $area);
+      }
+    }
     if(isset($dataOrdenCats['rancho']) && count($dataOrdenCats['rancho']) > 0) {
       foreach ($dataOrdenCats['rancho'] as $keyr => $rancho) {
         $rancho['id_orden'] = $id_orden;
@@ -223,6 +237,12 @@ class compras_ordenes_model extends CI_Model {
       foreach ($dataOrdenCats['centroCosto'] as $keyr => $centro_costo) {
         $centro_costo['id_orden'] = $id_orden;
         $this->db->insert('compras_ordenes_centro_costo', $centro_costo);
+      }
+    }
+    if(isset($dataOrdenCats['activo']) && count($dataOrdenCats['activo']) > 0) {
+      foreach ($dataOrdenCats['activo'] as $keyr => $activo) {
+        $activo['id_orden'] = $id_orden;
+        $this->db->insert('compras_ordenes_activos', $activo);
       }
     }
 
@@ -760,8 +780,7 @@ class compras_ordenes_model extends CI_Model {
               co.cont_x_dia,
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
               -- co.id_area, co.id_activo,
-              co.otros_datos,
-              cr.folio AS folio_requisicion
+              co.otros_datos
        FROM compras_ordenes AS co
          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -772,7 +791,6 @@ class compras_ordenes_model extends CI_Model {
          LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
          LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
          LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
-         LEFT JOIN compras_requisicion cr ON cr.id_requisicion = co.id_requisicion
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -875,6 +893,12 @@ class compras_ordenes_model extends CI_Model {
         //eNTRADA ALMACEN
         $data['info'][0]->entrada_almacen = array();
         $data['info'][0]->entrada_almacen = $this->getInfoEntrada(0,0, $data['info'][0]->id_orden);
+
+        // Requisiciones ligadas
+        $data['info'][0]->requisiciones = $this->db->query("SELECT cr.id_requisicion, cr.folio, cor.num_row
+                                           FROM compras_ordenes_requisiciones cor
+                                            INNER JOIN compras_requisicion cr ON cr.id_requisicion = cor.id_requisicion
+                                           WHERE cor.id_orden = {$data['info'][0]->id_orden}")->result();
 
         // Codigos nuevos
         $data['info'][0]->area = $this->db->query("SELECT a.id_area, a.nombre, csa.num
@@ -2056,12 +2080,16 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
 
         // El dato de la requisicion
-        if (!empty($orden['info'][0]->folio_requisicion)) {
+        if (!empty($orden['info'][0]->requisiciones)) {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(25, 50));
-          $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
+          $requiss = [];
+          foreach ($orden['info'][0]->requisiciones as $key => $value) {
+            $requiss[] = $value->folio;
+          }
+          $pdf->Row(array('ENLACE', "Requisicion(es) ".implode(' | ', $requiss)), false, true);
         }
         if (!empty($orden['info'][0]->area)) {
           $pdf->SetFont('Arial','',8);
