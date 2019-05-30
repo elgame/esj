@@ -197,7 +197,7 @@ class caja_chica_model extends CI_Model {
         $boletasRes = [];
         $folio_sig = (isset($last_folio->boleta) && ($boletas[0]->boleta - $last_folio->boleta) < 11? $last_folio->boleta: $boletas[0]->boleta);
         foreach ($boletas as $key => $boleta) {
-          if ($all && $key > 0) {
+          if ($all && $key >= 0) {
             ++$folio_sig;
 
             if ($boleta->boleta > $folio_sig) {
