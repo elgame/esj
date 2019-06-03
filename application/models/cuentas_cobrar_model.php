@@ -770,11 +770,12 @@ if($close){
       'where_field' => 'id_factura');
     $sql_nc = "UNION
     SELECT
-    id_factura AS id_abono,
-    fecha,
-    total AS abono,
-    ('Nota de credito ' || serie || folio) AS concepto,
-    'nc' AS tipo, 1 AS facturado
+      id_factura AS id_abono,
+      fecha,
+      total AS abono,
+      ('Nota de credito ' || serie || folio) AS concepto,
+      'nc' AS tipo, 1 AS facturado,
+      '' AS url_comp_pago
     FROM facturacion
     WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
     AND id_nc = {$_GET['id']}
@@ -795,21 +796,22 @@ if($close){
 
       //Obtenemos los abonos de la factura o ticket
     $res = $this->db->query(
-      "SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo, facturado
+      "SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo, facturado, url_comp_pago
       FROM
       (
         SELECT
-        id_abono,
-        fecha,
-        total AS abono,
-        concepto,
-        'ab' AS tipo,
-        (SELECT Count(id_factura) FROM facturacion WHERE id_abono_factura = {$sql['tabla']}.id_abono) AS facturado
+          id_abono,
+          fecha,
+          total AS abono,
+          concepto,
+          'ab' AS tipo,
+          (SELECT Count(id_factura) FROM facturacion WHERE id_abono_factura = {$sql['tabla']}.id_abono) AS facturado,
+          url_comp_pago
         FROM {$sql['tabla']}
         WHERE {$sql['where_field']} = {$_GET['id']}
         AND Date(fecha) <= '{$fecha2}'
         {$sql_nc}
-        ) AS tt
+      ) AS tt
     ORDER BY fecha ASC
     ");
 
@@ -838,6 +840,7 @@ if($close){
       'fecha1'  => $fecha1
       );
     $abonos = 0;
+
     if($res->num_rows() > 0){
       $response['abonos'] = $res->result();
 
@@ -880,6 +883,35 @@ if($close){
     return (isset($data->cuenta)? $data->cuenta : '00800000');
   }
 
+  public function uploadComPago()
+  {
+    if (isset($_FILES['comprobante']) && $_FILES['comprobante']['tmp_name'] !== '')
+    {
+      $path_comp = 'media/ventas/com_pagos';
+
+      $config_upload = array(
+        'upload_path'     => APPPATH.$path_comp,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE
+      );
+
+      $this->load->library('my_upload');
+      $this->my_upload->initialize($config_upload);
+      $this->my_upload->crearFolder(true);
+      $data_doc = $this->my_upload->do_upload('comprobante');
+
+      if (isset($data_doc[0]) && $data_doc[0] === false) {
+        return $data_doc;
+      } else {
+        $path = explode('application/', $data_doc['full_path']);
+        return APPPATH.$path[1];
+      }
+    }
+
+    return '';
+  }
+
   public function addAbonoMasivo()
   {
     $ids   = $_POST['ids']; //explode(',', substr($_GET['id'], 1));
@@ -895,6 +927,13 @@ if($close){
     $_GET['id']   = $ids[0];
     $_GET['tipo'] = $tipos[0];
     $inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo'], true);
+
+    // Carga comprobante de pago
+    $url_comp_pago = $this->uploadComPago();
+    if (is_array($url_comp_pago)) {
+      return $url_comp_pago;
+    }
+
     //Registra deposito
     foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
     {
@@ -926,7 +965,9 @@ if($close){
         'total'          => $_POST['montofv'][$key], //$total,
         'id_cuenta'      => $this->input->post('dcuenta'),
         'ref_movimiento' => $this->input->post('dreferencia'),
-        'saldar'         => $_POST['saldar'][$key] );
+        'saldar'         => $_POST['saldar'][$key],
+        'url_comp_pago'  => $url_comp_pago
+      );
       $resa = $this->addAbono($data, null, true);
       $total -= $resa['total'];
 
@@ -961,12 +1002,21 @@ if($close){
     }
 
     if ($data == null) {
-      $data = array('fecha'        => $this->input->post('dfecha'),
+      // Carga comprobante de pago
+      $url_comp_pago = $this->uploadComPago();
+      if (is_array($url_comp_pago)) {
+        return $url_comp_pago;
+      }
+
+      $data = array(
+        'fecha'          => $this->input->post('dfecha'),
         'concepto'       => $this->input->post('dconcepto'),
         'total'          => $this->input->post('dmonto'),
         'id_cuenta'      => $this->input->post('dcuenta'),
         'ref_movimiento' => $this->input->post('dreferencia'),
-        'saldar' => 'no' );
+        'saldar'         => 'no',
+        'url_comp_pago'  => $url_comp_pago
+      );
     }
 
     $pagada = false;
@@ -1012,7 +1062,9 @@ if($close){
       'concepto'       => $data['concepto'],
       'total'          => $data['total']+$pago_saldar,
       'id_cuenta'      => $data['id_cuenta'],
-      'ref_movimiento' => $data['ref_movimiento'], );
+      'ref_movimiento' => $data['ref_movimiento'],
+      'url_comp_pago'  => $data['url_comp_pago']
+    );
     //se inserta el abono
     $this->db->insert($camps[1], $data);
     $data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');

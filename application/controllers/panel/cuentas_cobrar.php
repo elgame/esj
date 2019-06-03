@@ -192,11 +192,15 @@ class cuentas_cobrar extends MY_Controller {
         else
           $respons = $this->cuentas_cobrar_model->addAbono();
 
-        if($this->input->post('imprimir') == 'si')
-          $params['print_recibo'] = $respons['id_movimiento'];
+        if (isset($respons[0]) && $respons[0] == false) {
+          $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+        } else {
+          if($this->input->post('imprimir') == 'si')
+            $params['print_recibo'] = $respons['id_movimiento'];
 
-        $params['closeModal'] = true;
-        $params['frm_errors'] = $this->showMsgs(4);
+          $params['closeModal'] = true;
+          $params['frm_errors'] = $this->showMsgs(4);
+        }
       }
 
       if(isset($_GET['total']{0})) //si es masivo
@@ -536,6 +540,10 @@ class cuentas_cobrar extends MY_Controller {
         break;
       case 101:
         $txt = 'Los abonos no se pueden eliminar porque tiene un complemento de pago (se tiene que cancelar).';
+        $icono = 'error';
+        break;
+      case 102:
+        $txt = 'El comprobante de pago no se pudo subir.';
         $icono = 'error';
         break;
 

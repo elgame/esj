@@ -108,6 +108,18 @@ class My_upload {
   	$this->config['upload_path'] = $this->libupload->upload_path = $new_path;
   }
 
+
+  public function crearFolder($anioMes=true)
+  {
+    $this->config['upload_path'] = $this->config['upload_path']."/".date("Y")."/".date("m");
+    $this->libupload->initialize($this->config);
+
+    if( ! file_exists($this->config['upload_path']))
+      return mkdir($this->config['upload_path'], 0777, true);
+    else
+      return true;
+  }
+
   /**
    * Realiza el upload del archivo (Solo un archivo)
    * @param  string $post_field [nombre del input del formulario] Default: archivo

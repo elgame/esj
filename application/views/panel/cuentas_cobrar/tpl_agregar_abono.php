@@ -10,7 +10,8 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.MyString::getVarsLink(array())); ?>"
+            method="post" id="form" enctype="multipart/form-data">
 
           <div class="row-fluid">
             <div class="span12">
@@ -70,6 +71,13 @@
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
                   <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" data-max="<?php echo $data['saldo'] ?>">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="comprobante">Comprobante</label>
+                <div class="controls">
+                  <input type="file" name="comprobante" id="comprobante">
                 </div>
               </div>
 
