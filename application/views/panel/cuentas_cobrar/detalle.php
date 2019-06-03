@@ -106,6 +106,12 @@
                               onclick="msb.confirm(\'Estas seguro de Facturar el abono?\', \'Facturas\', this); return false;" title="Facturar">
                             <i class="icon-file-text-alt icon-white"></i> <span class="hidden-tablet">Facturar</span></a>';
 									}
+
+                  if ($cuenta->url_comp_pago != '')
+                  {
+                    echo '<a class="btn btn-info" href="'.base_url($cuenta->url_comp_pago).'" title="Comprobante de pago">
+                            <i class="icon-list-alt icon-white"></i> <span class="hidden-tablet">Comprobante</span></a>';
+                  }
 									?>
 									</td>
 								</tr>
