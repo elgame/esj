@@ -61,6 +61,8 @@ class bascula extends MY_Controller {
 
     'bascula/get_calidades/',
     'bascula/rdefull_xls/',
+
+    'bascula/rpt_auditorias_pdf/',
     );
 
   public function _remap($method){
@@ -791,6 +793,56 @@ class bascula extends MY_Controller {
 
     $params['data'] = $this->bascula_model->getMovimientos();
     $this->load->view('panel/bascula/reportes/rmc', $params);
+  }
+
+  public function rptAuditoria()
+  {
+    // if (isset($_GET['fid_proveedor']))
+    //   if ($_GET['fid_proveedor'] == '')
+    //     redirect(base_url('panel/bascula/movimientos/?msg=13'));
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/bascula/movimientos_cuenta.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Movimientos de Cuenta'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+    $_GET['farea'] = empty($_GET['farea'])? $params['areas']['areas'][0]->id_area: $_GET['farea'];
+    // $params['movimientos'] = $this->bascula_model->getMovimientos();
+
+    // echo "<pre>";
+    //   var_dump($params['movimientos']);
+    // echo "</pre>";exit;
+
+    if (isset($_GET['p']) && isset($_GET['pe']))
+    {
+      $params['p'] = true;
+      $params['pe'] = $_GET['pe'];
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_auditorias', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rpt_auditorias_pdf()
+  {
+    $this->load->model('bascula2_model');
+
+    $params['data'] = $this->bascula2_model->getMovimientosAuditoria();
+    $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
   }
 
   /**
