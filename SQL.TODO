@@ -76,7 +76,7 @@
    Crear carpetas sanjorge/application/media/ventas/com_pagos
    ALTER TABLE public.facturacion_abonos ADD COLUMN url_comp_pago character varying(120);
 
- ✔ Reporte auditoria @done (19-06-01 22:50) pcc|pct
+ ✔ Reporte auditoria @done (19-06-01 22:50) pcc|pct|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de auditorias',40,TRUE,'bascula/rptAuditoria/','exchange',TRUE);
 
  ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct|pcc
