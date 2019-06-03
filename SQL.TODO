@@ -1,76 +1,76 @@
  ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc
       ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Faltantes de productos',136,TRUE,'recetas/faltantes_productos/','question-sign',FALSE);
-      -- pcc
-        CREATE TABLE public.compras_ordenes_requisiciones
-            (
-              id_orden bigint NOT NULL,
-              id_requisicion bigint NOT NULL,
-              num_row integer NOT NULL,
-              CONSTRAINT compras_ordenes_requisiciones_pkey PRIMARY KEY (id_orden, id_requisicion, num_row),
-              CONSTRAINT compras_ordenes_requisiciones_id_orden_fkey FOREIGN KEY (id_orden)
-                  REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
-                  ON UPDATE CASCADE ON DELETE CASCADE,
-              CONSTRAINT compras_ordenes_requisiciones_id_requisicion_fkey FOREIGN KEY (id_requisicion)
-                  REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
-                  ON UPDATE CASCADE ON DELETE CASCADE
-            )
-            WITH (
-              OIDS=FALSE
-            );
-            ALTER TABLE public.compras_ordenes_requisiciones
-              OWNER TO programa;
-            COMMENT ON TABLE public.compras_ordenes_requisiciones
-              IS 'Se registra la relacion de la orden con la o las requisiciones que se ligan a la orden';
-        CREATE TABLE public.compras_ordenes_areas
+      CREATE TABLE public.compras_ordenes_requisiciones
           (
-            id_area bigint NOT NULL,
             id_orden bigint NOT NULL,
-            num integer NOT NULL DEFAULT 1, -- numero de area (cultivo) asignados a la orden de compra
-            CONSTRAINT compras_ordenes_areas_pkey PRIMARY KEY (id_area, id_orden),
-            CONSTRAINT compras_ordenes_areas_id_area_fkey FOREIGN KEY (id_area)
-                REFERENCES public.areas (id_area) MATCH SIMPLE
-                ON UPDATE CASCADE ON DELETE CASCADE,
-            CONSTRAINT compras_ordenes_areas_id_orden_fkey FOREIGN KEY (id_orden)
+            id_requisicion bigint NOT NULL,
+            num_row integer NOT NULL,
+            CONSTRAINT compras_ordenes_requisiciones_pkey PRIMARY KEY (id_orden, id_requisicion, num_row),
+            CONSTRAINT compras_ordenes_requisiciones_id_orden_fkey FOREIGN KEY (id_orden)
                 REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            CONSTRAINT compras_ordenes_requisiciones_id_requisicion_fkey FOREIGN KEY (id_requisicion)
+                REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE
                 ON UPDATE CASCADE ON DELETE CASCADE
           )
           WITH (
             OIDS=FALSE
           );
-          ALTER TABLE public.compras_ordenes_areas
+          ALTER TABLE public.compras_ordenes_requisiciones
             OWNER TO programa;
-          COMMENT ON TABLE public.compras_ordenes_areas
-            IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
-          COMMENT ON COLUMN public.compras_ordenes_areas.num IS 'numero de area (cultivo) asignados a la orden de compra';
-        CREATE TABLE public.compras_ordenes_activos
-          (
-            id_activo bigint NOT NULL,
-            id_orden bigint NOT NULL,
-            num integer NOT NULL DEFAULT 1, -- numero de activo (productos) asignados a la orden de compra
-            CONSTRAINT compras_ordenes_activos_pkey PRIMARY KEY (id_activo, id_orden),
-            CONSTRAINT compras_ordenes_activos_id_activo_fkey FOREIGN KEY (id_activo)
-                REFERENCES public.productos (id_producto) MATCH SIMPLE
-                ON UPDATE CASCADE ON DELETE CASCADE,
-            CONSTRAINT compras_ordenes_activos_id_orden_fkey FOREIGN KEY (id_orden)
-                REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
-                ON UPDATE CASCADE ON DELETE CASCADE
-          )
-          WITH (
-            OIDS=FALSE
-          );
-          ALTER TABLE public.compras_ordenes_activos
-            OWNER TO programa;
-          COMMENT ON TABLE public.compras_ordenes_activos
-            IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
-          COMMENT ON COLUMN public.compras_ordenes_activos.num IS 'numero de area (cultivo) asignados a la orden de compra';
-        INSERT INTO compras_ordenes_requisiciones (id_requisicion, id_orden, num_row) (SELECT id_requisicion, id_orden, 0 FROM compras_ordenes WHERE id_requisicion IS NOT NULL);
-        INSERT INTO compras_ordenes_areas (id_area, id_orden, num) (SELECT id_area, id_orden, 1 FROM compras_ordenes WHERE id_area IS NOT NULL);
-        INSERT INTO compras_ordenes_activos (id_activo, id_orden, num) (SELECT id_activo, id_orden, 1 FROM compras_ordenes WHERE id_activo IS NOT NULL);
+          COMMENT ON TABLE public.compras_ordenes_requisiciones
+            IS 'Se registra la relacion de la orden con la o las requisiciones que se ligan a la orden';
+      CREATE TABLE public.compras_ordenes_areas
+        (
+          id_area bigint NOT NULL,
+          id_orden bigint NOT NULL,
+          num integer NOT NULL DEFAULT 1, -- numero de area (cultivo) asignados a la orden de compra
+          CONSTRAINT compras_ordenes_areas_pkey PRIMARY KEY (id_area, id_orden),
+          CONSTRAINT compras_ordenes_areas_id_area_fkey FOREIGN KEY (id_area)
+              REFERENCES public.areas (id_area) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT compras_ordenes_areas_id_orden_fkey FOREIGN KEY (id_orden)
+              REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE public.compras_ordenes_areas
+          OWNER TO programa;
+        COMMENT ON TABLE public.compras_ordenes_areas
+          IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
+        COMMENT ON COLUMN public.compras_ordenes_areas.num IS 'numero de area (cultivo) asignados a la orden de compra';
+      CREATE TABLE public.compras_ordenes_activos
+        (
+          id_activo bigint NOT NULL,
+          id_orden bigint NOT NULL,
+          num integer NOT NULL DEFAULT 1, -- numero de activo (productos) asignados a la orden de compra
+          CONSTRAINT compras_ordenes_activos_pkey PRIMARY KEY (id_activo, id_orden),
+          CONSTRAINT compras_ordenes_activos_id_activo_fkey FOREIGN KEY (id_activo)
+              REFERENCES public.productos (id_producto) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT compras_ordenes_activos_id_orden_fkey FOREIGN KEY (id_orden)
+              REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE public.compras_ordenes_activos
+          OWNER TO programa;
+        COMMENT ON TABLE public.compras_ordenes_activos
+          IS 'Codigos nuevos, areas de bascula = cultivos en los catalogos';
+        COMMENT ON COLUMN public.compras_ordenes_activos.num IS 'numero de area (cultivo) asignados a la orden de compra';
+      INSERT INTO compras_ordenes_requisiciones (id_requisicion, id_orden, num_row) (SELECT id_requisicion, id_orden, 0 FROM compras_ordenes WHERE id_requisicion IS NOT NULL);
+      INSERT INTO compras_ordenes_areas (id_area, id_orden, num) (SELECT id_area, id_orden, 1 FROM compras_ordenes WHERE id_area IS NOT NULL);
+      INSERT INTO compras_ordenes_activos (id_activo, id_orden, num) (SELECT id_activo, id_orden, 1 FROM compras_ordenes WHERE id_activo IS NOT NULL);
 
-        ALTER TABLE public.compras_ordenes DROP COLUMN id_requisicion;
-        ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
-        ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
+      ALTER TABLE public.compras_ordenes DROP COLUMN id_requisicion;
+      ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
+      ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
+      ALTER TABLE public.compras_ordenes ALTER COLUMN solicito TYPE character varying(250);
 
  ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct
    Crear carpetas sanjorge/application/media/ventas/com_pagos

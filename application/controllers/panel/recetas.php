@@ -7,6 +7,10 @@ class recetas extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'recetas/registrar_ordenes/',
+
+
+
     'compras_requisicion/ajax_producto_by_codigo/',
     'compras_requisicion/ajax_producto/',
     'compras_requisicion/ajax_get_folio/',
@@ -98,6 +102,7 @@ class recetas extends MY_Controller {
 
     $params['requisicion'] = false;
     $params['method']      = '';
+    $params['method2']     = 'registrar_ordenes';
     $params['titleBread']  = 'Faltantes de productos';
 
     if (isset($_GET['msg']))
@@ -109,7 +114,11 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
-
+  public function registrar_ordenes()
+  {
+    $this->load->model('recetas_model');
+    $this->recetas_model->crearOrdenesFaltantes();
+  }
 
 
 

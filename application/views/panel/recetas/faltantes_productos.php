@@ -54,7 +54,7 @@
               </tbody>
             </table>
 
-
+            <a href="<?php echo base_url('panel/recetas/faltantes_productos/'.$method2); ?>" title="Crear ordenes" class="btn">Crear ordenes</a>
           </div>
         </div><!--/span-->
 
