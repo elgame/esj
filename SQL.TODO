@@ -74,14 +74,14 @@
       -- pcc|lap
       ALTER TABLE public.compras_ordenes ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
 
- ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct|pcc|lap
+ ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct|pcc|lap|san
    Crear carpetas sanjorge/application/media/ventas/com_pagos
    ALTER TABLE public.facturacion_abonos ADD COLUMN url_comp_pago character varying(120);
 
  ✔ Reporte auditoria @done (19-06-01 22:50) pcc|pct|san|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de auditorias',40,TRUE,'bascula/rptAuditoria/','exchange',TRUE);
 
- ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct|pcc|lap
+ ✔ Lista de activos registro de productos en piezas @done (19-05-22 14:23) pct|pcc|lap|san
      ALTER TABLE public.productos_piezas ADD COLUMN id_producto_pieza bigint;
      ALTER TABLE public.productos_piezas ADD CONSTRAINT productos_piezas_id_producto_pieza_fkey FOREIGN KEY (id_producto_pieza)
       REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
