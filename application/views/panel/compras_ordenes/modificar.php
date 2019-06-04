@@ -85,6 +85,11 @@
         $badgeStyle = '-warning';
       }
     }
+
+    if ($orden['info'][0]->es_receta == 't') {
+      $receta_readonly = 'readonly';
+      $readonlyCat = 'disable';
+    }
   ?>
 
   <div class="row-fluid">
@@ -126,7 +131,7 @@
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="">
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="" <?php echo $receta_readonly ?>>
                   </div>
                 </div>
               </div>
@@ -157,7 +162,8 @@
                 <label class="control-label" for="descripcion">Observaciones</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <textarea name="descripcion" class="span11" id="descripcion"><?php echo set_value('descripcion', $orden['info'][0]->descripcion) ?></textarea>
+                    <textarea name="descripcion" class="span11" id="descripcion"
+                      <?php echo $receta_readonly ?>><?php echo set_value('descripcion', $orden['info'][0]->descripcion) ?></textarea>
                   </div>
                 </div>
               </div>
@@ -175,7 +181,7 @@
                 <label class="control-label" for="autorizo">Autoriza</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>" placeholder="" required>
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>" placeholder="" required <?php echo $receta_readonly ?>>
                   </div>
                 </div>
                   <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId', $orden['info'][0]->id_autorizo) ?>" required>
@@ -430,13 +436,14 @@
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="area" class="span11" id="area" value="" placeholder="Limon, Piña">
+                          <input type="text" name="area" class="span11" id="area" value="" placeholder="Limon, Piña" <?php echo $receta_readonly ?>>
                         </div>
                       </div>
                       <ul class="tags" id="tagsAreaIds">
                       <?php if (isset($orden['info'][0]->area)) {
                         foreach ($orden['info'][0]->area as $key => $area) { ?>
-                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $area->nombre ?></span>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $area->nombre ?></span>
                             <input type="hidden" name="areaId[]" class="areaId" value="<?php echo $area->id_area ?>">
                             <input type="hidden" name="areaText[]" class="areaText" value="<?php echo $area->nombre ?>">
                           </li>
@@ -448,13 +455,14 @@
                       <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1" <?php echo $receta_readonly ?>>
                         </div>
                       </div>
                       <ul class="tags" id="tagsRanchoIds">
                       <?php if (isset($orden['info'][0]->rancho)) {
                         foreach ($orden['info'][0]->rancho as $key => $rancho) { ?>
-                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $rancho->nombre ?></span>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $rancho->nombre ?></span>
                             <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
                             <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
                           </li>
@@ -468,13 +476,14 @@
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" <?php echo $receta_readonly ?>>
                         </div>
                       </div>
                       <ul class="tags" id="tagsCCIds">
                       <?php if (isset($orden['info'][0]->centroCosto)) {
                         foreach ($orden['info'][0]->centroCosto as $key => $centroCosto) { ?>
-                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $centroCosto->nombre ?></span>
                             <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
                             <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
                           </li>
@@ -486,13 +495,14 @@
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="activos" class="span11" id="activos" value="" placeholder="Nissan FRX, Maquina limon">
+                          <input type="text" name="activos" class="span11" id="activos" value="" placeholder="Nissan FRX, Maquina limon" <?php echo $receta_readonly ?>>
                         </div>
                       </div>
                       <ul class="tags" id="tagsCCIds">
                       <?php if (isset($orden['info'][0]->activo)) {
                         foreach ($orden['info'][0]->activo as $key => $activo) { ?>
-                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>"><span class="tag"><?php echo $activo->nombre ?></span>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $activo->nombre ?></span>
                             <input type="hidden" name="activoId[]" class="activoId" value="<?php echo $activo->id_producto ?>">
                             <input type="hidden" name="activoText[]" class="activoText" value="<?php echo $activo->nombre ?>">
                           </li>

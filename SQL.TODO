@@ -71,8 +71,10 @@
       ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
       ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
       ALTER TABLE public.compras_ordenes ALTER COLUMN solicito TYPE character varying(250);
+      -- pcc
+      ALTER TABLE public.compras_ordenes ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
 
- ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct
+ ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct|pcc
    Crear carpetas sanjorge/application/media/ventas/com_pagos
    ALTER TABLE public.facturacion_abonos ADD COLUMN url_comp_pago character varying(120);
 

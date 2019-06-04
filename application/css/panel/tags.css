@@ -24,7 +24,7 @@
   -webkit-transition: color 0.2s;
   cursor: pointer;
 }
-.tag::before {
+.tag:before:not(.disable) {
   font-family: 'FontAwesome';
   position: relative;
   left: -5px;

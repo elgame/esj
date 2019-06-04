@@ -118,6 +118,7 @@ class recetas extends MY_Controller {
   {
     $this->load->model('recetas_model');
     $this->recetas_model->crearOrdenesFaltantes();
+    redirect(base_url('panel/recetas/faltantes_productos'));
   }
 
 
