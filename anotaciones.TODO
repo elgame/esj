@@ -1,5 +1,14 @@
- ☐ En la aplicacion poner opcion para que pueda seleccionar los gastos por reponer de la caja 2
- ☐ El listado de piezas de los activos que sean seleccionados productos
+
+ ☐ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos,
+     poner la cotizacion, poner los campos iniciales del formato de la orden de compra
+ ☐ Poner un apartado de pre ventas para que las puedan modificar y despues esas ventas se puedan remisionar, serian lo mismo porque tendrian el mismo folio, en marca de agua que diga documento no valido
+ ☐ Poner # de rastreabilidad en las remisiones el cual se pasaria a factura
+ ☐ En las boletas de salida y en las facturas poner un campo de # Traz, en reporte de auditoria (movimientos) poner la factura el # traz
+ ☐ Reporte de balance de masas, de los datos de rastreabilidad de limon, compararia las boletas que entran (kilos) con los quilos que salen en las lineas
+ ☐ En rastreabilidad de limon poder imprimir en blanco con folio, Acomodo de tarimas en trailer, ver foto
+
+ ✔ En la aplicacion poner opcion para que pueda seleccionar los gastos por reponer de la caja 2 @done (19-06-04 14:09)
+ ✔ El listado de piezas de los activos que sean seleccionados productos @done (19-06-04 14:09)
  ✔ poner folio de factura en los gastos x reponer de la caja 2 @done (19-05-21 23:06)
  ☐ no deja hacer mas de 1 traspaso en las cajas
  ✔ En la imprecion de las ordenes la obserbacion ponerla abajo y que solo salga en la ultima copia, tambien en la ultima copia quitar el codigo de la tabla y poner fecha y precio de la ultima compra, poner la empresa en los codigos al final @done (19-04-29 22:24)
