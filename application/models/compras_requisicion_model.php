@@ -521,7 +521,6 @@ class compras_requisicion_model extends CI_Model {
       $this->db->delete('compras_requisicion_productos', array('id_requisicion' => $idOrden));
       $this->db->insert_batch('compras_requisicion_productos', $productos);
 
-
       // Generar las ordenes compra
       if(isset($data['autorizado']))
         if($data['autorizado'] == 't')
@@ -933,7 +932,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
