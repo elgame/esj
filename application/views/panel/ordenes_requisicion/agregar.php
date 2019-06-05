@@ -127,7 +127,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="checkbox" name="es_receta" id="es_receta" value="true" data-uniform="false" data-next="no_recetas">
-                    <input type="text" name="no_recetas" id="no_recetas" class="span11" placeholder="No de recetas (si es mas de una separar con ,)">
+                    <input type="text" name="no_recetas" id="no_recetas" class="span11" placeholder="No de recetas (si es mas de una separar con ,)" readonly>
                   </div>
                 </div>
               </div>

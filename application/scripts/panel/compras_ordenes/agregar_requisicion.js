@@ -16,6 +16,8 @@
     autocompleteCentroCosto();
     autocompleteActivos();
 
+    eventOtros();
+
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnListaOtros();
@@ -646,6 +648,13 @@
    | Events
    |------------------------------------------------------------------------
    */
+  var eventOtros = function () {
+    $('#es_receta').on('change', function(event) {
+      var checked = $(this).is(':checked');
+      $('#no_recetas').attr('readonly', !checked).val('');
+    });
+  };
+
   var eventCodigoBarras = function () {
     $('#productos #fcodigo').on('keypress', function(event) {
       var $codigo = $(this);
