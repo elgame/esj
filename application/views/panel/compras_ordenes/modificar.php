@@ -32,6 +32,7 @@
     $prodOk = false;
 
     $readonlyCat = '';
+    $receta_readonly = '';
     if ($orden['info'][0]->status === 'p' AND $orden['info'][0]->autorizado === 'f' AND ! isset($_GET['mod']))
     {
       $badgeTitle = 'NO AUTORIZADO';

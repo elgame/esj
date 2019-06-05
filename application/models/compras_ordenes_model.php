@@ -205,7 +205,6 @@ class compras_ordenes_model extends CI_Model {
     $id_orden = $this->db->insert_id();
 
     $this->db->update('compras_ordenes', ['cont_x_dia' => $this->folioDia(substr($data['fecha_creacion'], 0, 10))], "id_orden = {$id_orden}");
-
     if(is_array($dataVeiculo) && count($dataVeiculo) > 0)
     {
       $dataVeiculo['id_orden'] = $id_orden;
