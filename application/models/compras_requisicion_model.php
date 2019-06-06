@@ -144,6 +144,7 @@ class compras_requisicion_model extends CI_Model {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
     }
+
     // Si trae datos extras
     $data['otros_datos'] = [];
     if ($this->input->post('infRecogerProv') != false) {
@@ -158,6 +159,9 @@ class compras_requisicion_model extends CI_Model {
     }
     if ($this->input->post('infCotizacion') != false) {
       $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+    }
+    if ($this->input->post('no_recetas') != false) {
+      $data['otros_datos']['noRecetas'] = explode(',', $_POST['no_recetas']);
     }
     $data['otros_datos'] = json_encode($data['otros_datos']);
 
@@ -213,50 +217,49 @@ class compras_requisicion_model extends CI_Model {
     }
 
     $productos = array();
-    foreach (array('1', '2', '3') as $value)
+    foreach (array('1') as $value)
     {
-      $id_proveedor = $_POST['proveedorId'.$value];
-      if($id_proveedor != '')
+      foreach ($_POST['concepto'] as $key => $concepto)
       {
-        foreach ($_POST['concepto'] as $key => $concepto)
-        {
-          if ($_POST['presentacionCant'][$key] !== '')
-          {
-            $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-            $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
-          }
-          else
-          {
-            $cantidad = $_POST['cantidad'][$key];
-            $pu       = $_POST['valorUnitario'.$value][$key];
-          }
+        $id_proveedor = $_POST['proveedorId'][$key];
 
-          $productos[] = array(
-            'id_requisicion'       => $ordenId,
-            'id_proveedor'         => $id_proveedor,
-            'num_row'              => $key,
-            'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-            'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-            'descripcion'          => $concepto,
-            'cantidad'             => $cantidad,
-            'precio_unitario'      => $pu,
-            'importe'              => $_POST['importe'.$value][$key],
-            'iva'                  => $_POST['trasladoTotal'.$value][$key],
-            'retencion_iva'        => $_POST['retTotal'.$value][$key],
-            'total'                => $_POST['total'.$value][$key],
-            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-            'porcentaje_retencion' => $_POST['ret_iva'][$key],
-            // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-            'observacion'          => $_POST['observacion'][$key],
-            'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-            'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-            // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-            'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-          );
+        if ($_POST['presentacionCant'][$key] !== '')
+        {
+          $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+          $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
         }
+        else
+        {
+          $cantidad = $_POST['cantidad'][$key];
+          $pu       = $_POST['valorUnitario'.$value][$key];
+        }
+
+        $productos[] = array(
+          'id_requisicion'       => $ordenId,
+          'id_proveedor'         => $id_proveedor,
+          'num_row'              => $key,
+          'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
+          'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
+          'descripcion'          => $concepto,
+          'cantidad'             => $cantidad,
+          'precio_unitario'      => $pu,
+          'importe'              => $_POST['importe'.$value][$key],
+          'iva'                  => $_POST['trasladoTotal'.$value][$key],
+          'retencion_iva'        => $_POST['retTotal'.$value][$key],
+          'total'                => $_POST['total'.$value][$key],
+          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+          'porcentaje_retencion' => $_POST['ret_iva'][$key],
+          // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
+          'observacion'          => $_POST['observacion'][$key],
+          'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
+          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+          'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+        );
       }
     }
 
@@ -924,7 +927,7 @@ class compras_requisicion_model extends CI_Model {
         $sql_produc = $prodAcep? " AND cp.prod_sel = 't'": '';
         // $sql_produc .= $idCompra!==NULL? " AND (cp.id_compra = {$idCompra} OR (cp.id_compra IS NULL AND Date(cp.fecha_aceptacion) <= '2014-05-26'))": '';
         $query = $this->db->query(
-          "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal,
+          "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal AS proveedor,
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
@@ -955,7 +958,7 @@ class compras_requisicion_model extends CI_Model {
             $data['info'][0]->productos2[] = clone $value;
 
             $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor,
-                                                          'nombre_fiscal' => $value->nombre_fiscal);
+                                                          'nombre_fiscal' => $value->proveedor);
 
             if($provee == $value->id_proveedor)
             {

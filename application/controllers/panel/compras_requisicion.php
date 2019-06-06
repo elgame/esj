@@ -154,6 +154,9 @@ class compras_requisicion extends MY_Controller {
     }
     else
     {
+      echo "<pre>";
+        var_dump($_POST);
+      echo "</pre>";exit;
       $res_mdl = $this->compras_requisicion_model->agregar();
 
       if ($res_mdl['passes'])
@@ -526,24 +529,24 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Es receta',
             'rules' => ''),
 
-      array('field' => 'proveedorId1',
-            'label' => 'Proveedor',
-            'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
-      array('field' => 'proveedorId2',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedorId3',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedor1',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor2',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor3',
-            'label' => '',
-            'rules' => ''),
+      // array('field' => 'proveedorId1',
+      //       'label' => 'Proveedor',
+      //       'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
+      // array('field' => 'proveedorId2',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedorId3',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedor1',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor2',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor3',
+      //       'label' => '',
+      //       'rules' => ''),
 
       array('field' => 'solicito',
             'label' => '',
@@ -615,12 +618,23 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'centroCostoText[]',
             'label' => 'Centro de costo',
             'rules' => ''),
-      array('field' => 'activoId',
-            'label' => 'Activo',
-            'rules' => ($valGasto && !$valFlete? 'numeric': '')),
-      array('field' => 'activos',
-            'label' => 'Activo',
+      // array('field' => 'activoId',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? 'numeric': '')),
+      // array('field' => 'activos',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'activosP[]',
+            'label' => 'Activo del producto',
             'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'proveedorId[]',
+            'label' => 'Proveedor',
+            'rules' => 'required|numeric'),
+      array('field' => 'proveedor[]',
+            'label' => 'Proveedor',
+            'rules' => ''),
 
       array('field' => 'totalLetra1',
             'label' => '',

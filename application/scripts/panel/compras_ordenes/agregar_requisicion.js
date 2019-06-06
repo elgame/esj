@@ -21,6 +21,7 @@
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnListaOtros();
+    eventBtnListaActivos();
     eventTipoCambioKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
@@ -453,35 +454,71 @@
   };
 
   var autocompleteActivos = function () {
-    $("#activos").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-        // if(parseInt($("#empresaId").val()) > 0)
-        //   params.did_empresa = $("#empresaId").val();
-        params.tipo = 'a'; // activos
-        $.ajax({
-            url: base_url + 'panel/productos/ajax_aut_productos/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-              response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $activos =  $(this);
+    $("#table-productos").on('focus', 'input.clsActivos:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: function(request, response) {
+          var params = {term : request.term};
+          // if(parseInt($("#empresaId").val()) > 0)
+          //   params.did_empresa = $("#empresaId").val();
+          params.tipo = 'a'; // activos
+          $.ajax({
+              url: base_url + 'panel/productos/ajax_aut_productos/',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                response(data);
+              }
+          });
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $activos =  $(this),
+          $parent = $activos.parents('.popover-content');
 
-        $activos.val(ui.item.id);
-        $("#activoId").val(ui.item.id);
-        $activos.css("background-color", "#A1F57A");
+          addActivoTag(ui.item, $parent);
+          setTimeout(function () {
+            $activos.val('');
+          }, 200);
+        }
+      }).css('z-index', 1011).on("keydown", function(event) {
+        if(event.which == 8 || event.which == 46) {
+          $(this).css("background-color", "#FFD071");
+        }
+      });
+    });
+
+    function addActivoTag(item, $parent) {
+      var jsonn = [];
+      try {
+        jsonn = JSON.parse($('.activosP', $parent).val());
+      } catch (e) {
+        jsonn = {};
       }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#activos").css("background-color", "#FFD071");
-        $("#activoId").val('');
+
+      if (!jsonn[item.id]) {
+        $('.tagsActivosIds', $parent).append('<li data-id="'+item.id+'"><span class="tag">'+item.value+'</span>'+
+          '</li>');
+
+        jsonn[item.id] = { id: item.id, text: item.value };
+        $('.activosP', $parent).val(JSON.stringify(jsonn));
+      } else {
+        noty({"text": 'Ya esta agregada el Activo a ese producto.', "layout":"topRight", "type": 'error'});
       }
+    };
+
+    $('#table-productos').on('click', '.tagsActivosIds li:not(.disable)', function(event) {
+      var id = $(this).attr('data-id'),
+        $parent = $(this).parents('.popover-content');
+      var jsonn = [];
+      try {
+        jsonn = JSON.parse($('.activosP', $parent).val().replace(/”/g, '"'));
+      } catch (e) {
+        jsonn = {};
+      }
+      delete jsonn[id];
+      $('.activosP', $parent).val(JSON.stringify(jsonn));
+      $(this).remove();
     });
   };
 
@@ -972,6 +1009,18 @@
     });
   };
 
+  var eventBtnListaActivos = function () {
+    $('#productos').on('click', "#btnListActivos", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden")){
+        $parent.find(".popover").show(80);
+        $parent.find('.clsActivos').focus();
+      }
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
+
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
     $('#productos #table-productos').on('keyup', '#cantidad, #valorUnitario1, #valorUnitario2, #valorUnitario3, #iepsPorcent', function(e) {
@@ -1211,6 +1260,21 @@
                   //   '<input type="hidden" name="retIsrTotal3[]" value="0" id="retIsrTotal3" class="span12" readonly>' +
                   // '</td>' +
                   '<td style="width: 35px;">'+
+                    '<div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>'+
+                      '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
+                        '<div class="arrow"></div><h3 class="popover-title">Activos</h3>'+
+                        '<div class="popover-content">'+
+                          '<div class="control-group activosGrup" style="width: 375px;display: '+ ($('#tipoOrden').find('option:selected').val() !== 'f'? 'block' : 'none') +';">'+
+                            '<div class="input-append span12">'+
+                              '<input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">'+
+                            '</div>'+
+                            '<ul class="tags tagsActivosIds">'+
+                            '</ul>'+
+                            '<input type="hidden" name="activosP[]" class="activosP" value="{}">'+
+                          '</div>'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+
                     '<div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>'+
                       '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
                         '<div class="arrow"></div><h3 class="popover-title">Otros</h3>'+

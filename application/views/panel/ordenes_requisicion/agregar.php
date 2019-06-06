@@ -384,7 +384,7 @@
                       </ul>
                     </div><!--/control-group -->
 
-                    <div class="control-group" id="activosGrup">
+                    <!-- <div class="control-group" id="activosGrup">
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -392,7 +392,7 @@
                         </div>
                         <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
                       </div>
-                    </div><!--/control-group -->
+                    </div> --><!--/control-group -->
                   </div>
 
                 </div>
@@ -625,6 +625,31 @@
                               <input type="hidden" name="retIsrTotal3[]" value="<?php echo $_POST['retIsrTotal3'][$key] ?>" id="retIsrTotal3" class="span12" readonly>
                             </td -->
                             <td style="width: 35px;">
+                              <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                  <div class="arrow"></div><h3 class="popover-title">Activos</h3>
+                                  <div class="popover-content">
+
+                                    <div class="control-group activosGrup" style="width: 375px;">
+                                      <div class="input-append span12">
+                                        <input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">
+                                      </div>
+                                      <ul class="tags tagsActivosIds">
+                                      <?php if (isset($_POST['activosP'][$key])) {
+                                        $json = json_decode(str_replace('”', '"', $_POST['activosP'][$key]) );
+                                        if ($json != null) {
+                                          foreach ($json as $key2 => $activo) { ?>
+                                            <li data-id="<?php echo $key2 ?>"><span class="tag"><?php echo $activo->text ?></span></li>
+                                      <?php }
+                                        }
+                                      } ?>
+                                      </ul>
+                                      <input type="hidden" name="activosP[]" class="activosP" value="<?php echo $_POST['activosP'][$key] ?>">
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </div>
                               <div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>
                                 <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
                                   <div class="arrow"></div><h3 class="popover-title">Otros</h3>

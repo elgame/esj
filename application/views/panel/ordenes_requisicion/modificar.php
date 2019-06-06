@@ -398,7 +398,7 @@
                       </ul>
                     </div><!--/control-group -->
 
-                    <div class="control-group" id="activosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                    <!-- <div class="control-group" id="activosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -406,7 +406,8 @@
                         </div>
                         <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($orden['info'][0]->activo->id_producto) ? $orden['info'][0]->activo->id_producto : '') ?>">
                       </div>
-                    </div><!--/control-group -->
+                    </div> -->
+                    <!--/control-group -->
                   </div>
 
                 </div>
@@ -496,10 +497,19 @@
                       </select>
                       <input type="text" class="span5 vpositive" id="ftipo_cambio" placeholder="12.45">
                     </div><!--/span2 -->
-                    <div class="span2">
+                  </div><!--/span12 -->
+                  <div class="span12 mquit">
+                    <div class="span8">
+                      <div class="input-append span12">
+                        <input type="text" class="span10" id="fproveedor" placeholder="Proveedor">
+                        <a href="<?php echo base_url('panel/proveedores/agregar').'?modal=true' ?>" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a>
+                      </div>
+                      <input type="hidden" class="span1" id="fproveedorId">
+                    </div><!--/span2 -->
+                    <div class="span2 offset2">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
                     </div><!--/span2 -->
-                  </div><!--/span12 -->
+                  </div>
 
                 </div><!--/row-fluid -->
                 <br>
@@ -593,7 +603,7 @@
                                                   ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
                           <?php if ($autorizar_active){ ?>
                             <td style="width: 10px;">
-                              <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $orden['info'][0]->proveedores[0]['id_proveedor'] ?>" class="prodSelOrden prodSelOrden1" <?php echo ($precio_unitario>0? 'checked': '') ?> data-uniform="false">
+                              <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $orden['info'][0]->proveedores[0]['id_proveedor'] ?>" class="prodSelOrden prodSelOrden1" <?php echo ($precio_unitario? 'checked': '') ?> data-uniform="false">
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
@@ -649,8 +659,31 @@
                               <input type="hidden" name="retIsrTotal3[]" value="<?php echo $concepto->{'retencion_isr'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retIsrTotal3" class="span12" readonly>
                             </td> -->
                             <td style="width: 35px;">
+                              <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                  <div class="arrow"></div><h3 class="popover-title">Activos</h3>
+                                  <div class="popover-content">
+
+                                    <div class="control-group activosGrup" style="width: 375px;display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                                      <div class="input-append span12">
+                                        <input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">
+                                      </div>
+                                      <ul class="tags tagsActivosIds">
+                                      <?php if (isset($concepto->activos)) {
+                                        foreach ($concepto->activos as $key => $activo) { ?>
+                                          <li class=""><span class="tag"><?php echo $activo->nombre ?></span>
+                                            <input type="hidden" name="activoId[][]" class="activoId" value="<?php echo $activo->id_producto ?>">
+                                            <input type="hidden" name="activoText[][]" class="activoText" value="<?php echo $activo->nombre ?>">
+                                          </li>
+                                       <?php }} ?>
+                                      </ul>
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </div>
                               <div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>
-                                <div class="popover fade left in" style="top:-55.5px;left:-411px;">
+                                <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
                                   <div class="arrow"></div><h3 class="popover-title">Otros</h3>
                                   <div class="popover-content">
                                     <table>
