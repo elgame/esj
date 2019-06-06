@@ -233,6 +233,7 @@ class caja_chica extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte de gastos');
 
     $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+    $params['cajas'] = $this->db->query("SELECT no_caja, nombre FROM cajachicas ORDER BY no_caja ASC")->result();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -265,6 +266,7 @@ class caja_chica extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte de ingresos');
 
     $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+    $params['cajas'] = $this->db->query("SELECT no_caja, nombre FROM cajachicas ORDER BY no_caja ASC")->result();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -297,6 +299,7 @@ class caja_chica extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte de ingresos/gastos');
 
     // $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+    $params['cajas'] = $this->db->query("SELECT no_caja, nombre FROM cajachicas ORDER BY no_caja ASC")->result();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
