@@ -42,7 +42,7 @@
 
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
-        <input type="hidden" name="pidb" value="<?php echo $idb ?>">
+        <input type="hidden" name="pidb" value="<?php echo $idb ?>" id="pidb">
         <div class="row-fluid"><!--Datos Bascula-->
           <div class="box span12">
             <div class="box-header well" data-original-title>

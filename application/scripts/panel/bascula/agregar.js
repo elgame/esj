@@ -701,6 +701,7 @@ $(function(){
 
       msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
       {
+        console.log('test', parseInt($('#pidb').val()));
         if ((parseInt($('#pidb').val())||0) > 0) {
           // $('#form').submit();
           $.ajax({

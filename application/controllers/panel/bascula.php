@@ -490,6 +490,7 @@ class bascula extends MY_Controller {
         array('libs/jquery.uniform.css', 'screen'),
       ));
       $this->carabiner->js(array(
+        array('general/msgbox.js'),
         array('libs/jquery.uniform.min.js'),
         array('libs/jquery.numeric.js'),
         array('general/supermodal.js'),
