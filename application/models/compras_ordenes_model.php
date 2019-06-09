@@ -2484,10 +2484,11 @@ class compras_ordenes_model extends CI_Model {
   {
     $query = null;
     if ($id_producto > 0) {
-      $query = $this->db->query("SELECT *
-        FROM compras_productos
-        WHERE id_producto = {$id_producto}
-        ORDER BY Date(fecha_aceptacion) DESC")->row();
+      $query = $this->db->query("SELECT cp.*, co.fecha_creacion
+        FROM compras_productos cp
+          INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+        WHERE cp.id_producto = {$id_producto}
+        ORDER BY Date(co.fecha_aceptacion) DESC")->row();
     }
     return $query;
   }

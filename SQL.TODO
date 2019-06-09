@@ -73,6 +73,8 @@
       ALTER TABLE public.compras_ordenes ALTER COLUMN solicito TYPE character varying(250);
       -- pcc|lap
       ALTER TABLE public.compras_ordenes ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
+      -- pcc
+      ALTER TABLE public.compras_requisicion_productos ADD COLUMN activos jsonb;
 
  ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct|pcc|lap|san
    Crear carpetas sanjorge/application/media/ventas/com_pagos

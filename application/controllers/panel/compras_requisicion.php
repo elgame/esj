@@ -154,9 +154,6 @@ class compras_requisicion extends MY_Controller {
     }
     else
     {
-      echo "<pre>";
-        var_dump($_POST);
-      echo "</pre>";exit;
       $res_mdl = $this->compras_requisicion_model->agregar();
 
       if ($res_mdl['passes'])
@@ -401,7 +398,7 @@ class compras_requisicion extends MY_Controller {
 
     if (isset($_GET['p']))
     {
-      $this->compras_requisicion_model->print_orden_compra($_GET['id']);
+      $this->compras_requisicion_model->print_pre_orden_compra($_GET['id']);
     }
     else
     {

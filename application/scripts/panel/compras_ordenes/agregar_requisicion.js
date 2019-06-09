@@ -95,14 +95,14 @@
   var btnAutorizarClick = function(){
     $("#btnAutorizar").on('click', function(e) {
       var passes = true;
-      $(".prodSelOrden:checked").each(function(index, el) {
-        if (($(this).val() != $('#proveedorId1').val() &&
-            $(this).val() != $('#proveedorId2').val() &&
-            $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
-          passes = false;
-          noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
-        }
-      });
+      // $(".prodSelOrden:checked").each(function(index, el) {
+      //   if (($(this).val() != $('#proveedorId1').val() &&
+      //       $(this).val() != $('#proveedorId2').val() &&
+      //       $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
+      //     passes = false;
+      //     noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
+      //   }
+      // });
 
       $(".prodIdOrden").each(function(index, el) {
         if ($(this).val() == '' || $(this).val() == '0') {

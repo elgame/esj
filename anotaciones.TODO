@@ -1,5 +1,5 @@
 
- ☐ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos,
+ ✔ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos, @done (19-06-09 17:11)
      poner la cotizacion, poner los campos iniciales del formato de la orden de compra
  ☐ Poner un apartado de pre ventas para que las puedan modificar y despues esas ventas se puedan remisionar, serian lo mismo porque tendrian el mismo folio, en marca de agua que diga documento no valido
  ☐ Poner # de rastreabilidad en las remisiones el cual se pasaria a factura
