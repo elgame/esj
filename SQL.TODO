@@ -1,3 +1,21 @@
+
+ ✔ Cambios en facturacion y boletas de salida @done (19-06-10 19:07) pcc
+     CREATE TABLE public.facturacion_otrosdatos
+        (
+          id_factura bigint NOT NULL,
+          no_trazabilidad character varying(15) NOT NULL,
+          CONSTRAINT facturacion_otrosdatos_pkey PRIMARY KEY (id_factura),
+          CONSTRAINT facturacion_otrosdatos_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES public.facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE public.facturacion_otrosdatos OWNER TO programa;
+     ALTER TABLE public.bascula ADD COLUMN no_trazabilidad character varying(15);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Utilerias',0,TRUE,'utilerias/','wrench',FALSE);
+
  ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc|lap
       ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Faltantes de productos',136,TRUE,'recetas/faltantes_productos/','question-sign',FALSE);

@@ -84,10 +84,11 @@ class Ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-            ->select("*")
-            ->from('facturacion')
-            ->where("id_factura = {$id}")
-            ->get();
+      ->select("f.*, fo.no_trazabilidad")
+      ->from('facturacion as f')
+      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
+      ->where("f.id_factura = {$id}")
+      ->get();
 
     if($res->num_rows() > 0)
     {
@@ -267,6 +268,10 @@ class Ventas_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
 
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
+
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
@@ -317,6 +322,14 @@ class Ventas_model extends privilegios_model{
 
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false) {
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'      => $id_venta,
+        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+      ]);
+    }
 
     // si probiene de una venta se asigna
     if (isset($_GET['id_vd'])) {
@@ -585,6 +598,10 @@ class Ventas_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
 
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
+
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
@@ -640,6 +657,14 @@ class Ventas_model extends privilegios_model{
                                     ':titulo'       => 'Venta'));
     $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
     // $id_venta = $this->db->insert_id();
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false) {
+      $this->db->update('facturacion_otrosdatos', [
+        'id_factura'      => $id_venta,
+        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+      ], "id_factura = {$id_venta}");
+    }
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);

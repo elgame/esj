@@ -172,10 +172,25 @@ class ventas extends MY_Controller {
       ->order_by('nombre')
       ->get()->result();
 
+    $params['cerrarVenta'] = false;
+    $params['desbloquear'] = false;
+
     $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
       $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']), false, true );
+      $params['borrador']['info']->cfdi_ext = $params['borrador']['info']->cfdi_ext? json_decode($params['borrador']['info']->cfdi_ext): false;
+
+      $params['cerrarVenta'] = false;
+      if (isset($params['borrador']['info']->cfdi_ext->cerrarVenta)) {
+        $params['cerrarVenta'] = true;
+      }
+
+      $params['desbloquear'] = false;
+      if ($this->usuarios_model->tienePrivilegioDe('', 'ventas/desbloquear/')) {
+        $params['desbloquear'] = true;
+      }
+
       if(isset($_GET['id_nr']))
         $params['fecha']    = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
       if(isset($_GET['id_nrc']))
@@ -519,6 +534,9 @@ class ventas extends MY_Controller {
         array('field'   => 'dobservaciones',
               'label'   => 'Observaciones',
               'rules'   => ''),
+        array('field'   => 'dno_trazabilidad',
+              'label'   => 'No Trazabilidad',
+              'rules'   => 'max_length[15]'),
     );
 
     if (isset($_POST['privAddDescripciones']{0}) || isset($_POST['id_nrc']{0})) {

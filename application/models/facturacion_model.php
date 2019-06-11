@@ -95,9 +95,10 @@ class facturacion_model extends privilegios_model{
 	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db
-      ->select("*")
-      ->from('facturacion')
-      ->where("id_factura = {$idFactura}")
+      ->select("f.*, fo.no_trazabilidad")
+      ->from('facturacion as f')
+      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
+      ->where("f.id_factura = {$idFactura}")
       ->get();
 
     if($res->num_rows() > 0)

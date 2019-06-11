@@ -163,6 +163,7 @@ class bascula_model extends CI_Model {
         {
           $data['id_cliente'] = $this->input->post('pid_cliente');
           $data['rancho']     = '';
+          $data['no_trazabilidad'] = $this->input->post('dno_trazabilidad');
         }
 
         $this->db->insert('bascula', $data);
@@ -200,6 +201,7 @@ class bascula_model extends CI_Model {
         {
           $data2['id_cliente']    = $this->input->post('pid_cliente');
           $data2['id_proveedor'] = null;
+          $data2['no_trazabilidad'] = $this->input->post('dno_trazabilidad');
         }
 
         $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
@@ -463,7 +465,8 @@ class bascula_model extends CI_Model {
                 b.certificado,
                 b.intangible,
                 (u.nombre || ' ' || u.apellido_paterno) AS creadox,
-                (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario")
+                (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario,
+                b.no_trazabilidad")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")

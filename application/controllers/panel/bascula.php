@@ -222,8 +222,9 @@ class bascula extends MY_Controller {
           $this->load->model('clientes_model');
           $cliente = $this->clientes_model->getClienteInfo($info['info'][0]->id_cliente, true);
 
-          $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
-          $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+          $_POST['pcliente']         = $cliente['info']->nombre_fiscal;
+          $_POST['pid_cliente']      = $info['info'][0]->id_cliente;
+          $_POST['dno_trazabilidad'] = $info['info'][0]->no_trazabilidad;
         }
 
         if ($info['info'][0]->id_productor != null)
@@ -1484,6 +1485,9 @@ class bascula extends MY_Controller {
       array('field' => 'pcliente',
             'label' => '',
             'rules' => ''),
+      array('field' => 'dno_trazabilidad',
+            'label' => '',
+            'rules' => ''),
       array('field' => 'pid_chofer',
             'label' => 'Chofer',
             'rules' => ''),
@@ -1601,6 +1605,10 @@ class bascula extends MY_Controller {
         $rules[] = array('field' => 'pid_cliente',
                          'label' => 'Cliente',
                          'rules' => 'required');
+
+        $rules[] = array('field' => 'dno_trazabilidad',
+                         'label' => 'No Trazabilidad',
+                         'rules' => 'max_length[15]');
 
         $rules[] = array('field' => 'pid_chofer',
                          'label' => 'Chofer',

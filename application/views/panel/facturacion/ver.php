@@ -116,6 +116,14 @@
                   <textarea name="dobservaciones" class="span9" id="dobservaciones" readonly><?php echo set_value('dobservaciones', $factura['info']->observaciones); ?></textarea>
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                <div class="controls">
+                  <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad" readonly
+                    value="<?php echo set_value('dno_trazabilidad', $factura['info']->no_trazabilidad); ?>">
+                </div>
+              </div>
             </div>
 
             <div class="span6">

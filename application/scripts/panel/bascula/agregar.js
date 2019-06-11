@@ -135,6 +135,7 @@ $(function(){
     if (option === 'en') {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
+      $('#groupTrazabilidad').css({'display': 'none'});
 
       // cargar kilos
       if (paccion == 'n')
@@ -152,6 +153,7 @@ $(function(){
     } else {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
+      $('#groupTrazabilidad').css({'display': 'block'});
 
       // cargar kilos
       if (paccion == 'n')
@@ -848,6 +850,7 @@ var recargaTipo = function () {
   if (option === 'en') {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
+    $('#groupTrazabilidad').css({'display': 'none'});
 
     // cargar kilos
     if (paccion == 'n')
@@ -864,6 +867,7 @@ var recargaTipo = function () {
   } else {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
+    $('#groupTrazabilidad').css({'display': 'block'});
 
     // cargar kilos
     if (paccion == 'n')
