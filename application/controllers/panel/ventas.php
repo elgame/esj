@@ -58,6 +58,11 @@ class ventas extends MY_Controller {
     $params['fecha']  = date("Y-m-d");
     $params['method']  = '';
 
+    $params['desbloquear'] = false;
+    if ($this->usuarios_model->tienePrivilegioDe('', 'ventas/desbloquear/')) {
+      $params['desbloquear'] = true;
+    }
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

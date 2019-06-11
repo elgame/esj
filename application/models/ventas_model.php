@@ -54,7 +54,7 @@ class Ventas_model extends privilegios_model{
         SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
                 f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada,
-                COALESCE(fh.id_remision, 0) AS facturada
+                COALESCE(fh.id_remision, 0) AS facturada, f.cfdi_ext
         FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
