@@ -608,7 +608,7 @@ class bascula2_model extends bascula_model {
   }
 
 
-  public function getDataMovimientosAuditoriaSa()
+  public function getDataMovimientosAuditoriaSa(&$data)
   {
     $sql = '';
 
@@ -675,7 +675,7 @@ class bascula2_model extends bascula_model {
          b.rancho,
          b.no_trazabilidad,
          (f.serie || f.folio) AS factura,
-         f.is_factura
+         (CASE WHEN f.is_factura = 't' THEN 'Factura' ELSE 'Remisión' END) AS tipo_doc
       FROM bascula AS b
         {$table_ms}
         LEFT JOIN facturacion_otrosdatos AS fo ON fo.no_trazabilidad = b.no_trazabilidad
@@ -696,33 +696,19 @@ class bascula2_model extends bascula_model {
 
     foreach ($movimientos as $key => $caja)
     {
-      // $data['totales']['importe']     += floatval($caja->importe);
-      // $data['totales']['total']       += floatval($caja->importe);
-      if(!is_numeric($caja->id_bonificacion))
-      {
-        $data['totales']['kilos']       += floatval($caja->kilos);
-        $data['totales']['cajas']       += floatval($caja->cajas);
-      }else
-        $caja->calidad = 'BONIFICACION';
-      // $data['precio_prom'] += floatval($caja->promedio);
-
-      if ($caja->status === 'p' || $caja->status === 'b')
-      {
-        // $data['totales']['pagados'] += floatval($caja->importe);
-        if ($caja->status === 'p')
-          $caja->tipo_pago = 'EFECTIVO';
-      }else{
-        // $data['totales']['no_pagados'] += floatval($caja->importe);
-      }
+      $data['totales']['kilos'] += floatval($caja->kilos);
+      $data['totales']['cajas'] += floatval($caja->cajas);
 
       if ($caja->tipo == 'en')
         $caja->tipo = 'E';
       elseif ($caja->tipo == 'sa')
         $caja->tipo = 'S';
     }
+
+    $data['movimientos'] = $movimientos;
   }
 
-  public function getDataMovimientosAuditoriaEn()
+  public function getDataMovimientosAuditoriaEn(&$data)
   {
     $sql = '';
 
@@ -839,6 +825,8 @@ class bascula2_model extends bascula_model {
       elseif ($caja->tipo == 'sa')
         $caja->tipo = 'S';
     }
+
+    $data['movimientos'] = $movimientos;
   }
 
   public function getMovimientosAuditoria()
@@ -860,7 +848,11 @@ class bascula2_model extends bascula_model {
         'no_pagados'  => 0,
       );
 
-
+      if($this->input->get('ftipop') == 'sa') {
+        $this->getDataMovimientosAuditoriaSa($data);
+      }else{
+        $this->getDataMovimientosAuditoriaEn($data);
+      }
 
 
       $this->load->model('areas_model');
@@ -877,8 +869,6 @@ class bascula2_model extends bascula_model {
         }else
           $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
       }
-
-      $data['movimientos'] = $movimientos;
     // }
 
     return $data;

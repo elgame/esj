@@ -843,7 +843,11 @@ class bascula extends MY_Controller {
     $this->load->model('bascula2_model');
 
     $params['data'] = $this->bascula2_model->getMovimientosAuditoria();
-    $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
+    if($this->input->get('ftipop') == 'sa') {
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_sa_pdf', $params);
+    }else{
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
+    }
   }
 
   /**
