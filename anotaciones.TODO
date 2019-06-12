@@ -1,9 +1,9 @@
 
  ✔ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos, @done (19-06-09 17:11)
      poner la cotizacion, poner los campos iniciales del formato de la orden de compra
- ☐ Poner un apartado de pre ventas para que las puedan modificar y despues esas ventas se puedan remisionar, serian lo mismo porque tendrian el mismo folio, en marca de agua que diga documento no valido
- ☐ Poner # de rastreabilidad en las remisiones el cual se pasaria a factura
- ☐ En las boletas de salida y en las facturas poner un campo de # Traz, en reporte de auditoria (movimientos) poner la factura el # traz
+ ✔ Poner un apartado de pre ventas para que las puedan modificar y despues esas ventas se puedan remisionar, serian lo mismo porque tendrian el mismo folio, en marca de agua que diga documento no valido @done (19-06-11 19:13)
+ ✔ Poner # de rastreabilidad en las remisiones el cual se pasaria a factura @done (19-06-11 19:13)
+ ✔ En las boletas de salida y en las facturas poner un campo de # Traz, en reporte de auditoria (movimientos) poner la factura el # traz @done (19-06-11 19:33)
  ☐ Reporte de balance de masas, de los datos de rastreabilidad de limon, compararia las boletas que entran (kilos) con los quilos que salen en las lineas
  ☐ En rastreabilidad de limon poder imprimir en blanco con folio, Acomodo de tarimas en trailer, ver foto
  ☐ impresora zebra zt230 etiquetas

@@ -15,6 +15,9 @@
         ALTER TABLE public.facturacion_otrosdatos OWNER TO programa;
      ALTER TABLE public.bascula ADD COLUMN no_trazabilidad character varying(15);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Utilerias',0,TRUE,'utilerias/','wrench',FALSE);
+     -- pcc
+     CREATE INDEX facturacion_otrosdatos_no_trazabilidad_idx ON public.facturacion_otrosdatos USING btree (no_trazabilidad COLLATE pg_catalog."default");
+     CREATE INDEX bascula_no_trazabilidad_idx ON public.bascula USING btree (no_trazabilidad COLLATE pg_catalog."default");
 
  ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc|lap
       ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;

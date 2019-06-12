@@ -289,7 +289,7 @@
                   <div class="well span9">
                       <label><input type="checkbox" name="cerrarVenta" value="true"
                         <?php echo ($cerrarVenta ? 'checked' : '') ?>
-                        <?php echo (!$desbloquear? 'disabled': ''); ?>> Cerrar Venta</label> <br>
+                        <?php echo ($cerrarVenta && !$desbloquear? 'disabled': ''); ?>> Cerrar Venta</label> <br>
 
                       <?php if (!$cerrarVenta || $desbloquear): ?>
                       <!-- <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br> -->
