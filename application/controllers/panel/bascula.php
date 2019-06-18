@@ -1646,21 +1646,23 @@ class bascula extends MY_Controller {
 
   public function check_trazabilidad($value)
   {
-    $sql = !empty($_POST['pidb'])? " AND b.id_bascula <> {$_POST['pidb']}": '';
-    $error = false;
-    $query = $this->db->query("SELECT b.id_bascula, b.no_trazabilidad
-                                 FROM bascula b
-                                 WHERE b.no_trazabilidad = '{$value}'
-                                  AND b.id_empresa = {$this->input->post('pid_empresa')}
-                                  AND b.status = 't'
-                                  {$sql}");
+    if (trim($value) != '') {
+      $sql = !empty($_POST['pidb'])? " AND b.id_bascula <> {$_POST['pidb']}": '';
+      $error = false;
+      $query = $this->db->query("SELECT b.id_bascula, b.no_trazabilidad
+                                   FROM bascula b
+                                   WHERE b.no_trazabilidad = '{$value}'
+                                    AND b.id_empresa = {$this->input->post('pid_empresa')}
+                                    AND b.status = 't'
+                                    {$sql}");
 
-    if ($query->num_rows() > 0)
-    {
-      $data = $query->row();
+      if ($query->num_rows() > 0)
+      {
+        $data = $query->row();
 
-      $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
-      return false;
+        $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
+        return false;
+      }
     }
 
     return true;

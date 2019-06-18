@@ -1335,22 +1335,24 @@ class facturacion extends MY_Controller {
 
   public function check_trazabilidad($value)
   {
-    $sql = !empty($_GET['id_nr'])? " AND f.id_factura <> {$_GET['id_nr']}": '';
-    $error = false;
-    $query = $this->db->query("SELECT f.id_factura, fp.no_trazabilidad
-                                 FROM facturacion_otrosdatos fp
-                                 INNER JOIN facturacion f ON f.id_factura = fp.id_factura
-                                 WHERE fp.no_trazabilidad = '{$value}'
-                                  AND f.id_empresa = {$this->input->post('did_empresa')}
-                                  AND f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'b'
-                                  {$sql}");
+    if (trim($value) != '') {
+      $sql = !empty($_GET['id_nr'])? " AND f.id_factura <> {$_GET['id_nr']}": '';
+      $error = false;
+      $query = $this->db->query("SELECT f.id_factura, fp.no_trazabilidad
+                                   FROM facturacion_otrosdatos fp
+                                   INNER JOIN facturacion f ON f.id_factura = fp.id_factura
+                                   WHERE fp.no_trazabilidad = '{$value}'
+                                    AND f.id_empresa = {$this->input->post('did_empresa')}
+                                    AND f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'b'
+                                    {$sql}");
 
-    if ($query->num_rows() > 0)
-    {
-      $data = $query->row();
+      if ($query->num_rows() > 0)
+      {
+        $data = $query->row();
 
-      $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
-      return false;
+        $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
+        return false;
+      }
     }
 
     return true;

@@ -660,10 +660,11 @@ class Ventas_model extends privilegios_model{
 
     // Si tiene el # de trazabilidad
     if ($this->input->post('dno_trazabilidad') !== false) {
-      $this->db->update('facturacion_otrosdatos', [
+      $this->db->delete('facturacion_otrosdatos', "id_factura = {$id_venta}");
+      $this->db->insert('facturacion_otrosdatos', [
         'id_factura'      => $id_venta,
         'no_trazabilidad' => $this->input->post('dno_trazabilidad')
-      ], "id_factura = {$id_venta}");
+      ]);
     }
 
     // Obtiene los datos del cliente.
