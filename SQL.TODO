@@ -1,5 +1,5 @@
 
- ✔ Cambios en facturacion y boletas de salida @done (19-06-10 19:07) pcc|pct|lap
+ ✔ Cambios en facturacion y boletas de salida @done (19-06-10 19:07) pcc|pct|lap|san
      CREATE TABLE public.facturacion_otrosdatos
         (
           id_factura bigint NOT NULL,
@@ -14,11 +14,11 @@
         );
         ALTER TABLE public.facturacion_otrosdatos OWNER TO programa;
      ALTER TABLE public.bascula ADD COLUMN no_trazabilidad character varying(15);
-     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Utilerias',0,TRUE,'utilerias/','wrench',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Desbloquear',0,FALSE,'ventas/desbloquear/','wrench',FALSE);
      CREATE INDEX facturacion_otrosdatos_no_trazabilidad_idx ON public.facturacion_otrosdatos USING btree (no_trazabilidad COLLATE pg_catalog."default");
      CREATE INDEX bascula_no_trazabilidad_idx ON public.bascula USING btree (no_trazabilidad COLLATE pg_catalog."default");
 
- ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc|lap
+ ✔ Cambios de prerequisicion @done (19-05-20 12:02) pct|pcc|lap|san
       ALTER TABLE public.compras_requisicion ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Faltantes de productos',136,TRUE,'recetas/faltantes_productos/','question-sign',FALSE);
       CREATE TABLE public.compras_ordenes_requisiciones
@@ -91,9 +91,7 @@
       ALTER TABLE public.compras_ordenes DROP COLUMN id_area;
       ALTER TABLE public.compras_ordenes DROP COLUMN id_activo;
       ALTER TABLE public.compras_ordenes ALTER COLUMN solicito TYPE character varying(250);
-      -- pcc|lap|pct
       ALTER TABLE public.compras_ordenes ADD COLUMN es_receta boolean NOT NULL DEFAULT false;
-      -- pcc|pct|lap
       ALTER TABLE public.compras_requisicion_productos ADD COLUMN activos jsonb;
 
  ✔ Agregar opcion para subir comprobante de pago en las ventas @done (19-06-03 12:38) pct|pcc|lap|san
