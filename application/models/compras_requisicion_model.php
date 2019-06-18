@@ -1743,9 +1743,12 @@ class compras_requisicion_model extends CI_Model {
   {
     $orden = $this->info($ordenId, true);
     $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
-    if ($tipo_requisicion) {
-      return $this->print_orden_compra($ordenId, $path);
+    if (!$tipo_requisicion && $orden['info'][0]->es_receta == 't') {
+      return $this->print_pre_receta($orden, $path); // pre recetas
+    } elseif ($tipo_requisicion) {
+      return $this->print_orden_compra($ordenId, $path); // requisiciones con datos
     }
+    // else imprime la pre orden requisición sin datos
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -1939,6 +1942,246 @@ class compras_requisicion_model extends CI_Model {
 
       $tipoCambio = '';
     }
+
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 50));
+    $pdf->SetXY(6, $pdf->GetY()-15);
+    $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : ($tipoCambio==''? 'TIPO DE CAMBIO: ': '')) ), false, false);
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(75));
+    $pdf->SetXY(6, $pdf->GetY()+6);
+    $pdf->Row(array('SOLICITA: __________________________________________'), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->SetAligns(array('C', 'L'));
+    $pdf->Row(array(strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+
+    // $pdf->SetAligns(array('L', 'R'));
+    // $pdf->SetWidths(array(104, 50));
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(250));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+    $pdf->SetXY(6, $pdf->GetY()+4);
+
+    // if ($tipo_requisicion) {
+    //   $pdf->SetWidths(array(250));
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+    // } else {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+
+      // El dato de la requisicion
+      // if (!empty($orden['info'][0]->folio_requisicion)) {
+      //   $pdf->SetFont('Arial','',8);
+      //   $pdf->SetXY(5, $pdf->GetY());
+      //   $pdf->SetAligns(array('L', 'L'));
+      //   $pdf->SetWidths(array(25, 80));
+      //   $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
+      // }
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('Cultivo / Actividad / Producto',
+        (!empty($orden['info'][0]->area)? $orden['info'][0]->area->nombre: '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $ranchos = [];
+      foreach ($orden['info'][0]->rancho as $key => $value) {
+        $ranchos[] = $value->nombre;
+      }
+      $pdf->Row(array('Areas / Ranchos / Lineas',
+        (!empty($orden['info'][0]->rancho)? implode(' | ', $ranchos): '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $centroCosto = [];
+      foreach ($orden['info'][0]->centroCosto as $key => $value) {
+        $centroCosto[] = $value->nombre;
+      }
+      $pdf->Row(array('Centro de costo',
+        (!empty($orden['info'][0]->centroCosto)? implode(' | ', $centroCosto): '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('Activo',
+        (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+    // }
+
+
+    if ($path)
+    {
+      $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
+
+  public function print_pre_receta($orden, $path = null)
+  {
+    // $orden = $this->info($ordenId, true);
+    $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
+
+    $tipo_orden = 'PRE REQUISICION';
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = ''; // $orden['info'][0]->empresa;
+    $pdf->titulo2 = $tipo_orden;
+
+    $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+    $pdf->noShowPages = false;
+    $pdf->noShowDate = false;
+    $pdf->AddPage();
+
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'C', 'R'));
+    $pdf->SetWidths(array(50));
+    $pdf->SetXY(222, $pdf->GetY()-20);
+    $pdf->Row(array('PRE-REQ: '.MyString::formatoNumero($orden['info'][0]->folio, 2, '')), false, true);
+    $pdf->SetXY(222, $pdf->GetY());
+    $pdf->Row(array('RECETA: '.(isset($orden['info'][0]->otros_datos->noRecetas)? $orden['info'][0]->otros_datos->noRecetas: '')), false, true);
+
+    $pdf->SetFont('helvetica','B', 7);
+    $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R', 'L', 'R', 'L', ));
+    $pdf->SetWidths(array(16, 63, 16, 25, 20, 25, 12, 25, ));
+    $pdf->SetXY(6, $pdf->GetY()+12);
+    $auxt = $pdf->GetY();
+    $pdf->Row(array(
+      'EMPRESA:', $orden['info'][0]->empresa,
+      '# HAS:', '______________',
+      'PLANTA X HA:', '______________',
+      'SEM:', '______________',
+    ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array(
+      'RANCHO:', '____________________________________________',
+      '# CARGAS:', '______________',
+      'KG PLANTAS:', '______________',
+      'CICLO:', '______________',
+    ), false, false);
+
+    $pdf->SetWidths(array(16, 63, 20, 21, 20, 25, 12, 25, ));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array(
+      'SECCION:', '____________________________________________',
+      '_____________', '____________',
+      'PH FORMULA:', '______________',
+      '', '',
+    ), false, false);
+    $pdf->SetTextColor(200, 200, 200);
+    $pdf->SetXY(6, $pdf->GetY()-6);
+    $pdf->Row(array(
+      '', '',
+      'COMPLETA', 'MEDIA',
+      '', '',
+      '', '',
+    ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(45));
+    $pdf->SetXY(220, $auxt-5);
+    $pdf->Row(array('FECHA'), false, TRUE);
+    $pdf->SetWidths(array(15, 15, 15));
+    $pdf->SetXY(220, $auxt+1);
+    $pdf->Row(array('', '', ''), false, TRUE);
+
+    $pdf->SetWidths(array(11));
+    $pdf->SetXY(209, $pdf->GetY()+5);
+    $pdf->Row(array('ETAPA'), false, false);
+    $pdf->SetWidths(array(11, 34));
+    $pdf->SetXY(220, $pdf->GetY()-9);
+    $pdf->Row(array('DP', ''), false, true);
+    $pdf->SetXY(220, $pdf->GetY()+1);
+    $pdf->Row(array('DF', ''), false, true);
+
+    $pdf->SetFont('helvetica','B', 7);
+    $pdf->SetWidths(array(16, 81));
+    $pdf->SetXY(170, $pdf->GetY()+1);
+    $pdf->Row(array('OBJETIVO: ', '_________________________________________________________'), false, false);
+
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+
+
+    // $pdf->Row(array(
+    //   MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
+    //   $tipo_orden,
+    //   'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
+    // ), false, false);
+
+    $subtotal = $iva = $total = $retencion = 0;
+
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+    $aligns2 = array('R', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths2 = array(20, 51, 51, 51);
+    $widths = array(18, 30, 65, 21, 30, 21, 30, 21, 30);
+    $header = array('CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
+
+    for ($i=0; $i < 15; $i++) {
+      if($pdf->GetY() >= $pdf->limiteY || $i === 0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetXY(6, $pdf->GetY()+3);
+        $pdf->SetFont('Arial','B',7);
+        // $pdf->SetTextColor(255,255,255);
+        // $pdf->SetFillColor(160,160,160);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('Arial','',7);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array('','','','','','','','','');
+
+      $pdf->SetX(6);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    // Totales
+    $pdf->SetFont('Arial','B',7);
+    $pdf->SetX(99);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 51, 51, 51));
+    $pdf->Row(array('SUB-TOTAL', '', '', ''), false, true);
+    $pdf->SetX(99);
+    $pdf->Row(array('IVA', '', '', ''), false, true);
+    $pdf->SetX(99);
+    $pdf->Row(array('TOTAL', '', '', ''), false, true);
+
+    $tipoCambio = '';
 
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(60, 50));

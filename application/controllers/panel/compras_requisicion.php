@@ -628,7 +628,7 @@ class compras_requisicion extends MY_Controller {
 
       array('field' => 'proveedorId[]',
             'label' => 'Proveedor',
-            'rules' => 'required|numeric'),
+            'rules' => 'numeric'),
       array('field' => 'proveedor[]',
             'label' => 'Proveedor',
             'rules' => ''),
