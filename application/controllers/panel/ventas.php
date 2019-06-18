@@ -58,6 +58,11 @@ class ventas extends MY_Controller {
     $params['fecha']  = date("Y-m-d");
     $params['method']  = '';
 
+    $params['desbloquear'] = false;
+    if ($this->usuarios_model->tienePrivilegioDe('', 'ventas/desbloquear/')) {
+      $params['desbloquear'] = true;
+    }
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -172,10 +177,25 @@ class ventas extends MY_Controller {
       ->order_by('nombre')
       ->get()->result();
 
+    $params['cerrarVenta'] = false;
+    $params['desbloquear'] = false;
+
     $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
       $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']), false, true );
+      $params['borrador']['info']->cfdi_ext = $params['borrador']['info']->cfdi_ext? json_decode($params['borrador']['info']->cfdi_ext): false;
+
+      $params['cerrarVenta'] = false;
+      if (isset($params['borrador']['info']->cfdi_ext->cerrarVenta)) {
+        $params['cerrarVenta'] = true;
+      }
+
+      $params['desbloquear'] = false;
+      if ($this->usuarios_model->tienePrivilegioDe('', 'ventas/desbloquear/')) {
+        $params['desbloquear'] = true;
+      }
+
       if(isset($_GET['id_nr']))
         $params['fecha']    = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
       if(isset($_GET['id_nrc']))
@@ -519,6 +539,9 @@ class ventas extends MY_Controller {
         array('field'   => 'dobservaciones',
               'label'   => 'Observaciones',
               'rules'   => ''),
+        array('field'   => 'dno_trazabilidad',
+              'label'   => 'No Trazabilidad',
+              'rules'   => 'max_length[15]|callback_check_trazabilidad'),
     );
 
     if (isset($_POST['privAddDescripciones']{0}) || isset($_POST['id_nrc']{0})) {
@@ -693,6 +716,29 @@ class ventas extends MY_Controller {
     if ($error)
     {
       $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
+      return false;
+    }
+
+    return true;
+  }
+
+  public function check_trazabilidad($value)
+  {
+    $sql = !empty($_GET['id_nr'])? " AND f.id_factura <> {$_GET['id_nr']}": '';
+    $error = false;
+    $query = $this->db->query("SELECT f.id_factura, fp.no_trazabilidad
+                                 FROM facturacion_otrosdatos fp
+                                 INNER JOIN facturacion f ON f.id_factura = fp.id_factura
+                                 WHERE fp.no_trazabilidad = '{$value}'
+                                  AND f.id_empresa = {$this->input->post('did_empresa')}
+                                  AND f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'b'
+                                  {$sql}");
+
+    if ($query->num_rows() > 0)
+    {
+      $data = $query->row();
+
+      $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
       return false;
     }
 

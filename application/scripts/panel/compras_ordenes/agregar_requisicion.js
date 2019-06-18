@@ -16,9 +16,12 @@
     autocompleteCentroCosto();
     autocompleteActivos();
 
+    eventOtros();
+
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnListaOtros();
+    eventBtnListaActivos();
     eventTipoCambioKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
@@ -92,14 +95,14 @@
   var btnAutorizarClick = function(){
     $("#btnAutorizar").on('click', function(e) {
       var passes = true;
-      $(".prodSelOrden:checked").each(function(index, el) {
-        if (($(this).val() != $('#proveedorId1').val() &&
-            $(this).val() != $('#proveedorId2').val() &&
-            $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
-          passes = false;
-          noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
-        }
-      });
+      // $(".prodSelOrden:checked").each(function(index, el) {
+      //   if (($(this).val() != $('#proveedorId1').val() &&
+      //       $(this).val() != $('#proveedorId2').val() &&
+      //       $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
+      //     passes = false;
+      //     noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
+      //   }
+      // });
 
       $(".prodIdOrden").each(function(index, el) {
         if ($(this).val() == '' || $(this).val() == '0') {
@@ -231,7 +234,7 @@
 
   // Autocomplete para los Proveedores.
   var autocompleteProveedores = function () {
-    $("#proveedor1, #proveedor2, #proveedor3").autocomplete({
+    $("#fproveedor").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
         if(parseInt($("#empresaId").val()) > 0)
@@ -248,20 +251,16 @@
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
-        var $proveedor =  $(this), idval = $proveedor.attr('id').replace("proveedor", "");
+        var $proveedor =  $(this);
 
-        // $proveedor.val(ui.item.id);
-        $("#proveedorId"+idval).val(ui.item.id);
+        $("#fproveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
-
-        // Asigna el nuevo id a los productos de la columna de ese proveedor
-        $('.prodSelOrden'+idval).val(ui.item.id);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
-        var $proveedor =  $(this), idval = $proveedor.attr('id').replace("proveedor", "");
-        $("#proveedor"+idval).css("background-color", "#FFD071");
-        $("#proveedorId"+idval).val('');
+        var $proveedor =  $(this);
+        $proveedor.css("background-color", "#FFD071");
+        $("#fproveedorId").val('');
       }
     });
   };
@@ -455,35 +454,71 @@
   };
 
   var autocompleteActivos = function () {
-    $("#activos").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-        // if(parseInt($("#empresaId").val()) > 0)
-        //   params.did_empresa = $("#empresaId").val();
-        params.tipo = 'a'; // activos
-        $.ajax({
-            url: base_url + 'panel/productos/ajax_aut_productos/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-              response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $activos =  $(this);
+    $("#table-productos").on('focus', 'input.clsActivos:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: function(request, response) {
+          var params = {term : request.term};
+          // if(parseInt($("#empresaId").val()) > 0)
+          //   params.did_empresa = $("#empresaId").val();
+          params.tipo = 'a'; // activos
+          $.ajax({
+              url: base_url + 'panel/productos/ajax_aut_productos/',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                response(data);
+              }
+          });
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $activos =  $(this),
+          $parent = $activos.parents('.popover-content');
 
-        $activos.val(ui.item.id);
-        $("#activoId").val(ui.item.id);
-        $activos.css("background-color", "#A1F57A");
+          addActivoTag(ui.item, $parent);
+          setTimeout(function () {
+            $activos.val('');
+          }, 200);
+        }
+      }).css('z-index', 1011).on("keydown", function(event) {
+        if(event.which == 8 || event.which == 46) {
+          $(this).css("background-color", "#FFD071");
+        }
+      });
+    });
+
+    function addActivoTag(item, $parent) {
+      var jsonn = [];
+      try {
+        jsonn = JSON.parse($('.activosP', $parent).val());
+      } catch (e) {
+        jsonn = {};
       }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#activos").css("background-color", "#FFD071");
-        $("#activoId").val('');
+
+      if (!jsonn[item.id]) {
+        $('.tagsActivosIds', $parent).append('<li data-id="'+item.id+'"><span class="tag">'+item.value+'</span>'+
+          '</li>');
+
+        jsonn[item.id] = { id: item.id, text: item.value };
+        $('.activosP', $parent).val(JSON.stringify(jsonn));
+      } else {
+        noty({"text": 'Ya esta agregada el Activo a ese producto.', "layout":"topRight", "type": 'error'});
       }
+    };
+
+    $('#table-productos').on('click', '.tagsActivosIds li:not(.disable)', function(event) {
+      var id = $(this).attr('data-id'),
+        $parent = $(this).parents('.popover-content');
+      var jsonn = [];
+      try {
+        jsonn = JSON.parse($('.activosP', $parent).val().replace(/”/g, '"'));
+      } catch (e) {
+        jsonn = {};
+      }
+      delete jsonn[id];
+      $('.activosP', $parent).val(JSON.stringify(jsonn));
+      $(this).remove();
     });
   };
 
@@ -650,6 +685,13 @@
    | Events
    |------------------------------------------------------------------------
    */
+  var eventOtros = function () {
+    $('#es_receta').on('change', function(event) {
+      var checked = $(this).is(':checked');
+      $('#no_recetas').attr('readonly', !checked).val('');
+    });
+  };
+
   var eventCodigoBarras = function () {
     $('#productos #fcodigo').on('keypress', function(event) {
       var $codigo = $(this);
@@ -695,7 +737,7 @@
   };
 
   var eventTipoCambioKeypress = function () {
-    $('#productos #ftipo_cambio').on('keypress', function(event) {
+    $('#productos #fproveedor').on('keypress', function(event) {
       if (event.which === 13) {
         var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", "");
 
@@ -849,6 +891,8 @@
           $ftraslado     = $('#productos #ftraslado'),
           $fretencionIva = $('#productos #fretencionIva'),
           $fIsrPercent   = $('#productos #fIsrPercent'),
+          $fproveedor    = $('#productos #fproveedor'),
+          $fproveedorId  = $('#productos #fproveedorId'),
 
           campos = [$fcantidad, $fprecio],
           producto = {},
@@ -887,11 +931,11 @@
         error = true;
       }
 
-      // Valida si el campo precio es 0.
-      // if ($fprecio.val() === '0') {
-      //   $fprecio.css({'background-color': '#FDFC9A'})
-      //   error = true;
-      // }
+      // Valida el proveedor
+      if ($fproveedorId.val() == '') {
+        $fproveedor.css({'background-color': '#FDFC9A'})
+        error = true;
+      }
 
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
@@ -927,6 +971,8 @@
           'tipo_cambio': $ftipo_cambio.val(),
           'ret_iva': $fretencionIva.find('option:selected').val(),
           'ret_isr': $fIsrPercent.val(),
+          'proveedor_id': $fproveedorId.val(),
+          'proveedor': $fproveedor.val(),
         };
 
         addProducto(producto, idval);
@@ -958,6 +1004,18 @@
       var $this = $(this), $parent = $this.parents("div:first");
       if ($parent.find(".popover").is(":hidden"))
         $parent.find(".popover").show(80);
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
+
+  var eventBtnListaActivos = function () {
+    $('#productos').on('click', "#btnListActivos", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden")){
+        $parent.find(".popover").show(80);
+        $parent.find('.clsActivos').focus();
+      }
       else
         $parent.find(".popover").hide(80);
     });
@@ -1127,6 +1185,11 @@
       htmlUnidad += '</select>';
 
       $trHtml = $('<tr class="rowprod">' +
+                  '<td style="">' +
+                    producto.proveedor+
+                    '<input type="hidden" name="proveedor[]" value="'+producto.proveedor+'" id="proveedor" class="span12" >' +
+                    '<input type="hidden" name="proveedorId[]" value="'+producto.proveedor_id+'" id="proveedorId" class="span12" readonly>' +
+                  '</td>' +
                   '<td style="width: 60px;">' +
                     '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" >' +
                     '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" readonly>' +
@@ -1170,35 +1233,50 @@
                     '<input type="hidden" name="retTotal1[]" value="0" id="retTotal1" class="span12" readonly>' +
                     '<input type="hidden" name="retIsrTotal1[]" value="0" id="retIsrTotal1" class="span12" readonly>' +
                   '</td>' +
-                  ($autorizar_active? '<td style="width: 10px;"></td>': '')+
-                  '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario2[]" value="" id="valorUnitario2" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td>' +
-                    '<span>'+util.darFormatoNum('0')+'</span>' +
-                    '<input type="hidden" name="importe2[]" value="0" id="importe2" class="span12 provimporte vpositive">' +
-                    '<input type="hidden" name="total2[]" value="0" id="total2" class="span12 provtotal vpositive">' +
-                    '<input type="hidden" name="trasladoTotal2[]" value="" id="trasladoTotal2" class="span12">' +
-                    '<input type="hidden" name="iepsTotal2[]" value="0" id="iepsTotal2" class="span12">' +
-                    '<input type="hidden" name="retTotal2[]" value="0" id="retTotal2" class="span12" readonly>' +
-                    '<input type="hidden" name="retIsrTotal2[]" value="0" id="retIsrTotal2" class="span12" readonly>' +
-                  '</td>' +
-                  ($autorizar_active? '<td style="width: 10px;"></td>': '')+
-                  '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario3[]" value="" id="valorUnitario3" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td>' +
-                    '<span>'+util.darFormatoNum('0')+'</span>' +
-                    '<input type="hidden" name="importe3[]" value="0" id="importe3" class="span12 provimporte vpositive">' +
-                    '<input type="hidden" name="total3[]" value="0" id="total3" class="span12 provtotal vpositive">' +
-                    '<input type="hidden" name="trasladoTotal3[]" value="" id="trasladoTotal3" class="span12">' +
-                    '<input type="hidden" name="iepsTotal3[]" value="0" id="iepsTotal3" class="span12">' +
-                    '<input type="hidden" name="retTotal3[]" value="0" id="retTotal3" class="span12" readonly>' +
-                    '<input type="hidden" name="retIsrTotal3[]" value="0" id="retIsrTotal3" class="span12" readonly>' +
-                  '</td>' +
+                  // ($autorizar_active? '<td style="width: 10px;"></td>': '')+
+                  // '<td style="width: 90px;">' +
+                  //   '<input type="text" name="valorUnitario2[]" value="" id="valorUnitario2" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  // '</td>' +
+                  // '<td>' +
+                  //   '<span>'+util.darFormatoNum('0')+'</span>' +
+                  //   '<input type="hidden" name="importe2[]" value="0" id="importe2" class="span12 provimporte vpositive">' +
+                  //   '<input type="hidden" name="total2[]" value="0" id="total2" class="span12 provtotal vpositive">' +
+                  //   '<input type="hidden" name="trasladoTotal2[]" value="" id="trasladoTotal2" class="span12">' +
+                  //   '<input type="hidden" name="iepsTotal2[]" value="0" id="iepsTotal2" class="span12">' +
+                  //   '<input type="hidden" name="retTotal2[]" value="0" id="retTotal2" class="span12" readonly>' +
+                  //   '<input type="hidden" name="retIsrTotal2[]" value="0" id="retIsrTotal2" class="span12" readonly>' +
+                  // '</td>' +
+                  // ($autorizar_active? '<td style="width: 10px;"></td>': '')+
+                  // '<td style="width: 90px;">' +
+                  //   '<input type="text" name="valorUnitario3[]" value="" id="valorUnitario3" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  // '</td>' +
+                  // '<td>' +
+                  //   '<span>'+util.darFormatoNum('0')+'</span>' +
+                  //   '<input type="hidden" name="importe3[]" value="0" id="importe3" class="span12 provimporte vpositive">' +
+                  //   '<input type="hidden" name="total3[]" value="0" id="total3" class="span12 provtotal vpositive">' +
+                  //   '<input type="hidden" name="trasladoTotal3[]" value="" id="trasladoTotal3" class="span12">' +
+                  //   '<input type="hidden" name="iepsTotal3[]" value="0" id="iepsTotal3" class="span12">' +
+                  //   '<input type="hidden" name="retTotal3[]" value="0" id="retTotal3" class="span12" readonly>' +
+                  //   '<input type="hidden" name="retIsrTotal3[]" value="0" id="retIsrTotal3" class="span12" readonly>' +
+                  // '</td>' +
                   '<td style="width: 35px;">'+
+                    '<div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>'+
+                      '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
+                        '<div class="arrow"></div><h3 class="popover-title">Activos</h3>'+
+                        '<div class="popover-content">'+
+                          '<div class="control-group activosGrup" style="width: 375px;display: '+ ($('#tipoOrden').find('option:selected').val() !== 'f'? 'block' : 'none') +';">'+
+                            '<div class="input-append span12">'+
+                              '<input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">'+
+                            '</div>'+
+                            '<ul class="tags tagsActivosIds">'+
+                            '</ul>'+
+                            '<input type="hidden" name="activosP[]" class="activosP" value="{}">'+
+                          '</div>'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+
                     '<div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>'+
-                      '<div class="popover fade left in" style="top:-55.5px;left:-566px;">'+
+                      '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
                         '<div class="arrow"></div><h3 class="popover-title">Otros</h3>'+
                         '<div class="popover-content">'+
                           '<table>'+

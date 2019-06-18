@@ -119,6 +119,14 @@
                 </div>
               </div>
 
+              <div class="control-group" style="background-color: #fffed7">
+                <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                <div class="controls">
+                  <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad"
+                    value="<?php echo set_value('dno_trazabilidad', isset($factura) ? $factura['info']->no_trazabilidad : ''); ?>" placeholder="">
+                </div>
+              </div>
+
               <div class="control-group">
                 <label class="control-label" for="es_carta_porte">Carta Porte</label>
                 <div class="controls">

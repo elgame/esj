@@ -95,9 +95,10 @@ class facturacion_model extends privilegios_model{
 	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db
-      ->select("*")
-      ->from('facturacion')
-      ->where("id_factura = {$idFactura}")
+      ->select("f.*, fo.no_trazabilidad")
+      ->from('facturacion as f')
+      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
+      ->where("f.id_factura = {$idFactura}")
       ->get();
 
     if($res->num_rows() > 0)
@@ -710,6 +711,14 @@ class facturacion_model extends privilegios_model{
       $this->db->insert('facturacion', $datosFactura);
       $idFactura = $this->db->insert_id('facturacion', 'id_factura');
 
+      // Si tiene el # de trazabilidad
+      if ($this->input->post('dno_trazabilidad') !== false) {
+        $this->db->insert('facturacion_otrosdatos', [
+          'id_factura'      => $idFactura,
+          'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+        ]);
+      }
+
       // Bitacora
       $this->bitacora_model->_insert('facturacion', $idFactura,
                                       array(':accion'    => $bitacora_accion, ':seccion' => 'facturas',
@@ -723,6 +732,14 @@ class facturacion_model extends privilegios_model{
     {
       $idFactura = $_GET['idb'];
       $this->db->update('facturacion', $datosFactura, array('id_factura' => $idFactura));
+
+      // Si tiene el # de trazabilidad
+      if ($this->input->post('dno_trazabilidad') !== false) {
+        $this->db->update('facturacion_otrosdatos', [
+          'id_factura'      => $idFactura,
+          'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+        ], "id_factura = {$idFactura}");
+      }
     }
 
     // Productos e Impuestos
@@ -1704,6 +1721,14 @@ class facturacion_model extends privilegios_model{
 
       // Inserta los datos de la factura y obtiene el Id.
       $this->db->update('facturacion', $datosFactura, array('id_factura' => $idBorrador));
+
+      // Si tiene el # de trazabilidad
+      if ($this->input->post('dno_trazabilidad') !== false) {
+        $this->db->update('facturacion_otrosdatos', [
+          'id_factura'      => $idBorrador,
+          'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+        ], "id_factura = {$idBorrador}");
+      }
 
       // Productos e Impuestos
       $productosFactura   = array(); // Productos para la Factura

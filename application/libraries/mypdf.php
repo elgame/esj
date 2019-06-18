@@ -17,6 +17,7 @@ class MYpdf extends FPDF {
 
   var $limiteY     = 0;
   var $noShowPages = true;
+  var $noShowDate = true;
   var $noShowPagesPos = null;
 
   var $auxy = 0;
@@ -81,10 +82,11 @@ class MYpdf extends FPDF {
 
       $this->SetFont('Arial','I',8);
       $this->SetXY(211, 5);
-        if($this->noShowPages)
-         $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
+      if($this->noShowPages)
+       $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
       $this->SetXY(194, 8);
-      $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+      if($this->noShowDate)
+        $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
       // $this->Line(6, 26, 210, 26);
 
@@ -114,7 +116,8 @@ class MYpdf extends FPDF {
       if($this->noShowPages)
        $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
       $this->SetXY(259, 8);
-      $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+      if($this->noShowDate)
+        $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
       $this->Line(6, 26, 273, 26);
 
@@ -145,7 +148,8 @@ class MYpdf extends FPDF {
         if($this->noShowPages)
          $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
       $this->SetXY(194, 8);
-      $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+      if($this->noShowDate)
+        $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
       $this->Line(6, 26, 210, 26);
     }
@@ -174,7 +178,8 @@ class MYpdf extends FPDF {
         if($this->noShowPages)
          $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
       $this->SetXY(333, 8);
-      $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+      if($this->noShowDate)
+        $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
       $this->Line(6, 26, 349, 26);
     }

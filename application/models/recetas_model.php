@@ -29,7 +29,7 @@ class recetas_model extends CI_Model {
         string_agg(crc.id_centro_costo::text, ', ') AS ids_centros_costos, string_agg(crr.id_rancho::text, ', ') AS ids_ranchos,
         string_agg(cr.id_area::text, ', ') AS ids_areas, string_agg(cr.id_activo::text, ', ') AS ids_activos,
         string_agg(cr.solicito, ', ') AS empleado_solicito, (Sum(crq.tipo_cambio)/Count(cr.id_requisicion)) AS tipo_cambio,
-        string_agg(cr.otros_datos::text, '&-,-&') AS otros_datos";
+        string_agg(cr.otros_datos::text, '&-,-&') AS otros_datos, string_agg(crq.activos::text, '&-,-&') AS activos";
     }
 
     if($this->input->get('did_empresa') != '')
@@ -196,16 +196,32 @@ class recetas_model extends CI_Model {
       }
 
       // Inserta los activos
-      if (isset($value->ids_activos) && $value->ids_activos != '') {
-        $value->ids_activos = array_unique(explode(', ', $value->ids_activos));
-        foreach ($value->ids_activos as $keyr => $dactivo) {
-          $dataOrdenCats[$keyaux]['activo'][] = [
-            'id_activo' => $dactivo,
-            'id_orden'  => '',
-            'num'       => count($value->ids_activos)
-          ];
+      if (isset($value->activos) && $value->activos != '') {
+        $value->activos = explode('&-,-&', $value->activos);
+        foreach ($value->activos as $keyr => $ddatos) {
+          $ddatos = json_decode($ddatos);
+          foreach ($ddatos as $keyaa => $campo) {
+            if (!isset($dataOrdenCats[$keyaux]['activo'][$campo->id])) {
+              $dataOrdenCats[$keyaux]['activo'][$campo->id] = [
+                'id_activo' => $campo->id,
+                'id_orden'  => '',
+                'num'       => 1
+              ];
+            }
+          }
         }
       }
+
+      // if (isset($value->ids_activos) && $value->ids_activos != '') {
+      //   $value->ids_activos = array_unique(explode(', ', $value->ids_activos));
+      //   foreach ($value->ids_activos as $keyr => $dactivo) {
+      //     $dataOrdenCats[$keyaux]['activo'][] = [
+      //       'id_activo' => $dactivo,
+      //       'id_orden'  => '',
+      //       'num'       => count($value->ids_activos)
+      //     ];
+      //   }
+      // }
 
       // Inserta otros datos (pasar a bascula, recoger, etc)
       if (isset($value->otros_datos) && $value->otros_datos != '') {
@@ -224,6 +240,18 @@ class recetas_model extends CI_Model {
 
       $rows_compras++;
     }
+
+    foreach ($dataOrdenCats as $keya => $actt) {
+      if (isset($actt['activo'])) {
+        foreach ($actt['activo'] as $keyy => $value) {
+          $dataOrdenCats[$keya]['activo'][$keyy]['num'] = count($actt['activo']);
+        }
+      }
+    }
+
+    // echo "<pre>";
+    //   var_dump($ordenes, $dataOrdenCats, $productos);
+    // echo "</pre>";exit;
 
     // creamos las ordenes
     foreach ($ordenes as $key => $orden) {

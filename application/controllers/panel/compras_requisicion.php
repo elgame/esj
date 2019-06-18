@@ -243,55 +243,27 @@ class compras_requisicion extends MY_Controller {
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
-    // if ( ! isset($_GET['m']))
-    // {
-      $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
-      if ($this->form_validation->run() == FALSE)
-      {
-        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-      }
-      else
-      {
-        $response = $this->compras_requisicion_model->actualizar($_GET['id']);
+    $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->compras_requisicion_model->actualizar($_GET['id']);
 
-        if ($response['passes'])
+      if ($response['passes'])
+      {
+        if ($response['autorizado'])
         {
-          if ($response['autorizado'])
-          {
-            redirect(base_url('panel/compras_ordenes/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
-          }
-          else
-          {
-            redirect(base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
-          }
+          redirect(base_url('panel/compras_ordenes/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
+        }
+        else
+        {
+          redirect(base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
         }
       }
-    // }
-    // else
-    // {
-    //   // Si esta autorizando una orden de compra.
-    //   if ($_GET['m'] === 'a')
-    //   {
-    //     $this->compras_requisicion_model->autorizar($_GET['id']);
-
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m')).'&msg=4&print=true'));
-    //   }
-
-    //   // Si esta dando la entrada de una orden.
-    //   elseif ($_GET['m'] === 'e')
-    //   {
-    //     $response = $this->compras_requisicion_model->entrada($_GET['id']);
-
-    //     if ($response['msg'] === 5)
-    //     {
-    //       $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
-    //       $printFaltantes .= (is_array($response['entrada'])) ? '&entrada='.$response['entrada']['folio'] : '';
-
-    //       redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
-    //     }
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
-    //   }
-    // }
+    }
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
@@ -426,7 +398,7 @@ class compras_requisicion extends MY_Controller {
 
     if (isset($_GET['p']))
     {
-      $this->compras_requisicion_model->print_orden_compra($_GET['id']);
+      $this->compras_requisicion_model->print_pre_orden_compra($_GET['id']);
     }
     else
     {
@@ -554,24 +526,24 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Es receta',
             'rules' => ''),
 
-      array('field' => 'proveedorId1',
-            'label' => 'Proveedor',
-            'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
-      array('field' => 'proveedorId2',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedorId3',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedor1',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor2',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor3',
-            'label' => '',
-            'rules' => ''),
+      // array('field' => 'proveedorId1',
+      //       'label' => 'Proveedor',
+      //       'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
+      // array('field' => 'proveedorId2',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedorId3',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedor1',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor2',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor3',
+      //       'label' => '',
+      //       'rules' => ''),
 
       array('field' => 'solicito',
             'label' => '',
@@ -643,12 +615,23 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'centroCostoText[]',
             'label' => 'Centro de costo',
             'rules' => ''),
-      array('field' => 'activoId',
-            'label' => 'Activo',
-            'rules' => ($valGasto && !$valFlete? 'numeric': '')),
-      array('field' => 'activos',
-            'label' => 'Activo',
+      // array('field' => 'activoId',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? 'numeric': '')),
+      // array('field' => 'activos',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'activosP[]',
+            'label' => 'Activo del producto',
             'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'proveedorId[]',
+            'label' => 'Proveedor',
+            'rules' => 'numeric'),
+      array('field' => 'proveedor[]',
+            'label' => 'Proveedor',
+            'rules' => ''),
 
       array('field' => 'totalLetra1',
             'label' => '',

@@ -222,8 +222,9 @@ class bascula extends MY_Controller {
           $this->load->model('clientes_model');
           $cliente = $this->clientes_model->getClienteInfo($info['info'][0]->id_cliente, true);
 
-          $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
-          $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+          $_POST['pcliente']         = $cliente['info']->nombre_fiscal;
+          $_POST['pid_cliente']      = $info['info'][0]->id_cliente;
+          $_POST['dno_trazabilidad'] = $info['info'][0]->no_trazabilidad;
         }
 
         if ($info['info'][0]->id_productor != null)
@@ -843,7 +844,11 @@ class bascula extends MY_Controller {
     $this->load->model('bascula2_model');
 
     $params['data'] = $this->bascula2_model->getMovimientosAuditoria();
-    $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
+    if($this->input->get('ftipop') == 'sa') {
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_sa_pdf', $params);
+    }else{
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
+    }
   }
 
   /**
@@ -1485,6 +1490,9 @@ class bascula extends MY_Controller {
       array('field' => 'pcliente',
             'label' => '',
             'rules' => ''),
+      array('field' => 'dno_trazabilidad',
+            'label' => '',
+            'rules' => 'max_length[15]|callback_check_trazabilidad'),
       array('field' => 'pid_chofer',
             'label' => 'Chofer',
             'rules' => ''),
@@ -1603,6 +1611,10 @@ class bascula extends MY_Controller {
                          'label' => 'Cliente',
                          'rules' => 'required');
 
+        $rules[] = array('field' => 'dno_trazabilidad',
+                         'label' => 'No Trazabilidad',
+                         'rules' => 'max_length[15]|callback_check_trazabilidad');
+
         $rules[] = array('field' => 'pid_chofer',
                          'label' => 'Chofer',
                          'rules' => 'required');
@@ -1630,6 +1642,28 @@ class bascula extends MY_Controller {
       }else
         return true;
     }
+  }
+
+  public function check_trazabilidad($value)
+  {
+    $sql = !empty($_POST['pidb'])? " AND b.id_bascula <> {$_POST['pidb']}": '';
+    $error = false;
+    $query = $this->db->query("SELECT b.id_bascula, b.no_trazabilidad
+                                 FROM bascula b
+                                 WHERE b.no_trazabilidad = '{$value}'
+                                  AND b.id_empresa = {$this->input->post('pid_empresa')}
+                                  AND b.status = 't'
+                                  {$sql}");
+
+    if ($query->num_rows() > 0)
+    {
+      $data = $query->row();
+
+      $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
+      return false;
+    }
+
+    return true;
   }
 
   /**

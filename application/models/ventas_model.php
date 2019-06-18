@@ -54,7 +54,7 @@ class Ventas_model extends privilegios_model{
         SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
                 f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada,
-                COALESCE(fh.id_remision, 0) AS facturada
+                COALESCE(fh.id_remision, 0) AS facturada, f.cfdi_ext
         FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -84,10 +84,11 @@ class Ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-            ->select("*")
-            ->from('facturacion')
-            ->where("id_factura = {$id}")
-            ->get();
+      ->select("f.*, fo.no_trazabilidad")
+      ->from('facturacion as f')
+      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
+      ->where("f.id_factura = {$id}")
+      ->get();
 
     if($res->num_rows() > 0)
     {
@@ -267,6 +268,10 @@ class Ventas_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
 
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
+
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
@@ -317,6 +322,14 @@ class Ventas_model extends privilegios_model{
 
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false) {
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'      => $id_venta,
+        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+      ]);
+    }
 
     // si probiene de una venta se asigna
     if (isset($_GET['id_vd'])) {
@@ -406,7 +419,7 @@ class Ventas_model extends privilegios_model{
           'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
@@ -585,6 +598,10 @@ class Ventas_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
 
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
+
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
@@ -640,6 +657,14 @@ class Ventas_model extends privilegios_model{
                                     ':titulo'       => 'Venta'));
     $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
     // $id_venta = $this->db->insert_id();
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false) {
+      $this->db->update('facturacion_otrosdatos', [
+        'id_factura'      => $id_venta,
+        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+      ], "id_factura = {$id_venta}");
+    }
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
@@ -713,7 +738,7 @@ class Ventas_model extends privilegios_model{
           'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,

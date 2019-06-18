@@ -87,7 +87,7 @@
         $tipo = "ENTRADAS";
       else
         $tipo = "SALIDAS";
-		$titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
+		$titulo2 = "AUDITORIA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
 
 	$titulo3 = '';
     if (isset($proveedor['info']->nombre_fiscal))
@@ -109,13 +109,13 @@
 							<td>TIPO</td>
 							<td>BOLETA</td>
 							<td>FECHA</td>
-							<td>CALIDAD</td>
+							<td>CLASIFICACION</td>
 							<td class="txt_right">CAJS</td>
 							<td class="txt_right">PROM</td>
 							<td class="txt_right">KILOS</td>
-							<td>LOTE</td>
-							<td>RANCHO</td>
-							<!-- <td>BONIF</td> -->
+              <td>Trazabilidad</td>
+              <td>TIPO DOC</td>
+							<td>FOLIO</td>
 						</tr>
 				<?php
 				$lastFolio = 0;
@@ -125,19 +125,18 @@
             {
         ?>
         		<tr>
-							<!-- <td><?php echo ($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : ''; ?></td> -->
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->tipo : ''; ?></td>
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->folio : ''; ?></td>
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->fecha : ''; ?></td>
-							<td><?php echo substr($caja->calidad, 0, 9); ?></td>
+							<td><?php echo $caja->tipo; ?></td>
+							<td><?php echo $caja->folio; ?></td>
+							<td><?php echo $caja->fecha; ?></td>
+							<td><?php echo substr($caja->calidad, 0, 15); ?></td>
 							<td class="txt_right"><?php echo $caja->cajas; ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->promedio, 2, '', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->kilos, 2, ''); ?></td>
-							<td><?php echo ''; ?></td>
-							<td><?php echo $caja->rancho; ?></td>
+              <td><?php echo $caja->no_trazabilidad; ?></td>
+							<td><?php echo $caja->tipo_doc; ?></td>
+							<td><?php echo $caja->factura; ?></td>
 						</tr>
         <?php
-							$lastFolio = $caja->id_bascula;
             }
         }
 				?>

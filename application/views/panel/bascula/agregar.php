@@ -238,11 +238,19 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente" value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente"
-                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="Cliente" <?php echo $disabled.$bmod['proveedor']; ?>>
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="dno_trazabilidad" placeholder="Cliente" <?php echo $disabled.$bmod['proveedor']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_cliente" value="<?php echo set_value('pid_cliente', $this->input->post('pid_cliente')) ?>" id="pid_cliente">
+                    </div>
+                  </div>
+
+                  <div class="control-group" id="groupTrazabilidad" style="display: none;background-color: #fffed7;">
+                    <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                    <div class="controls">
+                      <input type="text" name="dno_trazabilidad" value="<?php echo set_value('dno_trazabilidad', $this->input->post('dno_trazabilidad')) ?>" id="dno_trazabilidad"
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="No Trazabilidad" <?php echo $disabled.$bmod['proveedor']; ?>>
                     </div>
                   </div>
 

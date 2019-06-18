@@ -126,6 +126,15 @@
                   <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', isset($borrador) ? $borrador['info']->observaciones : ''); ?></textarea>
                 </div>
               </div>
+
+              <div class="control-group" style="background-color: #fffed7">
+                <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                <div class="controls">
+                  <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad"
+                    value="<?php echo set_value('dno_trazabilidad', isset($borrador) ? $borrador['info']->no_trazabilidad : ''); ?>" placeholder="">
+                </div>
+              </div>
+
               <?php if( isset($_GET['id_nrc']) ){ ?>
                 <input type="hidden" name="id_nrc" value="<?php echo $_GET['id_nrc']; ?>">
               <?php }else{ ?>
@@ -265,7 +274,7 @@
                   <select name="duso_cfdi" class="span9" id="duso_cfdi">
 
                     <?php
-                      $metodo = isset($borrador) ? $borrador['info']->cfdi_ext->uso_cfdi : '';
+                      $metodo = isset($borrador) ? $borrador['info']->cfdi_ext->usoCfdi : '';
                      ?>
                     <?php foreach ($usoCfdi as $key => $usoCfdi) { ?>
                       <option value="<?php echo $usoCfdi['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfdi['key'], $metodo === $usoCfdi['key'] ? true : false); ?>><?php echo $usoCfdi['key'].' - '.$usoCfdi['value'] ?></option>
@@ -278,8 +287,14 @@
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
+                      <label><input type="checkbox" name="cerrarVenta" value="true"
+                        <?php echo ($cerrarVenta ? 'checked' : '') ?>
+                        <?php echo ($cerrarVenta && !$desbloquear? 'disabled': ''); ?>> Cerrar Venta</label> <br>
+
+                      <?php if (!$cerrarVenta || $desbloquear): ?>
                       <!-- <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br> -->
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;" name="guardar">Guardar</button>
+                      <?php endif ?>
 
                       <?php
                       $show_imprimir = 'none';
