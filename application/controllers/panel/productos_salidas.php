@@ -132,6 +132,78 @@ class productos_salidas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function modificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/productos_salidas/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
+    ));
+
+    $this->load->model('almacenes_model');
+    $this->load->model('productos_salidas_model');
+    $this->load->model('compras_areas_model');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar salida'
+    );
+
+    $this->configAddSalida();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->productos_salidas_model->agregar();
+      $this->productos_salidas_model->agregarProductos($res_mdl['id_salida']);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+      }
+    }
+
+    $params['salida'] = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['fecha']      = str_replace(' ', 'T', substr($params['salida']->fecha, 0, 19));
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/productos_salidas/modificar', $params);
+    $this->load->view('panel/footer');
+  }
+
   public function ver()
   {
     $this->carabiner->css(array(
@@ -265,6 +337,12 @@ class productos_salidas extends MY_Controller {
   {
     $this->load->library('form_validation');
 
+    $req1 = $req2 = '';
+    if (!empty($this->input->post('guardar'))) {
+      $req1 = 'required';
+      $req2 = 'required|';
+    }
+
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
@@ -312,16 +390,16 @@ class productos_salidas extends MY_Controller {
             'rules' => 'max_length[30]'),
       array('field' => 'ranchoC',
             'label' => 'Rancho',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'ranchoC_id',
             'label' => 'Rancho',
-            'rules' => 'required|numeric'),
+            'rules' => $req2.'numeric'),
       array('field' => 'centro_costo',
             'label' => 'Centro de costo',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'centro_costo_id',
             'label' => 'Centro de costo',
-            'rules' => 'required|numeric'),
+            'rules' => $req2.'numeric'),
       array('field' => 'hectareas',
             'label' => 'Hectareas',
             'rules' => 'numeric'),
@@ -359,7 +437,7 @@ class productos_salidas extends MY_Controller {
       //       'rules' => 'required'),
       array('field' => 'tipoProducto[]',
             'label' => '',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'precioUnit[]',
             'label' => '',
             'rules' => ''),
@@ -368,25 +446,25 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'concepto[]',
             'label' => 'Productos',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'productoId[]',
             'label' => '',
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]')
+            'rules' => $req2.'|greater_than[0]')
     );
 
     if ($this->input->post('tid_almacen') == '') {
       $rules[] = array('field' => 'areaId',
             'label' => 'Cultivo',
-            'rules' => 'required|numeric');
+            'rules' => $req2.'numeric');
       $rules[] = array('field' => 'area',
             'label' => 'Cultivo',
-            'rules' => 'required');
+            'rules' => $req1.'');
       $rules[] = array('field' => 'ranchoId[]',
             'label' => 'Rancho',
-            'rules' => 'required|numeric');
+            'rules' => $req2.'numeric');
       $rules[] = array('field' => 'ranchoText[]',
             'label' => 'Rancho',
             'rules' => '');
@@ -395,7 +473,7 @@ class productos_salidas extends MY_Controller {
             'rules' => '');
       $rules[] = array('field' => 'centroCostoId[]',
             'label' => 'Centro de costo',
-            'rules' => 'required|numeric');
+            'rules' => $req2.'numeric');
       $rules[] = array('field' => 'centroCostoText[]',
             'label' => 'Centro de costo',
             'rules' => '');

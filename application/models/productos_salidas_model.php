@@ -54,9 +54,10 @@ class productos_salidas_model extends CI_Model {
 
     $sql_fil_prod = '';
     if ($this->input->get('fconceptoId') > 0) {
-      $sql_fil_prod = "INNER JOIN (
-          SELECT id_salida FROM compras_salidas_productos WHERE id_producto = {$this->input->get('fconceptoId')} GROUP BY id_salida
-        ) sp ON cs.id_salida = sp.id_salida";
+      // $sql_fil_prod = "INNER JOIN (
+      //     SELECT id_salida FROM compras_salidas_productos WHERE id_producto = {$this->input->get('fconceptoId')} GROUP BY id_salida
+      //   ) sp ON cs.id_salida = sp.id_salida";
+      $sql .= " AND sp.id_producto = {$this->input->get('fconceptoId')}";
     }
 
     $query = BDUtil::pagination(
@@ -64,12 +65,13 @@ class productos_salidas_model extends CI_Model {
                 cs.id_empresa, e.nombre_fiscal AS empresa,
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-                cs.status, cs.concepto
+                cs.status, cs.concepto, Count(sp.id_salida) AS productos
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
-          {$sql_fil_prod}
+          LEFT JOIN compras_salidas_productos sp ON cs.id_salida = sp.id_salida
         WHERE 1 = 1 {$sql}
+        GROUP BY cs.id_salida, e.id_empresa, u.id
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
         ", $params, true);
 
@@ -133,10 +135,16 @@ class productos_salidas_model extends CI_Model {
       }
     }
 
-    $this->db->insert('compras_salidas', $data);
-    $id_salida = $this->db->insert_id();
+    if ($this->input->post('id_salida') > 0) {
+      $id_salida = $this->input->post('id_salida');
+      $this->db->update('compras_salidas', $data, "id_salida = {$id_salida}");
+    } else {
+      $this->db->insert('compras_salidas', $data);
+      $id_salida = $this->db->insert_id();
+    }
 
     // Inserta los ranchos
+    $this->db->delete('compras_salidas_rancho', "id_salida = {$id_salida}");
     if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
       foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
         $this->db->insert('compras_salidas_rancho', [
@@ -148,6 +156,7 @@ class productos_salidas_model extends CI_Model {
     }
 
     // Inserta los centros de costo
+    $this->db->delete('compras_salidas_centro_costo', "id_salida = {$id_salida}");
     if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
       foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
         $this->db->insert('compras_salidas_centro_costo', [
@@ -237,6 +246,7 @@ class productos_salidas_model extends CI_Model {
       }
     }
 
+    $this->db->delete('compras_salidas_productos', "id_salida = {$idSalida}");
     $this->db->insert_batch('compras_salidas_productos', $productos);
 
     // si es transferencia de almacenes
@@ -345,7 +355,8 @@ class productos_salidas_model extends CI_Model {
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
               cs.status, cs.concepto, cs.solicito, cs.recibio,
               cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
-              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso,
+              cs.no_impresiones, cs.no_impresiones_tk,
+              ca.id_almacen, ca.nombre AS almacen, cs.id_traspaso,
               cs.no_receta, cs.etapa, cs.rancho, cs.centro_costo, cs.hectareas, cs.grupo,
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
@@ -452,6 +463,10 @@ class productos_salidas_model extends CI_Model {
     $this->load->model('catalogos_sft_model');
 
     $orden = $this->info($salidaID, true);
+
+    if (isset($orden['info'][0]->productos) && count($orden['info'][0]->productos) === 0) {
+      $this->print_orden_pre_salida($orden, $path);
+    }
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -612,6 +627,191 @@ class productos_salidas_model extends CI_Model {
     else
     {
       $pdf->Output('SALIDA_PRODUCTO'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
+
+  public function print_orden_pre_salida($orden, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $orden['info'][0]->empresa;
+    $tipo_orden = 'ORDEN DE SALIDA DE PRODUCTOS';
+    // if($orden['info'][0]->tipo_orden == 'd')
+    //   $tipo_orden = 'ORDEN DE SERVICIO';
+    // elseif($orden['info'][0]->tipo_orden == 'f')
+    //   $tipo_orden = 'ORDEN DE FLETE';
+
+    $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->SetXY(6, $pdf->GetY()-6);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(150, 50));
+    $pdf->Row(array(
+      $tipo_orden,
+      'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
+    ), false, false);
+    // $pdf->SetFont('helvetica','', 8);
+    // $pdf->SetX(6);
+    // $pdf->Row(array(
+    //   'PROVEEDOR: ' . $orden['info'][0]->empleado,
+    //   MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
+    // ), false, false);
+
+    $aligns = array('C', 'C', 'L', 'R', 'R');
+    $widths = array(35, 25, 94, 25, 25);
+    $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+
+    $subtotal = $iva = $total = $retencion = $ieps = 0;
+
+    $tipoCambio = 0;
+    $codigoAreas = array();
+
+    for ($i=0; $i < 15; $i++) {
+      $tipoCambio = 1;
+
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $i==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array(
+        '',
+        '',
+        '',
+        '',
+        '',
+      );
+
+      $pdf->SetX(6);
+      $pdf->Row($datos, false);
+    }
+
+    $yy = $pdf->GetY();
+
+    //Otros datos
+    // $pdf->SetXY(6, $yy);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(154));
+
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(104, 50));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(154));
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+4);
+    $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+    $yy2 = $pdf->GetY();
+    if(count($codigoAreas) > 0){
+      // $yy2 -= 9;
+      // $pdf->SetXY(160, $yy2);
+      // $pdf->Row(array('_______________________________'), false, false);
+      $yy2 = $pdf->GetY();
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetWidths(array(155));
+      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetWidths(array(155));
+      $pdf->Row(array('Se asigno a: ' . $orden['info'][0]->trabajador), false, false);
+    }
+
+    // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
+
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+    // if($orden['info'][0]->tipo_orden == 'f'){
+    //   $pdf->SetWidths(array(205));
+    //   $pdf->SetX(6);
+    //   $pdf->Row(array(substr($clientessss, 2)), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()-3);
+    //   $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
+    // }
+
+    $y_compras = $pdf->GetY();
+
+    $pdf->SetX(6);
+    $pdf->SetWidths(array(100, 100));
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones),
+                    'Almacen: '.$orden['info'][0]->almacen.($orden['info'][0]->id_traspaso>0? ' | Traspaso de almacen': '') ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetX(6);
+      $pdf->Row(array( 'TRASPASO: '.$orden['info'][0]->traspaso->almacen,
+                      'Fecha: '.$orden['info'][0]->traspaso->fecha.' | Orden: '.$orden['info'][0]->traspaso->folio ), false, false);
+    }
+    $auxy = $pdf->GetY();
+
+    //Totales
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(160, $yy);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(25, 25));
+    $pdf->SetX(160);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $auxy+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Cultivo / Actividad / Producto', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Areas / Ranchos / Lineas', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Centro de costo', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Activo', ''), false, true);
+
+    if ($path)
+    {
+      $file = $path.'SALIDA_PRODUCTO'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('SALIDA_PRODUCTO'.date('Y-m-d').'.pdf', 'I');
+      exit;
     }
   }
 

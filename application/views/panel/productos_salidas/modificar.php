@@ -8,7 +8,7 @@
       <li>
         <a href="<?php echo base_url('panel/productos_salidas/'); ?>">Salidas de Productos</a> <span class="divider">/</span>
       </li>
-      <li>Agregar</li>
+      <li>Modificar</li>
     </ul>
   </div>
 
@@ -16,15 +16,15 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> Agregar Salida</h2>
+        <h2><i class="icon-plus"></i> Modificar Salida</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
-
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+          <input type="hidden" name="id_salida" value="<?php echo $salida->id_salida ?>">
           <div class="row-fluid">
             <div class="span6">
 
@@ -32,9 +32,9 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', (isset($salida->empresa)? $salida->empresa: '')) ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
-                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
+                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', (isset($salida->id_empresa)? $salida->id_empresa: '')) ?>">
                 </div>
               </div><!--/control-group -->
 
@@ -42,7 +42,7 @@
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="" required>
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', (isset($salida->solicito)? $salida->solicito: '')) ?>" placeholder="" required>
                   </div>
                 </div>
               </div>
@@ -51,7 +51,7 @@
                 <label class="control-label" for="recibio">Recibio</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="recibio" class="span11" id="recibio" value="<?php echo set_value('recibio') ?>" placeholder="" required>
+                    <input type="text" name="recibio" class="span11" id="recibio" value="<?php echo set_value('recibio', (isset($salida->recibio)? $salida->recibio: '')) ?>" placeholder="" required>
                   </div>
                 </div>
               </div>
@@ -60,8 +60,8 @@
                 <label class="control-label" for="ftrabajador">Trabajador</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="ftrabajador" class="span11" id="ftrabajador" value="<?php echo set_value('ftrabajador') ?>" placeholder="Asignar material y/o herramienta">
-                    <input type="hidden" name="fid_trabajador" class="span12" id="fid_trabajador" value="" required="">
+                    <input type="text" name="ftrabajador" class="span11" id="ftrabajador" value="<?php echo set_value('ftrabajador', (isset($salida->trabajador)? $salida->trabajador: '')) ?>" placeholder="Asignar material y/o herramienta">
+                    <input type="hidden" name="fid_trabajador" class="span12" id="fid_trabajador" value="<?php echo set_value('fid_trabajador', (isset($salida->id_usuario)? $salida->id_usuario: '')) ?>" required="">
                   </div>
                 </div>
               </div>
@@ -71,7 +71,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <select name="id_almacen" class="span11">
-                    <?php $default = ($this->input->post('id_almacen')>0? $this->input->post('id_almacen'): '1');
+                    <?php $default = ($salida->id_almacen>0? $salida->id_almacen: '1');
                     foreach ($almacenes['almacenes'] as $key => $value) { ?>
                       <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
                     <?php } ?>
@@ -115,7 +115,7 @@
               <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
-                  <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $next_folio); ?>" size="25" readonly>
+                  <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', (isset($salida->folio)? $salida->folio: '')); ?>" size="25" readonly>
                 </div>
               </div>
 
@@ -123,7 +123,6 @@
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" name="guardar" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
-                      <button type="submit" name="preguardar" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar Pre-Salida</button>
                   </div>
                 </div>
               </div>
@@ -145,9 +144,9 @@
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', (isset($salida->area)? $salida->area->nombre: '')) ?>" placeholder="Limon, Piña">
                         </div>
-                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', (isset($salida->area)? $salida->area->id_area: '')) ?>">
                       </div>
                     </div><!--/control-group -->
 
@@ -159,11 +158,11 @@
                         </div>
                       </div>
                       <ul class="tags" id="tagsRanchoIds">
-                      <?php if (isset($_POST['ranchoId'])) {
-                        foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
-                          <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
-                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
-                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
+                      <?php if (isset($salida->rancho)) {
+                        foreach ($salida->rancho as $key => $rancho) { ?>
+                          <li><span class="tag"><?php echo $rancho->nombre ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
                           </li>
                        <?php }} ?>
                       </ul>
@@ -179,11 +178,11 @@
                         </div>
                       </div>
                       <ul class="tags" id="tagsCCIds">
-                      <?php if (isset($_POST['centroCostoId'])) {
-                        foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
-                          <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
-                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
-                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+                      <?php if (isset($salida->centroCosto)) {
+                        foreach ($salida->centroCosto as $key => $centroCosto) { ?>
+                          <li><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
                           </li>
                        <?php }} ?>
                       </ul>
@@ -193,9 +192,9 @@
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', (isset($salida->activo)? $salida->activo->nombre: '')) ?>" placeholder="Nissan FRX, Maquina limon">
                         </div>
-                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', (isset($salida->activo)? $salida->activo->id_producto: '')) ?>">
                       </div>
                     </div><!--/control-group -->
                   </div>
@@ -403,7 +402,6 @@
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
                       <thead>
                         <tr>
-                          <!-- <th>COD AREA <input type="checkbox" id="chkcopydatos"></th> -->
                           <th>CODIGO</th>
                           <th>PRODUCTO</th>
                           <th>CANT.</th>
@@ -412,28 +410,22 @@
                       </thead>
                       <tbody>
 
-                        <?php if (isset($_POST['concepto'])) {
-                              foreach ($_POST['concepto'] as $key => $concepto) { ?>
+                        <?php if (isset($salida->productos)) {
+                              foreach ($salida->productos as $key => $concepto) { ?>
                             <tr>
-                              <!-- <td style="width: 60px;">
-                                <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
-                                <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
-                                <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
-                              </td> -->
                               <td style="width: 70px;">
-                                <input type="hidden" name="tipoProducto[]" value="<?php echo $_POST['tipoProducto'][$key] ?>">
-                                <input type="hidden" name="precioUnit[]" value="<?php echo $_POST['precioUnit'][$key] ?>">
-                                <?php echo $_POST['codigo'][$key] ?>
-                                <input type="hidden" name="codigo[]" value="<?php echo $_POST['codigo'][$key] ?>" class="span12">
+                                <input type="hidden" name="tipoProducto[]" value="<?php echo $concepto->tipo_orden ?>">
+                                <input type="hidden" name="precioUnit[]" value="<?php echo $concepto->precio_unitario ?>">
+                                <?php echo $concepto->codigo ?>
+                                <input type="hidden" name="codigo[]" value="<?php echo $concepto->codigo ?>" class="span12">
                               </td>
                               <td>
-                                  <?php echo $concepto ?>
-                                  <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
-                                  <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
+                                  <?php echo $concepto->producto ?>
+                                  <input type="hidden" name="concepto[]" value="<?php echo $concepto->producto ?>" id="concepto" class="span12">
+                                  <input type="hidden" name="productoId[]" value="<?php echo $concepto->id_producto ?>" id="productoId" class="span12">
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0.01">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="0.01">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>

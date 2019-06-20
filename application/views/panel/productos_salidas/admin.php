@@ -88,20 +88,29 @@
                   </td>
                   <td class="center">
                     <?php
-                      echo $this->usuarios_model->getLinkPrivSm('productos_salidas/ver/', array(
-                        'params'   => 'id='.$salida->id_salida,
-                        'btn_type' => 'btn-success',
-                        'attrs' => array())
-                      );
+                      if ($salida->productos > 0) {
+                        echo $this->usuarios_model->getLinkPrivSm('productos_salidas/ver/', array(
+                          'params'   => 'id='.$salida->id_salida,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
+
+                        if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
+                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                                  <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                        }
+                      } else {
+                        echo $this->usuarios_model->getLinkPrivSm('productos_salidas/modificar/', array(
+                          'params'   => 'id='.$salida->id_salida,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
+                      }
                       echo $this->usuarios_model->getLinkPrivSm('productos_salidas/imprimir/', array(
                         'params'   => 'id='.$salida->id_salida,
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => '_BLANK'))
                       );
-                      if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
-                        echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
-                                <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
-                      }
 
                       if ($salida->status !== 'ca')
                       {
