@@ -1,9 +1,9 @@
 
- ☐ REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO cambiar a  -> # bit-41
+ ✔ REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO cambiar a volumenes de masas -> # bit-41 @done (19-06-19 18:12)
  ☐ REPORTE RENDIMIENTO crear uno nuevo por rango de fechas por dia
- ☐ REPORTE RASTREABILIDAD DEL PRODUCTO poner en el titulo # bit-40
+ ✔ REPORTE RASTREABILIDAD DEL PRODUCTO poner en el titulo # bit-40 @done (19-06-19 18:14)
  ☐ Poder imprimir salidas de almacen en blanco
- ☐ Salidas de Productos poner filtro de productos
+ ✔ Salidas de Productos poner filtro de productos @done (19-06-19 19:47)
 
  ✔ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos, @done (19-06-09 17:11)
      poner la cotizacion, poner los campos iniciales del formato de la orden de compra

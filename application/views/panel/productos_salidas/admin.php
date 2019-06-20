@@ -31,6 +31,10 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa'); ?>">
 
+                <label for="fconcepto">Producto</label>
+                <input type="text" name="fconcepto" value="<?php echo set_value_get('fconcepto'); ?>" id="fconcepto" class="input-large search-query" placeholder="Producto / Descripción">
+                <input type="hidden" name="fconceptoId" id="fconceptoId" value="<?php echo set_value_get('fconceptoId'); ?>">
+
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01')); ?>" size="10">

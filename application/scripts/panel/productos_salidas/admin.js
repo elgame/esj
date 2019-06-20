@@ -5,6 +5,7 @@
   $(function(){
     autocompleteProveedores();
     autocompleteEmpresas();
+    autocompleteConcepto();
   });
 
   /*
@@ -12,6 +13,46 @@
    | Autocompletes
    |------------------------------------------------------------------------
    */
+
+  // Autocomplete para el codigo.
+  var autocompleteConcepto = function () {
+    $("#fconcepto").autocomplete({
+      source: function (request, response) {
+        console.log($('#empresaId').val());
+        if ($('#empresaId').val() != '') {
+          $.ajax({
+            url: base_url + 'panel/compras_ordenes/ajax_producto/',
+            dataType: 'json',
+            data: {
+              term : request.term,
+              ide: $('#empresaId').val()
+              // tipo: ($('#tipoOrden').find('option:selected').val()=='oc'? 'd': $('#tipoOrden').find('option:selected').val()),
+            },
+            success: function (data) {
+              response(data);
+            }
+          });
+        } else {
+          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+        }
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $fconcepto    = $(this),
+            $fconceptoId   = $('#fconceptoId');
+
+
+        $fconcepto.css("background-color", "#B6E7FF");
+        $fconceptoId.val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $(this).css("background-color", "#FDFC9A");
+        $('#fconceptoId').val('');
+      }
+    });
+  };
 
   // Autocomplete para los Proveedores.
   var autocompleteProveedores = function () {

@@ -52,6 +52,13 @@ class productos_salidas_model extends CI_Model {
       $sql .= " AND cs.status in ('s', 'ca')";
     }
 
+    $sql_fil_prod = '';
+    if ($this->input->get('fconceptoId') > 0) {
+      $sql_fil_prod = "INNER JOIN (
+          SELECT id_salida FROM compras_salidas_productos WHERE id_producto = {$this->input->get('fconceptoId')} GROUP BY id_salida
+        ) sp ON cs.id_salida = sp.id_salida";
+    }
+
     $query = BDUtil::pagination(
         "SELECT cs.id_salida,
                 cs.id_empresa, e.nombre_fiscal AS empresa,
@@ -59,8 +66,9 @@ class productos_salidas_model extends CI_Model {
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
                 cs.status, cs.concepto
         FROM compras_salidas AS cs
-        INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
-        INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
+          INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          {$sql_fil_prod}
         WHERE 1 = 1 {$sql}
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
         ", $params, true);
