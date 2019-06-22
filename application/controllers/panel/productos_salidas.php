@@ -338,7 +338,10 @@ class productos_salidas extends MY_Controller {
     $this->load->library('form_validation');
 
     $req1 = $req2 = '';
-    if (!empty($this->input->post('guardar'))) {
+    if ($this->input->post('guardar') != false) {
+      echo "<pre>";
+        var_dump('ddd', $this->input->post('guardar'));
+      echo "</pre>";exit;
       $req1 = 'required';
       $req2 = 'required|';
     }
