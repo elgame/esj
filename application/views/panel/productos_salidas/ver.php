@@ -226,6 +226,13 @@
 
 </div>
 
+<?php if (floatval($prints) > 0) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/productos_salidas/imprimir/?id=' . $prints."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
+
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){

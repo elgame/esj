@@ -160,6 +160,13 @@ class productos_salidas extends MY_Controller {
       'titulo' => 'Agregar salida'
     );
 
+    if (isset($_GET['id'])) {
+      $salida = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+      if (count($salida->productos) > 0) {
+        redirect(base_url('panel/productos_salidas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+      }
+    }
+
     $this->configAddSalida();
     if ($this->form_validation->run() == FALSE)
     {
@@ -172,7 +179,11 @@ class productos_salidas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        $salida = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+        if (count($salida->productos) > 0) {
+          redirect(base_url('panel/productos_salidas/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        } else
+          redirect(base_url('panel/productos_salidas/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
       }
     }
 
@@ -246,6 +257,9 @@ class productos_salidas extends MY_Controller {
 
     $params['salida'] = $this->productos_salidas_model->info($_GET['id'], true);
     $params['modificar'] = $this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/modificar/');
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -338,10 +352,7 @@ class productos_salidas extends MY_Controller {
     $this->load->library('form_validation');
 
     $req1 = $req2 = '';
-    if ($this->input->post('guardar') != false) {
-      echo "<pre>";
-        var_dump('ddd', $this->input->post('guardar'));
-      echo "</pre>";exit;
+    if ($this->input->post('guardar') !== false) {
       $req1 = 'required';
       $req2 = 'required|';
     }
@@ -557,6 +568,10 @@ class productos_salidas extends MY_Controller {
       case 5:
         $txt = 'La salida se modifico correctamente.';
         $icono = 'success';
+      break;
+      case 6:
+        $txt = 'La salida ya sta cerrada no la puedes modificar.';
+        $icono = 'error';
       break;
     }
 
