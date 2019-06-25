@@ -10,6 +10,7 @@ class gastos extends MY_Controller {
     'gastos/ajax_get_cuentas_proveedor/',
     'gastos/ligar/',
     'gastos/ajax_get_facturas/',
+    'gastos/verXml/'
   );
 
   public function _remap($method){
@@ -140,6 +141,10 @@ class gastos extends MY_Controller {
     $this->load->model('proveedores_model');
     $this->load->model('empresas_model');
 
+    echo "<pre>";
+      var_dump(scandir('/home/elgame/Downloads/DescargasXMLenlinea'));
+    echo "</pre>";exit;
+
     $this->configUpdateXml();
     if ($this->form_validation->run() == FALSE)
     {
@@ -155,6 +160,46 @@ class gastos extends MY_Controller {
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
     $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], false);
     $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
+
+    $this->load->view('panel/gastos/ver', $params);
+  }
+
+  public function verXml()
+  {
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->model('gastos_model');
+    $this->load->model('compras_model');
+    $this->load->model('proveedores_model');
+    $this->load->model('empresas_model');
+
+
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(4);
+    }
+
+    $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
+    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], false);
+    $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
+
+    $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
+    $path = "/home/elgame/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
+    if (is_dir($path)) {
+      $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('folio'));
+      echo "<pre>";
+        var_dump($response);
+      echo "</pre>";exit;
+    }
 
     $this->load->view('panel/gastos/ver', $params);
   }
