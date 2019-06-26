@@ -141,10 +141,6 @@ class gastos extends MY_Controller {
     $this->load->model('proveedores_model');
     $this->load->model('empresas_model');
 
-    echo "<pre>";
-      var_dump(scandir('/home/elgame/Downloads/DescargasXMLenlinea'));
-    echo "</pre>";exit;
-
     $this->configUpdateXml();
     if ($this->form_validation->run() == FALSE)
     {
@@ -166,6 +162,10 @@ class gastos extends MY_Controller {
 
   public function verXml()
   {
+    $this->carabiner->js(array(
+      array('general/util.js'),
+      array('panel/gastos/verXml.js')
+    ));
     $this->carabiner->css(array(
       array('panel/tags.css', 'screen'),
     ));
@@ -193,15 +193,19 @@ class gastos extends MY_Controller {
     $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
 
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
-    $path = "/home/elgame/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
+    $params['rfc'] = $rfcProv;
+
+    $path = "/home/gama/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
     if (is_dir($path)) {
-      $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('folio'));
-      echo "<pre>";
-        var_dump($response);
-      echo "</pre>";exit;
+      $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
+        $this->input->get('ffecha1'), $this->input->get('ffecha2'));
+      $params['files'] = $response;
+      // echo "<pre>";
+      //   var_dump($response);
+      // echo "</pre>";exit;
     }
 
-    $this->load->view('panel/gastos/ver', $params);
+    $this->load->view('panel/gastos/addXmls', $params);
   }
 
   public function cancelar()

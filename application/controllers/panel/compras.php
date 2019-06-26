@@ -68,6 +68,7 @@ class compras extends MY_Controller {
   public function ver()
   {
     $this->carabiner->js(array(
+      array('general/supermodal.js'),
       array('general/util.js'),
       array('panel/compras_ordenes/ver.js'),
     ));

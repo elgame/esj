@@ -96,7 +96,13 @@
                     </div>
 
                     <?php //if ( ! $compra['info']->xml){ ?>
-                      <div class="span4">
+                    <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$_GET['idp'].'') ?>"
+                      rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                      <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                    <br><br>
+                    UUID: <input type="text" name="uuid" value="" id="buscarUuid"><br>
+                    No Certificado: <input type="text" name="noCertificado" value="" id="buscarNoCertificado">
+                      <!-- <div class="span4">
                         <div class="control-group">
                           <div class="controls span9">
                             XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
@@ -104,7 +110,7 @@
                             <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                           </div>
                         </div>
-                      </div>
+                      </div> -->
                     <?php //} ?>
                   </div>
 

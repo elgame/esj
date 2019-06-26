@@ -2,12 +2,18 @@
 
 class MyFiles {
 
-  public static function searchXmlEnlinea($path, $rfcProv, $folio=''){
+  public static function searchXmlEnlinea($path, $brfcProv, $bfolio='', $bfechaIni='', $bfechaFin=''){
     $dir = new DirectoryIterator($path);
     $files = array();
 
-    $rfcProv = trim($rfcProv);
-    $folio = (trim($folio) !==''? 'folio="'.trim($folio): '');
+    $brfcProv = trim($brfcProv);
+    $bfolio = (trim($bfolio) !==''? 'folio="'.trim($bfolio): '');
+    if ($bfechaIni != '') {
+      $bfechaIni = new DateTime($bfechaIni);
+    }
+    if ($bfechaFin != '') {
+      $bfechaFin = new DateTime($bfechaFin);
+    }
 
     $totalFiles = 0;
     $cont = 0;
@@ -17,12 +23,12 @@ class MyFiles {
         $content = file_get_contents($file->getPathname());
 
         $find = false;
-        if ($rfcProv != '' && strpos($content, $rfcProv) !== false) {
+        if ($brfcProv != '' && stripos($content, $brfcProv) !== false) {
           $find = true;
         }
-        if ($folio != '' && $find === true) {
+        if ($bfolio != '' && $find === true) {
           $find = false;
-          if (strpos($content, $folio) !== false) {
+          if (stripos($content, $bfolio) !== false) {
             $find = true;
           }
         }
@@ -30,35 +36,53 @@ class MyFiles {
         if ($find) {
           $matches = [];
 
-          $uuid = '';
-          preg_match('/TimbreFiscalDigital (.+) UUID="([A-Z0-9\-]){35,38}"/', $content, $matches);
-          if (count($matches) > 0) {
-            preg_match('/UUID="([A-Z0-9\-]){35,38}"/', $matches[0], $matches);
-            if (count($matches) > 0) {
-              $uuid = preg_replace('/(UUID=|")/', '', $matches[0]);
-            }
-          }
+          $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $content));
 
-          $noCertificado = '';
-          preg_match('/TimbreFiscalDigital (.+) noCertificadoSAT="([0-9]){18,22}"/', $content, $matches);
-          if (count($matches) > 0) {
-            preg_match('/noCertificadoSAT="([0-9]){18,22}"/', $matches[0], $matches);
-            if (count($matches) > 0) {
-              $noCertificado = preg_replace('/(noCertificadoSAT=|")/', '', $matches[0]);
-            }
-          }
+          $uuid = (string)$xml->Complemento->TimbreFiscalDigital['UUID'];
+          $fecha = substr((((string)$xml['fecha'])<>''? (string)$xml['fecha']: (string)$xml['Fecha']), 0, 10);
+          $folio = (($xml['serie'].$xml['folio'])<>''? $xml['serie'].$xml['folio']: $xml['Serie'].$xml['Folio']);
+          $noCertificado = ((string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']<>''?
+            (string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']:
+            (string)$xml->Complemento->TimbreFiscalDigital['NoCertificadoSAT']);
+          $total = (((string)$xml['total'])<>''? (string)$xml['total']: (string)$xml['Total']);
 
-          $files[$file->getMTime()] = [
-            'name'          => $file->getBasename(),
-            'rfc'           => $rfcProv,
-            'uuid'          => $uuid,
-            'noCertificado' => $noCertificado
-          ];
+          $find = false;
+          $fechaVal = new DateTime(substr($fecha, 0, 10));
+          if ($bfechaIni != '' && $bfechaFin != '') {
+            $bfechaIni = $bfechaIni;
+            $bfechaFin = $bfechaFin;
+            if ($fechaVal >= $bfechaIni && $fechaVal <= $bfechaFin) {
+              $find = true;
+            }
+          } elseif ($bfechaIni != '') {
+            $bfechaIni = $bfechaIni;
+            if ($fechaVal >= $bfechaIni) {
+              $find = true;
+            }
+          } elseif ($bfechaFin != '') {
+            $bfechaFin = $bfechaFin;
+            if ($fechaVal >= $bfechaFin) {
+              $find = true;
+            }
+          } else
+            $find = true;
+
+          if ($find) {
+            $files[strtotime($fecha)] = [
+              'name'          => $file->getBasename(),
+              'rfc'           => $brfcProv,
+              'fecha'         => $fecha,
+              'folio'         => $folio,
+              'total'         => $total,
+              'uuid'          => $uuid,
+              'noCertificado' => $noCertificado
+            ];
+          }
         }
       }
     }
 
-    // ksort($files);
+    krsort($files);
 
     return $files;
   }
