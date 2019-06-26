@@ -242,12 +242,12 @@ class compras_model extends privilegios_model{
       'total'         => MyString::float($this->input->post('htotalOrden')),
     );
     $compra = array(
-      'subtotal'      => MyString::float($this->input->post('totalImporte')),
-      'importe_iva'   => MyString::float($this->input->post('totalImpuestosTrasladados')),
-      'importe_ieps'  => MyString::float($this->input->post('totalIeps')),
-      'retencion_iva' => MyString::float($this->input->post('totalRetencion')),
-      'retencion_isr' => MyString::float($this->input->post('totalRetencionIsr')),
-      'total'         => MyString::float($this->input->post('totalOrden')),
+      'subtotal'       => MyString::float($this->input->post('totalImporte')),
+      'importe_iva'    => MyString::float($this->input->post('totalImpuestosTrasladados')),
+      'importe_ieps'   => MyString::float($this->input->post('totalIeps')),
+      'retencion_iva'  => MyString::float($this->input->post('totalRetencion')),
+      'retencion_isr'  => MyString::float($this->input->post('totalRetencionIsr')),
+      'total'          => MyString::float($this->input->post('totalOrden')),
     );
 
     foreach ($compra as $key => $value) {
@@ -296,6 +296,9 @@ class compras_model extends privilegios_model{
                                     ':empresa'      => 'en '.$datoscompra['info']->empresa->nombre_fiscal,
                                     ':id'           => 'id_compra',
                                     ':titulo'       => 'Compra'));
+
+    $compra['uuid']           = $this->input->post('uuid');
+    $compra['no_certificado'] = $this->input->post('noCertificado');
 
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }

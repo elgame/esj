@@ -84,7 +84,7 @@ class compras extends MY_Controller {
     }
     else
     {
-      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: false));
 
       if (is_array($response)) {
         $params['frm_errors'] = $this->showMsgs(2, $response[0]);
@@ -305,6 +305,9 @@ class compras extends MY_Controller {
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -312,8 +315,25 @@ class compras extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
+      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($file)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = {$folio} AND UPPER(serie) = '{$serie}'
+        AND id_empresa = ".$this->input->post('empresaId')." AND id_proveedor = ".$this->input->post('proveedorId')."  ".
+        (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
+
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
     }

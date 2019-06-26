@@ -1,5 +1,5 @@
 
- ✔ Cambios para ADD de compras @done (19-06-24 19:52) pcc|lap
+ ✔ Cambios para ADD de compras @done (19-06-24 19:52) pcc|lap|pct
    ALTER TABLE public.compras ADD COLUMN uuid character varying;
    ALTER TABLE public.compras ADD COLUMN no_certificado character varying;
 
