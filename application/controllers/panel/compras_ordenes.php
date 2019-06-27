@@ -364,6 +364,7 @@ class compras_ordenes extends MY_Controller {
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
       array('general/util.js'),
       array('general/keyjump.js'),
       array('general/msgbox.js'),
@@ -382,7 +383,8 @@ class compras_ordenes extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'], $_GET['ids'], $_FILES['xml']);
+      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'],
+        $_GET['ids'], (isset($_FILES['xml'])? $_FILES['xml']: null));
 
       if ($res_mdl['passes'])
       {
@@ -948,6 +950,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'xml',
             'label' => 'XML',
             'rules' => 'callback_xml_check'),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -972,10 +977,28 @@ class compras_ordenes extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($uuid)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'")->row();
+
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {

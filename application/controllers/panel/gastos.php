@@ -132,6 +132,12 @@ class gastos extends MY_Controller {
 
   public function ver()
   {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/compras_ordenes/ver.js'),
+    ));
+
     $this->carabiner->css(array(
       array('panel/tags.css', 'screen'),
     ));
@@ -148,7 +154,7 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: false));
 
       $params['frm_errors'] = $this->showMsgs(4);
     }
@@ -175,27 +181,17 @@ class gastos extends MY_Controller {
     $this->load->model('proveedores_model');
     $this->load->model('empresas_model');
 
-
-    $this->configUpdateXml();
-    if ($this->form_validation->run() == FALSE)
-    {
-      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-    }
-    else
-    {
-      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
-
-      $params['frm_errors'] = $this->showMsgs(4);
-    }
-
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
-    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], false);
-    $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
+    if (!empty($_GET['id'])) {
+      $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], false);
+    }
+    $ide = isset($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
+    $params['empresa']   = $this->empresas_model->getInfoEmpresa($ide, true);
 
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
     $params['rfc'] = $rfcProv;
 
-    $path = "/home/gama/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
+    $path = "/home/elgame/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
     if (is_dir($path)) {
       $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
         $this->input->get('ffecha1'), $this->input->get('ffecha2'));
@@ -616,6 +612,9 @@ class gastos extends MY_Controller {
       array('field' => 'xml',
             'label' => 'XML',
             'rules' => 'callback_xml_check'),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
@@ -654,10 +653,29 @@ class gastos extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($uuid)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
+        (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
+
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {

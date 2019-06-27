@@ -139,11 +139,22 @@
 
                   <?php //if ( ! $gasto['info']->xml){ ?>
                     <div class="control-group">
+                      <div class="controls span9">
+                        <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$_GET['idp'].'') ?>"
+                          rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                          <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                        <span style="float: right;">
+                          UUID: <input type="text" name="uuid" value="<?php echo $gasto['info']->uuid; ?>" id="buscarUuid"><br>
+                          No Certificado: <input type="text" name="noCertificado" value="<?php echo $gasto['info']->no_certificado; ?>" id="buscarNoCertificado">
+                        </span>
+                      </div>
+                    </div>
+                    <!-- <div class="control-group">
                       <label class="control-label" for="xml">XML</label>
                       <div class="controls">
                         <input type="file" name="xml" class="span9" id="xml" data-uniform="false" accept="text/xml">
                       </div>
-                    </div>
+                    </div> -->
                   <?php //} ?>
 
                   <div class="control-group">

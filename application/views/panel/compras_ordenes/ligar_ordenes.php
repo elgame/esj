@@ -104,9 +104,19 @@
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
+                        <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$_GET['ide'].'&idp='.$_GET['idp'].'') ?>"
+                          rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                          <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                        <br><br>
+                        UUID: <input type="text" name="uuid" value="" id="buscarUuid"><br>
+                        No Certificado: <input type="text" name="noCertificado" value="" id="buscarNoCertificado">
                       </div>
                     </div>
+                    <!-- <div class="control-group">
+                      <div class="controls span9">
+                        XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
+                      </div>
+                    </div> -->
                   </div>
                 </div>
                 <div class="row-fluid" id="group_pago_contado" style="display: none;">

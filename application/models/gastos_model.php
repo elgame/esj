@@ -234,6 +234,9 @@ class gastos_model extends privilegios_model{
                                     ':id'           => 'id_compra',
                                     ':titulo'       => 'Compra'));
 
+    $compra['uuid']           = $this->input->post('uuid');
+    $compra['no_certificado'] = $this->input->post('noCertificado');
+
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
 

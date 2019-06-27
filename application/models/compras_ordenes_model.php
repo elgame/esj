@@ -608,6 +608,8 @@ class compras_ordenes_model extends CI_Model {
       'concepto'       => 'Concepto',
       'isgasto'        => 'f',
       'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'uuid'           => $this->input->post('uuid'),
+      'no_certificado' => $this->input->post('noCertificado'),
     );
 
     // //si es contado, se verifica que la cuenta tenga saldo

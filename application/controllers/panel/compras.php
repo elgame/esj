@@ -326,16 +326,18 @@ class compras extends MY_Controller {
     }
   }
 
-  public function uuid_check($file)
+  public function uuid_check($uuid)
   {
     if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
     {
-      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = {$folio} AND UPPER(serie) = '{$serie}'
-        AND id_empresa = ".$this->input->post('empresaId')." AND id_proveedor = ".$this->input->post('proveedorId')."  ".
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
         (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
 
-      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
-      return false;
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {
