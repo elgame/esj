@@ -1901,7 +1901,7 @@ class polizas_model extends CI_Model {
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
             LEFT JOIN banco_movimientos_facturas AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
           WHERE bm.status = 't' AND bm.tipo = 't' AND bm.clasificacion <> 'elimon' {$sql2}
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
             bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
@@ -2286,7 +2286,7 @@ class polizas_model extends CI_Model {
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
           WHERE bm.status = 'f' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon'
             {$sql2} AND LOWER(bm.metodo_pago) = 'cheque'
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
@@ -2339,7 +2339,7 @@ class polizas_model extends CI_Model {
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
           WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
             bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
