@@ -569,10 +569,22 @@ class nomina_fiscal extends MY_Controller {
 
   public function addAsistencias()
   {
-    $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['did_empresa'], $_GET['anio']);
+    if (isset($_POST['ajax'])) {
+      foreach ($_POST['empleados'] as $key => $dias) {
+        foreach ($dias as $keydd => $value) {
+          $datos[$key][$value['fecha']] = $value['valor'];
+        }
+      }
+    } else
+      $datos = $_POST['empleados'];
 
-    redirect(base_url('panel/nomina_fiscal/asistencia/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addAsistencias($datos, $_POST['numSemana'], $_GET['did_empresa'], $_GET['anio']);
+
+    if (isset($_POST['ajax'])) {
+      echo json_encode(['response' => true]);
+    } else
+      redirect(base_url('panel/nomina_fiscal/asistencia/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function validaAddAsistencias()

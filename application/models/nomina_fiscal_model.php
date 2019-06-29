@@ -1930,7 +1930,8 @@ class nomina_fiscal_model extends CI_Model {
     ), $filtros);
 
     // Filtros
-    $semana = $filtros['semana'] !== '' ? $this->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']) : $this->semanaActualDelMes();
+    $semana = $filtros['semana'] !== '' ? $this->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']) : $this->semanaActualDelMes($filtros['anio'], 0, $filtros['dia_inicia_semana']);
+    $filtros['semana'] = $semana['semana'];
 
     $sql = '';
     if ($filtros['empresaId'] !== '')
@@ -2997,10 +2998,10 @@ class nomina_fiscal_model extends CI_Model {
    *
    * @return array
    */
-  public function semanaActualDelMes($anio=null)
+  public function semanaActualDelMes($anio=null, $mes = 0, $diaInicia = 4)
   {
     $anio = $anio!=null? $anio: date('Y');
-    $semanas = MyString::obtenerSemanasDelAnioV2(date('Y'), 0, 4);
+    $semanas = MyString::obtenerSemanasDelAnioV2(date('Y'), $mes, $diaInicia);
     return end($semanas);
   }
 

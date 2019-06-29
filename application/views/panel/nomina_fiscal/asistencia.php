@@ -127,7 +127,9 @@
                                     }
                                 ?>
 
-                                <select name="empleados[<?php echo $e->id ?>][<?php echo $fecha ?>]" class="span12 select-tipo" style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;" title="<?php echo $fecha ?>">
+                                <select name="empleados[<?php echo $e->id ?>][<?php echo $fecha ?>]" class="span12 select-tipo"
+                                  data-id="<?php echo $e->id ?>" data-fecha="<?php echo $fecha ?>"
+                                  style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;" title="<?php echo $fecha ?>">
                                   <option value="a" style="background-color: green;" <?php echo $selected_a ?>></option>
                                   <option value="f" style="background-color: red;" <?php echo $selected_f ?> <?php echo $dia === 2 ? '' : '' ?>></option>
 
@@ -163,6 +165,7 @@
       </div><!--/row-->
     </div><!--/#content.span10-->
 
+<div id="loaderAsistencia" style="position:fixed;top: 0px;left: 0px;width: 100%;height: 100%;background: #0000004d;text-align: center;font-size: 3em;color: #fff;padding-top: 16%; display: none;">Cargando...</div>
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){

@@ -58,10 +58,26 @@
   var eventOnChangeSelectDia = function () {
     $('.select-tipo').on('change', function(event) {
       var $select = $(this),
+          $tr = $select.parent().parent(),
           $option = $select.find('option:selected');
+      var datos = {ajax: true, empleados: {} }
 
-      color = getColor($option.val());
-      $select.css({'background-color': color});
+      datos.empleados[$select.attr('data-id')] = [];
+      $tr.find('.select-tipo').each(function (index, el) {
+        datos.empleados[$select.attr('data-id')].push({'fecha': $(el).attr('data-fecha'), 'valor': $(el).find('option:selected').val()});
+      });
+      datos.numSemana = $('#formAsistencia #numSemana').val();
+
+      $('#loaderAsistencia').show();
+      $.post($('#formAsistencia').attr('action'),
+        datos,
+        function(data, textStatus, xhr) {
+          color = getColor($option.val());
+          $select.css({'background-color': color});
+          $('#loaderAsistencia').hide();
+      }).always(function() {
+        $('#loaderAsistencia').hide();
+      });
     });
   };
 
