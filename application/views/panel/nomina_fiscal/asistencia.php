@@ -75,7 +75,7 @@
                   <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
                 </div>
                 <div class="span1">
-                  <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button>
+                  <!-- <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button> -->
                 </div>
               </div>
 

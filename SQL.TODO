@@ -1,4 +1,80 @@
 
+ ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Paletas de Salida',61,TRUE,'rastreabilidad_paletas/','list-alt',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',497,TRUE,'rastreabilidad_paletas/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',497,FALSE,'rastreabilidad_paletas/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',497,FALSE,'rastreabilidad_paletas/cancelar/','minus',FALSE);
+    CREATE TABLE otros.paletas_salidas
+      (
+        id_paleta_salida bigserial NOT NULL,
+        id_empresa integer NOT NULL,
+        id_registro bigint NOT NULL,
+        fecha date,
+        fecha_registro timestamp without time zone DEFAULT now(),
+        status character varying(5) NOT NULL DEFAULT 'r'::character varying, -- r: registrado, f: finalizado, ca: cancelado
+        CONSTRAINT paletas_salidas_pkey PRIMARY KEY (id_paleta_salida),
+        CONSTRAINT paletas_salidas_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_id_registro_fkey FOREIGN KEY (id_registro)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.paletas_salidas
+        OWNER TO programa;
+      COMMENT ON COLUMN otros.paletas_salidas.status IS 'r: registrado, f: finalizado, ca: cancelado';
+    CREATE TABLE otros.paletas_salidas_pallets
+      (
+        id_paleta_salida bigint NOT NULL,
+        id_pallet bigint NOT NULL,
+        posicion integer NOT NULL,
+        CONSTRAINT paletas_salidas_pallets_pkey PRIMARY KEY (id_paleta_salida, id_pallet),
+        CONSTRAINT paletas_salidas_pallets_id_paleta_salida_fkey FOREIGN KEY (id_paleta_salida)
+            REFERENCES otros.paletas_salidas (id_paleta_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_pallets_id_pallet_fkey FOREIGN KEY (id_pallet)
+            REFERENCES public.rastria_pallets (id_pallet) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.paletas_salidas_pallets
+        OWNER TO programa;
+    CREATE TABLE otros.paletas_salidas_productos
+      (
+        id_paleta_salida bigint NOT NULL,
+        num_rows integer NOT NULL,
+        id_cliente bigint NOT NULL,
+        id_clasificacion bigint NOT NULL,
+        clasificacion character varying(200),
+        id_unidad integer NOT NULL,
+        unidad character varying(100),
+        cantidad double precision NOT NULL DEFAULT 0,
+        kilos double precision NOT NULL DEFAULT 0,
+        id_pallet bigint,
+        CONSTRAINT paletas_salidas_productos_pkey PRIMARY KEY (id_paleta_salida, num_rows),
+        CONSTRAINT paletas_salidas_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+            REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_productos_id_cliente_fkey FOREIGN KEY (id_cliente)
+            REFERENCES public.clientes (id_cliente) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_productos_id_paleta_salida_fkey FOREIGN KEY (id_paleta_salida)
+            REFERENCES otros.paletas_salidas (id_paleta_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_productos_id_pallet_fkey FOREIGN KEY (id_pallet)
+            REFERENCES public.rastria_pallets (id_pallet) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT paletas_salidas_productos_id_unidad_fkey FOREIGN KEY (id_unidad)
+            REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.paletas_salidas_productos OWNER TO programa;
+
  ✔ Cambios para ADD de compras @done (19-06-24 19:52) pcc|lap|pct|san
    ALTER TABLE public.compras ADD COLUMN uuid character varying;
    ALTER TABLE public.compras ADD COLUMN no_certificado character varying;
