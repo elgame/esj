@@ -1561,9 +1561,16 @@ class compras_ordenes_model extends CI_Model {
 
   public function getBoletas($datos)
   {
-    // $tipo = $datos['tipo'] == 'f'? 't': 'f';
+    $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
     $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
     $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'p', 'b'";
+
+    $campos = "p.nombre_fiscal AS proveedor,";
+    $tablas = "INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor";
+    if ($tipo === 'sa') {
+      $campos = "c.nombre_fiscal AS cliente, e.id_empresa, ";
+      $tablas = "INNER JOIN clientes AS c ON c.id_cliente = b.id_cliente";
+    }
 
     $query = $this->db->query("SELECT b.id_bascula,
                 b.folio,
@@ -1571,7 +1578,7 @@ class compras_ordenes_model extends CI_Model {
                 b.status,
                 e.nombre_fiscal AS empresa,
                 a.nombre AS area,
-                p.nombre_fiscal AS proveedor,
+                {$campos}
                 ch.nombre AS chofer,
                 (ca.marca || ' ' || ca.modelo) AS camion,
                 ca.placa AS placas,
@@ -1580,10 +1587,10 @@ class compras_ordenes_model extends CI_Model {
         FROM bascula AS b
           INNER JOIN empresas AS e ON e.id_empresa = b.id_empresa
           INNER JOIN areas AS a ON a.id_area = b.id_area
-          INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          {$tablas}
           LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
           LEFT JOIN camiones AS ca ON ca.id_camion = b.id_camion
-        WHERE b.tipo = 'en' AND b.accion in({$accion}) {$filtro}
+        WHERE b.tipo = '{$tipo}' AND b.accion in({$accion}) {$filtro}
         ORDER BY b.folio DESC
         LIMIT 100");
     $response = array();
