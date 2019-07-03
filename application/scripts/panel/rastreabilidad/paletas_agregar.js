@@ -23,11 +23,13 @@ var addpaletas = (function($){
     setBoletasSel();
 
     eventOnChangeMedida();
+    eventOnChangeTipo();
 
     autocompleteClasifiLive();
     autocompleteClientes();
 
     nuevoRegistro();
+    quitProducto();
   }
 
   // --------------------------------
@@ -85,10 +87,12 @@ var addpaletas = (function($){
   // Eventos
   function eventOnChangeMedida() {
     $('#table_prod').on('change', 'select#prod_dmedida', function(event) {
+      console.log('1111');
       calculaKilos($(this));
     });
 
     $('#table_prod').on('keyup', 'input#prod_dcantidad', function(event) {
+      console.log('5555');
       calculaKilos($(this));
     });
   };
@@ -103,6 +107,7 @@ var addpaletas = (function($){
         $optionSel = $select.find('option:selected');
     var kilos = (parseFloat($optionSel.attr('data-cantidad'))||0)*(parseFloat($cantidad.val())||0);
 
+    console.log($optionSel.attr('data-cantidad'), $cantidad.val(), kilos);
     $medidaId.val($optionSel.attr('data-id'));
     $kilosInput.val( kilos );
     $kilosInputTxt.text( kilos );
@@ -198,7 +203,7 @@ var addpaletas = (function($){
         event.preventDefault();
         var $tr = $(this).parent().parent();
 
-        if (valida_agregar($tr)) {
+        if (validaAgregar($tr)) {
           $tr.find('td').not('.cporte').effect("highlight", {'color': '#99FF99'}, 500);
           $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
             addProducto(unidades);
@@ -213,7 +218,7 @@ var addpaletas = (function($){
     });
   }
 
-  function valida_agregar ($tr) {
+  function validaAgregar ($tr) {
     if ($tr.find("#prod_id_cliente").val() === '' || $tr.find("#prod_did_prod").val() == '' ||
       $tr.find("#prod_dcantidad").val() == '') {
       return false;
@@ -243,7 +248,7 @@ var addpaletas = (function($){
     var unidadesHtml = '';
     for (var i in unidades) {
       selectedUnidad = (unidades[i].id_unidad == prod.id_unidad ? 'selected' : '');
-      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+selectedUnidad+' data-id="'+unidades[i].id_unidad+'" data-id="'+unidades[i].cantidad+'">'+unidades[i].nombre+'</option>';
+      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+selectedUnidad+' data-id="'+unidades[i].id_unidad+'" data-cantidad="'+unidades[i].cantidad+'">'+unidades[i].nombre+'</option>';
     }
 
     trHtml =
@@ -283,6 +288,15 @@ var addpaletas = (function($){
     $('.jump'+(indexJump)).focus();
     $(".vpositive").numeric({ negative: false });
     $(".vnumeric").numeric();
+  }
+
+  function quitProducto() {
+    $('#table_prod').on('click', 'button#delProd', function(e) {
+      var $this = $(this),
+          $tr = $this.parent().parent();
+
+      $tr.remove(); // elimina el tr padre.
+    });
   }
 
 

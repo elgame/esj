@@ -76,139 +76,41 @@ class rastreabilidad_paletas_model extends privilegios_model {
     return $response;
   }
 
-  public function getInfoPallet($id_pallet, $basic_info=FALSE, $cajas_libres=true){
-    $result = $this->db->query("SELECT * FROM rastria_pallets_lista WHERE id_pallet = {$id_pallet}");
-    $response['info'] = array();
-    if($result->num_rows() > 0)
-    {
-      $response['info'] = $result->row();
+  public function getInfoPaleta($id_paleta, $basic_info=FALSE, $cajas_libres=true){
+    $result = $this->db->query("SELECT ps.id_paleta_salida, ps.fecha, ps.fecha_registro, ps.id_empresa, e.nombre_fiscal AS empresa,
+        b.folio, ps.tipo, ps.status
+      FROM otros.paletas_salidas ps
+        INNER JOIN empresas e ON e.id_empresa = ps.id_empresa
+        INNER JOIN bascula b ON b.id_bascula = ps.id_bascula
+      WHERE ps.id_paleta_salida =  {$id_paleta}");
+
+    $response = [];
+    if($result->num_rows() > 0){
+      $response['paleta'] = $result->row();
       $result->free_result();
 
-      if(!$basic_info)
-      {
-        $result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
-            u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
-            rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado
-          FROM rastria_pallets_rendimiento AS rpr
-            INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
-            INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
-            INNER JOIN unidades AS u ON rpr.id_unidad = u.id_unidad
-            INNER JOIN calibres AS cal ON rpr.id_calibre = cal.id_calibre
-            INNER JOIN etiquetas AS e ON rpr.id_etiqueta = e.id_etiqueta
-            LEFT JOIN calibres AS sz ON rpr.id_size = sz.id_calibre
-          WHERE id_pallet = {$id_pallet}");
-        $response['rendimientos'] = $result->result();
-        $response['info']->calibre_fijo_origen = ($response['info']->calibre_fijo==''? NULL: $response['info']->calibre_fijo);
-        if($response['info']->calibre_fijo == '')
-        {
-          $nombre_calibres = array();
-          foreach ($response['rendimientos'] as $key => $value)
-          {
-            if( ! isset($nombre_calibres[$value->size]) )
-              $nombre_calibres[$value->size] = 1;
-          }
-          $response['info']->calibre_fijo = implode(',', array_keys($nombre_calibres));
-        }
+      if (!$basic_info) {
+        $result = $this->db->query("SELECT psp.id_paleta_salida, psp.num_rows, psp.id_cliente, psp.id_clasificacion, psp.clasificacion,
+            psp.id_unidad, psp.unidad, u.cantidad AS cantidad_unidad, psp.cantidad, psp.kilos, psp.id_pallet
+          FROM otros.paletas_salidas_productos psp
+            INNER JOIN clientes c ON c.id_cliente = psp.id_cliente
+            INNER JOIN clasificaciones cl ON cl.id_clasificacion = psp.id_clasificacion
+            INNER JOIN unidades u ON u.id_unidad = psp.id_unidad
+          WHERE psp.id_paleta_salida = {$id_paleta}");
+        $response['clasificaciones'] = $result->result();
+        $result->free_result();
 
-        // if($cajas_libres){
-        //  $rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
-        //  $response['rend_libres'] = $rendimientos_libres['rendimientos'];
-        // }
-
-        //lista calibres
-        $response['calibres'] = array();
-        $data_calibres = $this->db->query("SELECT rpc.id_pallet, rpc.id_calibre, c.nombre
-                          FROM rastria_pallets_calibres AS rpc
-                            INNER JOIN calibres AS c ON c.id_calibre = rpc.id_calibre
-                          WHERE id_pallet = {$id_pallet}");
-        if($data_calibres->num_rows() > 0)
-          $response['calibres'] = $data_calibres->result();
-
-        //Salidas de productos
-        $response['psalidas'] = array();
-        $data_calibres = $this->db->query("SELECT p.id_producto, p.nombre, rps.cantidad, rps.nom_row
-                          FROM rastria_pallets_salidas AS rps
-                            LEFT JOIN productos AS p ON p.id_producto = rps.id_producto
-                          WHERE rps.id_pallet = {$id_pallet} ORDER BY rps.nom_row ASC");
-        $aux_num_row = 1;
-        if($data_calibres->num_rows() > 0) {
-          $response['psalidas'] = $data_calibres->result();
-          foreach ($response['psalidas'] as $key => $ps) {
-            if($aux_num_row != $ps->nom_row) {
-              $response['psalidas2'][] = count($psalidas)>1? $psalidas: $psalidas[0];
-              $psalidas = array();
-              $aux_num_row = $ps->nom_row;
-            }
-            $psalidas[] = $ps;
-          }
-
-          if(count($psalidas) > 0) {
-            $response['psalidas2'][] = count($psalidas)>1? $psalidas: $psalidas[0];
-          }
-        }
-
-        //Info cliente
-        $response['cliente'] = array();
-        if ($response['info']->id_cliente !== null)
-        {
-          $this->load->model('clientes_model');
-          $data_cliente        = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
-          $response['cliente'] = $data_cliente['info'];
-        }
+        $result = $this->db->query("SELECT p.id_pallet, psp.posicion, p.no_cajas, string_agg(c.codigo, ', ') AS clasificaciones
+          FROM otros.paletas_salidas_pallets psp
+            INNER JOIN rastria_pallets p ON p.id_pallet = psp.id_pallet
+            INNER JOIN rastria_pallets_rendimiento pr ON p.id_pallet = pr.id_pallet
+            INNER JOIN clasificaciones c ON c.id_clasificacion = pr.id_clasificacion
+          WHERE psp.id_paleta_salida = {$id_paleta}
+          GROUP BY p.id_pallet, psp.posicion");
+        $response['pallets'] = $result->result();
+        $result->free_result();
       }
     }
-    return $response;
-  }
-
-  public function calibreSelec($id_calibre, $selecs)
-  {
-    $res = false;
-    foreach ($selecs as $key => $value)
-    {
-      if($id_calibre == $value->id_calibre)
-      {
-        $res = true;
-        break;
-      }
-    }
-    return $res;
-  }
-
-  /**
-   * Obtiene el siguiente folio para el pallet
-   * @return [type] [description]
-   */
-  public function getNextFolio($id_area){
-    $result = $this->db->query("SELECT (folio+1) AS folio FROM rastria_pallets WHERE id_area = {$id_area} ORDER BY folio DESC LIMIT 1")->row();
-    return (is_object($result)? $result->folio: '1');
-  }
-
-  /**
-   * Obtiene la lista de rendimientos con cajas disponibles para agregarlos a los pallets
-   * de una clasificacion espesifica
-   * @param  [type] $id_clasificacion [description]
-   * @return [type]                   [description]
-   */
-  public function getRendimientoLibre($id_clasificacion, $idunidad, $idcalibre, $idetiqueta){
-    $sql = $idunidad!=''? ' AND rcl.id_unidad = '.$idunidad: '';
-    $sql .= $idcalibre!=''? ' AND rcl.id_calibre = '.$idcalibre: '';
-    $sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
-    $result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
-                    rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
-                    rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
-                               FROM rastria_rendimiento AS rr
-                  INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
-                  LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
-                  LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
-                  LEFT JOIN etiquetas AS e ON rcl.id_etiqueta = e.id_etiqueta
-                  LEFT JOIN calibres AS sz ON rcl.id_size = sz.id_calibre
-                               WHERE rcl.id_clasificacion = {$id_clasificacion} {$sql}
-                               ORDER BY fecha DESC, lote ASC, unidad ASC");
-    $response = array('rendimientos' => array());
-    if($result->num_rows() > 0)
-      $response['rendimientos'] = $result->result();
-
-    $result->free_result();
 
     return $response;
   }
@@ -231,8 +133,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
       );
     }
 
-    $this->db->insert('paletas_salidas', $data);
-    $id_paleta = $this->db->insert_id('paletas_salidas', 'id_paleta_salida');
+    $this->db->insert('otros.paletas_salidas', $data);
+    $id_paleta = $this->db->insert_id('otros.paletas_salidas', 'id_paleta_salida');
 
     $this->saveClasificaciones($id_paleta);
 
@@ -286,67 +188,69 @@ class rastreabilidad_paletas_model extends privilegios_model {
     return array('msg' => 5);
   }
 
-  public function saveClasificaciones($id_pallet, $data=NULL, $id_bitacora=0){
+  public function saveClasificaciones($id_paleta, $data=NULL, $id_bitacora=0){
     if ($data==NULL)
     {
-      if(is_array($this->input->post('rendimientos')))
+      if(is_array($this->input->post('prod_id_cliente')))
       {
-        foreach ($this->input->post('rendimientos') as $key => $cajas)
+        foreach ($this->input->post('prod_id_cliente') as $key => $cajas)
         {
           $data[] = array(
-            'id_pallet'        => $id_pallet,
-            'id_rendimiento'   => $_POST['idrendimientos'][$key],
-            'id_clasificacion' => $_POST['idclasificacion'][$key],
-            'id_unidad'        => $_POST['idunidad'][$key],
-            'id_calibre'       => $_POST['idcalibre'][$key],
-            'id_etiqueta'      => $_POST['idetiqueta'][$key],
-            'id_size'          => $_POST['idsize'][$key],
-            'cajas'            => $cajas,
-            'kilos'            => $_POST['dkilos'][$key],
-            );
+            'id_paleta_salida' => $id_paleta,
+            'num_rows'         => $key,
+            'id_cliente'       => $this->input->post('prod_id_cliente')[$key],
+            'id_clasificacion' => $this->input->post('prod_did_prod')[$key],
+            'clasificacion'    => $this->input->post('prod_ddescripcion')[$key],
+            'id_unidad'        => $this->input->post('prod_dmedida_id')[$key],
+            'unidad'           => $this->input->post('prod_dmedida')[$key],
+            'cantidad'         => $this->input->post('prod_dcantidad')[$key],
+            'kilos'            => $this->input->post('prod_dmedida_kilos')[$key],
+          );
         }
       }
     }
 
+    $this->db->delete('otros.paletas_salidas_productos', ['id_paleta_salida' => $id_paleta]);
     if(count($data) > 0) {
-      if($id_bitacora > 0) {
-        // Bitacora
-        $this->bitacora_model->_updateExt($id_bitacora, 'rastria_pallets_rendimiento', $id_pallet, $data,
-                                  array(':id'             => 'id_pallet',
-                                        ':titulo'         => 'Clasificaciones',
-                                        ':updates_fields' => 'rastria_pallets_rendimiento'));
-      }
-      $this->db->insert_batch('rastria_pallets_rendimiento', $data);
+      $this->db->insert_batch('otros.paletas_salidas_productos', $data);
     }
 
     return true;
   }
 
-  public function addPalletCalibres($id_pallet, $data=null)
+  public function savePallets($id_paleta, $data=null)
   {
     if ($data==NULL)
     {
       $data = array();
-      if(is_array($this->input->post('idcalibre')))
+      if(is_array($this->input->post('pallets_id')))
       {
-        foreach ($this->input->post('idcalibre') as $key => $calibre)
+        foreach ($this->input->post('pallets_id') as $key => $id_pallet)
         {
-          if (!array_key_exists($calibre, $data))
-          {
-            $data[$calibre] = array(
-              'id_pallet'  => $id_pallet,
-              'id_calibre' => $calibre,
-              );
-          }
+          $data[] = array(
+            'id_paleta_salida' => $id_paleta,
+            'id_pallet'        => $id_pallet,
+            'posicion'         => $this->input->post('pallets_cantidad')[$key],
+          );
         }
       }
     }
 
-    if(count($data) > 0)
-      $this->db->insert_batch('rastria_pallets_calibres', $data);
+    $this->db->delete('otros.paletas_salidas_pallets', ['id_paleta_salida' => $id_paleta]);
+    if(count($data) > 0) {
+      $this->db->insert_batch('otros.paletas_salidas_pallets', $data);
+    }
 
     return true;
   }
+
+
+
+
+
+
+
+
 
   public function addPalletProductosSalida($id_pallet, $data=NULL, $id_bitacora=0){
     if ($data==NULL)

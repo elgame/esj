@@ -93,7 +93,7 @@
                       $v_status = 'Nacional o Exportación (pallets)';
                     }
                   ?>
-                  <span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
+                  <?php echo $v_status; ?>
                 </td>
 								<td>
 									<?php

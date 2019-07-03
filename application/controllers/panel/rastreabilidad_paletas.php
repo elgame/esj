@@ -125,12 +125,10 @@ class rastreabilidad_paletas extends MY_Controller {
 
       $params['info_empleado'] = $this->info_empleado['info']; //info empleado
       $params['seo'] = array(
-        'titulo' => 'Agregar Pallet'
+        'titulo' => 'Modificar Paleta de Salida'
       );
 
       $this->load->model('rastreabilidad_paletas_model');
-      $this->load->model('calibres_model');
-      $this->load->model('areas_model');
 
       $this->configAddModPaleta();
       if ($this->form_validation->run() == FALSE)
@@ -144,29 +142,19 @@ class rastreabilidad_paletas extends MY_Controller {
         redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
       }
 
-      $params['info'] = $this->rastreabilidad_paletas_model->getInfoPallet($_GET['id']);
+      $params['info'] = $this->rastreabilidad_paletas_model->getInfoPaleta($_GET['id']);
+      // echo "<pre>";
+      //   var_dump($params['info']);
+      // echo "</pre>";exit;
 
-      // $params['calibres'] = $this->calibres_model->getCalibres();
-
-
-      $params['areas'] = $this->areas_model->getAreas();
-      // Obtenemos area predeterminada
-      $params['area_default'] = null;
-      foreach ($params['areas']['areas'] as $key => $value)
-      {
-        if($value->predeterminado == 't')
-        {
-          $params['area_default'] = $value->id_area;
-          break;
-        }
-      }
+      $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
       $this->load->view('panel/header', $params);
       $this->load->view('panel/general/menu', $params);
-      $this->load->view('panel/rastreabilidad/pallets/modificar', $params);
+      $this->load->view('panel/rastreabilidad/paletas/modificar', $params);
       $this->load->view('panel/footer');
     }else
       redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
@@ -300,7 +288,7 @@ class rastreabilidad_paletas extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'El pallet se agregó correctamente.';
+        $txt = 'La paleta de salida se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
@@ -308,7 +296,7 @@ class rastreabilidad_paletas extends MY_Controller {
         $icono = 'error';
         break;
       case 5:
-        $txt = 'El pallet se modifico correctamente.';
+        $txt = 'La paleta de salida se modifico correctamente.';
         $icono = 'success';
         break;
       case 6:
@@ -316,11 +304,11 @@ class rastreabilidad_paletas extends MY_Controller {
         $icono = 'success';
         break;
       case 7:
-        $txt = 'El pallet se elimino correctamente.';
+        $txt = 'La paleta de salida se elimino correctamente.';
         $icono = 'success';
         break;
       case 8:
-        $txt = 'El pallet se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $txt = 'La paleta de salida se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
         $icono = 'error';
         break;
     }
