@@ -217,47 +217,28 @@ class rastreabilidad_paletas_model extends privilegios_model {
    * Agregar un pallet a la bd
    * @param [type] $data array con los valores a insertar
    */
-  public function addPallet($data=NULL)
+  public function addPaletaSalida($data=NULL)
   {
     if ($data==NULL)
     {
       $data = array(
-            // 'id_clasificacion' => $this->input->post('fid_clasificacion'),
-            'folio'        => $this->input->post('ffolio'),
-            'no_cajas'     => $this->input->post('fcajas'),
-            'no_hojas'     => 0,
-            'kilos_pallet' => $this->input->post('fkilos'),
-            'id_area'      => $this->input->post('parea'),
-            );
-      if($this->input->post('fid_cliente') > 0)
-        $data['id_cliente'] = $this->input->post('fid_cliente');
+        'id_empresa'     => $this->input->post('empresaId'),
+        'id_registro'    => $this->session->userdata('id_usuario'),
+        'fecha'          => $this->input->post('fecha'),
+        'status'         => 'r',
+        'id_bascula'     => $this->input->post('boletasSalidasId'),
+        'tipo'           => $this->input->post('tipo'),
+      );
     }
 
-    //se valida que no este un pallet pendiente de la misma clasificacion
-    // if($this->checkPalletPendiente($data['id_clasificacion'])){
-      $this->db->insert('rastria_pallets', $data);
-      $id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
+    $this->db->insert('paletas_salidas', $data);
+    $id_paleta = $this->db->insert_id('paletas_salidas', 'id_paleta_salida');
 
-      // Bitacora
-      $this->bitacora_model->_insert('rastria_pallets', $id_pallet,
-                                      array(':accion'    => 'el pallet', ':seccion' => 'pallets',
-                                            ':folio'     => $data['folio'],
-                                            ':id_empresa' => '2',
-                                            ':empresa'   => 'en EMPAQUE SAN JORGE SA DE CV'));
+    $this->saveClasificaciones($id_paleta);
 
-      $this->addPalletRendimientos($id_pallet);
+    $this->savePallets($id_paleta);
 
-      $this->addPalletCalibres($id_pallet);
-
-      $this->addPalletProductosSalida($id_pallet);
-
-      // $this->addPalletRendimiento($data['id_clasificacion']);
-
-      $this->registraSalida($id_pallet);
-
-      return array('msg' => 3, $id_pallet);
-    // }
-    // return array('msg' => 4, 0);
+    return array('msg' => 3, 'id' => $id_paleta);
   }
 
   /**
@@ -305,7 +286,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     return array('msg' => 5);
   }
 
-  public function addPalletRendimientos($id_pallet, $data=NULL, $id_bitacora=0){
+  public function saveClasificaciones($id_pallet, $data=NULL, $id_bitacora=0){
     if ($data==NULL)
     {
       if(is_array($this->input->post('rendimientos')))

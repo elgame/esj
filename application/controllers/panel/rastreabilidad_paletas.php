@@ -79,14 +79,14 @@ class rastreabilidad_paletas extends MY_Controller {
 
     $this->load->model('rastreabilidad_paletas_model');
 
-    $this->configAddModPallet();
+    $this->configAddModPaleta();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-      $res_mdl = $this->rastreabilidad_paletas_model->addPallet();
+      $res_mdl = $this->rastreabilidad_paletas_model->addPaletaSalida();
 
       redirect(base_url('panel/rastreabilidad_paletas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
@@ -132,7 +132,7 @@ class rastreabilidad_paletas extends MY_Controller {
       $this->load->model('calibres_model');
       $this->load->model('areas_model');
 
-      $this->configAddModPallet();
+      $this->configAddModPaleta();
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -225,92 +225,62 @@ class rastreabilidad_paletas extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddModPallet()
+  public function configAddModPaleta()
   {
     $this->load->library('form_validation');
 
     $rules = array(
-      array('field' => 'ffolio',
+      array('field' => 'boletasSalidasFolio',
             'label' => 'Folio',
-            'rules' => 'required|is_natural_no_zero|callback_chkfolio|callback_productos_existencia'),
-      array('field' => 'fid_clasificacion',
-            'label' => 'Clasificacion',
+            'rules' => 'required'),
+      array('field' => 'boletasSalidasId',
+            'label' => 'Folio',
+            'rules' => 'required'),
+      array('field' => 'empresaId',
+            'label' => 'Empresa',
+            'rules' => 'required'),
+      array('field' => 'empresa',
+            'label' => 'Empresa',
             'rules' => ''),
-      array('field' => 'fcajas',
-            'label' => 'Cajas',
-            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'required'),
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
 
-      array('field' => 'fclasificacion',
-            'label' => 'Clasificacion',
-            'rules' => ''),
-      array('field' => 'rendimientos[]',
-            'label' => 'Lista de cajas',
-            'rules' => 'is_natural_no_zero'),
-      array('field' => 'idrendimientos[]',
-            'label' => 'Caja disponible',
-            'rules' => 'is_natural_no_zero'),
-      array('field' => 'idclasificacion[]',
-            'label' => 'Clasificacion',
-            'rules' => 'is_natural_no_zero'),
-
-      array('field' => 'idcalibre[]',
-            'label' => 'Calibres',
-            'rules' => 'required|is_natural_no_zero'),
-      array('field' => 'fcliente',
+      array('field' => 'prod_cliente[]',
             'label' => 'Cliente',
             'rules' => ''),
-      array('field' => 'fid_cliente',
+      array('field' => 'prod_id_cliente[]',
             'label' => 'Cliente',
-            'rules' => 'is_natural_no_zero'),
-      // array('field' => 'fhojaspapel',
-      //       'label' => 'Hojas de papel',
-      //       'rules' => 'required|is_natural'),
-      array('field' => 'ps[]',
-            'label' => 'Producto',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'prod_ddescripcion[]',
+            'label' => 'Clasificacion',
             'rules' => ''),
-      array('field' => 'ps_id[]',
-            'label' => 'Producto',
+      array('field' => 'prod_did_prod[]',
+            'label' => 'Clasificacion',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'prod_dmedida[]',
+            'label' => 'Medida',
             'rules' => ''),
-      array('field' => 'ps_num[]',
+      array('field' => 'prod_dmedida_id[]',
+            'label' => 'Medida',
+            'rules' => ''),
+      array('field' => 'prod_dcantidad[]',
             'label' => 'Cantidad',
             'rules' => ''),
+      array('field' => 'prod_dmedida_kilos[]',
+            'label' => 'Kilos',
+            'rules' => ''),
+
     );
 
 
     $this->form_validation->set_rules($rules);
   }
 
-  public function chkfolio($folio){
-    $result = $this->db->query("SELECT Count(id_pallet) AS num FROM rastria_pallets
-      WHERE id_area = {$_POST['parea']} AND folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
-    if($result->num > 0){
-      $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
-      return false;
-    }else
-      return true;
-  }
 
-  public function productos_existencia($str)
-  {
-    $this->load->model('inventario_model');
-    $productos = array();
-    if (is_array($_POST['ps_id']) && count($_POST['ps_id']) > 0) {
-      foreach ($_POST['ps_id'] as $key => $value) {
-        if (floatval($value) > 0) {
-          $item = $this->inventario_model->getEPUData($value);
-          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( MyString::float($existencia-$_POST['ps_num'][$key]) < 0) {
-            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')';
-          }
-        }
-      }
-    }
-    if (count($productos)>0) {
-      $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
-      return FALSE;
-    }
-    return true;
-  }
 
 
   /*

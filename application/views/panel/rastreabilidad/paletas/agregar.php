@@ -55,9 +55,9 @@
                     <div class="controls">
                       <div class="input-append span12">
                         <select name="tipo" id="tipo" class="span11" data-next="fecha">
-                          <option value="lo">Local</option>
-                          <option value="na">Nacional</option>
-                          <option value="naex">Nacional o Exportación (pallets)</option>
+                          <option value="lo" <?php echo set_select('tipo', 'lo'); ?>>Local</option>
+                          <option value="na" <?php echo set_select('tipo', 'na'); ?>>Nacional</option>
+                          <option value="naex" <?php echo set_select('tipo', 'naex'); ?>>Nacional o Exportación (pallets)</option>
                         </select>
                       </div>
                     </div>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="clearfix"></div>
 
-								<div class="row-fluid">
+								<div class="row-fluid" id="show-table-prod">
                   <div class="span12">
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod">
                       <thead>
@@ -87,6 +87,7 @@
                           <th>Clasificación</th>
                           <th>Medida</th>
                           <th>Cant.</th>
+                          <th>Kg</th>
                           <th>Accion</th>
                         </tr>
                       </thead>
@@ -101,7 +102,7 @@
                             <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                           </td>
                           <td>
-                            <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                            <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad">
                               <?php foreach ($unidades as $key => $u) {
                                   if ($key === 0) $uni = $u->id_unidad;
                                 ?>
@@ -109,11 +110,13 @@
                               <?php } ?>
                             </select>
                             <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
-                            <input type="hidden" name="prod_dmedida_kilos[]" value="<?php echo $uni ?>" id="prod_dmedida_kilos">
                           </td>
                           <td>
                             <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
-                            <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
+                          </td>
+                          <td>
+                            <span id="prod_dmedida_kilos_text"></span>
+                            <input type="hidden" name="prod_dmedida_kilos[]" value="0" id="prod_dmedida_kilos" class="span12 vpositive" readonly="readonly">
                           </td>
                           <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
                         </tr>

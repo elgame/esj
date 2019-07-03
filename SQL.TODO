@@ -74,7 +74,6 @@
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE );
       ALTER TABLE otros.paletas_salidas_productos OWNER TO programa;
-    -- pct
     ALTER TABLE otros.paletas_salidas ADD COLUMN id_bascula bigint NOT NULL;
     ALTER TABLE otros.paletas_salidas ADD CONSTRAINT paletas_salidas_id_bascula_fkey FOREIGN KEY (id_bascula) REFERENCES public.bascula (id_bascula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     ALTER TABLE otros.paletas_salidas ADD COLUMN tipo character varying(5) NOT NULL;
