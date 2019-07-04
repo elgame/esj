@@ -63,10 +63,11 @@ class rastreabilidad_paletas extends MY_Controller {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
       array('libs/jquery.chosen.css', 'screen'),
+      array('panel/paletas_salidas.css', 'screen'),
     ));
     $this->carabiner->js(array(
-      array('libs/jquery.uniform.min.js'),
-      array('libs/jquery.chosen.min.js'),
+      // array('libs/jquery.uniform.min.js'),
+      // array('libs/jquery.chosen.min.js'),
       array('libs/jquery.numeric.js'),
       array('general/keyjump.js'),
       array('panel/rastreabilidad/paletas_agregar.js'),
@@ -113,7 +114,7 @@ class rastreabilidad_paletas extends MY_Controller {
       $this->carabiner->css(array(
         array('libs/jquery.uniform.css', 'screen'),
         array('libs/jquery.chosen.css', 'screen'),
-        array('panel/general_sanjorge.css', 'screen'),
+        array('panel/paletas_salidas.css', 'screen'),
       ));
       $this->carabiner->js(array(
         array('libs/jquery.uniform.min.js'),

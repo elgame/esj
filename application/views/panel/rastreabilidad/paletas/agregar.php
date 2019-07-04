@@ -125,6 +125,43 @@
                   </div>
                 </div>
 
+                <div class="row-fluid" id="show-table-pallets">
+                  <div class="span5">
+                    <h6>Acomodo de Pallets</h6>
+                    <div id="select_pallets">
+                      <div class="span1 nums">1</div>
+                      <div class="span4 slots">
+                        <span class="holder">Posición 1</span>
+                      </div>
+                      <div class="span4 slots">
+                        <span class="holder">Posición 2</span>
+                      </div>
+                      <div class="span1 nums">2</div>
+                    </div>
+                  </div>
+
+                  <div class="span7">
+                    <fieldset>
+
+                      <label for="fnombre">Buscar</label>
+                      <input type="text" name="fnombre" id="fnombre" value=""
+                        class="input-large search-query" placeholder="Folio" autofocus> |
+
+                      <label for="ffecha">Fecha</label>
+                      <input type="date" name="ffecha" id="ffecha" value=""> |
+
+                      <input type="button" name="enviar" value="Buscar" class="btn">
+                    </fieldset>
+
+                    <div id="table_pallets">
+                      <div class="span12 pallet" data-id="1">aaaa</div>
+                      <div class="span12 pallet" data-id="2">wwww</div>
+                      <div class="span12 pallet" data-id="3">zzzz</div>
+                    </div>
+
+                  </div>
+                </div>
+
 								<div class="form-actions">
 								  <button type="submit" id="btn_submit" class="btn btn-primary">Guardar</button>
 								  <a href="<?php echo base_url('panel/rastreabilidad_paletas/'); ?>" class="btn">Cancelar</a>

@@ -1,0 +1,38 @@
+
+#select_pallets .slots,
+#select_pallets .nums {
+  border: 1px solid #888;
+  margin: 0px;
+  vertical-align: middle;
+  height: 60px;
+  text-align: center;
+}
+#select_pallets .slots {
+  color: #888;
+}
+#select_pallets .nums {
+  border: none;
+}
+
+#show-table-pallets fieldset label {
+  display: inline;
+}
+
+
+#select_pallets .slots.hovered,
+#table_pallets.hovered {
+  background: #aaa;
+}
+#table_pallets .pallet {
+  border: 1px solid #888;
+  margin: 0px;
+}
+#table_pallets .pallet.correct {
+  background: #ccc;
+}
+#table_pallets .pallet.ui-draggable-dragging {
+  -moz-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  -webkit-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  width: 25%;
+}

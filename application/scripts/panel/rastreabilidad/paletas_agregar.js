@@ -30,6 +30,8 @@ var addpaletas = (function($){
 
     nuevoRegistro();
     quitProducto();
+
+    setEventsDragDrop();
   }
 
   // --------------------------------
@@ -297,6 +299,70 @@ var addpaletas = (function($){
 
       $tr.remove(); // elimina el tr padre.
     });
+  }
+
+
+  //----------------------------------
+  // Funciones de Drag and Drop de pallets
+  function setEventsDragDrop() {
+    $('#select_pallets .slots').droppable({
+      accept: '#table_pallets .pallet',
+      hoverClass: 'hovered',
+      drop: handlePalletDrop,
+      out: handlePalletOut
+    });
+
+    $('#table_pallets').droppable({
+      accept: '#select_pallets .pallet',
+      hoverClass: 'hovered',
+      // drop: handlePalletDrop,
+      // out: handlePalletOut
+    });
+
+    $('#table_pallets .pallet').draggable( {
+      containment: '#show-table-pallets',
+      stack: '#table_pallets .pallet',
+      cursor: 'move',
+      revert: true
+    });
+  }
+
+  function handlePalletDrop( event, ui ) {
+    var $slot = $(this);
+    var id = ui.draggable.data( 'id' );
+    console.log($slot, $slot.css('width'));
+
+    $slot.append(ui.draggable);
+
+    ui.draggable.addClass( 'correct' ).css({
+      width: $slot.css('width'),
+      height: $slot.css('height'),
+    });
+    $slot.find('.holder').hide();
+    ui.draggable.find('.holder').hide();
+    ui.draggable.position( { of: $(this), my: 'left top', at: 'left top' } );
+    ui.draggable.draggable( 'option', 'revert', false );
+    // ui.draggable.draggable( 'disable' );
+    // $(this).droppable( 'disable' );
+
+  }
+
+  function handlePalletOut( event, ui ) {
+    var $slot = $(this);
+    var id = ui.draggable.data( 'id' );
+    console.log($slot, $slot.css('width'));
+
+    ui.draggable.removeClass( 'correct' ).css({
+      width: '',
+      height: '',
+    });
+    $slot.find('.holder').show();
+    ui.draggable.find('.holder').show();
+    ui.draggable.draggable( 'option', 'revert', true );
+    // ui.draggable.position( { of: $(this), my: 'left top', at: 'left top' } );
+    // ui.draggable.draggable( 'disable' );
+    // $(this).droppable( 'disable' );
+
   }
 
 
