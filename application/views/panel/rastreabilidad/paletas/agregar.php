@@ -92,7 +92,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr data-pallets="" data-remisiones="">
+                        <tr data-pallet="">
                           <td>
                             <input type="text" name="prod_cliente[]" value="" id="prod_cliente" class="span12" data-next="prod_ddescripcion">
                             <input type="hidden" name="prod_id_cliente[]" value="" id="prod_id_cliente" class="span12">
@@ -126,39 +126,49 @@
                 </div>
 
                 <div class="row-fluid" id="show-table-pallets">
-                  <div class="span5">
-                    <h6>Acomodo de Pallets</h6>
-                    <div id="select_pallets">
-                      <div class="span1 nums">1</div>
-                      <div class="span4 slots">
-                        <span class="holder">Posición 1</span>
+                  <div class="span12"><h4>Acomodo de Pallets</h4></div>
+
+                  <div class="row-fluid">
+                    <div class="span5">
+                      <div id="select_pallets">
+                        <?php for ($i = 0; $i < 12; $i++): ?>
+                        <div class="row-fluid">
+                          <div class="span1 nums"><?php echo ($i*2)+1 ?></div>
+                          <div class="span4 slots">
+                            <span class="holder">Posición <?php echo ($i*2)+1 ?>
+                              <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i*2)+1 ?>">
+                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="">
+                            </span>
+                          </div>
+                          <div class="span4 slots">
+                            <span class="holder">Posición <?php echo ($i+1)*2 ?>
+                              <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i+1)*2 ?>">
+                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="">
+                            </span>
+                          </div>
+                          <div class="span1 nums"><?php echo ($i+1)*2 ?></div>
+                        </div>
+                        <?php endfor ?>
                       </div>
-                      <div class="span4 slots">
-                        <span class="holder">Posición 2</span>
-                      </div>
-                      <div class="span1 nums">2</div>
-                    </div>
-                  </div>
-
-                  <div class="span7">
-                    <fieldset>
-
-                      <label for="fnombre">Buscar</label>
-                      <input type="text" name="fnombre" id="fnombre" value=""
-                        class="input-large search-query" placeholder="Folio" autofocus> |
-
-                      <label for="ffecha">Fecha</label>
-                      <input type="date" name="ffecha" id="ffecha" value=""> |
-
-                      <input type="button" name="enviar" value="Buscar" class="btn">
-                    </fieldset>
-
-                    <div id="table_pallets">
-                      <div class="span12 pallet" data-id="1">aaaa</div>
-                      <div class="span12 pallet" data-id="2">wwww</div>
-                      <div class="span12 pallet" data-id="3">zzzz</div>
                     </div>
 
+                    <div class="span7">
+                      <fieldset>
+                        <label for="fnombre">Buscar</label>
+                        <input type="text" name="fnombre" id="fnombre" value=""
+                          class="input-large search-query" placeholder="Folio" autofocus> |
+
+                        <label for="ffecha">Fecha</label>
+                        <input type="date" name="ffecha" id="ffecha" value=""> |
+
+                        <input type="button" name="enviar" value="Buscar" class="btn" id="fbtnFindPallet">
+                      </fieldset>
+
+                      <div id="table_pallets">
+                        No hay resultados
+                      </div>
+
+                    </div>
                   </div>
                 </div>
 

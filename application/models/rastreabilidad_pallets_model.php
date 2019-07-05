@@ -37,24 +37,34 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		if($this->input->get('parea') != '')
 			$sql .= ($sql==''? 'WHERE': ' AND')." rp.id_area = '".$this->input->get('parea')."'";
 
-		$query = BDUtil::pagination("SELECT
-					rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas,
-					c.nombre_fiscal
-				FROM rastria_pallets AS rp
-					LEFT JOIN rastria_pallets_rendimiento AS rpr ON rp.id_pallet = rpr.id_pallet
-					LEFT JOIN clientes AS c ON rp.id_cliente = c.id_cliente
-				{$sql}
-				GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas, c.nombre_fiscal
-				ORDER BY folio DESC
-				", $params, true);
+
+    $sql = "SELECT
+        rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas,
+        c.nombre_fiscal, c.id_cliente
+      FROM rastria_pallets AS rp
+        LEFT JOIN rastria_pallets_rendimiento AS rpr ON rp.id_pallet = rpr.id_pallet
+        LEFT JOIN clientes AS c ON rp.id_cliente = c.id_cliente
+      {$sql}
+      GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas, c.id_cliente
+      ORDER BY folio DESC
+      ";
+    $response = array(
+      'pallets'        => array(),
+      'total_rows'     => 0,
+      'items_per_page' => 0,
+      'result_page'    => 0
+    );
+    if ($paginados) {
+		  $query = BDUtil::pagination($sql, $params, true);
+      $reponse['total_rows']     = $query['total_rows'];
+      $reponse['items_per_page'] = $params['result_items_per_page'];
+      $reponse['result_page']    = $params['result_page'];
+    } else {
+      $sql .= "LIMIT ".($this->input->get('limit') != ''? $this->input->get('limit'): 40);
+      $query['query'] = $sql;
+    }
 		$res = $this->db->query($query['query']);
 
-		$response = array(
-				'pallets'      => array(),
-				'total_rows'     => $query['total_rows'],
-				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
-		);
 		if($res->num_rows() > 0)
 			$response['pallets'] = $res->result();
 
@@ -73,9 +83,11 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 			if(!$basic_info)
 			{
-				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
-						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
-						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado
+				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext,
+            to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
+						u.id_unidad, u.nombre AS unidad, u.cantidad AS unidad_cantidad, cal.id_calibre, cal.nombre AS calibre,
+            e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
+						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado, c.codigo AS cls_codigo
 					FROM rastria_pallets_rendimiento AS rpr
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion

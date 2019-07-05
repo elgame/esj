@@ -32,6 +32,7 @@ var addpaletas = (function($){
     quitProducto();
 
     setEventsDragDrop();
+    setEventBuscar();
   }
 
   // --------------------------------
@@ -236,7 +237,7 @@ var addpaletas = (function($){
         existe    = false,
         $tr, addInputPalletId = true;
 
-    Object.assign(prod, {
+    Object.assign({
       cliente: '',
       id_cliente: '',
       clasificacion: '',
@@ -245,7 +246,8 @@ var addpaletas = (function($){
       id_unidad: '',
       cantidad: '0',
       kilos: '0',
-    });
+      id_pallet: '',
+    }, prod);
 
     var unidadesHtml = '';
     for (var i in unidades) {
@@ -254,10 +256,11 @@ var addpaletas = (function($){
     }
 
     trHtml =
-      '<tr data-pallets="" data-remisiones="">'+
+      '<tr data-pallet="'+prod.id_pallet+'">'+
         '<td>'+
           '<input type="text" name="prod_cliente[]" value="'+prod.cliente+'" id="prod_cliente" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">'+
           '<input type="hidden" name="prod_id_cliente[]" value="'+prod.id_cliente+'" id="prod_id_cliente" class="span12">'+
+          '<input type="hidden" name="prod_id_pallet[]" value="'+prod.id_pallet+'" id="prod_id_pallet" class="span12">'+
         '</td>'+
         '<td>'+
           '<input type="text" name="prod_ddescripcion[]" value="'+prod.clasificacion+'" id="prod_ddescripcion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
@@ -303,66 +306,145 @@ var addpaletas = (function($){
 
 
   //----------------------------------
+  //-------------- PALLETS --------------
   // Funciones de Drag and Drop de pallets
-  function setEventsDragDrop() {
-    $('#select_pallets .slots').droppable({
-      accept: '#table_pallets .pallet',
-      hoverClass: 'hovered',
-      drop: handlePalletDrop,
-      out: handlePalletOut
-    });
-
-    $('#table_pallets').droppable({
-      accept: '#select_pallets .pallet',
-      hoverClass: 'hovered',
-      // drop: handlePalletDrop,
-      // out: handlePalletOut
-    });
-
+  function setEventsDragDrop($reasign=false) {
     $('#table_pallets .pallet').draggable( {
-      containment: '#show-table-pallets',
-      stack: '#table_pallets .pallet',
-      cursor: 'move',
-      revert: true
+      cancel: "i.quit",
+      revert: "invalid",
+      containment: 'document', //"#show-table-pallets",
+      helper: "clone",
+      cursor: "move"
+    });
+
+    if (!$reasign) {
+      $('#select_pallets .slots').droppable({
+        accept: '#table_pallets .pallet',
+        classes: {
+          "ui-droppable-active": "custom-state-active"
+        },
+        hoverClass: 'hovered',
+        drop: function (event, ui) {
+          handlePalletDrop($(this), ui.draggable);
+        }
+      });
+
+      // Evento para quitar el pallet seleccionado
+      $( "#select_pallets" ).on( "click", '.pallet', function( event ) {
+        var $item = $( this ),
+          $target = $( event.target );
+
+        if ( $target.is( "i.quit" ) ) {
+          handleQuitPallet($target.parents('.slots'), $item );
+        }
+
+        return false;
+      });
+    }
+
+  }
+
+  function handleQuitPallet( $slot, $item ) {
+    $item.fadeOut(function() {
+      var $list = $( "#table_pallets");
+
+      $slot.find('.holder').show();
+      $slot.find('.pallets_id').val('');
+
+      $item.removeClass( 'correct' ).css({
+        width: '',
+        height: '',
+      });
+      $item.find('.holder').show();
+      $item.find('.dataInSlot').hide();
+      $item.find('.quit').remove();
+      $item.draggable( 'enable' );
+      $item.appendTo( $list ).show();
+
+      $('#table_prod tbody tr[data-pallet="'+$item.data('id')+'"]').remove();
     });
   }
 
-  function handlePalletDrop( event, ui ) {
-    var $slot = $(this);
-    var id = ui.draggable.data( 'id' );
-    console.log($slot, $slot.css('width'));
+  function handlePalletDrop( $slot, $item ) {
+    var id = $item.data( 'id' ),
+    folio = $item.data( 'folio' ),
+    idCliente = (parseFloat($item.data('idcliente'))||0);
 
-    $slot.append(ui.draggable);
+    if (idCliente > 0) {
+      if ($('#select_pallets .pallets_id[value="'+id+'"]').length == 0) {
+        $slot.find('.holder').hide();
+        $slot.find('.pallets_id').val(id);
 
-    ui.draggable.addClass( 'correct' ).css({
-      width: $slot.css('width'),
-      height: $slot.css('height'),
-    });
-    $slot.find('.holder').hide();
-    ui.draggable.find('.holder').hide();
-    ui.draggable.position( { of: $(this), my: 'left top', at: 'left top' } );
-    ui.draggable.draggable( 'option', 'revert', false );
-    // ui.draggable.draggable( 'disable' );
-    // $(this).droppable( 'disable' );
+        $item.addClass( 'correct' ).css({
+          width: $slot.css('width'),
+          height: $slot.css('height'),
+        });
+        $item.find('.holder').hide();
+        $item.find('.dataInSlot').show();
+        $item.draggable( 'disable' );
+        $item.append('<i class="icon-remove quit" title="Quitar"></i>');
 
+        $slot.append($item);
+        setDataPallet(id);
+      } else {
+        noty({"text": 'El pallet '+folio+' ya esta agregado al camión.', "layout":"topRight", "type": 'error'});
+      }
+    } else {
+      noty({"text": 'El pallet no tiene asignado un cliente, no se puede agregar al camión.', "layout":"topRight", "type": 'error'});
+    }
   }
 
-  function handlePalletOut( event, ui ) {
-    var $slot = $(this);
-    var id = ui.draggable.data( 'id' );
-    console.log($slot, $slot.css('width'));
+  function setEventBuscar() {
+    $('#fbtnFindPallet').on('click', function(event) {
+      event.preventDefault();
 
-    ui.draggable.removeClass( 'correct' ).css({
-      width: '',
-      height: '',
+      var param = {
+        "fnombre" : $("#fnombre").val(),
+        "ffecha"  : $("#ffecha").val(),
+        "limit"   : 40,
+      };
+      $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_pallets/', param, function(data) {
+        var html = '';
+
+        for (var i = 0; i < data.pallets.length; i++) {
+          html += '<div class="span12 pallet" data-id="'+data.pallets[i].id_pallet+'" data-folio="'+data.pallets[i].folio+'" data-idcliente="'+data.pallets[i].id_cliente+'">'+
+            '<span class="holder">Folio: '+data.pallets[i].folio+' | Fecha: '+data.pallets[i].fecha+' | '+
+            'Cajas: '+data.pallets[i].cajas+' | Cliente: '+data.pallets[i].nombre_fiscal+'</span>'+
+            '<span class="dataInSlot">Folio: '+data.pallets[i].folio+' | Cajas: '+data.pallets[i].cajas+'</span>'+
+          '</div>';
+        }
+        $('#table_pallets').html(html);
+
+        setEventsDragDrop(true);
+      });
     });
-    $slot.find('.holder').show();
-    ui.draggable.find('.holder').show();
-    ui.draggable.draggable( 'option', 'revert', true );
-    // ui.draggable.position( { of: $(this), my: 'left top', at: 'left top' } );
-    // ui.draggable.draggable( 'disable' );
-    // $(this).droppable( 'disable' );
+  }
 
+  function setDataPallet(id_pallet) {
+    var param = { id_pallet: id_pallet };
+    $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_info_pallet/', param, function(data) {
+      var html = '', prod = {};
+      console.log(data);
+
+      if (data.rendimientos && data.rendimientos.length > 0) {
+        $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+          for (var i = 0; i < data.rendimientos.length; i++) {
+            prod = {
+              cliente          : data.cliente.nombre_fiscal,
+              id_cliente       : data.cliente.id_cliente,
+              clasificacion    : data.rendimientos[i].nombre,
+              id_clasificacion : data.rendimientos[i].id_clasificacion,
+              unidad           : data.rendimientos[i].unidad,
+              id_unidad        : data.rendimientos[i].id_unidad,
+              cantidad         : data.rendimientos[i].cajas,
+              kilos            : ((parseFloat(data.rendimientos[i].cajas)||0) * (parseFloat(data.rendimientos[i].unidad_cantidad)||0)).toFixed(2),
+              id_pallet        : data.info.id_pallet,
+            };
+            addProducto(unidades, prod);
+          }
+        }, 'json');
+      }
+    });
   }
 
 

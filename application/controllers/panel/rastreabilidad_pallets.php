@@ -10,6 +10,8 @@ class rastreabilidad_pallets extends MY_Controller {
     'rastreabilidad_pallets/ajax_get_rendimientos/',
     'rastreabilidad_pallets/dd/',
     'rastreabilidad_pallets/ajax_get_folio/',
+    'rastreabilidad_pallets/ajax_get_pallets/',
+    'rastreabilidad_pallets/ajax_get_info_pallet/',
     );
 
   public function _remap($method){
@@ -235,6 +237,22 @@ class rastreabilidad_pallets extends MY_Controller {
       $this->load->model('rastreabilidad_pallets_model');
       $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($_GET['darea']);
     }
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_pallets(){
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $params = $this->rastreabilidad_pallets_model->getPallets(false);
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_info_pallet(){
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $params = $this->rastreabilidad_pallets_model->getInfoPallet($this->input->get('id_pallet'));
 
     echo json_encode($params);
   }

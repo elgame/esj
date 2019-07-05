@@ -230,7 +230,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
           $data[] = array(
             'id_paleta_salida' => $id_paleta,
             'id_pallet'        => $id_pallet,
-            'posicion'         => $this->input->post('pallets_cantidad')[$key],
+            'posicion'         => $this->input->post('pallets_posicion')[$key],
           );
         }
       }

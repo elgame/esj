@@ -187,22 +187,11 @@ class rastreabilidad_paletas extends MY_Controller {
   /**
    * Obtiene la lista de rendimientos de una clasificacion, ajax
    */
-  public function ajax_get_rendimientos(){
+  public function ajax_get_pallets(){
     $this->load->model('rastreabilidad_paletas_model');
     $params = $this->rastreabilidad_paletas_model->getRendimientoLibre(
                 $this->input->get('id'), $this->input->get('idunidad'),
                 $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
-
-    echo json_encode($params);
-  }
-
-  public function ajax_get_folio(){
-    $params = array('folio' => null);
-    if(isset($_GET['darea']{0}))
-    {
-      $this->load->model('rastreabilidad_paletas_model');
-      $params['folio'] = $this->rastreabilidad_paletas_model->getNextFolio($_GET['darea']);
-    }
 
     echo json_encode($params);
   }
@@ -261,6 +250,13 @@ class rastreabilidad_paletas extends MY_Controller {
             'rules' => ''),
       array('field' => 'prod_dmedida_kilos[]',
             'label' => 'Kilos',
+            'rules' => ''),
+
+      array('field' => 'pallets_posicion[]',
+            'label' => 'Posición pallet',
+            'rules' => ''),
+      array('field' => 'pallets_id[]',
+            'label' => 'Pallet',
             'rules' => ''),
 
     );
