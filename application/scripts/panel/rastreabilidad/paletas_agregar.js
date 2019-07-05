@@ -33,6 +33,8 @@ var addpaletas = (function($){
 
     setEventsDragDrop();
     setEventBuscar();
+
+    // $('#tipo').change();
   }
 
   // --------------------------------
@@ -399,9 +401,10 @@ var addpaletas = (function($){
       event.preventDefault();
 
       var param = {
-        "fnombre" : $("#fnombre").val(),
-        "ffecha"  : $("#ffecha").val(),
-        "limit"   : 40,
+        "fnombre"     : $("#fnombre").val(),
+        "ffecha"      : $("#ffecha").val(),
+        "onlyCliente" : 1,
+        "limit"       : 40,
       };
       $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_pallets/', param, function(data) {
         var html = '';

@@ -92,10 +92,50 @@
                         </tr>
                       </thead>
                       <tbody>
+                      <?php if (isset($_POST['prod_dmedida']) && count($_POST['prod_dmedida']) > 0): ?>
+                        <?php foreach ($_POST['prod_dmedida'] as $key => $unidad): ?>
+                          <?php if ($_POST['prod_id_cliente'][$key] !== '' || $_POST['prod_did_prod'][$key] !== ''): ?>
+                          <tr data-pallet="<?php echo $_POST['prod_id_pallet'][$key]; ?>">
+                            <td>
+                              <input type="text" name="prod_cliente[]" value="<?php echo $_POST['prod_cliente'][$key]; ?>" id="prod_cliente" class="span12" data-next="prod_ddescripcion">
+                              <input type="hidden" name="prod_id_cliente[]" value="<?php echo $_POST['prod_id_cliente'][$key]; ?>" id="prod_id_cliente" class="span12">
+                              <input type="hidden" name="prod_id_pallet[]" value="<?php echo $_POST['prod_id_pallet'][$key]; ?>" id="prod_id_pallet" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_ddescripcion[]" value="<?php echo $_POST['prod_ddescripcion'][$key]; ?>" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
+                              <input type="hidden" name="prod_did_prod[]" value="<?php echo $_POST['prod_did_prod'][$key]; ?>" id="prod_did_prod" class="span12">
+                            </td>
+                            <td>
+                              <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad">
+                                <?php
+                                foreach ($unidades as $keyu => $u) {
+                                  $selected = '';
+                                  if ($u->id_unidad == $_POST['prod_dmedida_id'][$key]) {
+                                    $selected = 'selected';
+                                  }
+                                ?>
+                                  <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo $selected ?>><?php echo $u->nombre ?></option>
+                                <?php } ?>
+                              </select>
+                              <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $_POST['prod_dmedida_id'][$key] ?>" id="prod_dmedida_id" class="span12 vpositive">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dcantidad[]" value="<?php echo $_POST['prod_dcantidad'][$key] ?>" id="prod_dcantidad" class="span12 vpositive">
+                            </td>
+                            <td>
+                              <span id="prod_dmedida_kilos_text"><?php echo $_POST['prod_dmedida_kilos'][$key] ?></span>
+                              <input type="hidden" name="prod_dmedida_kilos[]" value="<?php echo $_POST['prod_dmedida_kilos'][$key] ?>" id="prod_dmedida_kilos" class="span12 vpositive" readonly="readonly">
+                            </td>
+                            <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                          </tr>
+                          <?php endif ?>
+                        <?php endforeach ?>
+                      <?php endif ?>
                         <tr data-pallet="">
                           <td>
                             <input type="text" name="prod_cliente[]" value="" id="prod_cliente" class="span12" data-next="prod_ddescripcion">
                             <input type="hidden" name="prod_id_cliente[]" value="" id="prod_id_cliente" class="span12">
+                            <input type="hidden" name="prod_id_pallet[]" value="" id="prod_id_pallet" class="span12">
                           </td>
                           <td>
                             <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
@@ -131,19 +171,25 @@
                   <div class="row-fluid">
                     <div class="span5">
                       <div id="select_pallets">
+                        <?php $postss = isset($_POST['pallets_id']); ?>
                         <?php for ($i = 0; $i < 12; $i++): ?>
                         <div class="row-fluid">
                           <div class="span1 nums"><?php echo ($i*2)+1 ?></div>
                           <div class="span4 slots">
                             <span class="holder">Posición <?php echo ($i*2)+1 ?>
                               <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i*2)+1 ?>">
-                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="">
+                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="<?php echo ($postss? $_POST['pallets_id'][($i*2)]: '') ?>">
                             </span>
+                            <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="60572"
+                                data-folio="58481" data-idcliente="262" aria-disabled="true" style="width: 185px; height: 60px;">
+                              <span class="holder" style="display: none;">Folio: 58481 | Fecha: 2019-03-01 | Cajas: 56 | Cliente: LUIS ALBERTO CORONA MENDOZA</span>
+                              <span class="dataInSlot" style="display: inline;">Folio: 58481 | Cajas: 56</span><i class="icon-remove quit" title="Quitar"></i>
+                            </div>
                           </div>
                           <div class="span4 slots">
                             <span class="holder">Posición <?php echo ($i+1)*2 ?>
                               <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i+1)*2 ?>">
-                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="">
+                              <input type="hidden" name="pallets_id[]" class="pallets_id" value="<?php echo ($postss? $_POST['pallets_id'][($i*2)+1]: '') ?>">
                             </span>
                           </div>
                           <div class="span1 nums"><?php echo ($i+1)*2 ?></div>

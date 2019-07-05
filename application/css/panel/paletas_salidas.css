@@ -17,7 +17,8 @@
 }
 
 #show-table-pallets {
-  display: none;
+  display: block;
+  border-top: 1px solid #ccc;
 }
 #show-table-pallets fieldset label {
   display: inline;
