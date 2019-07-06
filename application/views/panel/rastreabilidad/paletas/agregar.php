@@ -176,21 +176,52 @@
                         <div class="row-fluid">
                           <div class="span1 nums"><?php echo ($i*2)+1 ?></div>
                           <div class="span4 slots">
-                            <span class="holder">Posición <?php echo ($i*2)+1 ?>
+                            <span class="holder" style="display: <?php echo ($postss && $_POST['pallets_id'][($i*2)] != ''? 'none': 'block') ?>">Posición <?php echo ($i*2)+1 ?>
                               <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i*2)+1 ?>">
                               <input type="hidden" name="pallets_id[]" class="pallets_id" value="<?php echo ($postss? $_POST['pallets_id'][($i*2)]: '') ?>">
+                              <input type="hidden" name="pallets_folio[]" class="pallets_folio" value="<?php echo ($postss? $_POST['pallets_folio'][($i*2)]: '') ?>">
+                              <input type="hidden" name="pallets_fecha[]" class="pallets_fecha" value="<?php echo ($postss? $_POST['pallets_fecha'][($i*2)]: '') ?>">
+                              <input type="hidden" name="pallets_cajas[]" class="pallets_cajas" value="<?php echo ($postss? $_POST['pallets_cajas'][($i*2)]: '') ?>">
+                              <input type="hidden" name="pallets_cliente[]" class="pallets_cliente" value="<?php echo ($postss? $_POST['pallets_cliente'][($i*2)]: '') ?>">
+                              <input type="hidden" name="pallets_idcliente[]" class="pallets_idcliente" value="<?php echo ($postss? $_POST['pallets_idcliente'][($i*2)]: '') ?>">
                             </span>
-                            <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="60572"
-                                data-folio="58481" data-idcliente="262" aria-disabled="true" style="width: 185px; height: 60px;">
-                              <span class="holder" style="display: none;">Folio: 58481 | Fecha: 2019-03-01 | Cajas: 56 | Cliente: LUIS ALBERTO CORONA MENDOZA</span>
-                              <span class="dataInSlot" style="display: inline;">Folio: 58481 | Cajas: 56</span><i class="icon-remove quit" title="Quitar"></i>
-                            </div>
+                            <?php if ($postss && $_POST['pallets_id'][($i*2)] != ''): ?>
+                              <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)]: '') ?>"
+                                  data-folio="<?php echo $_POST['pallets_folio'][($i*2)] ?>" data-cajas="<?php echo $_POST['pallets_cajas'][($i*2)] ?>"
+                                  data-fecha="<?php echo $_POST['pallets_fecha'][($i*2)] ?>" data-cliente="<?php echo $_POST['pallets_cliente'][($i*2)] ?>"
+                                  data-idcliente="<?php echo $_POST['pallets_idcliente'][($i*2)] ?>"
+                                  aria-disabled="true" style="width: 185px; height: 60px;">
+                                <span class="holder" style="display: none;">
+                                  Folio: <?php echo $_POST['pallets_folio'][($i*2)] ?> | Fecha: <?php echo $_POST['pallets_fecha'][($i*2)] ?> | Cajas: <?php echo $_POST['pallets_cajas'][($i*2)] ?> | Cliente: <?php echo $_POST['pallets_cliente'][($i*2)] ?></span>
+                                <span class="dataInSlot" style="display: inline;">
+                                  Folio: <?php echo $_POST['pallets_folio'][($i*2)] ?> | Cajas: <?php echo $_POST['pallets_cajas'][($i*2)] ?></span>
+                                  <i class="icon-remove quit" title="Quitar"></i>
+                              </div>
+                            <?php endif ?>
                           </div>
                           <div class="span4 slots">
-                            <span class="holder">Posición <?php echo ($i+1)*2 ?>
+                            <span class="holder" style="display: <?php echo ($postss && $_POST['pallets_id'][($i*2)+1] != ''? 'none': 'block') ?>">Posición <?php echo ($i+1)*2 ?>
                               <input type="hidden" name="pallets_posicion[]" class="pallets_posicion" value="<?php echo ($i+1)*2 ?>">
                               <input type="hidden" name="pallets_id[]" class="pallets_id" value="<?php echo ($postss? $_POST['pallets_id'][($i*2)+1]: '') ?>">
+                              <input type="hidden" name="pallets_folio[]" class="pallets_folio" value="<?php echo ($postss? $_POST['pallets_folio'][($i*2)+1]: '') ?>">
+                              <input type="hidden" name="pallets_fecha[]" class="pallets_fecha" value="<?php echo ($postss? $_POST['pallets_fecha'][($i*2)+1]: '') ?>">
+                              <input type="hidden" name="pallets_cajas[]" class="pallets_cajas" value="<?php echo ($postss? $_POST['pallets_cajas'][($i*2)+1]: '') ?>">
+                              <input type="hidden" name="pallets_cliente[]" class="pallets_cliente" value="<?php echo ($postss? $_POST['pallets_cliente'][($i*2)+1]: '') ?>">
+                              <input type="hidden" name="pallets_idcliente[]" class="pallets_idcliente" value="<?php echo ($postss? $_POST['pallets_idcliente'][($i*2)+1]: '') ?>">
                             </span>
+                            <?php if ($postss && $_POST['pallets_id'][($i*2)+1] != ''): ?>
+                              <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)+1]: '') ?>"
+                                  data-folio="<?php echo $_POST['pallets_folio'][($i*2)+1] ?>" data-cajas="<?php echo $_POST['pallets_cajas'][($i*2)+1] ?>"
+                                  data-fecha="<?php echo $_POST['pallets_fecha'][($i*2)+1] ?>" data-cliente="<?php echo $_POST['pallets_cliente'][($i*2)+1] ?>"
+                                  data-idcliente="<?php echo $_POST['pallets_idcliente'][($i*2)+1] ?>"
+                                  aria-disabled="true" style="width: 185px; height: 60px;">
+                                <span class="holder" style="display: none;">
+                                  Folio: <?php echo $_POST['pallets_folio'][($i*2)+1] ?> | Fecha: <?php echo $_POST['pallets_fecha'][($i*2)+1] ?> | Cajas: <?php echo $_POST['pallets_cajas'][($i*2)+1] ?> | Cliente: <?php echo $_POST['pallets_cliente'][($i*2)+1] ?></span>
+                                <span class="dataInSlot" style="display: inline;">
+                                  Folio: <?php echo $_POST['pallets_folio'][($i*2)+1] ?> | Cajas: <?php echo $_POST['pallets_cajas'][($i*2)+1] ?></span>
+                                  <i class="icon-remove quit" title="Quitar"></i>
+                              </div>
+                            <?php endif ?>
                           </div>
                           <div class="span1 nums"><?php echo ($i+1)*2 ?></div>
                         </div>

@@ -370,12 +370,21 @@ var addpaletas = (function($){
   function handlePalletDrop( $slot, $item ) {
     var id = $item.data( 'id' ),
     folio = $item.data( 'folio' ),
-    idCliente = (parseFloat($item.data('idcliente'))||0);
+    cajas = $item.data( 'cajas' ),
+    fecha = $item.data( 'fecha' ),
+    cliente = $item.data( 'cliente' ),
+    idCliente = (parseFloat($item.data('idcliente'))||0)
+    ;
 
     if (idCliente > 0) {
       if ($('#select_pallets .pallets_id[value="'+id+'"]').length == 0) {
         $slot.find('.holder').hide();
         $slot.find('.pallets_id').val(id);
+        $slot.find('.pallets_folio').val(folio);
+        $slot.find('.pallets_fecha').val(fecha);
+        $slot.find('.pallets_cajas').val(cajas);
+        $slot.find('.pallets_cliente').val(cliente);
+        $slot.find('.pallets_idcliente').val(idCliente);
 
         $item.addClass( 'correct' ).css({
           width: $slot.css('width'),
@@ -410,7 +419,9 @@ var addpaletas = (function($){
         var html = '';
 
         for (var i = 0; i < data.pallets.length; i++) {
-          html += '<div class="span12 pallet" data-id="'+data.pallets[i].id_pallet+'" data-folio="'+data.pallets[i].folio+'" data-idcliente="'+data.pallets[i].id_cliente+'">'+
+          html += '<div class="span12 pallet" data-id="'+data.pallets[i].id_pallet+'" data-folio="'+data.pallets[i].folio+'" '+
+              'data-cajas="'+data.pallets[i].cajas+'" data-fecha="'+data.pallets[i].fecha+'" data-cliente="'+data.pallets[i].nombre_fiscal+'" '+
+              'data-idcliente="'+data.pallets[i].id_cliente+'">'+
             '<span class="holder">Folio: '+data.pallets[i].folio+' | Fecha: '+data.pallets[i].fecha+' | '+
             'Cajas: '+data.pallets[i].cajas+' | Cliente: '+data.pallets[i].nombre_fiscal+'</span>'+
             '<span class="dataInSlot">Folio: '+data.pallets[i].folio+' | Cajas: '+data.pallets[i].cajas+'</span>'+
