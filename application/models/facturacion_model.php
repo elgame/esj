@@ -2079,6 +2079,27 @@ class facturacion_model extends privilegios_model{
 		return $data;
 	}
 
+  public function get_series($ide, $tipof)
+  {
+    if(isset($ide))
+    {
+      $tipo = $tipof;
+      $this->load->model('facturacion_model');
+      $res = $this->getSeriesEmpresa($ide);
+      $quit = array('f' => array('NCR' => 0, 'R' => 0, 'AB' => 0, 'VD' => 0), 'r' => array('D' => 0, 'AB' => 0, 'VD' => 0),
+                    'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
+      foreach ($res[0] as $key => $value)
+      {
+        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
+          unset($res[0][$key]);
+      }
+
+      $param['data'] = $res[0];
+
+      return $param;
+    }
+  }
+
 	/**
 	 * Obtiene la informacion de una serie/folio
    *

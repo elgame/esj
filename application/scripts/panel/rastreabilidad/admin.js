@@ -8,4 +8,8 @@ $(function(){
       $a.attr('href', href[0]);
     }
   });
+
+  $('.modal-series').on('click', function(event) {
+    $("#modal-series").modal('show');
+  });
 });

@@ -24,6 +24,7 @@ var addpaletas = (function($){
 
     eventOnChangeMedida();
     eventOnChangeTipo();
+    eventOnSubmit();
 
     autocompleteClasifiLive();
     autocompleteClientes();
@@ -90,6 +91,17 @@ var addpaletas = (function($){
 
   // --------------------------------
   // Eventos
+  function eventOnSubmit() {
+    $('#form-papeleta').submit(function(event) {
+      var $tr;
+      $('#table_prod #prod_id_cliente').each(function(index, el) {
+        $tr = $(this).parent().parent();
+        if ($(this).val() == '' && $tr.find('#prod_did_prod').val() == '') {
+          $tr.remove();
+        }
+      });
+    });
+  }
   function eventOnChangeMedida() {
     $('#table_prod').on('change', 'select#prod_dmedida', function(event) {
       console.log('1111');

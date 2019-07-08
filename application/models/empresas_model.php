@@ -1,7 +1,8 @@
 <?php
 
 class empresas_model extends CI_Model{
-	private $pass_finkok = 'F4ctur4rt!'; //F4ctur4rt!
+  private $pass_finkok = 'F4ctur4rt!'; //F4ctur4rt!
+	public static $version = '3.3';
 
 	function __construct(){
 		parent::__construct();

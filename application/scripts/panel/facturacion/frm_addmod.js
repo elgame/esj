@@ -1169,7 +1169,7 @@ function loadSerieFolio (ide, forceLoad) {
   loader.create();
     $.getJSON(base_url+'panel/facturacion/get_series/?tipof=f&ide='+ide,
       function(res){
-        if(res.msg === 'ok') {
+        if(res.data) {
           var html_option = '<option value="void"></option>',
               selected = '', serieSelected = 'void',
               loadDefault = false;
@@ -1202,7 +1202,7 @@ function loadSerieFolio (ide, forceLoad) {
             // }
           }
         } else {
-          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+          noty({"text":'No hay series', "layout":"topRight", "type": 'error'});
         }
         loader.close();
       });

@@ -23,7 +23,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/rastreabilidad_paletas/agregar'); ?>" id="form-search" method="post" class="form-horizontal">
+						<form action="<?php echo base_url('panel/rastreabilidad_paletas/agregar'); ?>" id="form-papeleta" method="post" class="form-horizontal">
 						  <fieldset>
 								<legend></legend>
 

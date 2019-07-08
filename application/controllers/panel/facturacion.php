@@ -1960,18 +1960,8 @@ class facturacion extends MY_Controller {
     {
       $tipo = isset($_GET['tipof'])? $_GET['tipof']: 'f';
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->getSeriesEmpresa($_GET['ide']);
-      $quit = array('f' => array('NCR' => 0, 'R' => 0, 'AB' => 0, 'VD' => 0), 'r' => array('D' => 0, 'AB' => 0, 'VD' => 0),
-                    'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
-      foreach ($res[0] as $key => $value)
-      {
-        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
-          unset($res[0][$key]);
-      }
-
-      $param =  $this->showMsgs(2, $res[1]);
-      $param['data'] = $res[0];
-      echo json_encode($param);
+      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo);
+      echo json_encode($res);
     }
   }
 

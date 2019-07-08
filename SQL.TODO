@@ -78,8 +78,9 @@
     ALTER TABLE otros.paletas_salidas ADD CONSTRAINT paletas_salidas_id_bascula_fkey FOREIGN KEY (id_bascula) REFERENCES public.bascula (id_bascula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     ALTER TABLE otros.paletas_salidas ADD COLUMN tipo character varying(5) NOT NULL;
     COMMENT ON COLUMN otros.paletas_salidas.tipo IS 'lo: local, na: nacional, naex: nacional y exportacion';
-    -- pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',497,FALSE,'rastreabilidad_paletas/imprimir/','print',FALSE);
+    --pct
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Remisionar',493,FALSE,'rastreabilidad_paletas/imprimir/','qrcode',FALSE);
 
  ✔ Cambios para ADD de compras @done (19-06-24 19:52) pcc|lap|pct|san
    ALTER TABLE public.compras ADD COLUMN uuid character varying;

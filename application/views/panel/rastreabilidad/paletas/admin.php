@@ -75,7 +75,7 @@
 								  <th>Clientes</th>
 									<th>Tipo</th>
 									<th>Estatus</th>
-								  <th>Opciones</th>
+								  <th style="width: 150px">Opciones</th>
 							  </tr>
 						  </thead>
 						  <tbody>
@@ -126,6 +126,13 @@
 												'attrs' => array('id' => 'pallet'.$paleta->id_paleta_salida, 'onclick' => "msb.confirm('Estas seguro de eliminar la paleta de salida?', 'paleta', this); return false;"))
 										);
 
+                    // echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_paletas/remisionar/', array(
+                    //     'params'   => 'id='.$paleta->id_paleta_salida,
+                    //     'btn_type' => 'btn-warning' )
+                    // );
+                    echo '<a class="btn btn-warning modal-series" title="Remisionar" data-id="'.$paleta->id_paleta_salida.'">
+                      <i class="icon-qrcode icon-white"></i> <span class="hidden-tablet">Remisionar</span></a>';
+
 										?>
 								</td>
 							</tr>
@@ -162,6 +169,27 @@
 					<!-- content ends -->
 		</div><!--/#content.span10-->
 
+<!-- Modal series -->
+<div id="modal-series" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Series</h3>
+  </div>
+  <div class="modal-body">
+    <div class="row-fluid">
+      <select name="">
+        <?php foreach ($series as $key => $value): ?>
+        <option value="<?php echo $value->id_serie_folio ?>"><?php echo $value->leyenda.' '.$value->serie ?></option>
+        <?php endforeach ?>
+      </select>
+      panel/rastreabilidad_paletas/remisionar/?id=4
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    <button class="btn btn-primary" id="BtnAddBoleta">Seleccionar</button>
+  </div>
+</div><!--/modal series -->
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

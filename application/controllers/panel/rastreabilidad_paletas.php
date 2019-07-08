@@ -41,9 +41,11 @@ class rastreabilidad_paletas extends MY_Controller {
 
     $this->load->model('rastreabilidad_paletas_model');
     $this->load->model('areas_model');
+    $this->load->model('facturacion_model');
 
     $params['paletas'] = $this->rastreabilidad_paletas_model->getPaletas(true);
     $params['areas']   = $this->areas_model->getAreas();
+    $params['series'] = $this->facturacion_model->get_series($_GET['did_empresa'], 'f')['data'];
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -146,6 +148,7 @@ class rastreabilidad_paletas extends MY_Controller {
       $params['info'] = $this->rastreabilidad_paletas_model->getInfoPaleta($_GET['id']);
       $params['readonly'] = ($params['info']['paleta']->status==='f'? 'readonly': '');
       $params['disabled'] = ($params['info']['paleta']->status==='f'? 'disabled': '');
+
       // echo "<pre>";
       //   var_dump($params['info']);
       // echo "</pre>";exit;
@@ -161,6 +164,12 @@ class rastreabilidad_paletas extends MY_Controller {
       $this->load->view('panel/footer');
     }else
       redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
+  }
+
+  public function remisionar()
+  {
+    $this->load->model('rastreabilidad_paletas_model');
+    $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
   }
 
   /**
