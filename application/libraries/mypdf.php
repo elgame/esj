@@ -219,6 +219,7 @@ class MYpdf extends FPDF {
     var $links;
     var $font;
     var $fontz;
+    public $fontb;
     var $font_bold = '';
 
     function SetWidths($w){
@@ -233,9 +234,10 @@ class MYpdf extends FPDF {
       $this->links=$a;
     }
 
-    function SetFounts($a, $z=array()){
+    function SetFounts($a, $z=array(), $b=[]){
         $this->font=$a;
         $this->fontz=$z;
+        $this->fontb=$b;
     }
 
     function Row($data, $header=false, $bordes=true, $colortxt=null, $height=3, $positionY=2){
@@ -300,7 +302,7 @@ class MYpdf extends FPDF {
                 $x=$this->GetX();
                 $y=$this->GetY();
 
-                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), $this->font_bold, ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
+                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), (isset($this->fontb[$i]) ? $this->fontb[$i] : $this->font_bold), ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
 
                 if($header===true && $bordes===true)
                   $this->Rect($x,$y,$w,$h,'DF');

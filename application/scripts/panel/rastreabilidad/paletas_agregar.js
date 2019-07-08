@@ -34,7 +34,7 @@ var addpaletas = (function($){
     setEventsDragDrop();
     setEventBuscar();
 
-    // $('#tipo').change();
+    $('#tipo').change();
   }
 
   // --------------------------------
@@ -239,7 +239,7 @@ var addpaletas = (function($){
         existe    = false,
         $tr, addInputPalletId = true;
 
-    Object.assign({
+    prod = Object.assign({
       cliente: '',
       id_cliente: '',
       clasificacion: '',
@@ -348,10 +348,18 @@ var addpaletas = (function($){
 
   function handleQuitPallet( $slot, $item ) {
     $item.fadeOut(function() {
-      var $list = $( "#table_pallets");
+      var $list = $( "#table_pallets"),
+      idPallet = $slot.find('.pallets_id').val(),
+      isDraggable = ($slot.find('.pallet.post-draggable').length===0);
 
       $slot.find('.holder').show();
       $slot.find('.pallets_id').val('');
+      $slot.find('.pallets_folio').val('');
+      $slot.find('.pallets_fecha').val('');
+      $slot.find('.pallets_cajas').val('');
+      $slot.find('.pallets_cliente').val('');
+      $slot.find('.pallets_idcliente').val('');
+      $slot.find('.pallet.post-draggable').remove();
 
       $item.removeClass( 'correct' ).css({
         width: '',
@@ -360,10 +368,12 @@ var addpaletas = (function($){
       $item.find('.holder').show();
       $item.find('.dataInSlot').hide();
       $item.find('.quit').remove();
-      $item.draggable( 'enable' );
-      $item.appendTo( $list ).show();
+      if (isDraggable) {
+        $item.draggable( 'enable' );
+        $item.appendTo( $list ).show();
+      }
 
-      $('#table_prod tbody tr[data-pallet="'+$item.data('id')+'"]').remove();
+      $('#table_prod tbody tr[data-pallet="'+idPallet+'"]').remove();
     });
   }
 

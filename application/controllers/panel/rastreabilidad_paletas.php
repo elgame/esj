@@ -75,7 +75,7 @@ class rastreabilidad_paletas extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar Paleta de salida'
+      'titulo' => 'Agregar Papeleta de salida'
     );
 
     $this->load->model('rastreabilidad_paletas_model');
@@ -121,12 +121,12 @@ class rastreabilidad_paletas extends MY_Controller {
         array('libs/jquery.chosen.min.js'),
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
-        array('panel/rastreabilidad/pallets_agregar.js'),
+        array('panel/rastreabilidad/paletas_agregar.js'),
       ));
 
       $params['info_empleado'] = $this->info_empleado['info']; //info empleado
       $params['seo'] = array(
-        'titulo' => 'Modificar Paleta de Salida'
+        'titulo' => 'Modificar Papeleta de Salida'
       );
 
       $this->load->model('rastreabilidad_paletas_model');
@@ -144,6 +144,8 @@ class rastreabilidad_paletas extends MY_Controller {
       }
 
       $params['info'] = $this->rastreabilidad_paletas_model->getInfoPaleta($_GET['id']);
+      $params['readonly'] = ($params['info']['paleta']->status==='f'? 'readonly': '');
+      $params['disabled'] = ($params['info']['paleta']->status==='f'? 'disabled': '');
       // echo "<pre>";
       //   var_dump($params['info']);
       // echo "</pre>";exit;
@@ -168,7 +170,7 @@ class rastreabilidad_paletas extends MY_Controller {
   public function imprimir()
   {
     $this->load->model('rastreabilidad_paletas_model');
-    $this->rastreabilidad_paletas_model->palletBig_pdf($this->input->get('id'));
+    $this->rastreabilidad_paletas_model->paleta_pdf($this->input->get('id'));
   }
 
   public function eliminar()
@@ -176,8 +178,7 @@ class rastreabilidad_paletas extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('rastreabilidad_paletas_model');
-      $delAll = isset($_GET['d']) ? true : false;
-      $res_mdl = $this->rastreabilidad_paletas_model->deletePallet( $this->input->get('id'), $delAll );
+      $res_mdl = $this->rastreabilidad_paletas_model->deletePaleta( $this->input->get('id'));
       redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
     else
@@ -213,7 +214,7 @@ class rastreabilidad_paletas extends MY_Controller {
             'rules' => 'required'),
       array('field' => 'boletasSalidasId',
             'label' => 'Folio',
-            'rules' => 'required'),
+            'rules' => 'required|callback_chkboleta'),
       array('field' => 'empresaId',
             'label' => 'Empresa',
             'rules' => 'required'),
@@ -265,6 +266,15 @@ class rastreabilidad_paletas extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function chkboleta($id){
+    $result = $this->db->query("SELECT Count(id_paleta_salida) AS num FROM otros.paletas_salidas
+      WHERE id_bascula = {$id} AND status <> 'ca'".(isset($_GET['id'])? " AND id_paleta_salida <> '{$_GET['id']}'": '') )->row();
+    if($result->num > 0){
+      $this->form_validation->set_message('chkboleta', "La boleta {$_POST['boletasSalidasFolio']} ya esta registrada en otra paleta de salida, intenta con otra.");
+      return false;
+    }else
+      return true;
+  }
 
 
 

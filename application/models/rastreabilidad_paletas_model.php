@@ -51,7 +51,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $sql .= ($sql==''? 'WHERE': ' AND')." ps.id_empresa = '".$this->input->get('did_empresa')."'";
 
     $query = BDUtil::pagination("SELECT
-          ps.id_paleta_salida, b.folio, Date(ps.fecha) AS fecha, ps.status, ps.tipo, string_agg(c.nombre_fiscal, ', ') AS clientes
+          ps.id_paleta_salida, b.folio, Date(ps.fecha) AS fecha, ps.status, ps.tipo,
+          string_agg(distinct c.nombre_fiscal, ', ') AS clientes
         FROM otros.paletas_salidas ps
           INNER JOIN public.bascula b ON b.id_bascula = ps.id_bascula
           LEFT JOIN otros.paletas_salidas_productos psp ON ps.id_paleta_salida = psp.id_paleta_salida
@@ -76,9 +77,9 @@ class rastreabilidad_paletas_model extends privilegios_model {
     return $response;
   }
 
-  public function getInfoPaleta($id_paleta, $basic_info=FALSE, $cajas_libres=true){
+  public function getInfoPaleta($id_paleta, $basic_info=FALSE, $all=false){
     $result = $this->db->query("SELECT ps.id_paleta_salida, ps.fecha, ps.fecha_registro, ps.id_empresa, e.nombre_fiscal AS empresa,
-        b.folio, ps.tipo, ps.status
+        b.id_bascula, b.folio, b.kilos_neto, b.no_trazabilidad, ps.tipo, ps.status, b.id_chofer, b.id_camion
       FROM otros.paletas_salidas ps
         INNER JOIN empresas e ON e.id_empresa = ps.id_empresa
         INNER JOIN bascula b ON b.id_bascula = ps.id_bascula
@@ -89,9 +90,10 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $response['paleta'] = $result->row();
       $result->free_result();
 
-      if (!$basic_info) {
-        $result = $this->db->query("SELECT psp.id_paleta_salida, psp.num_rows, psp.id_cliente, psp.id_clasificacion, psp.clasificacion,
-            psp.id_unidad, psp.unidad, u.cantidad AS cantidad_unidad, psp.cantidad, psp.kilos, psp.id_pallet
+      if (!$basic_info || $all) {
+        $result = $this->db->query("SELECT psp.id_paleta_salida, psp.num_rows, psp.id_cliente, psp.id_clasificacion,
+            psp.clasificacion, psp.id_unidad, psp.unidad, u.cantidad AS cantidad_unidad, psp.cantidad, psp.kilos,
+            psp.id_pallet, c.nombre_fiscal AS cliente
           FROM otros.paletas_salidas_productos psp
             INNER JOIN clientes c ON c.id_cliente = psp.id_cliente
             INNER JOIN clasificaciones cl ON cl.id_clasificacion = psp.id_clasificacion
@@ -100,15 +102,44 @@ class rastreabilidad_paletas_model extends privilegios_model {
         $response['clasificaciones'] = $result->result();
         $result->free_result();
 
-        $result = $this->db->query("SELECT p.id_pallet, psp.posicion, p.no_cajas, string_agg(c.codigo, ', ') AS clasificaciones
+        $result = $this->db->query("SELECT p.id_pallet, psp.posicion, p.no_cajas, p.folio,
+            string_agg(distinct c.codigo, ', ') AS clasificaciones, string_agg(distinct u.codigo, ', ') AS unidades
           FROM otros.paletas_salidas_pallets psp
             INNER JOIN rastria_pallets p ON p.id_pallet = psp.id_pallet
             INNER JOIN rastria_pallets_rendimiento pr ON p.id_pallet = pr.id_pallet
             INNER JOIN clasificaciones c ON c.id_clasificacion = pr.id_clasificacion
+            INNER JOIN unidades u ON u.id_unidad = pr.id_unidad
           WHERE psp.id_paleta_salida = {$id_paleta}
           GROUP BY p.id_pallet, psp.posicion");
-        $response['pallets'] = $result->result();
+        $pallets = $result->result();
+        $response['pallets'] = [];
+        foreach ($pallets as $key => $value) {
+          $response['pallets'][$value->posicion] = $value;
+        }
         $result->free_result();
+
+        if ($all) {
+          $listClientes = array_unique(array_column($response['clasificaciones'], 'id_cliente'));
+          $response['paleta']->carga_compartida = (count($listClientes)>0? 'Si': 'No');
+
+          $response['paleta']->total_tarimas = count($response['pallets']);
+          $response['paleta']->total_bultos = 0;
+          $response['paleta']->total_kg = 0;
+          foreach ($response['clasificaciones'] as $key => $value) {
+            $response['paleta']->total_bultos += $value->cantidad;
+            $response['paleta']->total_kg += $value->kilos;
+          }
+
+          $result = $this->db->query("SELECT id_chofer, nombre, telefono, no_licencia, no_ife
+            FROM choferes WHERE id_chofer = {$response['paleta']->id_chofer}");
+          $response['paleta']->chofer = $result->row();
+          $result->free_result();
+
+          $result = $this->db->query("SELECT id_camion, placa, modelo, marca, color
+            FROM camiones WHERE id_camion = {$response['paleta']->id_camion}");
+          $response['paleta']->camion = $result->row();
+          $result->free_result();
+        }
       }
     }
 
@@ -147,45 +178,26 @@ class rastreabilidad_paletas_model extends privilegios_model {
    * Modifica un pallet a la bd
    * @param [type] $data array con los valores a insertar
    */
-  public function updatePallet($id_pallet, $data=NULL){
+  public function updatePallet($id_paleta, $data=NULL){
     if ($data==NULL)
     {
       $data = array(
-            // 'id_clasificacion' => $this->input->post('fid_clasificacion'),
-            'folio'        => $this->input->post('ffolio'),
-            'no_cajas'     => $this->input->post('fcajas'),
-            'no_hojas'     => 0,
-            'kilos_pallet' => $this->input->post('fkilos'),
-            'calibre_fijo' => $this->input->post('fcalibre_fijo'),
-            );
-      if($this->input->post('fid_cliente') > 0)
-        $data['id_cliente'] = $this->input->post('fid_cliente');
+        'id_empresa'     => $this->input->post('empresaId'),
+        'id_registro'    => $this->session->userdata('id_usuario'),
+        'fecha'          => $this->input->post('fecha'),
+        'status'         => $this->input->post('status'),
+        'id_bascula'     => $this->input->post('boletasSalidasId'),
+        'tipo'           => $this->input->post('tipo'),
+      );
     }
 
-    // Bitacora
-    $id_bitacora = $this->bitacora_model->_update('rastria_pallets', $id_pallet, $data,
-                              array(':accion'       => 'el pallet', ':seccion' => 'pallets',
-                                    ':folio'        => $data['folio'],
-                                    ':id_empresa'   => '2',
-                                    ':empresa'      => 'en EMPAQUE SAN JORGE SA DE CV',
-                                    ':id'           => 'id_pallet',
-                                    ':titulo'       => 'Pallet'));
+    $this->db->update('otros.paletas_salidas', $data, "id_paleta_salida = {$id_paleta}");
 
-    $this->db->update('rastria_pallets', $data, "id_pallet = {$id_pallet}");
+    $this->saveClasificaciones($id_paleta);
 
-    $this->db->delete('rastria_pallets_rendimiento', "id_pallet = {$id_pallet}");
-    $this->addPalletRendimientos($id_pallet, NULL, $id_bitacora);
+    $this->savePallets($id_paleta);
 
-    $this->db->delete('rastria_pallets_calibres', "id_pallet = {$id_pallet}");
-    $this->addPalletCalibres($id_pallet);
-
-    $this->db->delete('rastria_pallets_salidas', "id_pallet = {$id_pallet}");
-    $this->addPalletProductosSalida($id_pallet);
-
-    $this->db->delete('compras_salidas', "id_pallet = {$id_pallet}");
-    $this->registraSalida($id_pallet);
-
-    return array('msg' => 5);
+    return array('msg' => 5, 'id' => $id_paleta);
   }
 
   public function saveClasificaciones($id_paleta, $data=NULL, $id_bitacora=0){
@@ -205,6 +217,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
             'unidad'           => $this->input->post('prod_dmedida')[$key],
             'cantidad'         => $this->input->post('prod_dcantidad')[$key],
             'kilos'            => $this->input->post('prod_dmedida_kilos')[$key],
+            'id_pallet'        => ($this->input->post('prod_id_pallet')[$key]!==''? $this->input->post('prod_id_pallet')[$key]: NULL),
           );
         }
       }
@@ -227,11 +240,13 @@ class rastreabilidad_paletas_model extends privilegios_model {
       {
         foreach ($this->input->post('pallets_id') as $key => $id_pallet)
         {
-          $data[] = array(
-            'id_paleta_salida' => $id_paleta,
-            'id_pallet'        => $id_pallet,
-            'posicion'         => $this->input->post('pallets_posicion')[$key],
-          );
+          if ($id_pallet !== '') {
+            $data[] = array(
+              'id_paleta_salida' => $id_paleta,
+              'id_pallet'        => $id_pallet,
+              'posicion'         => $this->input->post('pallets_posicion')[$key],
+            );
+          }
         }
       }
     }
@@ -244,196 +259,184 @@ class rastreabilidad_paletas_model extends privilegios_model {
     return true;
   }
 
-
-
-
-
-
-
-
-
-  public function addPalletProductosSalida($id_pallet, $data=NULL, $id_bitacora=0){
-    if ($data==NULL)
-    {
-      if(is_array($this->input->post('ps_id')))
-      {
-        foreach ($this->input->post('ps_id') as $key => $prod)
-        {
-          $data[] = array(
-            'id_pallet'   => $id_pallet,
-            'id_producto' => $prod>0? $prod: NULL,
-            'cantidad'    => floatval($_POST['ps_num'][$key]),
-            'nom_row'     => $_POST['ps_row'][$key],
-            'row'         => $key,
-            );
-        }
-      }
-    }
-
-    if(count($data) > 0) {
-      $this->db->insert_batch('rastria_pallets_salidas', $data);
-    }
-
-    return true;
-  }
-
-  public function registraSalida($id_pallet)
+  public function deletePaleta($id_paleta)
   {
-    $dato_info = $this->getInfoPallet($id_pallet, true);
-
-    if($dato_info['info']->no_cajas == $dato_info['info']->cajas)
-    {
-      // Procesa la salida
-      $this->load->model('productos_salidas_model');
-      $this->load->model('inventario_model');
-
-      $infoSalida      = array();
-      $productosSalida = array(); // contiene los productos que se daran salida.
-      // // Se obtienen los pallets ligados a la factura
-      // $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$idFactura}")->result();
-      // // Si hay pallets ligados
-      // if(count($listaPallets) > 0)
-      // {
-        // $lipallets = array();
-        // foreach ($listaPallets as $keylp => $lipallet) {
-        //   $lipallets[] = $lipallet->id_pallet;
-        // }
-        $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
-                            FROM rastria_pallets_salidas WHERE id_pallet = {$id_pallet} AND id_producto IS NOT NULL")->result();
-        if (count($productosPallets))
-        {
-
-          $infoSalida = array(
-            'id_empresa'      => 2, // sanjorge
-            'id_empleado'     => $this->session->userdata('id_usuario'),
-            'folio'           => $this->productos_salidas_model->folio(),
-            'fecha_creacion'  => $dato_info['info']->fecha,
-            'fecha_registro'  => $dato_info['info']->fecha,
-            'status'          => 's',
-            // 'concepto'        => 'Salida automatica de productos al armar pallet',
-            'id_pallet'       => $id_pallet,
-          );
-
-          $ress = $this->productos_salidas_model->agregar($infoSalida);
-
-          $row = 0;
-          foreach ($productosPallets as $keypp => $prodspp) {
-            $inv   = $this->inventario_model->promedioData($prodspp->id_producto, substr($dato_info['info']->fecha, 0, 10), substr($dato_info['info']->fecha, 0, 10));
-            $saldo = array_shift($inv);
-            $productosSalida[] = array(
-                  'id_salida'       => $ress['id_salida'],
-                  'id_producto'     => $prodspp->id_producto,
-                  'no_row'          => $row,
-                  'cantidad'        => $prodspp->cantidad,
-                  'precio_unitario' => $saldo['saldo'][1],
-                );
-
-            $row++;
-          }
-        }
-
-        // Si hay al menos 1 producto para las salidas lo inserta.
-        if (count($productosSalida) > 0)
-        {
-          $this->productos_salidas_model->agregarProductos(null, $productosSalida);
-        }
-        // Si no hay productos para ninguna de las medidas elimina la salida.
-        else
-        {
-          $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
-        }
-      // }
-    }
-  }
-
-  public function deletePallet($id_pallet, $delRendimientos = false)
-  {
-    $data = $this->db->query("SELECT Count(f.id_factura) AS num
-        FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura
-        WHERE fp.id_pallet = {$id_pallet} AND f.status <> 'ca' AND f.status <> 'b'")->row();
-    $response = array('passes' => false, 'msg' => '8');
-    if ($data->num == 0)
-    {
-      if ($delRendimientos)
-      {
-        $sql = $this->db->select('id_rendimiento')
-                       ->from('rastria_pallets_rendimiento')
-                       ->where('id_pallet', $id_pallet)
-                       ->get();
-
-        if ($sql->num_rows() > 0)
-        {
-          $rendimientos = $sql->result();
-          foreach ($rendimientos as $r)
-          {
-            $this->db->delete('rastria_rendimiento', array('id_rendimiento' => $r->id_rendimiento));
-          }
-        }
-      }
-
-      // Bitacora
-      $clientedata = $this->getInfoPallet($id_pallet);
-      $this->bitacora_model->_cancel('rastria_pallets', $id_pallet,
-                                      array(':accion'     => 'el pallet', ':seccion' => 'pallets',
-                                            ':folio'      => $clientedata['info']->folio,
-                                            ':id_empresa' => '2',
-                                            ':empresa'    => 'de EMPAQUE SAN JORGE SA DE CV'));
-
-      $this->db->delete('rastria_pallets', array('id_pallet' => $id_pallet));
-
-      $response = array('passes' => true, 'msg' => '7');
-    }
+    $this->db->update('otros.paletas_salidas', ['status' => 'ca'], "id_paleta_salida = {$id_paleta}");
+    $response = array('passes' => true, 'msg' => '7');
     return $response;
   }
 
-
-  public function pallet_pdf($id_pallet){
+  public function paleta_pdf($id_paleta){
     // Obtiene los datos del reporte.
-    $data = $this->getInfoPallet($id_pallet, false, false);
-
+    $this->load->model('empresas_model');
+    $data = $this->getInfoPaleta($id_paleta, false, true);
+    $empresa = $this->empresas_model->getInfoEmpresa($data['paleta']->id_empresa);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', array(105, 140));
+    $pdf = new MYpdf('L', 'mm');
     $pdf->show_head = false;
+    $pdf->limiteY = 190;
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $pdf->SetXY(25, 3);
-    $pdf->Image(APPPATH.'images/logo.png');
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+    else
+      $pdf->logo = 'images/logo.png';
 
-    $clasificaciones = array();
-    foreach ($data['rendimientos'] as $key => $value) {
-      if(!isset($clasificaciones[$value->id_clasificacion]))
-        $clasificaciones[$value->id_clasificacion] = $value->nombre;
-    }
-    $clsf_show = (count($clasificaciones) > 1? true: false);
+    $pdf->Image($pdf->logo, 6, 5, 20);
 
-    $pdf->SetTextColor(0,0,0);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(46, 46));
-    $pdf->Row(array('DESTINO:', "No CLASIF: ".implode(', ', $clasificaciones)), false);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('C', 'C'));
-    $pdf->Row(array('LOTE', 'CAJAS'), false);
+    $pdf->SetFillColor(200, 200, 200);
 
-    foreach ($data['rendimientos'] as $key => $value) {
-      $fecha = strtotime($value->fecha);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(50));
+    $pdf->SetXY(80, 3);
+    $pdf->font_bold = 'B';
+    $pdf->SetFounts(array($pdf->fount_txt), array(2));
+    $pdf->Row2(array('PAPELETA DE SALIDA'), false, false);
+    $pdf->SetXY(80, $pdf->GetY()-1);
+    $pdf->Row2(array($data['paleta']->folio), false, false);
+
+    $pdf->SetFounts(array($pdf->fount_txt), array(0));
+    $pdf->SetWidths(array(40));
+    $pdf->SetXY(130, 3);
+    $pdf->Row2(array('FECHA'), true, true);
+    $pdf->SetXY(130, $pdf->GetY());
+    $pdf->Row2(array(strtoupper(MyString::fechaATexto($data['paleta']->fecha, '/c'))), false, true);
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1.5));
+    $pdf->SetXY(130, $pdf->GetY()+2);
+    $pdf->Row2(array("CARGA COMPARTIDA: {$data['paleta']->carga_compartida}"), false, false);
+
+    $pdf->SetFounts(array($pdf->fount_txt), array(1));
+    $pdf->SetWidths(array(80));
+    $pdf->SetXY(180, 3);
+    $pdf->Row2(array('CASETA DE VIGILANCIA'), true, true);
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->SetXY(180, $pdf->GetY());
+    $pdf->Row2(array(''), false, true, 14);
+    $pdf->Text(210, $pdf->GetY()-1, 'Reloj Checador');
+
+    $pdf->font_bold = '';
+    $pdf->SetWidths(array(15, 50));
+    $pdf->SetFounts(array($pdf->fount_txt), [0], ['B']);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row2(array('Empresa:', $empresa['info']->nombre_fiscal), false, false);
+
+    $pdf->Line(6, $pdf->GetY()+2, 270, $pdf->GetY()+2);
+
+    $pdf->SetWidths(array(30, 45, 18, 35, 16, 35, 18, 40));
+    $pdf->SetFounts(array($pdf->fount_txt), [0], ['B', '', 'B', '', 'B', '', 'B', '']);
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->Row2([
+      'RASTREABILIDAD:', $data['paleta']->no_trazabilidad,
+      'TARIMAS:', MyString::formatoNumero($data['paleta']->total_tarimas, 0, '', false),
+      'BULTOS:', MyString::formatoNumero($data['paleta']->total_bultos, 0, '', false),
+      'BASCULA:', MyString::formatoNumero($data['paleta']->kilos_neto, 2, '', false).' Kg',
+    ], false, false);
+
+    // Si la papeleta es local o nacional
+    if ($data['paleta']->tipo == 'lo' || $data['paleta']->tipo == 'na') {
+      $pdf->SetXY(6, $pdf->GetY()+2);
+      foreach ($data['clasificaciones'] as $key => $item) {
+        if($pdf->GetY() >= $pdf->limiteY || $key === 0)
+        {
+          if($key > 0)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Arial', 'B', 8);
+          $pdf->SetX(15);
+          $pdf->SetAligns(['L', 'L', 'R', 'R']);
+          $pdf->SetWidths([70, 110, 30, 35]);
+          $pdf->Row(['UNIDAD', 'DESCRIPCION', 'CANTIDAD', 'KILOS'], true, true);
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetX(15);
+        $pdf->Row(array(
+          $item->unidad,
+          $item->clasificacion,
+          MyString::formatoNumero($item->cantidad, 2, '', false),
+          MyString::formatoNumero($item->kilos, 2, '', false),
+        ), false, true, null, 2, 1);
+      }
+
+      $pdf->SetX(85);
+      $pdf->SetAligns(['R', 'R', 'R']);
+      $pdf->SetWidths([110, 30, 35]);
+      $pdf->Row(array(
+        'TOTAL',
+        MyString::formatoNumero($data['paleta']->total_bultos, 2, '', false),
+        MyString::formatoNumero($data['paleta']->total_kg, 2, '', false),
+      ), false, true, null, 2, 1);
+    } else { // exportación
+      $pdf->SetXY(6, $pdf->GetY()+2);
+      $pallets = [];
+      for ($i=0; $i < 12; $i++) {
+        $exist = isset($data['pallets'][($i*2)+1]);
+        $pallets[0][$i] = ($i*2)+1;
+        $pallets[1][$i] = ($exist? $data['pallets'][($i*2)+1]->clasificaciones: '');
+        $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
+
+        $exist = isset($data['pallets'][($i+1)*2]);
+        $pallets[3][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
+        $pallets[4][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
+        $pallets[5][$i] = ($i+1)*2;
+      }
+      $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
+      $pdf->SetWidths([22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22]);
+      $pdf->SetFont('Arial', '', 8);
       $pdf->SetX(6);
-      $pdf->Row(array(date("Ww", $fecha).' '.$value->lote, $value->cajas.($clsf_show? ' '.$value->nombre: '')), false);
+      $pdf->Row($pallets[0], false, false);
+      $pdf->SetFont('Arial', '', 6);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[1], true, true);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[2], true, true);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[3], true, true);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[4], true, true);
+      $pdf->SetFillColor(200, 200, 200);
+      $pdf->SetFont('Arial', '', 8);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[5], false, false);
     }
-    $pdf->SetX(6);
-    $pdf->Row(array('No. TARIMA', $data['info']->no_cajas), false);
 
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(66));
-    $pdf->Row(array('FECHA: '.MyString::fechaAT($data['info']->fecha)), false, false);
 
-    $pdf->Output('REPORTE_DIARIO.pdf', 'I');
+    $pdf->SetWidths(array(16, 75, 18, 35, 16, 45, 18, 40));
+    $pdf->SetAligns(array('R', 'L', 'R', 'L', 'R', 'L', 'R', 'L'));
+    $pdf->SetFounts(array($pdf->fount_txt), [0], ['B', '', 'B', '', 'B', '', 'B', '']);
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->Row2([
+      'CHOFER:', $data['paleta']->chofer->nombre,
+      'LICENCIA:', $data['paleta']->chofer->no_licencia,
+      'CAMION:', "{$data['paleta']->camion->marca} {$data['paleta']->camion->color}",
+      'PLACAS:', $data['paleta']->camion->placa,
+    ], false, false);
+
+
+    $pdf->SetWidths(array(90, 90, 90));
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetFounts(array($pdf->fount_txt), [], []);
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->Row2([
+      '______________________________________',
+      '______________________________________',
+      '______________________________________',
+    ], false, false);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row2([
+      'LOGISTICA',
+      'VIGILANCIA',
+      'AUDITORIA',
+    ], false, false);
+
+    $pdf->Output('papeleta_salida.pdf', 'I');
   }
 
   public function palletBig_pdf($id_pallet)

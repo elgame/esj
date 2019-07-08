@@ -186,7 +186,7 @@
                               <input type="hidden" name="pallets_idcliente[]" class="pallets_idcliente" value="<?php echo ($postss? $_POST['pallets_idcliente'][($i*2)]: '') ?>">
                             </span>
                             <?php if ($postss && $_POST['pallets_id'][($i*2)] != ''): ?>
-                              <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)]: '') ?>"
+                              <div class="span12 pallet post-draggable correct" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)]: '') ?>"
                                   data-folio="<?php echo $_POST['pallets_folio'][($i*2)] ?>" data-cajas="<?php echo $_POST['pallets_cajas'][($i*2)] ?>"
                                   data-fecha="<?php echo $_POST['pallets_fecha'][($i*2)] ?>" data-cliente="<?php echo $_POST['pallets_cliente'][($i*2)] ?>"
                                   data-idcliente="<?php echo $_POST['pallets_idcliente'][($i*2)] ?>"
@@ -210,7 +210,7 @@
                               <input type="hidden" name="pallets_idcliente[]" class="pallets_idcliente" value="<?php echo ($postss? $_POST['pallets_idcliente'][($i*2)+1]: '') ?>">
                             </span>
                             <?php if ($postss && $_POST['pallets_id'][($i*2)+1] != ''): ?>
-                              <div class="span12 pallet ui-draggable correct ui-draggable-disabled ui-state-disabled" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)+1]: '') ?>"
+                              <div class="span12 pallet post-draggable correct" data-id="<?php echo ($postss? $_POST['pallets_id'][($i*2)+1]: '') ?>"
                                   data-folio="<?php echo $_POST['pallets_folio'][($i*2)+1] ?>" data-cajas="<?php echo $_POST['pallets_cajas'][($i*2)+1] ?>"
                                   data-fecha="<?php echo $_POST['pallets_fecha'][($i*2)+1] ?>" data-cliente="<?php echo $_POST['pallets_cliente'][($i*2)+1] ?>"
                                   data-idcliente="<?php echo $_POST['pallets_idcliente'][($i*2)+1] ?>"
