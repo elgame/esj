@@ -11,5 +11,12 @@ $(function(){
 
   $('.modal-series').on('click', function(event) {
     $("#modal-series").modal('show');
+    $('#BtnRemisionar').data('id', $(this).data('id'));
+    // $('#BtnRemisionar').attr('href', $('#BtnRemisionar').data('href')+$(this).data('id'));
+  });
+
+  $('#BtnRemisionar').on('click', function(event) {
+    var $this = $(this);
+    $this.attr('href', $this.data('href')+$this.data('id')+'&serie='+$('#serieRemisionar').val());
   });
 });

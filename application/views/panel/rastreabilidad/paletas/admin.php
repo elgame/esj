@@ -177,17 +177,16 @@
   </div>
   <div class="modal-body">
     <div class="row-fluid">
-      <select name="">
+      <select id="serieRemisionar">
         <?php foreach ($series as $key => $value): ?>
-        <option value="<?php echo $value->id_serie_folio ?>"><?php echo $value->leyenda.' '.$value->serie ?></option>
+        <option value="<?php echo $value->serie ?>"><?php echo $value->leyenda.' '.$value->serie ?></option>
         <?php endforeach ?>
       </select>
-      panel/rastreabilidad_paletas/remisionar/?id=4
     </div>
   </div>
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-    <button class="btn btn-primary" id="BtnAddBoleta">Seleccionar</button>
+    <a href="" class="btn btn-primary" id="BtnRemisionar" data-href="<?php echo base_url('panel/rastreabilidad_paletas/remisionar/?id='); ?>">Seleccionar</a>
   </div>
 </div><!--/modal series -->
 

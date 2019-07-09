@@ -269,7 +269,10 @@ class rastreabilidad_paletas_model extends privilegios_model {
   public function remisionarPapeleta($id_paleta)
   {
     $serie = $this->input->get('serie');
+
     $this->load->model('ventas_model');
+    $this->load->model('clientes_model');
+
     $result = $this->db->query("SELECT ps.id_paleta_salida, ps.id_empresa,
         psp.id_cliente, psp.id_clasificacion, psp.clasificacion, psp.id_unidad,
         psp.unidad, psp.cantidad, psp.kilos, u.cantidad AS cantidad_c
@@ -319,9 +322,31 @@ class rastreabilidad_paletas_model extends privilegios_model {
           'sin_costo'           => 'f',
           'is_factura'          => 'f',
           'sin_costo_nover'     => 'f',
-          'moneda'              => $_POST['moneda'],
+          'moneda'              => 'MXN',
           'cfdi_ext'            => json_encode($cfdi_ext),
           'tipo_cambio'         => '1',
+        ];
+
+        $remisiones[$value->id_cliente]['otrosdatos'] = [
+          'id_factura'       => '',
+          'no_trazabilidad'  => '',
+          'id_paleta_salida' => $id_paleta,
+        ];
+
+        $cliente = $this->clientes_model->getClienteInfo($value->id_cliente, true);
+        $remisiones[$value->id_cliente]['cliente'] = [
+          'id_factura'    => '',
+          'nombre'      => $cliente['info']->nombre_fiscal,
+          'rfc'         => $cliente['info']->rfc,
+          'calle'       => $cliente['info']->calle,
+          'no_exterior' => $cliente['info']->no_exterior,
+          'no_interior' => $cliente['info']->no_interior,
+          'colonia'     => $cliente['info']->colonia,
+          'localidad'   => $cliente['info']->localidad,
+          'municipio'   => $cliente['info']->municipio,
+          'estado'      => $cliente['info']->estado,
+          'cp'          => $cliente['info']->cp,
+          'pais'        => 'MEXICO',
         ];
       }
 
