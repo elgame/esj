@@ -186,7 +186,8 @@ class gastos extends MY_Controller {
       $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], false);
     }
     $ide = !empty($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
-    $params['empresa']   = $this->empresas_model->getInfoEmpresa($ide, true);
+    $params['ide']     = $ide;
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($ide, true);
 
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
     $params['rfc'] = $rfcProv;
