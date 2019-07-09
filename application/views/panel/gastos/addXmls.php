@@ -44,7 +44,7 @@
           <form action="<?php echo base_url('panel/gastos/verXml/?'.MyString::getVarsLink(array('msg'))); ?>" method="get"  class="form-search">
             <input type="hidden" name="idp" value="<?php echo $_GET['idp'] ?>">
             <input type="hidden" name="id" value="<?php echo (!empty($_GET['id'])? $_GET['id']: '') ?>">
-            <input type="hidden" name="ide" value="<?php echo (!empty($_GET['ide'])? $_GET['ide']: '') ?>">
+            <input type="hidden" name="ide" value="<?php echo (!empty($_GET['ide'])? $_GET['ide']: $ide) ?>">
 
             <label for="rfc">RFC</label>
             <input type="text" name="rfc" id="rfc" value="<?php echo set_value_get('rfc', $rfc); ?>" class="search-query" autofocus>
