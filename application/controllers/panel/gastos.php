@@ -185,7 +185,7 @@ class gastos extends MY_Controller {
     if (!empty($_GET['id'])) {
       $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], false);
     }
-    $ide = isset($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
+    $ide = !empty($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
     $params['empresa']   = $this->empresas_model->getInfoEmpresa($ide, true);
 
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
