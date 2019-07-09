@@ -185,13 +185,14 @@ class gastos extends MY_Controller {
     if (!empty($_GET['id'])) {
       $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], false);
     }
-    $ide = isset($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
-    $params['empresa']   = $this->empresas_model->getInfoEmpresa($ide, true);
+    $ide = !empty($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
+    $params['ide']     = $ide;
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($ide, true);
 
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
     $params['rfc'] = $rfcProv;
 
-    $path = "/home/elgame/Downloads/DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
+    $path = "C:\DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS";
     if (is_dir($path)) {
       $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
         $this->input->get('ffecha1'), $this->input->get('ffecha2'));
