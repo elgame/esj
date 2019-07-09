@@ -1401,7 +1401,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
               f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
               f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
-              0 AS indemnizaciones, 'no' AS tipo
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid
           FROM nomina_fiscal AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1413,7 +1413,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
             f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
             f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
-            f.indemnizaciones, 'fi' AS tipo
+            f.indemnizaciones, 'fi' AS tipo, f.uuid
           FROM finiquito AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente

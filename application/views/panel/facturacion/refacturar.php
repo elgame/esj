@@ -124,6 +124,7 @@
                 <div class="controls">
                   <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad"
                     value="<?php echo set_value('dno_trazabilidad', isset($factura) ? $factura['info']->no_trazabilidad : ''); ?>" placeholder="">
+                  <input type="hidden" name="id_paleta_salida" value="<?php echo (isset($factura) ? $factura['info']->id_paleta_salida : ''); ?>">
                 </div>
               </div>
 

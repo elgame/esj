@@ -286,8 +286,6 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $remisiones = [];
     foreach ($datos as $key => $value) {
       if (!isset($remisiones[$value->id_cliente])) {
-        $serfolio = $this->ventas_model->getFolio($value->id_empresa, $serie);
-
         $cfdi_ext = [
           'tipoDeComprobante' => 'I',
           'usoCfdi'           => 'G01',
@@ -296,21 +294,21 @@ class rastreabilidad_paletas_model extends privilegios_model {
           'id_cliente'          => $value->id_cliente,
           'id_empresa'          => $value->id_empresa,
           'version'             => empresas_model::$version,
-          'serie'               => $serfolio[0]->serie,
-          'folio'               => $serfolio[0]->folio,
+          'serie'               => $serie,
+          'folio'               => '',
           'fecha'               => date("Y-m-d H:i:s"),
           'subtotal'            => 0,
           'importe_iva'         => 0,
           'retencion_iva'       => 0,
           'total'               => 0,
           'total_letra'         => '',
-          'no_aprobacion'       => $serfolio[0]->no_aprobacion,
-          'ano_aprobacion'      => substr($serfolio[0]->ano_aprobacion, 0, 4),
+          'no_aprobacion'       => '',
+          'ano_aprobacion'      => '',
           'tipo_comprobante'    => 'ingreso',
           'forma_pago'          => '01',
           'metodo_pago'         => 'PUE',
           'metodo_pago_digitos' => 'No identificado',
-          'no_certificado'      => $serfolio[0]->no_aprobacion,
+          'no_certificado'      => '',
           'cadena_original'     => '',
           'sello'               => '',
           'certificado'         => '',
@@ -383,9 +381,10 @@ class rastreabilidad_paletas_model extends privilegios_model {
         'cfdi_ext'              => json_encode($cfdi_ext),
       ];
     }
-    echo "<pre>";
-      var_dump($remisiones);
-    echo "</pre>";exit;
+
+    $this->load->model('ventas_model');
+    $this->ventas_model->addNotaVentaData($remisiones);
+    $this->db->update('otros.paletas_salidas', ['status' => 'f'], "id_paleta_salida = {$id_paleta}");
   }
 
   public function paleta_pdf($id_paleta){

@@ -1,5 +1,5 @@
 
- ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc|pct
+ ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc|pct|lap
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Papeleta de Salida',61,TRUE,'rastreabilidad_paletas/','list-alt',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',497,TRUE,'rastreabilidad_paletas/agregar/','plus',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',497,FALSE,'rastreabilidad_paletas/modificar/','edit',FALSE);
@@ -80,7 +80,7 @@
     COMMENT ON COLUMN otros.paletas_salidas.tipo IS 'lo: local, na: nacional, naex: nacional y exportacion';
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',497,FALSE,'rastreabilidad_paletas/imprimir/','print',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Remisionar',493,FALSE,'rastreabilidad_paletas/remisionar/','qrcode',FALSE);
-    -- pcc
+    -- pcc|lap
     ALTER TABLE public.facturacion_otrosdatos ADD COLUMN id_paleta_salida bigint;
     ALTER TABLE public.facturacion_otrosdatos ADD CONSTRAINT facturacion_otrosdatos_id_paleta_salida_fkey FOREIGN KEY (id_paleta_salida) REFERENCES otros.paletas_salidas (id_paleta_salida) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 

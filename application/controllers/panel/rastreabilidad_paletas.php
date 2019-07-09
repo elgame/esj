@@ -45,7 +45,7 @@ class rastreabilidad_paletas extends MY_Controller {
 
     $params['paletas'] = $this->rastreabilidad_paletas_model->getPaletas(true);
     $params['areas']   = $this->areas_model->getAreas();
-    $params['series'] = $this->facturacion_model->get_series($_GET['did_empresa'], 'f')['data'];
+    $params['series']  = $this->facturacion_model->get_series($_GET['did_empresa'], 'r')['data'];
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -170,6 +170,7 @@ class rastreabilidad_paletas extends MY_Controller {
   {
     $this->load->model('rastreabilidad_paletas_model');
     $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
+    redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
   }
 
   /**
@@ -304,7 +305,7 @@ class rastreabilidad_paletas extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La paleta de salida se agregó correctamente.';
+        $txt = 'La papeleta de salida se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
@@ -312,19 +313,19 @@ class rastreabilidad_paletas extends MY_Controller {
         $icono = 'error';
         break;
       case 5:
-        $txt = 'La paleta de salida se modifico correctamente.';
+        $txt = 'La papeleta de salida se modifico correctamente.';
         $icono = 'success';
         break;
       case 6:
-        $txt = 'El camión se activó correctamente.';
+        $txt = 'La papeleta de salida se finalizo correctamente (se generaron las remisiones).';
         $icono = 'success';
         break;
       case 7:
-        $txt = 'La paleta de salida se elimino correctamente.';
+        $txt = 'La papeleta de salida se elimino correctamente.';
         $icono = 'success';
         break;
       case 8:
-        $txt = 'La paleta de salida se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $txt = 'La papeleta de salida se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
         $icono = 'error';
         break;
     }

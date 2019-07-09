@@ -1040,7 +1040,7 @@ function loadSerieFolio (ide, forceLoad) {
   loader.create();
     $.getJSON(base_url+'panel/facturacion/get_series/?tipof=vd&ide='+ide,
       function(res){
-        if(res.msg === 'ok') {
+        if(res.data) {
           var html_option = '<option value="void"></option>',
               selected = '', serieSelected = 'void',
               loadDefault = false;

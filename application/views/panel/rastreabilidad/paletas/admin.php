@@ -101,7 +101,7 @@
 										$vlbl_status = 'label-success';
 										if($paleta->status === 'f'){
                       $v_status = 'Finalizado';
-                      $vlbl_status = 'label-success';
+                      $vlbl_status = 'label-info';
 										}elseif($paleta->status === 'ca'){
 											$v_status = 'Cancelado';
 											$vlbl_status = 'label-warning';
@@ -126,12 +126,10 @@
 												'attrs' => array('id' => 'pallet'.$paleta->id_paleta_salida, 'onclick' => "msb.confirm('Estas seguro de eliminar la paleta de salida?', 'paleta', this); return false;"))
 										);
 
-                    // echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_paletas/remisionar/', array(
-                    //     'params'   => 'id='.$paleta->id_paleta_salida,
-                    //     'btn_type' => 'btn-warning' )
-                    // );
-                    echo '<a class="btn btn-warning modal-series" title="Remisionar" data-id="'.$paleta->id_paleta_salida.'">
-                      <i class="icon-qrcode icon-white"></i> <span class="hidden-tablet">Remisionar</span></a>';
+                    if ($paleta->status !== 'f' && $this->usuarios_model->tienePrivilegioDe('', 'rastreabilidad_paletas/remisionar/')) {
+                      echo '<a class="btn btn-warning modal-series" title="Remisionar" data-id="'.$paleta->id_paleta_salida.'">
+                        <i class="icon-qrcode icon-white"></i> <span class="hidden-tablet">Remisionar</span></a>';
+                    }
 
 										?>
 								</td>
@@ -179,7 +177,7 @@
     <div class="row-fluid">
       <select id="serieRemisionar">
         <?php foreach ($series as $key => $value): ?>
-        <option value="<?php echo $value->serie ?>"><?php echo $value->leyenda.' '.$value->serie ?></option>
+        <option value="<?php echo $value->serie ?>"><?php echo $value->serie.' - '.$value->leyenda ?></option>
         <?php endforeach ?>
       </select>
     </div>

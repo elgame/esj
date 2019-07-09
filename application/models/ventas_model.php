@@ -84,7 +84,7 @@ class Ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad")
+      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida")
       ->from('facturacion as f')
       ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
       ->where("f.id_factura = {$id}")
@@ -326,8 +326,9 @@ class Ventas_model extends privilegios_model{
     // Si tiene el # de trazabilidad
     if ($this->input->post('dno_trazabilidad') !== false) {
       $this->db->insert('facturacion_otrosdatos', [
-        'id_factura'      => $id_venta,
-        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+        'id_factura'       => $id_venta,
+        'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
+        'id_paleta_salida' => $this->input->post('id_paleta_salida')
       ]);
     }
 
@@ -582,6 +583,33 @@ class Ventas_model extends privilegios_model{
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 
+  public function addNotaVentaData($data)
+  {
+    foreach ($data as $key => $remision) {
+      $serfolio = $this->getFolio($remision['remision']['id_empresa'], $remision['remision']['serie']);
+      $remision['remision']['serie']          = $serfolio[0]->serie;
+      $remision['remision']['folio']          = $serfolio[0]->folio;
+      $remision['remision']['no_aprobacion']  = $serfolio[0]->no_aprobacion;
+      $remision['remision']['ano_aprobacion'] = substr($serfolio[0]->ano_aprobacion, 0, 4);
+
+      $this->db->insert('facturacion', $remision['remision']);
+      $id_venta = $this->db->insert_id();
+
+      $remision['otrosdatos']['id_factura'] = $id_venta;
+      $this->db->insert('facturacion_otrosdatos', $remision['otrosdatos']);
+
+      $remision['cliente']['id_factura'] = $id_venta;
+      $this->db->insert('facturacion_cliente', $remision['cliente']);
+
+      foreach ($remision['productos'] as $keyp => $producto) {
+        $producto['id_factura'] = $id_venta;
+        $this->db->insert('facturacion_productos', $producto);
+      }
+    }
+
+    return true;
+  }
+
   public function updateNotaVenta($id_venta)
   {
     $this->load->model('clientes_model');
@@ -662,8 +690,9 @@ class Ventas_model extends privilegios_model{
     if ($this->input->post('dno_trazabilidad') !== false) {
       $this->db->delete('facturacion_otrosdatos', "id_factura = {$id_venta}");
       $this->db->insert('facturacion_otrosdatos', [
-        'id_factura'      => $id_venta,
-        'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+        'id_factura'       => $id_venta,
+        'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
+        'id_paleta_salida' => $this->input->post('id_paleta_salida')
       ]);
     }
 

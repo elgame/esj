@@ -251,6 +251,7 @@
                     <div class="controls">
                       <input type="text" name="dno_trazabilidad" value="<?php echo set_value('dno_trazabilidad', $this->input->post('dno_trazabilidad')) ?>" id="dno_trazabilidad"
                         class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="No Trazabilidad" <?php echo $disabled.$bmod['proveedor']; ?>>
+                      <input type="hidden" name="id_paleta_salida" value="<?php echo set_value('id_paleta_salida', $this->input->post('id_paleta_salida')) ?>">
                     </div>
                   </div>
 
