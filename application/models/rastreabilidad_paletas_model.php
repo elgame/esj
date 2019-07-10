@@ -152,6 +152,21 @@ class rastreabilidad_paletas_model extends privilegios_model {
             ORDER BY f.id_factura ASC");
           $response['facturacion'] = $result->result();
           $result->free_result();
+
+          $result = $this->db->query("SELECT c.nombre AS clasificacion, string_agg(DISTINCT p.nombre_fiscal, ', ') AS proveedor,
+              string_agg(DISTINCT(CASE WHEN fsc.pol_seg IS NULL THEN 'cer' ELSE 'seg' END), '') AS tipo,
+              string_agg(fsc.pol_seg, ', ') AS seg_certs,
+              string_agg(fsc.certificado, ', ') AS certificados
+            FROM facturacion f
+              LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+              LEFT JOIN facturacion_seg_cert fsc ON f.id_factura = fsc.id_factura
+              LEFT JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
+              LEFT JOIN clasificaciones c ON c.id_clasificacion = fsc.id_clasificacion
+            WHERE f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'pf' AND fo.id_paleta_salida = {$id_paleta}
+            GROUP BY c.id_clasificacion
+            HAVING c.nombre IS NOT NULL");
+          $response['certificados'] = $result->result();
+          $result->free_result();
         }
       }
     }
@@ -469,7 +484,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $pdf->Row2([
         'CLIENTE:', $value->cliente,
         'REMISION:', "{$value->folio_rem}/{$value->total_rem}",
-        'FACTURA:', "{$value->folio_rem}/{$value->total_rem}",
+        'FACTURA:', "{$value->folio_fact}/{$value->total_fact}",
       ], false, false);
     }
 
@@ -554,11 +569,30 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $pdf->Row($pallets[5], false, false);
     }
 
+    if (count($data['certificados']) > 0) {
+      $pdf->SetAligns(['L', 'L', 'L', 'R']);
+      $pdf->SetWidths([100, 65, 100]);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      foreach ($data['certificados'] as $key => $item) {
+        if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
+          if($key > 0)
+            $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $item->proveedor,
+          $item->clasificacion,
+          ($item->tipo === 'cer'? $item->certificados: $item->seg_certs),
+        ), false, false, null, 2, 1);
+      }
+    }
 
     $pdf->SetWidths(array(16, 75, 18, 35, 16, 45, 18, 40));
     $pdf->SetAligns(array('R', 'L', 'R', 'L', 'R', 'L', 'R', 'L'));
     $pdf->SetFounts(array($pdf->fount_txt), [0], ['B', '', 'B', '', 'B', '', 'B', '']);
-    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->SetXY(6, $pdf->GetY()+4);
     $pdf->Row2([
       'CHOFER:', $data['paleta']->chofer->nombre,
       'LICENCIA:', $data['paleta']->chofer->no_licencia,
