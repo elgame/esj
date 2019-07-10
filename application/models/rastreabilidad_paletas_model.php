@@ -139,6 +139,19 @@ class rastreabilidad_paletas_model extends privilegios_model {
             FROM camiones WHERE id_camion = {$response['paleta']->id_camion}");
           $response['paleta']->camion = $result->row();
           $result->free_result();
+
+          $result = $this->db->query("SELECT f.id_factura, f.id_cliente, (f.serie || f.folio) AS folio_rem,
+              f.fecha, f.total AS total_rem, c.nombre_fiscal AS cliente,
+              (ff.serie || ff.folio) AS folio_fact, ff.total AS total_fact
+            FROM facturacion f
+              INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+              LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+              LEFT JOIN facturacion_remision_hist fh ON f.id_factura = fh.id_remision
+              LEFT JOIN facturacion ff ON (ff.id_factura = fh.id_factura AND ff.status <> 'ca' AND ff.status <> 'pf')
+            WHERE f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'pf' AND fo.id_paleta_salida = {$id_paleta}
+            ORDER BY f.id_factura ASC");
+          $response['facturacion'] = $result->result();
+          $result->free_result();
         }
       }
     }
@@ -363,7 +376,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
         'precio_unitario'       => 0,
         'importe'               => 0,
         'iva'                   => 0,
-        'unidad'                => 0,
+        'unidad'                => $value->unidad,
         'retencion_iva'         => 0,
         'porcentaje_iva'        => 0,
         'porcentaje_retencion'  => 0,
@@ -446,6 +459,19 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->SetFounts(array($pdf->fount_txt), [0], ['B']);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row2(array('Empresa:', $empresa['info']->nombre_fiscal), false, false);
+
+    $pdf->Line(6, $pdf->GetY()+2, 270, $pdf->GetY()+2);
+
+    $pdf->SetWidths(array(18, 120, 18, 45, 18, 45, 18, 40));
+    $pdf->SetFounts(array($pdf->fount_txt), [0], ['B', '', 'B', '', 'B', '', 'B', '']);
+    foreach ($data['facturacion'] as $key => $value) {
+      $pdf->SetXY(6, $pdf->GetY()+2);
+      $pdf->Row2([
+        'CLIENTE:', $value->cliente,
+        'REMISION:', "{$value->folio_rem}/{$value->total_rem}",
+        'FACTURA:', "{$value->folio_rem}/{$value->total_rem}",
+      ], false, false);
+    }
 
     $pdf->Line(6, $pdf->GetY()+2, 270, $pdf->GetY()+2);
 
