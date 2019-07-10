@@ -36,47 +36,50 @@ class MyFiles {
         if ($find) {
           $matches = [];
 
+          libxml_use_internal_errors(true);
           $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $content));
 
-          $uuid = (string)$xml->Complemento->TimbreFiscalDigital['UUID'];
-          $fecha = substr((((string)$xml['fecha'])<>''? (string)$xml['fecha']: (string)$xml['Fecha']), 0, 10);
-          $folio = (($xml['serie'].$xml['folio'])<>''? $xml['serie'].$xml['folio']: $xml['Serie'].$xml['Folio']);
-          $noCertificado = ((string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']<>''?
-            (string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']:
-            (string)$xml->Complemento->TimbreFiscalDigital['NoCertificadoSAT']);
-          $total = (((string)$xml['total'])<>''? (string)$xml['total']: (string)$xml['Total']);
+          if (isset($xml->Complemento->TimbreFiscalDigital['UUID'])) {
+            $uuid = (string)$xml->Complemento->TimbreFiscalDigital['UUID'];
+            $fecha = substr((((string)$xml['fecha'])<>''? (string)$xml['fecha']: (string)$xml['Fecha']), 0, 10);
+            $folio = (($xml['serie'].$xml['folio'])<>''? $xml['serie'].$xml['folio']: $xml['Serie'].$xml['Folio']);
+            $noCertificado = ((string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']<>''?
+              (string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']:
+              (string)$xml->Complemento->TimbreFiscalDigital['NoCertificadoSAT']);
+            $total = (((string)$xml['total'])<>''? (string)$xml['total']: (string)$xml['Total']);
 
-          $find = false;
-          $fechaVal = new DateTime(substr($fecha, 0, 10));
-          if ($bfechaIni != '' && $bfechaFin != '') {
-            $bfechaIni = $bfechaIni;
-            $bfechaFin = $bfechaFin;
-            if ($fechaVal >= $bfechaIni && $fechaVal <= $bfechaFin) {
+            $find = false;
+            $fechaVal = new DateTime(substr($fecha, 0, 10));
+            if ($bfechaIni != '' && $bfechaFin != '') {
+              $bfechaIni = $bfechaIni;
+              $bfechaFin = $bfechaFin;
+              if ($fechaVal >= $bfechaIni && $fechaVal <= $bfechaFin) {
+                $find = true;
+              }
+            } elseif ($bfechaIni != '') {
+              $bfechaIni = $bfechaIni;
+              if ($fechaVal >= $bfechaIni) {
+                $find = true;
+              }
+            } elseif ($bfechaFin != '') {
+              $bfechaFin = $bfechaFin;
+              if ($fechaVal >= $bfechaFin) {
+                $find = true;
+              }
+            } else
               $find = true;
-            }
-          } elseif ($bfechaIni != '') {
-            $bfechaIni = $bfechaIni;
-            if ($fechaVal >= $bfechaIni) {
-              $find = true;
-            }
-          } elseif ($bfechaFin != '') {
-            $bfechaFin = $bfechaFin;
-            if ($fechaVal >= $bfechaFin) {
-              $find = true;
-            }
-          } else
-            $find = true;
 
-          if ($find) {
-            $files[strtotime($fecha)] = [
-              'name'          => $file->getBasename(),
-              'rfc'           => $brfcProv,
-              'fecha'         => $fecha,
-              'folio'         => $folio,
-              'total'         => $total,
-              'uuid'          => $uuid,
-              'noCertificado' => $noCertificado
-            ];
+            if ($find) {
+              $files[strtotime($fecha)] = [
+                'name'          => $file->getBasename(),
+                'rfc'           => $brfcProv,
+                'fecha'         => $fecha,
+                'folio'         => $folio,
+                'total'         => $total,
+                'uuid'          => $uuid,
+                'noCertificado' => $noCertificado
+              ];
+            }
           }
         }
       }
