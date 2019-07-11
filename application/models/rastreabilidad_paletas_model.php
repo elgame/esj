@@ -486,6 +486,9 @@ class rastreabilidad_paletas_model extends privilegios_model {
         'REMISION:', "{$value->folio_rem}/{$value->total_rem}",
         'FACTURA:', "{$value->folio_fact}/{$value->total_fact}",
       ], false, false);
+
+      $data['otros_facturas'][] = $value->folio_fact;
+      $data['otros_clientes'][] = $value->cliente;
     }
 
     $pdf->Line(6, $pdf->GetY()+2, 270, $pdf->GetY()+2);
@@ -617,7 +620,111 @@ class rastreabilidad_paletas_model extends privilegios_model {
       'AUDITORIA',
     ], false, false);
 
+    $this->pdfManifiestoDelChofer($data, $empresa, $pdf);
+
     $pdf->Output('papeleta_salida.pdf', 'I');
+  }
+
+  public function pdfManifiestoDelChofer($data, $empresa, $pdf)
+  {
+
+    $pdf->show_head = false;
+
+    // $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+    else
+      $pdf->logo = 'images/logo.png';
+
+    $pdf->Image($pdf->logo, 6, 5, 20);
+
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFont('Arial','',8);
+
+    $pdf->SetAligns(['C']);
+    $pdf->SetWidths([100]);
+    $pdf->SetXY(80, 8);
+    $pdf->Row(['KM.8 CARRETERA TECOMAN PLAYA AZUL  C.P. 28935'], false, false);
+    $pdf->SetXY(80, $pdf->GetY()-1);
+    $pdf->Row(['COL COFRADIA DE MORELOS EN TECOMAN, COLIMA'], false, false);
+    $pdf->SetXY(80, $pdf->GetY()-1);
+    $pdf->Row(['TEL: 313 324 4420  CEL: 313 113 0040'], false, false);
+
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetXY(180, $pdf->GetY()-16);
+    $pdf->Row(['MANIFIESTO'], false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+20);
+    $pdf->SetAligns(['C', 'C']);
+    $pdf->SetWidths([180, 80]);
+    $pdf->Row(['CONDICIONES DEL FLETE', 'DESTINO'], true, true);
+    $pdf->SetAligns(['L', 'L']);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ', $data['otros_facturas'])]);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['CLIENTE DESTINO:', 'DIA DE LLEGADA:']);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['DIRECCION:', 'HR DE ENTREGA:']);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['C', 'C']);
+    $pdf->SetWidths([180, 80]);
+    $pdf->Row(['DATOS DE LINEA Y CHOFER', 'ANEXOS'], true, true);
+    $pdf->SetWidths([120, 60, 80]);
+    $pdf->SetAligns(['L', 'L', 'L']);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['Chofer: '.$data['paleta']->chofer->nombre,
+      'Cel: '.$data['paleta']->chofer->telefono,
+      'No. Licencia: '.$data['paleta']->chofer->no_licencia
+    ]);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['Linea: '.$data['paleta']->chofer->nombre,
+      'Tel: '.$data['paleta']->chofer->telefono,
+      'No. IFE: '.$data['paleta']->chofer->no_ife
+    ]);
+    $pdf->SetWidths([60, 60, 60, 80]);
+    $pdf->SetAligns(['L', 'L', 'L', 'L']);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['Placas Camión: '.$data['paleta']->camion->placa,
+      'Modelo: '.$data['paleta']->camion->modelo,
+      'Marca: '.$data['paleta']->camion->marca,
+      'No Pesada: '.$data['paleta']->folio,
+    ]);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['Placas Termo: ',
+      'Color: '.$data['paleta']->camion->color,
+      'Temp: ',
+      'Orden Flete: '
+    ]);
+
+    $pdf->SetFont('Arial', '', 8);
+    $txt = "MANIFIESTO DEL CHOFER: COMO CHOFER DEL CAMION ARRIBA DESCRITO, ME COMPROMETO A TRANSPORTAR LA(S) A LA TEMPERATURA ARRIBA INDICADA. EN PARADAS DE DESCANSO Y COMIDAS IR GASEANDO LA FRUTA Y LLEGAR A MI DESTINO EN TIEMPO Y FORMA.".
+      "MANIFIESTO EN EL PRESENTE DOCUMENTO, QUE EL (LOS) PRODUCTO(S) TRANSPORTADO(S) FUE CARGADO EN MI PRESENCIA Y VERIFIQUE QUE VA LIBRE DE CUALQUIER TIPO DE ESTUPEFACIENTE (DROGAS) POR LO QUE EXIMO DE TODA RESPONSABILIDAD AL (LOS) CONTRATANTE(S) Y AL (LOS) DESTINATARIO(S) DE CUALQUIER MERCANCIA NO DESCRITA EN EL PRESENTE EMBARQUE, FACTURA O PEDIDO. TENIENDO PROHIBIDO LLEVAR Y/O TRANSPORTAR OTRA MERCANCIA Y SI POR ALGUNA CIRCUNSTANCIA LO HAGO, ASUMO LAS CONSECUENCIAS DERIVADAS DE LA VIOLACION A ESTAS DISPOSICIONES.".
+      "ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE, SI NO ENTREGO LA MERCANCIA CONFORME A LA FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECÁNICO DE MI UNIDAD (CAMIÓN ARRIBA DESCRITO), SE ME DESCONTARA UN 20% (VEINTE POR CIENTO) DEL VALOR DEL FLETE, ASI COMO CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRANSPORTADA.";
+    $pdf->SetWidths([260]);
+    $pdf->SetAligns(['L']);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row([$txt]);
+
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetAligns(['C']);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(['RECIBO Y ACEPTO DE CONFORMIDAD'], false, false);
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->Row(['___________________________________________'], false, false);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(['NOMBRE Y FIRMA DEL CHOFER'], false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+15);
+    $pdf->Row(['TECOMAN, COL. A ____________________________ DE _________________________________ DE _________________________'], false, false);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetWidths([30]);
+    $pdf->SetXY(45, $pdf->GetY()-45);
+    $pdf->Row(['HUELLA DEL CHOFER'], false, true, null, 30, 30);
   }
 
 
