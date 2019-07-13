@@ -1,4 +1,6 @@
 
+ ✔ Caja chica gastos x comprobar @done (19-07-12 17:17) pct
+     ALTER TABLE public.cajachica_gastos ADD COLUMN monto_ini double precision DEFAULT 0;
  ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc|pct|lap
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Papeleta de Salida',61,TRUE,'rastreabilidad_paletas/','list-alt',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',497,TRUE,'rastreabilidad_paletas/agregar/','plus',FALSE);

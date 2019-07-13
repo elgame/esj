@@ -915,7 +915,7 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
-              co.flete_de, co.id_almacen,
+              co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo,
               otros_datos
       FROM compras_requisicion AS co
@@ -925,7 +925,8 @@ class compras_requisicion_model extends CI_Model {
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
-       WHERE co.id_requisicion = {$idOrden}");
+       LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
+      WHERE co.id_requisicion = {$idOrden}");
 
     $data = array();
     if ($query->num_rows() > 0)
@@ -1527,6 +1528,9 @@ class compras_requisicion_model extends CI_Model {
       $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
       $pdf->SetXY(6, $pdf->GetY()-1.5);
       $pdf->Row(array('Uso del CFDI:', "G03 (Gastos en General)"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
+      $yyy1 = $pdf->GetY();
 
       $pdf->SetXY(95, $yyy);
       $pdf->SetFont('helvetica','B', 8);
@@ -1539,7 +1543,7 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('( '.(isset($orden['info'][0]->otros_datos->infEntOrdenCom)? 'Si': 'No').' ) Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
 
-      $pdf->SetY($pdf->GetY()+5);
+      $pdf->SetY($yyy1+2);
 
       $subtotal = $iva = $total = $retencion = 0;
 
@@ -1914,6 +1918,12 @@ class compras_requisicion_model extends CI_Model {
           $pdf->SetX(99);
           $pdf->Row(array('Proveedores:', '', '', ''), false, true, null, 6);
 
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(6, $pdf->GetY()-6);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(17, 70));
+          $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
+
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
@@ -2019,8 +2029,8 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetXY(5, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(25, 80));
-      $pdf->Row(array('Activo',
-        (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+      $pdf->Row(array('Activo', (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+
     // }
 
 

@@ -1693,6 +1693,8 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Uso del CFDI:', "G03 (Gastos en General)"), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
 
       $pdf->SetXY(95, $pdf->GetY()+3);
       $pdf->SetFont('helvetica','B', 8);
@@ -1892,7 +1894,7 @@ class compras_ordenes_model extends CI_Model {
 
         $pdf->SetX(6);
         if ($ultima_compra) {
-          $ultcompra = $this->getUltimaCompra($prod->id_producto);
+          $ultcompra = $this->getUltimaCompra($prod->id_producto, $orden['info'][0]->id_orden);
           $pdf->SetAligns($aligns2);
           $pdf->SetWidths($widths2);
           $pdf->Row([
@@ -2488,15 +2490,17 @@ class compras_ordenes_model extends CI_Model {
     return isset($query->fecha)? $query->fecha: '';
    }
 
-  public function getUltimaCompra($id_producto)
+  public function getUltimaCompra($id_producto, $id_orden = null)
   {
     $query = null;
     if ($id_producto > 0) {
+      $sql = isset($id_orden)? " AND co.id_orden < {$id_orden}": '';
       $query = $this->db->query("SELECT cp.*, co.fecha_creacion
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
-        WHERE cp.id_producto = {$id_producto}
-        ORDER BY Date(co.fecha_aceptacion) DESC")->row();
+        WHERE cp.id_producto = {$id_producto} {$sql}
+        ORDER BY Date(co.fecha_aceptacion) DESC
+        LIMIT 1")->row();
     }
     return $query;
   }

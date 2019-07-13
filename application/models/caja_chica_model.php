@@ -511,9 +511,11 @@ class caja_chica_model extends CI_Model {
     $fecha1 = '';
 
     if (is_array($fecha) && $fecha[0] === 'gc') {
-      $sql .= " AND cg.tipo = 'gc'";
-      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
-      $sql .= " AND cg.monto > Coalesce(cga.abonos, 0)";
+      $sql .= " AND cg.tipo = 'gc' AND cg.fecha <= '{$fecha[1]}'";
+      $sql .= " AND (
+        ( (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}') AND cg.monto > Coalesce(cga.abonos, 0) )
+        OR (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
+      )";
       $fecha1 = $fecha[1];
     } elseif (is_array($fecha) && $fecha[0] === 'rg') {
       $sql .= " AND cg.tipo = 'rg'";
@@ -533,7 +535,7 @@ class caja_chica_model extends CI_Model {
 
     $response = [];
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cc.id_categoria, cc.abreviatura as empresa,
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.monto_ini, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
@@ -541,7 +543,8 @@ class caja_chica_model extends CI_Model {
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
           cg.nombre, cg.status, cg.folio_sig,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
-          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo, cg.fecha_compro_gasto
+          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
+          (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha1}' < cg.fecha_cancelado) AS show_back_cortes
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -565,6 +568,12 @@ class caja_chica_model extends CI_Model {
     if ($gastos->num_rows() > 0)
     {
       $response = $gastos->result();
+      foreach ($response as $key => $value) {
+        if (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes === 't') {
+          $value->monto = $value->monto_ini;
+          $value->saldo = $value->monto - $value->abonos;
+        }
+      }
     }
 
     return $response;
@@ -1045,7 +1054,8 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
 
           // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
-          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica'], 'monto_ini' => 0],
+            "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
@@ -1054,6 +1064,7 @@ class caja_chica_model extends CI_Model {
             'concepto'        => $gasto,
             'nombre'          => $data['gasto_comprobar_nombre'][$key],
             'monto'           => $data['gasto_comprobar_importe'][$key],
+            'monto_ini'       => $data['gasto_comprobar_importe'][$key],
             // 'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
@@ -1086,6 +1097,7 @@ class caja_chica_model extends CI_Model {
             'concepto'                 => $gasto,
             'nombre'                   => $data['gasto_comprobar_nombre'][$key],
             'monto'                    => $data['gasto_comprobar_importe'][$key],
+            'monto_ini'                => $data['gasto_comprobar_importe'][$key],
             'fecha'                    => $data['fecha_caja_chica'],
             'no_caja'                  => $data['fno_caja'],
             'tipo'                     => 'gc',
