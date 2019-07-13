@@ -453,6 +453,8 @@
                                             <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
                                             <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
                                             <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                            <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
+                                              <i class="ico icon-print" style="cursor:pointer"></i></a>
                                           </td>
                                           <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
                                           <td>
@@ -1187,8 +1189,8 @@
                                       <input type="text" name="deudor_nombre[]" value="<?php echo $deudor->nombre ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
                                       <input type="hidden" name="deudor_id_deudor[]" value="<?php echo $deudor->id_deudor ?>" id="deudor_id_gasto">
                                       <input type="hidden" name="deudor_del[]" value="" id="deudor_del">
-                                      <!-- <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$deudor->id_deudor)?>" target="_blank" title="Imprimir vale prestamo">
-                                        <i class="ico icon-print" style="cursor:pointer"></i></a> -->
+                                      <a href="<?php echo base_url('panel/caja_chica/print_vale_deudor/?id='.$deudor->id_deudor.'&noCaja='.$deudor->no_caja)?>" target="_blank" title="Imprimir vale prestamo">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
                                     <td style="width: 200px;">
                                       <input type="text" name="deudor_concepto[]" value="<?php echo $deudor->concepto ?>" class="span12 deudor-cargo" required <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>

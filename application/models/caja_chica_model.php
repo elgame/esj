@@ -324,7 +324,8 @@ class caja_chica_model extends CI_Model {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
-          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura,
+          cd.no_caja
         FROM cajachica_deudores cd
           LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
           LEFT JOIN (
@@ -3682,6 +3683,224 @@ class caja_chica_model extends CI_Model {
 
     // $pdf->AutoPrint(true);
     $pdf->Output('vale_ingreso.pdf', 'I');
+  }
+
+
+  public function getDataValeTraspasos($id_traspaso, $noCaja)
+  {
+    $traspaso = $this->db->query(
+      "SELECT ct.*, c.nombre AS caja,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM cajachica_traspasos ct
+       INNER JOIN cajachicas c ON c.no_caja = ct.no_caja::character varying
+       LEFT JOIN usuarios u ON u.id = ct.id_usuario
+      WHERE ct.id_traspaso = {$id_traspaso} AND ct.no_caja = {$noCaja}"
+    )->row();
+
+    return $traspaso;
+  }
+
+  public function printValeTraspasos($id_traspaso, $noCaja)
+  {
+    $traspaso = $this->getDataValeTraspasos($id_traspaso, $noCaja);
+    $caja_destino = $this->getCajaByCode($traspaso->tipo_caja);
+
+    // echo "<pre>";
+    //   var_dump($traspaso, $caja_destino);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array('TRASPASO'), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$traspaso->folio), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('De: '.$traspaso->caja), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array('Af. Fondo: '.($traspaso->afectar_fondo=='t'? 'Si': 'No')), false, false);
+
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($traspaso->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($traspaso->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($traspaso->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($traspaso->no_impresiones==0? 'ORIGINAL': 'COPIA '.$traspaso->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($traspaso->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $traspaso->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($traspaso->fecha_creacion)), false, false);
+
+    $this->db->update('cajachica_traspasos', ['no_impresiones' => $traspaso->no_impresiones+1],
+        "id_traspaso = '{$id_traspaso}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_traspaso.pdf', 'I');
+  }
+
+  public function getDataValeDeudor($id_deudor, $noCaja)
+  {
+    $deudor = $this->db->query(
+      "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+        (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura,
+        c.nombre AS caja, cd.fecha_creacion, cd.no_impresiones,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM cajachica_deudores cd
+        INNER JOIN cajachicas c ON c.no_caja = cd.no_caja::character varying
+        LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
+        LEFT JOIN (
+          SELECT id_deudor, Sum(monto) AS abonos
+          FROM cajachica_deudores_pagos
+          WHERE id_deudor = {$id_deudor}
+          GROUP BY id_deudor
+        ) ab ON cd.id_deudor = ab.id_deudor
+        LEFT JOIN usuarios u ON u.id = cd.id_usuario
+      WHERE cd.id_deudor = {$id_deudor}"
+    )->row();
+
+    return $deudor;
+  }
+
+  public function printValeDeudor($id_deudor, $noCaja)
+  {
+    $deudor = $this->getDataValeDeudor($id_deudor, $noCaja);
+    $caja_destino = $this->getCajaByCode($deudor->tipo);
+
+    // echo "<pre>";
+    //   var_dump($deudor, $caja_destino);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array('PRESTAMO'), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$deudor->folio), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('De: '.$deudor->caja), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('     '.$deudor->nombre), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($deudor->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($deudor->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($deudor->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($deudor->no_impresiones==0? 'ORIGINAL': 'COPIA '.$deudor->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($deudor->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $deudor->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($deudor->fecha_creacion)), false, false);
+
+    $this->db->update('cajachica_deudores', ['no_impresiones' => $deudor->no_impresiones+1],
+        "id_deudor = '{$id_deudor}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_deudor.pdf', 'I');
+  }
+
+
+  public function getCajaByCode($codigo)
+  {
+    $no_caja = '';
+    if ($codigo == 'caja_limon') {
+      $no_caja = 1;
+    } elseif ($codigo == 'caja_gastos') {
+      $no_caja = 2;
+    } elseif ($codigo == 'caja_general') {
+      $no_caja = 4;
+    } elseif ($codigo == 'caja_fletes') {
+      $no_caja = 5;
+    }
+
+    $caja = $this->db->query(
+      "SELECT *
+      FROM cajachicas
+      WHERE no_caja = '{$no_caja}'"
+    )->row();
+
+    return (!empty($caja)? $caja: 'Otros');
   }
 
 

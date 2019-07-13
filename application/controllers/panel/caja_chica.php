@@ -18,6 +18,8 @@ class caja_chica extends MY_Controller {
     'caja_chica/print_vale/',
     'caja_chica/print_vale_rm/',
     'caja_chica/print_vale_ipr/',
+    'caja_chica/print_vale_tras/',
+    'caja_chica/print_vale_deudor/',
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
@@ -997,6 +999,29 @@ class caja_chica extends MY_Controller {
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }
+
+  public function print_vale_tras()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeTraspasos($_GET['id_traspaso'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_tras/?id_traspaso='.$_GET['id_traspaso'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_deudor()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeDeudor($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_deudor/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')
   {
