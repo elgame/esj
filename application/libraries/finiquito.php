@@ -500,8 +500,12 @@ class finiquito
     if ($this->despido_det['prima']) {
       // Prima de antigüedad 12 días de salario por cada año de servicio
       // SalariozonaB*2*años_trabajados*12
-      $prima_antiguedad = floatval($this->salariosZonasConfig->zona_b)*2*$this->empleado->anios_trabajados*12;
-      $prima_antiguedad += floatval($this->salariosZonasConfig->zona_b)*2*($this->empleado->dias_anio_vacaciones/365)*12;
+      $salario = floatval($this->salariosZonasConfig->zona_b)*2;
+      if ($salario > $this->empleado->salario_diario_integrado) {
+        $salario = $this->empleado->salario_diario_integrado;
+      }
+      $prima_antiguedad = $salario*$this->empleado->anios_trabajados*12;
+      $prima_antiguedad += $salario*($this->empleado->dias_anio_vacaciones/365)*12;
     }
 
     return round($despido_injustificado+$indemnisacion_negativa+$prima_antiguedad, 4);
