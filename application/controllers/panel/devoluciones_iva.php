@@ -32,7 +32,6 @@ class devoluciones_iva extends MY_Controller {
 
   public function index()
   {
-    # code...
   }
 
   public function cedula_proveedores()
@@ -59,12 +58,49 @@ class devoluciones_iva extends MY_Controller {
   }
   public function cedula_proveedores_pdf(){
     $this->load->model('devoluciones_iva_model');
-    $this->devoluciones_iva_model->getCedulaProveedoresPdf();
+    $this->devoluciones_iva_model->getCedulaProveedoresXls(true);
   }
   public function cedula_proveedores_xls(){
     $this->load->model('devoluciones_iva_model');
     $this->devoluciones_iva_model->getCedulaProveedoresXls();
   }
+
+  public function cedula_proveedores()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'CÉDULA A DETALLE DE PROVEEDORES SOLICITADOS');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/devoluciones_iva/cedula_proveedores',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cedula_proveedores_pdf(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getCedulaProveedoresXls(true);
+  }
+  public function cedula_proveedores_xls(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getCedulaProveedoresXls();
+  }
+
+
+
+
+
+
 
   public function cproductos()
   {

@@ -10,7 +10,7 @@ class devoluciones_iva_model extends privilegios_model{
    -------------------------------------------*/
 
   /**
-   * Reporte existencias por unidad
+   * Reporte de cedula proveedores
    *
    * @return
    */
@@ -40,8 +40,8 @@ class devoluciones_iva_model extends privilegios_model{
 
     $facturas = $this->db->query(
     "SELECT c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, c.subtotal, c.importe_iva, c.total,
-      p.id_proveedor, p.nombre_fiscal AS proveedor, c.uuid, c.no_certificado, Sum(ca.total) AS total_pago,
-      string_agg(Date(ca.fecha)::text, ', ') AS fecha_pagos,
+      p.id_proveedor, p.nombre_fiscal AS proveedor, p.rfc AS rfc_proveedor, c.uuid, c.no_certificado,
+      Sum(ca.total) AS total_pago, string_agg(Date(ca.fecha)::text, ', ') AS fecha_pagos,
       string_agg(bm.metodo_pago, ', ') AS metodo_pago, string_agg(ca.concepto, ', ') AS concepto
     FROM compras c
       INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
@@ -54,119 +54,18 @@ class devoluciones_iva_model extends privilegios_model{
     ORDER BY p.nombre_fiscal
     ");
     $response = $facturas->result();
-    echo "<pre>";
-      var_dump($response);
-    echo "</pre>";exit;
 
     return $response;
   }
 
-  public function getCedulaProveedoresPdf(){
-    $res = $this->getCedulaProveedoresData();
-
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
-
-    $this->load->library('mypdf');
-    // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
-
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
-
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = 'Reporte de Compras por Proveedor';
-    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
-    $pdf->AliasNbPages();
-    $pdf->SetFont('Arial','',8);
-
-    $aligns = array('L', 'R', 'C', 'R', 'R', 'R');
-    $widths = array(65, 30, 20, 30, 30, 30);
-    $header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
-
-    $familia = '';
-    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
-    foreach($res as $key => $item){
-      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-        $pdf->AddPage();
-
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
-        $pdf->SetFillColor(160,160,160);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
-      }
-
-      $pdf->SetFont('Arial','B',10);
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetX(6);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths(array(150));
-      $pdf->Row(array($item->nombre_fiscal), false, false);
-
-      $pdf->SetFont('Arial','',8);
-      $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
-      foreach ($item->productos as $key => $producto)
-      {
-        $datos = array($producto->nombre,
-          MyString::formatoNumero($producto->cantidad, 2, '', false),
-          $producto->abreviatura,
-          MyString::formatoNumero($producto->importe, 2, '', false),
-          MyString::formatoNumero($producto->impuestos, 2, '', false),
-          MyString::formatoNumero(($producto->total), 2, '', false),
-          );
-        $pdf->SetXY(6, $pdf->GetY()-2);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($datos, false, false);
-
-        $proveedor_cantidad  += $producto->cantidad;
-        $proveedor_importe   += $producto->importe;
-        $proveedor_impuestos += $producto->impuestos;
-        $proveedor_total     += $producto->total;
-      }
-
-      $datos = array('Total Proveedor',
-        MyString::formatoNumero($proveedor_cantidad, 2, '', false),
-        '',
-        MyString::formatoNumero($proveedor_importe, 2, '', false),
-        MyString::formatoNumero($proveedor_impuestos, 2, '', false),
-        MyString::formatoNumero(($proveedor_total), 2, '', false),
-        );
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-      $pdf->Row($datos, false);
-
-      $total_cantidad  += $proveedor_cantidad;
-      $total_importe   += $proveedor_importe;
-      $total_impuestos += $proveedor_impuestos;
-      $total_total     += $proveedor_total;
-    }
-
-    $datos = array('Total General',
-      MyString::formatoNumero($total_cantidad, 2, '', false),
-      '',
-      MyString::formatoNumero($total_importe, 2, '', false),
-      MyString::formatoNumero($total_impuestos, 2, '', false),
-      MyString::formatoNumero(($total_total), 2, '', false),
-      );
-    $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
-    $pdf->Row($datos, false);
-
-    $pdf->Output('compras_proveedor.pdf', 'I');
-  }
-
-  public function getCProveedorXls()
+  public function getCedulaProveedoresXls($show = false)
   {
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=CedulaProveedores.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    if (!$show) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=CedulaProveedores.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
 
     $res = $this->getCedulaProveedoresData();
 
@@ -174,82 +73,107 @@ class devoluciones_iva_model extends privilegios_model{
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = 'Reporte de Cédula a Detalle de Proveedores';
+    $titulo2 = 'Reporte Cédula a Detalle de Proveedores';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 
 
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="14" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="14" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="14" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="14"></td>
         </tr>';
-      $html .= '<tr style="font-weight:bold">
-        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre (Producto, Servicio)</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
-      </tr>';
-    $familia = '';
-    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+
+    $proveedor = '';
+    $total_subtotal = $total_iva = $total_total = $total_pagos = 0;
     foreach($res as $key => $item){
-      $html .= '<tr>
-          <td colspan="6" style="font-weight:bold">'.$item->nombre_fiscal.'</td>
-        </tr>';
-
-      $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
-      foreach ($item->productos as $key => $producto)
-      {
-        $html .= '<tr>
-            <td style="width:400px;border:1px solid #000;">'.$producto->nombre.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
-          </tr>';
-
-        $proveedor_cantidad  += $producto->cantidad;
-        $proveedor_importe   += $producto->importe;
-        $proveedor_impuestos += $producto->impuestos;
-        $proveedor_total     += $producto->total;
-      }
-
-      $html .= '
+      if ($proveedor != $item->id_proveedor) {
+        if ($key > 0) {
+          $html .= '
           <tr style="font-weight:bold">
-            <td colspan="2">Total Proveedor</td>
-            <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
-            <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
-            <td style="border:1px solid #000;">'.$proveedor_impuestos.'</td>
-            <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+            <td colspan="7"></td>
+            <td style="border:1px solid #000;">'.$subtotal.'</td>
+            <td style="border:1px solid #000;">'.$iva.'</td>
+            <td style="border:1px solid #000;">'.$total.'</td>
+            <td style="border:1px solid #000;">'.$pagos.'</td>
+            <td colspan="3"></td>
           </tr>
           <tr>
-            <td colspan="6"></td>
+            <td colspan="14"></td>
           </tr>';
-      $total_cantidad  += $proveedor_cantidad;
-      $total_importe   += $proveedor_importe;
-      $total_impuestos += $proveedor_impuestos;
-      $total_total     += $proveedor_total;
+        }
+
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha de Pago</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha Factura</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Serie CFDI</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio CFDI</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC Proveedor</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Nombre del Proveedor</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Concepto a detalle</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Subtotal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IVA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Pago Total</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Forma de Pago</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Certificado digital</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio fiscal autorizado</td>
+        </tr>';
+
+        $subtotal = $iva = $total = $pagos = 0;
+        $proveedor = $item->id_proveedor;
+      }
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_pagos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->serie.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->rfc_proveedor.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->proveedor.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->concepto.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->subtotal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->importe_iva.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->metodo_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->no_certificado.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->uuid.'</td>
+        </tr>';
+
+      $subtotal += $item->subtotal;
+      $iva      += $item->importe_iva;
+      $total    += $item->total;
+      $pagos    += $item->total_pago;
+
+      $total_subtotal += $item->subtotal;
+      $total_iva      += $item->importe_iva;
+      $total_total    += $item->total;
+      $total_pagos    += $item->total_pago;
+
+
 
     }
 
     $html .= '
         <tr style="font-weight:bold">
-          <td colspan="2">Total General</td>
-          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
-          <td style="border:1px solid #000;">'.$total_importe.'</td>
-          <td style="border:1px solid #000;">'.$total_impuestos.'</td>
+          <td colspan="7"></td>
+          <td style="border:1px solid #000;">'.$total_subtotal.'</td>
+          <td style="border:1px solid #000;">'.$total_iva.'</td>
           <td style="border:1px solid #000;">'.$total_total.'</td>
+          <td style="border:1px solid #000;">'.$total_pagos.'</td>
+          <td colspan="3"></td>
+        </tr>
+        <tr>
+          <td colspan="14"></td>
         </tr>
       </tbody>
     </table>';
@@ -263,7 +187,7 @@ class devoluciones_iva_model extends privilegios_model{
 	 * @return
 	 */
 	public function getCProductosData()
-  	{
+  {
 		$sql = '';
 	    $idsproveedores = '';
 
