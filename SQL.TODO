@@ -1,6 +1,10 @@
 
  ✔ Reportes de devolucion de iva @done (19-07-17 21:51) pcc|lap
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Devoluciones de IVA',361,TRUE,'#','repeat',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Cédula a Detalle de Proveedores',503,TRUE,'devoluciones_iva/cedula_proveedores/','print',TRUE);
+     -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Cédula Totalidad de IVA',503,TRUE,'devoluciones_iva/cedula_totalidad_iva/','print',TRUE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Integración IVA 16%',503,TRUE,'devoluciones_iva/cedula_iva16/','print',TRUE);
 
  ✔ Caja chica gastos x comprobar @done (19-07-12 17:17) pct|pcc|lap
      ALTER TABLE public.cajachica_gastos ADD COLUMN monto_ini double precision DEFAULT 0;
