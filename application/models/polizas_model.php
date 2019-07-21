@@ -2,6 +2,7 @@
 
 class polizas_model extends CI_Model {
   private $empresaId;
+  private $uuidsADD = '';
 
   function __construct()
   {
@@ -736,6 +737,20 @@ class polizas_model extends CI_Model {
     return $response;
   }
 
+  public function addLineUUID($uuid)
+  {
+    $txt = '';
+    if (!empty($uuid)) {
+      $txt = $this->setEspacios('AM',2).
+            $this->setEspacios($uuid, 36)."\r\n";
+
+      $this->uuidsADD .= $this->setEspacios('AD',2).
+                        $this->setEspacios($uuid, 36)."\r\n";
+    }
+
+    return $txt;
+  }
+
   /**
    * GENERA UNA POLIZA DE DIARIOS PARA LAS VENTAS
    * @return [type] [description]
@@ -829,6 +844,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio.' CANCELADA',100).
                               $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
           }else
           {
             //Colocamos el Cargo al Cliente de la factura
@@ -841,6 +857,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
 
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
@@ -871,6 +888,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).
                                 $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
                                 $this->setEspacios('',4)."\r\n";
+                $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
               }
             }
             //Colocamos los impuestos de la factura
@@ -887,6 +905,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
                               $this->setEspacios('',4)."\r\n";
+                $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
               }
             }
           }
@@ -898,6 +917,10 @@ class polizas_model extends CI_Model {
       $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
+
+    if (!empty($this->uuidsADD)) {
+      $response['data'] .= $this->uuidsADD;
+    }
 
     $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
