@@ -1,14 +1,14 @@
 <?php
 
 class MyFiles {
-  function microtime_float()
+  function static microtime_float()
   {
       list($usec, $sec) = explode(" ", microtime());
       return ((float)$usec + (float)$sec);
   }
 
   public static function searchXmlEnlinea($path, $brfcProv, $bfolio='', $bfechaIni='', $bfechaFin=''){
-    $time_start = $this->microtime_float();
+    $time_start = self::microtime_float();
     $dir = new DirectoryIterator($path);
     $files = array();
 
@@ -91,7 +91,7 @@ class MyFiles {
       }
     }
 
-    $time_end = $this->microtime_float();
+    $time_end = self::microtime_float();
     $time = $time_end - $time_start;
     echo "<pre>";
     var_dump($time);
