@@ -1137,6 +1137,9 @@ class banco_cuentas_model extends banco_model {
   		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
   			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago
   			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+      $data_caja_gastos = $this->db->query("SELECT bm.id_movimiento, bm.id_gasto, bm.id_movimiento2
+        FROM banco_movimientos_caja_chica_gastos AS bm
+        WHERE bm.id_movimiento = {$id_movimiento} OR bm.id_movimiento2 = {$id_movimiento}")->result();
 
   		// Bitacora
   		$inf_movi = $this->getMovimientoInfo($id_movimiento);
@@ -1182,6 +1185,22 @@ class banco_cuentas_model extends banco_model {
   				$this->bascula_model->cancelar_pago($value->id_bascula_pago, !$cancelar);
   			}
   		}
+
+      //cuendo se cancela el mov de caja chica gastos
+      $this->load->model('caja_chica_model');
+      if(count($data_caja_gastos) > 0){
+        foreach ($data_caja_gastos as $key => $value) {
+          $this->caja_chica_model->cancelarRecGastosMov($value->id_gasto);
+        }
+
+        if($cancelar) { //cancelar movimiento
+          $this->updateMovimiento($data_caja_gastos[0]->id_movimiento, array('status' => 'f') );
+          $this->updateMovimiento($data_caja_gastos[0]->id_movimiento2, array('status' => 'f') );
+        } else {
+          $this->db->delete('banco_movimientos', "id_movimiento = {$data_caja_gastos[0]->id_movimiento}");
+          $this->db->delete('banco_movimientos', "id_movimiento = {$data_caja_gastos[0]->id_movimiento2}");
+        }
+      }
 		  return true;
     }
     return false;

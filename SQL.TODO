@@ -1,4 +1,20 @@
 
+ ✔ Comprobar gastos de caja @done (19-07-22 20:45) lap
+     CREATE TABLE public.banco_movimientos_caja_chica_gastos
+        (
+          id_movimiento bigint NOT NULL,
+          id_gasto bigint NOT NULL,
+          id_movimiento2 bigint NOT NULL,
+          CONSTRAINT banco_movimientos_caja_chica_gastos_pkey PRIMARY KEY (id_movimiento, id_gasto, id_movimiento2),
+          CONSTRAINT banco_movimientos_caja_chica_gastos_id_gasto_fkey FOREIGN KEY (id_gasto)
+              REFERENCES public.cajachica_gastos (id_gasto) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT banco_movimientos_caja_chica_gastos_id_movimiento_fkey FOREIGN KEY (id_movimiento)
+              REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        ) WITH ( OIDS=FALSE );
+        ALTER TABLE public.banco_movimientos_caja_chica_gastos OWNER TO programa;
+
  ✔ Reportes de devolucion de iva @done (19-07-17 21:51) pcc|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Devoluciones de IVA',361,TRUE,'#','repeat',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Cédula a Detalle de Proveedores',503,TRUE,'devoluciones_iva/cedula_proveedores/','print',TRUE);

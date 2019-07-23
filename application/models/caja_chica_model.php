@@ -1357,6 +1357,15 @@ class caja_chica_model extends CI_Model {
     return true;
   }
 
+  /**
+   * Cuando se cancela un movimiento de banco revertir la recuperacion del gasto
+   * @return [type] [description]
+   */
+  public function cancelarRecGastosMov($id_gasto)
+  {
+    $this->db->update('cajachica_gastos', ['fecha_compro_gasto' => NULL], "id_gasto = {$id_gasto}");
+  }
+
   public function addAbonoDeudor($datos)
   {
     $deudores = $this->db->query(
