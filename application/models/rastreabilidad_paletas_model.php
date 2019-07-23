@@ -420,6 +420,9 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $this->load->model('empresas_model');
     $data = $this->getInfoPaleta($id_paleta, false, true);
     $empresa = $this->empresas_model->getInfoEmpresa($data['paleta']->id_empresa);
+    echo "<pre>";
+    var_dump($data);
+    echo "</pre>";exit;
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
