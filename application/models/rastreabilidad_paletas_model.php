@@ -420,9 +420,9 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $this->load->model('empresas_model');
     $data = $this->getInfoPaleta($id_paleta, false, true);
     $empresa = $this->empresas_model->getInfoEmpresa($data['paleta']->id_empresa);
-    echo "<pre>";
-    var_dump($data);
-    echo "</pre>";exit;
+    // echo "<pre>";
+    // var_dump($data);
+    // echo "</pre>";exit;
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -666,7 +666,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->Row(['CONDICIONES DEL FLETE', 'DESTINO'], true, true);
     $pdf->SetAligns(['L', 'L']);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ', $data['otros_facturas'])]);
+    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ', (!empty($data['otros_facturas'])? $data['otros_facturas']: '') )]);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(['CLIENTE DESTINO:', 'DIA DE LLEGADA:']);
     $pdf->SetXY(6, $pdf->GetY());
