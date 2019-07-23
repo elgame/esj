@@ -1,5 +1,5 @@
 
- ✔ Comprobar gastos de caja @done (19-07-22 20:45) lap
+ ✔ Comprobar gastos de caja @done (19-07-22 20:45) lap|san|pcc
      CREATE TABLE public.banco_movimientos_caja_chica_gastos
         (
           id_movimiento bigint NOT NULL,
@@ -15,16 +15,15 @@
         ) WITH ( OIDS=FALSE );
         ALTER TABLE public.banco_movimientos_caja_chica_gastos OWNER TO programa;
 
- ✔ Reportes de devolucion de iva @done (19-07-17 21:51) pcc|lap
+ ✔ Reportes de devolucion de iva @done (19-07-17 21:51) pcc|lap|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Devoluciones de IVA',361,TRUE,'#','repeat',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Cédula a Detalle de Proveedores',503,TRUE,'devoluciones_iva/cedula_proveedores/','print',TRUE);
-     -- pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Cédula Totalidad de IVA',503,TRUE,'devoluciones_iva/cedula_totalidad_iva/','print',TRUE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Integración IVA 16%',503,TRUE,'devoluciones_iva/cedula_iva16/','print',TRUE);
 
- ✔ Caja chica gastos x comprobar @done (19-07-12 17:17) pct|pcc|lap
+ ✔ Caja chica gastos x comprobar @done (19-07-12 17:17) pct|pcc|lap|san
      ALTER TABLE public.cajachica_gastos ADD COLUMN monto_ini double precision DEFAULT 0;
- ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc|pct|lap
+ ✔ Paletas de salida en rastreabilidad @done (19-07-01 22:11) pcc|pct|lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Papeleta de Salida',61,TRUE,'rastreabilidad_paletas/','list-alt',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',497,TRUE,'rastreabilidad_paletas/agregar/','plus',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',497,FALSE,'rastreabilidad_paletas/modificar/','edit',FALSE);
