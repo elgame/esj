@@ -800,6 +800,7 @@ class polizas_model extends CI_Model {
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
 
+        $this->uuidsADD = '';
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
                             $this->setEspacios(str_replace('-', '', $fecha),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
