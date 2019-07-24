@@ -1898,8 +1898,8 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetAligns($aligns2);
           $pdf->SetWidths($widths2);
           $pdf->Row([
-            MyString::formatoNumero($ultcompra->precio_unitario, 2, '$', false),
-            substr($ultcompra->fecha_aceptacion, 0, 10)
+            MyString::formatoNumero((isset($ultcompra->precio_unitario)? $ultcompra->precio_unitario: ''), 2, '$', false),
+            substr((isset($ultcompra->fecha_aceptacion)? $ultcompra->fecha_aceptacion: ''), 0, 10)
           ], false);
 
           $pdf->SetY($pdf->GetY()-5.8);
