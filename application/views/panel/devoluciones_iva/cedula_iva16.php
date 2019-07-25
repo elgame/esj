@@ -45,6 +45,26 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="tasa_iva">Tasa de IVA</label>
+                  <div class="controls">
+                    <select name="tasa_iva" id="tasa_iva">
+                      <option value="16">16%</option>
+                      <option value="0">0%</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="exportacion">Exportación</label>
+                  <div class="controls">
+                    <select name="exportacion" id="exportacion">
+                      <option value="no">No</option>
+                      <option value="si">Si</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

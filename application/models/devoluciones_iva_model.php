@@ -417,22 +417,39 @@ class devoluciones_iva_model extends privilegios_model{
       $sql .= " AND c.id_cliente IN(".implode(',', $this->input->get('ids_clientes')).")";
     }
 
+    if($this->input->get('tasa_iva') == 16)
+      $sql_iva = " iva > 0";
+    else
+      $sql_iva = " iva = 0";
+
+    if($this->input->get('exportacion') == 'si')
+      $sql .= " AND c.rfc = 'XEXX010101000'";
+    else
+      $sql .= " AND c.rfc <> 'XEXX010101000'";
+
     $sql .= " AND Date(f.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     $facturas = $this->db->query(
     "SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.rfc, c.nombre_fiscal AS cliente,
-      c.id_cliente, string_agg(DISTINCT fp.descripcion, ', ') AS conceptos, f.subtotal, f.importe_iva, f.total,
+      c.id_cliente, string_agg(DISTINCT fp.conceptos, ', ') AS conceptos, Sum(fp.subtotal) AS subtotal,
+      Sum(fp.importe_iva) AS importe_iva, Sum(fp.total) AS total,
       f.no_certificado, f.uuid, string_agg(DISTINCT Date(bm.fecha)::text, ', ') AS fecha_pago,
       Sum(fa.total) AS total_pago, string_agg(DISTINCT bc.alias, ', ') AS cuentas,
       string_agg(DISTINCT bm.metodo_pago, ', ') AS metodo_pago, f.tipo_cambio
     FROM facturacion f
       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
-      INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+      INNER JOIN (
+        SELECT id_factura, Sum(importe) AS subtotal, Sum(iva) AS importe_iva,
+          Sum(importe + iva) AS total, string_agg(DISTINCT descripcion, ', ') AS conceptos
+        FROM facturacion_productos
+        WHERE {$sql_iva}
+        GROUP BY id_factura
+      ) fp ON f.id_factura = fp.id_factura
       LEFT JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
       LEFT JOIN banco_movimientos_facturas bmf ON bmf.id_abono_factura = fa.id_abono
       LEFT JOIN banco_movimientos bm ON bm.id_movimiento = bmf.id_movimiento
       LEFT JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
-    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND f.importe_iva > 0
+    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't'
       {$sql}
     GROUP BY f.id_factura, c.id_cliente
     ORDER BY cliente
