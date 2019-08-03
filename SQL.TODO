@@ -1,7 +1,31 @@
 
- ✔ Pago masivo de bajio @done (19-08-02 19:10) pct
+ ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc
    ALTER TABLE public.banco_cuentas ADD COLUMN is_pago_masivo boolean NOT NULL DEFAULT false;
    ALTER TABLE public.banco_bancos ADD COLUMN codigo_bajio character varying(8);
+   -- pcc
+    UPDATE public.banco_cuentas SET id_banco=9 WHERE id_banco=11;
+    UPDATE public.banco_bancos SET status='e' WHERE id_banco=11;
+    UPDATE public.banco_cuentas SET id_banco=3 WHERE id_banco=13;
+    UPDATE public.banco_bancos SET status='e' WHERE id_banco=13;
+    UPDATE public.banco_cuentas SET id_banco=1 WHERE id_banco=14;
+    UPDATE public.banco_bancos SET status='e' WHERE id_banco=14;
+    UPDATE public.banco_cuentas SET id_banco=12 WHERE id_banco=16;
+    UPDATE public.banco_bancos SET status='e' WHERE id_banco=16;
+    UPDATE public.banco_bancos SET codigo_bajio=40062 WHERE id_banco=1;
+    UPDATE public.banco_bancos SET codigo_bajio=40002 WHERE id_banco=2;
+    UPDATE public.banco_bancos SET codigo_bajio=40030 WHERE id_banco=3;
+    UPDATE public.banco_bancos SET codigo_bajio=40072 WHERE id_banco=4;
+    UPDATE public.banco_bancos SET codigo_bajio=40014 WHERE id_banco=5;
+    UPDATE public.banco_bancos SET codigo_bajio=40012 WHERE id_banco=6;
+    UPDATE public.banco_bancos SET codigo_bajio=40021 WHERE id_banco=7;
+    UPDATE public.banco_bancos SET codigo_bajio=40044 WHERE id_banco=8;
+    UPDATE public.banco_bancos SET codigo_bajio=90611 WHERE id_banco=10;
+    UPDATE public.banco_bancos SET codigo_bajio=40036 WHERE id_banco=12;
+    UPDATE public.banco_bancos SET codigo_bajio=40127 WHERE id_banco=15;
+    UPDATE public.banco_bancos SET codigo_bajio=40131 WHERE id_banco=17;
+    UPDATE public.banco_bancos SET codigo_bajio=37019 WHERE id_banco=18;
+    UPDATE public.banco_bancos SET codigo_bajio=40058 WHERE id_banco=19;
+
 
  ✔ Comprobar gastos de caja @done (19-07-22 20:45) lap|san|pcc
      CREATE TABLE public.banco_movimientos_caja_chica_gastos

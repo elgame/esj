@@ -10,16 +10,9 @@ class banco_layout_bajio_model extends banco_cuentas_model {
 
   public function get($pagos, $cuenta_retiro)
   {
-    echo "<pre>";
-      var_dump($pagos, $cuenta_retiro);
-    echo "</pre>";exit;
     if (count($pagos) > 0)
     {
       $noFile = isset($_GET['nofile']{0})? $_GET['nofile']: 1;
-
-      //header("Content-type: text/x-PAG");
-      //header("Content-type: application/PAG");
-      header("Content-Disposition: attachment; filename=pagos_".date("dmY").'.txt');
 
       // Escribe encabezado en archivo
       $header = '01';
@@ -27,34 +20,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
       $header .= date("Ymd");
       $header .= $this->llena0(3, $noFile)."\r\n"; //Consecutivo de archivo en el día
 
-      $pagos_archivo = array();
-      $total_pagar = $num_abonos = 0;
-      foreach ($pagos as $key => $pago)
-      {
-        $total_proveedor = 0;
-        foreach ($pago->pagos as $keyp => $value)
-        {
-          $total_pagar += $value->new_total; // monto
-          $total_proveedor += $value->new_total; //monto
-        }
-        if ($total_proveedor > 0)
-        {
-          $num_abonos++;
-          $pagos_archivo[] = array(
-            'monto'              => $total_proveedor,
-            'proveedor_sucursal' => $value->sucursal,
-            'proveedor_cuenta'   => $value->cuenta,
-            'ref_alfanumerica'   => $value->ref_alfanumerica,
-            'beneficiario'       => $pago->nombre_fiscal,
-            'es_moral'           => $pago->es_moral,
-            'clave_banco'        => $value->codigo_bajio,
-            'ref_numerica'       => $value->referencia,
-            'descripcion'        => $value->descripcion,
-            'alias'              => $value->alias,
-            'importe_iva'        => '0',
-          );
-        }
-      }
+      $pagos_archivo = $this->getPagosGrup($pagos, $cuenta_retiro);
 
       // Escribe detalle en archivo
       $reg = '';
@@ -90,12 +56,64 @@ class banco_layout_bajio_model extends banco_cuentas_model {
       $footer .= $this->llena0(7, $renglon-2);
       $footer .= $this->llena0(18, number_format($total, 2, '', '') )."\r\n";
 
+      header("Content-Disposition: attachment; filename=pagos_".date("dmY").'.txt');
       echo($header.$reg.$footer);
     }
   }
 
+  public function getPagosGrup($pagos, $cuenta_retiro)
+  {
+    $pagos_archivo = array();
+    $total_pagar = $num_abonos = 0;
+    foreach ($pagos as $key => $pago)
+    {
+      $total_proveedor = 0;
+      foreach ($pago->pagos as $keyp => $value)
+      {
+        $total_pagar += $value->new_total; // monto
+        $total_proveedor += $value->new_total; //monto
+      }
+      if ($total_proveedor > 0)
+      {
+        $num_abonos++;
+        $pagos_archivo[] = array(
+          'monto'              => $total_proveedor,
+          'proveedor_sucursal' => $pago->pagos[0]->sucursal,
+          'proveedor_cuenta'   => $pago->pagos[0]->cuenta,
+          'ref_alfanumerica'   => $pago->pagos[0]->ref_alfanumerica,
+          'beneficiario'       => $pago->nombre_fiscal,
+          'es_moral'           => $pago->es_moral,
+          'clave_banco'        => $pago->pagos[0]->codigo_bajio,
+          'ref_numerica'       => $pago->pagos[0]->referencia,
+          'descripcion'        => $pago->pagos[0]->descripcion,
+          'alias'              => $pago->pagos[0]->alias,
+          'importe_iva'        => '0',
+          'tipo_cuenta'        => $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro),
+        );
+      }
+    }
+    return $pagos_archivo;
+  }
+
+  public function getTipoCuenta($pago, $cuenta_retiro)
+  {
+    $tipo = '40'; // interbancarias
+    $leng = strlen($pago->cuenta);
+    if ($leng == 11 && $pago->id_banco == $cuenta_retiro->id_banco) { // cuentas bajio
+      $tipo = '1';
+    } elseif ($leng == 16) { // tarjetas
+      $tipo = '3';
+    }
+    return $tipo;
+  }
 
 
+  private function llena0($hasta, $str, $char='0', $dir='I'){
+    $llenar = '';
+    for ($i=1;$i<=($hasta-strlen($str));$i++)
+      $llenar .= $char;
+    return ($dir=='I'? $llenar.$str: $str.$llenar);
+  }
 
 	private function numero($numero, $pos, $decimales=false)
 	{

@@ -33,7 +33,7 @@ class banco_pagos_model extends CI_Model {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.serie, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
                                   COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion, bpc.modificado_banco,
-                                  bpc.tcambio, b.codigo_bajio, pc.alias
+                                  bpc.tcambio, b.codigo_bajio, pc.alias, b.id_banco
                                FROM banco_pagos_compras AS bpc
                                  INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
                                  LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
