@@ -42,7 +42,7 @@ class banco_cuentas_model extends banco_model {
 									(
 										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}') -
 										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}' {$sql_todos})
-									) AS saldo
+									) AS saldo, bc.is_pago_masivo
 								FROM banco_cuentas AS bc
 									INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
 									INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa

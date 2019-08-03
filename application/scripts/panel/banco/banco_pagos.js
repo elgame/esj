@@ -48,10 +48,12 @@ $(function(){
   $("#cuenta_retiro").on('change', function(event) {
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
+    bajio = $("#downloadBajio").attr('href').split('&cuentaretiro'),
     aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
     id_empresa = $("#did_empresa").val();
     $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
     $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
     $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val()+"&ide="+id_empresa);
   });
 

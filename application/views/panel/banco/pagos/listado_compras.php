@@ -45,7 +45,7 @@
                   $primera_cuenta = null;
                   foreach ($data['cuentas'] as $keyc => $cuentasp)
                   {
-                    if($cuentasp->id_banco == '2'){ //banamex
+                    if($cuentasp->is_pago_masivo == 't'){ //banamex
                       if($primera_cuenta == null)
                         $primera_cuenta = $cuentasp->id_cuenta;
                   ?>
@@ -54,8 +54,9 @@
                     }
                   } ?>
                   </select>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout/?layout=banamex&tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout/?layout=banamex&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Banamex Interb</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout/?layout=bajio&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBajio" class="btn"><i class="icon-download-alt"></i> Bajio</a>
                   <a href="<?php echo base_url('panel/banco_pagos/aplica_pagos/?cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="aplicarPagos" class="btn"
                     onclick="msb.confirm('Estas seguro de Aplicar los Pagos?', 'Facturas', this); return false;"><i class="icon-tag"></i> Aplicar pagos</a>
               <?php
