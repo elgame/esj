@@ -108,7 +108,7 @@
                   <td><?php
                           $texto = 'NO';
                           $label = 'warning';
-                        if ($compra->xml) {
+                        if ($compra->uuid != '') {
                           $texto = 'SI';
                           $label = 'success';
                         }

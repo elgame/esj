@@ -9,7 +9,6 @@ class MyFiles {
 
   public static function searchXmlEnlinea($path, $brfcProv, $bfolio='', $bfechaIni='', $bfechaFin=''){
     // $time_start = self::microtime_float();
-    $dir = new DirectoryIterator($path);
     $files = array();
 
     $brfcProv = trim($brfcProv);
@@ -19,6 +18,18 @@ class MyFiles {
     }
     if ($bfechaFin != '') {
       $bfechaFin = new DateTime($bfechaFin);
+    }
+
+    if ($bfechaFin != '') {
+      $pathanio = $bfechaFin->format("Y").'/'.$bfechaFin->format("m");
+    } elseif ($bfechaIni != '') {
+      $pathanio = $bfechaIni->format("Y").'/'.$bfechaFin->format("m");
+    }
+
+    if (is_dir($path.$pathanio)) {
+      $dir = new DirectoryIterator($path.$pathanio);
+    } else {
+      return "No se encontro el direcctorio de busqueda ({$path.$pathanio}).";
     }
 
     $totalFiles = 0;

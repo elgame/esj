@@ -192,7 +192,7 @@ class gastos extends MY_Controller {
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
     $params['rfc'] = $rfcProv;
 
-    $path = "C:\DescargasXMLenlinea/{$params['empresa']['info']->rfc}/RECIBIDOS"; // C:\DescargasXMLenlinea/
+    $path = "C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos/"; // C:\DescargasXMLenlinea/
     if (is_dir($path)) {
       $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
         $this->input->get('ffecha1'), $this->input->get('ffecha2'));
