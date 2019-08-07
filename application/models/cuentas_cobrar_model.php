@@ -1198,8 +1198,8 @@ if($close){
     $query = BDUtil::pagination(
       "SELECT
       bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-      bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
-      Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+      bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/Coalesce(NULLIF(f.total, 0), 1))*f.importe_iva/100)) AS importe_iva,
+      Sum(((fa.total*100/Coalesce(NULLIF(f.total, 0), 1))*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
       c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
       FROM facturacion AS f
       INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
