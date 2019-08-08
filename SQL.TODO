@@ -1,4 +1,14 @@
 
+ ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
+     SELECT f.serie, f.folio, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad
+FROM facturacion f
+  INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+  INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
+WHERE f.is_factura = 'f' AND c.id_area = 2 AND Date(f.fecha) BETWEEN '2019-06-10' AND '2019-06-12'
+GROUP BY c.id_clasificacion, f.serie, f.folio
+
+
  ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc|san|lap
     ALTER TABLE public.banco_cuentas ADD COLUMN is_pago_masivo boolean NOT NULL DEFAULT false;
     ALTER TABLE public.banco_bancos ADD COLUMN codigo_bajio character varying(8);
