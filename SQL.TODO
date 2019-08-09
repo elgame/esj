@@ -1,12 +1,33 @@
 
  ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
-     SELECT f.serie, f.folio, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad
+     SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
+  (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe,
+  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kg
 FROM facturacion f
+  INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
   INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
   INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
-WHERE f.is_factura = 'f' AND c.id_area = 2 AND Date(f.fecha) BETWEEN '2019-06-10' AND '2019-06-12'
-GROUP BY c.id_clasificacion, f.serie, f.folio
+  INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+WHERE f.id_empresa = 2 AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
+  AND c.id_area = 2 AND Date(f.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
+GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad
+ORDER BY folio ASC
+
+SELECT -- b.folio,
+  -- pr.nombre_fiscal,
+  c.id_calidad, c.nombre AS calidad, Sum(bc.kilos) AS kilos,
+  (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe, (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
+FROM bascula b
+  INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
+  INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
+  --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+WHERE b.id_empresa = 2 AND b.status = 't'
+  AND b.id_area = 2 AND Date(b.fecha_bruto) BETWEEN '2018-06-10' AND '2019-06-12'
+GROUP BY --b.id_bascula,
+  c.id_calidad
+  --, pr.id_proveedor
+ORDER BY id_calidad ASC
 
 
  ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc|san|lap
