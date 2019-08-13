@@ -273,10 +273,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'   => $factura->cfdi_ext->emisor->rfc,
-        'uuids' => $factura->uuid,
-        'cer'   => $this->cfdi->obtenCer(),
-        'key'   => $this->cfdi->obtenKey(),
+        'rfc'    => $factura->cfdi_ext->emisor->rfc,
+        'rfcRec' => $factura->cfdi_ext->receptor->rfc,
+        'uuids'  => $factura->uuid,
+        'cer'    => $this->cfdi->obtenCer(),
+        'key'    => $this->cfdi->obtenKey(),
+        'total'  => $factura->cfdi_ext->total,
+        'sello'  => $factura->sello,
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.

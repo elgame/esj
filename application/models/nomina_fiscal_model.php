@@ -10097,20 +10097,26 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('documentos_model');
 
     // Obtenemos la info de la factura a cancelar.
-    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext,
+                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_ptu AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
-                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+                                INNER JOIN usuarios AS u ON u.id = nf.id_empleado
+                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa}
+                                AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
 
     // Carga los datos fiscales de la empresa dentro de la lib CFDI.
     $this->cfdi->cargaDatosFiscales($query->id_empresa);
 
     // Parametros que necesita el webservice para la cancelacion.
     $params = array(
-      'rfc'   => $query->rfc,
-      'uuids' => $query->uuid,
-      'cer'   => $this->cfdi->obtenCer(),
-      'key'   => $this->cfdi->obtenKey(),
+      'rfc'    => $query->rfc,
+      'rfcRec' => $query->rfcRec,
+      'uuids'  => $query->uuid,
+      'cer'    => $this->cfdi->obtenCer(),
+      'key'    => $this->cfdi->obtenKey(),
+      'total'  => $query->total_neto,
+      'sello'  => $query->sello,
     );
 
     // Lama el metodo cancelar para que realiza la peticion al webservice.
@@ -12155,20 +12161,26 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('documentos_model');
 
     // Obtenemos la info de la factura a cancelar.
-    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext,
+                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_aguinaldo AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
-                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+                                INNER JOIN usuarios AS u ON u.id = nf.id_empleado
+                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa}
+                                AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
 
     // Carga los datos fiscales de la empresa dentro de la lib CFDI.
     $this->cfdi->cargaDatosFiscales($query->id_empresa);
 
     // Parametros que necesita el webservice para la cancelacion.
     $params = array(
-      'rfc'   => $query->rfc,
-      'uuids' => $query->uuid,
-      'cer'   => $this->cfdi->obtenCer(),
-      'key'   => $this->cfdi->obtenKey(),
+      'rfc'    => $query->rfc,
+      'rfcRec' => $query->rfcRec,
+      'uuids'  => $query->uuid,
+      'cer'    => $this->cfdi->obtenCer(),
+      'key'    => $this->cfdi->obtenKey(),
+      'total'  => $query->total_neto,
+      'sello'  => $query->sello,
     );
 
     // Lama el metodo cancelar para que realiza la peticion al webservice.
@@ -12217,9 +12229,11 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('documentos_model');
 
     // Obtenemos la info de la factura a cancelar.
-    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext, nf.otros_datos
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext, nf.otros_datos,
+                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_fiscal AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
+                                INNER JOIN usuarios AS u ON u.id = nf.id_empleado
                                WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa}
                                 AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
 
@@ -12230,10 +12244,13 @@ class nomina_fiscal_model extends CI_Model {
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'   => $query->rfc,
-        'uuids' => $query->uuid,
-        'cer'   => $this->cfdi->obtenCer(),
-        'key'   => $this->cfdi->obtenKey(),
+        'rfc'    => $query->rfc,
+        'rfcRec' => $query->rfcRec,
+        'uuids'  => $query->uuid,
+        'cer'    => $this->cfdi->obtenCer(),
+        'key'    => $this->cfdi->obtenKey(),
+        'total'  => $query->total_neto,
+        'sello'  => $query->sello,
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.

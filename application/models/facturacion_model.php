@@ -1310,10 +1310,13 @@ class facturacion_model extends privilegios_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'   => $factura['info']->empresa->rfc,
-        'uuids' => $factura['info']->uuid,
-        'cer'   => $this->cfdi->obtenCer(),
-        'key'   => $this->cfdi->obtenKey(),
+        'rfc'    => $factura['info']->empresa->rfc,
+        'rfcRec' => $factura['info']->cliente->rfc,
+        'uuids'  => $factura['info']->uuid,
+        'cer'    => $this->cfdi->obtenCer(),
+        'key'    => $this->cfdi->obtenKey(),
+        'total'  => $factura['info']->total,
+        'sello'  => $factura['info']->sello,
       );
 
       // Lama el metodo cancelar para que realiza la peticion al webservice.
