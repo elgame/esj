@@ -1,7 +1,13 @@
 
- ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap
+ ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
-     SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
+     -- pcc
+     ALTER TABLE public.unidades ADD COLUMN tipo character varying(5) DEFAULT 'o'::character varying;
+     COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
+     UPDATE public.unidades SET tipo='a' WHERE Lower(nombre) LIKE '%arpil%';
+     UPDATE public.unidades SET tipo='c' WHERE Lower(nombre) LIKE '%caja%' OR Lower(nombre) LIKE '%cp%';
+
+SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
   (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe,
   Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kg
 FROM facturacion f
@@ -28,6 +34,18 @@ GROUP BY --b.id_bascula,
   c.id_calidad
   --, pr.id_proveedor
 ORDER BY id_calidad ASC
+
+SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
+  '' AS precio, '' AS importe, u.id_unidad,
+  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kg
+FROM rastria_rendimiento rr
+  INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
+  INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
+  INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
+WHERE rr.status = 't' AND c.id_area = 2
+  AND Date(rr.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
+GROUP BY c.id_clasificacion, u.id_unidad
+ORDER BY id_clasificacion, id_unidad ASC
 
 
  ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc|san|lap
