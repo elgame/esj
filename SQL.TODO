@@ -1,7 +1,7 @@
 
- ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc
+ ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
-     -- pcc
+     -- pcc|pct
      ALTER TABLE public.unidades ADD COLUMN tipo character varying(5) DEFAULT 'o'::character varying;
      COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
      UPDATE public.unidades SET tipo='a' WHERE Lower(nombre) LIKE '%arpil%';
@@ -45,7 +45,7 @@ FROM rastria_rendimiento rr
 WHERE rr.status = 't' AND c.id_area = 2
   AND Date(rr.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
 GROUP BY c.id_clasificacion, u.id_unidad
-ORDER BY id_clasificacion, id_unidad ASC
+ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC
 
 
  ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc|san|lap

@@ -65,8 +65,6 @@
 
         <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica" name="registerform">
           <?php
-          $totalfondo = $totalprestamos = $totalpagos = $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
-          $totalprescp_salini = $totalprescp_pago_dia = $totalprescp_salfin = 0;
           $fecha_caja_chica = set_value('fecha_caja_chica', isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d'));
           ?>
           <!-- Header -->
@@ -86,6 +84,7 @@
               <div class="span4">
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
+                  <input type="hidden" name="farea" id="farea" value="<?php echo $_GET['farea']; ?>">
 
                   <?php if ($show){ ?>
                     <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
@@ -109,516 +108,133 @@
               <div class="row-fluid">
                 <div class="span12">
 
-                    <!-- Deudores diversos -->
+                    <!-- Ventas -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-fondocajas">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-ventas">
                           <thead>
                             <tr>
-                              <th colspan="4">DEUDORES DIVERSOS
-                                <button type="button" class="btn btn-success" id="btn-add-fondocaja" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
-                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
-                              </th>
+                              <th colspan="4">VENTAS</th>
                               <th colspan="5" id="dvfondo_caja"></th>
                             </tr>
                             <tr>
-                              <th>EMPRESA</th>
-                              <th>FONDO DE CAJA</th>
-                              <th>FECHA</th>
-                              <th>REFERENCIA</th>
-                              <th>INGRESOS</th>
-                              <th>EGRESOS</th>
-                              <th>SALDOS</th>
-                              <th>TICKET</th>
+                              <!-- <th>FECHA</th> -->
+                              <th>FOLIO</th>
+                              <th>CLIENTE</th>
+                              <th>CLASIF</th>
+                              <th>UNIDAD</th>
+                              <th>CANTIDAD</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
                               <th></th>
                             </tr>
                           </thead>
                           <tbody style="overflow-y: auto;max-height: 300px;">
                             <?php
-                                $saldofc = 0;
-                                  foreach ($caja['fondos_caja'] as $fondoc) {
-                                      $totalfondo += floatval($fondoc->monto);
-                                      $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
+                                $venta_importe = 0;
+                                  foreach ($caja['ventas'] as $venta) {
+                                      $venta_importe += floatval($venta->importe);
                                     ?>
                                     <tr>
-                                      <td>
-                                        <input type="text" name="fondo_categoria[]" value="<?php echo $fondoc->categoria ?>" class="span11 gasto-cargo" id="fondo_categoria" required>
-                                        <input type="hidden" name="fondo_id_categoria[]" value="<?php echo $fondoc->id_categoria ?>" id="fondo_id_categoria" class="gasto-cargo-id">
-                                        <input type="hidden" name="fondo_id_fondo[]" value="<?php echo $fondoc->id_fondo ?>" id="fondo_id_fondo">
-                                        <input type="hidden" name="fondo_del[]" value="" id="fondo_del">
-                                      </td>
-                                      <td><?php echo $fondoc->empresa ?></td>
-                                      <td><input type="date" name="fondo_fecha[]" value="<?php echo $fondoc->fecha ?>" id="fondo_fecha" required></td>
-                                      <td> <input type="text" name="fondo_referencia[]" value="<?php echo $fondoc->referencia ?>" id="fondo_referencia" class="span11"> </td>
-                                      <td> <input type="number" name="fondo_ingreso[]" value="<?php echo ($fondoc->tipo_movimiento=='t'? $fondoc->monto: '') ?>" id="fondo_ingreso" class="span11 vpositive"></td>
-                                      <td> <input type="number" name="fondo_egreso[]" value="<?php echo ($fondoc->tipo_movimiento=='f'? $fondoc->monto: '') ?>" id="fondo_egreso" class="span11 vpositive"></td>
-                                      <td class="fondoc_saldo"><?php echo $saldofc ?></td>
-                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_fondo/?id='.$fondoc->id_fondo)?>" target="_blank" title="Imprimir">
-                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $fondoc->id_fondo ?></a></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-fondo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                      <td><?php echo $venta->serie.$venta->folio ?></td>
+                                      <td><?php echo $venta->nombre_fiscal ?></td>
+                                      <td><?php echo $venta->clasificacion ?></td>
+                                      <td><?php echo $venta->unidad ?></td>
+                                      <td><?php echo $venta->cantidad ?></td>
+                                      <td><?php echo $venta->precio ?></td>
+                                      <td><?php echo $venta->importe ?></td>
                                     </tr>
                             <?php } ?>
                           </tbody>
                         </table>
                       </div>
                     </div>
-                    <!--/ Deudores diversos -->
+                    <!--/ Ventas -->
 
-                    <!-- Prestamos largo plazo -->
+                    <!-- Compra de fruta -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamolp">
                           <thead>
                             <tr>
-                              <th colspan="9">PRESTAMOS A LARGO PLAZO
-                                <!-- <button type="button" class="btn btn-success" id="btn-add-prestamo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
-                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
-                              </th>
-                              <th colspan="1">IMPORTE</th>
+                              <th colspan="4">COMPRA DE LIMON</th>
                             </tr>
                             <tr>
-                              <th>EMPRESA</th>
-                              <th>TRABAJADOR</th>
-                              <th>FECHA</th>
-                              <th>REFERENCIA</th>
-                              <th>CARGO <br> PRESTAMOS</th>
-                              <th>SALDOS <br> INICIALES</th>
-                              <th>ABONO <br> DEL DIA</th>
-                              <th>No.</th>
-                              <th>TICKET <br> INGRESO</th>
-                              <th>SALDOS <br> FINALES</th>
+                              <th>CALIDAD</th>
+                              <th>KILOS</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
                             </tr>
                           </thead>
                           <tbody>
                             <?php
-                                  $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
-                                  $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
-                                  foreach ($caja['prestamos_lp'] as $prestamo) {
-                                      $totalpreslp_salini += floatval($prestamo->saldo_ini);
-                                      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
-                                      $totalpreslp_salfin += floatval($prestamo->saldo_fin);
-                                      if ($prestamo->tipo == 'fi') {
-                                        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
-                                        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
-                                        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
-                                      }
-                                      else {
-                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
-                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
-                                      }
-                                    ?>
-                                    <tr>
-                                      <td><?php echo $prestamo->categoria ?></td>
-                                      <td><?php echo $prestamo->empleado ?></td>
-                                      <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
-                                      <td><?php echo $prestamo->referencia ?></td>
-                                      <td><?php echo $prestamo->monto ?></td>
-                                      <td><?php echo $prestamo->saldo_ini ?></td>
-                                      <td><?php echo $prestamo->pago_dia ?></td>
-                                      <td><?php echo $prestamo->no_pagos.'/'.$prestamo->tno_pagos ?></td>
-                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->no_ticket."&fecha=".$fecha_caja_chica)?>"
-                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->no_ticket>0? 'block': 'none') ?>">
-                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->no_ticket ?></a></td>
-                                      <td>
-                                        <?php if ($priv_saldar_prestamo): ?>
-                                          <a href="<?php echo base_url('panel/caja_chica_prest/saldar_prestamos/?id='.$prestamo->id_prestamo_nom."&fecha=".$fecha_caja_chica."&fno_caja=".$_GET['fno_caja'])?>"
-                                            onclick="msb.confirm('Estas seguro saldar este préstamo? \n No se podrá revertir.', 'Prestamos', this); return false;">
-                                        <?php endif ?>
-
-                                        <?php echo $prestamo->saldo_fin ?>
-
-                                        <?php if ($priv_saldar_prestamo): ?>
-                                          </a>
-                                        <?php endif ?>
-                                      </td>
-                                    </tr>
+                            $compra_fruta_kilos = $compra_fruta_importe = 0;
+                              foreach ($caja['compra_fruta'] as $com_fruta) {
+                                  $compra_fruta_kilos += floatval($com_fruta->kilos);
+                                  $compra_fruta_importe += floatval($com_fruta->importe);
+                            ?>
+                                <tr>
+                                  <td><?php echo $com_fruta->calidad ?></td>
+                                  <td><?php echo $com_fruta->kilos ?></td>
+                                  <td><?php echo $com_fruta->precio ?></td>
+                                  <td><?php echo $com_fruta->importe ?></td>
+                                </tr>
                             <?php } ?>
-                                  <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">SUMAS</td>
-                                    <td><?php echo $totalpreslp_salini ?></td>
-                                    <td><?php echo $totalpreslp_pago_dia ?></td>
-                                    <td colspan="2"></td>
-                                    <td><?php echo $totalpreslp_salfin ?></td>
-                                  </tr>
-                                  <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Fiscal</td>
-                                    <td><?php echo $totalpreslp_salini_fi ?></td>
-                                    <td><?php echo $totalpreslp_pago_dia_fi ?></td>
-                                    <td colspan="2"></td>
-                                    <td><?php echo $totalpreslp_salfin_fi ?></td>
-                                  </tr>
-                                  <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo</td>
-                                    <td><?php echo $totalpreslp_salini_ef ?></td>
-                                    <td><?php echo $totalpreslp_pago_dia_ef ?></td>
-                                    <td colspan="2"></td>
-                                    <td><?php echo $totalpreslp_salfin_ef ?></td>
-                                  </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
-                    <!--/ Prestamos largo plazo -->
+                    <!--/ Compra de fruta -->
 
-                    <!-- Prestamos corto plazo -->
+                    <!-- Produccion -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
                           <thead>
                             <tr>
-                              <th colspan="10">PRESTAMOS A CORTO PLAZO
-                                <button type="button" class="btn btn-success" id="btn-add-prestamo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
-                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
-                              </th>
-                              <th></th>
+                              <th colspan="6">PRODUCCION</th>
                             </tr>
                             <tr>
-                              <th>EMPRESA</th>
-                              <th>TRABAJADOR</th>
-                              <th>FECHA</th>
-                              <th>REFERENCIA</th>
-                              <th>CARGO <br>PRESTAMO</th>
-                              <th>SALDO <br>INICIAL</th>
-                              <th>ABONO <br>DEL DIA</th>
-                              <th></th>
-                              <th>TICKET <br> INGRESO</th>
-                              <th>SALDOS <br> FINALES</th>
-                              <th></th>
+                              <th>COSTO X ENVACE</th>
+                              <th>CLASIFICACION</th>
+                              <th>UNIDAD</th>
+                              <th>KILOS</th>
+                              <th>CANTIDAD</th>
+                              <th>IMPORTE</th>
                             </tr>
                           </thead>
                           <tbody>
                             <?php
-                                  foreach ($caja['prestamos'] as $prestamo) {
-                                      $totalprestamos += floatval($prestamo->monto);
-                                      $totalprescp_salini += floatval($prestamo->saldo_ini);
-                                      $totalprescp_pago_dia += floatval($prestamo->pago_dia);
-                                      $totalprescp_salfin += floatval($prestamo->saldo_fin);
-                                    ?>
-                                    <tr>
-                                      <td style="width: 100px;">
-                                        <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $prestamo->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                        <input type="hidden" name="prestamo_id_prestamo[]" value="<?php echo $prestamo->id_prestamo ?>" id="prestamo_id_prestamo" class="input-small vpositive">
-                                        <input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">
-                                        <input type="hidden" name="prestamo_id_prestamo_nom[]" value="<?php echo $prestamo->id_prestamo_nom ?>" class="input-small vpositive">
-                                        <!-- <input type="hidden" name="prestamo_id_empleado[]" value="<?php echo $prestamo->id_empleado ?>" class="input-small vpositive"> -->
-                                      </td>
-                                      <td>
-                                        <input type="text" name="prestamo_empleado[]" value="<?php echo $prestamo->empleado ?>" class="prestamo-empleado span12" maxlength="500" placeholder="Trabajador" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="prestamo_empleado_id[]" value="<?php echo $prestamo->id_empleado ?>" class="prestamo-empleado-id span12" required>
-                                      </td>
-                                      <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
-                                      <td>
-                                        <input type="text" name="prestamo_concepto[]" value="<?php echo $prestamo->concepto ?>" class="prestamo-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                      </td>
-                                      <td style="width: 100px;"><input type="text" name="prestamo_monto[]" value="<?php echo $prestamo->monto ?>" class="prestamo-monto vpositive input-small" placeholder="Monto" required <?php echo ($prestamo->id_prestamo_nom>0? 'readonly': $readonly) ?>></td>
-                                      <td><a href="#" class="btn prestamo-cp-pago"><?php echo $prestamo->saldo_ini ?></a></td>
-                                      <td><?php echo $prestamo->pago_dia ?></td>
-                                      <td></td>
-                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamocp/?id='.$prestamo->id_pago."&fecha=".$fecha_caja_chica)?>"
-                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->id_pago>0? 'block': 'none') ?>">
-                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->id_pago ?></a></td>
-                                      <td><?php echo $prestamo->saldo_fin ?></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                    </tr>
-                            <?php } ?>
-                                  <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">SUMAS</td>
-                                    <td><?php echo $totalprescp_salini ?></td>
-                                    <td><?php echo $totalprescp_pago_dia ?></td>
-                                    <td colspan="2"></td>
-                                    <td><?php echo $totalprescp_salfin ?></td>
-                                    <td></td>
-                                  </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    <!--/ Prestamos corto plazo -->
-
-                    <!-- Prestamos a largo y corto plazo -->
-                    <div class="row-fluid">
-                      <div class="span12" style="margin-top: 1px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-presdia">
-                          <thead>
-                            <tr>
-                              <th colspan="10">PRESTAMOS DEL DIA
-                              </th>
-                              <th></th>
-                            </tr>
-                            <tr>
-                              <th>EMPRESA</th>
-                              <th>TRABAJADOR</th>
-                              <th>FECHA</th>
-                              <th>REFERENCIA</th>
-                              <th>CARGO <br>PRESTAMO</th>
-                              <th>SALDO <br>INICIAL</th>
-                              <th>ABONO <br>DEL DIA</th>
-                              <th></th>
-                              <th>TICKET <br> INGRESO</th>
-                              <th>SALDOS <br> FINALES</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php
-                              $totalpreslgcp_monto = $totalpreslgcp_salini = $totalpreslgcp_pago_dia = $totalpreslgcp_salfin = 0;
-                                  foreach ($caja['prestamos_dia'] as $prestamo) {
-                                    $totalpreslgcp_monto += floatval($prestamo->monto);
-                                    $totalpreslgcp_salini += floatval($prestamo->saldo_ini);
-                                    $totalpreslgcp_pago_dia += floatval($prestamo->pago_dia);
-                                    $totalpreslgcp_salfin += floatval($prestamo->saldo_fin);
-                                    if (isset($prestamo->id_prestamo) && $prestamo->id_prestamo > 0) { // corto plazo
-                                    ?>
-                                    <tr>
-                                      <td style="width: 100px;">
-                                        <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $prestamo->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                        <input type="hidden" name="prestamo_id_prestamo[]" value="<?php echo $prestamo->id_prestamo ?>" id="prestamo_id_prestamo" class="input-small vpositive">
-                                        <input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">
-                                        <input type="hidden" name="prestamo_id_prestamo_nom[]" value="<?php echo $prestamo->id_prestamo_nom ?>" class="input-small vpositive">
-                                        <!-- <input type="hidden" name="prestamo_id_empleado[]" value="<?php echo $prestamo->id_empleado ?>" class="input-small vpositive"> -->
-                                      </td>
-                                      <td>
-                                        <input type="text" name="prestamo_empleado[]" value="<?php echo $prestamo->empleado ?>" class="prestamo-empleado span12" maxlength="500" placeholder="Trabajador" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="prestamo_empleado_id[]" value="<?php echo $prestamo->id_empleado ?>" class="prestamo-empleado-id span12" required>
-                                      </td>
-                                      <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
-                                      <td>
-                                        <input type="text" name="prestamo_concepto[]" value="<?php echo $prestamo->concepto ?>" class="prestamo-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                      </td>
-                                      <td style="width: 100px;"><input type="text" name="prestamo_monto[]" value="<?php echo $prestamo->monto ?>" class="prestamo-monto vpositive input-small" placeholder="Monto" required <?php echo ($prestamo->id_prestamo_nom>0? 'readonly': $readonly) ?>></td>
-                                      <td><a href="#" class="btn prestamo-cp-pago <?php echo ($prestamo->saldo_fin==0? ' hide': '') ?>"><?php echo $prestamo->saldo_ini ?></a></td>
-                                      <td><?php echo $prestamo->pago_dia ?></td>
-                                      <td></td>
-                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamocp/?id='.$prestamo->id_pago."&fecha=".$fecha_caja_chica)?>"
-                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->id_pago>0? 'block': 'none') ?>">
-                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->id_pago ?></a></td>
-                                      <td><?php echo $prestamo->saldo_fin ?></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                    </tr>
-                            <?php
-                                    } else {
+                            $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
+                              foreach ($caja['produccion'] as $produccion) {
+                                $produccion_kilos    += floatval($produccion->kg);
+                                $produccion_cantidad += floatval($produccion->cantidad);
+                                $produccion_importe  += floatval($produccion->importe);
                             ?>
-                                    <tr>
-                                      <td><?php echo $prestamo->categoria ?></td>
-                                      <td><?php echo $prestamo->empleado ?></td>
-                                      <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
-                                      <td><?php echo $prestamo->referencia ?></td>
-                                      <td><?php echo $prestamo->monto ?></td>
-                                      <td><?php echo $prestamo->saldo_ini ?></td>
-                                      <td><?php echo $prestamo->pago_dia ?></td>
-                                      <td><?php echo $prestamo->no_pagos.'/'.$prestamo->tno_pagos ?></td>
-                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->no_ticket."&fecha=".$fecha_caja_chica)?>"
-                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->no_ticket>0? 'block': 'none') ?>">
-                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->no_ticket ?></a></td>
-                                      <td><?php echo $prestamo->saldo_fin ?></td>
-                                      <td></td>
-                                    </tr>
-                            <?php
-                                    }
-                                  } ?>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    <!--/ Prestamos a largo y corto plazo -->
-
-                    <!-- Saldo empleados -->
-                    <div class="row-fluid">
-                      <div class="span12" style="margin-top: 1px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-empsaldo">
-                          <thead>
-                            <tr>
-                              <th colspan="3">SALDO EMPLEADOS</th>
-                              <th colspan="2">IMPORTE</th>
-                            </tr>
-                            <tr>
-                              <th>NOMBRE</th>
-                              <th>PRESTADO</th>
-                              <th>PAGADO</th>
-                              <th>SALDO</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                              <?php
-                                $totalempsaldos = 0;
-                                foreach ($caja['saldos_empleados'] as $empsaldo) {
-                                    $totalempsaldos += floatval($empsaldo->saldo);
-                                  ?>
-                                    <tr>
-                                      <td><?php echo $empsaldo->nombre ?>
-                                        <input type="hidden" name="empsaldo_empleado_id[]" value="<?php echo $empsaldo->id ?>" class="input-small vpositive empsaldo_empleado_id">
-                                      </td>
-                                      <td>
-                                        <input type="text" name="empsaldo_prestado[]" value="<?php echo $empsaldo->prestado ?>" class="empsaldo_prestado span12" maxlength="500" placeholder="Prestado" required readonly>
-                                      </td>
-                                      <td>
-                                        <input type="text" name="empsaldo_pagado[]" value="<?php echo $empsaldo->pagado ?>" class="empsaldo_pagado span12" maxlength="500" placeholder="Pagado" required readonly>
-                                      </td>
-                                      <td><input type="text" name="empsaldo_saldo[]" value="<?php echo $empsaldo->saldo ?>" class="empsaldo_saldo vpositive input-small" placeholder="Saldo" required readonly></td>
-                                      <td style="width: 30px;">
-                                        <a href="javascript:void()" class="btn btn-danger btn-del-empsaldo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></a></td>
-                                    </tr>
+                              <tr>
+                                <td style="width: 100px;">
+                                  <input type="text" name="produccion_costo[]" value="<?php  ?>" class="input-small produccion_costo" style="width: 150px;" required <?php echo $readonly ?>>
+                                  <input type="hidden" name="prestamo_empresa_id[]" value="<?php  ?>" class="input-small vpositive gasto-cargo-id">
+                                  <input type="hidden" name="prestamo_id_prestamo[]" value="<?php  ?>" id="prestamo_id_prestamo" class="input-small vpositive">
+                                </td>
+                                <td><?php echo $produccion->clasificacion ?></td>
+                                <td><?php echo $produccion->unidad ?></td>
+                                <td><?php echo $produccion->kg ?></td>
+                                <td><?php echo $produccion->cantidad ?></td>
+                                <td><?php echo $produccion->importe ?></td>
+                              </tr>
                             <?php } ?>
-                                  <tr class="row-total">
-                                    <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                    <td><input type="text" value="<?php echo $totalempsaldos ?>" class="input-small vpositive" id="ttotal-empsaldo" style="text-align: right;" readonly></td>
-                                    <td></td>
-                                  </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
-                    <!--/ Saldo empleados-->
+                    <!--/ Produccion -->
+
                 </div>
               </div>
             </div>
 
-            <div class="span6">
-
-              <!-- Tabulacion -->
-              <div class="row-fluid">
-                <div class="span12">
-                  <div class="span12" style="text-align: center; font-weight: bold; min-height: 20px;">TABULACION DE EFECTIVO</div>
-                  <div class="row-fluid">
-
-                    <div class="span6" style="margin-top: 1px;">
-                      <table class="table table-striped table-bordered table-hover table-condensed" id="table-tabulaciones">
-                        <thead>
-                          <tr>
-                            <th>NUMERO</th>
-                            <th>DENOMINACION</th>
-                            <th>TOTAL</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-
-                        <?php
-                          $totalEfectivo = 0;
-                          if (isset($_POST['denominacion_cantidad'])) {
-                            foreach ($_POST['denominacion_cantidad'] as $key => $cantidad) {
-                              $totalEfectivo += floatval($_POST['denominacion_total'][$key]); ?>
-                                <tr>
-                                  <td>
-                                    <input type="text" name="denominacion_cantidad[]" value="<?php echo $cantidad ?>" class="input-small vpositive denom-num" data-denominacion="<?php echo $_POST['denominacion_denom'][$key] ?>" <?php echo $readonly ?>>
-                                    <input type="hidden" name="denominacion_denom[]" value="<?php echo $_POST['denominacion_denom'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
-                                    <input type="hidden" name="denom_abrev[]" value="<?php echo $_POST['denom_abrev'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
-                                  </td>
-                                  <td style="text-align: right;"><?php echo MyString::formatoNumero($_POST['denominacion_denom'][$key], 2, '$') ?></td>
-                                  <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($_POST['denominacion_total'][$key]) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
-                                </tr>
-                        <?php }} else {
-                          foreach ($caja['denominaciones'] as $denominacion) {
-                            $totalEfectivo += floatval($denominacion['total']);
-                          ?>
-                          <tr>
-                            <td>
-                              <input type="text" name="denominacion_cantidad[]" value="<?php echo $denominacion['cantidad'] ?>" class="input-small vpositive denom-num" data-denominacion="<?php echo $denominacion['denominacion'] ?>" <?php echo $readonly ?>>
-                              <input type="hidden" name="denominacion_denom[]" value="<?php echo $denominacion['denominacion'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
-                              <input type="hidden" name="denom_abrev[]" value="<?php echo $denominacion['denom_abrev'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
-                            </td>
-                            <td style="text-align: right;"><?php echo MyString::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
-                            <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
-                          </tr>
-                        <?php }} ?>
-                        <tbody>
-                          <tr>
-                            <td colspan="2">TOTAL EFECTIVO</td>
-                            <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalEfectivo, 2, '$') ?></td>
-                          </tr>
-                          <!-- <tr>
-                            <td colspan="2">TOTAL DIFERENCIA</td>
-                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalEfectivo, 2, '$') ?></td>
-                          </tr> -->
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <!--Totales -->
-                    <div class="span4 pull-right">
-                      <div class="row-fluid">
-                        <table class="table table-striped table-bordered table-hover table-condensed">
-                          <thead>
-                            <tr>
-                              <th></th>
-                              <th>TOTALES</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                          <?php
-                          $tt_saldo_inicial       = $totalpreslp_salini+$totalprescp_salini;
-                          $tt_saldo_finales       = $totalpreslp_salfin+$totalprescp_salfin+$totalpreslgcp_salfin;
-                          $tt_efectivo_anterior   = $saldofc-$tt_saldo_inicial;
-                          $tt_caja_ingreso        = $totalpreslp_pago_dia+$totalprescp_pago_dia+$totalpreslgcp_pago_dia;
-                          $tt_caja_egreso         = $totalpreslgcp_monto;
-                          $tt_efectivo_disponible = $tt_efectivo_anterior+$tt_caja_ingreso-$tt_caja_egreso;
-                          ?>
-                            <tr>
-                              <td>SALDO INICIAL:</td>
-                              <td><input type="text" name="" value="<?php echo $tt_saldo_inicial; //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-saldo-inicial" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>EFECTIVO ANTERIOR:</td>
-                              <td><input type="text" name="" value="<?php echo $tt_efectivo_anterior; //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-efectivo-anter" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>CAJA INGRESOS:</td>
-                              <td><input type="text" name="" value="<?php echo $tt_caja_ingreso; ?>" class="input-small vpositive" id="total-saldo-prestamo" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>CAJA EGRESOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalpreslgcp_monto ?>" class="input-small vpositive" id="ttotal-pagos" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>EFECTIVO DISPONIBLE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $tt_efectivo_disponible ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>DIFERENCIA DEL CORTE:</td>
-                              <td><input type="text" name="total_diferencia" value="<?php echo $tt_efectivo_disponible-$totalEfectivo ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly></td>
-                            </tr>
-                            <!-- <tr>
-                              <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $caja['saldo_inicial'] - $totalprestamos + $totalpagos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                            </tr> -->
-                            <!-- <tr>
-                              <td colspan="2"></td>
-                            </tr> -->
-                            <tr>
-                              <td>FONDO DE CAJA:</td>
-                              <td><input type="text" name="fondo_caja" value="<?php echo ($totalEfectivo+($tt_efectivo_disponible-$totalEfectivo)+$tt_saldo_finales); ?>" class="input-small vpositive" id="ttotal-fondo_caja" style="text-align: right;" readonly></td>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <div class="span12" style="margin-left: 0;"> <br>
-                          <?php if ($show){ ?>
-                            <div class="span5"><button type="submit" class="btn btn-success btn-large span12">Guardar</button></div>
-                          <?php } ?>
-
-                          <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica_prest/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
-                          <?php } ?>
-
-                          <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica_prest/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
-                          <?php }  ?>
-                        </div>
-                      </div>
-                    </div>
-                    <!--/Totales -->
-
-                  </div>
-                </div>
-              </div>
-              <!--/Tabulacion -->
-            </div>
           </div>
-          <!-- /Ingresos por Reposicion -->
         </form>
       </div>
 

@@ -45,10 +45,12 @@ class existencias_limon extends MY_Controller {
     // ));
 
     $this->load->library('pagination');
-    $this->load->model('caja_chica_model');
+    $this->load->model('areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info'];
     $params['seo']           = array('titulo' => 'Reporte de Existencia de Limon');
+
+    $params['areas'] = $this->areas_model->getAreas();
 
     // $this->db->query("SELECT refreshallmaterializedviews();");
 
@@ -93,8 +95,9 @@ class existencias_limon extends MY_Controller {
 
     $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
     $_GET['ffecha'] = $fecha;
+    $area = isset($_GET['farea']) ? $_GET['farea'] : 2;
 
-    $params['caja'] = $this->existencias_limon_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1') );
+    $params['caja'] = $this->existencias_limon_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'), $area );
 
     $params['priv_saldar_prestamo'] = $this->usuarios_model->tienePrivilegioDe('', 'existencias_limon/saldar_prestamos/');
 

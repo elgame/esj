@@ -88,336 +88,80 @@ class existencias_limon_model extends CI_Model {
     return $info;
   }
 
-  public function get($fecha, $noCaja)
+  public function get($fecha, $noCaja, $id_area)
   {
+    $id_empresa = 2;
+
     $info = array(
       'saldo_inicial'    => 0,
-      'fondos_caja'      => array(),
-      'prestamos_lp'     => array(),
-      'prestamos'        => array(),
-      'prestamos_dia'    => array(),
-      'pagos'            => array(),
-      'denominaciones'   => array(),
-      'categorias'       => array(),
-      'saldos_empleados' => array(),
+      'ventas'           => array(),
+      'compra_fruta'     => array(),
+      'produccion'        => array(),
     );
 
-    // Obtiene el saldo incial.
-    $ultimoSaldo = $this->db->query(
-      "SELECT saldo
-       FROM otros.cajaprestamo_efectivo
-       WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
-       ORDER BY fecha DESC
-       LIMIT 1"
+    $ventas = $this->db->query(
+      "SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
+        (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe,
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kg
+      FROM facturacion f
+        INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
+        INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+        INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
+        INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+      WHERE f.id_empresa = {$id_empresa} AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
+        AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
+      GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad
+      ORDER BY folio ASC"
     );
 
-    if ($ultimoSaldo->num_rows() > 0)
+    if ($ventas->num_rows() > 0)
     {
-      $info['saldo_inicial'] = $ultimoSaldo->result()[0]->saldo;
+      $info['ventas'] = $ventas->result();
     }
 
-    $fondos_caja = $this->db->query(
-      "SELECT cf.id_fondo, cf.fecha, cf.referencia, cf.tipo_movimiento, cf.no_caja, cf.monto, cf.no_impresiones, cc.id_categoria,
-        cc.abreviatura AS categoria, e.nombre_fiscal AS empresa
-      FROM otros.cajaprestamo_fondo cf
-      INNER JOIN cajachica_categorias cc ON cc.id_categoria = cf.id_categoria
-      LEFT JOIN empresas e ON e.id_empresa = cc.id_empresa
-      WHERE cf.fecha <= '{$fecha}' AND cf.no_caja = {$noCaja}
-      ORDER BY cf.fecha ASC"
+
+    $compra_fruta = $this->db->query(
+      "SELECT -- b.folio,
+        -- pr.nombre_fiscal,
+        c.id_calidad, c.nombre AS calidad, Sum(bc.kilos) AS kilos,
+        (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe, (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
+      FROM bascula b
+        INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
+        INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
+        --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+      WHERE b.id_empresa = {$id_empresa} AND b.status = 't'
+        AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
+      GROUP BY --b.id_bascula,
+        c.id_calidad
+        --, pr.id_proveedor
+      ORDER BY id_calidad ASC"
     );
 
-    if ($fondos_caja->num_rows() > 0)
+    if ($compra_fruta->num_rows() > 0)
     {
-      $info['fondos_caja'] = $fondos_caja->result();
+      $info['compra_fruta'] = $compra_fruta->result();
     }
 
-    // Prestamos a largo plazo
-    $prestamos = $this->db->query(
-      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
-        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
-      FROM nomina_prestamos np
-      INNER JOIN usuarios u ON u.id = np.id_usuario
-      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
-      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
-      LEFT JOIN (
-        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
-        FROM nomina_fiscal_prestamos nfp
-          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
-        WHERE nfp.fecha < '{$fecha}'
-        GROUP BY np.id_prestamo
-      ) pai ON np.id_prestamo = pai.id_prestamo
-      LEFT JOIN (
-        SELECT id_prestamo, no_ticket, monto AS pago_dia
-        FROM nomina_fiscal_prestamos
-        WHERE fecha = '{$fecha}'
-      ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
-      ORDER BY fecha ASC, id_prestamo_nom ASC"
+
+    $produccion = $this->db->query(
+      "SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
+        '' AS precio, '' AS importe, u.id_unidad,
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kg
+      FROM rastria_rendimiento rr
+        INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
+        INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
+        INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
+      WHERE rr.status = 't' AND c.id_area = {$id_area}
+        AND Date(rr.fecha) = '{$fecha}'
+      GROUP BY c.id_clasificacion, u.id_unidad
+      ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC"
     );
 
-    if ($prestamos->num_rows() > 0)
+    if ($produccion->num_rows() > 0)
     {
-      $info['prestamos_lp'] = $prestamos->result();
-      foreach ($info['prestamos_lp'] as $key => $item) {
-        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
-        if ($item->pago_dia > 0)
-          ++$item->no_pagos;
-        if ($item->saldo_ini == 0)
-          unset($info['prestamos_lp'][$key]);
-      }
+      $info['produccion'] = $produccion->result();
     }
 
-    // Prestamo a corto plazo
-    $prestamos = $this->db->query(
-      "SELECT cp.id_prestamo, '' AS id_prestamo_nom, cp.id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, '') AS categoria,
-        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(cp.fecha) AS fecha, cp.monto, cp.concepto,
-        (cp.monto-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
-      FROM otros.cajaprestamo_prestamos cp
-        INNER JOIN usuarios u ON u.id = cp.id_empleado
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
-        LEFT JOIN (
-          SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
-          FROM otros.cajaprestamo_pagos nfp
-            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
-          WHERE nfp.fecha < '{$fecha}'
-          GROUP BY np.id_prestamo
-        ) pai ON cp.id_prestamo = pai.id_prestamo
-        LEFT JOIN (
-          SELECT id_prestamo_caja AS id_prestamo, id_pago, monto AS pago_dia
-          FROM otros.cajaprestamo_pagos
-          WHERE fecha = '{$fecha}'
-        ) abd ON cp.id_prestamo = abd.id_prestamo
-      WHERE cp.fecha < '{$fecha}' AND cp.no_caja = {$noCaja}
-        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0
-      ORDER BY fecha ASC, id_prestamo ASC"
-    );
-
-    if ($prestamos->num_rows() > 0)
-    {
-      $info['prestamos'] = $prestamos->result();
-      foreach ($info['prestamos'] as $key => $item) {
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
-      }
-    }
-
-    // Prestamos a largo plazo de ese dia
-    $prestamos = $this->db->query(
-      "SELECT 0 AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
-        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
-      FROM nomina_prestamos np
-      INNER JOIN usuarios u ON u.id = np.id_usuario
-      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
-      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
-      LEFT JOIN (
-        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
-        FROM nomina_fiscal_prestamos nfp
-          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
-        WHERE nfp.fecha < '{$fecha}'
-        GROUP BY np.id_prestamo
-      ) pai ON np.id_prestamo = pai.id_prestamo
-      LEFT JOIN (
-        SELECT id_prestamo, no_ticket, monto AS pago_dia
-        FROM nomina_fiscal_prestamos
-        WHERE fecha = '{$fecha}'
-      ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) = '{$fecha}'
-      ORDER BY id_prestamo_nom ASC"
-    );
-
-    if ($prestamos->num_rows() > 0)
-    {
-      $info['prestamos_dia'] = $prestamos->result();
-      foreach ($info['prestamos_dia'] as $key => $item) {
-        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
-        if ($item->pago_dia > 0)
-          ++$item->no_pagos;
-        if ($item->saldo_fin == 0)
-          unset($info['prestamos_dia'][$key]);
-      }
-    }
-
-    // Prestamo a corto plazo de ese dia
-    $prestamos = $this->db->query(
-      "SELECT cp.id_prestamo, '' AS id_prestamo_nom, cp.id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, '') AS categoria,
-        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(cp.fecha) AS fecha, cp.monto, cp.concepto,
-        (cp.monto-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
-      FROM otros.cajaprestamo_prestamos cp
-        INNER JOIN usuarios u ON u.id = cp.id_empleado
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
-        LEFT JOIN (
-          SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
-          FROM otros.cajaprestamo_pagos nfp
-            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
-          WHERE nfp.fecha < '{$fecha}'
-          GROUP BY np.id_prestamo
-        ) pai ON cp.id_prestamo = pai.id_prestamo
-        LEFT JOIN (
-          SELECT id_prestamo_caja AS id_prestamo, id_pago, monto AS pago_dia
-          FROM otros.cajaprestamo_pagos
-          WHERE fecha = '{$fecha}'
-        ) abd ON cp.id_prestamo = abd.id_prestamo
-      WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
-        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) >= 0
-      ORDER BY id_prestamo ASC"
-    );
-
-    if ($prestamos->num_rows() > 0)
-    {
-      $prestamos_dia = $prestamos->result();
-      foreach ($prestamos_dia as $key => $item) {
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
-        $info['prestamos_dia'][] = $item;
-      }
-    }
-
-    // $pagos = $this->db->query(
-    //   "SELECT id_pago, id_empleado, id_empresa, anio, semana, id_prestamo, id_categoria, concepto, monto, fecha, id_nomenclatura, categoria, nomenclatura
-    //   FROM (
-    //     SELECT cp.id_pago, cp.id_empleado, cp.id_empresa, cp.anio, cp.semana, cp.id_prestamo, cp.id_categoria, cp.concepto, cp.monto, cp.fecha,
-    //       cp.id_nomenclatura, cc.abreviatura as categoria, cn.nomenclatura
-    //     FROM otros.cajaprestamo_pagos cp
-    //     INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
-    //     INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
-    //     WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
-    //     UNION
-    //     SELECT cp.id_pago, np.id_empleado, np.id_empresa, np.anio, np.semana, np.id_prestamo, cp.id_categoria,
-    //       (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || '; Sem ' || np.semana) AS concepto,
-    //       np.monto, np.fecha, cp.id_nomenclatura, null AS categoria, null AS nomenclatura
-    //     FROM nomina_fiscal_prestamos np
-    //     INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
-    //     INNER JOIN usuarios u ON u.id = np.id_empleado
-    //     LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
-    //     WHERE np.saldado = 'f' AND (npp.tipo = 'ef') AND np.fecha = '{$fecha}' AND cp.id_pago IS NULL
-    //   ) AS t
-    //   ORDER BY id_pago ASC"
-    // );
-
-    // if ($pagos->num_rows() > 0)
-    // {
-    //   $info['pagos'] = $pagos->result();
-    // }
-
-    $saldos = $this->db->query("SELECT u.id, (u.nombre || ' ' || u.apellido_paterno || '' || u.apellido_materno) AS nombre,
-        COALESCE(p.prestado, 0) AS prestado, COALESCE(pa.pagado, 0) AS pagado,
-        (COALESCE(p.prestado, 0) - COALESCE(pa.pagado, 0)) AS saldo
-      FROM usuarios u
-      LEFT JOIN (
-        SELECT np.id_usuario, Sum(np.prestado) AS prestado
-        FROM nomina_prestamos np
-          INNER JOIN usuarios u ON u.id = np.id_usuario
-        WHERE (np.tipo = 'ef') AND Date(np.fecha) < '{$fecha}'
-        GROUP BY np.id_usuario
-      ) p ON u.id = p.id_usuario
-      LEFT JOIN (
-        SELECT nfp.id_empleado, Sum(nfp.monto) AS pagado
-        FROM nomina_fiscal_prestamos nfp
-          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
-          INNER JOIN usuarios u ON u.id = np.id_usuario
-        WHERE (np.tipo = 'ef') AND (Date(nfp.fecha) <= '{$fecha}' OR Date(nfp.fecha) IS NULL)
-        GROUP BY nfp.id_empleado
-      ) pa ON u.id = pa.id_empleado
-      WHERE (COALESCE(p.prestado, 0) - COALESCE(pa.pagado, 0)) > 0");
-
-    if ($saldos->num_rows() > 0)
-    {
-      $info['saldos_empleados'] = $saldos->result();
-    }
-
-    // denominaciones
-    $denominaciones = $this->db->query(
-      "SELECT *
-       FROM otros.cajaprestamo_efectivo
-       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
-    );
-
-    if ($denominaciones->num_rows() === 0)
-    {
-      $denominaciones = new StdClass;
-      $denominaciones->den_05 = 0;
-      $denominaciones->den_1 = 0;
-      $denominaciones->den_2 = 0;
-      $denominaciones->den_5 = 0;
-      $denominaciones->den_10 = 0;
-      $denominaciones->den_20 = 0;
-      $denominaciones->den_50 = 0;
-      $denominaciones->den_100 = 0;
-      $denominaciones->den_200 = 0;
-      $denominaciones->den_500 = 0;
-      $denominaciones->den_1000 = 0;
-    }
-    else
-    {
-      $denominaciones = $denominaciones->result()[0];
-      $info['status'] = $denominaciones->status;
-      $info['id'] = $denominaciones->id_efectivo;
-    }
-
-    foreach ($denominaciones as $den => $cantidad)
-    {
-      if (strrpos($den, 'den_') !== false)
-      {
-        switch ($den)
-        {
-          case 'den_05':
-            $denominacion = '0.50';
-            break;
-          case 'den_1':
-            $denominacion = '1.00';
-            break;
-          case 'den_2':
-            $denominacion = '2.00';
-            break;
-          case 'den_5':
-            $denominacion = '5.00';
-            break;
-          case 'den_10':
-            $denominacion = '10.00';
-            break;
-          case 'den_20':
-            $denominacion = '20.00';
-            break;
-          case 'den_50':
-            $denominacion = '50.00';
-            break;
-          case 'den_100':
-            $denominacion = '100.00';
-            break;
-          case 'den_200':
-            $denominacion = '200.00';
-            break;
-          case 'den_500':
-            $denominacion = '500.00';
-            break;
-          case 'den_1000':
-            $denominacion = '1000.00';
-            break;
-        }
-
-        $info['denominaciones'][] = array(
-          'denominacion' => $denominacion,
-          'cantidad'     => $cantidad,
-          'total'        => floatval($denominacion) * $cantidad,
-          'denom_abrev'  => $den,
-        );
-      }
-    }
-
-    $info['categorias'] = $this->db->query(
-    "SELECT id_categoria, nombre, abreviatura
-     FROM cajachica_categorias
-     WHERE status = 't'")->result();
 
     return $info;
   }

@@ -9,6 +9,16 @@
               <label class="control-label" for="ffecha">Fecha</label>
               <input type="date" name="ffecha" class="input-medium search-query" id="ffecha" value="<?php echo set_value($this->input->post('ffecha'), date('Y-m-d')); ?>" data-next="ffecha2">
               <input type="hidden" name="fno_caja" value="1">
+
+              <br><label class="control-label" for="ffecha">Cultivo</label>
+              <select name="farea" class="input-xlarge" id="farea">
+                <?php foreach ($areas['areas'] as $area){ ?>
+                  <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>" data-coco="<?php echo ($area->nombre == 'COCOS'? 't': 'f') ?>"
+                    <?php $set_select=set_select('farea', $area->id_area, false, isset($_POST['farea']) ? $_POST['farea'] : ($area->predeterminado == 't' ? $area->id_area: '') );
+                     echo $set_select.($set_select==' selected="selected"'? '': ''); ?>><?php echo $area->nombre ?></option>
+                <?php } ?>
+              </select>
+
               <button type="submit" id="btn_submit" class="btn btn-primary">Enviar</button>
             </form> <!-- /form -->
           </div>
