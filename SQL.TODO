@@ -1,12 +1,11 @@
 
  ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
-     -- pcc|pct
      ALTER TABLE public.unidades ADD COLUMN tipo character varying(5) DEFAULT 'o'::character varying;
      COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
      UPDATE public.unidades SET tipo='a' WHERE Lower(nombre) LIKE '%arpil%';
      UPDATE public.unidades SET tipo='c' WHERE Lower(nombre) LIKE '%caja%' OR Lower(nombre) LIKE '%cp%';
-     -- pcc
+     -- pcc|lap
      CREATE TABLE otros.existencias_limon_produccion
         (
           id bigserial NOT NULL,
