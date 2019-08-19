@@ -5,7 +5,6 @@
      COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
      UPDATE public.unidades SET tipo='a' WHERE Lower(nombre) LIKE '%arpil%';
      UPDATE public.unidades SET tipo='c' WHERE Lower(nombre) LIKE '%caja%' OR Lower(nombre) LIKE '%cp%';
-     -- pcc|lap
      CREATE TABLE otros.existencias_limon_produccion
         (
           id bigserial NOT NULL,

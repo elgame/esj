@@ -93,10 +93,12 @@ class existencias_limon_model extends CI_Model {
     $id_empresa = 2;
 
     $info = array(
-      'saldo_inicial'    => 0,
-      'ventas'           => array(),
-      'compra_fruta'     => array(),
-      'produccion'        => array(),
+      'saldo_inicial'       => 0,
+      'ventas'              => array(),
+      'compra_fruta'        => array(),
+      'produccion'          => array(),
+      'existencia_anterior' => [],
+      'existencia'          => [],
     );
 
     $ventas = $this->db->query(
@@ -163,6 +165,33 @@ class existencias_limon_model extends CI_Model {
     if ($produccion->num_rows() > 0)
     {
       $info['produccion'] = $produccion->result();
+    }
+
+
+    $existencia_anterior = $this->db->query(
+      "SELECT ele.id_existencia, ele.id_clasificacion, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS clasificacion, Coalesce(u.codigo, u.nombre) AS unidad
+      FROM otros.existencias_limon_existencia ele
+        INNER JOIN clasificaciones c ON c.id_clasificacion = ele.id_clasificacion
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}'"
+    );
+
+    if ($existencia_anterior->num_rows() > 0)
+    {
+      $info['existencia_anterior'] = $existencia_anterior->result();
+    }
+
+
+    $existencia = [];
+    foreach ($info['existencia_anterior'] as $key => $item) {
+      if (isset($existencia[$item->id_clasificacion.$item->id_unidad])) {
+        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad += $item->cantidad;
+        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos    += $item->kilos;
+        $existencia[$item->id_clasificacion.$item->id_unidad]->importe  += $item->importe;
+      } else {
+        $existencia[$item->id_clasificacion.$item->id_unidad] = new stdClass;
+      }
     }
 
 

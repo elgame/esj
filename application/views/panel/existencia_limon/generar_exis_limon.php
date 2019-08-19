@@ -242,6 +242,51 @@
                     </div>
                     <!--/ Produccion -->
 
+                    <!-- Existencia Anterior -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia_ant">
+                          <thead>
+                            <tr>
+                              <th colspan="6">EXISTENCIA ANTERIOR</th>
+                            </tr>
+                            <tr>
+                              <th>CLASIFICACION</th>
+                              <th>UNIDAD</th>
+                              <th>KILOS</th>
+                              <th>CANTIDAD</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
+                              foreach ($caja['existencia_anterior'] as $existencia_ant) {
+                                $existencia_ant_kilos    += floatval($existencia_ant->kilos);
+                                $existencia_ant_cantidad += floatval($existencia_ant->cantidad);
+                                $existencia_ant_importe  += floatval($existencia_ant->importe);
+                            ?>
+                              <tr>
+                                <td><?php echo $existencia_ant->clasificacion ?></td>
+                                <td><?php echo $existencia_ant->unidad ?></td>
+                                <td><?php echo $existencia_ant->kilos ?></td>
+                                <td class="existencia_ant_cantidad"><?php echo $existencia_ant->cantidad ?></td>
+                                <td class="existencia_ant_importe"><?php echo $existencia_ant->importe ?></td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr>
+                              <th colspan="3"></th>
+                              <th><?php echo $existencia_ant_kilos ?></th>
+                              <th><?php echo $existencia_ant_cantidad ?></th>
+                              <th><?php echo $existencia_ant_importe ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Existencia Anterior -->
+
                 </div>
               </div>
             </div>
