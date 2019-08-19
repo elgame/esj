@@ -145,15 +145,18 @@ class existencias_limon_model extends CI_Model {
 
     $produccion = $this->db->query(
       "SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
-        '' AS precio, '' AS importe, u.id_unidad,
-        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kg
+        Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
+        elp.id AS id_produccion
       FROM rastria_rendimiento rr
         INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
         INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
+        LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_clasificacion = c.id_clasificacion
+          AND elp.id_unidad = u.id_unidad AND Date(elp.fecha) = '{$fecha}')
       WHERE rr.status = 't' AND c.id_area = {$id_area}
         AND Date(rr.fecha) = '{$fecha}'
-      GROUP BY c.id_clasificacion, u.id_unidad
+      GROUP BY c.id_clasificacion, u.id_unidad, elp.id
       ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC"
     );
 
@@ -168,150 +171,38 @@ class existencias_limon_model extends CI_Model {
 
   public function guardar($data)
   {
-    $fondoc = array();
-    $fondoc_updt = array();
+    $produccion_inst = array();
+    $produccion_updt = array();
 
-    // fondo caja DEUDORES DIVERSOS
-    foreach ($data['fondo_id_categoria'] as $key => $id_cat)
+    // Produccion
+    foreach ($data['produccion_costo'] as $key => $id_cat)
     {
-      if (isset($data['fondo_del'][$key]) && $data['fondo_del'][$key] == 'true' &&
-        isset($data['fondo_id_fondo'][$key]) && floatval($data['fondo_id_fondo'][$key]) > 0) {
-        // $gastos_ids['delets'][] = $this->getDataGasto($data['fondo_id_fondo'][$key]);
-
-        $this->db->delete('otros.cajaprestamo_fondo', "id_fondo = ".$data['fondo_id_fondo'][$key]);
-      } elseif ($data['fondo_id_fondo'][$key] > 0) {
-        $prestamos_updt = array(
-          'id_categoria'    => $id_cat,
-          'fecha'           => $data['fondo_fecha'][$key],
-          'referencia'      => $data['fondo_referencia'][$key],
-          'tipo_movimiento' => ($data['fondo_ingreso'][$key]>0? 't': 'f'),
-          'no_caja'         => $data['fno_caja'],
-          'monto'           => ($data['fondo_ingreso'][$key]>0? $data['fondo_ingreso'][$key]: $data['fondo_egreso'][$key]),
+      if ($data['produccion_id_produccion'][$key] > 0) {
+        $produccion_updt = array(
+          'id_clasificacion' => $data['produccion_id_clasificacion'][$key],
+          'id_unidad'        => $data['produccion_id_unidad'][$key],
+          'costo'            => $data['produccion_costo'][$key],
+          'importe'          => $data['produccion_importe'][$key],
+          'fecha'            => $data['fecha_caja_chica'],
+          'no_caja'          => $data['fno_caja'],
         );
-        $this->db->update('otros.cajaprestamo_fondo', $prestamos_updt, "id_fondo = ".$data['fondo_id_fondo'][$key]);
+        $this->db->update('otros.existencias_limon_produccion', $produccion_updt, "id = ".$data['produccion_id_produccion'][$key]);
       } else {
-        $fondoc[] = array(
-          'id_empleado'     => $this->session->userdata('id_usuario'),
-          'id_categoria'    => $id_cat,
-          'fecha'           => $data['fondo_fecha'][$key],
-          'referencia'      => $data['fondo_referencia'][$key],
-          'tipo_movimiento' => ($data['fondo_ingreso'][$key]>0? 't': 'f'),
-          'no_caja'         => $data['fno_caja'],
-          'monto'           => ($data['fondo_ingreso'][$key]>0? $data['fondo_ingreso'][$key]: $data['fondo_egreso'][$key]),
+        $produccion_inst[] = array(
+          'id_clasificacion' => $data['produccion_id_clasificacion'][$key],
+          'id_unidad'        => $data['produccion_id_unidad'][$key],
+          'costo'            => $data['produccion_costo'][$key],
+          'importe'          => $data['produccion_importe'][$key],
+          'fecha'            => $data['fecha_caja_chica'],
+          'no_caja'          => $data['fno_caja'],
         );
       }
     }
 
-    if (count($fondoc) > 0)
+    if (count($produccion_inst) > 0)
     {
-      $this->db->insert_batch('otros.cajaprestamo_fondo', $fondoc);
+      $this->db->insert_batch('otros.existencias_limon_produccion', $produccion_inst);
     }
-
-    $prestamos = array();
-    $prestamos_updt = array();
-
-    // prestamos
-    foreach ($data['prestamo_monto'] as $key => $ingreso)
-    {
-      if (isset($data['prestamo_del'][$key]) && $data['prestamo_del'][$key] == 'true' &&
-        isset($data['prestamo_id_prestamo'][$key]) && floatval($data['prestamo_id_prestamo'][$key]) > 0) {
-        // $gastos_ids['delets'][] = $this->getDataGasto($data['prestamo_id_prestamo'][$key]);
-
-        $this->db->delete('otros.cajaprestamo_prestamos', "id_prestamo = ".$data['prestamo_id_prestamo'][$key]);
-      } elseif ($data['prestamo_id_prestamo'][$key] > 0) {
-        $prestamos_updt = array(
-          'id_prestamo_nom' => ($data['prestamo_id_prestamo_nom'][$key]!=''? $data['prestamo_id_prestamo_nom'][$key]: NULL),
-          'id_empleado'     => ($data['prestamo_empleado_id'][$key]!=''? $data['prestamo_empleado_id'][$key]: NULL),
-          'id_categoria'    => $data['prestamo_empresa_id'][$key],
-          // 'id_nomenclatura' => $data['prestamo_nomenclatura'][$key],
-          'concepto'        => $data['prestamo_concepto'][$key],
-          // 'fecha'           => $data['fecha_caja_chica'],
-          'monto'           => $data['prestamo_monto'][$key],
-          // 'no_caja'         => $data['fno_caja'],
-        );
-        $this->db->update('otros.cajaprestamo_prestamos', $prestamos_updt, "id_prestamo = ".$data['prestamo_id_prestamo'][$key]);
-      } else {
-        $prestamos[] = array(
-          // 'id_prestamo' => $data['prestamo_id_prestamo'][$key],
-          'id_prestamo_nom' => ($data['prestamo_id_prestamo_nom'][$key]!=''? $data['prestamo_id_prestamo_nom'][$key]: NULL),
-          'id_empleado'     => ($data['prestamo_empleado_id'][$key]!=''? $data['prestamo_empleado_id'][$key]: NULL),
-          'id_categoria'    => $data['prestamo_empresa_id'][$key],
-          // 'id_nomenclatura' => $data['prestamo_nomenclatura'][$key],
-          'concepto'        => $data['prestamo_concepto'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'monto'           => $data['prestamo_monto'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
-      }
-    }
-
-    if (count($prestamos) > 0)
-    {
-      $this->db->insert_batch('otros.cajaprestamo_prestamos', $prestamos);
-    }
-
-    $pagos = array();
-    $pagos_updt = array();
-
-    // pagos
-    foreach ($data['pago_importe'] as $key => $ingreso)
-    {
-      if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
-        isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
-        // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
-
-        $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
-      } elseif ($data['pago_id'][$key] > 0) {
-        $pagos_updt = array(
-          // 'id_pago' => $data['pago_id'][$key],
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
-        $this->db->update('otros.cajaprestamo_pagos', $pagos_updt, "id_pago = ".$data['pago_id'][$key]);
-      } else {
-        $pagos[] = array(
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
-      }
-    }
-
-    if (count($pagos) > 0)
-    {
-      $this->db->insert_batch('otros.cajaprestamo_pagos', $pagos);
-    }
-
-    // Denominaciones
-    $this->db->delete('otros.cajaprestamo_efectivo', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
-    $efectivo = array();
-    foreach ($data['denom_abrev'] as $key => $denominacion)
-    {
-      $efectivo[$denominacion] = $data['denominacion_cantidad'][$key];
-    }
-
-    $efectivo['fecha']   = $data['fecha_caja_chica'];
-    $efectivo['saldo']   = $data['saldo_corte'];
-    $efectivo['no_caja'] = $data['fno_caja'];
-
-    $this->db->insert('otros.cajaprestamo_efectivo', $efectivo);
 
 
     return true;

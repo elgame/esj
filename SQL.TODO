@@ -6,6 +6,46 @@
      COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
      UPDATE public.unidades SET tipo='a' WHERE Lower(nombre) LIKE '%arpil%';
      UPDATE public.unidades SET tipo='c' WHERE Lower(nombre) LIKE '%caja%' OR Lower(nombre) LIKE '%cp%';
+     -- pcc
+     CREATE TABLE otros.existencias_limon_produccion
+        (
+          id bigserial NOT NULL,
+          id_clasificacion integer NOT NULL,
+          id_unidad integer NOT NULL,
+          costo double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL DEFAULT 0,
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          CONSTRAINT existencias_limon_produccion_pkey PRIMARY KEY (id),
+          CONSTRAINT existencias_limon_produccion_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+              REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT existencias_limon_produccion_id_unidad_fkey FOREIGN KEY (id_unidad)
+              REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        ) WITH ( OIDS=FALSE );
+        ALTER TABLE otros.existencias_limon_produccion OWNER TO programa;
+     CREATE TABLE otros.existencias_limon_existencia
+        (
+          id_existencia bigserial NOT NULL,
+          id_clasificacion integer NOT NULL,
+          id_unidad integer NOT NULL,
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          costo double precision NOT NULL DEFAULT 0,
+          kilos double precision NOT NULL DEFAULT 0,
+          cantidad double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL DEFAULT 0,
+          CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY (id_existencia),
+          CONSTRAINT existencias_limon_existencia_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+              REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT existencias_limon_existencia_id_unidad_fkey FOREIGN KEY (id_unidad)
+              REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH ( OIDS=FALSE );
+        ALTER TABLE otros.existencias_limon_existencia OWNER TO programa;
 
 SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
   (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe,
@@ -36,15 +76,17 @@ GROUP BY --b.id_bascula,
 ORDER BY id_calidad ASC
 
 SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
-  '' AS precio, '' AS importe, u.id_unidad,
-  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kg
+  Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
+  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
+  elp.id AS id_produccion
 FROM rastria_rendimiento rr
   INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
   INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
   INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
+  LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_clasificacion = c.id_clasificacion AND elp.id_unidad = u.id_unidad AND Date(elp.fecha) = '2019-06-10')
 WHERE rr.status = 't' AND c.id_area = 2
   AND Date(rr.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
-GROUP BY c.id_clasificacion, u.id_unidad
+GROUP BY c.id_clasificacion, u.id_unidad, elp.id
 ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC
 
 

@@ -69,7 +69,7 @@ class existencias_limon extends MY_Controller {
       array('libs/jquery.filtertable.min.js'),
       array('general/msgbox.js'),
       array('general/util.js'),
-      array('panel/caja_chica/cargar_prestamos.js'),
+      array('panel/otros/rpt_existencias_limon.js'),
       // array('panel/caja_chica/areas_requisicion.js'),
     ));
 
@@ -264,6 +264,9 @@ class existencias_limon extends MY_Controller {
       array('field' => 'fecha_caja_chica',
             'label' => '',
             'rules' => 'required'),
+      array('field' => 'farea',
+            'label' => '',
+            'rules' => 'required'),
       array('field' => 'saldo_inicial',
             'label' => 'Saldo Inicial',
             'rules' => 'required|numeric'),
@@ -272,79 +275,30 @@ class existencias_limon extends MY_Controller {
             'rules' => 'required|numeric'),
     );
 
-    if (isset($_POST['prestamo_monto']))
+    if (isset($_POST['produccion_costo']))
     {
-      $rules[] = array('field' => 'prestamo_empresa[]',
-                      'label' => 'Prestamo Emprea',
+      $rules[] = array('field' => 'produccion_costo[]',
+                      'label' => 'Produccion costo',
                       'rules' => '');
-      $rules[] = array('field' => 'prestamo_empresa_id[]',
-                      'label' => 'Prestamo Emprea',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'prestamo_id_prestamo[]',
-                      'label' => 'Prestamo',
+      $rules[] = array('field' => 'produccion_id_produccion[]',
+                      'label' => 'Produccion',
                       'rules' => '');
-      $rules[] = array('field' => 'prestamo_id_prestamo_nom[]',
-                      'label' => 'Prestamo',
-                      'rules' => '');
-      $rules[] = array('field' => 'prestamo_empleado_id[]',
-                      'label' => 'Prestamo',
-                      'rules' => 'required');
-      // $rules[] = array('field' => 'prestamo_nomenclatura[]',
-      //                 'label' => 'Prestamo Nomenclatura',
-      //                 'rules' => 'required');
-      $rules[] = array('field' => 'prestamo_concepto[]',
-                      'label' => 'Prestamo Concepto',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'prestamo_monto[]',
-                      'label' => 'Prestamo Monto',
+      $rules[] = array('field' => 'produccion_id_clasificacion[]',
+                      'label' => 'Produccion clasificacion',
+                      'rules' => 'required|numeric');
+      $rules[] = array('field' => 'produccion_id_unidad[]',
+                      'label' => 'Produccion unidad',
+                      'rules' => 'required|numeric');
+      // $rules[] = array('field' => 'produccion_kilos[]',
+      //                 'label' => 'Produccion kilos',
+      //                 'rules' => 'required|numeric');
+      // $rules[] = array('field' => 'produccion_cantidad[]',
+      //                 'label' => 'Producción Cantidad',
+      //                 'rules' => 'required|numeric');
+      $rules[] = array('field' => 'produccion_importe[]',
+                      'label' => 'Producción importe',
                       'rules' => 'required|numeric');
     }
-
-    if (isset($_POST['pago_importe']))
-    {
-      $rules[] = array('field' => 'pago_empresa[]',
-                      'label' => 'Pago Emprea',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_empresa_id[]',
-                      'label' => 'Pago Emprea',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'pago_id[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_id_empleado[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_id_empresa[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_anio[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_semana[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_id_prestamo[]',
-                      'label' => 'Pago',
-                      'rules' => '');
-      $rules[] = array('field' => 'pago_nomenclatura[]',
-                      'label' => 'Pago Nomenclatura',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'pago_concepto[]',
-                      'label' => 'Pago Concepto',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'pago_importe[]',
-                      'label' => 'Pago Monto',
-                      'rules' => 'required|numeric');
-    }
-
-    $rules[] = array('field' => 'denominacion_cantidad[]',
-                      'label' => 'Numero de Denominacion',
-                      'rules' => 'required|numeric');
-
-    $rules[] = array('field' => 'denominacion_total[]',
-                      'label' => 'Total de Denominacion',
-                      'rules' => 'required|numeric');
-
 
     $this->form_validation->set_rules($rules);
   }

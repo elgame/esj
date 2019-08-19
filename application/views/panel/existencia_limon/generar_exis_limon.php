@@ -45,8 +45,8 @@
         $readonly = '';
         $show = true;
         $display = '';
-        $action = base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('msg')));
-        if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'caja_chica_prest/modificar_caja/'))
+        $action = base_url('panel/existencias_limon/cargar/?'.MyString::getVarsLink(array('msg')));
+        if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'existencias_limon/modificar_caja/'))
         {
           $readonly = 'readonly';
           $display = 'display: none;';
@@ -66,6 +66,7 @@
         <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica" name="registerform">
           <?php
           $fecha_caja_chica = set_value('fecha_caja_chica', isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d'));
+          $farea = set_value('farea', isset($_GET['farea']) ? $_GET['farea'] : 2);
           ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
@@ -84,18 +85,18 @@
               <div class="span4">
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
-                  <input type="hidden" name="farea" id="farea" value="<?php echo $_GET['farea']; ?>">
+                  <input type="hidden" name="farea" id="farea" value="<?php echo $farea; ?>">
 
                   <?php if ($show){ ?>
                     <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica_prest/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica_prest/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -189,7 +190,7 @@
                     <!-- Produccion -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-produccion">
                           <thead>
                             <tr>
                               <th colspan="6">PRODUCCION</th>
@@ -207,23 +208,34 @@
                             <?php
                             $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
                               foreach ($caja['produccion'] as $produccion) {
-                                $produccion_kilos    += floatval($produccion->kg);
+                                $produccion_kilos    += floatval($produccion->kilos);
                                 $produccion_cantidad += floatval($produccion->cantidad);
                                 $produccion_importe  += floatval($produccion->importe);
                             ?>
                               <tr>
                                 <td style="width: 100px;">
-                                  <input type="text" name="produccion_costo[]" value="<?php  ?>" class="input-small produccion_costo" style="width: 150px;" required <?php echo $readonly ?>>
-                                  <input type="hidden" name="prestamo_empresa_id[]" value="<?php  ?>" class="input-small vpositive gasto-cargo-id">
-                                  <input type="hidden" name="prestamo_id_prestamo[]" value="<?php  ?>" id="prestamo_id_prestamo" class="input-small vpositive">
+                                  <input type="text" name="produccion_costo[]" value="<?php echo $produccion->costo ?>" class="input-small produccion_costo" style="width: 150px;" <?php echo $readonly ?>>
+                                  <input type="hidden" name="produccion_id_produccion[]" value="<?php echo $produccion->id_produccion ?>" id="produccion_id_produccion" class="input-small vpositive">
+                                  <input type="hidden" name="produccion_id_clasificacion[]" value="<?php echo $produccion->id_clasificacion ?>" id="produccion_id_clasificacion" class="input-small vpositive">
+                                  <input type="hidden" name="produccion_id_unidad[]" value="<?php echo $produccion->id_unidad ?>" class="input-small produccion_id_unidad vpositive gasto-cargo-id">
+                                  <!-- <input type="hidden" name="produccion_kilos[]" value="<?php echo $produccion->kilos ?>" class="input-small produccion_kilos vpositive gasto-cargo-id"> -->
+                                  <!-- <input type="hidden" name="produccion_cantidad[]" value="<?php echo $produccion->cantidad ?>" class="input-small tproduccion_cantidad vpositive gasto-cargo-id"> -->
+                                  <input type="hidden" name="produccion_importe[]" value="<?php echo $produccion->importe ?>" class="input-small tproduccion_importe vpositive gasto-cargo-id">
                                 </td>
                                 <td><?php echo $produccion->clasificacion ?></td>
                                 <td><?php echo $produccion->unidad ?></td>
-                                <td><?php echo $produccion->kg ?></td>
-                                <td><?php echo $produccion->cantidad ?></td>
-                                <td><?php echo $produccion->importe ?></td>
+                                <td><?php echo $produccion->kilos ?></td>
+                                <td class="produccion_cantidad"><?php echo $produccion->cantidad ?></td>
+                                <td class="produccion_importe"><?php echo $produccion->importe ?></td>
                               </tr>
                             <?php } ?>
+
+                            <tr>
+                              <th colspan="3"></th>
+                              <th><?php echo $produccion_kilos ?></th>
+                              <th><?php echo $produccion_cantidad ?></th>
+                              <th><?php echo $produccion_importe ?></th>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -245,7 +257,7 @@
 
   <!-- Modal -->
   <div id="addPrestamosCp" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <form class="form-horizontal" action="<?php echo base_url();?>panel/caja_chica_prest/abono_prestamo_cp" method="POST" id="frmcajachicapres" name="frmcajachicapres">
+    <form class="form-horizontal" action="<?php echo base_url();?>panel/existencias_limon/abono_prestamo_cp" method="POST" id="frmcajachicapres" name="frmcajachicapres">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
         <h3 id="myModalLabel">Prestamo a corto plazo</h3>
