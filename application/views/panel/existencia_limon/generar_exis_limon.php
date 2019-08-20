@@ -95,7 +95,7 @@
                     <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
                   <?php } ?>
 
-                  <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
+                  <?php if ($caja['guardado']) { ?>
                     <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
@@ -116,7 +116,7 @@
                           <thead>
                             <tr>
                               <th colspan="4">VENTAS</th>
-                              <th colspan="5" id="dvfondo_caja"></th>
+                              <th colspan="4" id="dvfondo_caja"></th>
                             </tr>
                             <tr>
                               <!-- <th>FECHA</th> -->
@@ -124,33 +124,95 @@
                               <th>CLIENTE</th>
                               <th>CLASIF</th>
                               <th>UNIDAD</th>
+                              <th>KILOS</th>
                               <th>CANTIDAD</th>
                               <th>PRECIO</th>
                               <th>IMPORTE</th>
-                              <th></th>
                             </tr>
                           </thead>
                           <tbody style="overflow-y: auto;max-height: 300px;">
                             <?php
-                                $venta_importe = 0;
+                                $venta_importe = $venta_kilos = $venta_cantidad = 0;
                                   foreach ($caja['ventas'] as $venta) {
                                       $venta_importe += floatval($venta->importe);
+                                      $venta_kilos += floatval($venta->kilos);
+                                      $venta_cantidad += floatval($venta->cantidad);
                                     ?>
                                     <tr>
                                       <td><?php echo $venta->serie.$venta->folio ?></td>
                                       <td><?php echo $venta->nombre_fiscal ?></td>
                                       <td><?php echo $venta->clasificacion ?></td>
                                       <td><?php echo $venta->unidad ?></td>
+                                      <td><?php echo $venta->kilos ?></td>
                                       <td><?php echo $venta->cantidad ?></td>
                                       <td><?php echo $venta->precio ?></td>
                                       <td><?php echo $venta->importe ?></td>
                                     </tr>
                             <?php } ?>
+                            <tr>
+                              <th colspan="4"></th>
+                              <th><?php echo $venta_kilos ?></th>
+                              <th><?php echo $venta_cantidad ?></th>
+                              <th></th>
+                              <th><?php echo $venta_importe ?></th>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
                     <!--/ Ventas -->
+
+                    <!-- Existencia -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia">
+                          <thead>
+                            <tr>
+                              <th colspan="5">EXISTENCIA</th>
+                            </tr>
+                            <tr>
+                              <th>CLASIFICACION</th>
+                              <th>UNIDAD</th>
+                              <th>KILOS</th>
+                              <th>CANTIDAD</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
+                              foreach ($caja['existencia'] as $existencia) {
+                                $existencia_kilos    += floatval($existencia->kilos);
+                                $existencia_cantidad += floatval($existencia->cantidad);
+                                $existencia_importe  += floatval($existencia->importe);
+                            ?>
+                              <tr>
+                                <td><?php echo $existencia->clasificacion ?>
+                                  <input type="hidden" name="existencia_id_clasificacion[]" value="<?php echo $existencia->id_clasificacion ?>">
+                                  <input type="hidden" name="existencia_id_unidad[]" value="<?php echo $existencia->id_unidad ?>">
+                                  <input type="hidden" name="existencia_costo[] " value="<?php echo $existencia->costo ?>">
+                                  <input type="hidden" name="existencia_kilos[]" value="<?php echo $existencia->kilos ?>">
+                                  <input type="hidden" name="existencia_cantidad[]" value="<?php echo $existencia->cantidad ?>">
+                                  <input type="hidden" name="existencia_importe[]" value="<?php echo $existencia->importe ?>">
+                                </td>
+                                <td><?php echo $existencia->unidad ?></td>
+                                <td><?php echo $existencia->kilos ?></td>
+                                <td class="existencia_cantidad"><?php echo $existencia->cantidad ?></td>
+                                <td class="existencia_importe"><?php echo $existencia->importe ?></td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr>
+                              <th colspan="2"></th>
+                              <th><?php echo $existencia_kilos ?></th>
+                              <th><?php echo $existencia_cantidad ?></th>
+                              <th><?php echo $existencia_importe ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Existencia -->
 
                     <!-- Compra de fruta -->
                     <div class="row-fluid">
@@ -248,7 +310,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia_ant">
                           <thead>
                             <tr>
-                              <th colspan="6">EXISTENCIA ANTERIOR</th>
+                              <th colspan="5">EXISTENCIA ANTERIOR</th>
                             </tr>
                             <tr>
                               <th>CLASIFICACION</th>
@@ -276,7 +338,7 @@
                             <?php } ?>
 
                             <tr>
-                              <th colspan="3"></th>
+                              <th colspan="2"></th>
                               <th><?php echo $existencia_ant_kilos ?></th>
                               <th><?php echo $existencia_ant_cantidad ?></th>
                               <th><?php echo $existencia_ant_importe ?></th>

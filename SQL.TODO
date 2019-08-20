@@ -44,48 +44,11 @@
         )
         WITH ( OIDS=FALSE );
         ALTER TABLE otros.existencias_limon_existencia OWNER TO programa;
-
-SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
-  (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe,
-  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kg
-FROM facturacion f
-  INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
-  INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
-  INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
-  INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
-WHERE f.id_empresa = 2 AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
-  AND c.id_area = 2 AND Date(f.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
-GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad
-ORDER BY folio ASC
-
-SELECT -- b.folio,
-  -- pr.nombre_fiscal,
-  c.id_calidad, c.nombre AS calidad, Sum(bc.kilos) AS kilos,
-  (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe, (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
-FROM bascula b
-  INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
-  INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
-  --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-WHERE b.id_empresa = 2 AND b.status = 't'
-  AND b.id_area = 2 AND Date(b.fecha_bruto) BETWEEN '2018-06-10' AND '2019-06-12'
-GROUP BY --b.id_bascula,
-  c.id_calidad
-  --, pr.id_proveedor
-ORDER BY id_calidad ASC
-
-SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
-  Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
-  Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
-  elp.id AS id_produccion
-FROM rastria_rendimiento rr
-  INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
-  INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
-  INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
-  LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_clasificacion = c.id_clasificacion AND elp.id_unidad = u.id_unidad AND Date(elp.fecha) = '2019-06-10')
-WHERE rr.status = 't' AND c.id_area = 2
-  AND Date(rr.fecha) BETWEEN '2018-06-10' AND '2019-06-12'
-GROUP BY c.id_clasificacion, u.id_unidad, elp.id
-ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC
+     -- pcc
+     ALTER TABLE otros.existencias_limon_existencia DROP COLUMN id_existencia;
+     ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY(id_clasificacion, id_unidad, fecha, no_caja);
+     --ALTER TABLE otros.existencias_limon_existencia ADD COLUMN precio double precision NOT NULL DEFAULT 0;
+     --ALTER TABLE otros.existencias_limon_existencia ADD COLUMN importe_venta double precision NOT NULL DEFAULT 0;
 
 
  ✔ Pago masivo de bajio @done (19-08-02 19:10) pct|pcc|san|lap
