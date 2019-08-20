@@ -1,5 +1,5 @@
 
- ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct
+ ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
      ALTER TABLE public.unidades ADD COLUMN tipo character varying(5) DEFAULT 'o'::character varying;
      COMMENT ON COLUMN public.unidades.tipo IS 'a:arpilla, c:caja, o:otros';
@@ -44,7 +44,7 @@
         )
         WITH ( OIDS=FALSE );
         ALTER TABLE otros.existencias_limon_existencia OWNER TO programa;
-     -- pcc
+     -- pcc|san|lap
      ALTER TABLE otros.existencias_limon_existencia DROP COLUMN id_existencia;
      ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY(id_clasificacion, id_unidad, fecha, no_caja);
      --ALTER TABLE otros.existencias_limon_existencia ADD COLUMN precio double precision NOT NULL DEFAULT 0;
