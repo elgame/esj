@@ -10122,7 +10122,7 @@ class nomina_fiscal_model extends CI_Model {
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
 
-    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
     {
       $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
@@ -12186,7 +12186,7 @@ class nomina_fiscal_model extends CI_Model {
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
 
-    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
     {
       $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
@@ -12257,7 +12257,7 @@ class nomina_fiscal_model extends CI_Model {
       $result = $this->facturartebarato_api->cancelar($params);
 
       $cancelada = false;
-      if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+      if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
       {
         $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
