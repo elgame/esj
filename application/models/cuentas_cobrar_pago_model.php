@@ -285,7 +285,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       // Llama el metodo cancelar para que realiza la peticion al webservice.
       $result = $this->facturartebarato_api->cancelar($params);
 
-      if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+      if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
       {
         $status_uuid = $result->data->status_uuid;
         $this->db->update('banco_movimientos_com_pagos',
