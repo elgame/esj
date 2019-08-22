@@ -1,4 +1,42 @@
 
+
+ ✔ Modulo de resguardos @done (19-08-22 16:47) lap
+     CREATE TABLE otros.resguardos_activos
+        (
+          id_resguardo bigserial NOT NULL,
+          id_empresa integer NOT NULL,
+          id_producto bigint NOT NULL,
+          id_entrego bigint NOT NULL,
+          id_recibio bigint NOT NULL,
+          id_registro bigint,
+          tipo character varying(15) NOT NULL DEFAULT 'resguardo'::character varying, -- resguardo, asignacion
+          fecha_entrega date,
+          fecha_finalizo date, -- fecha cuendo le quitaron el resguardo a esa persona
+          CONSTRAINT resguardos_activos_pkey PRIMARY KEY (id_resguardo),
+          CONSTRAINT resguardos_activos_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT resguardos_activos_id_entrego_fkey FOREIGN KEY (id_entrego)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT resguardos_activos_id_producto_fkey FOREIGN KEY (id_producto)
+              REFERENCES public.productos (id_producto) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT resguardos_activos_id_recibio_fkey FOREIGN KEY (id_recibio)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT resguardos_activos_id_registro_fkey FOREIGN KEY (id_registro)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE otros.resguardos_activos
+          OWNER TO programa;
+        COMMENT ON COLUMN otros.resguardos_activos.tipo IS 'resguardo, asignacion';
+        COMMENT ON COLUMN otros.resguardos_activos.fecha_finalizo IS 'fecha cuendo le quitaron el resguardo a esa persona';
+
  ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
      ALTER TABLE public.unidades ADD COLUMN tipo character varying(5) DEFAULT 'o'::character varying;
