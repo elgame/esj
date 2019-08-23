@@ -20,16 +20,17 @@ class MyFiles {
       $bfechaFin = new DateTime($bfechaFin);
     }
 
+    $pathanio = '/'.date("Y").'/'.date("m");
     if ($bfechaFin != '') {
-      $pathanio = $bfechaFin->format("Y").'/'.$bfechaFin->format("m");
+      $pathanio = '/'.$bfechaFin->format("Y").'/'.$bfechaFin->format("m");
     } elseif ($bfechaIni != '') {
-      $pathanio = $bfechaIni->format("Y").'/'.$bfechaFin->format("m");
+      $pathanio = '/'.$bfechaIni->format("Y").'/'.$bfechaFin->format("m");
     }
 
     if (is_dir($path.$pathanio)) {
       $dir = new DirectoryIterator($path.$pathanio);
     } else {
-      return "No se encontro el direcctorio de busqueda ({$path.$pathanio}).";
+      return "No se encontro el direcctorio de busqueda ({$path}{$pathanio}).";
     }
 
     $totalFiles = 0;
