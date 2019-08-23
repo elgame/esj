@@ -594,6 +594,8 @@ class caja_chica_model extends CI_Model {
 
     $sql .= " AND cg.tipo = 'rg'";
     $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+    $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')
+      AND (cg.fecha_compro_gasto IS NULL OR cg.fecha_compro_gasto >= '{$fecha[1]}')";
     $fecha1 = $fecha[1];
 
     $sql_status2 = str_replace('{fecha}', $fecha1, $sql_status2);
