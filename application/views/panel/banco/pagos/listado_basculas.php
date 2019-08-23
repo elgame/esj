@@ -45,7 +45,7 @@
                   $primera_cuenta = null;
                   foreach ($data['cuentas'] as $keyc => $cuentasp)
                   {
-                    if($cuentasp->id_banco == '2'){ //banamex
+                    if($cuentasp->is_pago_masivo == 't'){ //banamex
                       if($primera_cuenta == null)
                         $primera_cuenta = $cuentasp->id_cuenta;
                   ?>
