@@ -2801,13 +2801,6 @@ class caja_chica_model extends CI_Model {
           $totalReposicionGastosEmp = 0;
         }
 
-        $colortxt = [[100, 100, 100]];
-        if ($gasto->status2 == 't') {
-          $totalReposicionGastosAnt += floatval($gasto->monto);
-          $totalReposicionGastosEmp += floatval($gasto->monto);
-          $colortxt = [[0, 0, 0]];
-        }
-
         if ($pdf->GetY() >= $pdf->limiteY)
         {
           if (count($pdf->pages) > $pdf->page) {
@@ -2817,6 +2810,10 @@ class caja_chica_model extends CI_Model {
             $pdf->AddPage();
         }
 
+        // $totalReposicionGastos += floatval($gasto->monto);
+        $totalReposicionGastosAnt += floatval($gasto->monto);
+        $totalReposicionGastosEmp += floatval($gasto->monto);
+
         $pdf->SetFont('Arial','', 6);
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(113, 70, 22));
@@ -2825,7 +2822,7 @@ class caja_chica_model extends CI_Model {
           $gasto->proveedor,
           $gasto->centro_costo,
           MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
-        ), false, true, $colortxt);
+        ), false, true);
       }
 
       $pdf->SetTextColor(0,0,0);
