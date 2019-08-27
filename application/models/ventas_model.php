@@ -2053,6 +2053,11 @@ class Ventas_model extends privilegios_model{
 
     // $this->printValeSalida($factura, $conceptos, $pdf);
 
+    if (!empty($factura['info']->id_paleta_salida)) {
+      $this->load->model('rastreabilidad_paletas_model');
+      $this->rastreabilidad_paletas_model->paleta_pdf($factura['info']->id_paleta_salida, $pdf);
+    }
+
     if ($path) {
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
     } else {

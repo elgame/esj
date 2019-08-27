@@ -1,6 +1,6 @@
 
 
- ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct
+ ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc
      CREATE TABLE otros.resguardos_activos
         (
           id_resguardo bigserial NOT NULL,

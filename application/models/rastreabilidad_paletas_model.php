@@ -303,12 +303,14 @@ class rastreabilidad_paletas_model extends privilegios_model {
 
     $result = $this->db->query("SELECT ps.id_paleta_salida, ps.id_empresa,
         psp.id_cliente, psp.id_clasificacion, psp.clasificacion, psp.id_unidad,
-        psp.unidad, psp.cantidad, psp.kilos, u.cantidad AS cantidad_c
+        psp.unidad, Sum(psp.cantidad) AS cantidad, Sum(psp.kilos) AS kilos,
+        (Sum(u.cantidad)/Coalesce(NULLIF(Count(u.cantidad), 0), 1)) AS cantidad_c
       FROM otros.paletas_salidas ps
         INNER JOIN otros.paletas_salidas_productos psp ON ps.id_paleta_salida = psp.id_paleta_salida
         INNER JOIN unidades u ON u.id_unidad = psp.id_unidad
       WHERE ps.id_paleta_salida =  {$id_paleta}
-      ORDER BY psp.id_cliente ASC, psp.num_rows ASC");
+      GROUP BY ps.id_paleta_salida, psp.id_cliente, psp.id_clasificacion, psp.clasificacion, psp.id_unidad, psp.unidad
+      ORDER BY id_cliente ASC");
 
     $datos = $result->result();
     $remisiones = [];
@@ -415,7 +417,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $this->db->update('otros.paletas_salidas', ['status' => 'f'], "id_paleta_salida = {$id_paleta}");
   }
 
-  public function paleta_pdf($id_paleta){
+  public function paleta_pdf($id_paleta, $pdf=null){
     // Obtiene los datos del reporte.
     $this->load->model('empresas_model');
     $data = $this->getInfoPaleta($id_paleta, false, true);
@@ -424,14 +426,18 @@ class rastreabilidad_paletas_model extends privilegios_model {
     // var_dump($data);
     // echo "</pre>";exit;
 
-    $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('L', 'mm');
+    if (empty($pdf)) {
+      $this->load->library('mypdf');
+      $pdf = new MYpdf('L', 'mm');
+    } else {
+      // $pdf->CurOrientation = 'L';
+    }
     $pdf->show_head = false;
     $pdf->limiteY = 190;
 
     $pdf->AliasNbPages();
-    $pdf->AddPage();
+    $pdf->AddPage('L');
     $pdf->SetFont('helvetica','', 8);
 
     if ($empresa['info']->logo !== '')
@@ -513,7 +519,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
         if($pdf->GetY() >= $pdf->limiteY || $key === 0)
         {
           if($key > 0)
-            $pdf->AddPage();
+            $pdf->AddPage('L');
 
           $pdf->SetFont('Arial', 'B', 8);
           $pdf->SetX(15);
@@ -582,7 +588,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
       foreach ($data['certificados'] as $key => $item) {
         if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
           if($key > 0)
-            $pdf->AddPage();
+            $pdf->AddPage('L');
         }
 
         $pdf->SetFont('Arial', '', 8);
@@ -634,7 +640,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->show_head = false;
 
     // $pdf->AliasNbPages();
-    $pdf->AddPage();
+    $pdf->AddPage('L');
     $pdf->SetFont('helvetica','', 8);
 
     if ($empresa['info']->logo !== '')
@@ -666,7 +672,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->Row(['CONDICIONES DEL FLETE', 'DESTINO'], true, true);
     $pdf->SetAligns(['L', 'L']);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ', (!empty($data['otros_facturas'])? $data['otros_facturas']: '') )]);
+    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ',  (!empty($data['otros_facturas'])? $data['otros_facturas']: []))]);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(['CLIENTE DESTINO:', 'DIA DE LLEGADA:']);
     $pdf->SetXY(6, $pdf->GetY());
