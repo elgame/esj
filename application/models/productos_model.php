@@ -253,7 +253,20 @@ class productos_model extends CI_Model {
         // Activos
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
         'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
-				);
+			);
+
+      // Activos
+      if ($this->input->post('ftipo_activo')) {
+        $ccodigo = explode('-', $this->input->post('fcodigo'));
+        if (count($ccodigo) === 3) {
+          if ($ccodigo[2] != '') {
+            $date = DateTime::createFromFormat('ymd', $ccodigo[2]);
+            if ($date) {
+              $data['fecha_compra'] = $date->format("Y-m-d");
+            }
+          }
+        }
+      }
 		}
 
 		$this->db->insert('productos', $data);
@@ -289,6 +302,19 @@ class productos_model extends CI_Model {
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
         'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
 			);
+
+      // Activos
+      if ($this->input->post('ftipo_activo')) {
+        $ccodigo = explode('-', $this->input->post('fcodigo'));
+        if (count($ccodigo) === 3) {
+          if ($ccodigo[2] != '') {
+            $date = DateTime::createFromFormat('ymd', $ccodigo[2]);
+            if ($date) {
+              $data['fecha_compra'] = $date->format("Y-m-d");
+            }
+          }
+        }
+      }
 		}
 
 		$this->db->update('productos', $data, "id_producto = {$id_producto}");
@@ -392,9 +418,27 @@ class productos_model extends CI_Model {
 	public function getFolioNext($id_familia)
 	{
 		$codigo = 1;
-		$res = $this->db->query("SELECT codigo FROM productos WHERE id_familia = {$id_familia} ORDER BY codigo::integer DESC")->row();
-		if(isset($res->codigo))
-			$codigo = intval($res->codigo) + 1;
+		$res = $this->db->query("SELECT Coalesce(t.codigo[2], t.codigo[1]) AS codigo, t.rfc,
+        t.codigo[3] AS codigo_fecha, t.tipo
+      FROM (
+        SELECT string_to_array(p.codigo, '-') AS codigo, substring(e.rfc, 1, 3) AS rfc,
+          pf.tipo
+        FROM empresas e
+          LEFT JOIN productos_familias pf ON e.id_empresa = pf.id_empresa
+          LEFT JOIN productos p ON pf.id_familia = p.id_familia
+        WHERE pf.id_familia = {$id_familia}
+      ) t
+      ORDER BY Coalesce(t.codigo[2], t.codigo[1])::integer DESC")->row();
+
+		if(isset($res->codigo)){
+      $codigo = intval($res->codigo) + 1;
+    }
+
+    // Si es activo
+    if ($res->tipo == 'a') {
+      $codigo = "{$res->rfc}-{$codigo}-";
+    }
+
 		return $codigo;
 	}
 

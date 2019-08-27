@@ -1,5 +1,8 @@
 
 
+ ✔ Productos codigo @done (19-08-26 23:13) pct
+     ALTER TABLE public.productos ADD COLUMN fecha_compra date;
+
  ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc
      CREATE TABLE otros.resguardos_activos
         (

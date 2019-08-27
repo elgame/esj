@@ -58,7 +58,9 @@
 
               <div class="span6">
                 <div class="control-group">
-                  <label class="control-label" for="fcodigo">Codigo </label>
+                  <label class="control-label" for="fcodigo">Codigo
+                    <?php echo ($familia['info']->tipo == 'a'? '<br>RFC(3)-FOLIO-FECHA(YYMMDD)': '') ?>
+                  </label>
                   <div class="controls">
                     <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', $folio) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required>
                   </div>

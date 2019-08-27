@@ -70,7 +70,9 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fcodigo">Codigo </label>
+                  <label class="control-label" for="fcodigo">Codigo
+                    <?php echo ($data['familia']->tipo == 'a'? '<br>RFC(3)-FOLIO-FECHA(YYMMDD)': '') ?>
+                  </label>
                   <div class="controls">
                     <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', (isset($data['info']->codigo)? $data['info']->codigo: '')) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required autofocus>
                   </div>
