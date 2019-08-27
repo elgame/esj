@@ -1,6 +1,6 @@
 
 
- ✔ Modulo de resguardos @done (19-08-22 16:47) lap
+ ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct
      CREATE TABLE otros.resguardos_activos
         (
           id_resguardo bigserial NOT NULL,
@@ -36,6 +36,7 @@
           OWNER TO programa;
         COMMENT ON COLUMN otros.resguardos_activos.tipo IS 'resguardo, asignacion';
         COMMENT ON COLUMN otros.resguardos_activos.fecha_finalizo IS 'fecha cuendo le quitaron el resguardo a esa persona';
+        COMMENT ON COLUMN otros.resguardos_activos.id_recibio IS 'usuario que tiene asignado el resguardo';
 
  ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
