@@ -42,6 +42,12 @@
         COMMENT ON COLUMN otros.resguardos_activos.id_recibio IS 'usuario que tiene asignado el resguardo';
      -- pcc
      ALTER TABLE otros.resguardos_activos ADD COLUMN status boolean NOT NULL DEFAULT true;
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Resguardo de Activos',0,TRUE,'resguardos_activos/','hdd',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',508,TRUE,'resguardos_activos/agregar/','plus',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',508,FALSE,'resguardos_activos/modificar/','edit',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',508,FALSE,'resguardos_activos/eliminar/','remove',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',508,FALSE,'resguardos_activos/activar/','ok',FALSE);
+
 
  ✔ Reporte de eistencia de limon @done (19-08-08 14:57) lap|pcc|pct|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Existencia de Limón',0,TRUE,'existencias_limon/','align-left',TRUE);
