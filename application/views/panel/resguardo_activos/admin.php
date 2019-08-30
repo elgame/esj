@@ -30,7 +30,7 @@
                 <input type="text" name="fempresa" id="fempresa" class="input-xlarge search-query" value="<?php echo set_value_get('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
                 <input type="hidden" name="did_empresa" value="<?php echo set_value_get('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">|
 
-                <label class="control-label" for="dproducto">Producto </label>
+                <label class="control-label" for="dproducto">Producto/Activo </label>
                 <input type="text" name="dproducto" id="dproducto" class="input-xlarge search-query" value="<?php echo set_value_get('dproducto'); ?>" placeholder="Producto">
                 <input type="hidden" name="did_producto" value="<?php echo set_value_get('did_producto'); ?>" id="did_producto">|
 

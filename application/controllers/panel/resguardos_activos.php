@@ -59,7 +59,7 @@ class resguardos_activos extends MY_Controller {
   }
 
   /**
-   * Muestra el Formulario para agregar un proveedor
+   * Muestra el Formulario para agregar un resguardo
    * @return [type] [description]
    */
   public function agregar()
@@ -90,7 +90,7 @@ class resguardos_activos extends MY_Controller {
       $res_mdl = $this->resguardos_activos_model->addProductor();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/productores/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
+        redirect(base_url('panel/resguardos_activos/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
     }
 
     $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
@@ -100,7 +100,7 @@ class resguardos_activos extends MY_Controller {
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/productores/agregar', $params);
+    $this->load->view('panel/resguardo_activos/agregar', $params);
     $this->load->view('panel/footer');
   }
 
