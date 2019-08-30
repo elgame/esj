@@ -1,6 +1,6 @@
 
 
- ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san
+ ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap
      ALTER TABLE public.productos ADD COLUMN fecha_compra date;
 
  ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc
