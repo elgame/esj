@@ -47,6 +47,8 @@ class resguardos_activos extends MY_Controller {
     if(!isset($_GET['did_empresa']))
       $_GET['did_empresa'] = $params['empresa']->id_empresa;
 
+    $params['fecha'] = date("Y-m-d");
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
