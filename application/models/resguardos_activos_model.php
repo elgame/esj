@@ -53,8 +53,8 @@ class resguardos_activos_model extends CI_Model {
       $sql .= " AND ra.tipo = '".$this->input->get('ftipo')."'";
     }
 
-    $fecha1 = $this->input->get('dfecha1')? $this->input->get('dfecha1'): date("Y-m").'-01';
-    $fecha2 = $this->input->get('dfecha2')? $this->input->get('dfecha2'): date("Y-m-d");
+    $fecha1 = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m").'-01';
+    $fecha2 = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
 
     $query['query'] =
       "SELECT ra.id_resguardo, e.id_empresa, e.nombre_fiscal AS empresa, p.id_producto, p.nombre AS producto,
@@ -92,106 +92,51 @@ class resguardos_activos_model extends CI_Model {
    * Agrega un proveedor a la BDD
    * @param [type] $data [description]
    */
-  public function addProductor($data=NULL)
+  public function addResguardo($data=NULL)
   {
 
     if ($data==NULL)
     {
       $data = array(
-            'id_empresa'        => $this->input->post('did_empresa'),
-            'nombre_fiscal'     => $this->input->post('fnombre_fiscal'),
-            'calle'             => $this->input->post('fcalle'),
-            'no_exterior'       => $this->input->post('fno_exterior'),
-            'no_interior'       => $this->input->post('fno_interior'),
-            'colonia'           => $this->input->post('fcolonia'),
-            'localidad'         => $this->input->post('flocalidad'),
-            'municipio'         => $this->input->post('fmunicipio'),
-            'estado'            => $this->input->post('festado'),
-            'cp'                => $this->input->post('fcp'),
-            'telefono'          => $this->input->post('ftelefono'),
-            'celular'           => $this->input->post('fcelular'),
-            'email'             => $this->input->post('femail'),
-            // 'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-            'parcela'           => $this->input->post('fparcela'),
-            'ejido_parcela'     => $this->input->post('fejido_parcela'),
-            'pais'              => $this->input->post('fpais'),
-            'tipo'              => $this->input->post('ftipo'),
-            'no_coeplim'        => $this->input->post('no_coeplim'),
-            'hectareas'         => floatval($this->input->post('hectareas')),
-            'pequena_propiedad' => $this->input->post('pequena_propiedad'),
-            'propietario'       => $this->input->post('propietario'),
-          );
+        'id_empresa'     => $this->input->post('did_empresa'),
+        'id_producto'    => $this->input->post('fid_producto'),
+        'id_entrego'     => $this->input->post('fid_entrego'),
+        'id_recibio'     => $this->input->post('fid_recibio'),
+        'id_registro'    => $this->session->userdata('id_usuario'),
+        'tipo'           => $this->input->post('ftipo'),
+        'fecha_entrega'  => $this->input->post('ffecha_entrego'),
+      );
+      $this->closeResguardo($data['id_empresa'], $data['id_producto'], $data['fecha_entrega']);
     }
-    $this->db->insert('otros.productor', $data);
 
-    $id_productor = $this->db->insert_id('otros.productor', 'id_productor');
-
-    // Bitacora
-    $this->bitacora_model->_insert('otros.productor', $id_productor,
-                                    array(':accion'    => 'el productor', ':seccion' => 'productores',
-                                          ':folio'     => $data['nombre_fiscal'],
-                                          ':id_empresa' => $data['id_empresa'],
-                                          ':empresa'   => 'en '.$this->input->post('fempresa')));
+    $this->db->insert('otros.resguardos_activos', $data);
 
     return array('error' => FALSE);
   }
 
   /**
    * Modificar la informacion de un proveedor
-   * @param  [type] $id_productor [description]
+   * @param  [type] $id_resguardo [description]
    * @param  [type] $data       [description]
    * @return [type]             [description]
    */
-  public function updateProductor($id_productor, $data=NULL)
+  public function updateResguardo($id_resguardo, $data=NULL)
   {
 
     if ($data==NULL)
     {
       $data = array(
-            'id_empresa'        => $this->input->post('did_empresa'),
-            'nombre_fiscal'     => $this->input->post('fnombre_fiscal'),
-            'calle'             => $this->input->post('fcalle'),
-            'no_exterior'       => $this->input->post('fno_exterior'),
-            'no_interior'       => $this->input->post('fno_interior'),
-            'colonia'           => $this->input->post('fcolonia'),
-            'localidad'         => $this->input->post('flocalidad'),
-            'municipio'         => $this->input->post('fmunicipio'),
-            'estado'            => $this->input->post('festado'),
-            'cp'                => $this->input->post('fcp'),
-            'telefono'          => $this->input->post('ftelefono'),
-            'celular'           => $this->input->post('fcelular'),
-            'email'             => $this->input->post('femail'),
-            // 'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-            'parcela'           => $this->input->post('fparcela'),
-            'ejido_parcela'     => $this->input->post('fejido_parcela'),
-            'pais'              => $this->input->post('fpais'),
-            'tipo'              => $this->input->post('ftipo'),
-            'no_coeplim'        => $this->input->post('no_coeplim'),
-            'hectareas'         => $this->input->post('hectareas'),
-            'pequena_propiedad' => $this->input->post('pequena_propiedad'),
-            'propietario'       => $this->input->post('propietario'),
-            );
-      // Bitacora
-      $id_bitacora = $this->bitacora_model->_update('otros.productor', $id_productor, $data,
-                                array(':accion'       => 'el productor', ':seccion' => 'productores',
-                                      ':folio'        => $data['nombre_fiscal'],
-                                      ':id_empresa'   => $data['id_empresa'],
-                                      ':empresa'      => 'en '.$this->input->post('fempresa'),
-                                      ':id'           => 'id_productor',
-                                      ':titulo'       => 'Productor'));
-    }else {
-      if (isset($data['status']) && $data['status'] === 'e') {
-        // Bitacora
-        $clientedata = $this->getProductorInfo($id_productor);
-        $this->bitacora_model->_cancel('otros.productor', $id_productor,
-                                        array(':accion'     => 'el productor', ':seccion' => 'productores',
-                                              ':folio'      => $clientedata['info']->nombre_fiscal,
-                                              ':id_empresa' => $clientedata['info']->id_empresa,
-                                              ':empresa'    => 'de '.$clientedata['info']->empresa->nombre_fiscal));
-      }
+        'id_empresa'     => $this->input->post('did_empresa'),
+        'id_producto'    => $this->input->post('did_producto'),
+        'id_entrego'     => $this->input->post('did_entrego'),
+        'id_recibio'     => $this->input->post('did_recibio'),
+        'id_registro'    => $this->session->userdata('id_usuario'),
+        'tipo'           => $this->input->post('ftipo'),
+        'fecha_entrega'  => $this->input->post('ffecha_entrego'),
+      );
     }
 
-    $this->db->update('otros.productor', $data, array('id_productor' => $id_productor));
+    $this->db->update('otros.resguardos_activos', $data, array('id_resguardo' => $id_resguardo));
 
     return array('error' => FALSE);
   }
@@ -203,34 +148,61 @@ class resguardos_activos_model extends CI_Model {
    * @param  boolean $basic_info [description]
    * @return [type]              [description]
    */
-  public function getProductorInfo($id_productor=FALSE, $basic_info=FALSE)
+  public function getResguardoInfo($id_resguardo=FALSE, $basic_info=FALSE)
   {
-    // $id_productor = (isset($_GET['id']))? $_GET['id']: $id_productor;
-    $id_productor = $id_productor? $id_productor: (isset($_GET['id'])? $_GET['id']: 0);
+    $id_resguardo = $id_resguardo? $id_resguardo: (isset($_GET['id'])? $_GET['id']: 0);
 
-    $sql_res = $this->db->select("id_productor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-                            estado, cp, telefono, celular, email, parcela, ejido_parcela, status, tipo, pais, id_empresa,
-                            no_coeplim, hectareas, pequena_propiedad, propietario" )
-                        ->from("otros.productor")
-                        ->where("id_productor", $id_productor)
-                        ->get();
+    $sql_res = $this->db->query("SELECT ra.id_resguardo, e.id_empresa, e.nombre_fiscal AS empresa, p.id_producto, p.nombre AS producto,
+        ra.id_entrego, (ue.nombre || ' ' || ue.apellido_paterno || ' ' || ue.apellido_materno) AS entrego,
+        ra.id_recibio, (ur.nombre || ' ' || ur.apellido_paterno || ' ' || ur.apellido_materno) AS recibio,
+        ra.id_registro, (urg.nombre || ' ' || urg.apellido_paterno || ' ' || urg.apellido_materno) AS registro,
+        ra.tipo, ra.fecha_entrega, ra.fecha_finalizo, ra.status
+      FROM otros.resguardos_activos ra
+        INNER JOIN empresas e ON e.id_empresa = ra.id_empresa
+        INNER JOIN productos p ON p.id_producto = ra.id_producto
+        INNER JOIN usuarios ue ON ue.id = ra.id_entrego
+        INNER JOIN usuarios ur ON ur.id = ra.id_recibio
+        INNER JOIN usuarios urg ON urg.id = ra.id_registro
+      WHERE ra.id_resguardo = {$id_resguardo}");
     $data['info'] = array();
 
     if ($sql_res->num_rows() > 0)
       $data['info'] = $sql_res->row();
     $sql_res->free_result();
 
-    $data['docus'] = array();
     if ($basic_info == False) {
-
-      // Carga la info de la empresa.
-      $this->load->model('empresas_model');
-      $empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa);
-      $data['info']->empresa = $empresa['info'];
     }
 
     return $data;
   }
+
+  /**
+   * Si es un activo resguardo busca el anterior y cierra la fecha de asignación
+   * @param  [type] $id_empresa     [description]
+   * @param  [type] $id_producto    [description]
+   * @param  [type] $fecha_finalizo [description]
+   * @return [type]                 [description]
+   */
+  private function closeResguardo($id_empresa, $id_producto, $fecha_finalizo)
+  {
+    $result = $this->db->query(
+      "SELECT id_resguardo
+        FROM otros.resguardos_activos
+        WHERE id_empresa = {$id_empresa} AND id_producto = {$id_producto}
+          AND tipo = 'resguardo' AND status = 't'
+        ORDER BY id_resguardo DESC");
+    if($result->num_rows() > 0){
+      $resguardo = $result->row();
+      $this->db->update('otros.resguardos_activos', ['fecha_finalizo' => $fecha_finalizo], "id_resguardo = {$resguardo->id_resguardo}");
+    }
+  }
+
+
+
+
+
+
+
 
   /**
    * Obtiene el listado de proveedores para usar ajax

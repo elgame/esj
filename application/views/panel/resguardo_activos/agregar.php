@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            <a href="<?php echo base_url('panel/productores/'); ?>">Productores</a> <span class="divider">/</span>
+            <a href="<?php echo base_url('panel/resguardos_activos/'); ?>">Resguardos</a> <span class="divider">/</span>
           </li>
           <li>Agregar</li>
         </ul>
@@ -17,13 +17,13 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-plus"></i> Agregar Productor</h2>
+            <h2><i class="icon-plus"></i> Agregar Resguardo</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/productores/'.(isset($method)? $method: 'agregar') ); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/resguardos_activos/agregar/' ); ?>" method="post" class="form-horizontal">
               <fieldset>
                 <legend></legend>
 
@@ -79,9 +79,9 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="ffecha_entrego">Ejido parcela </label>
+                    <label class="control-label" for="ffecha_entrego">Fecha de entrega </label>
                     <div class="controls">
-                      <input type="date" name="ffecha_entrego" id="ffecha_entrego" class="span12" value="<?php echo set_value('ffecha_entrego'); ?>" required>
+                      <input type="date" name="ffecha_entrego" id="ffecha_entrego" class="span12" value="<?php echo set_value('ffecha_entrego', date("Y-m-d")); ?>" required>
                     </div>
                   </div>
 
@@ -91,7 +91,7 @@
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
-                  <a href="<?php echo base_url('panel/productores/'); ?>" class="btn">Cancelar</a>
+                  <a href="<?php echo base_url('panel/resguardos_activos/'); ?>" class="btn">Cancelar</a>
                 </div>
               </fieldset>
             </form>

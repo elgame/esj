@@ -69,17 +69,17 @@ class resguardos_activos extends MY_Controller {
     ));
     $this->carabiner->js(array(
         array('libs/jquery.uniform.min.js'),
-      array('panel/clientes/agregar.js'),
+      array('panel/resguardo_activos/agregar.js'),
     ));
 
     $this->load->model('empresas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar Cliente'
+      'titulo' => 'Agregar Resguardo'
     );
 
-    $this->configAddModCliente();
+    $this->configAddModResguardo();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -87,13 +87,13 @@ class resguardos_activos extends MY_Controller {
     else
     {
       $this->load->model('resguardos_activos_model');
-      $res_mdl = $this->resguardos_activos_model->addProductor();
+      $res_mdl = $this->resguardos_activos_model->addResguardo();
 
       if(!$res_mdl['error'])
         redirect(base_url('panel/resguardos_activos/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
     }
 
-    $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -102,56 +102,6 @@ class resguardos_activos extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/resguardo_activos/agregar', $params);
     $this->load->view('panel/footer');
-  }
-
-  /**
-   * Muestra formulario agregar area.
-   * @return void
-   */
-  public function show_view_agregar_productor()
-  {
-    $this->carabiner->css(array(
-      array('libs/jquery.uniform.css', 'screen'),
-    ));
-    $this->carabiner->js(array(
-        array('libs/jquery.uniform.min.js'),
-      array('panel/clientes/agregar.js'),
-    ));
-
-    $this->load->model('empresas_model');
-
-    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
-    $params['seo'] = array(
-      'titulo' => 'Agregar Productor'
-    );
-
-    $this->configAddModCliente();
-    if ($this->form_validation->run() == FALSE)
-    {
-      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-    }
-    else
-    {
-      $this->load->model('resguardos_activos_model');
-      $res_mdl = $this->resguardos_activos_model->addProductor();
-
-      if(!$res_mdl['error'])
-        redirect(base_url('panel/productores/show_view_agregar_productor/?'.MyString::getVarsLink(array('msg')).'&msg=3&close=1'));
-    }
-
-    $params['closeModal'] = false;
-    if (isset($_GET['close']))
-      $params['closeModal'] = true;
-
-    if (isset($_GET['msg']))
-      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
-    $params['method'] = 'show_view_agregar_productor';
-
-    $params['template'] = $this->load->view('panel/productores/agregar', $params, true);
-
-    $this->load->view('panel/bascula/supermodal', $params);
   }
 
   /*
@@ -163,12 +113,10 @@ class resguardos_activos extends MY_Controller {
     {
       $this->carabiner->css(array(
         array('libs/jquery.uniform.css', 'screen'),
-        array('libs/jquery.treeview.css', 'screen')
       ));
       $this->carabiner->js(array(
-        array('libs/jquery.uniform.min.js'),
-        array('libs/jquery.treeview.js'),
-        array('panel/usuarios/add_mod_frm.js')
+          array('libs/jquery.uniform.min.js'),
+        array('panel/resguardo_activos/agregar.js'),
       ));
 
       $this->load->model('resguardos_activos_model');
@@ -176,23 +124,23 @@ class resguardos_activos extends MY_Controller {
 
       $params['info_empleado'] = $this->info_empleado['info']; //info empleado
       $params['seo'] = array(
-        'titulo' => 'Modificar productor'
+        'titulo' => 'Modificar Resguardo'
       );
 
-      $this->configAddModCliente('modificar');
+      $this->configAddModResguardo('modificar');
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
       }
       else
       {
-        $res_mdl = $this->resguardos_activos_model->updateProductor($this->input->get('id'));
+        $res_mdl = $this->resguardos_activos_model->updateResguardo($this->input->get('id'));
 
         if($res_mdl['error'] == FALSE)
           redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
       }
 
-      $params['productor'] = $this->resguardos_activos_model->getProductorInfo();
+      $params['productor'] = $this->resguardos_activos_model->getResguardoInfo();
 
       $params['empresa']       = $this->empresas_model->getInfoEmpresa($params['productor']['info']->id_empresa);
 
@@ -263,83 +211,44 @@ class resguardos_activos extends MY_Controller {
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
-  public function configAddModCliente($accion='agregar')
+  public function configAddModResguardo($accion='agregar')
   {
     $this->load->library('form_validation');
     $rules = array(
-      array('field' => 'fnombre_fiscal',
-            'label' => 'Nombre fiscal',
-            'rules' => 'required|max_length[140]'),
-      array('field' => 'fcalle',
-            'label' => 'Calle',
-            'rules' => 'max_length[60]'),
-      array('field' => 'fno_exterior',
-            'label' => 'No. exterior',
-            'rules' => 'max_length[7]'),
-      array('field' => 'fno_interior',
-            'label' => 'No. interior',
-            'rules' => 'max_length[7]'),
-      array('field' => 'fcolonia',
-            'label' => 'Colonia',
-            'rules' => 'max_length[60]'),
-      array('field' => 'flocalidad',
-            'label' => 'Localidad',
-            'rules' => 'max_length[45]'),
-      array('field' => 'fmunicipio',
-            'label' => 'Municipio',
-            'rules' => 'max_length[45]'),
-      array('field' => 'festado',
-            'label' => 'Estado',
-            'rules' => 'max_length[45]'),
-      array('field' => 'fpais',
-            'label' => 'Pais',
-            'rules' => 'max_length[25]'),
-
-      array('field' => 'fparcela',
-            'label' => 'Parcela',
-            'rules' => 'max_length[20]'),
-      array('field' => 'fejido_parcela',
-            'label' => 'Ejido parcela',
-            'rules' => 'max_length[150]'),
-      array('field' => 'fcp',
-            'label' => 'CP',
-            'rules' => 'max_length[10]'),
-      array('field' => 'ftelefono',
-            'label' => 'Telefono',
-            'rules' => 'max_length[15]'),
-      array('field' => 'fcelular',
-            'label' => 'Celular',
-            'rules' => 'max_length[20]'),
-      array('field' => 'ftipo',
-            'label' => 'Metodo de Pago',
-            'rules' => 'max_length[40]'),
-      array('field' => 'femail',
-            'label' => 'Email',
-            'rules' => 'max_length[600]'),
-
-      array('field' => 'fcuenta_cpi',
-            'label' => 'Cuenta ContpaqI',
-            'rules' => 'max_length[12]'),
-
       array('field' => 'fempresa',
-            'label' => '',
-            'rules' => ''),
+            'label' => 'Empresa',
+            'rules' => 'required|max_length[140]'),
       array('field' => 'did_empresa',
             'label' => 'Empresa',
-            'rules' => ''),
+            'rules' => 'required'),
 
-      array('field' => 'no_coeplim',
-            'label' => '# Coeplim',
-            'rules' => 'max_length[55]'),
-      array('field' => 'hectareas',
-            'label' => '# Hectareas',
-            'rules' => 'is_natural|max_length[15]'),
-      array('field' => 'pequena_propiedad',
-            'label' => 'Pequeña propiedad',
-            'rules' => 'max_length[55]'),
-      array('field' => 'propietario',
-            'label' => 'Propietario',
-            'rules' => 'max_length[150]'),
+      array('field' => 'fproducto',
+            'label' => 'Producto/Activo',
+            'rules' => 'required|max_length[140]'),
+      array('field' => 'fid_producto',
+            'label' => 'Producto/Activo',
+            'rules' => 'required'),
+
+      array('field' => 'fentrego',
+            'label' => 'Entrego',
+            'rules' => 'required|max_length[140]'),
+      array('field' => 'fid_entrego',
+            'label' => 'Entrego',
+            'rules' => 'required'),
+
+      array('field' => 'frecibio',
+            'label' => 'Recibió',
+            'rules' => 'required|max_length[140]'),
+      array('field' => 'fid_recibio',
+            'label' => 'Recibió',
+            'rules' => 'required'),
+
+      array('field' => 'ftipo',
+            'label' => 'Tipo',
+            'rules' => 'max_length[60]'),
+      array('field' => 'ffecha_entrego',
+            'label' => 'Fecha de entrega',
+            'rules' => 'max_length[60]'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -358,19 +267,19 @@ class resguardos_activos extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'El productor se agregó correctamente.';
+        $txt = 'El resguardo se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
-        $txt = 'El productor se modificó correctamente.';
+        $txt = 'El resguardo se modificó correctamente.';
         $icono = 'success';
         break;
       case 5:
-        $txt = 'El productor se eliminó correctamente.';
+        $txt = 'El resguardo se eliminó correctamente.';
         $icono = 'success';
         break;
       case 6:
-        $txt = 'El productor se activó correctamente.';
+        $txt = 'El resguardo se activó correctamente.';
         $icono = 'success';
         break;
     }
