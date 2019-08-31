@@ -253,6 +253,7 @@ class productos_model extends CI_Model {
         // Activos
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
         'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
+        'descripcion' => ($this->input->post('fdescripcion')? $this->input->post('fdescripcion'): ''),
 			);
 
       // Activos
@@ -301,6 +302,7 @@ class productos_model extends CI_Model {
         // Activos
         'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
         'monto'       => ($this->input->post('fmonto')? $this->input->post('fmonto'): 0),
+        'descripcion' => ($this->input->post('fdescripcion')? $this->input->post('fdescripcion'): ''),
 			);
 
       // Activos
@@ -386,7 +388,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
-									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo, monto, tipo_apli" )
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo, monto, tipo_apli, descripcion" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();
@@ -530,7 +532,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$result = $this->db->query("SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre,
-      	stock_min, ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps, tipo_apli
+      	stock_min, ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps, tipo_apli, descripcion
       FROM productos WHERE id_empresa = 2 AND lower(nombre) = '".mb_strtolower($text, 'UTF-8')."'")->row();
 
 		return $result;
@@ -542,7 +544,7 @@ class productos_model extends CI_Model {
 
     $sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
                                   ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps,
-                                  last_precio, tipo, tipo_apli" )
+                                  last_precio, tipo, tipo_apli, descripcion" )
                         ->from("productos")
                         ->where("id_producto", $id_producto)
                         ->get();

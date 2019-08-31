@@ -18,7 +18,7 @@ class productos extends MY_Controller {
 		$this->load->model("usuarios_model");
 		if($this->usuarios_model->checkSession()){
 			$this->usuarios_model->excepcion_privilegio = $this->excepcion_privilegio;
-			$this->info_empleado                         = $this->usuarios_model->get_usuario_info($this->session->userdata('id_usuario'), true);
+			$this->info_empleado                        = $this->usuarios_model->get_usuario_info($this->session->userdata('id_usuario'), true);
 
 			if($this->usuarios_model->tienePrivilegioDe('', get_class($this).'/'.$method.'/')){
 				$this->{$method}();

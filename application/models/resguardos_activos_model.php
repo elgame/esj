@@ -61,7 +61,8 @@ class resguardos_activos_model extends CI_Model {
         ra.id_entrego, (ue.nombre || ' ' || ue.apellido_paterno || ' ' || ue.apellido_materno) AS entrego,
         ra.id_recibio, (ur.nombre || ' ' || ur.apellido_paterno || ' ' || ur.apellido_materno) AS recibio,
         ra.id_registro, (urg.nombre || ' ' || urg.apellido_paterno || ' ' || urg.apellido_materno) AS registro,
-        ra.tipo, ra.fecha_entrega, ra.fecha_finalizo, ra.status
+        ra.tipo, ra.fecha_entrega, ra.fecha_finalizo, ra.status, ra.observaciones, p.tipo_activo,
+        p.descripcion AS descripcion_activo, p.monto AS monto_activo
       FROM otros.resguardos_activos ra
         INNER JOIN empresas e ON e.id_empresa = ra.id_empresa
         INNER JOIN productos p ON p.id_producto = ra.id_producto
@@ -105,6 +106,7 @@ class resguardos_activos_model extends CI_Model {
         'id_registro'    => $this->session->userdata('id_usuario'),
         'tipo'           => $this->input->post('ftipo'),
         'fecha_entrega'  => $this->input->post('ffecha_entrego'),
+        'observaciones'  => $this->input->post('fobservaciones'),
       );
       $this->closeResguardo($data['id_empresa'], $data['id_producto'], $data['fecha_entrega']);
     }
@@ -127,12 +129,13 @@ class resguardos_activos_model extends CI_Model {
     {
       $data = array(
         'id_empresa'     => $this->input->post('did_empresa'),
-        'id_producto'    => $this->input->post('did_producto'),
-        'id_entrego'     => $this->input->post('did_entrego'),
-        'id_recibio'     => $this->input->post('did_recibio'),
+        'id_producto'    => $this->input->post('fid_producto'),
+        'id_entrego'     => $this->input->post('fid_entrego'),
+        'id_recibio'     => $this->input->post('fid_recibio'),
         'id_registro'    => $this->session->userdata('id_usuario'),
         'tipo'           => $this->input->post('ftipo'),
         'fecha_entrega'  => $this->input->post('ffecha_entrego'),
+        'observaciones'  => $this->input->post('fobservaciones'),
       );
     }
 
@@ -156,7 +159,8 @@ class resguardos_activos_model extends CI_Model {
         ra.id_entrego, (ue.nombre || ' ' || ue.apellido_paterno || ' ' || ue.apellido_materno) AS entrego,
         ra.id_recibio, (ur.nombre || ' ' || ur.apellido_paterno || ' ' || ur.apellido_materno) AS recibio,
         ra.id_registro, (urg.nombre || ' ' || urg.apellido_paterno || ' ' || urg.apellido_materno) AS registro,
-        ra.tipo, ra.fecha_entrega, ra.fecha_finalizo, ra.status
+        ra.tipo, ra.fecha_entrega, ra.fecha_finalizo, ra.status, e.logo, ra.observaciones, p.tipo_activo,
+        p.descripcion AS descripcion_activo, p.monto AS monto_activo
       FROM otros.resguardos_activos ra
         INNER JOIN empresas e ON e.id_empresa = ra.id_empresa
         INNER JOIN productos p ON p.id_producto = ra.id_producto
@@ -197,134 +201,212 @@ class resguardos_activos_model extends CI_Model {
     }
   }
 
-
-
-
-
-
-
-
-  /**
-   * Obtiene el listado de proveedores para usar ajax
-   * @param term. termino escrito en la caja de texto, busca en el nombre
-   * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
-   */
-  public function getProductorAjax($sqlX = null){
-    $sql = '';
-    if ($this->input->get('term') !== false)
-      $sql = " AND lower(c.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-
-    if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
-      $sql .= " AND e.id_empresa in(".$this->input->get('did_empresa').")";
-
-      if ( ! is_null($sqlX))
-        $sql .= $sqlX;
-
-    $res = $this->db->query(
-        "SELECT c.id_productor, c.nombre_fiscal, c.parcela, c.calle, c.no_exterior, c.no_interior, c.colonia, c.municipio, c.estado, c.cp,
-          c.telefono, c.ejido_parcela, c.tipo, c.id_empresa, e.nombre_fiscal AS empresa
-        FROM otros.productor c INNER JOIN empresas e ON e.id_empresa = c.id_empresa
-        WHERE c.status = 'ac'
-          {$sql}
-        ORDER BY c.nombre_fiscal ASC
-        LIMIT 20"
-    );
-
-    $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
-        $dato_ext = $itm->municipio==''? ($itm->estado==''? '': ' - '.$itm->estado): ' - '.$itm->municipio;
-        $dato_ext .= $this->input->get('empresa')=='si'? ' - '.substr($itm->empresa, 0, 5): '';
-        $response[] = array(
-            'id'    => $itm->id_productor,
-            'label' => $itm->nombre_fiscal,
-            'value' => $itm->nombre_fiscal,
-            'item'  => $itm,
-        );
-      }
+  private function getTipoActivo($tipo)
+  {
+    switch ($tipo) {
+      case 'et': $tipo = 'Equipo de Transporte'; break;
+      case 'ec': $tipo = 'Equipo de Computo'; break;
+      case 'meo': $tipo = 'Mobiliario y Equipo de Oficina'; break;
+      case 'me': $tipo = 'Maquinaria y Equipo'; break;
+      case 'e': $tipo = 'Edificios'; break;
+      case 't': $tipo = 'Terrenos'; break;
     }
-
-    return $response;
+    return $tipo;
   }
 
-  public function catalogo_xls()
+  /**
+  * Visualiza/Descarga el PDF del resguardo.
+  *
+  * @return void
+  */
+  public function printResguardo($id_resguardo, $path = null)
   {
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=productores.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
 
-    // $this->load->model('areas_model');
-    // $area = $this->areas_model->getAreaInfo($id_area, true);
-    $producotres = $this->getResguardos(false);
+    $resguardo = $this->getResguardoInfo($id_resguardo, true);
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
-
-    $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = "Catalogo de productores";
-    $titulo3 = '';
-
-    $html = '<table>
-      <tbody>
-        <tr>
-          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
-        </tr>
-        <tr>
-          <td colspan="3"></td>
-        </tr>
-        <tr style="font-weight:bold">
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre Fiscal</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calle</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No exterior</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">No interior</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Colonia</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Localidad</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Municipio</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pais</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CP</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Telefono</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Celular</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Email</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Parcela</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Ejido parcela</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Tipo</td>
-        </tr>';
-
-    foreach ($producotres['productores'] as $key => $clasif)
-    {
-      $html .= '<tr>
-          <td style="width:400px;border:1px solid #000;">'.utf8_decode($clasif->nombre_fiscal).'</td>
-          <td style="width:400px;border:1px solid #000;">'.utf8_decode($clasif->calle).'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->no_exterior.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->no_interior.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->colonia.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->localidad.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->municipio.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->estado.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->pais.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->cp.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->telefono.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->celular.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->email.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->parcela.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->ejido_parcela.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->tipo.'</td>
-        </tr>';
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $resguardo['info']->empresa;
+    if ($resguardo['info']->tipo === 'resguardo') {
+      $tipo_orden = 'RESGUARDO DE BIENES MUEBLES';
+    } else {
+      $tipo_orden = 'ASIGNACION DE PRODUCTOS';
     }
 
-    $html .= '
-      </tbody>
-    </table>';
+    $pdf->logo = $resguardo['info']->logo!=''? (file_exists($resguardo['info']->logo)? $resguardo['info']->logo: '') : '';
 
-    echo $html;
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFillColor(190,190,190);
+
+    $pdf->SetXY(6, $pdf->GetY()-10);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(150, 50));
+    $pdf->Row(array(
+      $tipo_orden,
+      '',
+    ), false, false);
+
+    $pdf->SetFont('helvetica','', 10);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(90, 115));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array('Clasificación', 'Producto'), true, true);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array($this->getTipoActivo($resguardo['info']->tipo_activo), $resguardo['info']->producto), false, true);
+
+    $pdf->SetWidths(array(50));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $auxy = $pdf->GetY();
+    $pdf->Row(array('Descripción'), true, true);
+    $pdf->SetWidths(array(155));
+    $pdf->SetXY(56, $auxy);
+    $pdf->Row(array($resguardo['info']->descripcion_activo), false, true);
+
+    $pdf->SetWidths(array(50));
+    $auxy = $pdf->GetY();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Importe'), true, true);
+    $pdf->SetWidths(array(155));
+    $pdf->SetXY(56, $auxy);
+    $pdf->Row(array(MyString::formatoNumero($resguardo['info']->monto_activo, 2, '$', false)), false, true);
+
+    $pdf->SetWidths(array(50));
+    $auxy = $pdf->GetY();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Fecha de Entrega'), true, true);
+    $pdf->SetWidths(array(155));
+    $pdf->SetXY(56, $auxy);
+    $pdf->Row(array($resguardo['info']->fecha_entrega), false, true);
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(100, 105));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array('Entrego', 'Recibió'), true, true);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array($resguardo['info']->entrego, $resguardo['info']->recibio), false, true);
+
+    $pdf->SetWidths(array(205));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array('Observaciones'), false, false);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array($resguardo['info']->observaciones), false, true);
+
+    if ($resguardo['info']->tipo === 'resguardo') {
+      $pdf->SetXY(6, $pdf->GetY()+10);
+      $pdf->Row(array("El Bien detallado en este documento forma parte del patrimonio de la empresa {$resguardo['info']->empresa}, y está dedicado al servicio de la misma, en la que el Custodio y Usuario es Responsable del buen uso que se haga de él. El Bien descrito lo recibe en buen estado y asume la responsabilidad que se derive de su mal uso, pérdida o daños ocasionados por el mal trato o utilización ajena a las funciones laborales de la empresa {$resguardo['info']->empresa}"), false, true);
+    }
+
+    $pdf->SetAligns(array('C', 'L'));
+    $pdf->SetWidths(array(200));
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->Row(array("____________________________________________\nREGISTRO: ".strtoupper($resguardo['info']->registro)), false, false);
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->Row(array("____________________________________________\nENTREGO: ".strtoupper($resguardo['info']->entrego)), false, false);
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->Row(array("____________________________________________\nRECIBE: ".strtoupper($resguardo['info']->recibio)), false, false);
+
+    if ($path)
+    {
+      $file = $path.'resguardo'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('resguardo'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
+
+  public function printListado()
+  {
+    $this->load->model('empresas_model');
+    $resguardos = $this->getResguardos(false);
+    $empresa = $this->empresas_model->getInfoEmpresa(true);
+    // echo "<pre>";
+    //   var_dump($resguardos);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $tipo_orden = 'RESGUARDO DE ACTIVOS';
+
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFillColor(190,190,190);
+
+    $pdf->SetXY(6, $pdf->GetY()-10);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(150, 50));
+    $pdf->Row(array(
+      $tipo_orden,
+      '',
+    ), false, false);
+
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'L');
+    $widths = array(68, 68, 68, 25, 20, 20);
+    $header = array('Producto', 'Entrego', 'Recibió', 'Fecha Entrega', 'Tipo', 'Status');
+
+    foreach ($resguardos['resguardos_activos'] as $key => $resg)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array(
+        $resg->producto,
+        $resg->entrego,
+        $resg->recibio,
+        $resg->fecha_entrega,
+        $resg->tipo,
+        ($resg->status == 't'? 'Activo': 'Eliminado'),
+      );
+      $pdf->SetXY(6, $pdf->getY());
+      $pdf->Row($datos, false);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetWidths([68, 38, 30, 133]);
+      $datos = array(
+        "Tipo Activo: ".$this->getTipoActivo($resg->tipo_activo),
+        "Monto: ".MyString::formatoNumero($resg->monto_activo, 2, '$', false),
+        "Finalizo: {$resg->fecha_finalizo}",
+        "Observaciones: {$resg->observaciones}",
+      );
+      $pdf->SetXY(6, $pdf->getY());
+      $pdf->Row($datos, false);
+
+      $pdf->SetXY(6, $pdf->getY()+3);
+
+    }
+
+    $pdf->Output('resguardo_lista.pdf', 'I');
   }
 
 }

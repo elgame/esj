@@ -183,6 +183,13 @@
                         value="<?php echo set_value('fmonto', (isset($data['info']->monto)? $data['info']->monto: '')) ?>" placeholder="Monto">
                   </div>
                 </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fdescripcion">Descripción</label>
+                  <div class="controls">
+                    <textarea name="fdescripcion" class="span12" rows="4"><?php echo set_value('fdescripcion', (isset($data['info']->descripcion)? $data['info']->descripcion: '')); ?></textarea>
+                  </div>
+                </div>
                 <?php endif ?>
               </div>
 

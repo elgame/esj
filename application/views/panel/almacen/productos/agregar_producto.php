@@ -170,6 +170,13 @@
                       value="<?php echo set_value('fmonto'); ?>" placeholder="Monto">
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fdescripcion">Descripción</label>
+                <div class="controls">
+                  <textarea name="fdescripcion" class="span12" rows="4"><?php echo set_value('fdescripcion'); ?></textarea>
+                </div>
+              </div>
               <?php endif ?>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $familia['info']->tipo ?>">

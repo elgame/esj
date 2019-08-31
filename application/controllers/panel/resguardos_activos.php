@@ -6,10 +6,9 @@ class resguardos_activos extends MY_Controller {
    * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
    * @var unknown_type
    */
-  private $excepcion_privilegio = array('productores/ajax_get_productores/',
-    'productores/merges/',
-    'productores/catalogo_xls/',
-    'productores/show_view_agregar_productor/');
+  private $excepcion_privilegio = array(
+    'resguardos_activos/resguardo_pdf/',
+  );
 
   public function _remap($method){
 
@@ -137,23 +136,21 @@ class resguardos_activos extends MY_Controller {
         $res_mdl = $this->resguardos_activos_model->updateResguardo($this->input->get('id'));
 
         if($res_mdl['error'] == FALSE)
-          redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
+          redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
       }
 
-      $params['productor'] = $this->resguardos_activos_model->getResguardoInfo();
-
-      $params['empresa']       = $this->empresas_model->getInfoEmpresa($params['productor']['info']->id_empresa);
+      $params['resguardo'] = $this->resguardos_activos_model->getResguardoInfo();
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
       $this->load->view('panel/header', $params);
       $this->load->view('panel/general/menu', $params);
-      $this->load->view('panel/productores/modificar', $params);
+      $this->load->view('panel/resguardo_activos/modificar', $params);
       $this->load->view('panel/footer');
     }
     else
-      redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -165,12 +162,12 @@ class resguardos_activos extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('resguardos_activos_model');
-      $res_mdl = $this->resguardos_activos_model->updateProductor( $this->input->get('id'), array('status' => 'e') );
+      $res_mdl = $this->resguardos_activos_model->updateResguardo( $this->input->get('id'), array('status' => 'f') );
       if($res_mdl)
-        redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
     }
     else
-      redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -182,28 +179,28 @@ class resguardos_activos extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('resguardos_activos_model');
-      $res_mdl = $this->resguardos_activos_model->updateProductor( $this->input->get('id'), array('status' => 'ac') );
+      $res_mdl = $this->resguardos_activos_model->updateResguardo( $this->input->get('id'), array('status' => 't') );
       if($res_mdl)
-        redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+        redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
     }
     else
-      redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/resguardos_activos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
-  /**
-   * Obtiene lostado de productores para el autocomplete, ajax
-   */
-  public function ajax_get_productores(){
-    $this->load->model('resguardos_activos_model');
-    $params = $this->resguardos_activos_model->getProductorAjax();
-
-    echo json_encode($params);
-  }
-
-  public function catalogo_xls()
+  public function imprimir()
   {
     $this->load->model('resguardos_activos_model');
-    $this->resguardos_activos_model->catalogo_xls();
+
+    if (isset($_GET['id']))
+    {
+      $this->resguardos_activos_model->printResguardo($_GET['id']);
+    }
+  }
+
+  public function resguardo_pdf()
+  {
+    $this->load->model('resguardos_activos_model');
+    $this->resguardos_activos_model->printListado();
   }
 
 
@@ -249,6 +246,9 @@ class resguardos_activos extends MY_Controller {
       array('field' => 'ffecha_entrego',
             'label' => 'Fecha de entrega',
             'rules' => 'max_length[60]'),
+      array('field' => 'fobservaciones',
+            'label' => 'Observaciones',
+            'rules' => 'max_length[1000]'),
     );
 
     $this->form_validation->set_rules($rules);

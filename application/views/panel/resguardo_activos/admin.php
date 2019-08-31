@@ -73,9 +73,9 @@
             </form>
 
 
-            <a href="<?php echo base_url('panel/resguardos_activos/catalogo_xls/?'.MyString::getVarsLink(array('fnombre')) ); ?>"
-                class="pull-left">
-              <i class="icon-table"></i> Catalogo</a>
+            <a href="<?php echo base_url('panel/resguardos_activos/resguardo_pdf/?'.MyString::getVarsLink(array('msg')) ); ?>"
+                class="pull-left" target="_blank">
+              <i class="icon-table"></i> Imprimir</a>
             <?php
             echo $this->usuarios_model->getLinkPrivSm('resguardos_activos/agregar/', array(
                     'params'   => '',
@@ -120,6 +120,10 @@
                     echo $this->usuarios_model->getLinkPrivSm('resguardos_activos/modificar/', array(
                         'params'   => 'id='.$resguardo->id_resguardo,
                         'btn_type' => 'btn-success')
+                    );
+                    echo $this->usuarios_model->getLinkPrivSm('resguardos_activos/imprimir/', array(
+                        'params'   => 'id='.$resguardo->id_resguardo,
+                        'btn_type' => 'btn-info')
                     );
                     if ($resguardo->status == 't') {
                       echo $this->usuarios_model->getLinkPrivSm('resguardos_activos/eliminar/', array(
