@@ -54,6 +54,13 @@
                   <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTES</option>
                   <option value="pa" <?php echo set_select_get('fstatus', 'pa'); ?>>PAGADAS</option>
                   <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
+                </select><br>
+
+                <label for="fxml">XML?</label>
+                <select name="fxml" class="input-medium" id="fxml">
+                  <option value="">TODOS</option>
+                  <option value="si" <?php echo set_select_get('fxml', 'si'); ?>>SI</option>
+                  <option value="no" <?php echo set_select_get('fxml', 'no'); ?>>NO</option>
                 </select>
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">

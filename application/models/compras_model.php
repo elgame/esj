@@ -56,6 +56,13 @@ class compras_model extends privilegios_model{
       $sql .= " AND co.isgasto = '".$this->input->get('ftipo')."'";
     }
 
+    if($this->input->get('fxml') == 'si')
+    {
+      $sql .= " AND Coalesce(co.uuid, '') <> ''";
+    } elseif ($this->input->get('fxml') == 'no') {
+      $sql .= " AND Coalesce(co.uuid, '') = ''";
+    }
+
     $query = BDUtil::pagination(
         "SELECT co.id_compra,
                 co.id_proveedor, p.nombre_fiscal AS proveedor,
