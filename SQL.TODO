@@ -3,7 +3,7 @@
  ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap
      ALTER TABLE public.productos ADD COLUMN fecha_compra date;
 
- ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc
+ ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc|san
      CREATE TABLE otros.resguardos_activos
         (
           id_resguardo bigserial NOT NULL,
@@ -40,14 +40,13 @@
         COMMENT ON COLUMN otros.resguardos_activos.tipo IS 'resguardo, asignacion';
         COMMENT ON COLUMN otros.resguardos_activos.fecha_finalizo IS 'fecha cuendo le quitaron el resguardo a esa persona';
         COMMENT ON COLUMN otros.resguardos_activos.id_recibio IS 'usuario que tiene asignado el resguardo';
-     -- pcc|pct
      ALTER TABLE otros.resguardos_activos ADD COLUMN status boolean NOT NULL DEFAULT true;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Resguardo de Activos',0,TRUE,'resguardos_activos/','hdd',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',508,TRUE,'resguardos_activos/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',508,FALSE,'resguardos_activos/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',508,FALSE,'resguardos_activos/eliminar/','remove',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',508,FALSE,'resguardos_activos/activar/','ok',FALSE);
-     -- pct
+     -- pct|lap|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',508,FALSE,'resguardos_activos/imprimir/','print',FALSE);
      ALTER TABLE public.productos ADD COLUMN descripcion character varying(1000);
      ALTER TABLE otros.resguardos_activos ADD COLUMN observaciones character varying(1000);

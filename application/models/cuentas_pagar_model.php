@@ -556,7 +556,7 @@ class cuentas_pagar_model extends privilegios_model{
 		}
 
 		//si es normex y sagarpa
-		if ($_GET['id_proveedor'] == 807) {
+		if ($_GET['id_proveedor'] == 3297) {
 			$aux = $_GET['id_proveedor'];
 
 			$_GET['id_proveedor'] = 147;
@@ -676,7 +676,7 @@ class cuentas_pagar_model extends privilegios_model{
       }
     }
     //si es normex y sagarpa
-		if ($_GET['id_proveedor'] == 807) {
+		if ($_GET['id_proveedor'] == 3297) {
 			$pdf->SetFont('Arial','B',10);
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetXY(6, $pdf->GetY()+2);

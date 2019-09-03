@@ -958,7 +958,7 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
     $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
 
-    $totalpreslgcp_monto = $totalpreslgcp_salini = $totalpreslgcp_pago_dia = $totalpreslgcp_salfin = 0;
+    $totalpreslgcp_monto = $totalpreslgcp_salini = $totalpreslgcp_pago_dia = $totalpreslgcp_salfin_fi = $totalpreslgcp_salfin_ef = 0;
     foreach ($caja['prestamos_dia'] as $prestamo) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
@@ -971,7 +971,11 @@ class caja_chica_prest_model extends CI_Model {
       $totalpreslgcp_monto    += floatval($prestamo->monto);
       $totalpreslgcp_salini   += floatval($prestamo->saldo_ini);
       $totalpreslgcp_pago_dia += floatval($prestamo->pago_dia);
-      $totalpreslgcp_salfin   += floatval($prestamo->saldo_fin);
+      if ($prestamo->tipo == 'fi') {
+        $totalpreslgcp_salfin_fi   += floatval($prestamo->saldo_fin); // fiscal
+      } else {
+        $totalpreslgcp_salfin_ef   += floatval($prestamo->saldo_fin); // efectivo
+      }
 
       $pdf->SetX(6);
 
@@ -1013,11 +1017,11 @@ class caja_chica_prest_model extends CI_Model {
       MyString::formatoNumero($totalpreslgcp_salini, 2, '$', false),
       MyString::formatoNumero($totalpreslgcp_pago_dia, 2, '$', false),
       '', '',
-      MyString::formatoNumero($totalpreslgcp_salfin, 2, '$', false),
+      MyString::formatoNumero(($totalpreslgcp_salfin_fi+$totalpreslgcp_salfin_ef), 2, '$', false),
       ), true, 'B');
 
     $tt_saldo_inicial       = $totalpreslp_salini+$totalprescp_salini;
-    $tt_saldo_finales       = $totalpreslp_salfin+$totalprescp_salfin+$totalpreslgcp_salfin;
+    $tt_saldo_finales       = $totalpreslp_salfin+$totalprescp_salfin+$totalpreslgcp_salfin_fi+$totalpreslgcp_salfin_ef;
     $tt_efectivo_anterior   = $saldofc-$tt_saldo_inicial;
     $tt_caja_ingreso        = $totalpreslp_pago_dia+$totalprescp_pago_dia+$totalpreslgcp_pago_dia;
     $tt_caja_egreso         = $totalpreslgcp_monto;
@@ -1108,20 +1112,21 @@ class caja_chica_prest_model extends CI_Model {
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('CAJA INGRESOS ', MyString::formatoNumero($tt_caja_ingreso, 2, '$', false),
-                    'PTMO DEL DIA', MyString::formatoNumero($totalpreslgcp_salfin, 2, '$', false)), false, false);
+                    'PTMO DEL DIA FI', MyString::formatoNumero($totalpreslgcp_salfin_fi, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('CAJA EGRESOS', MyString::formatoNumero($totalpreslgcp_monto, 2, '$', false),
-                    'TABULACION DE EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
+                    'PTMO DEL DIA EF', MyString::formatoNumero($totalpreslgcp_salfin_ef, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('EFECTIVO DISPONIBLE', MyString::formatoNumero($tt_efectivo_disponible, 2, '$', false),
+                    'TABULACION DE EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
+    $this->saltaPag($pdf);
+    $pdf->SetX(63);
+    $pdf->Row(array('DIFERENCIA DEL CORTE', MyString::formatoNumero($tt_efectivo_disponible-$totalEfectivo, 2, '$', false),
                     'TOTAL', MyString::formatoNumero($totalpreslp_salfin_ef+$totalprescp_salfin+$totalEfectivo, 2, '$', false)), false, false);
 
     $pdf->SetWidths(array(25, 19));
-    $this->saltaPag($pdf);
-    $pdf->SetX(63);
-    $pdf->Row(array('DIFERENCIA DEL CORTE', MyString::formatoNumero($tt_efectivo_disponible-$totalEfectivo, 2, '$', false)), false, false);
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero(($totalEfectivo+($tt_efectivo_disponible-$totalEfectivo)+$tt_saldo_finales), 2, '$', false)), false, false);
