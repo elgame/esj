@@ -282,7 +282,8 @@ var addpallets = (function($){
             data: {
               term : request.term,
               did_empresa : '2,3,4,5,7,15',
-              empresa: 'si'
+              empresa: 'si',
+              dir_emp: 'l'
             },
             success: function(data) {
                 response(data);
