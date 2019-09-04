@@ -912,16 +912,18 @@ class polizas_model extends CI_Model {
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
       $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
-
-    if (!empty($this->uuidsADD)) {
-      $response['data'] .= $this->uuidsADD;
-    }
 
     $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
@@ -1009,6 +1011,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
                             $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
           }
           //Colocamos el Abono al Cliente de la factura
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -1020,6 +1023,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
           {
@@ -1034,10 +1038,17 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
             }
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
