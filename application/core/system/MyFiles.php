@@ -61,6 +61,7 @@ class MyFiles {
             $uuid = (string)$xml->Complemento->TimbreFiscalDigital['UUID'];
             $fecha = substr((((string)$xml['fecha'])<>''? (string)$xml['fecha']: (string)$xml['Fecha']), 0, 10);
             $folio = (($xml['serie'].$xml['folio'])<>''? $xml['serie'].$xml['folio']: $xml['Serie'].$xml['Folio']);
+            $folioInt = (($xml['folio'])<>''? $xml['folio']: $xml['Folio']);
             $noCertificado = ((string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']<>''?
               (string)$xml->Complemento->TimbreFiscalDigital['noCertificadoSAT']:
               (string)$xml->Complemento->TimbreFiscalDigital['NoCertificadoSAT']);
@@ -88,7 +89,7 @@ class MyFiles {
               $find = true;
 
             if ($find) {
-              $files[strtotime($fecha)+$folio] = [
+              $files[strtotime($fecha)+intval($folioInt)] = [
                 'name'          => $file->getBasename(),
                 'rfc'           => $brfcProv,
                 'fecha'         => $fecha,
