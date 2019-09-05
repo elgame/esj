@@ -252,7 +252,7 @@ class caja_chica_prest_model extends CI_Model {
         (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
         Date(cp.fecha) AS fecha, cp.monto, cp.concepto,
         (cp.monto-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago, 'ef' AS tipo
       FROM otros.cajaprestamo_prestamos cp
         INNER JOIN usuarios u ON u.id = cp.id_empleado
         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
