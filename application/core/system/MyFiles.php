@@ -88,7 +88,7 @@ class MyFiles {
               $find = true;
 
             if ($find) {
-              $files[strtotime($fecha)] = [
+              $files[strtotime($fecha)+$folio] = [
                 'name'          => $file->getBasename(),
                 'rfc'           => $brfcProv,
                 'fecha'         => $fecha,
