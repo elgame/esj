@@ -38,6 +38,8 @@ class gastos_model extends privilegios_model{
       'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
       'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
 
     //Cuenta espesifica al gasto
     if(is_numeric($data['did_cuentacpi']))
@@ -59,31 +61,31 @@ class gastos_model extends privilegios_model{
     //     return array('passes' => false, 'msg' => 30);
     // }
 
-    // Realiza el upload del XML.
-    if ($xml && $xml['tmp_name'] !== '')
-    {
-      $this->load->library("my_upload");
-      $this->load->model('proveedores_model');
+    // // Realiza el upload del XML.
+    // if ($xml && $xml['tmp_name'] !== '')
+    // {
+    //   $this->load->library("my_upload");
+    //   $this->load->model('proveedores_model');
 
-      $proveedor = $this->proveedores_model->getProveedorInfo($datos['id_proveedor']);
-      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+    //   $proveedor = $this->proveedores_model->getProveedorInfo($datos['id_proveedor']);
+    //   $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
 
-      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+    //   $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => $xmlName,
-      );
-      $this->my_upload->initialize($config_upload);
+    //   $config_upload = array(
+    //     'upload_path'     => $path,
+    //     'allowed_types'   => '*',
+    //     'max_size'        => '2048',
+    //     'encrypt_name'    => FALSE,
+    //     'file_name'       => $xmlName,
+    //   );
+    //   $this->my_upload->initialize($config_upload);
 
-      $xmlData = $this->my_upload->do_upload('xml');
+    //   $xmlData = $this->my_upload->do_upload('xml');
 
-      $xmlFile     = explode('application', $xmlData['full_path']);
-      $datos['xml'] = 'application'.$xmlFile[1];
-    }
+    //   $xmlFile     = explode('application', $xmlData['full_path']);
+    //   $datos['xml'] = 'application'.$xmlFile[1];
+    // }
 
     // inserta la compra
     $this->db->insert('compras', $datos);

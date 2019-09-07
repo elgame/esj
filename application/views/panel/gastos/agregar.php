@@ -111,11 +111,23 @@
                 </div>
 
                 <div class="control-group">
+                  <div class="controls span8">
+                    <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.set_value('empresaId', $empresa_default->id_empresa).'&idp='.set_value('proveedorId').'') ?>"
+                      data-href="<?php echo base_url('panel/gastos/verXml/') ?>"
+                      rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                      <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                    <span style="float: right;">
+                      UUID: <input type="text" name="uuid" value="" id="buscarUuid"><br>
+                      No Certificado: <input type="text" name="noCertificado" value="" id="buscarNoCertificado">
+                    </span>
+                  </div>
+                </div>
+                <!-- <div class="control-group">
                   <label class="control-label" for="xml">XML</label>
                   <div class="controls">
                     <input type="file" name="xml" class="span9" id="xml" data-uniform="false" accept="text/xml">
                   </div>
-                </div>
+                </div> -->
 
                 <div class="control-group">
                   <label class="control-label" for="concepto">Concepto</label>

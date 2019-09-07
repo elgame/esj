@@ -189,7 +189,7 @@ class gastos extends MY_Controller {
     $params['ide']     = $ide;
     $params['empresa'] = $this->empresas_model->getInfoEmpresa($ide, true);
 
-    $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): $params['proveedor']['info']->rfc;
+    $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): (isset($params['proveedor']['info']->rfc)? $params['proveedor']['info']->rfc: '');
     $params['rfc'] = $rfcProv;
 
     $path = mb_convert_encoding("C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8"); // C:\DescargasXMLenlinea/

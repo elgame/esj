@@ -80,6 +80,11 @@
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
 
+          $('#proveedor').val('');
+          $('#proveedorId').val('');
+
+          $('#supermodalBtn').attr('href', $('#supermodalBtn').attr('data-href')+'?ide='+ui.item.id+'&idp='+$('#proveedorId').val());
+
           $('#groupCatalogos').show();
           $('#area').val('');
           $('#areaId').val('');
@@ -92,6 +97,8 @@
         if(event.which == 8 || event == 46){
           $(this).css("background-color", "#FFD9B3");
           $("#empresaId").val("");
+          $('#proveedor').val('');
+          $('#proveedorId').val('');
 
           $('#area').val('');
           $('#areaId').val('');
@@ -137,6 +144,8 @@
 
           $('#fcuentas_proveedor').html(htmlOptions);
         }, 'json');
+
+        $('#supermodalBtn').attr('href', $('#supermodalBtn').attr('data-href')+'?ide='+$('#empresaId').val()+'&idp='+ui.item.id);
 
       }
     }).on("keydown", function(event) {
