@@ -10098,7 +10098,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtenemos la info de la factura a cancelar.
     $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext,
-                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
+                                  u.rfc AS rfc_rec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_ptu AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
                                 INNER JOIN usuarios AS u ON u.id = nf.id_empleado
@@ -10111,7 +10111,7 @@ class nomina_fiscal_model extends CI_Model {
     // Parametros que necesita el webservice para la cancelacion.
     $params = array(
       'rfc'    => $query->rfc,
-      'rfcRec' => $query->rfcRec,
+      'rfcRec' => $query->rfc_rec,
       'uuids'  => $query->uuid,
       'cer'    => $this->cfdi->obtenCer(),
       'key'    => $this->cfdi->obtenKey(),
@@ -10122,7 +10122,7 @@ class nomina_fiscal_model extends CI_Model {
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
 
-    if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
+    if ($result->data->status_uuid == 201 || $result->data->status_uuid == 202)
     {
       $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
@@ -12162,7 +12162,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtenemos la info de la factura a cancelar.
     $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext,
-                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
+                                  u.rfc AS rfc_rec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_aguinaldo AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
                                 INNER JOIN usuarios AS u ON u.id = nf.id_empleado
@@ -12175,7 +12175,7 @@ class nomina_fiscal_model extends CI_Model {
     // Parametros que necesita el webservice para la cancelacion.
     $params = array(
       'rfc'    => $query->rfc,
-      'rfcRec' => $query->rfcRec,
+      'rfcRec' => $query->rfc_rec,
       'uuids'  => $query->uuid,
       'cer'    => $this->cfdi->obtenCer(),
       'key'    => $this->cfdi->obtenKey(),
@@ -12186,7 +12186,7 @@ class nomina_fiscal_model extends CI_Model {
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
 
-    if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
+    if ($result->data->status_uuid == 201 || $result->data->status_uuid == 202)
     {
       $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
@@ -12230,7 +12230,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtenemos la info de la factura a cancelar.
     $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal, nf.xml, nf.cfdi_ext, nf.otros_datos,
-                                  u.rfc AS rfcRec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
+                                  u.rfc AS rfc_rec, nf.total_neto, nf.cfdi_ext->'timbre'->>'sello' AS sello
                                FROM nomina_fiscal AS nf
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
                                 INNER JOIN usuarios AS u ON u.id = nf.id_empleado
@@ -12245,7 +12245,7 @@ class nomina_fiscal_model extends CI_Model {
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
         'rfc'    => $query->rfc,
-        'rfcRec' => $query->rfcRec,
+        'rfcRec' => $query->rfc_rec,
         'uuids'  => $query->uuid,
         'cer'    => $this->cfdi->obtenCer(),
         'key'    => $this->cfdi->obtenKey(),
@@ -12257,7 +12257,7 @@ class nomina_fiscal_model extends CI_Model {
       $result = $this->facturartebarato_api->cancelar($params);
 
       $cancelada = false;
-      if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
+      if ($result->data->status_uuid == 201 || $result->data->status_uuid == 202)
       {
         $data_cancelnom = $this->db->query("SELECT Count(*) AS num
                                FROM nomina_fiscal_canceladas
