@@ -29,6 +29,8 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/imprimir_com_pago/',
     'cuentas_cobrar/xml_com_pago/',
     'cuentas_cobrar/ajax_get_com_pagos/',
+
+    'cuentas_cobrar/reporte_pdf/',
   );
 
 
@@ -460,6 +462,33 @@ class cuentas_cobrar extends MY_Controller {
   public function rpt_ventas2_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->rptVentasClienteXls();
+  }
+
+  public function reporte()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Compras y productos');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/rptcompras_productos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function reporte_pdf(){
+    $this->load->model('compras_model');
+    $this->compras_model->getRptComprasProductosPdf();
   }
 
   /**
