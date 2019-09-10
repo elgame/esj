@@ -1531,7 +1531,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
          LEFT JOIN cajachica_categorias cc ON cc.id_empresa = bc.id_empresa
        WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0
-        AND DATE(bm.fecha) > (Now() - interval '3 months') {$sql}
+        AND DATE(bm.fecha) > (Now() - interval '6 months') {$sql}
        ORDER BY bm.fecha ASC, ci.id_ingresos ASC
     ");
 
