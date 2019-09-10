@@ -11,7 +11,7 @@ class gastos_model extends privilegios_model{
    * @param  array $data
    * @return array
    */
-  public function agregar($data, $xml)
+  public function agregar($data)
   {
     // datos del gasto.
     $datos = array(

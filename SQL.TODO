@@ -2,6 +2,8 @@
 
  ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap
      ALTER TABLE public.productos ADD COLUMN fecha_compra date;
+     --pcc|san
+     ALTER TABLE public.compras ALTER COLUMN folio TYPE bigint;
 
  ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc|san
      CREATE TABLE otros.resguardos_activos

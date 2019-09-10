@@ -66,7 +66,7 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->gastos_model->agregar($_POST, $_FILES['xml']);
+      $res_mdl = $this->gastos_model->agregar($_POST);
 
       if ($res_mdl['passes'])
       {
