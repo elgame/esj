@@ -1,8 +1,8 @@
 
 
- ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc
+ ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',84,TRUE,'cuentas_cobrar/reporte/','print',TRUE);
-     --pcc
+     --pcc|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',144,TRUE,'cuentas_pagar/reporte/','print',TRUE);
 
  ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap
