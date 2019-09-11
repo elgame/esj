@@ -2062,4 +2062,156 @@ class cuentas_pagar_model extends privilegios_model{
     echo $html;
   }
 
+  public function rptFacturasVencidasData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $sql .= " AND (Date(f.fecha) >= '{$_GET['ffecha1']}' AND Date(f.fecha) <= '{$_GET['ffecha2']}')";
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND f.id_empresa = {$_GET['did_empresa']}";
+    }
+
+    $response = array();
+    $facturas = $this->db->query("SELECT
+      f.id_compra,
+      f.serie,
+      f.folio,
+      Date(f.fecha) AS fecha,
+      p.nombre_fiscal AS proveedor,
+      COALESCE(f.total, 0) AS cargo,
+      COALESCE(f.importe_iva, 0) AS iva,
+      COALESCE(ac.abono, 0) AS abono,
+      (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+      (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
+      Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+      (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
+      ('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
+      'f'::text as tipo, f.status,
+      COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
+    FROM compras AS f
+      INNER JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+      LEFT JOIN (
+        SELECT id_compra, Sum(abono) AS abono
+        FROM (
+          (
+            SELECT
+              id_compra,
+              Sum(total) AS abono
+            FROM
+              compras_abonos as fa
+            WHERE Date(fecha) <= '2019-09-10'
+            GROUP BY id_compra
+          )
+          UNION
+          (
+            SELECT
+              id_nc AS id_compra,
+              Sum(total) AS abonos
+            FROM
+              compras
+            WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+              AND id_proveedor = 173
+              AND Date(fecha) <= '2019-09-10'
+            GROUP BY id_nc
+          )
+        ) AS ffs
+        GROUP BY id_compra
+      ) AS ac ON f.id_compra = ac.id_compra  AND f.id_empresa = {$_GET['did_empresa']}
+    WHERE f.status <> 'ca' AND f.id_nc IS NULL
+      AND (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) > 0
+      AND Date(f.fecha + (f.plazo_credito || ' days')::interval) <= Date(Now())
+      {$sql}
+    ORDER BY proveedor ASC, fecha ASC, serie ASC, folio ASC");
+    $response = $facturas->result();
+
+    return $response;
+  }
+  public function rptFacturasVencidasPdf(){
+    $res = $this->rptFacturasVencidasData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Facturas Vencidas';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('tipo')==''? 'Todas': ($this->input->get('tipo')=='t'? 'Facturas': 'Remisiones') );
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'R', 'R', 'R', 'L');
+    $widths = array(19, 25, 60, 25, 25, 25, 25);
+    $header = array('Fecha', 'Factura', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'F. Vencimiento');
+
+    $proveedor_aux = '';
+    $show_headers = false;
+    foreach($res as $key => $factura){
+
+      if ($proveedor_aux !== $factura->proveedor) {
+        if ($pdf->GetY() >= $pdf->limiteY || $key==0) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([200]);
+        $pdf->Row([$factura->proveedor], false, false);
+
+        $proveedor_aux = $factura->proveedor;
+        $show_headers = true;
+      }
+
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $show_headers){ //salta de pagina si exede el max
+        $show_headers = false;
+        if ($pdf->GetY() >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFillColor(200,200,200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = [
+        MyString::fechaATexto($factura->fecha, '/c'),
+        $factura->serie.$factura->folio,
+        $factura->concepto,
+        MyString::formatoNumero($factura->cargo, 2, '', false),
+        MyString::formatoNumero($factura->abono, 2, '', false),
+        MyString::formatoNumero($factura->saldo, 2, '', false),
+        MyString::fechaATexto($factura->fecha_vencimiento, '/c'),
+      ];
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+    }
+
+
+    $pdf->Output('facturas_vencidas.pdf', 'I');
+  }
+
 }

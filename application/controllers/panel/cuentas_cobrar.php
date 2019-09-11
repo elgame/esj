@@ -475,7 +475,7 @@ class cuentas_cobrar extends MY_Controller {
     $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Reporte Compras y productos');
+    $params['seo']        = array('titulo' => 'Reporte Facturas Vencidas');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
@@ -483,12 +483,12 @@ class cuentas_cobrar extends MY_Controller {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header',$params);
-    $this->load->view('panel/almacen/compras/rptcompras_productos',$params);
+    $this->load->view('panel/cuentas_cobrar/rpt_facturas_vencidas',$params);
     $this->load->view('panel/footer',$params);
   }
   public function reporte_pdf(){
-    $this->load->model('compras_model');
-    $this->compras_model->getRptComprasProductosPdf();
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->rptFacturasVencidasPdf();
   }
 
   /**
