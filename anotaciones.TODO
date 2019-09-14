@@ -1,6 +1,7 @@
 
+ ☐ Reportes de facturas vencidas, apartado de resguardos, pólizas asociar uuid, pago masivo bajio
  ☐ En los reportes del iva de devoluciones, tomar la fecha de pago, si no tiene que no salgan y un reporte que salga las 3 tasas de iva
- ☐ En las notas de credito de compras poner el xml, poner filtro de xml en el listado
+ ✔ En las notas de credito de compras poner el xml, poner filtro de xml en el listado @done (19-09-14 10:47)
  ✔ Resguardos @done (19-09-03 13:56)
  ✔ rfc(3)0001fecha(6 digitos) @done (19-08-27 15:35)
  ✔ En las cajas imprimir tiket en traspasos y prestamos @done (19-07-13 14:29)

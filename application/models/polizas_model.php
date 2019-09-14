@@ -1181,7 +1181,7 @@ class polizas_model extends CI_Model {
 
           foreach ($productos_grups as $key => $value)
           {
-            if($value->importe > 0)
+            if($value->importe > 0){
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($value->cuenta_cpi, 30).  //cuenta conpaq
                             $this->setEspacios('F/'.$inf_compra['info']->serie.$inf_compra['info']->folio,10).
@@ -1191,6 +1191,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
+            }
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
@@ -1206,6 +1208,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
             }
           }
 
@@ -1219,6 +1222,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
 
           unset($inf_compra);
         }
@@ -1258,6 +1262,12 @@ class polizas_model extends CI_Model {
         //   }
         //   unset($inf_compra);
         // }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
@@ -1345,6 +1355,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
 
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
@@ -1364,6 +1375,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
@@ -1379,10 +1391,17 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
             }
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
@@ -1946,6 +1965,54 @@ class polizas_model extends CI_Model {
       ) AS t
       WHERE es_traspaso = 0
       ORDER BY fecha ASC");
+    // echo "<pre>";
+    //   var_dump("SELECT *
+    //   FROM (
+    //     (
+    //       SELECT
+    //         bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
+    //         bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+    //         Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+    //         c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
+    //         string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
+    //         'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso
+    //       FROM facturacion AS f
+    //         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+    //         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+    //         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+    //         INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+    //       WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
+    //          {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
+    //          AND f.id_abono_factura IS NULL
+    //       GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
+    //         bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
+    //       ORDER BY bmf.id_movimiento ASC
+    //     )
+    //     UNION
+    //     (
+    //       SELECT
+    //         bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
+    //         bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva,
+    //         COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
+    //         COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
+    //         0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
+    //         'banco'::character varying AS tipoo,
+    //         (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso
+    //       FROM banco_movimientos AS bm
+    //         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
+    //         LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+    //         LEFT JOIN banco_movimientos_facturas AS bmc ON bmc.id_movimiento = bm.id_movimiento
+    //         LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
+    //       WHERE bm.status = 't' AND bm.tipo = 't' AND bm.clasificacion <> 'elimon' {$sql2}
+    //       GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
+    //         bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
+    //       HAVING Count(bmc.id_movimiento) = 0
+    //       ORDER BY bm.fecha ASC
+    //     )
+    //   ) AS t
+    //   WHERE es_traspaso = 0
+    //   ORDER BY fecha ASC");
+    // echo "</pre>";exit;
 
     if($query->num_rows() > 0)
     {
