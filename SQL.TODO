@@ -1,13 +1,12 @@
 
 
- ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc|san
+ ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',84,TRUE,'cuentas_cobrar/reporte/','print',TRUE);
-     --pcc|san
+     --pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',144,TRUE,'cuentas_pagar/reporte/','print',TRUE);
 
  ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap
      ALTER TABLE public.productos ADD COLUMN fecha_compra date;
-     --pcc|san|pct
      ALTER TABLE public.compras ALTER COLUMN folio TYPE bigint;
 
  ✔ Modulo de resguardos @done (19-08-22 16:47) lap|pct|pcc|san

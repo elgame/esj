@@ -42,7 +42,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
           $reg .= "000000000";
           $reg .= $this->llena0(15, trim($value['alias']), ' ', 'D');
           $reg .= $this->llena0(15, number_format($value['importe_iva'], 2, '', '') );
-         //$reg .= "000000000000000"
+          //$reg .= "000000000000000"
           $reg .= $this->llena0(40, trim($value['descripcion']), ' ', 'D')."\r\n";
           $total += floatval(number_format($value['monto'], 2, '.', ''));
           $renglon++;
