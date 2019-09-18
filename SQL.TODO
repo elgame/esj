@@ -1,8 +1,25 @@
 
+ ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct
+   CREATE TABLE otros.paletas_salidas_manifesto
+      (
+        id_paleta_salida bigint NOT NULL,
+        empresa_contratante character varying(200),
+        cliente_destino character varying(200),
+        direccion character varying(1000),
+        dia_llegada date,
+        hr_entrega character varying(50),
+        placa_termo character varying(150),
+        temperatura character varying(40),
+        orden_flete character varying(150),
+        CONSTRAINT paletas_salidas_manifesto_pkey PRIMARY KEY (id_paleta_salida),
+        CONSTRAINT paletas_salidas_manifesto_id_paleta_salida_fkey FOREIGN KEY (id_paleta_salida)
+            REFERENCES otros.paletas_salidas (id_paleta_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.paletas_salidas_manifesto OWNER TO programa;
 
  ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',84,TRUE,'cuentas_cobrar/reporte/','print',TRUE);
-     --pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',144,TRUE,'cuentas_pagar/reporte/','print',TRUE);
 
  ✔ Productos codigo @done (19-08-26 23:13) pcc|pct|san|lap

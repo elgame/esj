@@ -199,6 +199,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
 
     $this->savePallets($id_paleta);
 
+    $this->saveManifesto($id_paleta);
+
     return array('msg' => 3, 'id' => $id_paleta);
   }
 
@@ -224,6 +226,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $this->saveClasificaciones($id_paleta);
 
     $this->savePallets($id_paleta);
+
+    $this->saveManifesto($id_paleta);
 
     return array('msg' => 5, 'id' => $id_paleta);
   }
@@ -283,6 +287,29 @@ class rastreabilidad_paletas_model extends privilegios_model {
     if(count($data) > 0) {
       $this->db->insert_batch('otros.paletas_salidas_pallets', $data);
     }
+
+    return true;
+  }
+
+  public function saveManifesto($id_paleta, $data=null)
+  {
+    if ($data==NULL)
+    {
+      $data = array(
+        'id_paleta_salida'    => $id_paleta,
+        'empresa_contratante' => $this->input->post('empresa_contratante'),
+        'cliente_destino'     => $this->input->post('cliente_destino'),
+        'direccion'           => $this->input->post('direccion'),
+        'dia_llegada'         => $this->input->post('dia_llegada'),
+        'hr_entrega'          => $this->input->post('hr_entrega'),
+        'placa_termo'         => $this->input->post('placa_termo'),
+        'temperatura'         => $this->input->post('temperatura'),
+        'orden_flete'         => $this->input->post('orden_flete'),
+      );
+    }
+
+    $this->db->delete('otros.paletas_salidas_manifesto', ['id_paleta_salida' => $id_paleta]);
+    $this->db->insert('otros.paletas_salidas_manifesto', $data);
 
     return true;
   }
@@ -492,8 +519,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $pdf->SetXY(6, $pdf->GetY()+2);
       $pdf->Row2([
         'CLIENTE:', $value->cliente,
-        'REMISION:', "{$value->folio_rem}/{$value->total_rem}",
-        'FACTURA:', "{$value->folio_fact}/{$value->total_fact}",
+        'REMISION:', "{$value->folio_rem}/".str_replace('.', '', $value->total_rem),
+        'FACTURA:', "{$value->folio_fact}/".str_replace('.', '', $value->total_fact),
       ], false, false);
 
       $data['otros_facturas'][] = $value->folio_fact;
