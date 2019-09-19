@@ -91,8 +91,16 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $result->free_result();
 
       if (!$basic_info || $all) {
+        $result = $this->db->query("SELECT empresa_contratante, cliente_destino, direccion, dia_llegada,
+            hr_entrega, placa_termo, temperatura, orden_flete
+          FROM otros.paletas_salidas_manifesto
+          WHERE id_paleta_salida = {$id_paleta}");
+        $response['paleta']->manifesto = $result->row();
+        $result->free_result();
+
         $result = $this->db->query("SELECT psp.id_paleta_salida, psp.num_rows, psp.id_cliente, psp.id_clasificacion,
-            psp.clasificacion, psp.id_unidad, psp.unidad, u.cantidad AS cantidad_unidad, psp.cantidad, psp.kilos,
+            psp.clasificacion, psp.id_unidad, psp.unidad,
+            (CASE u.cantidad WHEN 0 THEN cl.unidad_cantidad ELSE u.cantidad END) AS cantidad_unidad, psp.cantidad, psp.kilos,
             psp.id_pallet, c.nombre_fiscal AS cliente
           FROM otros.paletas_salidas_productos psp
             INNER JOIN clientes c ON c.id_cliente = psp.id_cliente
@@ -120,7 +128,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
 
         if ($all) {
           $listClientes = array_unique(array_column($response['clasificaciones'], 'id_cliente'));
-          $response['paleta']->carga_compartida = (count($listClientes)>0? 'Si': 'No');
+          $response['paleta']->carga_compartida = (count($listClientes)>1? 'Si': 'No');
 
           $response['paleta']->total_tarimas = count($response['pallets']);
           $response['paleta']->total_bultos = 0;
@@ -699,11 +707,14 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->Row(['CONDICIONES DEL FLETE', 'DESTINO'], true, true);
     $pdf->SetAligns(['L', 'L']);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['EMPRESA CONTRATANTE:', 'No FACTURA:'.implode(', ',  (!empty($data['otros_facturas'])? $data['otros_facturas']: []))]);
+    $pdf->Row(['EMPRESA CONTRATANTE: '.(!empty($data['paleta']->manifesto->empresa_contratante)? $data['paleta']->manifesto->empresa_contratante: ''),
+      'No FACTURA: '.implode(', ',  (!empty($data['otros_facturas'])? $data['otros_facturas']: []))]);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['CLIENTE DESTINO:', 'DIA DE LLEGADA:']);
+    $pdf->Row(['CLIENTE DESTINO: '.(!empty($data['paleta']->manifesto->cliente_destino)? $data['paleta']->manifesto->cliente_destino: ''),
+      'DIA DE LLEGADA: '.(!empty($data['paleta']->manifesto->dia_llegada)? $data['paleta']->manifesto->dia_llegada: '')]);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['DIRECCION:', 'HR DE ENTREGA:']);
+    $pdf->Row(['DIRECCION: '.(!empty($data['paleta']->manifesto->direccion)? $data['paleta']->manifesto->direccion: ''),
+      'HR DE ENTREGA: '.(!empty($data['paleta']->manifesto->hr_entrega)? $data['paleta']->manifesto->hr_entrega: '')]);
 
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(['C', 'C']);
@@ -730,10 +741,10 @@ class rastreabilidad_paletas_model extends privilegios_model {
       'No Pesada: '.$data['paleta']->folio,
     ]);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(['Placas Termo: ',
+    $pdf->Row(['Placas Termo: '.(!empty($data['paleta']->manifesto->placa_termo)? $data['paleta']->manifesto->placa_termo: ''),
       'Color: '.$data['paleta']->camion->color,
-      'Temp: ',
-      'Orden Flete: '
+      'Temp: '.(!empty($data['paleta']->manifesto->temperatura)? $data['paleta']->manifesto->temperatura: ''),
+      'Orden Flete: '.(!empty($data['paleta']->manifesto->orden_flete)? $data['paleta']->manifesto->orden_flete: '')
     ]);
 
     $pdf->SetFont('Arial', '', 8);

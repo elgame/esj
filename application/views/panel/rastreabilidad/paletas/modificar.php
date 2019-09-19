@@ -90,6 +90,85 @@
                     </div>
                   </div><!--/control-group -->
                 </div>
+
+                <div class="row-fluid">
+                  <div class="control-group span6">
+                    <label class="control-label" for="empresa_contratante">Empresa contratante </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="empresa_contratante" id="empresa_contratante" class="span11" value="<?php echo (isset($info['paleta']->manifesto->empresa_contratante)? $info['paleta']->manifesto->empresa_contratante: ''); ?>" data-next="cliente_destino">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
+                  <div class="control-group span6">
+                    <label class="control-label" for="cliente_destino">Cliente Destino </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="cliente_destino" id="cliente_destino" class="span11" value="<?php echo (isset($info['paleta']->manifesto->cliente_destino)? $info['paleta']->manifesto->cliente_destino: ''); ?>" data-next="direccion">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+                </div>
+
+                <div class="row-fluid">
+                  <div class="control-group span12">
+                    <label class="control-label" for="direccion">Dirección </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="direccion" id="direccion" class="span11" value="<?php echo (isset($info['paleta']->manifesto->direccion)? $info['paleta']->manifesto->direccion: ''); ?>" data-next="dia_llegada">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+                </div>
+
+                <div class="row-fluid">
+                  <div class="control-group span4">
+                    <label class="control-label" for="dia_llegada">Día de llegada </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="date" name="dia_llegada" id="dia_llegada" class="span12" value="<?php echo (isset($info['paleta']->manifesto->dia_llegada)? $info['paleta']->manifesto->dia_llegada: ''); ?>" data-next="hr_entrega">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
+                  <div class="control-group span4">
+                    <label class="control-label" for="hr_entrega">Hr de entrega </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="hr_entrega" id="hr_entrega" class="span12" value="<?php echo (isset($info['paleta']->manifesto->hr_entrega)? $info['paleta']->manifesto->hr_entrega: ''); ?>" data-next="placa_termo">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
+                  <div class="control-group span4">
+                    <label class="control-label" for="placa_termo">Placa termo </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="placa_termo" id="placa_termo" class="span12" value="<?php echo (isset($info['paleta']->manifesto->placa_termo)? $info['paleta']->manifesto->placa_termo: ''); ?>" data-next="temperatura">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
+                  <div class="control-group span4">
+                    <label class="control-label" for="temperatura">Temperatura </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="temperatura" id="temperatura" class="span12" value="<?php echo (isset($info['paleta']->manifesto->temperatura)? $info['paleta']->manifesto->temperatura: ''); ?>" data-next="orden_flete">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
+                  <div class="control-group span4">
+                    <label class="control-label" for="orden_flete">Orden de Flete </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="orden_flete" id="orden_flete" class="span12" value="<?php echo (isset($info['paleta']->manifesto->orden_flete)? $info['paleta']->manifesto->orden_flete: ''); ?>" data-next="prod_cliente">
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+                </div>
+
                 <div class="clearfix"></div>
 
                 <div class="row-fluid" id="show-table-prod">
@@ -125,6 +204,7 @@
                                   $selected = '';
                                   if ($u->id_unidad == $clasificacion->id_unidad) {
                                     $selected = 'selected';
+                                    $u->cantidad = $clasificacion->cantidad_unidad;
                                   }
                                 ?>
                                   <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo $selected ?>><?php echo $u->nombre ?></option>

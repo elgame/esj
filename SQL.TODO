@@ -1,5 +1,5 @@
 
- ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct
+ ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc
    CREATE TABLE otros.paletas_salidas_manifesto
       (
         id_paleta_salida bigint NOT NULL,
@@ -17,6 +17,11 @@
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE );
       ALTER TABLE otros.paletas_salidas_manifesto OWNER TO programa;
+   ALTER TABLE public.clasificaciones ADD COLUMN unidad_cantidad double precision;
+   UPDATE public.clasificaciones SET unidad_cantidad=0.62 WHERE id_clasificacion = 169;
+   UPDATE public.clasificaciones SET unidad_cantidad=0.75 WHERE id_clasificacion = 170;
+   UPDATE public.clasificaciones SET unidad_cantidad=0.004 WHERE id_clasificacion = 171;
+
 
  ✔ Reportes de facturas vencidas @done (19-09-10 11:51) pct|pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Facturas Vencidas',84,TRUE,'cuentas_cobrar/reporte/','print',TRUE);

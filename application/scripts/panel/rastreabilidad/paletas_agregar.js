@@ -159,7 +159,11 @@ var addpaletas = (function($){
 
           $tr.find('#prod_did_prod').val(ui.item.id);
 
-          $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
+          var unidadd = $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]');
+          unidadd.attr('selected', 'selected');
+          if ((parseFloat(unidadd.attr('data-cantidad'))||0) === 0) {
+            unidadd.attr('data-cantidad', ui.item.item.unidad_cantidad);
+          }
         }
       }).keydown(function(event){
         if(event.which == 8 || event == 46) {

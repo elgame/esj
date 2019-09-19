@@ -205,7 +205,7 @@ class clasificaciones_model extends CI_Model {
 			$sql .= " AND id_area = {$this->input->get('type')}";
     if($this->input->get('inventario') !== false)
       $sql .= " AND inventario = 't'";
-		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad
+		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad, unidad_cantidad
 				FROM clasificaciones
 				WHERE status = true {$sql}
 				ORDER BY nombre ASC
