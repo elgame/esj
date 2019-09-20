@@ -1,5 +1,5 @@
 
- ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc
+ ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san
    CREATE TABLE otros.paletas_salidas_manifesto
       (
         id_paleta_salida bigint NOT NULL,
