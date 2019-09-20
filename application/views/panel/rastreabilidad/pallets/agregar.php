@@ -23,6 +23,16 @@
 						</div>
 					</div>
 					<div class="box-content">
+            <div class="control-group">
+              <label class="control-label" for="empresa">Empresa </label>
+              <div class="controls">
+                <div class="input-append span12">
+                  <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" placeholder="" autofocus>
+                </div>
+                <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
+              </div>
+            </div><!--/control-group -->
+
 						<form action="<?php echo base_url('panel/rastreabilidad_pallets/agregar'); ?>" id="form-search" method="post" class="form-horizontal">
 						  <fieldset>
 								<legend></legend>
@@ -31,7 +41,7 @@
 
 									<div class="span3">
 									  <label class="span3" for="parea">Area </label>
-										<select name="parea" id="parea" class="span9" autofocus data-next="fcajas">
+										<select name="parea" id="parea" class="span9" data-next="fcajas">
 	                    <?php foreach ($areas['areas'] as $area){ ?>
 	                      <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
 	                        <?php $set_select=($area->id_area == (isset($area_default) ? $area_default : ($area->predeterminado == 't' ? $area->id_area: '')));

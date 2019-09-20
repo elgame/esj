@@ -302,12 +302,12 @@ class rastreabilidad_paletas extends MY_Controller {
   }
 
   public function chkboleta($id){
-    $result = $this->db->query("SELECT Count(id_paleta_salida) AS num FROM otros.paletas_salidas
-      WHERE id_bascula = {$id} AND status <> 'ca'".(isset($_GET['id'])? " AND id_paleta_salida <> '{$_GET['id']}'": '') )->row();
-    if($result->num > 0){
-      $this->form_validation->set_message('chkboleta', "La boleta {$_POST['boletasSalidasFolio']} ya esta registrada en otra paleta de salida, intenta con otra.");
-      return false;
-    }else
+    // $result = $this->db->query("SELECT Count(id_paleta_salida) AS num FROM otros.paletas_salidas
+    //   WHERE id_bascula = {$id} AND status <> 'ca'".(isset($_GET['id'])? " AND id_paleta_salida <> '{$_GET['id']}'": '') )->row();
+    // if($result->num > 0){
+    //   $this->form_validation->set_message('chkboleta', "La boleta {$_POST['boletasSalidasFolio']} ya esta registrada en otra paleta de salida, intenta con otra.");
+    //   return false;
+    // }else
       return true;
   }
 

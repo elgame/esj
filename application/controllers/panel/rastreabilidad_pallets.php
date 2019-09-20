@@ -113,6 +113,9 @@ class rastreabilidad_pallets extends MY_Controller {
 
     $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($params['area_default']);
 
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
     // $params['calibres'] = $this->calibres_model->getCalibres();
 
 
