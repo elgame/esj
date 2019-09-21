@@ -1,4 +1,101 @@
 
+
+ ✔ Recetas @done (19-09-20 19:28) pct
+   CREATE TABLE otros.formulas
+      (
+        id_formula bigserial NOT NULL,
+        id_empresa integer NOT NULL,
+        id_area integer NOT NULL,
+        folio bigint NOT NULL,
+        tipo character varying NOT NULL DEFAULT 'kg'::character varying, -- kg, lts
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT formulas_pkey PRIMARY KEY (id_formula),
+        CONSTRAINT formulas_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT formulas_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.formulas OWNER TO programa; COMMENT ON COLUMN otros.formulas.tipo IS 'kg, lts';
+   CREATE TABLE otros.formulas_productos
+      (
+        id_formula bigint NOT NULL,
+        id_producto bigint NOT NULL,
+        rows integer NOT NULL,
+        dosis_mezcla double precision NOT NULL DEFAULT 0,
+        percent double precision NOT NULL DEFAULT 0,
+        CONSTRAINT formulas_productos_pkey PRIMARY KEY (id_formula, id_producto, rows)
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.formulas_productos OWNER TO programa;
+   CREATE TABLE otros.recetas
+      (
+        id_recetas bigserial NOT NULL,
+        id_empresa integer NOT NULL,
+        id_realizo bigint NOT NULL,
+        id_solicito bigint NOT NULL,
+        id_autorizo bigint,
+        id_area integer NOT NULL,
+        fecha date NOT NULL,
+        folio bigint NOT NULL,
+        objetico character varying(350),
+        semana integer,
+        dosis_planta double precision NOT NULL,
+        planta_ha double precision NOT NULL,
+        ha_neta double precision NOT NULL,
+        no_plantas double precision NOT NULL,
+        kg_totales double precision NOT NULL,
+        a_etapa character varying(20),
+        a_ciclo character varying(20),
+        a_dds character varying(20),
+        a_turno character varying(20),
+        a_via character varying(20),
+        a_aplic character varying(30),
+        a_equipo character varying(30),
+        a_observaciones character varying(600),
+        status boolean NOT NULL DEFAULT true,
+        id_formula bigint NOT NULL,
+        CONSTRAINT recetas_pkey PRIMARY KEY (id_recetas),
+        CONSTRAINT recetas_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_id_autorizo_fkey FOREIGN KEY (id_autorizo)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_id_formula_fkey FOREIGN KEY (id_formula)
+            REFERENCES otros.formulas (id_formula) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_id_realizo_fkey FOREIGN KEY (id_realizo)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_id_solicito_fkey FOREIGN KEY (id_solicito)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.recetas OWNER TO programa;
+   CREATE TABLE otros.recetas_productos
+      (
+        id_receta bigint NOT NULL,
+        id_producto bigint NOT NULL,
+        rows integer NOT NULL,
+        percent double precision NOT NULL DEFAULT 0,
+        dosis_mezcla double precision NOT NULL DEFAULT 0,
+        aplicacion_total double precision NOT NULL DEFAULT 0,
+        precio double precision NOT NULL DEFAULT 0,
+        importe double precision NOT NULL DEFAULT 0,
+        CONSTRAINT recetas_productos_pkey PRIMARY KEY (id_receta, id_producto, rows),
+        CONSTRAINT recetas_productos_id_producto_fkey FOREIGN KEY (id_producto)
+            REFERENCES public.productos (id_producto) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT recetas_productos_id_receta_fkey FOREIGN KEY (id_receta)
+            REFERENCES otros.recetas (id_recetas) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE );
+      ALTER TABLE otros.recetas_productos OWNER TO programa;
+
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san
    CREATE TABLE otros.paletas_salidas_manifesto
       (
