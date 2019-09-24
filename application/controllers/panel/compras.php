@@ -208,8 +208,10 @@ class compras extends MY_Controller {
     }
     else
     {
+      $id_resp = $_GET['id'];
       $res_mdl = $this->compras_model->actualizarNotaCredito($_GET['id'], $_POST, $_FILES['xml']);
 
+      $_GET['id'] = $id_resp;
       if ($res_mdl['passes'])
       {
         redirect(base_url('panel/compras/ver_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
@@ -418,9 +420,17 @@ class compras extends MY_Controller {
       array('field' => 'totalOrden',
             'label' => 'Total',
             'rules' => 'greater_than[-1]'),
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
+
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => '')  ,
+      array('field' => 'noCertificado',
+            'label' => 'Certificado',
+            'rules' => '')  ,
+
+      // array('field' => 'xml',
+      //       'label' => 'XML',
+      //       'rules' => 'callback_xml_check'),
     );
 
     $this->form_validation->set_rules($rules);

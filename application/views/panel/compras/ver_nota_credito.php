@@ -51,7 +51,7 @@
                 <div class="span3">
                   <div class="control-group">
                     <div class="controls span11">
-                      <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$nota_credito['info']->id_empresa.'') ?>"
+                      <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$nota_credito['info']->id_proveedor.'') ?>"
                         rel="superbox-80x550" title="Buscar" id="supermodalBtn">
                         <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
                       <br><br>
