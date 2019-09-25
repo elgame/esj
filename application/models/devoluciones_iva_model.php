@@ -435,11 +435,11 @@ class devoluciones_iva_model extends privilegios_model{
 
     $facturas = $this->db->query(
     "SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.rfc, c.nombre_fiscal AS cliente,
-      c.id_cliente, string_agg(DISTINCT fp.conceptos, ', ') AS conceptos, Sum(fp.subtotal) AS subtotal,
-      Sum(fp.importe_iva) AS importe_iva, Sum(fp.total) AS total,
+      c.id_cliente, fp.conceptos AS conceptos, f.subtotal AS subtotal,
+      f.importe_iva AS importe_iva, f.total AS total,
       f.no_certificado, f.uuid, Date(bm.fecha) AS fecha_pago,
-      Sum(fa.total) AS total_pago, bc.alias AS cuentas,
-      string_agg(DISTINCT bm.metodo_pago, ', ') AS metodo_pago, f.tipo_cambio
+      fa.total AS total_pago, bc.alias AS cuentas,
+      bm.metodo_pago AS metodo_pago, f.tipo_cambio
     FROM facturacion f
       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
       INNER JOIN (
@@ -455,7 +455,6 @@ class devoluciones_iva_model extends privilegios_model{
       INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
     WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND bm.status = 't'
       {$sql}
-    GROUP BY f.id_factura, c.id_cliente, bm.id_movimiento, bc.id_cuenta
     ORDER BY cliente ASC, fecha_pago ASC
     ");
     $response = $facturas->result();
