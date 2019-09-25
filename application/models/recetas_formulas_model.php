@@ -903,11 +903,12 @@ class recetas_formulas_model extends CI_Model {
     return $data;
   }
 
-  public function folio($tipo = 'p')
+  public function folio($empresaId, $tipo = 'kg')
   {
     $res = $this->db->select('folio')
-      ->from('compras_requisicion')
-      ->where('tipo_orden', $tipo)
+      ->from('otros.formulas')
+      ->where('tipo', $tipo)
+      ->where('id_empresa', $empresaId)
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 

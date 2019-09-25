@@ -7,9 +7,12 @@ class recetas_formulas extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'recetas_formulas/ajax_get_folio/',
+
+
+
     'compras_requisicion/ajax_producto_by_codigo/',
     'compras_requisicion/ajax_producto/',
-    'compras_requisicion/ajax_get_folio/',
     'compras_requisicion/ajax_get_producto_all/',
     'compras_requisicion/ajax_get_tipo_cambio/',
 
@@ -103,14 +106,13 @@ class recetas_formulas extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar orden de requisición'
+      'titulo' => 'Agregar formula'
     );
 
-    $params['next_folio']    = $this->recetas_formulas_model->folio();
-    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
-    $params['departamentos'] = $this->recetas_formulas_model->departamentos();
-    $params['unidades']      = $this->recetas_formulas_model->unidades();
-    $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['next_folio'] = $this->recetas_formulas_model->folio($params['empresa_default']->id_empresa);
 
     $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
@@ -123,51 +125,17 @@ class recetas_formulas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras_requisicion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/recetas_formulas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
-    $params['areas'] = $this->compras_areas_model->getTipoAreas();
-
-    // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    // $this->db
-    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-    //   ->from("empresas AS e")
-    //   ->where("e.predeterminado", "t")
-    //   ->get()
-    //   ->row();
-
-    if (isset($_GET['idf']) && $_GET['idf'] !== '')
-    {
-      $this->load->model('facturacion_model');
-      $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['idf']);
-      $params['ordenFlete'] = true;
-      $params['next_folio'] = $this->recetas_formulas_model->folio('f');
-      $params['noHeader'] = true;
-
-      $params['empresa_default'] = new StdClass;
-      $params['empresa_default']->id_empresa = $params['factura']['info']->empresa->id_empresa;
-      $params['empresa_default']->nombre_fiscal = $params['factura']['info']->empresa->nombre_fiscal;
-      $params['empresa_default']->cer_caduca = $params['factura']['info']->empresa->cer_caduca;
-      $params['empresa_default']->cfdi_version = $params['factura']['info']->empresa->cfdi_version;
-      $params['empresa_default']->cer_org = $params['factura']['info']->empresa->cer_org;
-
-      $this->load->view('panel/header', $params);
-      // $this->load->view('panel/general/menu', $params);
-      $this->load->view('panel/ordenes_requisicion/agregar', $params);
-      $this->load->view('panel/footer');
-    }
-    else
-    {
-      $this->load->view('panel/header', $params);
-      $this->load->view('panel/general/menu', $params);
-      $this->load->view('panel/ordenes_requisicion/agregar', $params);
-      $this->load->view('panel/footer');
-    }
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/formulas/agregar', $params);
+    $this->load->view('panel/footer');
   }
 
   /**
@@ -440,7 +408,7 @@ class recetas_formulas extends MY_Controller {
   public function ajax_get_folio()
   {
     $this->load->model('recetas_formulas_model');
-    echo $this->recetas_formulas_model->folio($_GET['tipo']);
+    echo $this->recetas_formulas_model->folio($_GET['id_empresa'], $_GET['tipo']);
   }
 
   public function ajaxGetFactRem()

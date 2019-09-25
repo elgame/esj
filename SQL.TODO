@@ -97,10 +97,10 @@
       ) WITH ( OIDS=FALSE );
       ALTER TABLE otros.recetas_productos OWNER TO programa;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Almacen Recetas',0,TRUE,'#','tasks',FALSE);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Formulas',514,TRUE,'recetas_formulas/','list-alt',FALSE);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',515,TRUE,'recetas_formulas/agregar/','plus',FALSE);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',515,FALSE,'recetas_formulas/modificar/','edit',FALSE);
-   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',515,FALSE,'recetas_formulas/cancelar/','remove',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Formulas',515,TRUE,'recetas_formulas/','list-alt',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',516,TRUE,'recetas_formulas/agregar/','plus',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',516,FALSE,'recetas_formulas/modificar/','edit',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',516,FALSE,'recetas_formulas/cancelar/','remove',FALSE);
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san
