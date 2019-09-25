@@ -942,6 +942,102 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   }
 
 
+  public function getCuadroAntiguedadData()
+  {
+    $sql = '';
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND u.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    $facturas = $this->db->query(
+    "SELECT
+        id, (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+        u.rfc, u.salario_diario, u.no_seguro, Date(u.fecha_entrada) AS fecha_entrada,
+        u.id_departamente, ud.nombre AS departamento, Date(u.fecha_nacimiento) AS fecha_nacimiento,
+        (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad,
+        (SELECT dias FROM nomina_configuracion_vacaciones WHERE (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
+      FROM usuarios AS u
+        INNER JOIN usuarios_departamento ud ON u.id_departamente = ud.id_departamento
+      WHERE u.user_nomina = 't' AND u.status = 't' {$sql}
+    ");
+    $response = $facturas->result();
+
+    return $response;
+  }
+  public function getCuadroAntiguedadXls($show = false)
+  {
+    if (!$show) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=cuadro_antiguedad.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getCuadroAntiguedadData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Cuadro General de Antigüedad de los Trabajadores';
+    $titulo3 = "";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="17" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="17" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="17" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="17"></td>
+        </tr>';
+
+    foreach($res as $key => $item){
+      if ($key == 0) {
+
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NSS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DEPARTAMENTO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S.D.</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE INGRESO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ANTIGUEDAD</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">D VACACIONES</td>
+        </tr>';
+      }
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$item->nombre.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->rfc.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->no_seguro.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->departamento.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_entrada.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->antiguedad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->dias_vacaciones.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+
   public function importAsistencias($semana)
   {
     $config['upload_path'] = APPPATH.'media/temp/';

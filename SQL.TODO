@@ -101,6 +101,8 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',515,TRUE,'recetas_formulas/agregar/','plus',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',515,FALSE,'recetas_formulas/modificar/','edit',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',515,FALSE,'recetas_formulas/cancelar/','remove',FALSE);
+   -- pct
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san
