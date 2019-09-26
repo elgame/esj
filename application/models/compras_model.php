@@ -486,6 +486,8 @@ class compras_model extends privilegios_model{
       'tipo' => 'nc',
       'id_nc' => $compraId,
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
 
     if ($deGasto)
     {
@@ -591,6 +593,8 @@ class compras_model extends privilegios_model{
       // 'tipo' => 'nc',
       // 'id_nc' => $compraId,
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
 
     if (isset($data['totalRetencionIsr']))
     {
