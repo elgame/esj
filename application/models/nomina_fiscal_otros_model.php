@@ -956,13 +956,16 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
 
     $facturas = $this->db->query(
     "SELECT
-        id, (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+        id, COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre as nombre,
         u.rfc, u.salario_diario, u.no_seguro, Date(u.fecha_entrada) AS fecha_entrada,
+        u.email, u.curp, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp, u.fecha_salida,
+        u.nacionalidad, u.estado_civil, u.cuenta_cpi, u.salario_diario, u.infonavit, u.salario_diario_real, u.fecha_imss, u.telefono,
         u.id_departamente, ud.nombre AS departamento, Date(u.fecha_nacimiento) AS fecha_nacimiento,
-        (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad,
+        (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad, up.nombre AS puesto,
         (SELECT dias FROM nomina_configuracion_vacaciones WHERE (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
       FROM usuarios AS u
         INNER JOIN usuarios_departamento ud ON u.id_departamente = ud.id_departamento
+        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
       WHERE u.user_nomina = 't' AND u.status = 't' {$sql}
     ");
     $response = $facturas->result();
@@ -991,16 +994,16 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="17" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="26" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="17" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="26" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="17" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="26" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="17"></td>
+          <td colspan="26"></td>
         </tr>';
 
     foreach($res as $key => $item){
@@ -1008,25 +1011,61 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
 
         $html .= '<tr style="font-weight:bold">
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">A PATERNO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">A MATERNO</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CURP</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NSS</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DEPARTAMENTO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PUESTO</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S.D.</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE INGRESO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE IMSS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE SALIDA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE NACIMIENTO</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ANTIGUEDAD</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">D VACACIONES</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CALLE</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NUMERO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">COLONIA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">MUNICIPIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTADO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CP</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NACIONALIDAD</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTADO CIVIL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALARIO DIARIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">INFONAVIT</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALARIO REAL</td>
         </tr>';
       }
 
       $html .= '<tr>
           <td style="width:150px;border:1px solid #000;">'.$item->nombre.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->apellido_paterno.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->apellido_materno.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->rfc.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->curp.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->no_seguro.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->departamento.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->puesto.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->salario_diario.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->fecha_entrada.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_imss.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_salida.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_nacimiento.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->antiguedad.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->dias_vacaciones.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->calle.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->numero.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->colonia.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->municipio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->estado.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->cp.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->nacionalidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->estado_civil.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->infonavit.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario_real.'</td>
         </tr>';
     }
 

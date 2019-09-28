@@ -183,6 +183,13 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="ftelefono">Teléfono </label>
+                      <div class="controls">
+                        <input type="text" name="ftelefono" id="ftelefono" class="span6" value="<?php echo set_value('ftelefono'); ?>" maxlength="20" placeholder="312321552">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
 										  <div class="controls">

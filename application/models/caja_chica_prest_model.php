@@ -1124,7 +1124,7 @@ class caja_chica_prest_model extends CI_Model {
     $this->saltaPag($pdf);
     $pdf->SetX(63);
     $pdf->Row(array('DIFERENCIA DEL CORTE', MyString::formatoNumero($tt_efectivo_disponible-$totalEfectivo, 2, '$', false),
-                    'TOTAL', MyString::formatoNumero($totalpreslp_salfin_ef+$totalprescp_salfin+$totalEfectivo, 2, '$', false)), false, false);
+                    'TOTAL', MyString::formatoNumero($totalpreslp_salfin_ef+$totalprescp_salfin+$totalEfectivo+$totalpreslgcp_salfin_ef, 2, '$', false)), false, false);
 
     $pdf->SetWidths(array(25, 19));
     $this->saltaPag($pdf);
