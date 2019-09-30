@@ -81,171 +81,31 @@ class recetas_formulas_model extends CI_Model {
   public function agregar()
   {
     $data = array(
-      'id_empresa'      => $_POST['empresaId'],
-      // 'id_proveedor' => $_POST['proveedorId'],
-      'id_departamento' => (is_numeric($_POST['departamento'])? $_POST['departamento']: NULL),
-      'id_empleado'     => $this->session->userdata('id_usuario'),
-      'folio'           => $_POST['folio'],
-      'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
-      'tipo_pago'       => $_POST['tipoPago'],
-      'tipo_orden'      => $_POST['tipoOrden'],
-      'solicito'        => $_POST['solicito'],
-      'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
-      'descripcion'     => $_POST['descripcion'],
-      'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+      'id_empresa' => $_POST['empresaId'],
+      'id_area'    => $_POST['areaId'],
+      'folio'      => $_POST['folio'],
+      'nombre'     => $_POST['nombre'],
+      'tipo'       => $_POST['tipo'],
     );
 
-    // Si es un gasto son requeridos los campos de catálogos
-    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
-        || $_POST['tipoOrden'] == 'p') {
-      $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
-      // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
-      // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
-
-      // if ($_POST['tipoOrden'] !== 'a') {
-      //   $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
-      // }
-    }
-
-    //si es una receta
-    if (isset($_POST['es_receta']))
-    {
-      $data['es_receta'] = $_POST['es_receta'];
-    }
-
-    //si se registra a un vehiculo
-    if (isset($_POST['es_vehiculo']))
-    {
-      $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
-      $data['id_vehiculo'] = $_POST['vehiculoId'];
-    }
-    //si es flete
-    if ($_POST['tipoOrden'] == 'f')
-    {
-      $data['flete_de'] = $_POST['fleteDe'];
-      $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
-    }
-
-    // Si trae datos extras
-    $data['otros_datos'] = [];
-    if ($this->input->post('infRecogerProv') != false) {
-      $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
-      $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
-    }
-    if ($this->input->post('infPasarBascula') != false) {
-      $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
-    }
-    if ($this->input->post('infEntOrdenCom') != false) {
-      $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
-    }
-    if ($this->input->post('infCotizacion') != false) {
-      $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
-    }
-    if ($this->input->post('no_recetas') != false) {
-      $data['otros_datos']['noRecetas'] = explode(',', $_POST['no_recetas']);
-    }
-    $data['otros_datos'] = json_encode($data['otros_datos']);
-
-    $this->db->insert('compras_requisicion', $data);
-    $ordenId = $this->db->insert_id();
-
-    // Bitacora
-    $this->bitacora_model->_insert('compras_requisicion', $ordenId,
-                                    array(':accion'     => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
-                                          ':folio'      => $data['folio'],
-                                          ':id_empresa' => $data['id_empresa'],
-                                          ':empresa'    => 'en '.$this->input->post('empresa')));
-
-    // Si es un gasto son requeridos los campos de catálogos
-    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
-        || $_POST['tipoOrden'] == 'p') {
-      // Inserta los ranchos
-      if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
-        foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
-          $this->db->insert('compras_requisicion_rancho', [
-            'id_rancho'      => $id_rancho,
-            'id_requisicion' => $ordenId,
-            'num'            => count($_POST['ranchoId'])
-          ]);
-        }
-      }
-
-      // Inserta los centros de costo
-      if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
-        foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
-          $this->db->insert('compras_requisicion_centro_costo', [
-            'id_centro_costo' => $id_centro_costo,
-            'id_requisicion'  => $ordenId,
-            'num'             => count($_POST['centroCostoId'])
-          ]);
-        }
-      }
-    }
-
-    //si se registra a un vehiculo
-    if (isset($_POST['es_vehiculo']))
-    {
-      //si es de tipo gasolina o diesel se registra los litros
-      if($_POST['tipo_vehiculo'] !== 'ot')
-      {
-        $this->db->insert('compras_vehiculos_reqs_gasolina', array(
-          'id_requisicion'  => $ordenId,
-          'kilometros' => $_POST['dkilometros'],
-          'litros'     => $_POST['dlitros'],
-          'precio'     => $_POST['dprecio'],
-          ));
-      }
-    }
+    $this->db->insert('otros.formulas', $data);
+    $formulaId = $this->db->insert_id();
 
     $productos = array();
-    foreach (array('1') as $value)
+    foreach ($_POST['concepto'] as $key => $concepto)
     {
-      foreach ($_POST['concepto'] as $key => $concepto)
-      {
-        $id_proveedor = $_POST['proveedorId'][$key];
-
-        if ($_POST['presentacionCant'][$key] !== '')
-        {
-          $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-          $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
-        }
-        else
-        {
-          $cantidad = $_POST['cantidad'][$key];
-          $pu       = $_POST['valorUnitario'.$value][$key];
-        }
-
-        $productos[] = array(
-          'id_requisicion'       => $ordenId,
-          'id_proveedor'         => $id_proveedor,
-          'num_row'              => $key,
-          'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-          'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-          'descripcion'          => $concepto,
-          'cantidad'             => $cantidad,
-          'precio_unitario'      => $pu,
-          'importe'              => $_POST['importe'.$value][$key],
-          'iva'                  => $_POST['trasladoTotal'.$value][$key],
-          'retencion_iva'        => $_POST['retTotal'.$value][$key],
-          'total'                => $_POST['total'.$value][$key],
-          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-          'porcentaje_retencion' => $_POST['ret_iva'][$key],
-          // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-          'observacion'          => $_POST['observacion'][$key],
-          'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-          'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
-        );
-      }
+      $productos[] = array(
+        'id_formula'   => $formulaId,
+        'id_producto'  => $_POST['productoId'][$key],
+        'rows'         => $key,
+        'descripcion'  => $concepto,
+        'dosis_mezcla' => $_POST['cantidad'][$key],
+        'percent'      => $_POST['percent'][$key],
+      );
     }
 
     if(count($productos) > 0)
-      $this->db->insert_batch('compras_requisicion_productos', $productos);
+      $this->db->insert_batch('otros.formulas_productos', $productos);
 
     return array('passes' => true, 'msg' => 3);
   }
@@ -258,646 +118,84 @@ class recetas_formulas_model extends CI_Model {
    * @param  mixed $productos
    * @return array
    */
-  public function actualizar($idOrden, $orden = null, $productos = null)
+  public function actualizar($formulaId)
   {
-    // Si $orden o $productos son pasados a la funcion.
-    if ($orden || $productos)
+    $data = array(
+      'id_empresa' => $_POST['empresaId'],
+      'id_area'    => $_POST['areaId'],
+      'folio'      => $_POST['folio'],
+      'nombre'     => $_POST['nombre'],
+      'tipo'       => $_POST['tipo'],
+    );
+
+    $this->db->update('otros.formulas', $data, "id_formula = {$formulaId}");
+
+    $productos = array();
+    $this->db->delete('otros.formulas_productos', "id_formula = {$formulaId}");
+    foreach ($_POST['concepto'] as $key => $concepto)
     {
-      if ($orden)
-      {
-        $this->db->update('compras_requisicion', $orden, array('id_requisicion' => $idOrden));
-      }
-
-      if ($productos)
-      {
-        $this->db->insert_batch('compras_requisicion_productos', $productos);
-      }
-
-      return array('passes' => true);
-    }
-
-    else
-    {
-      $datos_ordenn = $this->db->select("folio")
-        ->from("compras_requisicion")
-        ->where("id_requisicion", $idOrden)
-        ->get()->row();
-
-      $data = array(
-        'id_empresa'      => $_POST['empresaId'],
-        // 'id_proveedor'    => $_POST['proveedorId'],
-        'id_departamento' => $_POST['departamento'],
-        // 'id_autorizo'     => null,
-        // 'id_empleado'     => $this->session->userdata('id_usuario'),
-        // 'folio'           => $_POST['folio'],
-        'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
-        'tipo_pago'       => $_POST['tipoPago'],
-        'tipo_orden'      => $_POST['tipoOrden'],
-        'solicito'        => $_POST['solicito'],
-        'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
-        'descripcion'     => $_POST['descripcion'],
-        'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
-        'id_almacen'      => $_POST['id_almacen'],
+      $productos[] = array(
+        'id_formula'   => $formulaId,
+        'id_producto'  => $_POST['productoId'][$key],
+        'rows'         => $key,
+        'dosis_mezcla' => $_POST['cantidad'][$key],
+        'percent'      => $_POST['percent'][$key],
       );
-
-      // Si es un gasto son requeridos los campos de catálogos
-      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
-          || $_POST['tipoOrden'] == 'p') {
-        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
-        // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
-        // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
-
-        // Inserta los ranchos
-        $this->db->delete('compras_requisicion_rancho', ['id_requisicion' => $idOrden]);
-        if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
-          foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
-            $this->db->insert('compras_requisicion_rancho', [
-              'id_rancho'      => $id_rancho,
-              'id_requisicion' => $idOrden,
-              'num'            => count($_POST['ranchoId'])
-            ]);
-          }
-        }
-
-        // Inserta los centros de costo
-        $this->db->delete('compras_requisicion_centro_costo', ['id_requisicion' => $idOrden]);
-        if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
-          foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
-            $this->db->insert('compras_requisicion_centro_costo', [
-              'id_centro_costo' => $id_centro_costo,
-              'id_requisicion'  => $idOrden,
-              'num'             => count($_POST['centroCostoId'])
-            ]);
-          }
-        }
-
-        if ($_POST['tipoOrden'] !== 'a') {
-          $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
-        }
-      }
-
-      if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true')
-      {
-        $data['id_autorizo']        = $_POST['autorizoId']; //$this->session->userdata('id_usuario');
-        $data['fecha_autorizacion'] = date('Y-m-d H:i:s');
-        $data['autorizado']         = 't';
-      }
-
-      // // Si esta modificando una orden rechazada entonces agrega mas campos
-      // // que se actualizaran.
-      // if ($status === 'r')
-      // {
-      // //   $data['id_autorizo'] = null;
-      //   $data['status']      = 'p';
-      // //   $data['autorizado']  = 'f';
-      // }
-
-      //si es una receta
-      $data['es_receta'] = 'f';
-      if (isset($_POST['es_receta']))
-      {
-        $data['es_receta'] = 't';
-      }
-
-      //si se registra a un vehiculo
-      if (isset($_POST['es_vehiculo']))
-      {
-        $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
-        $data['id_vehiculo'] = $_POST['vehiculoId'];
-      }
-      else
-      {
-        $data['tipo_vehiculo'] = 'ot';
-        $data['id_vehiculo'] = null;
-      }
-      //si es flete
-      if ($_POST['tipoOrden'] == 'f')
-      {
-        $data['flete_de'] = $_POST['fleteDe'];
-        $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
-      }
-
-      // Si trae datos extras
-      $data['otros_datos'] = [];
-      if ($this->input->post('infRecogerProv') != false) {
-        $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
-        $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
-      }
-      if ($this->input->post('infPasarBascula') != false) {
-        $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
-      }
-      if ($this->input->post('infEntOrdenCom') != false) {
-        $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
-      }
-      if ($this->input->post('infCotizacion') != false) {
-        $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
-      }
-      if ($this->input->post('no_recetas') != false) {
-        $data['otros_datos']['noRecetas'] = explode(',', $_POST['no_recetas']);
-      }
-      $data['otros_datos'] = json_encode($data['otros_datos']);
-
-      // Bitacora
-      $id_bitacora = $this->bitacora_model->_update('compras_requisicion', $idOrden, $data,
-                                array(':accion'       => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
-                                      ':folio'        => $datos_ordenn->folio,
-                                      ':id_empresa'   => $data['id_empresa'],
-                                      ':empresa'      => 'en '.$this->input->post('empresa'),
-                                      ':id'           => 'id_requisicion',
-                                      ':titulo'       => 'Orden de requisicion'));
-
-      $this->db->update('compras_requisicion', $data, array('id_requisicion' => $idOrden));
-
-      //si se registra a un vehiculo
-      if (isset($_POST['es_vehiculo']))
-      {
-        //si es de tipo gasolina o diesel se registra los litros
-        if($_POST['tipo_vehiculo'] !== 'ot')
-        {
-          $this->db->delete('compras_vehiculos_reqs_gasolina', array('id_requisicion' => $idOrden));
-          $this->db->insert('compras_vehiculos_reqs_gasolina', array(
-            'id_requisicion' => $idOrden,
-            'kilometros'     => $_POST['dkilometros'],
-            'litros'         => $_POST['dlitros'],
-            'precio'         => $_POST['dprecio'],
-            ));
-        }
-      }
-      else
-      {
-        $this->db->delete('compras_vehiculos_reqs_gasolina', array('id_requisicion' => $idOrden));
-      }
-
-      $productos = array();
-      foreach (array('1') as $value)
-      {
-        foreach ($_POST['concepto'] as $key => $concepto)
-        {
-          $id_proveedor = $_POST['proveedorId'][$key];
-          if ($_POST['presentacionCant'][$key] !== '')
-          {
-            $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-            $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
-          }
-          else
-          {
-            $cantidad = $_POST['cantidad'][$key];
-            $pu       = $_POST['valorUnitario'.$value][$key];
-          }
-
-          $prod_sel = 'f';
-          if (isset($_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0]) &&
-              $_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0] == $id_proveedor &&
-              isset($data['autorizado']))
-          {
-            $prod_sel = 't';
-          }
-
-          $productos[] = array(
-            'id_requisicion'       => $idOrden,
-            'id_proveedor'         => $id_proveedor,
-            'num_row'              => $key,
-            'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-            'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-            'descripcion'          => $concepto,
-            'cantidad'             => $cantidad,
-            'precio_unitario'      => $pu,
-            'importe'              => $_POST['importe'.$value][$key],
-            'iva'                  => $_POST['trasladoTotal'.$value][$key],
-            'retencion_iva'        => $_POST['retTotal'.$value][$key],
-            'total'                => $_POST['total'.$value][$key],
-            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-            'porcentaje_retencion' => $_POST['ret_iva'][$key],
-            // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-            'observacion'          => $_POST['observacion'][$key],
-            'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-            'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-            // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            // $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'prod_sel'             => $prod_sel,
-            'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-            'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-            'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
-          );
-        }
-      }
-
-      // Bitacora
-      $this->bitacora_model->_updateExt($id_bitacora, 'compras_requisicion_productos', $idOrden, $productos,
-                                array(':id'             => 'id_requisicion',
-                                      ':titulo'         => 'Productos',
-                                      ':updates_fields' => 'compras_requisicion_productos'));
-      $this->db->delete('compras_requisicion_productos', array('id_requisicion' => $idOrden));
-      $this->db->insert_batch('compras_requisicion_productos', $productos);
-
-      // Generar las ordenes compra
-      if(isset($data['autorizado']))
-        if($data['autorizado'] == 't')
-          $this->crearOrdenes($idOrden);
-
     }
 
+    if(count($productos) > 0)
+      $this->db->insert_batch('otros.formulas_productos', $productos);
 
-    return array('passes' => true, 'msg' => 7, 'autorizado' => isset($data['autorizado']));
+
+    return array('passes' => true, 'msg' => 7);
   }
 
 
-  public function crearOrdenes($idOrden)
+  public function cancelar($formulaId)
   {
-    $this->load->model('compras_ordenes_model');
-
-    $data = $this->info($idOrden, true, false)['info'][0];
-
-    // Se asignan los productos seleccionados x cada proveedor
-    foreach ($data->productos2 as $key => $value)
-    {
-      foreach ($data->proveedores as $keyp => $prov)
-      {
-        if ($value->id_proveedor == $prov['id_proveedor'] && $value->prod_sel == 't')
-        {
-          $data->proveedores[$keyp]['productos'][] = $value;
-        }
-      }
-    }
-
-    // Se crean los ordenes de compra con productos por proveedor
-    foreach ($data->proveedores as $key => $value)
-    {
-      if(isset($value['productos']) && count($value['productos']) > 0)
-      {
-        $dataOrdenCats = null;
-        $dataOrden = array(
-          'id_empresa'         => $data->id_empresa,
-          'id_proveedor'       => $value['id_proveedor'],
-          'id_departamento'    => $data->id_departamento,
-          'id_empleado'        => $data->id_empleado,
-          'folio'              => $this->compras_ordenes_model->folio($data->tipo_orden),
-          'status'             => 'p',
-          'autorizado'         => 't',
-          'fecha_autorizacion' => $data->fecha_autorizacion,
-          'fecha_aceptacion'   => substr($data->fecha_aceptacion, 0, 19),
-          'fecha_creacion'     => $data->fecha,
-          'tipo_pago'          => $data->tipo_pago,
-          'tipo_orden'         => $data->tipo_orden,
-          'solicito'           => $data->empleado_solicito,
-          'id_cliente'         => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
-          'descripcion'        => $data->descripcion,
-          'id_autorizo'        => $data->id_autorizo,
-          'id_almacen'         => $data->id_almacen,
-          'es_receta'          => $data->es_receta,
-        );
-
-        $dataOrdenCats['requisiciones'][] = [
-          'id_requisicion' => $idOrden,
-          'id_orden'       => '',
-          'num_row'        => 0
-        ];
-
-        // Si es un gasto son requeridos los campos de catálogos
-        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
-            || $data->tipo_orden == 'p') {
-          // $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
-          // Inserta las areas
-          if (isset($data->id_area) && $data->id_area > 0) {
-            $dataOrdenCats['area'][] = [
-              'id_area' => $data->id_area,
-              'id_orden'  => '',
-              'num'       => 1
-            ];
-          }
-
-          // Inserta los ranchos
-          if (isset($data->rancho) && count($data->rancho) > 0) {
-            foreach ($data->rancho as $keyr => $drancho) {
-              $dataOrdenCats['rancho'][] = [
-                'id_rancho' => $drancho->id_rancho,
-                'id_orden'  => '',
-                'num'       => $drancho->num
-              ];
-            }
-          }
-
-          // Inserta los centros de costo
-          if (isset($data->centroCosto) && count($data->centroCosto) > 0) {
-            foreach ($data->centroCosto as $keyr => $dcentro_costo) {
-              $dataOrdenCats['centroCosto'][] = [
-                'id_centro_costo' => $dcentro_costo->id_centro_costo,
-                'id_orden'        => '',
-                'num'             => $dcentro_costo->num
-              ];
-            }
-          }
-
-          // Inserta los activos
-          $or_activos = array();
-          foreach ($value['productos'] as $keypr => $prod)
-          {
-            // activos
-            if (isset($prod->activos) && !empty($prod->activos)) {
-              foreach ($prod->activos as $kact => $activ) {
-                if (!isset($or_activos[$kact])) {
-                  $or_activos[$activ->id] = $activ;
-                }
-              }
-            }
-          }
-          if (isset($or_activos) && count($or_activos) > 0) {
-            foreach ($or_activos as $orkey => $activ) {
-              $dataOrdenCats['activo'][] = [
-                'id_activo' => $orkey,
-                'id_orden'  => '',
-                'num'       => count($or_activos)
-              ];
-            }
-          }
-        }
-
-        //si se registra a un vehiculo
-        if (is_numeric($data->id_vehiculo))
-        {
-          $dataOrden['tipo_vehiculo'] = $data->tipo_vehiculo;
-          $dataOrden['id_vehiculo']   = $data->id_vehiculo;
-        }
-        //si es flete
-        if ($data->tipo_orden == 'f')
-        {
-          $dataOrden['ids_facrem'] = $data->ids_facrem;
-          $dataOrden['flete_de']   = $data->flete_de;
-        }
-
-        // si se registra a un vehiculo
-        $veiculoData = array();
-        if (is_numeric($data->id_vehiculo))
-        {
-          //si es de tipo gasolina o diesel se registra los litros
-          if($data->tipo_vehiculo !== 'ot')
-          {
-            $veiculoData = array(
-              'id_orden'   => null,
-              'kilometros' => $data->gasolina[0]->kilometros,
-              'litros'     => $data->gasolina[0]->litros,
-              'precio'     => $data->gasolina[0]->precio,
-            );
-          }
-        }
-
-        // Si trae datos extras
-        $dataOrden['otros_datos'] = [];
-        if (isset($data->otros_datos->infRecogerProv) || isset($data->otros_datos->infPasarBascula) ||
-            isset($data->otros_datos->infEntOrdenCom)) {
-          $dataOrden['otros_datos'] = $data->otros_datos;
-        }
-        $dataOrden['otros_datos'] = json_encode($dataOrden['otros_datos']);
-
-        $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
-        $id_orden = $res['id_orden'];
-
-        // Productos
-        $rows_compras = 0;
-        $productos = array();
-        foreach ($value['productos'] as $keypr => $prod)
-        {
-          $productos[] = array(
-            'id_orden'             => $id_orden,
-            'num_row'              => $rows_compras,
-            'id_producto'          => $prod->id_producto,
-            'id_presentacion'      => $prod->id_presentacion !== '' ? $prod->id_presentacion : null,
-            'descripcion'          => $prod->descripcion,
-            'cantidad'             => $prod->cantidad,
-            'precio_unitario'      => $prod->precio_unitario,
-            'importe'              => $prod->importe,
-            'iva'                  => $prod->iva,
-            'retencion_iva'        => $prod->retencion_iva,
-            'total'                => $prod->total,
-            'porcentaje_iva'       => $prod->porcentaje_iva,
-            'porcentaje_retencion' => $prod->porcentaje_retencion,
-            'faltantes'            => '0',
-            'observacion'          => $prod->observacion,
-            'ieps'                 => $prod->ieps,
-            'porcentaje_ieps'      => $prod->porcentaje_ieps,
-            'tipo_cambio'          => $prod->tipo_cambio,
-            // 'id_area'              => $prod->id_area,
-            $prod->campo           => $prod->id_area,
-            'retencion_isr'        => $prod->retencion_isr,
-            'porcentaje_isr'       => $prod->porcentaje_isr,
-          );
-          $rows_compras++;
-        }
-
-        if(count($productos) > 0)
-          $this->compras_ordenes_model->agregarProductosData($productos);
-
-      }
-    }
-
-  }
-
-
-  public function cancelar($idOrden)
-  {
-    $data = array('status' => 'ca');
-    $this->actualizar($idOrden, $data);
-
-    // Bitacora
-    $datosorden = $this->info($idOrden);
-    $this->bitacora_model->_cancel('compras_requisicion', $idOrden,
-                                    array(':accion'     => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
-                                          ':folio'      => $datosorden['info'][0]->folio,
-                                          ':id_empresa' => $datosorden['info'][0]->id_empresa,
-                                          ':empresa'    => 'de '.$datosorden['info'][0]->empresa));
+    $data = array('status' => 'f');
+    $this->db->update('otros.formulas', $data, "id_formula = {$formulaId}");
 
     return array('passes' => true);
   }
 
-  public function info($idOrden, $full = false, $prodAcep=false, $idCompra=NULL)
+  public function activar($formulaId)
   {
-    $this->load->model('compras_areas_model');
-    $this->load->model('catalogos_sft_model');
+    $data = array('status' => 't');
+    $this->db->update('otros.formulas', $data, "id_formula = {$formulaId}");
 
+    return array('passes' => true);
+  }
+
+  public function info($formulaId, $full = false, $prodAcep=false, $idCompra=NULL)
+  {
     $query = $this->db->query(
-      "SELECT co.id_requisicion,
-              co.id_empresa, e.nombre_fiscal AS empresa,
-              e.logo,
-              co.id_departamento, cd.nombre AS departamento,
-              co.id_empleado, u.nombre AS empleado,
-              co.id_autorizo, (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) AS autorizo,
-              co.id_cliente, cl.nombre_fiscal AS cliente,
-              co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
-              co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
-              co.autorizado,
-              co.solicito as empleado_solicito, co.descripcion,
-              co.id_vehiculo,
-              co.tipo_vehiculo,
-              co.es_receta,
-              COALESCE(cv.placa, null) as placa,
-              COALESCE(cv.modelo, null) as modelo,
-              COALESCE(cv.marca, null) as marca,
-              COALESCE(cv.color, null) as color,
-              co.ids_facrem,
-              co.flete_de, co.id_almacen, ca.nombre AS almacen,
-              co.id_area, co.id_activo,
-              otros_datos
-      FROM compras_requisicion AS co
-       INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-       INNER JOIN usuarios AS u ON u.id = co.id_empleado
-       LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
-       LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
-       LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
-       LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
-       LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
-      WHERE co.id_requisicion = {$idOrden}");
+      "SELECT f.id_formula, f.id_empresa, f.id_area, a.nombre AS area, f.nombre, f.folio, f.tipo, f.status
+        FROM otros.formulas f
+          INNER JOIN areas a ON a.id_area = f.id_area
+        WHERE id_formula = {$formulaId}");
 
     $data = array();
     if ($query->num_rows() > 0)
     {
-      $data['info'] = $query->result();
-
-      $data['info'][0]->otros_datos = json_decode($data['info'][0]->otros_datos);
+      $data['info'] = $query->row();
 
       $query->free_result();
       if ($full)
       {
-        $sql_produc = $prodAcep? " AND cp.prod_sel = 't'": '';
-        // $sql_produc .= $idCompra!==NULL? " AND (cp.id_compra = {$idCompra} OR (cp.id_compra IS NULL AND Date(cp.fecha_aceptacion) <= '2014-05-26'))": '';
         $query = $this->db->query(
-          "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal AS proveedor,
-                  cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
-                  cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
-                  cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
-                  cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-                  COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo,
-                  activos
-           FROM compras_requisicion_productos AS cp
-           LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
-           LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
-           LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
-           LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area
-           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cp.id_cat_codigos
-           WHERE cp.id_requisicion = {$data['info'][0]->id_requisicion} {$sql_produc}
-           ORDER BY p.id_proveedor ASC, cp.id_producto ASC");
+          "SELECT fp.id_formula, fp.rows, pr.id_producto, pr.nombre AS producto,
+                  pr.codigo, pr.id_unidad, fp.dosis_mezcla, fp.percent
+           FROM otros.formulas_productos AS fp
+            INNER JOIN productos AS pr ON pr.id_producto = fp.id_producto
+           WHERE fp.id_formula = {$data['info']->id_formula}
+           ORDER BY fp.rows ASC");
 
-        $data['info'][0]->productos2 = array();
-        $data['info'][0]->productos = array();
-        $data_proveedores = $data['info'][0]->proveedores = $data['info'][0]->data_desCodigos = array();
-        if ($query->num_rows() > 0)
-        {
-          $productos = $query->result();
-          foreach ($productos as $key => $value)
-          {
-            if (!empty($value->activos)) {
-              $value->activos = json_decode($value->activos);
-            }
-            $data['info'][0]->productos2[] = clone $value;
-
-            $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor,
-                                                          'nombre_fiscal' => $value->proveedor);
-
-              // $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
-              // $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
-            if($value->id_area != '')
-              $data['info'][0]->data_desCodigos[] = $this->{($value->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($value->id_area);
-
-            // var_dump ($value->id_producto.$value->num_row, $value);
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'importe'.$value->id_proveedor}         = $value->importe;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'iva'.$value->id_proveedor}             = $value->iva;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
-
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->iva                                      = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_iva                            = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->total                                    = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->ieps                                     = 0;
-            $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_isr                            = 0;
-          }
-
-          foreach ($data_proveedores as $key => $value)
-          {
-            $data['info'][0]->proveedores[] = $value;
-          }
-          for ($i = count($data['info'][0]->proveedores); $i < 3; $i++)
-            $data['info'][0]->proveedores[] = array('id_proveedor' => '', 'nombre_fiscal' => '');
-        }
-
+        $data['info']->productos = $query->result();
         $query->free_result();
 
-        $data['info'][0]->gasolina = array();
-        if ($data['info'][0]->id_vehiculo)
-        {
-          // Vehiculo
-          $query = $this->db->query(
-            "SELECT cvg.id_requisicion, cvg.kilometros, cvg.litros, cvg.precio
-             FROM compras_vehiculos_reqs_gasolina AS cvg
-             WHERE cvg.id_requisicion = {$data['info'][0]->id_requisicion}");
-
-          if ($query->num_rows() > 0)
-          {
-            $data['info'][0]->gasolina = $query->result();
-          }
-        }
-
-        // facturas ligadas
-        $data['info'][0]->facturasligadas = array();
-        $data['info'][0]->boletasligadas = array();
-        if ($data['info'][0]->flete_de === 'v') { // facturas y remisiones
-          $this->load->model('facturacion_model');
-          $facturasss = explode('|', $data['info'][0]->ids_facrem);
-          if (count($facturasss) > 0)
-          {
-            array_pop($facturasss);
-            foreach ($facturasss as $key => $value)
-            {
-              $facturaa = explode(':', $value);
-              $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1], true)['info'];
-            }
-          }
-        } else { // boletas
-          $this->load->model('bascula_model');
-          $boletasss = explode('|', $data['info'][0]->ids_facrem);
-          if (count($boletasss) > 0)
-          {
-            array_pop($boletasss);
-            foreach ($boletasss as $key => $value)
-            {
-              $data['info'][0]->boletasligadas[] = $this->bascula_model->getBasculaInfo($value, 0, true)['info'][0];
-            }
-          }
-        }
-
-        $data['info'][0]->area = null;
-        if ($data['info'][0]->id_area)
-        {
-          $this->load->model('areas_model');
-          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
-        }
-
-        $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
-                                   FROM compras_requisicion_rancho csr
-                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
-                                   WHERE csr.id_requisicion = {$data['info'][0]->id_requisicion}")->result();
-
-        $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
-                                   FROM compras_requisicion_centro_costo cscc
-                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
-                                   WHERE cscc.id_requisicion = {$data['info'][0]->id_requisicion}")->result();
-
-        $data['info'][0]->activo = null;
-        if ($data['info'][0]->id_activo)
-        {
-          $this->load->model('productos_model');
-          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
-        }
+        $this->load->model('empresas_model');
+        $data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
       }
     }
     return $data;
@@ -917,195 +215,11 @@ class recetas_formulas_model extends CI_Model {
     return $folio;
   }
 
-  public function entrada($idOrden)
-  {
-    $ordenRechazada = false;
-
-    $this->load->model('productos_model');
-
-    $almacen = array();
-    $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
-              WHERE id_orden = {$idOrden}")->result();
-    $productos = array();
-    $faltantes = false;
-    foreach ($_POST['concepto'] as $key => $concepto)
-    {
-
-      if ($_POST['presentacionCant'][$key] !== '')
-      {
-        $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-        $pu       = floatval($_POST['valorUnitario'][$key]) / floatval($_POST['presentacionCant'][$key]);
-      }
-      else
-      {
-        $cantidad = $_POST['cantidad'][$key];
-        $pu       = $_POST['valorUnitario'][$key];
-      }
-
-      $faltantesProd = $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key];
-
-      $prod_id_compra = NULL;
-      foreach ($res_prodc_orden as $keyor => $ord)
-      {
-        if($_POST['prodIdOrden'][$key] == $ord->id_orden && $_POST['prodIdNumRow'][$key] == $ord->num_row)
-          $prod_id_compra = $ord->id_compra;
-      }
-      $productos[] = array(
-        'id_orden'        => $idOrden,
-        'num_row'         => $key,
-        'id_producto'     => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-        'id_presentacion' => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-        'descripcion'     => $concepto,
-        'cantidad'        => $cantidad,
-        'precio_unitario' => $pu,
-        'importe'         => $_POST['importe'][$key],
-        'iva'             => $_POST['trasladoTotal'][$key],
-        'retencion_iva'   => $_POST['retTotal'][$key],
-        'total'           => $_POST['total'][$key],
-        'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
-        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
-        'status'          => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r',
-        'fecha_aceptacion' => date('Y-m-d H:i:s'),
-        'faltantes'       => $faltantesProd,
-        'observacion'     => $_POST['observacion'][$key],
-        'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
-        'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-        'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-        'id_compra'        => $prod_id_compra,
-      );
-
-      if ($faltantesProd !== '0')
-      {
-        $faltantes = true;
-      }
-
-      if ($_POST['isProdOk'][$key] === '0')
-      {
-        $ordenRechazada = true;
-      }
-
-      $producto_dd = $this->productos_model->getProductoInfo(false, false, $_POST['productoId'][$key]);
-      if(count($producto_dd['info']) > 0 && !in_array($producto_dd['familia']->almacen, $almacen))
-        $almacen[] = $producto_dd['familia']->almacen;
-    }
-    $this->db->delete('compras_productos', array('id_orden' => $idOrden));
-
-    $data_almacen = null;
-    // Si todos los productos fueron aceptados entonces la orden se marca
-    // como aceptada.
-    if ( ! $ordenRechazada)
-    {
-      $data = array(
-        'fecha_aceptacion' => date('Y-m-d H:i:s'),
-        'status'           => 'a',
-      );
-
-      $msg = 5;
-
-      // se registra la entrada al almacen
-      $getFolio = $this->db->query("SELECT (coalesce((SELECT folio FROM compras_entradas_almacen WHERE status = 't' AND id_empresa = {$_POST['empresaId']} ORDER BY folio DESC LIMIT 1),0)+1) AS folio")->row();
-      $data_almacen = array(
-        'id_orden'   => $idOrden,
-        'id_empresa' => $_POST['empresaId'],
-        'id_recibio' => $this->session->userdata('id_usuario'),
-        'folio'      => $getFolio->folio,
-        'fecha'      => date('Y-m-d H:i:s'),
-        'almacen'    => implode('|', $almacen),
-        );
-      $this->db->insert('compras_entradas_almacen', $data_almacen);
-    }
-
-    // Si al menos un producto no fue aceptado entonces la orden es
-    // rechazada.
-    else
-    {
-      $data = array(
-        'status' => 'r',
-      );
-
-      $msg = 6;
-    }
-
-    $this->actualizar($idOrden, $data, $productos);
-
-    // // Si la orden no esta rechazada verifica si el proveedor tiene el email
-    // // asignado para enviarle la orden de compra.
-    // if ( ! $ordenRechazada)
-    // {
-    //   $this->load->model('proveedores_model');
-    //   $proveedor = $this->proveedores_model->getProveedorInfo($_POST['proveedorId']);
-
-    //   if ($proveedor['info']->email !== '')
-    //   {
-    //     // Si el proveedor tiene email asigando le envia la orden.
-    //     $this->load->library('my_email');
-
-    //     $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
-    //     $nombreEmisor   = 'Empaque San Jorge';
-    //     $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
-    //     $contrasena     = "2x02pxeexCUpiKncoWI50Q"; // Contraseña de $correEmisor
-
-    //     $path = APPPATH . 'media/temp/';
-
-    //     $file = $this->print_orden_compra($idOrden, $path);
-
-    //     $datosEmail = array(
-    //       'correoEmisorEm' => $correoEmisorEm,
-    //       'correoEmisor'   => $correoEmisor,
-    //       'nombreEmisor'   => $nombreEmisor,
-    //       'contrasena'     => $contrasena,
-    //       'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
-    //       'altBody'        => 'Nueva orden de compra.',
-    //       'body'           => 'Nueva orden de compra.',
-    //       'correoDestino'  => array($proveedor['info']->email),
-    //       'nombreDestino'  => $proveedor['info']->nombre_fiscal,
-    //       'cc'             => '',
-    //       'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
-    //     );
-
-    //     $result = $this->my_email->setData($datosEmail)->send();
-    //     unlink($file);
-    //   }
-    // }
-
-    return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes, 'entrada' => $data_almacen);
-  }
-
   /*
    |------------------------------------------------------------------------
    |
    |------------------------------------------------------------------------
    */
-
-  public function departamentos()
-  {
-    $depas = $this->db->select("*")
-      ->from("compras_departamentos")
-      ->order_by('nombre')
-      ->get();
-
-    if ($depas->num_rows > 0)
-    {
-      return $depas->result();
-    }
-
-    return array();
-  }
-
-  public function unidades()
-  {
-    $unidades = $this->db->select("*")
-      ->from("productos_unidades")
-      ->order_by('nombre')
-      ->get();
-
-    if ($unidades->num_rows > 0)
-    {
-      return $unidades->result();
-    }
-
-    return array();
-  }
 
   public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo'){
     $sql = '';

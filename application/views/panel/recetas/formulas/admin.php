@@ -112,7 +112,7 @@
                       } else {
                         echo $this->usuarios_model->getLinkPrivSm('recetas_formulas/activar/', array(
                           'params'   => 'id='.$formula->id_formula,
-                          'btn_type' => 'btn-danger',
+                          'btn_type' => 'btn',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Activar la formula?', 'Formulas', this); return false;"))
                         );
                       }

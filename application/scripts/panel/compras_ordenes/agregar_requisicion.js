@@ -6,29 +6,39 @@
     $('#form').keyJump();
 
     autocompleteEmpresas();
+    autocompleteProveedores();
+    autocompleteAutorizo();
+    // autocompleteCodigo();
     autocompleteConcepto();
+    autocompleteClientes();
     autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+    autocompleteActivos();
 
-    // eventOtros();
+    eventOtros();
 
-    eventOnChangeTipo();
     eventCodigoBarras();
-
     eventBtnAddProducto();
-    // eventBtnListaOtros();
-    // eventKeyUpCantPrecio();
-    // eventOnChangeTraslado();
-    // eventBtnDelProducto();
-    // eventCheckboxProducto();
-    // eventOnChangePresentacionTable();
-    // //Ligar ordenes
-    // eventOnChangeCondicionPago();
-    // eventOnChangeMetodoPago();
+    eventBtnListaOtros();
+    eventBtnListaActivos();
+    eventTipoCambioKeypress();
+    eventKeyUpCantPrecio();
+    eventOnChangeTraslado();
+    eventBtnDelProducto();
+    eventCheckboxProducto();
+    eventOnChangePresentacionTable();
+    eventOnChangeTipoOrden();
+    //Ligar ordenes
+    eventOnChangeCondicionPago();
+    eventOnChangeMetodoPago();
 
-    // eventTipoMonedaChange();
+    eventTipoMonedaChange();
 
-    // eventLigarFacturas();
-    // eventLigarBoletas();
+    eventLigarFacturas();
+    eventLigarBoletas();
+
+    btnAutorizarClick();
 
     if($("#form-modif").length > 0)
     {
@@ -40,8 +50,83 @@
       // calculaTotal(2);
       // calculaTotal(3);
     }
+
+    // Autocomplete para los Vehiculos.
+    $("#vehiculo").autocomplete({
+      source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $vehiculo =  $(this);
+
+        $vehiculo.val(ui.item.id);
+        $("#vehiculoId").val(ui.item.id);
+        $vehiculo.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#vehiculo").css("background-color", "#FFD071");
+        $("#vehiculoId").val('');
+      }
+    });
+
+    $("#es_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.is(":checked")){
+        $("#groupVehiculo").show();
+        if($("#tipo_vehiculo").val() != 'ot')
+          $("#group_gasolina").show();
+      }else{
+        $("#groupVehiculo").hide();
+        $("#group_gasolina").hide();
+      }
+    });
+
+    $("#tipo_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.val() !== 'ot')
+        $("#group_gasolina").show();
+      else
+        $("#group_gasolina").hide();
+    });
   });
 
+
+  var btnAutorizarClick = function(){
+    $("#btnAutorizar").on('click', function(e) {
+      var passes = true;
+      // $(".prodSelOrden:checked").each(function(index, el) {
+      //   if (($(this).val() != $('#proveedorId1').val() &&
+      //       $(this).val() != $('#proveedorId2').val() &&
+      //       $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
+      //     passes = false;
+      //     noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
+      //   }
+      // });
+
+      $(".prodIdOrden").each(function(index, el) {
+        if ($(this).val() == '' || $(this).val() == '0') {
+          passes = false;
+          noty({"text": 'Hay nuevos productos, guarde la orden y despues la autoriza', "layout":"topRight", "type": 'error'});
+        }
+      });
+
+      if($("#autorizoId").val() == ''){
+        noty({"text": 'Tiene que seleccionar la persona que autoriza', "layout":"topRight", "type": 'error'});
+        passes = false;
+        $("#autorizo").focus();
+      }
+
+
+      // Envia el form para autorizar
+      if (passes){
+        msb.confirm('Estas seguro de Autorizar y crear la(s) ordenes?', 'Ordenes de Compras', this, function(){
+          $("#txtBtnAutorizar").val('true');
+          setTimeout(function(){ $("#form").submit(); }, 100);
+        });
+      }
+    });
+  }
 
   /*
    |------------------------------------------------------------------------
@@ -50,22 +135,67 @@
    */
 
    // Obtiene el siguiente folio segun el tipo de orden.
-  var tipoOrderActual = $('#tipo').find('option:selected').val();
-  var eventOnChangeTipo = function () {
-    $('#tipo').on('change', function(event) {
+  var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
+  var eventOnChangeTipoOrden = function () {
+    $('#tipoOrden').on('change', function(event) {
       var $this      = $(this),
           $folio     = $('#folio'),
           $tableProd = $('#table-productos');
 
       if ($tableProd.find('tbody tr').length > 0) {
-        noty({"text": 'Ya tiene productos para un tipo, si desea cambiar de tipo elimine los productos del listado', "layout":"topRight", "type": 'error'});
+        noty({"text": 'Ya tiene productos para un tipo de orden, si desea cambiar de tipo de orden elimine los productos del listado', "layout":"topRight", "type": 'error'});
 
         $this.val(tipoOrderActual);
       } else {
-        $.get(base_url + 'panel/recetas_formulas/ajax_get_folio/?id_empresa='+$('#empresaId').val()+'&tipo=' + $this.find('option:selected').val(), function(folio) {
+        $.get(base_url + 'panel/compras_requisicion/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
           $folio.val(folio);
           tipoOrderActual = $this.find('option:selected').val();
+          if(tipoOrderActual == 'f') {
+            $("#grpFleteDe").show();
+          } else {
+            $("#fletesFactura").hide();
+            $("#grpFleteDe").hide();
+          }
+          $("#fleteDe").change();
+
+          if(tipoOrderActual == 'd')
+            $("#verVehiculoChk").show();
+          else
+            $("#verVehiculoChk").hide();
+
+          if (tipoOrderActual == 'p') {
+            $('.grpes_receta').show();
+          } else {
+            $('.grpes_receta').hide();
+            $('#es_receta').attr("checked", false);
+          }
+
+          $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
+          if (tipoOrderActual != 'a') {
+            $('#groupCatalogos').show();
+            $('#ranchosGrup, #centrosCostosGrup, #activosGrup, #cultivosGrup').show();
+
+            if (tipoOrderActual == 'f') {
+              $('#ranchosGrup, #centrosCostosGrup, #activosGrup').hide();
+            }
+          } else {
+            $('#groupCatalogos').hide();
+          }
         });
+      }
+    });
+
+    $('#fleteDe').on('change', function(event) {
+      var $this = $(this),
+          de = $this.find('option:selected').val();
+      if (de == 'v') {
+        $("#fletesFactura").show();
+        $("#fletesBoletas").hide();
+        $("#boletasLigada").html('');
+      } else {
+        $("#fletesBoletas").show();
+        $("#fletesFactura").hide();
+        $("#facturaLigada").html('');
       }
     });
   };
@@ -752,7 +882,19 @@
           $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId   = $('#productos #fconceptoId'),
           $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
-          campos = [$fcantidad],
+          $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
+          $fpresentacion = $('#productos #fpresentacion'),
+          $funidad       = $('#productos #funidad'),
+          $fieps         = $('#productos #fieps'),
+          $ftipo_moneda  = $('#productos #ftipo_moneda'),
+          $ftipo_cambio  = $('#productos #ftipo_cambio'),
+          $ftraslado     = $('#productos #ftraslado'),
+          $fretencionIva = $('#productos #fretencionIva'),
+          $fIsrPercent   = $('#productos #fIsrPercent'),
+          $fproveedor    = $('#productos #fproveedor'),
+          $fproveedorId  = $('#productos #fproveedorId'),
+
+          campos = [$fcantidad, $fprecio],
           producto = {},
           error = false;
 
@@ -782,12 +924,55 @@
         error = true;
       }
 
+      // Valida el tipo de cambio
+      $ftipo_cambio.css({'background-color': '#FFF'});
+      if ($ftipo_moneda.val() === 'dolar' && $ftipo_cambio.val() === '') {
+        $ftipo_cambio.css({'background-color': '#FDFC9A'});
+        error = true;
+      }
+
+      // Valida el proveedor
+      if ($fproveedorId.val() == '') {
+        $fproveedor.css({'background-color': '#FDFC9A'})
+        error = true;
+      }
+
+      // Si no hubo un error, es decir que no halla faltado algun campo de
+      // completar.
+
+      var selectHtml = '<select name="presentacion[]" id="presentacion">',
+          selected = $fpresentacion.find('option:selected').val(),
+          existOpt = false;
+
+      $fpresentacion.find('option').each(function(index, el) {
+        selectHtml += '<option value="'+$(this).val()+'" data-cantidad="'+($(this).attr('data-cantidad') || '')+'" '+($(this).val() == selected ? 'selected' : '')+'>'+$(this).text()+'</option>';
+        existOpt = true;
+      });
+
+      if ( ! existOpt) {
+        selectHtml += '<option value="" data-cantidad=""></option>';
+      }
+
+      selectHtml += '</select>';
+
       if ( ! error) {
         producto = {
-          'id'       : $fconceptoId.val(),
-          'codigo'   : $fcodigo.val(),
-          'concepto' : $fconcepto.val(),
-          'cantidad' : $fcantidad.val(),
+          'codigo': $fcodigo.val(),
+          'concepto': $fconcepto.val(),
+          'id': $fconceptoId.val(),
+          'cantidad': $fcantidad.val(),
+          'precio_unitario': $fprecio.val(),
+          'presentacion': selectHtml,
+          'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
+          'unidad': $funidad.find('option:selected').val(),
+          'ieps': $fieps.val(),
+          'traslado': $ftraslado.find('option:selected').val(),
+          'tipo_moneda': $ftipo_moneda.val(),
+          'tipo_cambio': $ftipo_cambio.val(),
+          'ret_iva': $fretencionIva.find('option:selected').val(),
+          'ret_isr': $fIsrPercent.val(),
+          'proveedor_id': $fproveedorId.val(),
+          'proveedor': $fproveedor.val(),
         };
 
         addProducto(producto, idval);
@@ -799,7 +984,13 @@
 
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
+        $funidad.val('');
+        $ftraslado.val('0');
+        $fpresentacion.html('');
         $fcodigo.val('');
+        $ftipo_cambio.val('');
+        $fretencionIva.val('0');
+        $fIsrPercent.val('')
         $("#productos #show_info_prod").show().find('span').text('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
