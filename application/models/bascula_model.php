@@ -3588,7 +3588,8 @@ class bascula_model extends CI_Model {
         "SELECT co.id_factura,
                 co.id_proveedor, p.nombre_fiscal AS proveedor,
                 co.id_empresa, e.nombre_fiscal as empresa,
-                co.serie, co.folio, co.fecha, co.status, co.xml, co.total
+                co.serie, co.folio, co.fecha, co.status, co.xml,
+                co.total, co.uuid, co.no_certificado
         FROM bascula_facturas AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -3643,6 +3644,8 @@ class bascula_model extends CI_Model {
       'serie'         => $this->input->post('serie'),
       'folio'         => $this->input->post('folio'),
     );
+    $compra['uuid']           = $this->input->post('uuid');
+    $compra['no_certificado'] = $this->input->post('noCertificado');
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')

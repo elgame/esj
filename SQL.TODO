@@ -1,4 +1,7 @@
 
+ ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct
+     ALTER TABLE public.bascula_facturas ADD COLUMN uuid character varying;
+     ALTER TABLE public.bascula_facturas ADD COLUMN no_certificado character varying;
 
  ✔ Recetas @done (19-09-20 19:28) pct|pcc
    CREATE TABLE otros.formulas

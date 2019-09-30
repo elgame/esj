@@ -1490,9 +1490,9 @@ class bascula extends MY_Controller {
       array('field' => 'pcliente',
             'label' => '',
             'rules' => ''),
-      array('field' => 'dno_trazabilidad',
-            'label' => '',
-            'rules' => 'max_length[15]|callback_check_trazabilidad'),
+      // array('field' => 'dno_trazabilidad',
+      //       'label' => '',
+      //       'rules' => 'max_length[15]|callback_check_trazabilidad'),
       array('field' => 'pid_chofer',
             'label' => 'Chofer',
             'rules' => ''),
@@ -2378,7 +2378,7 @@ class bascula extends MY_Controller {
     }
     else
     {
-      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: null));
 
       $params['frm_errors'] = $this->showMsgs(20);
     }
@@ -2410,9 +2410,9 @@ class bascula extends MY_Controller {
     $this->load->library('form_validation');
 
     $rules = array(
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
+      // array('field' => 'xml',
+      //       'label' => 'XML',
+      //       'rules' => 'callback_xml_check'),
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
