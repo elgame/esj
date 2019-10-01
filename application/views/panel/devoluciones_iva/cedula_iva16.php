@@ -49,6 +49,7 @@
                   <label class="control-label" for="tasa_iva">Tasa de IVA</label>
                   <div class="controls">
                     <select name="tasa_iva" id="tasa_iva">
+                      <option value="">Todas</option>
                       <option value="16">16%</option>
                       <option value="0">0%</option>
                     </select>
