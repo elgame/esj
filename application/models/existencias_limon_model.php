@@ -131,7 +131,7 @@ class existencias_limon_model extends CI_Model {
         INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
         INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
         --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-      WHERE b.id_empresa = {$id_empresa} AND b.status = 't'
+      WHERE b.id_empresa = {$id_empresa} AND b.status = 't' AND b.intangible = 'f'
         AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
       GROUP BY --b.id_bascula,
         c.id_calidad
