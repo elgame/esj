@@ -223,9 +223,10 @@ class devoluciones_iva_model extends privilegios_model{
     $sql .= " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     $facturas = $this->db->query(
-    "SELECT c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, c.subtotal, c.importe_iva, c.total,
-      c.retencion_iva, p.id_proveedor, p.nombre_fiscal AS proveedor, p.rfc AS rfc_proveedor, c.uuid, c.no_certificado,
-      Sum(ca.total) AS total_pago, Date(bm.fecha) AS fecha_pagos,
+    "SELECT c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, Coalesce(Sum(cp.subtotal), c.subtotal) AS subtotal,
+      Coalesce(Sum(cp.importe_iva), c.importe_iva) AS importe_iva, Coalesce(Sum(cp.total), c.total) AS total,
+      c.retencion_iva, bm.monto AS total_pago, bm.id_movimiento, p.id_proveedor, p.nombre_fiscal AS proveedor,
+      p.rfc AS rfc_proveedor, c.uuid, c.no_certificado, Date(bm.fecha) AS fecha_pagos,
       bm.metodo_pago AS metodo_pago, Coalesce(string_agg(cp.conceptos, ', '), c.concepto) AS conceptos,
       bc.alias AS cuenta_pago, Coalesce(Sum(cp.tipo_cambio), 0) AS tipo_cambio
     FROM compras c
@@ -235,7 +236,7 @@ class devoluciones_iva_model extends privilegios_model{
       INNER JOIN banco_movimientos bm ON bm.id_movimiento = bmc.id_movimiento
       INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
       LEFT JOIN (
-        SELECT id_compra, Sum(importe) AS subtotal, Sum(iva) AS importe_iva,
+        SELECT id_compra, Sum(importe) AS subtotal, Sum(iva) AS importe_iva, Sum(retencion_iva) AS retencion_iva,
           Coalesce(Sum(tipo_cambio)/(CASE WHEN Count(tipo_cambio) = 0 THEN 1 ELSE Count(tipo_cambio) END), 0) AS tipo_cambio,
           Sum(importe + iva) AS total, string_agg(DISTINCT descripcion, ', ') AS conceptos
         FROM compras_productos
@@ -244,7 +245,7 @@ class devoluciones_iva_model extends privilegios_model{
     WHERE c.status <> 'ca' AND c.importe_iva > 0 AND bm.status = 't'
        {$sql}
     GROUP BY c.id_compra, p.id_proveedor, bm.id_movimiento, bc.id_cuenta
-    ORDER BY proveedor ASC, fecha_pagos ASC
+    ORDER BY proveedor ASC, fecha_pagos ASC, id_movimiento ASC
     ");
     $response = $facturas->result();
 
@@ -285,6 +286,7 @@ class devoluciones_iva_model extends privilegios_model{
         </tr>';
 
     $proveedor = '';
+    $auxmov = '';
     $total_subtotal = $total_iva = $total_total = $total_pagos = $total_ret_iva = 0;
     $subtotal = $iva = $total = $pagos = $ret_iva = 0;
     foreach($res as $key => $item){
@@ -329,6 +331,21 @@ class devoluciones_iva_model extends privilegios_model{
         $proveedor = $item->id_proveedor;
       }
 
+      $subtotal += $item->subtotal;
+      $iva      += $item->importe_iva;
+      $ret_iva  += $item->retencion_iva;
+      $total    += $item->total;
+
+      $total_subtotal += $item->subtotal;
+      $total_iva      += $item->importe_iva;
+      $total_ret_iva  += $item->retencion_iva;
+      $total_total    += $item->total;
+
+      if ($auxmov != $item->id_movimiento) {
+        $pagos       += $item->total_pago;
+        $total_pagos += $item->total_pago;
+      }
+
       $html .= '<tr>
           <td style="width:150px;border:1px solid #000;">'.$item->fecha.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->serie.'</td>
@@ -349,17 +366,6 @@ class devoluciones_iva_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$item->tipo_cambio.'</td>
         </tr>';
 
-      $subtotal += $item->subtotal;
-      $iva      += $item->importe_iva;
-      $ret_iva  += $item->retencion_iva;
-      $total    += $item->total;
-      $pagos    += $item->total_pago;
-
-      $total_subtotal += $item->subtotal;
-      $total_iva      += $item->importe_iva;
-      $total_ret_iva  += $item->retencion_iva;
-      $total_total    += $item->total;
-      $total_pagos    += $item->total_pago;
     }
 
     $html .= '
@@ -438,16 +444,21 @@ class devoluciones_iva_model extends privilegios_model{
       c.id_cliente, fp.conceptos AS conceptos, fp.subtotal AS subtotal,
       fp.importe_iva AS importe_iva, fp.total AS total,
       f.no_certificado, f.uuid, Date(bm.fecha) AS fecha_pago,
-      bm.monto AS total_pago, bc.alias AS cuentas,
+      bm.monto AS total_pago, bm.id_movimiento, bc.alias AS cuentas,
       bm.metodo_pago AS metodo_pago, f.tipo_cambio
     FROM facturacion f
       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
       INNER JOIN (
-        SELECT id_factura, Sum(importe) AS subtotal, Sum(iva) AS importe_iva,
-          Sum(importe + iva) AS total, string_agg(DISTINCT descripcion, ', ') AS conceptos
-        FROM facturacion_productos
-        WHERE {$sql_iva}
-        GROUP BY id_factura
+        SELECT ffp.id_factura, Sum(ffp.importe) AS subtotal, Sum(ffp.iva) AS importe_iva,
+          Sum(ffp.importe + ffp.iva) AS total, string_agg(DISTINCT ffp.descripcion, ', ') AS conceptos
+        FROM facturacion_productos ffp
+          INNER JOIN facturacion ff ON ff.id_factura = ffp.id_factura
+            WHERE  ffp.iva > 0 AND (
+          ff.sin_costo = 'f' OR
+          (ff.sin_costo = 't' AND ffp.id_clasificacion <> '49' AND ffp.id_clasificacion <> '50' AND
+           ffp.id_clasificacion <> '51' AND ffp.id_clasificacion <> '52' AND ffp.id_clasificacion <> '53')
+        )
+        GROUP BY ffp.id_factura
       ) fp ON f.id_factura = fp.id_factura
       INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
       INNER JOIN banco_movimientos_facturas bmf ON bmf.id_abono_factura = fa.id_abono
@@ -455,7 +466,7 @@ class devoluciones_iva_model extends privilegios_model{
       INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
     WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND bm.status = 't'
       {$sql}
-    ORDER BY cliente ASC, fecha_pago ASC
+    ORDER BY cliente ASC, fecha_pago ASC, id_movimiento ASC
     ");
     $response = $facturas->result();
 
@@ -496,6 +507,7 @@ class devoluciones_iva_model extends privilegios_model{
         </tr>';
 
     $cliente = '';
+    $auxmov = '';
     $total_subtotal = $total_iva = $total_total = $total_pagos = $total_ret_iva = 0;
     $subtotal = $iva = $total = $pagos = $ret_iva = 0;
     foreach($res as $key => $item){
@@ -538,6 +550,22 @@ class devoluciones_iva_model extends privilegios_model{
         $cliente = $item->id_cliente;
       }
 
+      $subtotal += $item->subtotal;
+      $iva      += $item->importe_iva;
+      $total    += $item->total;
+
+      $total_subtotal += $item->subtotal;
+      $total_iva      += $item->importe_iva;
+      $total_total    += $item->total;
+
+      if ($auxmov != $item->id_movimiento) {
+        $pagos       += $item->total_pago;
+        $total_pagos += $item->total_pago;
+        $auxmov      = $item->id_movimiento;
+      } else {
+        $item->total_pago = 0;
+      }
+
       $html .= '<tr>
           <td style="width:150px;border:1px solid #000;">'.$item->fecha.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->serie.'</td>
@@ -557,15 +585,6 @@ class devoluciones_iva_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$item->tipo_cambio.'</td>
         </tr>';
 
-      $subtotal += $item->subtotal;
-      $iva      += $item->importe_iva;
-      $total    += $item->total;
-      $pagos    += $item->total_pago;
-
-      $total_subtotal += $item->subtotal;
-      $total_iva      += $item->importe_iva;
-      $total_total    += $item->total;
-      $total_pagos    += $item->total_pago;
     }
 
     $html .= '

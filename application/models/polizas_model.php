@@ -1017,8 +1017,8 @@ class polizas_model extends CI_Model {
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($inf_factura['info']->cliente->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).  //referencia movimiento
-                            $this->setEspacios('1',1).  //tipo movimiento, clientes es un Abono = 1
-                            $this->setEspacios( $this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un Abono = 1
+                            $this->setEspacios( '-'.$this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio, 100). //concepto
