@@ -435,10 +435,10 @@ class devoluciones_iva_model extends privilegios_model{
 
     $facturas = $this->db->query(
     "SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.rfc, c.nombre_fiscal AS cliente,
-      c.id_cliente, fp.conceptos AS conceptos, f.subtotal AS subtotal,
-      f.importe_iva AS importe_iva, f.total AS total,
+      c.id_cliente, fp.conceptos AS conceptos, fp.subtotal AS subtotal,
+      fp.importe_iva AS importe_iva, fp.total AS total,
       f.no_certificado, f.uuid, Date(bm.fecha) AS fecha_pago,
-      fa.total AS total_pago, bc.alias AS cuentas,
+      bm.monto AS total_pago, bc.alias AS cuentas,
       bm.metodo_pago AS metodo_pago, f.tipo_cambio
     FROM facturacion f
       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
