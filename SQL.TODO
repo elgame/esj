@@ -1,9 +1,9 @@
 
- ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct
+ ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san
      ALTER TABLE public.bascula_facturas ADD COLUMN uuid character varying;
      ALTER TABLE public.bascula_facturas ADD COLUMN no_certificado character varying;
 
- ✔ Recetas @done (19-09-20 19:28) pct|pcc
+ ✔ Recetas @done (19-09-20 19:28) pct|pcc|san
    CREATE TABLE otros.formulas
       (
         id_formula bigserial NOT NULL,
@@ -104,7 +104,6 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',515,TRUE,'recetas_formulas/agregar/','plus',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',515,FALSE,'recetas_formulas/modificar/','edit',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',515,FALSE,'recetas_formulas/cancelar/','remove',FALSE);
-   -- pct
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',515,FALSE,'recetas_formulas/activar/','ok',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
