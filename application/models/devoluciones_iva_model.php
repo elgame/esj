@@ -428,9 +428,9 @@ class devoluciones_iva_model extends privilegios_model{
     }
 
     if($this->input->get('tasa_iva') == 16)
-      $sql_iva = " iva > 0";
+      $sql_iva = " ffp.iva > 0";
     else
-      $sql_iva = " iva = 0";
+      $sql_iva = " ffp.iva = 0";
 
     if($this->input->get('exportacion') == 'si')
       $sql .= " AND c.rfc = 'XEXX010101000'";
@@ -453,7 +453,7 @@ class devoluciones_iva_model extends privilegios_model{
           Sum(ffp.importe + ffp.iva) AS total, string_agg(DISTINCT ffp.descripcion, ', ') AS conceptos
         FROM facturacion_productos ffp
           INNER JOIN facturacion ff ON ff.id_factura = ffp.id_factura
-            WHERE  ffp.iva > 0 AND (
+            WHERE {$sql_iva} AND (
           ff.sin_costo = 'f' OR
           (ff.sin_costo = 't' AND ffp.id_clasificacion <> '49' AND ffp.id_clasificacion <> '50' AND
            ffp.id_clasificacion <> '51' AND ffp.id_clasificacion <> '52' AND ffp.id_clasificacion <> '53')
