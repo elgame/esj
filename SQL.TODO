@@ -1,9 +1,9 @@
 
- ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san
+ ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san|lap
      ALTER TABLE public.bascula_facturas ADD COLUMN uuid character varying;
      ALTER TABLE public.bascula_facturas ADD COLUMN no_certificado character varying;
 
- ✔ Recetas @done (19-09-20 19:28) pct|pcc|san
+ ✔ Recetas @done (19-09-20 19:28) pct|pcc|san|lap
    CREATE TABLE otros.formulas
       (
         id_formula bigserial NOT NULL,
@@ -109,7 +109,7 @@
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
 
 
- ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san
+ ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san|lap
    CREATE TABLE otros.paletas_salidas_manifesto
       (
         id_paleta_salida bigint NOT NULL,
