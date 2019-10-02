@@ -476,9 +476,15 @@ class productos extends MY_Controller {
 			$id_familia = $this->input->post('ffamilia');
 		}
 
+    $str = mb_strtolower($str, 'UTF-8');
+    $codigo = explode('-', $str);
+    if (count($codigo) > 1) {
+      $str = "{$codigo[0]}-{$codigo[1]}";
+    }
+
 		$res = $this->db->select('Count(id_producto) AS num')
 			->from('productos')
-			->where("status <> 'e' AND id_familia = ".$id_familia." AND codigo = '".$str."'".$sql)->get()->row();
+			->where("status <> 'e' AND id_familia = ".$id_familia." AND lower(codigo) LIKE '".$str."%'".$sql)->get()->row();
 		if($res->num == '0')
 			return true;
 

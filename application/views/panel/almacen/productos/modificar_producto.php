@@ -106,7 +106,7 @@
                   <label class="control-label" for="fstock_min">Stock min </label>
                   <div class="controls">
                     <input type="text" name="fstock_min" id="fstock_min" class="span12 vpositive" maxlength="40"
-                    value="<?php echo set_value('fcodigo', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
+                    value="<?php echo set_value('fstock_min', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
                   </div>
                 </div>
 
@@ -114,7 +114,7 @@
                   <label class="control-label" for="ubicacion">Ubicacion </label>
                   <div class="controls">
                     <input type="text" name="ubicacion" id="ubicacion" class="span12" maxlength="70"
-                    value="<?php echo set_value('fcodigo', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
+                    value="<?php echo set_value('ubicacion', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
                   </div>
                 </div>
 

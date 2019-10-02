@@ -197,7 +197,8 @@ class productos_model extends CI_Model {
 		}
 
 		if (isset($_GET['fproducto']{0}))
-			$sql .= ($sql==''? 'WHERE': ' AND ')." lower(nombre) LIKE '%".mb_strtolower($this->input->get('fproducto'), 'UTF-8')."%'";
+			$sql .= ($sql==''? 'WHERE': ' AND ')." (lower(nombre) LIKE '%".mb_strtolower($this->input->get('fproducto'), 'UTF-8')."%' OR
+          lower(codigo) LIKE '".mb_strtolower($this->input->get('fproducto'), 'UTF-8')."%')";
 
 		$_GET['fstatus'] = (isset($_GET['fstatus'])? $_GET['fstatus']: 'ac');
 		$sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";
