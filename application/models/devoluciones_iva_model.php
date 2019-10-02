@@ -427,7 +427,9 @@ class devoluciones_iva_model extends privilegios_model{
       $sql .= " AND c.id_cliente IN(".implode(',', $this->input->get('ids_clientes')).")";
     }
 
-    if($this->input->get('tasa_iva') == 16)
+    if ($this->input->get('tasa_iva') == '')
+      $sql_iva = "";
+    elseif($this->input->get('tasa_iva') == 16)
       $sql_iva = " ffp.iva > 0 AND";
     elseif($this->input->get('tasa_iva') == 0)
       $sql_iva = " ffp.iva = 0 AND";

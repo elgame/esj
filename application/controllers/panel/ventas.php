@@ -542,6 +542,9 @@ class ventas extends MY_Controller {
         array('field'   => 'dno_trazabilidad',
               'label'   => 'No Trazabilidad',
               'rules'   => 'max_length[15]|callback_check_trazabilidad'),
+        array('field'   => 'dno_salida_fruta',
+              'label'   => 'No Salida de fruta',
+              'rules'   => 'max_length[15]'),
     );
 
     if (isset($_POST['privAddDescripciones']{0}) || isset($_POST['id_nrc']{0})) {

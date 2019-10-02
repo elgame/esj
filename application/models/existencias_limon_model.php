@@ -104,15 +104,17 @@ class existencias_limon_model extends CI_Model {
     $ventas = $this->db->query(
       "SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
         (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe, u.id_unidad,
-        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kilos
+        Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kilos,
+        fo.no_salida_fruta
       FROM facturacion f
         INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+        LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
       WHERE f.id_empresa = {$id_empresa} AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
         AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
-      GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad
+      GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad, fo.id_factura
       ORDER BY folio ASC"
     );
 
@@ -390,14 +392,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 55, 35, 16, 20, 20, 15, 23));
-    $pdf->Row(array('FOLIO', 'CLIENTE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(20, 55, 35, 16, 20, 20, 15, 23));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
 
     $venta_importe = $venta_kilos = $venta_cantidad = 0;
     foreach ($caja['ventas'] as $venta) {
@@ -416,6 +418,7 @@ class existencias_limon_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->Row(array(
         $venta->serie.$venta->folio,
+        $venta->no_salida_fruta,
         $venta->nombre_fiscal,
         $venta->clasificacion,
         $venta->unidad,
@@ -429,6 +432,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       '',

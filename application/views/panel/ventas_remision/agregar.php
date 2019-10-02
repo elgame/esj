@@ -136,6 +136,14 @@
                 </div>
               </div>
 
+              <div class="control-group" style="background-color: #bef7b0">
+                <label class="control-label" for="dno_salida_fruta">No Salida de fruta</label>
+                <div class="controls">
+                  <input type="text" name="dno_salida_fruta" class="span9" id="dno_salida_fruta"
+                    value="<?php echo set_value('dno_salida_fruta', isset($borrador) ? $borrador['info']->no_salida_fruta : ''); ?>" placeholder="">
+                </div>
+              </div>
+
               <?php if( isset($_GET['id_nrc']) ){ ?>
                 <input type="hidden" name="id_nrc" value="<?php echo $_GET['id_nrc']; ?>">
               <?php }else{ ?>
@@ -151,7 +159,7 @@
               <div class="control-group">
                 <div class="controls">
                   <div class="input-append pull-left"> <?php $chk_sincosto = isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : ''); ?>
-                    <label class="control-label">Sin Costo <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo $chk_sincosto; ?>></label>
+                    <label class="control-label">Sin Costo <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo $chk_sincosto; ?> disabled></label>
                   </div>
 
                   <div class="input-append <?php echo $chk_sincosto=='checked'? '': 'hide'; ?>  pull-left" id="dsincosto_novergrup">

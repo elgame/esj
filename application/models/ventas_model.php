@@ -84,7 +84,7 @@ class Ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida")
+      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida, fo.no_salida_fruta")
       ->from('facturacion as f')
       ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
       ->where("f.id_factura = {$id}")
@@ -324,10 +324,20 @@ class Ventas_model extends privilegios_model{
     $id_venta = $this->db->insert_id();
 
     // Si tiene el # de trazabilidad
-    if ($this->input->post('dno_trazabilidad') !== false) {
+    if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
         'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
+        'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
+        'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
+      ]);
+    }
+
+    // Si tiene el # de Salida de fruta
+    if ($this->input->post('dno_salida_fruta') !== false) {
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'       => $id_venta,
+
         'id_paleta_salida' => $this->input->post('id_paleta_salida')
       ]);
     }
@@ -687,12 +697,13 @@ class Ventas_model extends privilegios_model{
     // $id_venta = $this->db->insert_id();
 
     // Si tiene el # de trazabilidad
-    if ($this->input->post('dno_trazabilidad') !== false) {
+    if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
       $this->db->delete('facturacion_otrosdatos', "id_factura = {$id_venta}");
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
         'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
-        'id_paleta_salida' => $this->input->post('id_paleta_salida')
+        'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
+        'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
       ]);
     }
 
