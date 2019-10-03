@@ -7,9 +7,8 @@ $(function(){
         ffecha2: $("#ffecha2").val(),
         dempresa: $("#dempresa").val(),
         did_empresa: $("#did_empresa").val(),
-        fproducto: $("#fproducto").val(),
-        fid_producto: $("#fid_producto").val(),
-        dcon_mov: $("#dcon_mov:checked").val(),
+        exportacion: $("#exportacion").val(),
+        tasa_iva: $("#tasa_iva").val(),
 
         ids_clientes: [],
       };
