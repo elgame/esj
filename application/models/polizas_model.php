@@ -1664,7 +1664,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios( $this->numero($value->{'indemnizaciones'.$iper}) , 20).  //importe movimiento - retencion
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                            $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios("INDEMNIZACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
 
