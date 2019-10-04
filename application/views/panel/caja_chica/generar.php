@@ -392,7 +392,7 @@
                                     <thead>
                                       <tr>
                                         <th colspan="2">TRASPASOS
-                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4')): ?>
+                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5')): ?>
                                           <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                           <?php endif ?>
                                         </th>

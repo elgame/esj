@@ -752,7 +752,7 @@ class caja_chica_model extends CI_Model {
   {
     $ingresos = array();
 
-    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General'];
+    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes'];
     $anio = date('Y');
 
     // ingresos
