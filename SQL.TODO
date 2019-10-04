@@ -1,5 +1,5 @@
 
- ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct
+ ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san
    ALTER TABLE public.facturacion_otrosdatos ADD COLUMN no_salida_fruta character varying(15);
 
  ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san|lap
