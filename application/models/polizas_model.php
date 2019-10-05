@@ -3448,7 +3448,7 @@ class polizas_model extends CI_Model {
         }
       }elseif($this->input->get('ftipo2') == 'no') //nomina diario
       {
-        $response = $this->polizaDiarioNominaDesglosado();
+        $response = $this->polizaDiarioNomina();
 
         //actualizamos el estado de la factura y bascula y descarga el archivo
         if (isset($_POST['poliza']{0}))
