@@ -3248,7 +3248,8 @@ class nomina_fiscal_model extends CI_Model {
       'empresaId' => $empresaId,
       'asegurado' => 'si',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
-      'ordenar' => "ORDER BY u.id ASC"
+      'ordenar' => "ORDER BY u.id ASC",
+      'dia_inicia_semana' => $diaComienza
     );
     $empleados = $this->nomina($configuraciones, $filtros);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
