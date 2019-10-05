@@ -1766,6 +1766,390 @@ class polizas_model extends CI_Model {
   }
 
   /**
+   * GENERA UNA POLIZA DE DIARIOS PARA LAS NOMINAS
+   * @return [type] [description]
+   */
+  public function polizaDiarioNominaDesglosado()
+  {
+    $response = array('data' => '', 'facturas' => array(), 'folio' => '');
+    $sql = $sql2 = '';
+
+    if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+      $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+      $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+    }
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+      $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      $sql .= " AND Date(f.fecha_inicio) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sql2 .= " AND Date(f.fecha_salida) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    }
+
+    $dias_desface = 4;
+    if ($this->input->get('fid_empresa') != '') {
+      $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $sql2 .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $dias_desface = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['fid_empresa'])->get()->row()->dia_inicia_semana;
+    }
+
+    $fecha = $_GET['ffecha1'];
+    if($_GET['ffecha1'] > $_GET['ffecha2'])
+      $fecha = $_GET['ffecha2'];
+
+    $folio = $this->input->get('ffolio');
+
+    $query = $this->db->query(
+      "SELECT id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, sueldo_semanal, vacaciones,
+            prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto, fondo_ahorro,
+            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo, uuid
+      FROM (
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
+              f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
+              f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid
+          FROM nomina_fiscal AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
+            f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            f.indemnizaciones, 'fi' AS tipo, f.uuid
+          FROM finiquito AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE u.esta_asegurado = 't'
+             {$sql2}
+        )
+      ) AS n
+      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
+      ");
+
+    echo "<pre>";
+      var_dump("SELECT id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, sueldo_semanal, vacaciones,
+            prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto, fondo_ahorro,
+            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo, uuid
+      FROM (
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
+              f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
+              f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid
+          FROM nomina_fiscal AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
+            f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            f.indemnizaciones, 'fi' AS tipo, f.uuid
+          FROM finiquito AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE u.esta_asegurado = 't'
+             {$sql2}
+        )
+      ) AS n
+      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
+      ");
+    echo "</pre>";exit;
+
+    $nominas = array();
+    foreach ($query->result() as $key => $value)
+    {
+      if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
+        $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
+        $value->anio = $semana['anio'];
+        $value->semana = $semana['semana'];
+        $value->fecha_inicio = $semana['fecha_inicio'];
+        $value->fecha_final = $semana['fecha_final'];
+      }
+
+      if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
+      {
+        if ($value->departamento == "ADMINISTRACION") {
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal1   += $value->sueldo_semanal;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones1       += $value->vacaciones;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones1  += $value->indemnizaciones;
+        } else {
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional2 += $value->prima_vacacional;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones2  += $value->indemnizaciones;
+        }
+
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->vejez           += $value->vejez;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
+      }else{
+        $value->fecha_inicio1    = $value->fecha_final;
+        $value->fecha_inicio     = str_replace('-', '/', $value->fecha_inicio);
+        $value->fecha_final      = str_replace('-', '/', $value->fecha_final);
+        if ($value->departamento == "ADMINISTRACION") {
+          $value->sueldo_semanal1   = $value->sueldo_semanal;
+          $value->vacaciones1       = $value->vacaciones;
+          $value->prima_vacacional1 = $value->prima_vacacional;
+          $value->aguinaldo1        = $value->aguinaldo;
+          $value->horas_extras1     = $value->horas_extras;
+          $value->pasistencia1      = $value->pasistencia;
+          $value->indemnizaciones1  = $value->indemnizaciones;
+
+          $value->sueldo_semanal2   = 0;
+          $value->vacaciones2       = 0;
+          $value->prima_vacacional2 = 0;
+          $value->aguinaldo2        = 0;
+          $value->horas_extras2     = 0;
+          $value->pasistencia2      = 0;
+          $value->indemnizaciones2  = 0;
+        } else {
+          $value->sueldo_semanal1   = 0;
+          $value->vacaciones1       = 0;
+          $value->prima_vacacional1 = 0;
+          $value->aguinaldo1        = 0;
+          $value->horas_extras1     = 0;
+          $value->pasistencia1      = 0;
+          $value->indemnizaciones1  = 0;
+
+          $value->sueldo_semanal2   = $value->sueldo_semanal;
+          $value->vacaciones2       = $value->vacaciones;
+          $value->prima_vacacional2 = $value->prima_vacacional;
+          $value->aguinaldo2        = $value->aguinaldo;
+          $value->horas_extras2     = $value->horas_extras;
+          $value->pasistencia2      = $value->pasistencia;
+          $value->indemnizaciones2  = $value->indemnizaciones;
+        }
+        $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
+      }
+    }
+
+    if(count($nominas) > 0)
+    {
+      $response['facturas'] = $nominas;
+
+      $this->load->model('facturacion_model');
+
+      $sql2 = $sql3 = '';
+      if ($this->input->get('fid_empresa') != '') {
+        $sql2 .= " AND u.id_empresa = '".$_GET['fid_empresa']."'";
+        $sql3 .= " AND nfp.id_empresa = '".$_GET['fid_empresa']."'";
+      }
+
+      //Contenido de la Poliza
+      foreach ($nominas as $key => $value)
+      {
+        //Se obtienen los prestamos
+        $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
+                               FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+                               WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+                               GROUP BY u.id")->result();
+
+        //Se obtienen los fondos_ahorro
+        $fondos_ahorro = $this->db->query("SELECT u.id, u.fondo_ahorro_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.fondo_ahorro), 0) AS fondo_ahorro
+                               FROM nomina_fiscal AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+                               WHERE nfp.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql3}
+                               GROUP BY u.id HAVING COALESCE(Sum(nfp.fondo_ahorro), 0) > 0")->result();
+
+        //Agregamos el header de la poliza
+        $response['data'] .= $this->setEspacios('P',2).
+                            $this->setEspacios(str_replace('-', '', $value->fecha_inicio1),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                            $this->setEspacios($folio,9,'r').  //folio poliza
+                            $this->setEspacios('1',1). //clase
+                            $this->setEspacios('0',10). //iddiario
+                            $this->setEspacios("Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}",100). //concepto
+                            $this->setEspacios('11',2). //sistema de origen
+                            $this->setEspacios('0',1). //impresa
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
+
+        //Colocamos el Cargo de la nomina
+        for ($iper=1; $iper <= 2; $iper++) {
+          if($value->{'sueldo_semanal'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNSueldo(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero(($value->{'sueldo_semanal'.$iper})) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("SUELDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'vacaciones'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNVacaciones(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'vacaciones'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("VACACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'prima_vacacional'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'prima_vacacional'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("PRIMA VACACIONAL Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'aguinaldo'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNAguinaldo(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'aguinaldo'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("AGUINALDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'horas_extras'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNHorasHex(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'horas_extras'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("HRS EXTRAS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'pasistencia'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getPAsistenciaContpaq(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'pasistencia'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'indemnizaciones'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'indemnizaciones'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("INDEMNIZACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        }
+
+        //Colocamos los abonos de la nomina
+        if($value->total_neto > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNominaPagar(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->total_neto) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("NOMINAS POR PAGAR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if(abs($value->subsidio) > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNSubsidio(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->subsidio*-1) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("SUBSIDIO AL EMPLEO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if($value->imss > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNImss(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->imss) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("IMSS RETENIDO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if($value->vejez > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNVejez(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->vejez) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("RETIRO CENSATIA Y VEJEZ Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if($value->infonavit > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNInfonavit(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->infonavit) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("CREDITO INFONAVIT Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if($value->isr > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNIsr(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->isr) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("ISR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        foreach ($prestamos as $keyp => $prestamo)
+        {
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($prestamo->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($prestamo->prestamo) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("{$prestamo->nombre} Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        }
+
+        foreach ($fondos_ahorro as $keyp => $fondo_ahorro)
+        {
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($fondo_ahorro->fondo_ahorro_cpi,30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($fondo_ahorro->fondo_ahorro) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("FA {$fondo_ahorro->nombre} Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        }
+
+        $folio++;
+      }
+    }
+
+    $response['folio'] = $folio-1;
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
+    return $response;
+  }
+
+  /**
    * GENERA UNA POLIZA DE DIARIOS PARA LOS PRODUCTOS
    * @return [type] [description]
    */
@@ -3064,7 +3448,7 @@ class polizas_model extends CI_Model {
         }
       }elseif($this->input->get('ftipo2') == 'no') //nomina diario
       {
-        $response = $this->polizaDiarioNomina();
+        $response = $this->polizaDiarioNominaDesglosado();
 
         //actualizamos el estado de la factura y bascula y descarga el archivo
         if (isset($_POST['poliza']{0}))
