@@ -1591,7 +1591,8 @@ class nomina_fiscal_model extends CI_Model {
       // Compara que halla prestamos.
       if (floatval($empleadoFiniquito[0]->prestamos) > 0)
       {
-        $semana = $this->semanaActualDelMes(substr($fechaSalida, 0, 4));
+        $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empleadoFiniquito[0]->id_empresa)->get()->row()->dia_inicia_semana;
+        $semana = $this->semanaActualDelMes(substr($fechaSalida, 0, 4), 0, $dia);
 
         // Recorre los prestamos del empleado para
         foreach ($empleadoFiniquito[0]->prestamos_pendientes as $prestamo)
@@ -4473,6 +4474,10 @@ class nomina_fiscal_model extends CI_Model {
     $y = $pdf->GetY();
     foreach ($finiquitos as $key => $empleado)
     {
+      $finiquito_prestamo = $this->db->query("SELECT Sum(monto) AS monto FROM nomina_fiscal_prestamos
+        WHERE id_empresa = {$empleado->id_empresa} AND id_empleado = {$empleado->id_empleado} AND fecha = '{$empleado->fecha_salida}'")->row();
+
+
       if($dep_tiene_empleados)
       {
         $pdf->SetFont('Helvetica','B', 10);
@@ -4648,6 +4653,21 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->isr;
         $total_gral['isr'] += $empleado->isr;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
+
+      if (isset($finiquito_prestamo->monto) && $finiquito_prestamo->monto != 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($finiquito_prestamo->monto, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['prestamos'] += $finiquito_prestamo->monto;
+        $total_gral['prestamos'] += $finiquito_prestamo->monto;
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();

@@ -110,6 +110,13 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',515,FALSE,'recetas_formulas/activar/','ok',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
+   -- pct
+   ALTER TABLE otros.recetas ADD COLUMN tipo character varying(4);
+   COMMENT ON COLUMN otros.recetas.tipo IS 'kg, lts';
+   ALTER TABLE otros.recetas ADD COLUMN ha_bruta double precision;
+   ALTER TABLE otros.recetas ADD COLUMN carga1 double precision;
+   ALTER TABLE otros.recetas ADD COLUMN carga2 double precision;
+   ALTER TABLE otros.recetas ADD COLUMN ph double precision;
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san|lap
