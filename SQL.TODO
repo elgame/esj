@@ -117,6 +117,13 @@
    ALTER TABLE otros.recetas ADD COLUMN carga1 double precision;
    ALTER TABLE otros.recetas ADD COLUMN carga2 double precision;
    ALTER TABLE otros.recetas ADD COLUMN ph double precision;
+   ALTER TABLE otros.recetas ALTER COLUMN dosis_planta DROP NOT NULL;
+   ALTER TABLE otros.recetas ALTER COLUMN kg_totales DROP NOT NULL;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Recetas',514,TRUE,'recetas/','list-alt',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',521,TRUE,'recetas/agregar/','plus',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',521,FALSE,'recetas/modificar/','edit',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',521,FALSE,'recetas/cancelar/','remove',FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',521,FALSE,'recetas/activar/','ok',FALSE);
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san|lap

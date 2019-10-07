@@ -231,6 +231,12 @@ class recetas_formulas extends MY_Controller {
     }
   }
 
+  public function ajax_get_folio()
+  {
+    $this->load->model('recetas_formulas_model');
+    echo $this->recetas_formulas_model->folio($_GET['ide'], $_GET['tipo']);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax

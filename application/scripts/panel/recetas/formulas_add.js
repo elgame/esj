@@ -9,6 +9,7 @@
     autocompleteEmpresas();
     autocompleteConcepto();
 
+    eventChangeTipo();
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantidadProd();
@@ -119,6 +120,16 @@
       }
     });
   };
+
+  var eventChangeTipo = function () {
+    $('#tipo').on('change', function(event) {
+      var tipo = $(this).find('option:selected').val();
+      var ide = $('#empresaId').val();
+      $.get(base_url + 'panel/recetas_formulas/ajax_get_folio/?tipo='+tipo+'&ide='+ide , function(folio) {
+        $('#folio').val(folio);
+      });
+    });
+  }
 
   var eventBtnAddProducto = function () {
     $('#productos #btnAddProd').on('click', function(event) {

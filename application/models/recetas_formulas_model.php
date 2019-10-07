@@ -98,7 +98,6 @@ class recetas_formulas_model extends CI_Model {
         'id_formula'   => $formulaId,
         'id_producto'  => $_POST['productoId'][$key],
         'rows'         => $key,
-        'descripcion'  => $concepto,
         'dosis_mezcla' => $_POST['cantidad'][$key],
         'percent'      => $_POST['percent'][$key],
       );
