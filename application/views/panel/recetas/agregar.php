@@ -294,7 +294,11 @@
                   <br><br>
                   <div class="span12 mquit">
                     <div class="span3">
-                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant." data-next="btnAddProd">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant." data-next="fprecio">
+                    </div><!--/span3s -->
+
+                    <div class="span3">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fprecio" min="0.01" placeholder="Precio" data-next="btnAddProd">
                     </div><!--/span3s -->
 
                     <div class="span2 offset3">
@@ -310,8 +314,11 @@
                       <thead>
                         <tr>
                           <th rowspan="2" style="vertical-align: middle;">%</th>
-                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
+                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
+                          <th rowspan="2" style="vertical-align: middle;">APLI TOTAL</th>
+                          <th rowspan="2" style="vertical-align: middle;">PRECIO</th>
+                          <th rowspan="2" style="vertical-align: middle;">IMPORTE</th>
                           <th rowspan="2" style="vertical-align: middle;">OPC</th>
                         </tr>
                       </thead>

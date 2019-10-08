@@ -9,6 +9,7 @@ class recetas_formulas extends MY_Controller {
   private $excepcion_privilegio = array(
     'recetas_formulas/ajax_get_folio/',
     'recetas_formulas/ajax_get_formulas/',
+    'recetas_formulas/ajax_get_formula/',
 
 
 
@@ -249,6 +250,13 @@ class recetas_formulas extends MY_Controller {
     $this->load->model('recetas_formulas_model');
     $formulas = $this->recetas_formulas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
     echo json_encode($formulas);
+  }
+
+  public function ajax_get_formula()
+  {
+    $this->load->model('recetas_formulas_model');
+    $formula = $this->recetas_formulas_model->info($_GET['id'], true);
+    echo json_encode($formula);
   }
 
   /*

@@ -13,6 +13,7 @@
     autocompleteConcepto();
 
     eventChangeTipo();
+    eventCalcuDatos();
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantidadProd();
@@ -53,6 +54,28 @@
         $('#areaId').val(ui.item.item.id_area);
         $('#tipo').change();
         $formula.css("background-color", "#A1F57A");
+
+        // agrega los productos
+        $.ajax({
+            url: base_url + 'panel/recetas_formulas/ajax_get_formula/',
+            dataType: "json",
+            data: {id: ui.item.id},
+            success: function(data) {
+              if (data.info.productos) {
+                var producto = {};
+                for (var i = 0; i < data.info.productos.length; i++) {
+                  producto = {
+                    id: data.info.productos[i].id_producto,
+                    concepto: data.info.productos[i].producto,
+                    cantidad: data.info.productos[i].dosis_mezcla,
+                    precio: data.info.productos[i].precio_unitario,
+                    percent: data.info.productos[i].precio,
+                  };
+                  addProducto(producto, '');
+                }
+              }
+            }
+        });
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -255,6 +278,7 @@
         $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
         $fcantidad.val('1');
+        $('#productos #fprecio').val(ui.item.item.last_precio);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -265,6 +289,7 @@
         $("#productos #fcodigo").val("");
         $('#productos #fconceptoId').val('');
         $('#productos #fcantidad').val('');
+        $('#productos #fprecio').val('');
       }
     });
   };
@@ -300,7 +325,8 @@
           $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId   = $('#productos #fconceptoId'),
           $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
-          campos = [$fcantidad],
+          $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
+          campos = [$fcantidad, $fprecio],
           producto = {},
           error = false;
 
@@ -336,6 +362,7 @@
           'codigo'   : $fcodigo.val(),
           'concepto' : $fconcepto.val(),
           'cantidad' : $fcantidad.val(),
+          'precio'   : $fprecio.val(),
         };
 
         addProducto(producto, idval);
@@ -356,6 +383,29 @@
     });
   };
 
+  var eventCalcuDatos = function () {
+    $('#dosis_planta, #planta_ha, #ha_neta').on('keyup', function(event) {
+      var $tipo     = $('#tipo'),
+      $dosis_planta = $('#dosis_planta'),
+      $planta_ha    = $('#planta_ha'),
+      $ha_neta      = $('#ha_neta'),
+      $no_plantas   = $('#no_plantas'),
+      $kg_totales   = $('#kg_totales');
+
+      if ($tipo.val() === 'kg') {
+        no_plantas = (parseFloat($ha_neta.val())||0) * (parseFloat($planta_ha.val())||0);
+        $no_plantas.val(no_plantas);
+        kg_totales = (parseFloat(no_plantas)||0) * (parseFloat($dosis_planta.val())||0);
+        $kg_totales.val(kg_totales);
+      } else {
+      }
+
+      calculaTotal();
+    });
+  };
+
+
+
   var jumpIndex = 0;
   function addProducto(producto, idval) {
     var $tabla            = $('#productos #table-productos'),
@@ -363,6 +413,13 @@
         indexJump         = jumpIndex + 1,
         exist             = false,
         $autorizar_active = $("#btnAutorizar").length>0?true:false;
+
+    // Valida si ya existe el producto agregado
+    $tabla.find('input[id=productoId]').each(function(index, el) {
+      if (el && $(el).val() == producto.id) {
+        exist = true;
+      }
+    });
 
     // Si el producto a agregar no existe en el listado los agrega por primera
     // vez.
@@ -374,13 +431,22 @@
             '<span class="percent"></span>'+
             '<input type="hidden" name="percent[]" value="" id="percent" class="jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
           '</td>'+
-          '<td style="width: 65px;">'+
-              '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
-          '</td>'+
           '<td>'+
             producto.concepto+
             '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">'+
             '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">'+
+          '</td>'+
+          '<td style="width: 65px;">'+
+              '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+          '</td>'+
+          '<td style="width: 65px;">'+
+              '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
+          '</td>'+
+          '<td style="width: 65px;">'+
+              '<input type="number" step="any" name="precio[]" value="'+(producto['precio']? producto.precio: '')+'" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+          '</td>'+
+          '<td style="width: 65px;">'+
+              '<input type="number" step="any" name="importe[]" value="'+(producto['importe']? producto.importe: '')+'" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
           '<td>'+
             '<button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>'+
@@ -399,7 +465,6 @@
       $(".vpos-int").numeric({ decimal: false, negative: false }); //Numero entero positivo
 
       calculaTotal();
-      // $('.jump'+indexJump).focus();
     }
   }
 
@@ -436,7 +501,7 @@
      $('#productos input#cantidad').each(function(i, e) {
         total_cantidad += (parseFloat($(this).val())||0);
      });
-     console.log(total_cantidad);
+     // console.log(total_cantidad);
 
     $('#productos tr.rowprod').each(function(i, e) {
       var $tr = $(this),

@@ -184,9 +184,15 @@ class recetas_formulas_model extends CI_Model {
       {
         $query = $this->db->query(
           "SELECT fp.id_formula, fp.rows, pr.id_producto, pr.nombre AS producto,
-                  pr.codigo, pr.id_unidad, fp.dosis_mezcla, fp.percent
+                  pr.codigo, pr.id_unidad, fp.dosis_mezcla, fp.percent, pre.precio_unitario
            FROM otros.formulas_productos AS fp
             INNER JOIN productos AS pr ON pr.id_producto = fp.id_producto
+            LEFT JOIN (
+              SELECT DISTINCT ON (cp.id_producto) id_producto, Date(co.fecha_creacion) AS fecha_creacion, cp.precio_unitario
+              FROM compras_productos cp
+                INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+              ORDER BY cp.id_producto, co.fecha_creacion DESC
+            ) pre ON pre.id_producto = fp.id_producto
            WHERE fp.id_formula = {$data['info']->id_formula}
            ORDER BY fp.rows ASC");
 
