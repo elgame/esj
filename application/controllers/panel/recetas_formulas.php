@@ -8,6 +8,7 @@ class recetas_formulas extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'recetas_formulas/ajax_get_folio/',
+    'recetas_formulas/ajax_get_formulas/',
 
 
 
@@ -58,7 +59,7 @@ class recetas_formulas extends MY_Controller {
     $this->load->model('empresas_model');
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
-    $params['formulas'] = $this->recetas_formulas_model->getRecetas();
+    $params['formulas'] = $this->recetas_formulas_model->getFormulas();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
@@ -231,17 +232,24 @@ class recetas_formulas extends MY_Controller {
     }
   }
 
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
   public function ajax_get_folio()
   {
     $this->load->model('recetas_formulas_model');
     echo $this->recetas_formulas_model->folio($_GET['ide'], $_GET['tipo']);
   }
 
-  /*
-   |------------------------------------------------------------------------
-   | Ajax
-   |------------------------------------------------------------------------
-   */
+  public function ajax_get_formulas()
+  {
+    $this->load->model('recetas_formulas_model');
+    $formulas = $this->recetas_formulas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
+    echo json_encode($formulas);
+  }
 
   /*
    |------------------------------------------------------------------------

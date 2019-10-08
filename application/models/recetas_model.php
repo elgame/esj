@@ -8,6 +8,81 @@ class recetas_model extends CI_Model {
     $this->load->model('bitacora_model');
   }
 
+  public function getRecetas($perpage = '100', $autorizadas = true)
+  {
+    $sql = '';
+    //paginacion
+    $params = array(
+        'result_items_per_page' => $perpage,
+        'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+    );
+
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+    if($this->input->get('fbuscar') != '')
+    {
+      $sqlfolio = is_numeric($this->input->get('fbuscar'))? "f.folio = '".$this->input->get('fbuscar')."' OR r.folio = '".$this->input->get('fbuscar')."' OR ": '';
+      $sql .= " AND ({$sqlfolio} f.nombre LIKE '%".$this->input->get('fbuscar')."%')";
+    }
+
+    if($this->input->get('ftipo') != '')
+    {
+      $sql .= " AND r.tipo = '".$this->input->get('ftipo')."'";
+    }
+
+    if($this->input->get('did_empresa') != '')
+    {
+      $sql .= "  AND r.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('did_area') != '')
+    {
+      $sql .= " AND r.id_area = '".$this->input->get('did_area')."'";
+    }
+
+    if($this->input->get('fstatus') != '')
+    {
+      $sql .= " AND r.status = '".$this->input->get('fstatus')."'";
+    }
+
+    $query = BDUtil::pagination(
+        "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
+          f.nombre, f.folio AS folio_formula, r.tipo, r.status, r.fecha
+        FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
+          INNER JOIN areas a ON a.id_area = r.id_area
+        WHERE 1 = 1 {$sql}
+        ORDER BY r.folio DESC
+        ", $params, true);
+
+    $res = $this->db->query($query['query']);
+
+    $response = array(
+        'recetas'       => array(),
+        'total_rows'     => $query['total_rows'],
+        'items_per_page' => $params['result_items_per_page'],
+        'result_page'    => $params['result_page']
+    );
+    if($res->num_rows() > 0)
+      $response['recetas'] = $res->result();
+
+    return $response;
+  }
+
+  public function folio($empresaId, $tipo = 'kg')
+  {
+    $res = $this->db->select('folio')
+      ->from('otros.recetas')
+      ->where('tipo', $tipo)
+      ->where('id_empresa', $empresaId)
+      ->order_by('folio', 'DESC')
+      ->limit(1)->get()->row();
+
+    $folio = (isset($res->folio) ? $res->folio : 0) + 1;
+
+    return $folio;
+  }
+
   /**
    * Obtiene el listado de facturas
    *

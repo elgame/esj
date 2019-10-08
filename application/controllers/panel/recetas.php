@@ -9,11 +9,13 @@ class recetas extends MY_Controller {
   private $excepcion_privilegio = array(
     'recetas/registrar_ordenes/',
 
+    'recetas/ajax_get_folio/',
+    'recetas/ajax_get_recetas/',
+
 
 
     'compras_requisicion/ajax_producto_by_codigo/',
     'compras_requisicion/ajax_producto/',
-    'compras_requisicion/ajax_get_folio/',
     'compras_requisicion/ajax_get_producto_all/',
     'compras_requisicion/ajax_get_tipo_cambio/',
 
@@ -44,31 +46,96 @@ class recetas extends MY_Controller {
       array('general/supermodal.js'),
       array('general/msgbox.js'),
       array('general/util.js'),
-      array('panel/compras_ordenes/admin.js'),
+      array('panel/recetas/formulas.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Administración de Ordenes de Compra'
+      'titulo' => 'Administración de Recetas'
     );
 
     $this->load->library('pagination');
-    $this->load->model('compras_requisicion_model');
+    $this->load->model('recetas_model');
 
-    $params['ordenes'] = $this->compras_requisicion_model->getOrdenes();
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['recetas'] = $this->recetas_model->getRecetas();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     $params['requisicion'] = false;
     $params['method']     = '';
-    $params['titleBread'] = 'Ordenes de Compras';
+    $params['titleBread'] = 'Administración de Recetas';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/compras_ordenes/admin', $params);
+    $this->load->view('panel/recetas/admin', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Visualiza el formulario para agregar.
+   *
+   * @return void
+   */
+  public function agregar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/recetas/recetas_add.js'),
+    ));
+
+    $this->load->model('recetas_formulas_model');
+    $this->load->model('compras_areas_model');
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar receta'
+    );
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['next_folio'] = $this->recetas_formulas_model->folio($params['empresa_default']->id_empresa);
+
+    $this->configAddReceta();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->recetas_formulas_model->agregar();
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/recetas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/agregar', $params);
     $this->load->view('panel/footer');
   }
 
@@ -121,6 +188,24 @@ class recetas extends MY_Controller {
     redirect(base_url('panel/recetas/faltantes_productos'));
   }
 
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+  public function ajax_get_folio()
+  {
+    $this->load->model('recetas_model');
+    echo $this->recetas_model->folio($_GET['ide'], $_GET['tipo']);
+  }
+
+  public function ajax_get_recetas()
+  {
+    $this->load->model('recetas_formulas_model');
+    $formulas = $this->recetas_formulas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
+    echo json_encode($formulas);
+  }
 
 
 
@@ -130,466 +215,69 @@ class recetas extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddOrden($prereq = false)
-  {
-    $this->load->library('form_validation');
-
-    $valGasto = $valFlete = false;
-    $tipoOrden = $this->input->post('tipoOrden');
-    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f') {
-      $valGasto = true;
-
-      if ($tipoOrden == 'f')
-        $valFlete = true;
-    }
-
-    $rules = array(
-      array('field' => 'empresaId',
-            'label' => 'Empresa',
-            'rules' => 'required'),
-      array('field' => 'empresa',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'id_almacen',
-            'label' => 'Almacen',
-            'rules' => ($prereq? '': 'required')),
-      array('field' => 'es_receta',
-            'label' => 'Es receta',
-            'rules' => ''),
-
-      array('field' => 'proveedorId1',
-            'label' => 'Proveedor',
-            'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
-      array('field' => 'proveedorId2',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedorId3',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedor1',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor2',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor3',
-            'label' => '',
-            'rules' => ''),
-
-      array('field' => 'solicito',
-            'label' => '',
-            'rules' => ''),
-
-      // array('field' => 'autorizoId',
-      //       'label' => 'Autorizo',
-      //       'rules' => 'required'),
-      // array('field' => 'autorizo',
-      //       'label' => 'Autorizo',
-      //       'rules' => 'required'),
-
-      array('field' => 'departamento',
-            'label' => 'Departamento',
-            'rules' => ($prereq? '': 'required')),
-
-      array('field' => 'descripcion',
-            'label' => 'Observacion',
-            'rules' => ''),
-
-      array('field' => 'clienteId',
-            'label' => 'Cliente',
-            'rules' => ''),
-      array('field' => 'cliente',
-            'label' => 'Cliente',
-            'rules' => ''),
-
-      array('field' => 'fecha',
-            'label' => 'Fecha',
-            'rules' => 'required'),
-      array('field' => 'folio',
-            'label' => 'Folio',
-            'rules' => 'required'),
-      array('field' => 'tipoPago',
-            'label' => 'Tipo de Pago',
-            'rules' => 'required'),
-      array('field' => 'tipoOrden',
-            'label' => 'Tipo de Orden',
-            'rules' => 'required'),
-
-      array('field' => 'infRecogerProv',
-            'label' => 'Recoger con el proveedor',
-            'rules' => ''),
-      array('field' => 'infRecogerProvNom',
-            'label' => 'Recoger con el proveedor',
-            'rules' => ''),
-      array('field' => 'infPasarBascula',
-            'label' => 'Pasar a Bascula',
-            'rules' => ''),
-      array('field' => 'infEntOrdenCom',
-            'label' => 'Entregar la mercancía',
-            'rules' => ''),
-
-      array('field' => 'areaId',
-            'label' => 'Cultivo',
-            'rules' => ($valGasto? 'required|numeric': '')),
-      array('field' => 'area',
-            'label' => 'Cultivo',
-            'rules' => ($valGasto? 'required': '')),
-      array('field' => 'ranchoId[]',
-            'label' => 'Rancho',
-            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
-      array('field' => 'ranchoText[]',
-            'label' => 'Rancho',
-            'rules' => ''),
-      array('field' => 'centroCostoId[]',
-            'label' => 'Centro de costo',
-            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
-      array('field' => 'centroCostoText[]',
-            'label' => 'Centro de costo',
-            'rules' => ''),
-      array('field' => 'activoId',
-            'label' => 'Activo',
-            'rules' => ($valGasto && !$valFlete? 'numeric': '')),
-      array('field' => 'activos',
-            'label' => 'Activo',
-            'rules' => ($valGasto && !$valFlete? '': '')),
-
-      array('field' => 'totalLetra1',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'totalLetra2',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'totalLetra3',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'codigoArea[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'codigoAreaId[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'codigo[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'tipo_cambio[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'prodIdOrden[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'prodIdNumRow[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'cantidad[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'unidad[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'presentacion[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'presentacionCant[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'presentacionText[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'concepto[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'productoId[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'valorUnitario1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'valorUnitario2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'valorUnitario3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'trasladoTotal1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'trasladoTotal2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'trasladoTotal3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsTotal1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsTotal2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsTotal3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'retTotal1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'retTotal2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'retTotal3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'importe1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'importe2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'importe3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'total1[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'total2[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'total3[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'observacion[]',
-            'label' => '',
-            'rules' => 'max_length[200]'),
-      array('field' => 'traslado[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'trasladoPorcent[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsPorcent[]',
-            'label' => '',
-            'rules' => ''),
-
-      array('field' => 'totalImporte1',
-            'label' => 'Subtotal',
-            'rules' => ''),
-      array('field' => 'totalImporte2',
-            'label' => 'Subtotal',
-            'rules' => ''),
-      array('field' => 'totalImporte3',
-            'label' => 'Subtotal',
-            'rules' => ''),
-      array('field' => 'totalImpuestosTrasladados1',
-            'label' => 'IVA',
-            'rules' => ''),
-      array('field' => 'totalImpuestosTrasladados2',
-            'label' => 'IVA',
-            'rules' => ''),
-      array('field' => 'totalImpuestosTrasladados3',
-            'label' => 'IVA',
-            'rules' => ''),
-      array('field' => 'totalIeps1',
-            'label' => 'IEPS',
-            'rules' => ''),
-      array('field' => 'totalIeps2',
-            'label' => 'IEPS',
-            'rules' => ''),
-      array('field' => 'totalIeps3',
-            'label' => 'IEPS',
-            'rules' => ''),
-      array('field' => 'totalRetencion1',
-            'label' => 'RET.',
-            'rules' => ''),
-      array('field' => 'totalRetencion2',
-            'label' => 'RET.',
-            'rules' => ''),
-      array('field' => 'totalRetencion3',
-            'label' => 'RET.',
-            'rules' => ''),
-      array('field' => 'totalOrden1',
-            'label' => 'Total',
-            'rules' => 'greater_than[-1]'),
-      array('field' => 'totalOrden2',
-            'label' => 'Total',
-            'rules' => 'greater_than[-1]'),
-      array('field' => 'totalOrden3',
-            'label' => 'Total',
-            'rules' => 'greater_than[-1]'),
-    );
-
-    $rules[] = array('field' => 'es_vehiculo',
-                    'label' => 'Vehiculo',
-                    'rules' => '');
-    $rules[] = array('field' => 'vehiculo',
-                    'label' => 'Vehiculos',
-                    'rules' => '');
-    $rules[] = array('field' => 'vehiculoId',
-                    'label' => 'Vehiculos',
-                    'rules' => '');
-
-    if ($this->input->post('es_vehiculo') == 'si')
-    {
-      $rules[count($rules)-1]['rules'] = 'required|numeric';
-
-      $rules[] = array('field' => 'tipo_vehiculo',
-                      'label' => 'Tipo vehiculo',
-                      'rules' => '');
-      if ($this->input->post('tipo_vehiculo') == 'g')
-      {
-        $rules[] = array('field' => 'dkilometros',
-                        'label' => 'Kilometros',
-                        'rules' => 'required|numeric');
-        $rules[] = array('field' => 'dlitros',
-                        'label' => 'Litros',
-                        'rules' => 'required|numeric');
-        $rules[] = array('field' => 'dprecio',
-                        'label' => 'Precio',
-                        'rules' => 'required|numeric');
-      }
-    }
-
-    if($this->input->post('tipoOrden') == 'f')
-    {
-      $rules[] = array('field' => 'fleteDe',
-                    'label' => 'Flete de',
-                    'rules' => 'required');
-      if($this->input->post('fleteDe') === 'v') {
-        $rules[] = array('field' => 'remfacs',
-                      'label' => 'Factura/Remision',
-                      'rules' => 'required');
-        $rules[] = array('field' => 'remfacs_folio',
-                      'label' => 'Factura/Remision',
-                      'rules' => '');
-      } else {
-        $rules[] = array('field' => 'boletas',
-                      'label' => 'Boletas',
-                      'rules' => 'required');
-        $rules[] = array('field' => 'boletas_folio',
-                      'label' => 'Boletas',
-                      'rules' => '');
-      }
-    }
-
-    $this->form_validation->set_rules($rules);
-  }
-
-  public function val_proveedor($proveedor)
-  {
-    if ($this->input->post('proveedorId1') == '' && $this->input->post('proveedorId2') == '' && $this->input->post('proveedorId3') == '' )
-    {
-      $this->form_validation->set_message('val_proveedor', 'Por lo menos un proveedor se tiene que seleccionar.');
-      return false;
-    }
-    else
-    {
-      return true;
-    }
-  }
-  public function val_proveedor2($proveedor)
-  {
-    if ($this->input->post('proveedorId1') == '' && $_POST['totalOrden1'] > 0 )
-    {
-      $this->form_validation->set_message('val_proveedor2', 'Se tiene que seleccionar el proveedor 1.');
-      return false;
-    }elseif ($this->input->post('proveedorId2') == '' && $_POST['totalOrden2'] > 0 )
-    {
-      $this->form_validation->set_message('val_proveedor2', 'Se tiene que seleccionar el proveedor 2.');
-      return false;
-    }elseif ($this->input->post('proveedorId3') == '' && $_POST['totalOrden3'] > 0 )
-    {
-      $this->form_validation->set_message('val_proveedor2', 'Se tiene que seleccionar el proveedor 3.');
-      return false;
-    }
-    return true;
-  }
-
-  public function configAddOrdenLigar()
+  public function configAddReceta($prereq = false)
   {
     $this->load->library('form_validation');
 
     $rules = array(
-      array('field' => 'proveedorId',
-            'label' => 'Proveedor',
-            'rules' => 'required'),
-      array('field' => 'empresaId',
-            'label' => 'Empresa',
-            'rules' => 'required'),
+      ['field' => 'empresa', 'label' => 'Empresa', 'rules' => ''],
+      ['field' => 'empresaId', 'label' => 'Empresa', 'rules' => 'required|numeric'],
+      ['field' => 'formula', 'label' => 'Formula', 'rules' => ''],
+      ['field' => 'formulaId', 'label' => 'Formula', 'rules' => ''],
+      ['field' => 'area', 'label' => 'Cultivo', 'rules' => ''],
+      ['field' => 'areaId', 'label' => 'Cultivo', 'rules' => ''],
+      ['field' => 'rancho', 'label' => 'Rancho', 'rules' => ''],
+      ['field' => 'ranchoId[]', 'label' => 'Rancho', 'rules' => ''],
+      ['field' => 'ranchoText[]', 'label' => 'Rancho', 'rules' => ''],
+      ['field' => 'centroCosto', 'label' => 'CentroCosto', 'rules' => ''],
+      ['field' => 'centroCostoId[]', 'label' => 'CentroCosto', 'rules' => ''],
+      ['field' => 'centroCostoText[]', 'label' => 'CentroCosto', 'rules' => ''],
+      ['field' => 'objetivo', 'label' => 'Objetivo', 'rules' => ''],
+      ['field' => 'tipo', 'label' => 'Tipo', 'rules' => ''],
+      ['field' => 'folio_formula', 'label' => 'Folio_formula', 'rules' => ''],
+      ['field' => 'folio', 'label' => 'Folio', 'rules' => ''],
+      ['field' => 'fecha', 'label' => 'Fecha', 'rules' => ''],
+      ['field' => 'a_etapa', 'label' => 'Etapa', 'rules' => ''],
+      ['field' => 'a_ciclo', 'label' => 'Ciclo', 'rules' => ''],
+      ['field' => 'a_dds', 'label' => 'DDS', 'rules' => ''],
+      ['field' => 'a_turno', 'label' => 'Turno', 'rules' => ''],
+      ['field' => 'a_via', 'label' => 'Via', 'rules' => ''],
+      ['field' => 'a_aplic', 'label' => 'Aplicación', 'rules' => ''],
+      ['field' => 'a_equipo', 'label' => 'Equipo', 'rules' => ''],
+      ['field' => 'a_observaciones', 'label' => 'Observaciones', 'rules' => ''],
+      ['field' => 'dosis_planta', 'label' => 'Dosis Planta', 'rules' => ''],
+      ['field' => 'ha_bruta', 'label' => 'Ha Bruta', 'rules' => ''],
+      ['field' => 'planta_ha', 'label' => 'Plantas x Ha', 'rules' => ''],
+      ['field' => 'ha_neta', 'label' => 'Ha Netas', 'rules' => ''],
+      ['field' => 'no_plantas', 'label' => 'No plantas', 'rules' => ''],
+      ['field' => 'kg_totales', 'label' => 'Kg Total', 'rules' => ''],
+      ['field' => 'carga1', 'label' => 'Carga 1', 'rules' => ''],
+      ['field' => 'carga2', 'label' => 'Carga 2', 'rules' => ''],
+      ['field' => 'ph', 'label' => 'PH', 'rules' => ''],
 
-      array('field' => 'serie',
-            'label' => 'Serie',
-            'rules' => ''),
-      array('field' => 'folio',
-            'label' => 'Folio',
-            'rules' => 'required|numeric|callback_serie_folio'),
-
-      array('field' => 'fecha',
-            'label' => 'Fecha',
-            'rules' => 'required'),
-
-      array('field' => 'condicionPago',
-            'label' => 'Condicion de Pago',
-            'rules' => 'required'),
-      array('field' => 'plazoCredito',
-            'label' => 'Plazo Credito',
-            'rules' => ''),
-
-      array('field' => 'totalLetra',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'concepto[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'cantidad[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'productoId[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'ordenId[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'row[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'valorUnitario[]',
-            'label' => 'Precio Unitario',
-            'rules' => 'greater_than[-1]'),
-      array('field' => 'trasladoTotal[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'trasladoPorcent[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsTotal[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'iepsPorcent[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'importe[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'total[]',
-            'label' => '',
-            'rules' => ''),
-
-      array('field' => 'totalImporte',
-            'label' => 'Subtotal',
-            'rules' => ''),
-      array('field' => 'totalImpuestosTrasladados',
-            'label' => 'IVA',
-            'rules' => ''),
-      array('field' => 'totalRetencion',
-            'label' => 'IVA',
-            'rules' => '')  ,
-      array('field' => 'totalIeps',
-            'label' => 'IEPS',
-            'rules' => ''),
-      array('field' => 'totalOrden',
-            'label' => 'Total',
-            'rules' => 'greater_than[-1]'),
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
     );
+
+    // if($this->input->post('tipoOrden') == 'f')
+    // {
+    //   $rules[] = array('field' => 'fleteDe',
+    //                 'label' => 'Flete de',
+    //                 'rules' => 'required');
+    //   if($this->input->post('fleteDe') === 'v') {
+    //     $rules[] = array('field' => 'remfacs',
+    //                   'label' => 'Factura/Remision',
+    //                   'rules' => 'required');
+    //     $rules[] = array('field' => 'remfacs_folio',
+    //                   'label' => 'Factura/Remision',
+    //                   'rules' => '');
+    //   } else {
+    //     $rules[] = array('field' => 'boletas',
+    //                   'label' => 'Boletas',
+    //                   'rules' => 'required');
+    //     $rules[] = array('field' => 'boletas_folio',
+    //                   'label' => 'Boletas',
+    //                   'rules' => '');
+    //   }
+    // }
 
     $this->form_validation->set_rules($rules);
   }
@@ -603,19 +291,6 @@ class recetas extends MY_Controller {
     if ($query->num > 0)
     {
       $this->form_validation->set_message('serie_folio', 'El %s ya esta asignado.');
-      return false;
-    }
-    else
-    {
-      return true;
-    }
-  }
-
-  public function xml_check($file)
-  {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
-    {
-      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
     }
     else

@@ -1,5 +1,5 @@
 
- ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san
+ ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san|pcc
    ALTER TABLE public.facturacion_otrosdatos ADD COLUMN no_salida_fruta character varying(15);
 
  ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san|lap
@@ -110,7 +110,7 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',515,FALSE,'recetas_formulas/activar/','ok',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
-   -- pct
+   -- pct|pcc
    ALTER TABLE otros.recetas ADD COLUMN tipo character varying(4);
    COMMENT ON COLUMN otros.recetas.tipo IS 'kg, lts';
    ALTER TABLE otros.recetas ADD COLUMN ha_bruta double precision;
