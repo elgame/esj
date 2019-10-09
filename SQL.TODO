@@ -124,6 +124,55 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',521,FALSE,'recetas/modificar/','edit',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',521,FALSE,'recetas/cancelar/','remove',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',521,FALSE,'recetas/activar/','ok',FALSE);
+   -- pcc
+   ALTER TABLE otros.recetas RENAME COLUMN objetico TO objetivo;
+   CREATE TABLE otros.recetas_centro_costo
+        (
+            id_centro_costo bigint NOT NULL,
+            id_receta bigint NOT NULL,
+            num integer NOT NULL DEFAULT 1,
+            CONSTRAINT recetas_centro_costo_pkey PRIMARY KEY (id_centro_costo, id_receta),
+            CONSTRAINT recetas_centro_costo_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+                REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+                NOT VALID,
+            CONSTRAINT recetas_centro_costo_id_receta_fkey FOREIGN KEY (id_receta)
+                REFERENCES otros.recetas (id_recetas) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+                NOT VALID
+        )
+        WITH (
+            OIDS = FALSE
+        )
+        TABLESPACE pg_default;
+        ALTER TABLE otros.recetas_centro_costo OWNER to programa;
+        COMMENT ON COLUMN otros.recetas_centro_costo.num IS 'numero de centro de costo asignados a la orden de compra';
+   CREATE TABLE otros.recetas_rancho
+        (
+            id_rancho bigint NOT NULL,
+            id_receta bigint NOT NULL,
+            num integer NOT NULL DEFAULT 1,
+            CONSTRAINT recetas_rancho_pkey PRIMARY KEY (id_rancho, id_receta),
+            CONSTRAINT recetas_rancho_id_rancho_fkey FOREIGN KEY (id_rancho)
+                REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+                NOT VALID,
+            CONSTRAINT recetas_rancho_id_receta_fkey FOREIGN KEY (id_receta)
+                REFERENCES otros.recetas (id_recetas) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+                NOT VALID
+        )
+        WITH (
+            OIDS = FALSE
+        )
+        TABLESPACE pg_default;
+        ALTER TABLE otros.recetas_rancho OWNER to programa;
+        COMMENT ON COLUMN otros.recetas_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+        COMMENT ON COLUMN otros.recetas_rancho.num IS 'numero de ranchos asignados a la orden de compra';
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san|lap

@@ -106,6 +106,26 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="solicito">Solicito</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="" required>
+                  </div>
+                </div>
+                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId') ?>" required>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="autorizo">Autoriza</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo') ?>" placeholder="" required>
+                  </div>
+                </div>
+                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId') ?>" required>
+              </div>
+
             </div>
 
             <div class="span6">
@@ -149,6 +169,7 @@
                 </div>
               </div>
             </div>
+
           </div>
 
           <div class="row-fluid">
@@ -163,44 +184,44 @@
                 <div class="row-fluid">
                   <div class="span3">
                     Etapa
-                    <input type="number" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo set_value('a_etapa'); ?>">
+                    <input type="text" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo set_value('a_etapa'); ?>">
                   </div>
 
                   <div class="span3">
                     Ciclo
-                    <input type="number" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo set_value('a_ciclo'); ?>">
+                    <input type="text" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo set_value('a_ciclo'); ?>">
                   </div>
 
                   <div class="span3">
                     DDS
-                    <input type="number" name="a_dds" class="span12 datosapl" id="a_dds" value="<?php echo set_value('a_dds'); ?>">
+                    <input type="text" name="a_dds" class="span12 datosapl" id="a_dds" value="<?php echo set_value('a_dds'); ?>">
                   </div>
 
                   <div class="span3">
                     Turno
-                    <input type="number" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo set_value('a_turno'); ?>">
+                    <input type="text" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo set_value('a_turno'); ?>">
                   </div>
                 </div>
 
                 <div class="row-fluid">
                   <div class="span3">
                     Via
-                    <input type="number" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo set_value('a_via'); ?>">
+                    <input type="text" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo set_value('a_via'); ?>">
                   </div>
 
                   <div class="span3">
                     Aplicación
-                    <input type="number" name="a_aplic" class="span12 datosapl" id="a_aplic" value="<?php echo set_value('a_aplic'); ?>">
+                    <input type="text" name="a_aplic" class="span12 datosapl" id="a_aplic" value="<?php echo set_value('a_aplic'); ?>">
                   </div>
 
                   <div class="span3">
                     Equipo
-                    <input type="number" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo set_value('a_equipo'); ?>">
+                    <input type="text" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo set_value('a_equipo'); ?>">
                   </div>
 
                   <div class="span3">
                     Observaciones
-                    <input type="number" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo set_value('a_observaciones'); ?>">
+                    <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo set_value('a_observaciones'); ?>">
                   </div>
                 </div>
               </div> <!-- /box-body -->
@@ -218,7 +239,7 @@
               <div class="box-content">
                 <div class="span3 datos-kg">
                   Dosis Planta
-                  <input type="number" name="dosis_planta" class="span12 datoskl" id="dosis_planta" value="<?php echo set_value('dosis_planta'); ?>">
+                  <input type="number" step="any" name="dosis_planta" class="span12 datoskl" id="dosis_planta" value="<?php echo set_value('dosis_planta'); ?>">
                 </div>
 
                 <div class="span3 datos-lts">
@@ -331,13 +352,22 @@
                               <span class="percent"><?php echo $_POST['percent'][$key] ?></span>
                               <input type="hidden" name="percent[]" value="<?php echo $_POST['percent'][$key] ?>" id="percent">
                             </td>
-                            <td style="width: 65px;">
-                                <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
-                            </td>
                             <td>
                               <?php echo $concepto ?>
                               <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
+                            </td>
+                            <td style="width: 65px;">
+                              <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
+                            </td>
+                            <td>
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $_POST['aplicacion_total'][$key] ?>" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
+                            </td>
+                            <td>
+                              <input type="number" step="any" name="precio[]" value="<?php echo $_POST['precio'][$key] ?>" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">
+                            </td>
+                            <td>
+                              <input type="number" step="any" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
                             </td>
                             <td>
                               <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
@@ -345,6 +375,17 @@
                           </tr>
                         <?php }} ?>
                       </tbody>
+                      <tfoot>
+                        <tr style="font-weight: bold;">
+                          <td id="ttpercent"></td>
+                          <td></td>
+                          <td id="ttcantidad"></td>
+                          <td id="ttaplicacion_total"></td>
+                          <td></td>
+                          <td id="ttimporte"></td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
                     </table>
                   </div>
                 </div>

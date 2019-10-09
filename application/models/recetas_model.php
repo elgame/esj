@@ -84,6 +84,92 @@ class recetas_model extends CI_Model {
   }
 
   /**
+   * Recetas agregar
+   *
+   * @return array
+   */
+  public function agregar()
+  {
+    $data = array(
+      'id_empresa'      => $_POST['empresaId'],
+      'id_formula'      => $_POST['formulaId'],
+      'id_realizo'      => $this->session->userdata('id_usuario'),
+      'id_solicito'     => $_POST['solicitoId'],
+      'id_autorizo'     => $_POST['autorizoId'],
+      'id_area'         => $_POST['areaId'],
+      'fecha'           => $_POST['fecha'],
+      'folio'           => $_POST['folio'],
+      'objetivo'        => $_POST['objetivo'],
+      'semana'          => $_POST[''],
+      'tipo'            => $_POST['tipo'],
+
+      'dosis_planta'    => floatval($_POST['dosis_planta']),
+      'planta_ha'       => floatval($_POST['planta_ha']),
+      'ha_neta'         => floatval($_POST['ha_neta']),
+      'no_plantas'      => floatval($_POST['no_plantas']),
+      'kg_totales'      => floatval($_POST['kg_totales']),
+      'ha_bruta'        => floatval($_POST['ha_bruta']),
+      'carga1'          => floatval($_POST['carga1']),
+      'carga2'          => floatval($_POST['carga2']),
+      'ph'              => floatval($_POST['ph']),
+
+      'a_etapa'         => $_POST['a_etapa'],
+      'a_ciclo'         => $_POST['a_ciclo'],
+      'a_dds'           => $_POST['a_dds'],
+      'a_turno'         => $_POST['a_turno'],
+      'a_via'           => $_POST['a_via'],
+      'a_aplic'         => $_POST['a_aplic'],
+      'a_equipo'        => $_POST['a_equipo'],
+      'a_observaciones' => $_POST['a_observaciones'],
+    );
+
+    $this->db->insert('otros.recetas', $data);
+    $recetaId = $this->db->insert_id('otros.recetas_id_recetas_seq');
+
+    $productos = array();
+    foreach ($_POST['concepto'] as $key => $concepto)
+    {
+      $productos[] = array(
+        'id_receta'        => $recetaId,
+        'id_producto'      => $_POST['productoId'][$key],
+        'rows'             => $key,
+        'percent'          => $_POST['percent'][$key],
+        'dosis_mezcla'     => $_POST['cantidad'][$key],
+        'aplicacion_total' => $_POST['aplicacion_total'][$key],
+        'precio'           => $_POST['precio'][$key],
+        'importe'          => $_POST['importe'][$key],
+      );
+    }
+
+    if(count($productos) > 0)
+      $this->db->insert_batch('otros.recetas_productos', $productos);
+
+    // Inserta los ranchos
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+        $this->db->insert('compras_requisicion_rancho', [
+          'id_rancho'      => $id_rancho,
+          'id_requisicion' => $recetaId,
+          'num'            => count($_POST['ranchoId'])
+        ]);
+      }
+    }
+
+    // Inserta los centros de costo
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+        $this->db->insert('otros.recetas_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_requisicion'  => $recetaId,
+          'num'             => count($_POST['centroCostoId'])
+        ]);
+      }
+    }
+
+    return array('passes' => true, 'msg' => 3);
+  }
+
+  /**
    * Obtiene el listado de facturas
    *
    * @return

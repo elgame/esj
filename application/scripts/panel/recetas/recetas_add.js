@@ -9,6 +9,7 @@
     autocompleteCultivo();
     autocompleteRanchos();
     autocompleteCentroCosto();
+    autocompleteAutorizo();
     autocompleteEmpresas();
     autocompleteConcepto();
 
@@ -294,6 +295,45 @@
     });
   };
 
+  var autocompleteAutorizo = function () {
+    $("#solicito").autocomplete({
+      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $solicito =  $(this);
+
+        $solicito.css("background-color", "#A1F57A");
+        $("#solicitoId").val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {$("#solicito").css("background-color", "#FFD071");
+        $("#solicitoId").val('');
+      }
+    });
+
+    $("#autorizo").autocomplete({
+      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $autorizo =  $(this);
+
+        $autorizo.css("background-color", "#A1F57A");
+        $("#autorizoId").val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {$("#autorizo").css("background-color", "#FFD071");
+        $("#autorizoId").val('');
+      }
+    });
+  };
+
+
+  /*********************************************
+   * Eventos
+   */
+
   var eventChangeTipo = function () {
     $('#tipo').on('change', function(event) {
       var tipo = $(this).find('option:selected').val();
@@ -436,19 +476,19 @@
             '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">'+
             '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">'+
           '</td>'+
-          '<td style="width: 65px;">'+
+          '<td>'+
               '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
-          '<td style="width: 65px;">'+
+          '<td>'+
               '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
-          '<td style="width: 65px;">'+
+          '<td>'+
               '<input type="number" step="any" name="precio[]" value="'+(producto['precio']? producto.precio: '')+'" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
-          '<td style="width: 65px;">'+
+          '<td>'+
               '<input type="number" step="any" name="importe[]" value="'+(producto['importe']? producto.importe: '')+'" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
-          '<td>'+
+          '<td style="width: 65px;">'+
             '<button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>'+
           '</td>'+
         '</tr>');
@@ -469,7 +509,7 @@
   }
 
   var eventCantidadProd = function () {
-    $('#productos #table-productos').on('keyup', '#cantidad', function(e) {
+    $('#productos #table-productos').on('keyup', '#cantidad, #precio', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parents("tr.rowprod");
@@ -477,7 +517,7 @@
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotal();
       }
-    }).on('change', '#cantidad', function(event) {
+    }).on('change', '#cantidad, #precio', function(event) {
       var $tr = $(this).parents("tr.rowprod");
       calculaTotal();
     });
@@ -496,19 +536,46 @@
   };
 
   function calculaTotal () {
-    var total_cantidad = 0;
+    var $tipo = $('#tipo'),
+    total_percent = 0,
+    total_cantidad = 0,
+    total_aplicacion = 0,
+    total_importe = 0;
 
      $('#productos input#cantidad').each(function(i, e) {
         total_cantidad += (parseFloat($(this).val())||0);
      });
-     // console.log(total_cantidad);
 
+    var $tr = undefined;
     $('#productos tr.rowprod').each(function(i, e) {
-      var $tr = $(this),
-      total = (parseFloat($tr.find('#cantidad').val())||0)*100/(total_cantidad>0? total_cantidad: 1);
-      $tr.find('#percent').val(total.toFixed(2));
-      $tr.find('.percent').text(total.toFixed(2));
+      $tr = $(this);
+
+      // Calcula el % de que le corresponde al producto de acuerdo a su cantidad
+      percent = (parseFloat($tr.find('#cantidad').val())||0)*100/(total_cantidad>0? total_cantidad: 1);
+      $tr.find('#percent').val(percent.toFixed(2));
+      $tr.find('.percent').text(percent.toFixed(2));
+
+      // Calculos de acuerdo al tipo de receta
+      if ($tipo.val() === 'kg') {
+        aplicacion_total = percent*(parseFloat($('#kg_totales').val())||0)/100;
+        $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
+
+        importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
+        $tr.find('#importe').val(importe.toFixed(2));
+      } else {
+
+      }
+
+      total_percent    += percent;
+      total_aplicacion += (aplicacion_total? aplicacion_total: 0);
+      total_importe    += (importe? importe: 0);
+
     });
+
+    $('#ttpercent').text(total_percent)
+    $('#ttcantidad').text(total_cantidad)
+    $('#ttaplicacion_total').text(total_aplicacion)
+    $('#ttimporte').text(total_importe)
   }
 
 

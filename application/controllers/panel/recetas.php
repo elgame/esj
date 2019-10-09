@@ -219,65 +219,70 @@ class recetas extends MY_Controller {
   {
     $this->load->library('form_validation');
 
+    $val_datos = [
+      'dosis_planta' => false, 'ha_bruta' => true, 'planta_ha' => true,
+      'ha_neta' => true, 'no_plantas' => true, 'kg_totales' => false,
+      'carga1' => true, 'carga2' => true, 'ph' => true
+    ];
+    if ($this->input->post('tipo') === 'kg') {
+      $val_datos = [
+        'dosis_planta' => true, 'ha_bruta' => false, 'planta_ha' => true,
+        'ha_neta' => true, 'no_plantas' => true, 'kg_totales' => true,
+        'carga1' => false, 'carga2' => false, 'ph' => false
+      ];
+    }
+
     $rules = array(
-      ['field' => 'empresa', 'label' => 'Empresa', 'rules' => ''],
-      ['field' => 'empresaId', 'label' => 'Empresa', 'rules' => 'required|numeric'],
-      ['field' => 'formula', 'label' => 'Formula', 'rules' => ''],
-      ['field' => 'formulaId', 'label' => 'Formula', 'rules' => ''],
-      ['field' => 'area', 'label' => 'Cultivo', 'rules' => ''],
-      ['field' => 'areaId', 'label' => 'Cultivo', 'rules' => ''],
-      ['field' => 'rancho', 'label' => 'Rancho', 'rules' => ''],
-      ['field' => 'ranchoId[]', 'label' => 'Rancho', 'rules' => ''],
-      ['field' => 'ranchoText[]', 'label' => 'Rancho', 'rules' => ''],
-      ['field' => 'centroCosto', 'label' => 'CentroCosto', 'rules' => ''],
-      ['field' => 'centroCostoId[]', 'label' => 'CentroCosto', 'rules' => ''],
-      ['field' => 'centroCostoText[]', 'label' => 'CentroCosto', 'rules' => ''],
-      ['field' => 'objetivo', 'label' => 'Objetivo', 'rules' => ''],
-      ['field' => 'tipo', 'label' => 'Tipo', 'rules' => ''],
-      ['field' => 'folio_formula', 'label' => 'Folio_formula', 'rules' => ''],
-      ['field' => 'folio', 'label' => 'Folio', 'rules' => ''],
-      ['field' => 'fecha', 'label' => 'Fecha', 'rules' => ''],
-      ['field' => 'a_etapa', 'label' => 'Etapa', 'rules' => ''],
-      ['field' => 'a_ciclo', 'label' => 'Ciclo', 'rules' => ''],
-      ['field' => 'a_dds', 'label' => 'DDS', 'rules' => ''],
-      ['field' => 'a_turno', 'label' => 'Turno', 'rules' => ''],
-      ['field' => 'a_via', 'label' => 'Via', 'rules' => ''],
-      ['field' => 'a_aplic', 'label' => 'Aplicación', 'rules' => ''],
-      ['field' => 'a_equipo', 'label' => 'Equipo', 'rules' => ''],
-      ['field' => 'a_observaciones', 'label' => 'Observaciones', 'rules' => ''],
-      ['field' => 'dosis_planta', 'label' => 'Dosis Planta', 'rules' => ''],
-      ['field' => 'ha_bruta', 'label' => 'Ha Bruta', 'rules' => ''],
-      ['field' => 'planta_ha', 'label' => 'Plantas x Ha', 'rules' => ''],
-      ['field' => 'ha_neta', 'label' => 'Ha Netas', 'rules' => ''],
-      ['field' => 'no_plantas', 'label' => 'No plantas', 'rules' => ''],
-      ['field' => 'kg_totales', 'label' => 'Kg Total', 'rules' => ''],
-      ['field' => 'carga1', 'label' => 'Carga 1', 'rules' => ''],
-      ['field' => 'carga2', 'label' => 'Carga 2', 'rules' => ''],
-      ['field' => 'ph', 'label' => 'PH', 'rules' => ''],
+      ['field' => 'empresa',            'label' => 'Empresa',       'rules' => 'required'],
+      ['field' => 'empresaId',          'label' => 'Empresa',       'rules' => 'required|numeric'],
+      ['field' => 'formula',            'label' => 'Formula',       'rules' => 'required'],
+      ['field' => 'formulaId',          'label' => 'Formula',       'rules' => 'required|numeric'],
+      ['field' => 'area',               'label' => 'Cultivo',       'rules' => 'required'],
+      ['field' => 'areaId',             'label' => 'Cultivo',       'rules' => 'required|numeric'],
+      ['field' => 'rancho',             'label' => 'Rancho',        'rules' => ''],
+      ['field' => 'ranchoId[]',         'label' => 'Rancho',        'rules' => 'required|numeric'],
+      ['field' => 'ranchoText[]',       'label' => 'Rancho',        'rules' => 'required'],
+      ['field' => 'centroCosto',        'label' => 'CentroCosto',   'rules' => ''],
+      ['field' => 'centroCostoId[]',    'label' => 'CentroCosto',   'rules' => 'required|numeric'],
+      ['field' => 'centroCostoText[]',  'label' => 'CentroCosto',   'rules' => 'required'],
+      ['field' => 'objetivo',           'label' => 'Objetivo',      'rules' => ''],
+      ['field' => 'tipo',               'label' => 'Tipo',          'rules' => 'required'],
+      ['field' => 'folio_formula',      'label' => 'Folio_formula', 'rules' => 'required|numeric'],
+      ['field' => 'folio',              'label' => 'Folio',         'rules' => 'required|numeric'],
+      ['field' => 'fecha',              'label' => 'Fecha',         'rules' => 'required'],
+      ['field' => 'solicito',           'label' => 'solicito',      'rules' => 'required'],
+      ['field' => 'solicitoId',         'label' => 'solicitoId',    'rules' => 'required|numeric'],
+      ['field' => 'autorizo',           'label' => 'autorizo',      'rules' => 'required'],
+      ['field' => 'autorizoId',         'label' => 'autorizoId',    'rules' => 'required|numeric'],
+
+      ['field' => 'a_etapa',            'label' => 'Etapa',         'rules' => ''],
+      ['field' => 'a_ciclo',            'label' => 'Ciclo',         'rules' => ''],
+      ['field' => 'a_dds',              'label' => 'DDS',           'rules' => ''],
+      ['field' => 'a_turno',            'label' => 'Turno',         'rules' => ''],
+      ['field' => 'a_via',              'label' => 'Via',           'rules' => ''],
+      ['field' => 'a_aplic',            'label' => 'Aplicación',    'rules' => ''],
+      ['field' => 'a_equipo',           'label' => 'Equipo',        'rules' => ''],
+      ['field' => 'a_observaciones',    'label' => 'Observaciones', 'rules' => ''],
+
+      ['field' => 'dosis_planta',       'label' => 'Dosis Planta',  'rules' => ($val_datos['dosis_planta']? 'required': '')],
+      ['field' => 'ha_bruta',           'label' => 'Ha Bruta',      'rules' => ($val_datos['ha_bruta']? 'required': '')],
+      ['field' => 'planta_ha',          'label' => 'Plantas x Ha',  'rules' => ($val_datos['planta_ha']? 'required': '')],
+      ['field' => 'ha_neta',            'label' => 'Ha Netas',      'rules' => ($val_datos['ha_neta']? 'required': '')],
+      ['field' => 'no_plantas',         'label' => 'No plantas',    'rules' => ($val_datos['no_plantas']? 'required': '')],
+      ['field' => 'kg_totales',         'label' => 'Kg Total',      'rules' => ($val_datos['kg_totales']? 'required': '')],
+      ['field' => 'carga1',             'label' => 'Carga 1',       'rules' => ($val_datos['carga1']? 'required': '')],
+      ['field' => 'carga2',             'label' => 'Carga 2',       'rules' => ($val_datos['carga2']? 'required': '')],
+      ['field' => 'ph',                 'label' => 'PH',            'rules' => ($val_datos['ph']? 'required': '')],
+
+      ['field' => 'percent[]',          'label' => 'PH',            'rules' => ''],
+      ['field' => 'concepto[]',         'label' => 'PH',            'rules' => ''],
+      ['field' => 'productoId[]',       'label' => 'PH',            'rules' => ''],
+      ['field' => 'cantidad[]',         'label' => 'PH',            'rules' => ''],
+      ['field' => 'aplicacion_total[]', 'label' => 'PH',            'rules' => ''],
+      ['field' => 'precio[]',           'label' => 'PH',            'rules' => ''],
+      ['field' => 'importe[]',          'label' => 'PH',            'rules' => ''],
 
     );
-
-    // if($this->input->post('tipoOrden') == 'f')
-    // {
-    //   $rules[] = array('field' => 'fleteDe',
-    //                 'label' => 'Flete de',
-    //                 'rules' => 'required');
-    //   if($this->input->post('fleteDe') === 'v') {
-    //     $rules[] = array('field' => 'remfacs',
-    //                   'label' => 'Factura/Remision',
-    //                   'rules' => 'required');
-    //     $rules[] = array('field' => 'remfacs_folio',
-    //                   'label' => 'Factura/Remision',
-    //                   'rules' => '');
-    //   } else {
-    //     $rules[] = array('field' => 'boletas',
-    //                   'label' => 'Boletas',
-    //                   'rules' => 'required');
-    //     $rules[] = array('field' => 'boletas_folio',
-    //                   'label' => 'Boletas',
-    //                   'rules' => '');
-    //   }
-    // }
 
     $this->form_validation->set_rules($rules);
   }
