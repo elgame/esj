@@ -124,7 +124,7 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',521,FALSE,'recetas/modificar/','edit',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',521,FALSE,'recetas/cancelar/','remove',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',521,FALSE,'recetas/activar/','ok',FALSE);
-   -- pcc
+   -- pcc|pct
    ALTER TABLE otros.recetas RENAME COLUMN objetico TO objetivo;
    CREATE TABLE otros.recetas_centro_costo
         (
@@ -173,6 +173,10 @@
         ALTER TABLE otros.recetas_rancho OWNER to programa;
         COMMENT ON COLUMN otros.recetas_rancho.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
         COMMENT ON COLUMN otros.recetas_rancho.num IS 'numero de ranchos asignados a la orden de compra';
+   -- pct
+   ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_formula_fkey FOREIGN KEY (id_formula) REFERENCES otros.formulas (id_formula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_producto_fkey FOREIGN KEY (id_producto) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',521,FALSE,'recetas/imprimir/','print',FALSE);
 
 
  ✔ Datos extras para el manifesto en papeleta @done (19-09-18 16:27) pct|pcc|san|lap

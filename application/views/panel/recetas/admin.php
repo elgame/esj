@@ -71,24 +71,24 @@
                   <th>Fecha</th>
                   <th>Cultivo</th>
                   <th>Folio</th>
-                  <th>Nombre</th>
+                  <th>Formula</th>
                   <th>Tipo</th>
                   <th>Estado</th>
                   <th>Opc</th>
                 </tr>
               </thead>
               <tbody>
-            <?php foreach($recetas['recetas'] as $formula) { ?>
+            <?php foreach($recetas['recetas'] as $receta) { ?>
                 <tr>
-                  <td><?php echo $formula->fecha; ?></td>
-                  <td><?php echo $formula->area; ?></td>
-                  <td><?php echo $formula->folio; ?></td>
-                  <td><?php echo $formula->nombre; ?></td>
-                  <td><?php echo $formula->tipo; ?></td>
+                  <td><?php echo $receta->fecha; ?></td>
+                  <td><?php echo $receta->area; ?></td>
+                  <td><?php echo $receta->folio; ?></td>
+                  <td><?php echo $receta->nombre; ?></td>
+                  <td><?php echo $receta->tipo; ?></td>
                   <td><?php
                         $texto = 'Activa';
                         $label = 'success';
-                        if ($formula->status === 'f') {
+                        if ($receta->status === 'f') {
                           $texto = 'Eliminada';
                           $label = 'warning';
                         }
@@ -99,23 +99,28 @@
                     <?php
 
                       echo $this->usuarios_model->getLinkPrivSm('recetas/modificar/', array(
-                        'params'   => 'id='.$formula->id_formula,
-                        'btn_type' => 'btn-info',
+                        'params'   => 'id='.$receta->id_recetas,
+                        'btn_type' => 'btn-success',
                         'attrs' => array())
                       );
+                      echo $this->usuarios_model->getLinkPrivSm('recetas/imprimir/', array(
+                        'params'   => 'id='.$receta->id_recetas,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => '_BLANK'))
+                      );
 
-                      if ($formula->status === 't')
+                      if ($receta->status === 't')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('recetas/cancelar/', array(
-                          'params'   => 'id='.$formula->id_formula,
+                          'params'   => 'id='.$receta->id_recetas,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la formula?', 'recetas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la receta?', 'recetas', this); return false;"))
                         );
                       } else {
                         echo $this->usuarios_model->getLinkPrivSm('recetas/activar/', array(
-                          'params'   => 'id='.$formula->id_formula,
+                          'params'   => 'id='.$receta->id_recetas,
                           'btn_type' => 'btn',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Activar la formula?', 'recetas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Activar la receta?', 'recetas', this); return false;"))
                         );
                       }
 

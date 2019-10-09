@@ -100,7 +100,7 @@ class recetas extends MY_Controller {
       array('panel/recetas/recetas_add.js'),
     ));
 
-    $this->load->model('recetas_formulas_model');
+    $this->load->model('recetas_model');
     $this->load->model('compras_areas_model');
     $this->load->model('empresas_model');
     $this->load->model('almacenes_model');
@@ -113,7 +113,7 @@ class recetas extends MY_Controller {
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
-    $params['next_folio'] = $this->recetas_formulas_model->folio($params['empresa_default']->id_empresa);
+    $params['next_folio'] = $this->recetas_model->folio($params['empresa_default']->id_empresa);
 
     $this->configAddReceta();
     if ($this->form_validation->run() == FALSE)
@@ -122,7 +122,7 @@ class recetas extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->recetas_formulas_model->agregar();
+      $res_mdl = $this->recetas_model->agregar();
 
       if ($res_mdl['passes'])
       {
@@ -139,6 +139,72 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  /**
+   * Visualiza el formulario para modificar una receta.
+   *
+   * @return void
+   */
+  public function modificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/recetas/recetas_add.js'),
+    ));
+
+    $this->load->model('recetas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Modificar receta'
+    );
+
+    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $this->configAddReceta();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->recetas_model->modificar($_GET['id']);
+
+      if ($response['passes'])
+      {
+        redirect(base_url('panel/recetas/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
+      }
+    }
+
+    $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['print']))
+      $params['print'] = true;
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/modificar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function imprimir()
+  {
+    $this->load->model('recetas_model');
+
+    $this->recetas_model->print_receta($_GET['id']);
+  }
 
 
 
@@ -202,8 +268,8 @@ class recetas extends MY_Controller {
 
   public function ajax_get_recetas()
   {
-    $this->load->model('recetas_formulas_model');
-    $formulas = $this->recetas_formulas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
+    $this->load->model('recetas_model');
+    $formulas = $this->recetas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
     echo json_encode($formulas);
   }
 

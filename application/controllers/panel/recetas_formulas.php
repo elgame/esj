@@ -139,7 +139,7 @@ class recetas_formulas extends MY_Controller {
   }
 
   /**
-   * Visualiza el formulario para modificar una orden.
+   * Visualiza el formulario para modificar una formula.
    *
    * @return void
    */

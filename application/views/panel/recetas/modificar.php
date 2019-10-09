@@ -1,7 +1,7 @@
 <div id="content" class="span<?php echo isset($_GET['idf']) ? '12' : '10' ?>">
 
   <?php
-    $titulo = 'Agregar receta';
+    $titulo = 'Modificar receta';
     if (! isset($_GET['idf'])){ ?>
     <div>
       <ul class="breadcrumb">
@@ -26,7 +26,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/recetas/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal modificar-receta" action="<?php echo base_url('panel/recetas/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -35,9 +35,9 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" data-next="tipo" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo $receta['info']->empresa ?>" data-next="tipo" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
-                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
+                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo $receta['info']->id_empresa ?>">
                 </div>
               </div><!--/control-group -->
 
@@ -45,8 +45,8 @@
                 <label class="control-label" for="formula">Formula </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo set_value('formula') ?>" placeholder="Selecciona una formula" required>
-                    <input type="hidden" name="formulaId" id="formulaId" value="<?php echo set_value('formulaId') ?>">
+                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo $receta['info']->formula ?>" placeholder="Selecciona una formula" required>
+                    <input type="hidden" name="formulaId" id="formulaId" value="<?php echo $receta['info']->id_formula ?>">
                   </div>
                 </div>
               </div>
@@ -55,9 +55,9 @@
                 <label class="control-label" for="area">Cultivo</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña" readonly>
+                    <input type="text" name="area" class="span11" id="area" value="<?php echo $receta['info']->area ?>" placeholder="Limon, Piña" readonly>
                   </div>
-                  <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                  <input type="hidden" name="areaId" id="areaId" value="<?php echo $receta['info']->id_area ?>">
                 </div>
               </div>
 
@@ -69,13 +69,13 @@
                   </div>
                 </div>
                 <ul class="tags" id="tagsRanchoIds">
-                <?php if (isset($_POST['ranchoId'])) {
-                  foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
-                    <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
-                      <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
-                      <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
-                    </li>
-                 <?php }} ?>
+                <?php if (isset($receta['info']->rancho)) {
+                foreach ($receta['info']->rancho as $key => $rancho) { ?>
+                  <li class=""><span class="tag"><?php echo $rancho->nombre ?></span>
+                    <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                    <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                  </li>
+                <?php }} ?>
                 </ul>
               </div>
 
@@ -87,13 +87,13 @@
                   </div>
                 </div>
                 <ul class="tags" id="tagsCCIds">
-                <?php if (isset($_POST['centroCostoId'])) {
-                  foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
-                    <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
-                      <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
-                      <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
-                    </li>
-                 <?php }} ?>
+                <?php if (isset($receta['info']->centroCosto)) {
+                foreach ($receta['info']->centroCosto as $key => $centroCosto) { ?>
+                  <li class=""><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                    <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                    <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+                  </li>
+                <?php }} ?>
                 </ul>
               </div>
 
@@ -101,7 +101,7 @@
                 <label class="control-label" for="objetivo">Objetivo </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="objetivo" class="span11" id="objetivo" value="<?php echo set_value('objetivo') ?>">
+                    <input type="text" name="objetivo" class="span11" id="objetivo" value="<?php echo $receta['info']->objetivo ?>">
                   </div>
                 </div>
               </div>
@@ -110,20 +110,20 @@
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="" required>
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo $receta['info']->solicito ?>" placeholder="" required>
                   </div>
                 </div>
-                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId') ?>" required>
+                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo $receta['info']->id_solicito ?>" required>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="autorizo">Autoriza</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo') ?>" placeholder="" required>
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo $receta['info']->autorizo ?>" placeholder="" required>
                   </div>
                 </div>
-                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId') ?>" required>
+                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo $receta['info']->id_autorizo ?>" required>
               </div>
 
             </div>
@@ -134,8 +134,8 @@
                 <label class="control-label" for="tipo">Tipo de Orden</label>
                 <div class="controls">
                   <select name="tipo" class="span9" id="tipo" data-next="formula">
-                    <option value="kg" <?php echo set_select('tipo', 'kg'); ?>>Kg</option>
-                    <option value="lts" <?php echo set_select('tipo', 'lts'); ?>>Lts</option>
+                    <option value="kg" <?php echo set_select('tipo', 'kg', ($receta['info']->tipo==='kg')); ?>>Kg</option>
+                    <option value="lts" <?php echo set_select('tipo', 'lts', ($receta['info']->tipo==='lts')); ?>>Lts</option>
                   </select>
                 </div>
               </div>
@@ -143,21 +143,21 @@
               <div class="control-group">
                 <label class="control-label" for="folio_formula">Folio Formula</label>
                 <div class="controls">
-                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo set_value('folio_formula'); ?>" size="25" readonly required>
+                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo $receta['info']->folio_formula ?>" size="25" readonly required>
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="folio">Folio Receta</label>
                 <div class="controls">
-                  <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $next_folio); ?>" size="25" readonly>
+                  <input type="text" name="folio" class="span9" id="folio" value="<?php echo $receta['info']->folio ?>" size="25" readonly>
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="fecha">Fecha</label>
                 <div class="controls">
-                  <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', date("Y-m-d")); ?>" size="25" readonly>
+                  <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo $receta['info']->fecha ?>" size="25" readonly>
                 </div>
               </div>
 
@@ -184,44 +184,44 @@
                 <div class="row-fluid">
                   <div class="span3">
                     Etapa
-                    <input type="text" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo set_value('a_etapa'); ?>">
+                    <input type="text" name="a_etapa" class="span12 datosapl" id="a_etapa" value="<?php echo $receta['info']->a_etapa ?>">
                   </div>
 
                   <div class="span3">
                     Ciclo
-                    <input type="text" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo set_value('a_ciclo'); ?>">
+                    <input type="text" name="a_ciclo" class="span12 datosapl" id="a_ciclo" value="<?php echo $receta['info']->a_ciclo ?>">
                   </div>
 
                   <div class="span3">
                     DDS
-                    <input type="text" name="a_dds" class="span12 datosapl" id="a_dds" value="<?php echo set_value('a_dds'); ?>">
+                    <input type="text" name="a_dds" class="span12 datosapl" id="a_dds" value="<?php echo $receta['info']->a_dds ?>">
                   </div>
 
                   <div class="span3">
                     Turno
-                    <input type="text" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo set_value('a_turno'); ?>">
+                    <input type="text" name="a_turno" class="span12 datosapl" id="a_turno" value="<?php echo $receta['info']->a_turno ?>">
                   </div>
                 </div>
 
                 <div class="row-fluid">
                   <div class="span3">
                     Via
-                    <input type="text" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo set_value('a_via'); ?>">
+                    <input type="text" name="a_via" class="span12 datosapl" id="a_via" value="<?php echo $receta['info']->a_via ?>">
                   </div>
 
                   <div class="span3">
                     Aplicación
-                    <input type="text" name="a_aplic" class="span12 datosapl" id="a_aplic" value="<?php echo set_value('a_aplic'); ?>">
+                    <input type="text" name="a_aplic" class="span12 datosapl" id="a_aplic" value="<?php echo $receta['info']->a_aplic ?>">
                   </div>
 
                   <div class="span3">
                     Equipo
-                    <input type="text" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo set_value('a_equipo'); ?>">
+                    <input type="text" name="a_equipo" class="span12 datosapl" id="a_equipo" value="<?php echo $receta['info']->a_equipo ?>">
                   </div>
 
                   <div class="span3">
                     Observaciones
-                    <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo set_value('a_observaciones'); ?>">
+                    <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo $receta['info']->a_observaciones ?>">
                   </div>
                 </div>
               </div> <!-- /box-body -->
@@ -239,47 +239,47 @@
               <div class="box-content">
                 <div class="span3 datos-kg">
                   Dosis Planta
-                  <input type="number" step="any" name="dosis_planta" class="span12 datoskl" id="dosis_planta" value="<?php echo set_value('dosis_planta'); ?>">
+                  <input type="number" step="any" name="dosis_planta" class="span12 datoskl" id="dosis_planta" value="<?php echo $receta['info']->dosis_planta ?>">
                 </div>
 
                 <div class="span3 datos-lts">
                   Ha Bruta
-                  <input type="number" name="ha_bruta" class="span12 datoskl" id="ha_bruta" value="<?php echo set_value('ha_bruta'); ?>">
+                  <input type="number" name="ha_bruta" class="span12 datoskl" id="ha_bruta" value="<?php echo $receta['info']->ha_bruta ?>">
                 </div>
 
                 <div class="span3">
                   Plantas x Ha
-                  <input type="number" name="planta_ha" class="span12 datoskl" id="planta_ha" value="<?php echo set_value('planta_ha'); ?>">
+                  <input type="number" name="planta_ha" class="span12 datoskl" id="planta_ha" value="<?php echo $receta['info']->planta_ha ?>">
                 </div>
 
                 <div class="span3">
                   Ha Netas
-                  <input type="number" name="ha_neta" class="span12 datoskl" id="ha_neta" value="<?php echo set_value('ha_neta'); ?>">
+                  <input type="number" name="ha_neta" class="span12 datoskl" id="ha_neta" value="<?php echo $receta['info']->ha_neta ?>">
                 </div>
 
                 <div class="span3">
                   No plantas
-                  <input type="number" name="no_plantas" class="span12 datoskl" id="no_plantas" value="<?php echo set_value('no_plantas'); ?>" readonly>
+                  <input type="number" name="no_plantas" class="span12 datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly>
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" name="kg_totales" class="span12 datoskl" id="kg_totales" value="<?php echo set_value('kg_totales'); ?>" readonly>
+                  <input type="number" name="kg_totales" class="span12 datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
                 </div>
 
                 <div class="span3 datos-lts">
                   Carga 1
-                  <input type="number" name="carga1" class="span12 datoskl" id="carga1" value="<?php echo set_value('carga1'); ?>">
+                  <input type="number" name="carga1" class="span12 datoskl" id="carga1" value="<?php echo $receta['info']->carga1 ?>">
                 </div>
 
                 <div class="span3 datos-lts">
                   Carga 2
-                  <input type="number" name="carga2" class="span12 datoskl" id="carga2" value="<?php echo set_value('carga2'); ?>">
+                  <input type="number" name="carga2" class="span12 datoskl" id="carga2" value="<?php echo $receta['info']->carga2 ?>">
                 </div>
 
                 <div class="span3 datos-lts">
                   PH
-                  <input type="number" name="ph" class="span12 datoskl" id="ph" value="<?php echo set_value('ph'); ?>">
+                  <input type="number" name="ph" class="span12 datoskl" id="ph" value="<?php echo $receta['info']->ph ?>">
                 </div>
               </div> <!-- /box-body -->
             </div> <!-- /box -->
@@ -337,8 +337,6 @@
                           <th rowspan="2" style="vertical-align: middle;">%</th>
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
                           <th rowspan="2" style="vertical-align: middle;">CANT.</th>
-                          <th rowspan="2" class="tipostyle" style="vertical-align: middle;display: none;">CARGA 1</th>
-                          <th rowspan="2" class="tipostyle" style="vertical-align: middle;display: none;">CARGA 2</th>
                           <th rowspan="2" style="vertical-align: middle;">APLI TOTAL</th>
                           <th rowspan="2" style="vertical-align: middle;">PRECIO</th>
                           <th rowspan="2" style="vertical-align: middle;">IMPORTE</th>
@@ -346,32 +344,32 @@
                         </tr>
                       </thead>
                       <tbody class="bodyproducs">
-                        <?php if (isset($_POST['concepto'])) {
-                        foreach ($_POST['concepto'] as $key => $concepto) { ?>
+                        <?php if (isset($receta['info']->productos)) {
+                        foreach ($receta['info']->productos as $key => $prod) { ?>
 
                           <tr class="rowprod">
-                            <td>
-                              <span class="percent"><?php echo $_POST['percent'][$key] ?></span>
-                              <input type="hidden" name="percent[]" value="<?php echo $_POST['percent'][$key] ?>" id="percent">
+                            <td style="width: 50px;">
+                              <span class="percent"><?php echo $prod->percent ?></span>
+                              <input type="hidden" name="percent[]" value="<?php echo $prod->percent ?>" id="percent">
                             </td>
                             <td>
-                              <?php echo $concepto ?>
-                              <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
-                              <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
+                              <?php echo $prod->producto ?>
+                              <input type="hidden" name="concepto[]" value="<?php echo $prod->producto ?>" id="concepto" class="span12">
+                              <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
                             </td>
-                            <td style="width: 65px;">
-                              <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
+                            <td style="width: 80px;">
+                              <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
-                            <td>
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $_POST['aplicacion_total'][$key] ?>" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
+                            <td style="width: 130px;">
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
                             </td>
-                            <td>
-                              <input type="number" step="any" name="precio[]" value="<?php echo $_POST['precio'][$key] ?>" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">
+                            <td style="width: 130px;">
+                              <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">
                             </td>
-                            <td>
-                              <input type="number" step="any" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
+                            <td style="width: 150px;">
+                              <input type="number" step="any" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
                             </td>
-                            <td>
+                            <td style="width: 50px;">
                               <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
                             </td>
                           </tr>
@@ -382,8 +380,6 @@
                           <td id="ttpercent"></td>
                           <td></td>
                           <td id="ttcantidad"></td>
-                          <th id="ttcargo1" class="tipostyle" style="display: none;">CARGA 1</th>
-                          <th id="ttcargo2" class="tipostyle" style="display: none;">CARGA 2</th>
                           <td id="ttaplicacion_total"></td>
                           <td></td>
                           <td id="ttimporte"></td>

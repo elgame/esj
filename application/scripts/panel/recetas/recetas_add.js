@@ -20,6 +20,7 @@
     eventCantidadProd();
 
     $('#tipo').change();
+    calculaTotal();
   });
 
   /*
@@ -338,22 +339,34 @@
     $('#tipo').on('change', function(event) {
       var tipo = $(this).find('option:selected').val();
       var ide = $('#empresaId').val();
-      $.get(base_url + 'panel/recetas/ajax_get_folio/?tipo='+tipo+'&ide='+ide , function(folio) {
-        $('#folio').val(folio);
-      });
+
+      if ($('.modificar-receta').length == 0) {
+        $.get(base_url + 'panel/recetas/ajax_get_folio/?tipo='+tipo+'&ide='+ide , function(folio) {
+          $('#folio').val(folio);
+        });
+
+        // Acomoda los campos de acuerdo al tipo de receta, se limpian
+        $('#formulaId, #formula, #folio_formula, #area, #areaId, #rancho, #centroCosto').val('');
+        $('#tagsRanchoIds, #tagsCCIds').html('');
+        $('.datoskl').val('');
+        $('tbody.bodyproducs .rowprod').remove();
+      } else {
+        $('#form').removeClass('modificar-receta');
+      }
 
       // Acomoda los campos de acuerdo al tipo de receta
-      $('.datoskl').val('');
       $(".datos-lts, .datos-kg").hide();
       $(".datos-"+tipo).show();
       if (tipo === 'kg') {
         $('#ha_neta').removeAttr('readonly');
         $('#no_plantas').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Kg');
+        $('.tipostyle').hide();
       } else {
         $('#no_plantas').removeAttr('readonly');
         $('#ha_neta').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Lts');
+        $('.tipostyle').show();
       }
     });
   }
@@ -438,6 +451,8 @@
         kg_totales = (parseFloat(no_plantas)||0) * (parseFloat($dosis_planta.val())||0);
         $kg_totales.val(kg_totales);
       } else {
+        ha_neta = (parseFloat($no_plantas.val())||0)/((parseFloat($planta_ha.val())||1)>0? (parseFloat($planta_ha.val())||1): 1);
+        $ha_neta.val(ha_neta.toFixed(2));
       }
 
       calculaTotal();
@@ -450,6 +465,7 @@
   function addProducto(producto, idval) {
     var $tabla            = $('#productos #table-productos'),
         trHtml            = '',
+        $tipo             = $('#tipo'),
         indexJump         = jumpIndex + 1,
         exist             = false,
         $autorizar_active = $("#btnAutorizar").length>0?true:false;
@@ -464,10 +480,11 @@
     // Si el producto a agregar no existe en el listado los agrega por primera
     // vez.
     if ( ! exist) {
+      tipostyle = $tipo.val() === 'kg'? 'display:none;': '';
 
       $trHtml = $(
         '<tr class="rowprod">'+
-          '<td>'+
+          '<td style="width: 50px;">'+
             '<span class="percent"></span>'+
             '<input type="hidden" name="percent[]" value="" id="percent" class="jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
           '</td>'+
@@ -476,19 +493,25 @@
             '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">'+
             '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">'+
           '</td>'+
-          '<td>'+
+          '<td style="width: 80px;">'+
               '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
-          '<td>'+
+          '<td style="width: 80px;'+tipostyle+'">'+
+              '<input type="number" step="any" name="pcarga1[]" value="'+(producto['carga1']? producto.carga1: '')+'" id="pcarga1" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+          '</td>'+
+          '<td style="width: 80px;'+tipostyle+'">'+
+              '<input type="number" step="any" name="pcarga2[]" value="'+(producto['carga2']? producto.carga2: '')+'" id="pcarga2" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+          '</td>'+
+          '<td style="width: 130px;">'+
               '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
-          '<td>'+
+          '<td style="width: 130px;">'+
               '<input type="number" step="any" name="precio[]" value="'+(producto['precio']? producto.precio: '')+'" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
-          '<td>'+
+          '<td style="width: 150px;">'+
               '<input type="number" step="any" name="importe[]" value="'+(producto['importe']? producto.importe: '')+'" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
-          '<td style="width: 65px;">'+
+          '<td style="width: 50px;">'+
             '<button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>'+
           '</td>'+
         '</tr>');
@@ -563,7 +586,11 @@
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
         $tr.find('#importe').val(importe.toFixed(2));
       } else {
+        aplicacion_total = percent*(parseFloat($('#kg_totales').val())||0)/100;
+        $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
 
+        importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
+        $tr.find('#importe').val(importe.toFixed(2));
       }
 
       total_percent    += percent;
@@ -572,10 +599,10 @@
 
     });
 
-    $('#ttpercent').text(total_percent)
-    $('#ttcantidad').text(total_cantidad)
-    $('#ttaplicacion_total').text(total_aplicacion)
-    $('#ttimporte').text(total_importe)
+    $('#ttpercent').text(total_percent.toFixed(2));
+    $('#ttcantidad').text(total_cantidad.toFixed(2));
+    $('#ttaplicacion_total').text(total_aplicacion.toFixed(2));
+    $('#ttimporte').text(total_importe.toFixed(2));
   }
 
 
