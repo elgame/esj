@@ -621,9 +621,9 @@ class recetas_model extends CI_Model {
    public function print_receta($recetaId, $path = null)
    {
       $receta = $this->info($recetaId, true);
-      echo "<pre>";
-      var_dump($receta);
-      echo "</pre>";exit;
+      // echo "<pre>";
+      // var_dump($receta);
+      // echo "</pre>";exit;
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
@@ -631,24 +631,67 @@ class recetas_model extends CI_Model {
       // $pdf->show_head = true;
       $pdf->titulo1 = $receta['info']->empresa;
 
-      $tipo_orden = $tipo_requisicion? 'ORDEN DE REQUISICION': 'PRE REQUISICION';
-
-
-      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+      $tipo_orden = 'ALMACENISTA';
+      $pdf->logo = $receta['info']->empresaData->logo!=''? (file_exists($receta['info']->empresaData->logo)? $receta['info']->empresaData->logo: '') : '';
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
-      $pdf->SetXY(6, $pdf->GetY()-10);
+      // $pdf->Line(6, $pdf->GetY(), 200, $pdf->GetY());
 
-      $pdf->SetFont('helvetica','B', 10);
-      $pdf->SetAligns(array('L', 'C', 'R'));
-      $pdf->SetWidths(array(50, 160, 50));
-      $pdf->Row(array(
-        MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
-        $tipo_orden,
-        'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
-      ), false, false);
+      $pdf->SetXY(6, $pdf->GetY());
+      $yaux = $pdf->GetY();
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(22, 90));
+      $pdf->Row(array('EMPRESA', $receta['info']->empresa), false, true);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array('CULTIVO', $receta['info']->area), false, true);
+      $pdf->SetXY(6, $pdf->GetY());
+      $ranchos = [];
+      if (count($receta['info']->rancho) > 0) {
+        foreach ($receta['info']->rancho as $key => $value) {
+          $ranchos[] = $value->nombre;
+        }
+      }
+      $pdf->Row(array('RANCHOS', implode(', ', $ranchos)), false, true);
+      $pdf->SetXY(6, $pdf->GetY());
+      $centros_costo = [];
+      if (count($receta['info']->centroCosto) > 0) {
+        foreach ($receta['info']->centroCosto as $key => $value) {
+          $centros_costo[] = $value->nombre;
+        }
+      }
+      $pdf->Row(array('C COSTO', implode(', ', $centros_costo)), false, true);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array('OBJETIVO', $receta['info']->objetivo), false, true);
+
+      if ($receta['info']->tipo === 'kg') {
+        // $yaux = $pdf->GetY();
+        $pdf->SetXY(120, $yaux);
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetAligns(array('C', 'C'));
+        $pdf->SetWidths(array(35, 35));
+        $pdf->Row(array('Dosis Planta', 'Planta x Ha'), false, false);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array($receta['info']->dosis_planta, $receta['info']->planta_ha), false, true);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array('Ha Neta', 'No Plantas'), false, false);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array($receta['info']->ha_neta, $receta['info']->no_plantas), false, true);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array('Kg Total', $receta['info']->kg_totales), false, true);
+      } else {
+      }
+
+      $pdf->SetXY(190, $yaux);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('C', 'C'));
+      $pdf->SetWidths(array(35, 35));
+      $pdf->Row(array('Receta', 'Planta x Ha'), false, false);
+      $pdf->SetXY(190, $pdf->GetY());
+
+      $pdf->Output('receta'.date('Y-m-d').'.pdf', 'I');
 
       $yyy = $pdf->GetY();
       $pdf->SetFont('helvetica','B', 8);
