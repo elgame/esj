@@ -1,5 +1,5 @@
 
- ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san|pcc
+ ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san|pcc|lap
    ALTER TABLE public.facturacion_otrosdatos ADD COLUMN no_salida_fruta character varying(15);
 
  ✔ UUID en pagos de bascula @done (19-09-30 16:37) pct|pcc|san|lap
@@ -110,7 +110,7 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',515,FALSE,'recetas_formulas/activar/','ok',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
-   -- pct|pcc
+   -- pct|pcc|lap
    ALTER TABLE otros.recetas ADD COLUMN tipo character varying(4);
    COMMENT ON COLUMN otros.recetas.tipo IS 'kg, lts';
    ALTER TABLE otros.recetas ADD COLUMN ha_bruta double precision;
@@ -175,7 +175,7 @@
    ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_formula_fkey FOREIGN KEY (id_formula) REFERENCES otros.formulas (id_formula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_producto_fkey FOREIGN KEY (id_producto) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',521,FALSE,'recetas/imprimir/','print',FALSE);
-   -- pcc
+   -- pcc|lap
    ALTER TABLE otros.recetas ADD COLUMN dosis_equipo double precision;
    COMMENT ON COLUMN otros.recetas.dosis_equipo IS 'La cantidad de lts que carga el equipo de aplicacion';
    ALTER TABLE otros.recetas ADD COLUMN dosis_equipo_car2 double precision;

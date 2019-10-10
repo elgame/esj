@@ -621,6 +621,9 @@ class recetas_model extends CI_Model {
    public function print_receta($recetaId, $path = null)
    {
       $receta = $this->info($recetaId, true);
+      echo "<pre>";
+      var_dump($receta);
+      echo "</pre>";exit;
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
