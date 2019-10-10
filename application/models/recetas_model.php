@@ -48,7 +48,8 @@ class recetas_model extends CI_Model {
 
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
-          f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha
+          f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
+          r.total_importe
         FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
           INNER JOIN areas a ON a.id_area = r.id_area
         WHERE 1 = 1 {$sql}
@@ -92,7 +93,8 @@ class recetas_model extends CI_Model {
         r.id_autorizo, (aut.nombre || ' ' || aut.apellido_paterno || ' ' || aut.apellido_materno) AS autorizo,
         r.folio, r.objetivo, r.semana, r.dosis_planta, r.planta_ha, r.ha_neta, r.no_plantas, r.kg_totales,
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
-        r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph
+        r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
+        r.dosis_equipo, r.dosis_equipo_car2, r.total_importe
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -112,7 +114,8 @@ class recetas_model extends CI_Model {
       {
         $query = $this->db->query(
           "SELECT rp.id_receta, rp.id_producto, rp.rows, pr.nombre AS producto, pr.codigo,
-            pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe
+            pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
+            rp.dosis_carga1, rp.dosis_carga2
           FROM otros.recetas_productos AS rp
             INNER JOIN productos AS pr ON pr.id_producto = rp.id_producto
           WHERE rp.id_receta = {$data['info']->id_recetas}
@@ -154,36 +157,40 @@ class recetas_model extends CI_Model {
     $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
 
     $data = array(
-      'id_empresa'      => $_POST['empresaId'],
-      'id_formula'      => $_POST['formulaId'],
-      'id_realizo'      => $this->session->userdata('id_usuario'),
-      'id_solicito'     => $_POST['solicitoId'],
-      'id_autorizo'     => $_POST['autorizoId'],
-      'id_area'         => $_POST['areaId'],
-      'fecha'           => $_POST['fecha'],
-      'folio'           => $_POST['folio'],
-      'objetivo'        => $_POST['objetivo'],
-      'semana'          => $semana['semana'],
-      'tipo'            => $_POST['tipo'],
+      'id_empresa'        => $_POST['empresaId'],
+      'id_formula'        => $_POST['formulaId'],
+      'id_realizo'        => $this->session->userdata('id_usuario'),
+      'id_solicito'       => $_POST['solicitoId'],
+      'id_autorizo'       => $_POST['autorizoId'],
+      'id_area'           => $_POST['areaId'],
+      'fecha'             => $_POST['fecha'],
+      'folio'             => $_POST['folio'],
+      'objetivo'          => $_POST['objetivo'],
+      'semana'            => $semana['semana'],
+      'tipo'              => $_POST['tipo'],
 
-      'dosis_planta'    => floatval($_POST['dosis_planta']),
-      'planta_ha'       => floatval($_POST['planta_ha']),
-      'ha_neta'         => floatval($_POST['ha_neta']),
-      'no_plantas'      => floatval($_POST['no_plantas']),
-      'kg_totales'      => floatval($_POST['kg_totales']),
-      'ha_bruta'        => floatval($_POST['ha_bruta']),
-      'carga1'          => floatval($_POST['carga1']),
-      'carga2'          => floatval($_POST['carga2']),
-      'ph'              => floatval($_POST['ph']),
+      'dosis_planta'      => floatval($_POST['dosis_planta']),
+      'planta_ha'         => floatval($_POST['planta_ha']),
+      'ha_neta'           => floatval($_POST['ha_neta']),
+      'no_plantas'        => floatval($_POST['no_plantas']),
+      'kg_totales'        => floatval($_POST['kg_totales']),
+      'ha_bruta'          => floatval($_POST['ha_bruta']),
+      'carga1'            => floatval($_POST['carga1']),
+      'carga2'            => floatval($_POST['carga2']),
+      'ph'                => floatval($_POST['ph']),
+      'dosis_equipo'      => floatval($_POST['dosis_equipo']),
+      'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'         => $_POST['a_etapa'],
-      'a_ciclo'         => $_POST['a_ciclo'],
-      'a_dds'           => $_POST['a_dds'],
-      'a_turno'         => $_POST['a_turno'],
-      'a_via'           => $_POST['a_via'],
-      'a_aplic'         => $_POST['a_aplic'],
-      'a_equipo'        => $_POST['a_equipo'],
-      'a_observaciones' => $_POST['a_observaciones'],
+      'a_etapa'           => $_POST['a_etapa'],
+      'a_ciclo'           => $_POST['a_ciclo'],
+      'a_dds'             => $_POST['a_dds'],
+      'a_turno'           => $_POST['a_turno'],
+      'a_via'             => $_POST['a_via'],
+      'a_aplic'           => $_POST['a_aplic'],
+      'a_equipo'          => $_POST['a_equipo'],
+      'a_observaciones'   => $_POST['a_observaciones'],
+
+      'total_importe'     => floatval($_POST['total_importe']),
     );
 
     $this->db->insert('otros.recetas', $data);
@@ -201,6 +208,8 @@ class recetas_model extends CI_Model {
         'aplicacion_total' => $_POST['aplicacion_total'][$key],
         'precio'           => $_POST['precio'][$key],
         'importe'          => $_POST['importe'][$key],
+        'dosis_carga1'     => floatval($_POST['pcarga1'][$key]),
+        'dosis_carga2'     => floatval($_POST['pcarga2'][$key]),
       );
     }
 
@@ -227,36 +236,40 @@ class recetas_model extends CI_Model {
     $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
 
     $data = array(
-      'id_empresa'      => $_POST['empresaId'],
-      'id_formula'      => $_POST['formulaId'],
-      // 'id_realizo'      => $this->session->userdata('id_usuario'),
-      'id_solicito'     => $_POST['solicitoId'],
-      'id_autorizo'     => $_POST['autorizoId'],
-      'id_area'         => $_POST['areaId'],
-      'fecha'           => $_POST['fecha'],
-      'folio'           => $_POST['folio'],
-      'objetivo'        => $_POST['objetivo'],
-      'semana'          => $semana['semana'],
-      'tipo'            => $_POST['tipo'],
+      'id_empresa'        => $_POST['empresaId'],
+      'id_formula'        => $_POST['formulaId'],
+      // 'id_realizo'     => $this->session->userdata('id_usuario'),
+      'id_solicito'       => $_POST['solicitoId'],
+      'id_autorizo'       => $_POST['autorizoId'],
+      'id_area'           => $_POST['areaId'],
+      'fecha'             => $_POST['fecha'],
+      'folio'             => $_POST['folio'],
+      'objetivo'          => $_POST['objetivo'],
+      'semana'            => $semana['semana'],
+      'tipo'              => $_POST['tipo'],
 
-      'dosis_planta'    => floatval($_POST['dosis_planta']),
-      'planta_ha'       => floatval($_POST['planta_ha']),
-      'ha_neta'         => floatval($_POST['ha_neta']),
-      'no_plantas'      => floatval($_POST['no_plantas']),
-      'kg_totales'      => floatval($_POST['kg_totales']),
-      'ha_bruta'        => floatval($_POST['ha_bruta']),
-      'carga1'          => floatval($_POST['carga1']),
-      'carga2'          => floatval($_POST['carga2']),
-      'ph'              => floatval($_POST['ph']),
+      'dosis_planta'      => floatval($_POST['dosis_planta']),
+      'planta_ha'         => floatval($_POST['planta_ha']),
+      'ha_neta'           => floatval($_POST['ha_neta']),
+      'no_plantas'        => floatval($_POST['no_plantas']),
+      'kg_totales'        => floatval($_POST['kg_totales']),
+      'ha_bruta'          => floatval($_POST['ha_bruta']),
+      'carga1'            => floatval($_POST['carga1']),
+      'carga2'            => floatval($_POST['carga2']),
+      'ph'                => floatval($_POST['ph']),
+      'dosis_equipo'      => floatval($_POST['dosis_equipo']),
+      'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'         => $_POST['a_etapa'],
-      'a_ciclo'         => $_POST['a_ciclo'],
-      'a_dds'           => $_POST['a_dds'],
-      'a_turno'         => $_POST['a_turno'],
-      'a_via'           => $_POST['a_via'],
-      'a_aplic'         => $_POST['a_aplic'],
-      'a_equipo'        => $_POST['a_equipo'],
-      'a_observaciones' => $_POST['a_observaciones'],
+      'a_etapa'           => $_POST['a_etapa'],
+      'a_ciclo'           => $_POST['a_ciclo'],
+      'a_dds'             => $_POST['a_dds'],
+      'a_turno'           => $_POST['a_turno'],
+      'a_via'             => $_POST['a_via'],
+      'a_aplic'           => $_POST['a_aplic'],
+      'a_equipo'          => $_POST['a_equipo'],
+      'a_observaciones'   => $_POST['a_observaciones'],
+
+      'total_importe'     => floatval($_POST['total_importe']),
     );
 
     $this->db->update('otros.recetas', $data, "id_recetas = {$recetaId}");
@@ -273,6 +286,8 @@ class recetas_model extends CI_Model {
         'aplicacion_total' => $_POST['aplicacion_total'][$key],
         'precio'           => $_POST['precio'][$key],
         'importe'          => $_POST['importe'][$key],
+        'dosis_carga1'     => floatval($_POST['pcarga1'][$key]),
+        'dosis_carga2'     => floatval($_POST['pcarga2'][$key]),
       );
     }
 
@@ -310,6 +325,22 @@ class recetas_model extends CI_Model {
         ]);
       }
     }
+  }
+
+  public function cancelar($recetaId)
+  {
+    $data = array('status' => 'f');
+    $this->db->update('otros.recetas', $data, "id_recetas = {$recetaId}");
+
+    return array('passes' => true);
+  }
+
+  public function activar($recetaId)
+  {
+    $data = array('status' => 't');
+    $this->db->update('otros.recetas', $data, "id_recetas = {$recetaId}");
+
+    return array('passes' => true);
   }
 
   /**

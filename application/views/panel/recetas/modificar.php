@@ -221,7 +221,7 @@
 
                   <div class="span3">
                     Observaciones
-                    <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo $receta['info']->a_observaciones ?>">
+                    <input type="text" name="a_observaciones" class="span12 datosapl" id="a_observaciones" value="<?php echo $receta['info']->a_observaciones ?>" data-next="dosis_planta|ha_bruta">
                   </div>
                 </div>
               </div> <!-- /box-body -->
@@ -239,47 +239,57 @@
               <div class="box-content">
                 <div class="span3 datos-kg">
                   Dosis Planta
-                  <input type="number" step="any" name="dosis_planta" class="span12 datoskl" id="dosis_planta" value="<?php echo $receta['info']->dosis_planta ?>">
+                  <input type="number" step="any" name="dosis_planta" class="span12 sikey datoskl" id="dosis_planta" value="<?php echo $receta['info']->dosis_planta ?>" data-next="planta_ha">
                 </div>
 
                 <div class="span3 datos-lts">
                   Ha Bruta
-                  <input type="number" name="ha_bruta" class="span12 datoskl" id="ha_bruta" value="<?php echo $receta['info']->ha_bruta ?>">
+                  <input type="number" step="any" name="ha_bruta" class="span12 sikey datoskl" id="ha_bruta" value="<?php echo $receta['info']->ha_bruta ?>" data-next="planta_ha">
                 </div>
 
                 <div class="span3">
                   Plantas x Ha
-                  <input type="number" name="planta_ha" class="span12 datoskl" id="planta_ha" value="<?php echo $receta['info']->planta_ha ?>">
+                  <input type="number" step="any" name="planta_ha" class="span12 sikey datoskl" id="planta_ha" value="<?php echo $receta['info']->planta_ha ?>" data-next="ha_neta|no_plantas">
                 </div>
 
                 <div class="span3">
                   Ha Netas
-                  <input type="number" name="ha_neta" class="span12 datoskl" id="ha_neta" value="<?php echo $receta['info']->ha_neta ?>">
+                  <input type="number" step="any" name="ha_neta" class="span12 sikey datoskl" id="ha_neta" value="<?php echo $receta['info']->ha_neta ?>" data-next="fconcepto">
                 </div>
 
                 <div class="span3">
                   No plantas
-                  <input type="number" name="no_plantas" class="span12 datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly>
+                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly data-next="carga1" style="display: none;">
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" name="kg_totales" class="span12 datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
+                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
                 </div>
 
                 <div class="span3 datos-lts">
                   Carga 1
-                  <input type="number" name="carga1" class="span12 datoskl" id="carga1" value="<?php echo $receta['info']->carga1 ?>">
+                  <input type="number" step="any" name="carga1" class="span12 sikey datoskl" id="carga1" value="<?php echo $receta['info']->carga1 ?>" data-next="dosis_equipo">
+                </div>
+
+                <div class="span3 datos-lts">
+                  Dosis Equipo Carga 1
+                  <input type="number" step="any" name="dosis_equipo" class="span12 sikey datoskl" id="dosis_equipo" value="<?php echo $receta['info']->dosis_equipo ?>" data-next="carga2">
                 </div>
 
                 <div class="span3 datos-lts">
                   Carga 2
-                  <input type="number" name="carga2" class="span12 datoskl" id="carga2" value="<?php echo $receta['info']->carga2 ?>">
+                  <input type="number" step="any" name="carga2" class="span12 sikey datoskl" id="carga2" value="<?php echo $receta['info']->carga2 ?>" data-next="ph">
+                </div>
+
+                <div class="span3 datos-lts">
+                  Lts de Cargas Extras
+                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>" readonly>
                 </div>
 
                 <div class="span3 datos-lts">
                   PH
-                  <input type="number" name="ph" class="span12 datoskl" id="ph" value="<?php echo $receta['info']->ph ?>">
+                  <input type="number" step="any" name="ph" class="span12 sikey datoskl" id="ph" value="<?php echo $receta['info']->ph ?>" data-next="fconcepto">
                 </div>
               </div> <!-- /box-body -->
             </div> <!-- /box -->
@@ -337,6 +347,8 @@
                           <th rowspan="2" style="vertical-align: middle;">%</th>
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
                           <th rowspan="2" style="vertical-align: middle;">CANT.</th>
+                          <th rowspan="2" class="tipostyle" style="vertical-align: middle;display: none;">CARGA 1</th>
+                          <th rowspan="2" class="tipostyle" style="vertical-align: middle;display: none;">CARGA 2</th>
                           <th rowspan="2" style="vertical-align: middle;">APLI TOTAL</th>
                           <th rowspan="2" style="vertical-align: middle;">PRECIO</th>
                           <th rowspan="2" style="vertical-align: middle;">IMPORTE</th>
@@ -360,14 +372,20 @@
                             <td style="width: 80px;">
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
-                            <td style="width: 130px;">
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
+                            <td class="tipostyle" style="width: 80px;display: none;">
+                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0" readonly>
+                            </td>
+                            <td class="tipostyle" style="width: 80px;display: none;">
+                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
                             </td>
                             <td style="width: 130px;">
-                              <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
+                            </td>
+                            <td style="width: 130px;">
+                              <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 150px;">
-                              <input type="number" step="any" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>
+                              <input type="number" step="any" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive" min="0" readonly>
                             </td>
                             <td style="width: 50px;">
                               <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
@@ -380,9 +398,14 @@
                           <td id="ttpercent"></td>
                           <td></td>
                           <td id="ttcantidad"></td>
+                          <th id="ttcargo1" class="tipostyle" style="display: none;"></th>
+                          <th id="ttcargo2" class="tipostyle" style="display: none;"></th>
                           <td id="ttaplicacion_total"></td>
                           <td></td>
-                          <td id="ttimporte"></td>
+                          <td>
+                            <span id="ttimporte"></span>
+                            <input type="hidden" name="total_importe" id="total_importe" value="<?php echo $receta['info']->total_importe ?>">
+                          </td>
                           <td></td>
                         </tr>
                       </tfoot>

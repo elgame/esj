@@ -74,6 +74,7 @@
                   <th>Formula</th>
                   <th>Tipo</th>
                   <th>Estado</th>
+                  <th>Importe</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -95,6 +96,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo $receta->total_importe; ?></td>
                   <td class="center">
                     <?php
 

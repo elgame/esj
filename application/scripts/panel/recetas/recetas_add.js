@@ -1,6 +1,7 @@
 (function (closure) {
   closure($, window);
 })(function ($, window) {
+  var opcClear = {formula: false, datos: false};
 
   $(function(){
     $('#form').keyJump();
@@ -19,6 +20,7 @@
     eventBtnDelProducto();
     eventCantidadProd();
 
+    opcClear.datos = opcClear.formula = true;
     $('#tipo').change();
     calculaTotal();
   });
@@ -54,6 +56,9 @@
         $('#folio_formula').val(ui.item.item.folio);
         $('#area').val(ui.item.item.area);
         $('#areaId').val(ui.item.item.id_area);
+
+        opcClear.datos = true;
+        opcClear.formula = false;
         $('#tipo').change();
         $formula.css("background-color", "#A1F57A");
 
@@ -345,16 +350,22 @@
           $('#folio').val(folio);
         });
 
-        // Acomoda los campos de acuerdo al tipo de receta, se limpian
-        $('#formulaId, #formula, #folio_formula, #area, #areaId, #rancho, #centroCosto').val('');
-        $('#tagsRanchoIds, #tagsCCIds').html('');
-        $('.datoskl').val('');
-        $('tbody.bodyproducs .rowprod').remove();
+        // Acomoda los campos de acuerdo al tipo de receta, se limpian los campos
+        if (opcClear.formula) {
+          $('#formulaId, #formula, #folio_formula, #area, #areaId, #rancho, #centroCosto').val('');
+          $('#tagsRanchoIds, #tagsCCIds').html('');
+        }
+        if (opcClear.datos) {
+          $('.datoskl').val('');
+          $('tbody.bodyproducs .rowprod').remove();
+          calculaTotal();
+        }
       } else {
         $('#form').removeClass('modificar-receta');
       }
 
       // Acomoda los campos de acuerdo al tipo de receta
+      $('#no_plantas').show();
       $(".datos-lts, .datos-kg").hide();
       $(".datos-"+tipo).show();
       if (tipo === 'kg') {
@@ -368,6 +379,8 @@
         $('.titulo-box-kglts').text('Datos Lts');
         $('.tipostyle').show();
       }
+
+      opcClear.datos = opcClear.formula = true;
     });
   }
 
@@ -437,13 +450,17 @@
   };
 
   var eventCalcuDatos = function () {
-    $('#dosis_planta, #planta_ha, #ha_neta').on('keyup', function(event) {
-      var $tipo     = $('#tipo'),
-      $dosis_planta = $('#dosis_planta'),
-      $planta_ha    = $('#planta_ha'),
-      $ha_neta      = $('#ha_neta'),
-      $no_plantas   = $('#no_plantas'),
-      $kg_totales   = $('#kg_totales');
+    $('#dosis_planta, #ha_bruta, #planta_ha, #ha_neta, #no_plantas, #carga1, #carga2, #dosis_equipo').on('keyup', function(event) {
+      var $tipo          = $('#tipo'),
+      $dosis_planta      = $('#dosis_planta'),
+      $planta_ha         = $('#planta_ha'),
+      $ha_neta           = $('#ha_neta'),
+      $no_plantas        = $('#no_plantas'),
+      $kg_totales        = $('#kg_totales'),
+      $dosis_equipo      = $('#dosis_equipo'),
+      $carga2            = $('#carga2'),
+      $dosis_equipo_car2 = $('#dosis_equipo_car2')
+      ;
 
       if ($tipo.val() === 'kg') {
         no_plantas = (parseFloat($ha_neta.val())||0) * (parseFloat($planta_ha.val())||0);
@@ -453,6 +470,9 @@
       } else {
         ha_neta = (parseFloat($no_plantas.val())||0)/((parseFloat($planta_ha.val())||1)>0? (parseFloat($planta_ha.val())||1): 1);
         $ha_neta.val(ha_neta.toFixed(2));
+
+        lts_cargas2 = (parseFloat($dosis_equipo.val())||0)*(parseFloat($carga2.val())||0);
+        $dosis_equipo_car2.val(lts_cargas2.toFixed(2));
       }
 
       calculaTotal();
@@ -497,10 +517,10 @@
               '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
           '<td style="width: 80px;'+tipostyle+'">'+
-              '<input type="number" step="any" name="pcarga1[]" value="'+(producto['carga1']? producto.carga1: '')+'" id="pcarga1" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+              '<input type="number" step="any" name="pcarga1[]" value="'+($tipo.val() === 'lts'? producto.cantidad: '')+'" id="pcarga1" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
           '<td style="width: 80px;'+tipostyle+'">'+
-              '<input type="number" step="any" name="pcarga2[]" value="'+(producto['carga2']? producto.carga2: '')+'" id="pcarga2" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
+              '<input type="number" step="any" name="pcarga2[]" value="'+(producto['carga2']? producto.carga2: '')+'" id="pcarga2" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
           '</td>'+
           '<td style="width: 130px;">'+
               '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
@@ -585,8 +605,11 @@
 
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
         $tr.find('#importe').val(importe.toFixed(2));
-      } else {
-        aplicacion_total = percent*(parseFloat($('#kg_totales').val())||0)/100;
+      } else { // lts
+        carga2 = (parseFloat($('#carga2').val())||0)*(parseFloat($tr.find('#cantidad').val())||0);
+        $tr.find('#pcarga2').val(carga2.toFixed(2));
+
+        aplicacion_total = ( (parseFloat($tr.find('#pcarga1').val())||0) * (parseFloat($('#carga1').val())||0) ) + (parseFloat($tr.find('#pcarga2').val())||0);
         $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
 
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
@@ -603,6 +626,7 @@
     $('#ttcantidad').text(total_cantidad.toFixed(2));
     $('#ttaplicacion_total').text(total_aplicacion.toFixed(2));
     $('#ttimporte').text(total_importe.toFixed(2));
+    $('#total_importe').val(total_importe.toFixed(2));
   }
 
 

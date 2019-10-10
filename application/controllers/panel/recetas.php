@@ -199,6 +199,22 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function cancelar()
+  {
+    $this->load->model('recetas_model');
+    $this->recetas_model->cancelar($_GET['id']);
+
+    redirect(base_url('panel/recetas/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
+  }
+
+  public function activar()
+  {
+    $this->load->model('recetas_model');
+    $this->recetas_model->activar($_GET['id']);
+
+    redirect(base_url('panel/recetas/?' . MyString::getVarsLink(array('id', 'w')).'&msg=9'));
+  }
+
   public function imprimir()
   {
     $this->load->model('recetas_model');
@@ -288,65 +304,71 @@ class recetas extends MY_Controller {
     $val_datos = [
       'dosis_planta' => false, 'ha_bruta' => true, 'planta_ha' => true,
       'ha_neta' => true, 'no_plantas' => true, 'kg_totales' => false,
-      'carga1' => true, 'carga2' => true, 'ph' => true
+      'carga1' => true, 'carga2' => true, 'ph' => true,
+      'dosis_equipo' => true, 'dosis_equipo_car2' => true
     ];
     if ($this->input->post('tipo') === 'kg') {
       $val_datos = [
         'dosis_planta' => true, 'ha_bruta' => false, 'planta_ha' => true,
         'ha_neta' => true, 'no_plantas' => true, 'kg_totales' => true,
-        'carga1' => false, 'carga2' => false, 'ph' => false
+        'carga1' => false, 'carga2' => false, 'ph' => false,
+        'dosis_equipo' => false, 'dosis_equipo_car2' => false
       ];
     }
 
     $rules = array(
-      ['field' => 'empresa',            'label' => 'Empresa',       'rules' => 'required'],
-      ['field' => 'empresaId',          'label' => 'Empresa',       'rules' => 'required|numeric'],
-      ['field' => 'formula',            'label' => 'Formula',       'rules' => 'required'],
-      ['field' => 'formulaId',          'label' => 'Formula',       'rules' => 'required|numeric'],
-      ['field' => 'area',               'label' => 'Cultivo',       'rules' => 'required'],
-      ['field' => 'areaId',             'label' => 'Cultivo',       'rules' => 'required|numeric'],
-      ['field' => 'rancho',             'label' => 'Rancho',        'rules' => ''],
-      ['field' => 'ranchoId[]',         'label' => 'Rancho',        'rules' => 'required|numeric'],
-      ['field' => 'ranchoText[]',       'label' => 'Rancho',        'rules' => 'required'],
-      ['field' => 'centroCosto',        'label' => 'CentroCosto',   'rules' => ''],
-      ['field' => 'centroCostoId[]',    'label' => 'CentroCosto',   'rules' => 'required|numeric'],
-      ['field' => 'centroCostoText[]',  'label' => 'CentroCosto',   'rules' => 'required'],
-      ['field' => 'objetivo',           'label' => 'Objetivo',      'rules' => ''],
-      ['field' => 'tipo',               'label' => 'Tipo',          'rules' => 'required'],
-      ['field' => 'folio_formula',      'label' => 'Folio_formula', 'rules' => 'required|numeric'],
-      ['field' => 'folio',              'label' => 'Folio',         'rules' => 'required|numeric'],
-      ['field' => 'fecha',              'label' => 'Fecha',         'rules' => 'required'],
-      ['field' => 'solicito',           'label' => 'solicito',      'rules' => 'required'],
-      ['field' => 'solicitoId',         'label' => 'solicitoId',    'rules' => 'required|numeric'],
-      ['field' => 'autorizo',           'label' => 'autorizo',      'rules' => 'required'],
-      ['field' => 'autorizoId',         'label' => 'autorizoId',    'rules' => 'required|numeric'],
+      ['field' => 'empresa',            'label' => 'Empresa',              'rules' => 'required'],
+      ['field' => 'empresaId',          'label' => 'Empresa',              'rules' => 'required|numeric'],
+      ['field' => 'formula',            'label' => 'Formula',              'rules' => 'required'],
+      ['field' => 'formulaId',          'label' => 'Formula',              'rules' => 'required|numeric'],
+      ['field' => 'area',               'label' => 'Cultivo',              'rules' => 'required'],
+      ['field' => 'areaId',             'label' => 'Cultivo',              'rules' => 'required|numeric'],
+      ['field' => 'rancho',             'label' => 'Rancho',               'rules' => ''],
+      ['field' => 'ranchoId[]',         'label' => 'Rancho',               'rules' => 'required|numeric'],
+      ['field' => 'ranchoText[]',       'label' => 'Rancho',               'rules' => 'required'],
+      ['field' => 'centroCosto',        'label' => 'CentroCosto',          'rules' => ''],
+      ['field' => 'centroCostoId[]',    'label' => 'CentroCosto',          'rules' => 'required|numeric'],
+      ['field' => 'centroCostoText[]',  'label' => 'CentroCosto',          'rules' => 'required'],
+      ['field' => 'objetivo',           'label' => 'Objetivo',             'rules' => ''],
+      ['field' => 'tipo',               'label' => 'Tipo',                 'rules' => 'required'],
+      ['field' => 'folio_formula',      'label' => 'Folio_formula',        'rules' => 'required|numeric'],
+      ['field' => 'folio',              'label' => 'Folio',                'rules' => 'required|numeric'],
+      ['field' => 'fecha',              'label' => 'Fecha',                'rules' => 'required'],
+      ['field' => 'solicito',           'label' => 'solicito',             'rules' => 'required'],
+      ['field' => 'solicitoId',         'label' => 'solicitoId',           'rules' => 'required|numeric'],
+      ['field' => 'autorizo',           'label' => 'autorizo',             'rules' => 'required'],
+      ['field' => 'autorizoId',         'label' => 'autorizoId',           'rules' => 'required|numeric'],
 
-      ['field' => 'a_etapa',            'label' => 'Etapa',         'rules' => ''],
-      ['field' => 'a_ciclo',            'label' => 'Ciclo',         'rules' => ''],
-      ['field' => 'a_dds',              'label' => 'DDS',           'rules' => ''],
-      ['field' => 'a_turno',            'label' => 'Turno',         'rules' => ''],
-      ['field' => 'a_via',              'label' => 'Via',           'rules' => ''],
-      ['field' => 'a_aplic',            'label' => 'Aplicación',    'rules' => ''],
-      ['field' => 'a_equipo',           'label' => 'Equipo',        'rules' => ''],
-      ['field' => 'a_observaciones',    'label' => 'Observaciones', 'rules' => ''],
+      ['field' => 'a_etapa',            'label' => 'Etapa',                'rules' => ''],
+      ['field' => 'a_ciclo',            'label' => 'Ciclo',                'rules' => ''],
+      ['field' => 'a_dds',              'label' => 'DDS',                  'rules' => ''],
+      ['field' => 'a_turno',            'label' => 'Turno',                'rules' => ''],
+      ['field' => 'a_via',              'label' => 'Via',                  'rules' => ''],
+      ['field' => 'a_aplic',            'label' => 'Aplicación',           'rules' => ''],
+      ['field' => 'a_equipo',           'label' => 'Equipo',               'rules' => ''],
+      ['field' => 'a_observaciones',    'label' => 'Observaciones',        'rules' => ''],
 
-      ['field' => 'dosis_planta',       'label' => 'Dosis Planta',  'rules' => ($val_datos['dosis_planta']? 'required': '')],
-      ['field' => 'ha_bruta',           'label' => 'Ha Bruta',      'rules' => ($val_datos['ha_bruta']? 'required': '')],
-      ['field' => 'planta_ha',          'label' => 'Plantas x Ha',  'rules' => ($val_datos['planta_ha']? 'required': '')],
-      ['field' => 'ha_neta',            'label' => 'Ha Netas',      'rules' => ($val_datos['ha_neta']? 'required': '')],
-      ['field' => 'no_plantas',         'label' => 'No plantas',    'rules' => ($val_datos['no_plantas']? 'required': '')],
-      ['field' => 'kg_totales',         'label' => 'Kg Total',      'rules' => ($val_datos['kg_totales']? 'required': '')],
-      ['field' => 'carga1',             'label' => 'Carga 1',       'rules' => ($val_datos['carga1']? 'required': '')],
-      ['field' => 'carga2',             'label' => 'Carga 2',       'rules' => ($val_datos['carga2']? 'required': '')],
-      ['field' => 'ph',                 'label' => 'PH',            'rules' => ($val_datos['ph']? 'required': '')],
+      ['field' => 'dosis_planta',       'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
+      ['field' => 'ha_bruta',           'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
+      ['field' => 'planta_ha',          'label' => 'Plantas x Ha',         'rules' => ($val_datos['planta_ha']? 'required': '')],
+      ['field' => 'ha_neta',            'label' => 'Ha Netas',             'rules' => ($val_datos['ha_neta']? 'required': '')],
+      ['field' => 'no_plantas',         'label' => 'No plantas',           'rules' => ($val_datos['no_plantas']? 'required': '')],
+      ['field' => 'kg_totales',         'label' => 'Kg Total',             'rules' => ($val_datos['kg_totales']? 'required': '')],
+      ['field' => 'carga1',             'label' => 'Carga 1',              'rules' => ($val_datos['carga1']? 'required': '')],
+      ['field' => 'carga2',             'label' => 'Carga 2',              'rules' => ($val_datos['carga2']? 'required': '')],
+      ['field' => 'ph',                 'label' => 'PH',                   'rules' => ($val_datos['ph']? 'required': '')],
+      ['field' => 'dosis_equipo',       'label' => 'Dosis Equipo Carga',   'rules' => ($val_datos['dosis_equipo']? 'required': '')],
+      ['field' => 'dosis_equipo_car2',  'label' => 'Lts de Cargas Extras', 'rules' => ($val_datos['dosis_equipo_car2']? 'required': '')],
 
-      ['field' => 'percent[]',          'label' => 'PH',            'rules' => ''],
-      ['field' => 'concepto[]',         'label' => 'PH',            'rules' => ''],
-      ['field' => 'productoId[]',       'label' => 'PH',            'rules' => ''],
-      ['field' => 'cantidad[]',         'label' => 'PH',            'rules' => ''],
-      ['field' => 'aplicacion_total[]', 'label' => 'PH',            'rules' => ''],
-      ['field' => 'precio[]',           'label' => 'PH',            'rules' => ''],
-      ['field' => 'importe[]',          'label' => 'PH',            'rules' => ''],
+      ['field' => 'percent[]',          'label' => 'PH',                   'rules' => ''],
+      ['field' => 'concepto[]',         'label' => 'PH',                   'rules' => ''],
+      ['field' => 'productoId[]',       'label' => 'PH',                   'rules' => ''],
+      ['field' => 'cantidad[]',         'label' => 'PH',                   'rules' => ''],
+      ['field' => 'aplicacion_total[]', 'label' => 'PH',                   'rules' => ''],
+      ['field' => 'precio[]',           'label' => 'PH',                   'rules' => ''],
+      ['field' => 'importe[]',          'label' => 'PH',                   'rules' => ''],
+
+      ['field' => 'total_importe',      'label' => 'Importe',              'rules' => ''],
 
     );
 
@@ -387,31 +409,31 @@ class recetas extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La orden de compra se agregó correctamente.';
+        $txt = 'La receta se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
-        $txt = 'La orden se autorizo correctamente.';
+        $txt = 'La receta se autorizo correctamente.';
         $icono = 'success';
         break;
       case 5:
-        $txt = 'La orden se acepto correctamente.';
+        $txt = 'La receta se acepto correctamente.';
         $icono = 'success';
       break;
       case 6:
-        $txt = 'La orden fue rechazada.';
+        $txt = 'La receta fue rechazada.';
         $icono = 'error';
       break;
       case 7:
-        $txt = 'La orden se actualizo correctamente.';
+        $txt = 'La receta se actualizo correctamente.';
         $icono = 'success';
       break;
       case 8:
-        $txt = 'La orden se cancelo correctamente.';
+        $txt = 'La receta se cancelo correctamente.';
         $icono = 'success';
       break;
       case 9:
-        $txt = 'La compra se agrego correctamente.';
+        $txt = 'La receta se activo correctamente.';
         $icono = 'success';
       break;
       case 10:

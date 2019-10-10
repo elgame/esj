@@ -228,7 +228,7 @@ class recetas_formulas_model extends CI_Model {
 
   public function getFormulasAjax($term, $idEmpresa = null, $tipo = null){
     $sql = '';
-
+    $term = mb_strtolower($term, 'UTF-8');
     if ($idEmpresa)
     {
       $sql = " AND p.id_empresa = {$idEmpresa}";
@@ -243,7 +243,7 @@ class recetas_formulas_model extends CI_Model {
        "SELECT f.id_formula, f.id_empresa, f.id_area, a.nombre AS area, f.nombre, f.folio, f.tipo
         FROM otros.formulas f
           INNER JOIN areas a ON a.id_area = f.id_area
-        WHERE f.status = 't' AND (f.nombre LIKE '%{$term}%') {$sql}
+        WHERE f.status = 't' AND (LOWER(f.nombre) LIKE '%{$term}%') {$sql}
         LIMIT 20");
 
     $response = array();
