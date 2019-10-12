@@ -175,7 +175,6 @@
    ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_formula_fkey FOREIGN KEY (id_formula) REFERENCES otros.formulas (id_formula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE otros.formulas_productos ADD CONSTRAINT formulas_productos_id_producto_fkey FOREIGN KEY (id_producto) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',521,FALSE,'recetas/imprimir/','print',FALSE);
-   -- pcc|lap
    ALTER TABLE otros.recetas ADD COLUMN dosis_equipo double precision;
    COMMENT ON COLUMN otros.recetas.dosis_equipo IS 'La cantidad de lts que carga el equipo de aplicacion';
    ALTER TABLE otros.recetas ADD COLUMN dosis_equipo_car2 double precision;
