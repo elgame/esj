@@ -606,6 +606,8 @@
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
         $tr.find('#importe').val(importe.toFixed(2));
       } else { // lts
+        $tr.find('#pcarga1').val( (parseFloat($tr.find('#cantidad').val())||0) );
+
         carga2 = (parseFloat($('#carga2').val())||0)*(parseFloat($tr.find('#cantidad').val())||0);
         $tr.find('#pcarga2').val(carga2.toFixed(2));
 

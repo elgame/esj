@@ -618,7 +618,7 @@ class recetas_model extends CI_Model {
     *
     * @return void
     */
-   public function print_receta($recetaId, $path = null)
+   public function print_receta($recetaId, $pdf = null)
    {
       $receta = $this->info($recetaId, true);
       // echo "<pre>";
@@ -627,11 +627,15 @@ class recetas_model extends CI_Model {
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('L', 'mm', 'Letter');
+      if (is_null($pdf)) {
+        $pdf = new MYpdf('L', 'mm', 'Letter');
+        $pdf->titulo2 = 'ALMACENISTA';
+      } else {
+        $pdf->titulo2 = 'APLICADOR';
+      }
       // $pdf->show_head = true;
       $pdf->titulo1 = $receta['info']->empresa;
 
-      $tipo_orden = 'ALMACENISTA';
       $pdf->logo = $receta['info']->empresaData->logo!=''? (file_exists($receta['info']->empresaData->logo)? $receta['info']->empresaData->logo: '') : '';
 
       $pdf->AliasNbPages();
@@ -681,7 +685,20 @@ class recetas_model extends CI_Model {
         $pdf->Row(array($receta['info']->ha_neta, $receta['info']->no_plantas), false, true);
         $pdf->SetXY(120, $pdf->GetY());
         $pdf->Row(array('Kg Total', $receta['info']->kg_totales), false, true);
-      } else {
+      } else { // lts
+        $pdf->SetXY(120, $yaux);
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetAligns(array('C', 'C'));
+        $pdf->SetWidths(array(35, 35));
+        $pdf->Row(array('Ha Bruta', 'Planta x Ha'), false, false);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array($receta['info']->ha_bruta, $receta['info']->planta_ha), false, true);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array('Ha Neta', 'No Plantas'), false, false);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array($receta['info']->ha_neta, $receta['info']->no_plantas), false, true);
+        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->Row(array('PH', $receta['info']->ph), false, true);
       }
 
       $yaux_datos = $pdf->GetY();
@@ -705,8 +722,13 @@ class recetas_model extends CI_Model {
       if ($receta['info']->tipo === 'kg') {
         $tpercent = $tcantidad = $ttaplicacion = $timporte = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R');
-        $widths = array(14, 75, 22, 26, 22, 26);
-        $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+        if ($pdf->titulo2 === 'ALMACENISTA') {
+          $widths = array(14, 75, 22, 26, 22, 26);
+          $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+        } else {
+          $widths = array(14, 75, 22, 26);
+          $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL');
+        }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+5);
         $yaux = $pdf->GetY();
@@ -726,14 +748,24 @@ class recetas_model extends CI_Model {
 
           $pdf->SetFont('Arial','',7);
           $pdf->SetTextColor(0,0,0);
-          $datos = array(
-            "{$prod->percent}%",
-            $prod->producto,
-            MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
-            MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
-            MyString::formatoNumero($prod->precio, 2, '$', false),
-            MyString::formatoNumero($prod->importe, 2, '$', false)
-          );
+          if ($pdf->titulo2 === 'ALMACENISTA') {
+            $datos = array(
+              "{$prod->percent}%",
+              $prod->producto,
+              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
+              MyString::formatoNumero($prod->precio, 2, '$', false),
+              MyString::formatoNumero($prod->importe, 2, '$', false)
+            );
+          } else {
+            $datos = array(
+              "{$prod->percent}%",
+              $prod->producto,
+              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
+            );
+          }
+
 
           $pdf->SetX(6);
           $pdf->SetWidths($widths);
@@ -752,63 +784,208 @@ class recetas_model extends CI_Model {
           "{$tpercent}%",
           $prod->producto,
           MyString::formatoNumero($tcantidad, 2, '', false),
-          MyString::formatoNumero($ttaplicacion, 2, '', false),
-          '',
-          MyString::formatoNumero($timporte, 2, '$', false)
+          MyString::formatoNumero($ttaplicacion, 2, '', false)
         ], false);
       } else { // lts
+        $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
+        $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+        if ($pdf->titulo2 === 'ALMACENISTA') {
+          $widths = array(14, 68, 16, 16, 16, 18, 16, 20);
+          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+        } else {
+          $widths = array(14, 68, 16, 16, 16, 18);
+          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+        }
+
+        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+2);
+
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->SetX(6);
+        if ($pdf->titulo2 === 'ALMACENISTA') {
+          $datos = [
+            '', '', 'Cargas',
+            MyString::formatoNumero($receta['info']->carga1, 2, '', false),
+            MyString::formatoNumero($receta['info']->carga2, 2, '', false),
+            ''
+          ];
+        } else {
+          $datos = [
+            '', '', 'Cargas',
+            MyString::formatoNumero($receta['info']->carga1, 2, '', false),
+            MyString::formatoNumero($receta['info']->carga2, 2, '', false),
+            ''
+          ];
+        }
+        $pdf->Row($datos, false, false);
+
+        $yaux = $pdf->GetY();
+        $page_aux = $pdf->page;
+        foreach ($receta['info']->productos as $key => $prod)
+        {
+          if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
+            if($pdf->GetY()+5 >= $pdf->limiteY)
+              $pdf->AddPage();
+            $pdf->SetFont('Arial','B',7);
+
+            if ($key === 0) {
+              $header[3] = MyString::formatoNumero($receta['info']->dosis_equipo, 2, '', false);
+              $header[4] = MyString::formatoNumero($receta['info']->dosis_equipo_car2, 2, '', false);
+            }
+
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+          }
+
+          $pdf->SetFont('Arial','',7);
+          $pdf->SetTextColor(0,0,0);
+          if ($pdf->titulo2 === 'ALMACENISTA') {
+            $datos = array(
+              "{$prod->percent}%",
+              $prod->producto,
+              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
+              MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
+              MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
+              MyString::formatoNumero($prod->precio, 2, '$', false),
+              MyString::formatoNumero($prod->importe, 2, '$', false)
+            );
+          } else {
+            $datos = array(
+              "{$prod->percent}%",
+              $prod->producto,
+              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
+              MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
+              MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
+            );
+          }
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
+
+          $tpercent     += $prod->percent;
+          $tcantidad    += $prod->dosis_mezcla;
+          $ttaplicacion += $prod->aplicacion_total;
+          $timporte     += $prod->importe;
+          $tcarga1      += $prod->dosis_carga1;
+          $tcarga2      += $prod->dosis_carga2;
+        }
+
+        // Totales
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(6);
+        if ($pdf->titulo2 === 'ALMACENISTA') {
+          $pdf->Row([
+            "{$tpercent}%",
+            '',
+            MyString::formatoNumero($tcantidad, 2, '', false),
+            MyString::formatoNumero($tcarga1, 2, '', false),
+            MyString::formatoNumero($tcarga2, 2, '', false),
+            MyString::formatoNumero($ttaplicacion, 2, '', false),
+            '',
+            MyString::formatoNumero($timporte, 2, '$', false)
+          ], false);
+        } else {
+          $pdf->Row([
+            "{$tpercent}%",
+            '',
+            MyString::formatoNumero($tcantidad, 2, '', false),
+            MyString::formatoNumero($tcarga1, 2, '', false),
+            MyString::formatoNumero($tcarga2, 2, '', false),
+            MyString::formatoNumero($ttaplicacion, 2, '', false)
+          ], false);
+        }
       }
 
       $page_aux2 = $pdf->page;
       $yaux_prod = $pdf->GetY();
 
+      $val_x = ($pdf->titulo2 !== 'ALMACENISTA')? 155: 192;
+      $val_widths1 = ($pdf->titulo2 !== 'ALMACENISTA')? array(117): array(80);
+      $val_widths2 = ($pdf->titulo2 !== 'ALMACENISTA')? array(20, 60): array(20, 60);
       $pdf->page = $page_aux;
-      $pdf->SetXY(192, $yaux);
+      $pdf->SetXY($val_x, $yaux);
       $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths(array(80));
+      $pdf->SetWidths($val_widths1);
       $pdf->Row(['PROGRAMA DE APLICACION'], true);
 
       $pdf->SetAligns(array('R', 'L'));
-      $pdf->SetWidths(array(20, 60));
-      $pdf->SetX(192);
+      $pdf->SetWidths($val_widths2);
+      $pdf->SetX($val_x);
       $pdf->Row(['ETAPA', $receta['info']->a_etapa], false, false);
-      $pdf->SetX(192);
+      $pdf->SetX($val_x);
       $pdf->Row(['CICLO', $receta['info']->a_ciclo], false, false);
-      $pdf->SetX(192);
+      $pdf->SetX($val_x);
       $pdf->Row(['DDS', $receta['info']->a_dds], false, false);
-      $pdf->SetX(192);
+      $pdf->SetX($val_x);
       $pdf->Row(['TURNO', $receta['info']->a_turno], false, false);
-      $pdf->SetX(192);
+      $pdf->SetX($val_x);
       $pdf->Row(['VIA', $receta['info']->a_via], false, false);
-      $pdf->SetX(192);
+      $pdf->SetX($val_x);
       $pdf->Row(['APLICACION', $receta['info']->a_aplic], false, false);
       $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths(array(80));
-      $pdf->SetX(192);
+      $pdf->SetWidths($val_widths1);
+      $pdf->SetX($val_x);
       $pdf->Row(['OBSERVACIONES'], false);
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(80));
-      $pdf->SetX(192);
+      $pdf->SetWidths($val_widths1);
+      $pdf->SetX($val_x);
       $pdf->Row([$receta['info']->a_observaciones], false, 'B');
-      $pdf->Line(192, $yaux, 192, $pdf->GetY());
+      $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
       $pdf->Line(272, $yaux, 272, $pdf->GetY());
+
+      if ($pdf->titulo2 !== 'ALMACENISTA') {
+        $pdf->page = $page_aux;
+        $pdf->SetXY(195, $yaux+8);
+        $pdf->SetAligns(array('C', 'L'));
+        $pdf->SetWidths(array(36));
+        $pdf->Row(['FECHA'], false);
+        $pdf->SetXY(195, $pdf->GetY());
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(12, 12, 12));
+        $pdf->Row(['', '', ''], false);
+
+        $pdf->SetXY(235, $pdf->GetY()-8);
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(14, 22));
+        $pdf->Row(['SEM', '______________'], false, false);
+
+        $pdf->SetXY(235, $pdf->GetY()+2);
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(14, 22));
+        $pdf->Row(['INICIO', '______________'], false, false);
+
+        $pdf->SetXY(235, $pdf->GetY());
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(14, 22));
+        $pdf->Row(['TERMINO', '______________'], false, false);
+
+        $pdf->SetXY(235, $pdf->GetY());
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(14, 22));
+        $pdf->Row(['TOTAL', '______________'], false, false);
+      }
 
       $pdf->page = $page_aux2;
       $pdf->SetXY(6, $yaux_prod);
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(75));
+      $pdf->SetWidths(array(71));
       $pdf->SetXY(6, $pdf->GetY()+6);
-      $pdf->Row(array('SOLICITA: __________________________________________'), false, false);
+      $pdf->Row(array('SOLICITA: ________________________________________'), false, false);
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(strtoupper($receta['info']->solicito)), false, false);
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(75));
-      $pdf->SetXY(90, $pdf->GetY()-9);
-      $pdf->Row(array('REALIZO: __________________________________________'), false, false);
-      $pdf->SetXY(90, $pdf->GetY()-2);
+      $pdf->SetXY(83, $pdf->GetY()-9);
+      $pdf->Row(array('REALIZO: _________________________________________'), false, false);
+      $pdf->SetXY(83, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(strtoupper($receta['info']->realizo)), false, false);
 
@@ -816,22 +993,24 @@ class recetas_model extends CI_Model {
         $pdf->AddPage();
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(75));
       $pdf->SetXY(6, $pdf->GetY()+6);
-      $pdf->Row(array('AUTORIZO: __________________________________________'), false, false);
+      $pdf->Row(array('AUTORIZO: _______________________________________'), false, false);
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(strtoupper($receta['info']->autorizo)), false, false);
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(75));
-      $pdf->SetXY(90, $pdf->GetY()-9);
-      $pdf->Row(array('RECIBIO: __________________________________________'), false, false);
-      $pdf->SetXY(90, $pdf->GetY()-2);
+      $pdf->SetXY(83, $pdf->GetY()-9);
+      $pdf->Row(array('RECIBIO: _________________________________________'), false, false);
+      $pdf->SetXY(83, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(''), false, false);
 
+      if ($pdf->titulo2 === 'ALMACENISTA') {
+        $this->print_receta($recetaId, $pdf);
+      }
       $pdf->Output('receta'.date('Y-m-d').'.pdf', 'I');
+      exit;
    }
 
 }
