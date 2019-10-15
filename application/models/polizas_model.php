@@ -2321,7 +2321,7 @@ class polizas_model extends CI_Model {
         (
           SELECT
             bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/(f.total - nc.abononc))*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
