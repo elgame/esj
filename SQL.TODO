@@ -1,4 +1,8 @@
 
+ ✔ UUID en movimientos de banco @done (19-10-15 13:15) lap
+   ALTER TABLE public.banco_movimientos ADD COLUMN uuid character varying;
+   ALTER TABLE public.banco_movimientos ADD COLUMN no_certificado character varying;
+
  ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san|pcc|lap
    ALTER TABLE public.facturacion_otrosdatos ADD COLUMN no_salida_fruta character varying(15);
 
@@ -110,7 +114,6 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',515,FALSE,'recetas_formulas/activar/','ok',FALSE);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Cuadro de Antigüedad',184,TRUE,'nomina_fiscal/cuadro_antiguedad/','print',TRUE);
    ALTER TABLE public.usuarios ADD COLUMN telefono character varying(20);
-   -- pct|pcc|lap
    ALTER TABLE otros.recetas ADD COLUMN tipo character varying(4);
    COMMENT ON COLUMN otros.recetas.tipo IS 'kg, lts';
    ALTER TABLE otros.recetas ADD COLUMN ha_bruta double precision;

@@ -135,6 +135,34 @@
               <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
                 <div class="box span12">
                   <div class="box-header well" data-original-title>
+                    <h2><i class="icon-truck"></i> Poliza</h2>
+                    <div class="box-icon">
+                      <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                    </div>
+                  </div><!--/box-header -->
+                  <div class="box-content">
+                    <div class="row-fluid">
+                      <div class="control-group">
+                        <div class="controls span12">
+                          <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$empresa['info']->id_empresa.'&idp='.$proveedor['info']->id_proveedor.'') ?>"
+                            data-href="<?php echo base_url('panel/gastos/verXml/') ?>"
+                            rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                            <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                          <span>
+                            UUID: <input type="text" name="uuid" value="<?php echo $mov->uuid ?>" id="buscarUuid"> |
+                            No Certificado: <input type="text" name="noCertificado" value="<?php echo $mov->no_certificado ?>" id="buscarNoCertificado">
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                   </div> <!-- /box-body -->
+                </div> <!-- /box -->
+              </div><!-- /row-fluid -->
+
+              <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+                <div class="box span12">
+                  <div class="box-header well" data-original-title>
                     <h2><i class="icon-truck"></i> Catálogos</h2>
                     <div class="box-icon">
                       <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>

@@ -189,7 +189,7 @@
                       'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.MyString::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
                       'btn_type' => 'btn-info',
                       'text_link'=> 'hidden',
-                      'attrs' => array('rel' => "superbox-50x500"))
+                      'attrs' => array('rel' => "superbox-70x500"))
                     );
       						}
               		?></td>

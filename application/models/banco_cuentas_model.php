@@ -939,7 +939,7 @@ class banco_cuentas_model extends banco_model {
 		// 	return array('error' => true, 'msg' => 30);
 
 		$this->db->insert('banco_movimientos', $data);
-		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
+		$id_movimiento = $this->db->insert_id('banco_movimientos_id_movimiento_seq');
 
 		// Bitacora
 		$data_cuenta = $this->getCuentaInfo($data['id_cuenta']);
@@ -1087,6 +1087,9 @@ class banco_cuentas_model extends banco_model {
       'id_rancho'       => ($datosP['ranchoId']? $datosP['ranchoId']: NULL),
       'id_centro_costo' => ($datosP['centroCostoId']? $datosP['centroCostoId']: NULL),
       'id_activo'       => ($datosP['activoId']? $datosP['activoId']: NULL),
+
+      'uuid'            => ($datosP['uuid']? $datosP['uuid']: NULL),
+      'no_certificado'  => ($datosP['noCertificado']? $datosP['noCertificado']: NULL),
     );
     if (isset($datosP['did_proveedor']) && $datosP['did_proveedor'] != '')
     {

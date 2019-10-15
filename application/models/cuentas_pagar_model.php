@@ -1094,7 +1094,7 @@ class cuentas_pagar_model extends privilegios_model{
 		$tipo = (isset($data['tipo']) && $data['tipo'] == 'f')? $data['tipo'] : $this->input->get('tipo');
 
 		if ($tipo == 'f') {
-			$camps = array('id_compra', 'compras_abonos', 'compras');
+			$camps = array('id_compra', 'compras_abonos', 'compras', 'compras_abonos_id_abono_seq');
 
       if ((isset($data['tipo']) && $data['tipo'] == 'f')) {
         unset($data['tipo']);
@@ -1159,7 +1159,7 @@ class cuentas_pagar_model extends privilegios_model{
 			'ref_movimiento' => $data['ref_movimiento'], );
 		//se inserta el abono
 		$this->db->insert($camps[1], $data);
-		$data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
+		$data['id_abono'] = $this->db->insert_id($camps[3]);
 
 		// Bitacora
     $this->bitacora_model->_insert($camps[1], $data['id_abono'],

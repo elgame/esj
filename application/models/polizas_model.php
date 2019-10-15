@@ -2295,7 +2295,7 @@ class polizas_model extends CI_Model {
   public function polizaIngreso()
   {
     $response = array('data' => '', 'abonos' => array(), 'folio' => '');
-    $sql = $sql2 = '';
+    $sqlnc = $sql = $sql2 = '';
 
     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
       $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
@@ -2305,12 +2305,14 @@ class polizas_model extends CI_Model {
       $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
       $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
       $sql2 .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sqlnc .= " AND Date(fecha) <= '".$_GET['ffecha2']."' ";
     }
 
     if ($this->input->get('fid_empresa') != '')
     {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
       $sql2 .= " AND bc.id_empresa = '".$_GET['fid_empresa']."'";
+      $sqlnc .= " AND id_empresa = '{$_GET['fid_empresa']}'";
     }
     $cuenta_cuadre = '';
     $query = $this->db->query(
@@ -2329,6 +2331,14 @@ class polizas_model extends CI_Model {
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
             INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+            LEFT JOIN (
+              SELECT
+                id_nc AS id_factura, Sum(total) AS abononc
+              FROM facturacion
+              WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+                {$sqlnc}
+              GROUP BY id_nc
+            ) nc ON nc.id_factura = f.id_factura
             LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bmf.id_movimiento
           WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
              {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
@@ -2363,55 +2373,6 @@ class polizas_model extends CI_Model {
       ) AS t
       WHERE es_traspaso = 0
       ORDER BY fecha ASC");
-    // echo "<pre>";
-    //   var_dump("SELECT *
-    //   FROM (
-    //     (
-    //       SELECT
-    //         bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-    //         bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
-    //         Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
-    //         c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
-    //         string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
-    //         'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso
-    //       FROM facturacion AS f
-    //         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-    //         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
-    //         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-    //         INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-    //         LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bmf.id_movimiento
-    //       WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
-    //          {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
-    //          AND f.id_abono_factura IS NULL
-    //       GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
-    //         bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
-    //       ORDER BY bmf.id_movimiento ASC
-    //     )
-    //     UNION
-    //     (
-    //       SELECT
-    //         bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
-    //         bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva,
-    //         COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
-    //         COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
-    //         0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
-    //         'banco'::character varying AS tipoo,
-    //         (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso
-    //       FROM banco_movimientos AS bm
-    //         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
-    //         LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
-    //         LEFT JOIN banco_movimientos_facturas AS bmc ON bmc.id_movimiento = bm.id_movimiento
-    //         LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
-    //       WHERE bm.status = 't' AND bm.tipo = 't' AND bm.clasificacion <> 'elimon' {$sql2}
-    //       GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-    //         bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
-    //       HAVING Count(bmc.id_movimiento) = 0
-    //       ORDER BY bm.fecha ASC
-    //     )
-    //   ) AS t
-    //   WHERE es_traspaso = 0
-    //   ORDER BY fecha ASC");
-    // echo "</pre>";exit;
 
     if($query->num_rows() > 0)
     {
@@ -2756,7 +2717,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bmcp.uuid
+            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2764,11 +2725,9 @@ class polizas_model extends CI_Model {
             INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
             LEFT JOIN banco_movimientos_bascula AS bmb ON bmb.id_bascula_pago = fa.id_pago
             LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = bmb.id_movimiento
-            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bm.id_movimiento = bmcp.id_movimiento
           WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago = 'cheque'
-            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
              {$sql}
-          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bmcp.uuid
+          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bm.uuid
           ORDER BY fa.id_pago ASC
         )
         UNION
@@ -2778,7 +2737,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, 0 AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bmcp.uuid
+            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2786,11 +2745,9 @@ class polizas_model extends CI_Model {
             INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
             LEFT JOIN banco_movimientos_bascula AS bmb ON bmb.id_bascula_pago = fa.id_pago
             LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = bmb.id_movimiento
-            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bm.id_movimiento = bmcp.id_movimiento
           WHERE fa.status = 'f' AND fa.poliza_egreso = 'f' AND fa.tipo_pago = 'cheque'
-            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
              {$sql}
-          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bmcp.uuid
+          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bm.uuid
           ORDER BY fa.id_pago ASC
         )
         UNION
@@ -2801,18 +2758,16 @@ class polizas_model extends CI_Model {
             COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bmcp.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
             LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
-            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bm.id_movimiento = bmcp.id_movimiento
           WHERE bm.status = 'f' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon'
-            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
             {$sql2} AND LOWER(bm.metodo_pago) = 'cheque'
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, bc.alias, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, bmcp.uuid
+            bm.monto, bc.alias, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, bm.uuid
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )";
@@ -2835,19 +2790,17 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bmcp.uuid
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
             INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
-            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bm.id_movimiento = bmcp.id_movimiento
           WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
-            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bmcp.uuid
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bm.uuid
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -2858,17 +2811,15 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bmcp.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
             LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
-            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bm.id_movimiento = bmcp.id_movimiento
           WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
-            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre, bmcp.uuid
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre, bm.uuid
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )
