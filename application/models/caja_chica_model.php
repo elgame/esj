@@ -1071,7 +1071,7 @@ class caja_chica_model extends CI_Model {
             'concepto'        => $gasto,
             'nombre'          => $data['gasto_comprobar_nombre'][$key],
             'monto'           => $data['gasto_comprobar_importe'][$key],
-            'monto_ini'       => $data['gasto_comprobar_importe'][$key],
+            // 'monto_ini'       => $data['gasto_comprobar_importe'][$key],
             // 'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
