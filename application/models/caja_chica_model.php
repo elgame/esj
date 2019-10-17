@@ -518,7 +518,7 @@ class caja_chica_model extends CI_Model {
     if (is_array($fecha) && $fecha[0] === 'gc') {
       $sql .= " AND cg.tipo = 'gc' AND cg.fecha <= '{$fecha[1]}'";
       $sql .= " AND (
-        ( (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}') AND cg.monto > Coalesce(cga.abonos, 0) )
+        ( (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}') AND cg.monto_ini-1 > Coalesce(cga.abonos, 0) )
         OR (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha[1]}' < cg.fecha_cancelado)
       )";
       $fecha1 = $fecha[1];
@@ -548,7 +548,7 @@ class caja_chica_model extends CI_Model {
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
           cg.nombre, cg.status, cg.folio_sig,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
-          {$sql_status2} AS status2, (cg.monto - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
+          {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
           (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha1}' < cg.fecha_cancelado) AS show_back_cortes
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
