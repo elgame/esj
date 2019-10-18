@@ -46,6 +46,10 @@
             <input type="hidden" name="id" value="<?php echo (!empty($_GET['id'])? $_GET['id']: '') ?>">
             <input type="hidden" name="ide" value="<?php echo (!empty($_GET['ide'])? $_GET['ide']: $ide) ?>">
 
+            <?php if (!empty($_GET['vmetodoPago'])): ?>
+            <input type="hidden" name="vmetodoPago" id="vmetodoPago" value="<?php echo $_GET['vmetodoPago'] ?>">
+            <?php endif ?>
+
             <label for="rfc">RFC</label>
             <input type="text" name="rfc" id="rfc" value="<?php echo set_value_get('rfc', $rfc); ?>" class="search-query" autofocus>
 
@@ -75,7 +79,10 @@
                 <?php foreach ($files as $key => $file): ?>
                 <tr class="itemXml" style="cursor: pointer;"
                   data-uuid="<?php echo $file['uuid'] ?>"
-                  data-noCertificado="<?php echo $file['noCertificado'] ?>">
+                  data-noCertificado="<?php echo $file['noCertificado'] ?>"
+                  data-metodoPago="<?php echo $file['metodoPago'] ?>"
+                  data-tipoDeComprobante="<?php echo $file['tipoDeComprobante'] ?>"
+                >
                   <td><?php echo $file['rfc'] ?></td>
                   <td><?php echo $file['fecha'] ?></td>
                   <td><?php echo $file['folio'] ?></td>

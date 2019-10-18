@@ -584,19 +584,21 @@ class rastreabilidad_paletas_model extends privilegios_model {
     } else { // exportación
       $pdf->SetXY(6, $pdf->GetY()+2);
       $pallets = [];
-      for ($i=0; $i < 12; $i++) {
+      for ($i=0; $i < 13; $i++) {
         $exist = isset($data['pallets'][($i*2)+1]);
-        $pallets[0][$i] = ($i*2)+1;
-        $pallets[1][$i] = ($exist? $data['pallets'][($i*2)+1]->clasificaciones: '');
-        $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
+        if ($i !== 12 || ($i == 12 && $exist)) {
+          $pallets[0][$i] = ($i*2)+1;
+          $pallets[1][$i] = ($exist? $data['pallets'][($i*2)+1]->clasificaciones: '');
+          $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
 
-        $exist = isset($data['pallets'][($i+1)*2]);
-        $pallets[3][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
-        $pallets[4][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
-        $pallets[5][$i] = ($i+1)*2;
+          $exist = isset($data['pallets'][($i+1)*2]);
+          $pallets[3][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
+          $pallets[4][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
+          $pallets[5][$i] = ($i+1)*2;
+        }
       }
-      $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
-      $pdf->SetWidths([22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22]);
+      $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
+      $pdf->SetWidths([20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]);
       $pdf->SetFont('Arial', '', 8);
       $pdf->SetX(6);
       $pdf->Row($pallets[0], false, false);
