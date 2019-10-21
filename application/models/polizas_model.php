@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class polizas_model extends CI_Model {
-  private $empresaId;
+  public $empresaId;
   private $uuidsADD = '';
 
   function __construct()
