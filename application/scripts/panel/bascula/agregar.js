@@ -329,7 +329,23 @@ $(function(){
 
   // Autocomplete Chofer
   $("#pchofer").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_choferes/',
+    // source: base_url + 'panel/bascula/ajax_get_choferes/',
+    source: function(request, response) {
+      params = {term : request.term};
+
+      if ($('#ptipo').val() === 'sa') {
+        params['alldata'] = 'true';
+      }
+
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_choferes/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -345,7 +361,23 @@ $(function(){
 
   // Autocomplete Camiones
   $("#pcamion").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_camiones/',
+    // source: base_url + 'panel/bascula/ajax_get_camiones/',
+    source: function(request, response) {
+      params = {term : request.term};
+
+      if ($('#ptipo').val() === 'sa') {
+        params['alldata'] = 'true';
+      }
+
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_camiones/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {

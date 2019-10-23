@@ -224,6 +224,9 @@ class choferes_model extends CI_Model {
 		if ($this->input->get('term') !== false)
 			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
 
+    if ($this->input->get('alldata') !== false)
+      $sql .= " AND Coalesce(telefono, '') <> '' AND Coalesce(no_licencia, '') <> '' AND Coalesce(no_ife, '') <> ''";
+
 		$res = $this->db->query("
 				SELECT id_chofer, nombre, status
 				FROM choferes

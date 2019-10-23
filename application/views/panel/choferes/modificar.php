@@ -42,7 +42,7 @@
                   <label class="control-label" for="ftelefono">Teléfono</label>
                   <div class="controls">
                     <input type="text" name="ftelefono" id="ftelefono" class="span6"
-                    value="<?php echo isset($data->telefono)?$data->telefono:''; ?>" maxlength="15" placeholder="312 309 1234">
+                    value="<?php echo isset($data->telefono)?$data->telefono:''; ?>" maxlength="15" placeholder="312 309 1234" required>
                   </div>
                 </div>
 
@@ -50,7 +50,7 @@
                   <label class="control-label" for="fid_nextel">ID Nextel</label>
                   <div class="controls">
                     <input type="text" name="fid_nextel" id="fid_nextel" class="span6"
-                    value="<?php echo isset($data->id_nextel)?$data->id_nextel:''; ?>" maxlength="20" placeholder="55*97*103954">
+                    value="<?php echo isset($data->id_nextel)?$data->id_nextel:''; ?>" maxlength="20" placeholder="55*97*103954" required>
                   </div>
                 </div>
 
@@ -58,7 +58,7 @@
                   <label class="control-label" for="fno_licencia">No. Licencia</label>
                   <div class="controls">
                     <input type="text" name="fno_licencia" id="fno_licencia" class="span6"
-                    value="<?php echo isset($data->no_licencia)?$data->no_licencia:''; ?>" maxlength="50" placeholder="123457890">
+                    value="<?php echo isset($data->no_licencia)?$data->no_licencia:''; ?>" maxlength="50" placeholder="123457890" required>
                   </div>
                 </div>
 
@@ -66,7 +66,7 @@
                   <label class="control-label" for="fno_ife">No. IFE</label>
                   <div class="controls">
                     <input type="text" name="fno_ife" id="fno_ife" class="span6"
-                    value="<?php echo isset($data->no_ife)?$data->no_ife:''; ?>" maxlength="30" placeholder="ASDF1234GHA">
+                    value="<?php echo isset($data->no_ife)?$data->no_ife:''; ?>" maxlength="30" placeholder="ASDF1234GHA" required>
                   </div>
                 </div>
 
