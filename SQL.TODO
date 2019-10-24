@@ -1,4 +1,10 @@
 
+ ✔ Apartado para ligar boletas a una factura @done (19-10-24 16:28) lap
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Facturacion Boletas', 40, true, 'bascula_factura_boletas/', 'flag', false);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',527,TRUE,'bascula_factura_boletas/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',527,FALSE,'bascula_factura_boletas/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',527,FALSE,'bascula_factura_boletas/cancelar/','remove',FALSE);
+
  ✔ UUID en movimientos de banco @done (19-10-15 13:15) lap|pcc|san|pct
    ALTER TABLE public.banco_movimientos ADD COLUMN uuid character varying;
    ALTER TABLE public.banco_movimientos ADD COLUMN no_certificado character varying;
