@@ -40,6 +40,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
     if($this->input->get('onlyCliente') == '1')
       $sql .= ($sql==''? 'WHERE': ' AND')." c.id_cliente IS NOT NULL";
 
+    if ($this->input->get('empresaId')) {
+      $sql .= ($sql==''? 'WHERE': ' AND')." c.id_empresa = {$_GET['empresaId']}";
+    }
 
     $sql = "SELECT
         rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas,

@@ -438,6 +438,7 @@ var addpaletas = (function($){
       var param = {
         "fnombre"     : $("#fnombre").val(),
         "ffecha"      : $("#ffecha").val(),
+        "empresaId"   : $("#empresaId").val(),
         "onlyCliente" : 1,
         "limit"       : 40,
       };

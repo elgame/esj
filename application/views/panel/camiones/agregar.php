@@ -39,7 +39,7 @@
 								  <label class="control-label" for="fmodelo">Modelo </label>
 								  <div class="controls">
 										<input type="text" name="fmodelo" id="fmodelo" class="span6" value="<?php echo set_value('fmodelo'); ?>"
-											maxlength="15" placeholder="1990, 2000">
+											maxlength="15" placeholder="1990, 2000" required>
 								  </div>
 								</div>
 
@@ -47,7 +47,7 @@
 								  <label class="control-label" for="fmarca">Marca </label>
 								  <div class="controls">
 										<input type="text" name="fmarca" id="fmarca" class="span6" value="<?php echo set_value('fmarca'); ?>"
-											maxlength="15" placeholder="Chevrolet, Toyota">
+											maxlength="15" placeholder="Chevrolet, Toyota" required>
 								  </div>
 								</div>
 
@@ -55,7 +55,7 @@
                   <label class="control-label" for="fcolor">Color </label>
                   <div class="controls">
                     <input type="text" name="fcolor" id="fcolor" class="span6" value="<?php echo set_value('fcolor'); ?>"
-                      maxlength="15" placeholder="Amarillo, Azul, Negro">
+                      maxlength="15" placeholder="Amarillo, Azul, Negro" required>
                   </div>
                 </div>
 

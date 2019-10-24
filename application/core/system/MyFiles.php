@@ -67,6 +67,9 @@ class MyFiles {
               (string)$xml->Complemento->TimbreFiscalDigital['NoCertificadoSAT']);
             $total = (((string)$xml['total'])<>''? (string)$xml['total']: (string)$xml['Total']);
 
+            $metodoPago = (($xml['MetodoPago'])<>''? $xml['MetodoPago']: $xml['metodoPago']);
+            $tipoDeComprobante = (($xml['TipoDeComprobante'])<>''? $xml['TipoDeComprobante']: $xml['tipoDeComprobante']);
+
             $find = false;
             $fechaVal = new DateTime(substr($fecha, 0, 10));
             if ($bfechaIni != '' && $bfechaFin != '') {
@@ -90,13 +93,15 @@ class MyFiles {
 
             if ($find) {
               $files[strtotime($fecha)+intval($folioInt)] = [
-                'name'          => $file->getBasename(),
-                'rfc'           => $brfcProv,
-                'fecha'         => $fecha,
-                'folio'         => $folio,
-                'total'         => $total,
-                'uuid'          => $uuid,
-                'noCertificado' => $noCertificado
+                'name'              => $file->getBasename(),
+                'rfc'               => $brfcProv,
+                'fecha'             => $fecha,
+                'folio'             => $folio,
+                'total'             => $total,
+                'uuid'              => $uuid,
+                'noCertificado'     => $noCertificado,
+                'metodoPago'        => $metodoPago,
+                'tipoDeComprobante' => $tipoDeComprobante,
               ];
             }
           }

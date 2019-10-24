@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class polizas_model extends CI_Model {
-  private $empresaId;
+  public $empresaId;
   private $uuidsADD = '';
 
   function __construct()
@@ -2951,6 +2951,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto  $value->concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2961,6 +2963,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
 
           //Colocamos los impuestos de la factura
           foreach ($impuestos as $key => $impuesto)
@@ -2976,6 +2979,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           }
         }else if($value->tipoo == 'banco'){ //Contenido de la Poliza de los movimientos directos de banco
@@ -3022,6 +3026,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
 
             if($value->banco_cuenta_contpaq != '') {
               //Colocamos el Cargo a la cuenta Compaq que realizo el pago
@@ -3034,6 +3039,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                                 $this->setEspacios($value->nombre_fiscal,100). //concepto
                                 $this->setEspacios('',4)."\r\n"; //segmento de negocio
+              $response['data'] .= $this->addLineUUID($value->uuid);
 
               //Colocamos el Abono al Proveedor que realizo el pago
               $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -3045,6 +3051,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                                 $this->setEspacios($value->nombre_fiscal,100). //concepto
                                 $this->setEspacios('',4)."\r\n"; //segmento de negocio
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           } elseif($value->cuenta_cpi_proveedor == $cuenta_cuadre && $value->banco_cuenta_contpaq != '' && $value->es_traspaso == 0) {
             // Pago de comisiones y Nomina, prestamos (cargo y abono)
@@ -3058,6 +3065,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
           } elseif($value->es_traspaso > 0) {
             // Traspaso de dinero
             //Colocamos el Cargo a la cuenta que se selecciono
@@ -3070,91 +3078,8 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
           }
-
-
-
-          // $es_proveedor = false;
-          // $lock1 = false;
-          // if($value->cuenta_cpi_proveedor != $value->banco_cuenta_contpaq)
-          // {
-          //   $es_proveedor = true;
-          //   $lock1 = true;
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-
-          //   // Si se seleccionan las 2 cuentas y no es de cuadre, asigna cuentas
-          //   if($value->cuenta_cpi_proveedor != $cuenta_cuadre && $value->banco_cuenta_contpaq != '')
-          //   {
-          //     //Colocamos el Cargo a la cuenta Compaq que realizo el pago
-          //     $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                       $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq
-          //                       $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                       $this->setEspacios('0',1).  //tipo movimiento, Cuenta del mov es un cargo
-          //                       $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)), 20).  //importe movimiento
-          //                       $this->setEspacios('0',10).  //iddiario poner 0
-          //                       $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                       $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                       $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //     //Colocamos el Abono al Proveedor que realizo el pago
-          //     $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-          //                       $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-          //                       $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                       $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
-          //                       $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)) , 20).  //importe movimiento
-          //                       $this->setEspacios('0',10).  //iddiario poner 0
-          //                       $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                       $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                       $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //   }
-          // }elseif ($value->banco_cuenta_contpaq != '' && $value->desglosar_iva == 't')
-          // {
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //   $lock1 = false;
-          // }
-
-          // if ($value->banco_cuenta_contpaq != '' && $value->desglosar_iva == 't' && $es_proveedor)
-          // {
-          //   // // Cuadra el Iva si es un proveedor y seleccionaron la cuenta de conpaq directo
-          //   // $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //   //                   $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //   //                   $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //   //                   $this->setEspacios('1',1).  //tipo movimiento, Cuadra el IVa es un abono = 1
-          //   //                   $this->setEspacios( $this->numero($impuestos2['iva_activo']['importe']), 20).  //importe movimiento
-          //   //                   $this->setEspacios('0',10).  //iddiario poner 0
-          //   //                   $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //   //                   $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //   //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          // }elseif($value->banco_cuenta_contpaq != '' && $value->banco_cuenta_contpaq == $value->cuenta_cpi_proveedor && $lock1)
-          // {
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          // }
 
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -3166,6 +3091,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos los impuestos de la factura
           foreach ($impuestos2 as $key => $impuesto)
           {
@@ -3180,6 +3107,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           }
         }elseif($value->tipoo == 'banco-chc') {
@@ -3193,6 +3121,8 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -3203,6 +3133,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
         }else  // Poliza de limon de cheques
         {
           //Agregamos el header de la poliza
@@ -3215,6 +3146,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
+          $response['data'] .= $this->addLineUUID($value->uuid);
 
           $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
 
@@ -3228,6 +3160,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -3238,62 +3172,25 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
         }
 
         if($aux_idmovimiento != $value->id_movimiento)
         {
+          if (!empty($this->uuidsADD)) {
+            $response['data'] .= $this->uuidsADD;
+            $this->uuidsADD = '';
+          }
+
           $aux_idmovimiento = $value->id_movimiento;
           $folio++;
         }
       }
 
-      // exit;
-
-      // //Contenido de la Poliza de los movimientos directos de banco
-      // foreach ($response['banco_mov'] as $key => $value)
-      // {
-      //   //Es traspaso entre cuentas bancarias, se cambian los numeros
-      //   if($value->es_traspaso > 0)
-      //   {
-      //     $info_mov                    = $this->banco_cuentas_model->getMovimientoInfo($value->es_traspaso, true)['info'];
-      //     $info_cuenta                 = $this->banco_cuentas_model->getCuentaInfo($info_mov->id_cuenta)['info'];
-      //     $value->cuenta_cpi_proveedor = $info_cuenta->cuenta_cpi;
-      //     $value->nombre_fiscal        = $info_cuenta->alias;
-      //   }
-
-      //   //Agregamos el header de la poliza
-      //   $response['data'] .= $this->setEspacios('P',2).
-      //                       $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('2',4,'r').  //tipo poliza = 2 poliza egreso
-      //                       $this->setEspacios($folio,9,'r').  //folio poliza
-      //                       $this->setEspacios('1',1). //clase
-      //                       $this->setEspacios('0',10). //iddiario
-      //                       $this->setEspacios('Egresos de gastos, '.MyString::fechaATexto($value->fecha),100). //concepto
-      //                       $this->setEspacios('11',2). //sistema de origen
-      //                       $this->setEspacios('0',1). //impresa
-      //                       $this->setEspacios('0',1)."\r\n"; //ajuste
-
-      //   //Colocamos el Cargo al Banco que se deposito el dinero
-      //   $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-      //                     $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
-      //                     $this->setEspacios($value->numero_ref,10).  //referencia movimiento
-      //                     $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
-      //                     $this->setEspacios( $this->numero($value->total) , 20).  //importe movimiento
-      //                     $this->setEspacios('0',10).  //iddiario poner 0
-      //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-      //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-      //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      //   //Colocamos el Abono al Proveedor que realizo el pago
-      //   $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-      //                     $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-      //                     $this->setEspacios($value->numero_ref,10).  //referencia movimiento
-      //                     $this->setEspacios('1',1).  //tipo movimiento, Proveedor es un abono = 1
-      //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-      //                     $this->setEspacios('0',10).  //iddiario poner 0
-      //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-      //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-      //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      //   $folio++;
-      // }
+      if (!empty($this->uuidsADD)) {
+        $response['data'] .= $this->uuidsADD;
+        $this->uuidsADD = '';
+      }
 
       $response['folio'] = $folio-1;
     }

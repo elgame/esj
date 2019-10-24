@@ -31,6 +31,8 @@ class banco extends MY_Controller {
     'banco/rpt_saldos_bancarios_pdf/',
     'banco/rpt_saldos_bancarios_xls/',
     'banco/ajax_get_cuentas/',
+
+    'banco/rptMovSinUuidPdf/',
 		);
 
 	public function _remap($method){
@@ -956,6 +958,38 @@ class banco extends MY_Controller {
   public function rpt_saldos_bancarios_xls(){
     $this->load->model('banco_model');
     $this->banco_model->getRAcumuladoEmpresaXls();
+  }
+
+  public function rptMovSinUuid()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/polizas/genera.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de movimientos UUID'
+    );
+
+    $this->load->model('empresas_model');
+    $this->load->model('areas_model');
+    $this->load->model('polizas_model');
+
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/banco/rpt_mov_sin_uuid', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rptMovSinUuidPdf(){
+    $this->load->model('banco_model');
+    $this->banco_model->getRptMovSinUuidPdf();
   }
 
 }

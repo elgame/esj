@@ -144,7 +144,7 @@
                     <div class="row-fluid">
                       <div class="control-group">
                         <div class="controls span12">
-                          <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$empresa['info']->id_empresa.'&idp='.$proveedor['info']->id_proveedor.'') ?>"
+                          <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$empresa['info']->id_empresa.'&idp='.(!empty($proveedor['info']->id_proveedor)? $proveedor['info']->id_proveedor: '').'&vmetodoPago=pue') ?>"
                             data-href="<?php echo base_url('panel/gastos/verXml/') ?>"
                             rel="superbox-80x550" title="Buscar" id="supermodalBtn">
                             <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>

@@ -688,6 +688,75 @@ class banco_model extends CI_Model {
     echo $html;
   }
 
+  public function getRptMovSinUuidPdf()
+  {
+    // Obtiene los datos del reporte.
+    $this->load->model('polizas_model');
+    $this->polizas_model->empresaId = $this->input->get('fid_empresa');
+    if($this->input->get('ftipo3') == 'el')  //Egreso de limon
+    {
+      $data = $this->polizas_model->polizaEgresoLimon();
+    }elseif($this->input->get('ftipo3') == 'ec') //Egreso de cheque
+    {
+      $data = $this->polizas_model->polizaEgreso();
+    }else //egreso de gasto
+    {
+      $data = $this->polizas_model->polizaEgreso('otros');
+    }
+
+    // echo "<pre>";
+    //   var_dump($data['abonos']);
+    // echo "</pre>";exit;
+
+    $tipos = [
+      'el' => 'Limon',
+      'ec' => 'Cheques',
+      'eg' => 'Gastos'
+    ];
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->titulo2 = "REPORTE DE MOVIMIENTOS UUID";
+    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+    $pdf->titulo3 .= $tipos[$_GET['ftipo3']];
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    // Listado de Rendimientos
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'C');
+    $widths = array(17, 25, 65, 60, 20, 18);
+    $header = array('FECHA', 'REF MOV', 'CONCEPTO', 'PROVEEDOR', 'MONTO', 'UUID');
+
+    // header
+    $pdf->SetFont('helvetica','B',8.5);
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($header, false, 'B');
+
+    foreach($data['abonos'] as $key => $mov)
+    {
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetX(6);
+      $pdf->Row([
+        $mov->fecha,
+        $mov->ref_movimiento,
+        $mov->concepto,
+        $mov->nombre_fiscal,
+        MyString::formatoNumero($mov->total_abono, 2, '$', false),
+        (trim($mov->uuid)!=''? 'Si': 'No')
+      ], false, true);
+    }
+
+    $pdf->Output('movimeintos_uuid.pdf', 'I');
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */
