@@ -194,7 +194,7 @@ class camiones extends MY_Controller {
 		$rules = array(
 			array('field' => 'fplacas',
 						'label' => 'Placas',
-						'rules' => 'required|max_length[15]'),
+						'rules' => 'required|max_length[15]|callback_chckPlaca'),
 			array('field' => 'fmodelo',
 						'label' => 'Modelo',
 						'rules' => 'max_length[15]'),
@@ -205,6 +205,20 @@ class camiones extends MY_Controller {
 
 		$this->form_validation->set_rules($rules);
 	}
+
+  public function chckPlaca($placa)
+  {
+    $sql = $this->input->get('id')? " AND id_camion <> ".$this->input->get('id'): '';
+    $result = $this->db->query("SELECT COUNT(placa) as total
+      FROM camiones
+      WHERE lower(placa) = '".mb_strtolower($placa)."' {$sql}")->row();
+
+    if($result->total > 0){
+        $this->form_validation->set_message('chckNombre', 'La placa del camión ya existe.');
+      return false;
+    }else
+      return true;
+  }
 
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
