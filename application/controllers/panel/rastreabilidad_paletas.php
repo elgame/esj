@@ -44,8 +44,12 @@ class rastreabilidad_paletas extends MY_Controller {
     $this->load->model('facturacion_model');
 
     $params['paletas'] = $this->rastreabilidad_paletas_model->getPaletas(true);
+
+    $fstatus = $this->input->get('fstatus');
+    unset($_GET['fstatus']);
     $params['areas']   = $this->areas_model->getAreas();
     $params['series']  = $this->facturacion_model->get_series($_GET['did_empresa'], 'r')['data'];
+    $_GET['fstatus'] = $fstatus;
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -183,7 +187,7 @@ class rastreabilidad_paletas extends MY_Controller {
     $this->rastreabilidad_paletas_model->paleta_pdf($this->input->get('id'));
   }
 
-  public function eliminar()
+  public function cancelar()
   {
     if (isset($_GET['id']))
     {

@@ -668,6 +668,13 @@ class rastreabilidad_paletas_model extends privilegios_model {
 
     $this->pdfManifiestoDelChofer($data, $empresa, $pdf);
 
+    if($data['paleta']->status === 'ca'){
+      $auxpage = $pdf->page;
+      $pdf->page = 1;
+      $pdf->Image(APPPATH.'/images/cancelado.png', 25, 10, 190, 190, "PNG");
+      $pdf->page = $auxpage;
+    }
+
     $pdf->Output('papeleta_salida.pdf', 'I');
   }
 
