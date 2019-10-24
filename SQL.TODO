@@ -1,5 +1,5 @@
 
- ✔ UUID en movimientos de banco @done (19-10-15 13:15) lap
+ ✔ UUID en movimientos de banco @done (19-10-15 13:15) lap|pcc|san
    ALTER TABLE public.banco_movimientos ADD COLUMN uuid character varying;
    ALTER TABLE public.banco_movimientos ADD COLUMN no_certificado character varying;
 
