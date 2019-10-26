@@ -315,7 +315,7 @@
                           <input type="checkbox" class="check-vacaciones <?php echo ($nominas_finalizadas || $nominas_generadas? 'hide': '') ?>" <?php echo $disabled ?>>
                           <input type="hidden" name="con_vacaciones[]" value="0" class="span12 con-vacaciones">
                           <input type="hidden" name="generar_nomina[]" value="<?php echo $generarNomina ?>" class="span12 generar-nomina">
-                          <input type="hidden" name="hrs_trabajadas[]" value="<?php echo $e->hrs ?>" class="span12 generar-nomina">
+                          <input type="hidden" name="hrs_trabajadas[]" value="<?php echo $e->hrs ?>" class="span12">
                           <input type="hidden" value="<?php echo $activaVacaciones ?>" class="span12 activa-vacaciones">
                           <input type="hidden" value="<?php echo $activaAguinaldo ?>" class="span12 activa-aguinaldo">
                           <?php if ($sinCurp){ ?>
