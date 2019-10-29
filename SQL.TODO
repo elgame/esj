@@ -1,5 +1,5 @@
 
- ✔ Apartado para ligar boletas a una factura @done (19-10-24 16:28) lap
+ ✔ Apartado para ligar boletas a una factura @done (19-10-24 16:28) lap|pct
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Facturacion Boletas', 40, true, 'bascula_factura_boletas/', 'flag', false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',527,TRUE,'bascula_factura_boletas/agregar/','plus',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',527,FALSE,'bascula_factura_boletas/modificar/','edit',FALSE);
