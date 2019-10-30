@@ -23,6 +23,16 @@
 						</div>
 					</div>
 					<div class="box-content">
+            <div class="control-group">
+              <label class="control-label" for="empresa">Empresa </label>
+              <div class="controls">
+                <div class="input-append span12">
+                  <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', (isset($info['empresa']->nombre_fiscal)? $info['empresa']->nombre_fiscal: $empresa_default->nombre_fiscal)) ?>" placeholder="" autofocus>
+                </div>
+                <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', (isset($info['empresa']->id_empresa)? $info['empresa']->id_empresa: $empresa_default->id_empresa)) ?>">
+              </div>
+            </div><!--/control-group -->
+
 						<form action="<?php echo base_url('panel/rastreabilidad_pallets/modificar?id='.$_GET['id']); ?>" id="form-search" method="post" class="form-horizontal">
 						  <fieldset>
 								<legend></legend>

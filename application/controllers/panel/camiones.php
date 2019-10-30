@@ -211,10 +211,10 @@ class camiones extends MY_Controller {
     $sql = $this->input->get('id')? " AND id_camion <> ".$this->input->get('id'): '';
     $result = $this->db->query("SELECT COUNT(placa) as total
       FROM camiones
-      WHERE lower(placa) = '".mb_strtolower($placa)."' {$sql}")->row();
+      WHERE status = 't' AND lower(placa) = '".mb_strtolower($placa)."' {$sql}")->row();
 
     if($result->total > 0){
-        $this->form_validation->set_message('chckNombre', 'La placa del camión ya existe.');
+        $this->form_validation->set_message('chckPlaca', 'La placa del camión ya existe.');
       return false;
     }else
       return true;

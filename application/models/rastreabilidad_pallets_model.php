@@ -154,11 +154,16 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 				//Info cliente
         $response['cliente'] = array();
+        $response['empresa'] = array();
         if ($response['info']->id_cliente !== null)
         {
           $this->load->model('clientes_model');
           $data_cliente        = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
           $response['cliente'] = $data_cliente['info'];
+
+          $this->load->model('empresas_model');
+          $data_empresa        = $this->empresas_model->getInfoEmpresa($response['cliente']->id_empresa, true);
+          $response['empresa'] = $data_empresa['info'];
         }
 			}
 		}

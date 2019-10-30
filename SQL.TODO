@@ -1,5 +1,20 @@
 
- ✔ Apartado para ligar boletas a una factura @done (19-10-24 16:28) lap|pct
+ ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap
+     CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones
+         AS
+         SELECT t.id_orden,
+            t.folio,
+            t.id_remision::bigint AS id_remision
+           FROM ( SELECT co.id_orden,
+                    co.folio,
+                    unnest(string_to_array(replace(co.ids_facrem::text, 'f:'::text, ''::text), '|'::text)) AS id_remision
+                   FROM compras_ordenes co
+                  WHERE co.flete_de::text = 'v'::text AND co.tipo_orden::text = 'f'::text AND (co.status::text = ANY (ARRAY['a'::character varying::text, 'f'::character varying::text])) AND co.ids_facrem IS NOT NULL AND co.ids_facrem::text ~~ 'f:%'::text) t
+          WHERE t.id_remision <> ''::text;
+        ALTER TABLE public.compras_ordenes_flete_remisiones OWNER TO programa;
+        COMMENT ON VIEW public.compras_ordenes_flete_remisiones IS 'Lista de remisiones ligadas a las ordenes de fletes';
+
+ ✔ Apartado para ligar boletas a una factura @done (19-10-24 16:28) lap|pct --- Cancelado
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Facturacion Boletas', 40, true, 'bascula_factura_boletas/', 'flag', false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',527,TRUE,'bascula_factura_boletas/agregar/','plus',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',527,FALSE,'bascula_factura_boletas/modificar/','edit',FALSE);
@@ -8,7 +23,7 @@
  ✔ UUID en movimientos de banco @done (19-10-15 13:15) lap|pcc|san|pct
    ALTER TABLE public.banco_movimientos ADD COLUMN uuid character varying;
    ALTER TABLE public.banco_movimientos ADD COLUMN no_certificado character varying;
-   -- pct|lap
+   -- pct|lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de movimientos UUID',104,TRUE,'banco/rptMovSinUuid/','print',TRUE);
 
  ✔ Cambios en reporte de existencia de limon @done (19-10-02 15:53) pct|san|pcc|lap

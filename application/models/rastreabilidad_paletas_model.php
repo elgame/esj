@@ -161,6 +161,18 @@ class rastreabilidad_paletas_model extends privilegios_model {
           $response['facturacion'] = $result->result();
           $result->free_result();
 
+          if (count($response['facturacion']) > 0) {
+            $idsRemisiones = [];
+            foreach ($response['facturacion'] as $key => $value) {
+              $idsRemisiones[] = $value->id_factura;
+            }
+            $result = $this->db->query("SELECT string_agg(folio::text, ',') AS folio_flete
+              FROM compras_ordenes_flete_remisiones
+              WHERE id_remision in(".implode(',', $idsRemisiones).")");
+            $response['orden_flete'] = $result->row();
+            $result->free_result();
+          }
+
           $result = $this->db->query("SELECT c.nombre AS clasificacion, string_agg(DISTINCT p.nombre_fiscal, ', ') AS proveedor,
               string_agg(DISTINCT(CASE WHEN fsc.pol_seg IS NULL THEN 'cer' ELSE 'seg' END), '') AS tipo,
               string_agg(fsc.pol_seg, ', ') AS seg_certs,
@@ -753,7 +765,8 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $pdf->Row(['Placas Termo: '.(!empty($data['paleta']->manifesto->placa_termo)? $data['paleta']->manifesto->placa_termo: ''),
       'Color: '.$data['paleta']->camion->color,
       'Temp: '.(!empty($data['paleta']->manifesto->temperatura)? $data['paleta']->manifesto->temperatura: ''),
-      'Orden Flete: '.(!empty($data['paleta']->manifesto->orden_flete)? $data['paleta']->manifesto->orden_flete: '')
+      'Orden Flete: '.(!empty($data['paleta']->manifesto->orden_flete)? $data['paleta']->manifesto->orden_flete: '').
+        (!empty($data['orden_flete']->folio_flete)? " ({$data['orden_flete']->folio_flete})": '')
     ]);
 
     $pdf->SetFont('Arial', '', 8);

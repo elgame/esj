@@ -187,6 +187,9 @@ class rastreabilidad_pallets extends MY_Controller {
         }
       }
 
+      // Obtiene los datos de la empresa predeterminada.
+      $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
