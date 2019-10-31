@@ -287,7 +287,6 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',508,FALSE,'resguardos_activos/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',508,FALSE,'resguardos_activos/eliminar/','remove',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',508,FALSE,'resguardos_activos/activar/','ok',FALSE);
-     -- pct|lap|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',508,FALSE,'resguardos_activos/imprimir/','print',FALSE);
      ALTER TABLE public.productos ADD COLUMN descripcion character varying(1000);
      ALTER TABLE otros.resguardos_activos ADD COLUMN observaciones character varying(1000);
