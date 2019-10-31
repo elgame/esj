@@ -143,6 +143,7 @@ class ventas_dia extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/vfrm_addmod.js'),
     ));
 
@@ -283,6 +284,7 @@ class ventas_dia extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
     ));
 

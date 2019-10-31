@@ -554,6 +554,7 @@
               <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod2">
                 <thead>
                   <tr>
+                    <th></th>
                     <th>Clasificación Descripción</th>
                     <th>Medida</th>
                     <th>Cant.</th>

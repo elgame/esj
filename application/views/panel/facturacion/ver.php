@@ -304,9 +304,7 @@
                             </tr>
                   <?php } else {
 
-                        if ($concepto->id_clasificacion != '48' AND $concepto->id_clasificacion != '49' AND
-                            $concepto->id_clasificacion != '50' AND $concepto->id_clasificacion != '51' AND
-                            $concepto->id_clasificacion != '52')
+                        if ( !GastosProductos::searchGastosProductos($concepto->id_clasificacion) )
                         {
                     ?>
                           <tr>

@@ -124,6 +124,7 @@ class bascula extends MY_Controller {
       array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('general/util.js'),
+      array('panel/facturacion/gastos_productos.js'),
       array('panel/bascula/agregar.js'),
       array('panel/bascula/bonificacion.js'),
       array('panel/bascula/clasif.js'),

@@ -55,9 +55,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos la existencia anterior
     foreach ($info['existencia_ant'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
@@ -65,9 +63,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos los ingresos del dia
     foreach ($info['remisiones'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
@@ -78,9 +74,7 @@ class bodega_guadalajara_model extends CI_Model {
     //   var_dump($info['prestamos']);
     // echo "</pre>";exit;
     foreach ($info['prestamos'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53' AND $value->tipo == 'false')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) AND $value->tipo == 'false')
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }

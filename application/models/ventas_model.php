@@ -1625,9 +1625,7 @@ class Ventas_model extends privilegios_model{
       $pdf->SetWidths($widths);
 
       $printRow = true;
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($factura['info']->sin_costo_nover == 'f')
         {
           $printRow = false;
@@ -1648,9 +1646,7 @@ class Ventas_model extends privilegios_model{
           $traslado16 += $item->iva;
 
         $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($item->id_clasificacion == '49' && isset($factura['seguro']))
             $descripcion_ext .= " (No {$factura['seguro']->pol_seg})";
           elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '52') && isset($factura['certificado'.$item->id_clasificacion]))
@@ -1716,9 +1712,7 @@ class Ventas_model extends privilegios_model{
         $hay_prod_certificados = true;
 
       $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($item->id_clasificacion == '49' && isset($factura['seguro'])){
           $seguro = array_map(function($e) {
               return $e->pol_seg;
@@ -2239,9 +2233,7 @@ class Ventas_model extends privilegios_model{
     foreach($conceptos as $key => $item)
     {
       $printRow = true;
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($factura['info']->sin_costo_nover == 'f')
         {
           $printRow = false;
@@ -2262,9 +2254,7 @@ class Ventas_model extends privilegios_model{
           $traslado16 += $item->iva;
 
         $descripcion_ext = '';
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($item->id_clasificacion == '49' && isset($factura['seguro']))
             $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
           elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '52') && isset($factura['certificado'.$item->id_clasificacion]))
@@ -2301,9 +2291,7 @@ class Ventas_model extends privilegios_model{
         $hay_prod_certificados = true;
 
       $descripcion_ext = '';
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($item->id_clasificacion == '49' && isset($factura['seguro'])){
           $seguro = array_map(function($e) {
               return $e->pol_seg;

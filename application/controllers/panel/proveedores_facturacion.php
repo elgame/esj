@@ -107,6 +107,7 @@ class proveedores_facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/proveedores/facturacion/frm_addmod.js'),
     ));
 

@@ -865,9 +865,7 @@ class polizas_model extends CI_Model {
             //Colocamos los Ingresos de la factura (41040000)
             foreach ($inf_factura['productos'] as $key => $value)
             {
-              if ( ($inf_factura['info']->sin_costo == 't' && $value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-                  $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-                  $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
+              if ( ($inf_factura['info']->sin_costo == 't' && !GastosProductos::searchGastosProductos($value->id_clasificacion)) || $inf_factura['info']->sin_costo == 'f')
               {
                 if (MyString::isJson($value->cuenta_cpi2)) {
                   $cuentas = json_decode($value->cuenta_cpi2);

@@ -164,6 +164,7 @@ class facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
     ));
@@ -335,6 +336,7 @@ class facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
     ));

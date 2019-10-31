@@ -533,9 +533,7 @@ class ventas_dia_model extends privilegios_model{
           $traslado11 += floatval($_POST['prod_diva_total'][$key]);
         else if ($_POST['prod_diva_porcent'][$key] == '16'){
           if($datosFactura['sin_costo'] == 't'){
-            if ($_POST['prod_did_prod'][$key] != '49' AND $_POST['prod_did_prod'][$key] != '50' AND
-                $_POST['prod_did_prod'][$key] != '51' AND $_POST['prod_did_prod'][$key] != '52' AND
-                $_POST['prod_did_prod'][$key] != '53')
+            if ( !GastosProductos::searchGastosProductos($_POST['prod_did_prod'][$key]) )
               $traslado16 += floatval($_POST['prod_diva_total'][$key]);
           }else
             $traslado16 += floatval($_POST['prod_diva_total'][$key]);
@@ -2453,9 +2451,7 @@ class ventas_dia_model extends privilegios_model{
       $pdf->SetWidths($widths);
 
       $printRow = true;
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53') {
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ) {
         $printRow = false;
         $gastos[] = $item;
       }

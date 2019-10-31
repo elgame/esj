@@ -234,9 +234,7 @@ class vales_salida_model extends CI_Model {
         $pdf->SetWidths($widths);
 
         $printRow = true;
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($vale->factura['info']->sin_costo_nover == 'f')
           {
             $printRow = false;
@@ -257,9 +255,7 @@ class vales_salida_model extends CI_Model {
             $traslado16 += $item->iva;
 
           $descripcion_ext = '';
-          if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-              $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-              $item->id_clasificacion == '53'){
+          if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
             if($item->id_clasificacion == '49' && isset($vale->factura['seguro']))
               $descripcion_ext = " (No {$vale->factura['seguro']->pol_seg})";
             elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($vale->factura['certificado'.$item->id_clasificacion]))
