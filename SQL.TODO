@@ -1,5 +1,25 @@
 
- ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc
+ ✔ Continueacion de recetas, control de saldo @done (19-11-05 13:29) pct
+     ALTER TABLE otros.recetas_productos ADD COLUMN aplicacion_total_saldo double precision NOT NULL DEFAULT 0;
+     ALTER TABLE otros.recetas ADD COLUMN paso character varying(3) NOT NULL DEFAULT 'p'::character varying;
+     COMMENT ON COLUMN otros.recetas.paso IS 'p: esta pendiente de salidas (solo registrada), r: ya se registraron salidas, t: terminada ya se entrego todo';
+     CREATE TABLE otros.recetas_salidas
+        (
+          id_recetas bigint NOT NULL,
+          id_salida bigint NOT NULL,
+          cargas double precision NOT NULL DEFAULT 0,
+          CONSTRAINT recetas_salidas_pkey PRIMARY KEY (id_recetas, id_salida),
+          CONSTRAINT recetas_salidas_id_recetas_fkey FOREIGN KEY (id_recetas)
+              REFERENCES otros.recetas (id_recetas) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT recetas_salidas_id_salida_fkey FOREIGN KEY (id_salida)
+              REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        ) WITH ( OIDS=FALSE );
+        ALTER TABLE otros.recetas_salidas OWNER TO programa;
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Salida producto',521,FALSE,'recetas/salida/','ok',FALSE);
+
+ ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc|pct
      CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones
          AS
          SELECT t.id_orden,

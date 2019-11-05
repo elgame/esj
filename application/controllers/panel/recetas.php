@@ -199,6 +199,66 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  /**
+   * Visualiza el formulario para registrar una salida de receta.
+   *
+   * @return void
+   */
+  public function salida()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/recetas/recetas_salida.js'),
+    ));
+
+    $this->load->model('recetas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Salida producto de receta'
+    );
+
+    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $this->configAddReceta();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->recetas_model->modificar($_GET['id']);
+
+      if ($response['passes'])
+      {
+        redirect(base_url('panel/recetas/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
+      }
+    }
+
+    $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['print']))
+      $params['print'] = true;
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/salida', $params);
+    $this->load->view('panel/footer');
+  }
+
   public function cancelar()
   {
     $this->load->model('recetas_model');

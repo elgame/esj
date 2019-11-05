@@ -49,7 +49,7 @@ class recetas_model extends CI_Model {
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
           f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
-          r.total_importe
+          r.total_importe, r.paso
         FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
           INNER JOIN areas a ON a.id_area = r.id_area
         WHERE 1 = 1 {$sql}
@@ -94,7 +94,7 @@ class recetas_model extends CI_Model {
         r.folio, r.objetivo, r.semana, r.dosis_planta, r.planta_ha, r.ha_neta, r.no_plantas, r.kg_totales,
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
-        r.dosis_equipo, r.dosis_equipo_car2, r.total_importe
+        r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -102,6 +102,7 @@ class recetas_model extends CI_Model {
         INNER JOIN usuarios rea ON rea.id = r.id_realizo
         INNER JOIN usuarios sol ON sol.id = r.id_solicito
         INNER JOIN otros.formulas f ON f.id_formula = r.id_formula
+        LEFT JOIN otros.recetas_salidas rs ON r.id_recetas = rs.id_recetas
       WHERE r.id_recetas = {$recetaId}");
 
     $data = array();
@@ -115,7 +116,7 @@ class recetas_model extends CI_Model {
         $query = $this->db->query(
           "SELECT rp.id_receta, rp.id_producto, rp.rows, pr.nombre AS producto, pr.codigo,
             pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
-            rp.dosis_carga1, rp.dosis_carga2
+            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo
           FROM otros.recetas_productos AS rp
             INNER JOIN productos AS pr ON pr.id_producto = rp.id_producto
           WHERE rp.id_receta = {$data['info']->id_recetas}
@@ -201,16 +202,17 @@ class recetas_model extends CI_Model {
     foreach ($_POST['concepto'] as $key => $concepto)
     {
       $productos[] = array(
-        'id_receta'        => $recetaId,
-        'id_producto'      => $_POST['productoId'][$key],
-        'rows'             => $key,
-        'percent'          => $_POST['percent'][$key],
-        'dosis_mezcla'     => $_POST['cantidad'][$key],
-        'aplicacion_total' => $_POST['aplicacion_total'][$key],
-        'precio'           => $_POST['precio'][$key],
-        'importe'          => $_POST['importe'][$key],
-        'dosis_carga1'     => floatval($_POST['pcarga1'][$key]),
-        'dosis_carga2'     => floatval($_POST['pcarga2'][$key]),
+        'id_receta'              => $recetaId,
+        'id_producto'            => $_POST['productoId'][$key],
+        'rows'                   => $key,
+        'percent'                => $_POST['percent'][$key],
+        'dosis_mezcla'           => $_POST['cantidad'][$key],
+        'aplicacion_total'       => $_POST['aplicacion_total'][$key],
+        'precio'                 => $_POST['precio'][$key],
+        'importe'                => $_POST['importe'][$key],
+        'dosis_carga1'           => floatval($_POST['pcarga1'][$key]),
+        'dosis_carga2'           => floatval($_POST['pcarga2'][$key]),
+        'aplicacion_total_saldo' => $_POST['aplicacion_total'][$key],
       );
     }
 
@@ -279,16 +281,17 @@ class recetas_model extends CI_Model {
     foreach ($_POST['concepto'] as $key => $concepto)
     {
       $productos[] = array(
-        'id_receta'        => $recetaId,
-        'id_producto'      => $_POST['productoId'][$key],
-        'rows'             => $key,
-        'percent'          => $_POST['percent'][$key],
-        'dosis_mezcla'     => $_POST['cantidad'][$key],
-        'aplicacion_total' => $_POST['aplicacion_total'][$key],
-        'precio'           => $_POST['precio'][$key],
-        'importe'          => $_POST['importe'][$key],
-        'dosis_carga1'     => floatval($_POST['pcarga1'][$key]),
-        'dosis_carga2'     => floatval($_POST['pcarga2'][$key]),
+        'id_receta'              => $recetaId,
+        'id_producto'            => $_POST['productoId'][$key],
+        'rows'                   => $key,
+        'percent'                => $_POST['percent'][$key],
+        'dosis_mezcla'           => $_POST['cantidad'][$key],
+        'aplicacion_total'       => $_POST['aplicacion_total'][$key],
+        'precio'                 => $_POST['precio'][$key],
+        'importe'                => $_POST['importe'][$key],
+        'dosis_carga1'           => floatval($_POST['pcarga1'][$key]),
+        'dosis_carga2'           => floatval($_POST['pcarga2'][$key]),
+        'aplicacion_total_saldo' => $_POST['aplicacion_total'][$key],
       );
     }
 

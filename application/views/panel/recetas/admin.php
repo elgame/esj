@@ -100,18 +100,28 @@
                   <td class="center">
                     <?php
 
-                      echo $this->usuarios_model->getLinkPrivSm('recetas/modificar/', array(
-                        'params'   => 'id='.$receta->id_recetas,
-                        'btn_type' => 'btn-success',
-                        'attrs' => array())
-                      );
+                      if ($receta->paso == 'p') {
+                        echo $this->usuarios_model->getLinkPrivSm('recetas/modificar/', array(
+                          'params'   => 'id='.$receta->id_recetas,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
+                      }
                       echo $this->usuarios_model->getLinkPrivSm('recetas/imprimir/', array(
                         'params'   => 'id='.$receta->id_recetas,
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => '_BLANK'))
                       );
 
-                      if ($receta->status === 't')
+                      if ($receta->paso != 't') {
+                        echo $this->usuarios_model->getLinkPrivSm('recetas/salida/', array(
+                          'params'   => 'id='.$receta->id_recetas,
+                          'btn_type' => 'btn',
+                          'attrs' => array())
+                        );
+                      }
+
+                      if ($receta->paso == 'p' && $receta->status === 't')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('recetas/cancelar/', array(
                           'params'   => 'id='.$receta->id_recetas,
