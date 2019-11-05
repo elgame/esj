@@ -321,7 +321,7 @@ class Ventas_model extends privilegios_model{
       $datosFactura['tipo_cambio'] = '1';
 
     $this->db->insert('facturacion', $datosFactura);
-    $id_venta = $this->db->insert_id();
+    $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
 
     // Si tiene el # de trazabilidad
     if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
@@ -603,7 +603,7 @@ class Ventas_model extends privilegios_model{
       $remision['remision']['ano_aprobacion'] = substr($serfolio[0]->ano_aprobacion, 0, 4);
 
       $this->db->insert('facturacion', $remision['remision']);
-      $id_venta = $this->db->insert_id();
+      $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
 
       $remision['otrosdatos']['id_factura'] = $id_venta;
       $this->db->insert('facturacion_otrosdatos', $remision['otrosdatos']);
@@ -694,7 +694,7 @@ class Ventas_model extends privilegios_model{
                                     ':id'           => 'id_factura',
                                     ':titulo'       => 'Venta'));
     $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
-    // $id_venta = $this->db->insert_id();
+    // $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
 
     // Si tiene el # de trazabilidad
     if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {

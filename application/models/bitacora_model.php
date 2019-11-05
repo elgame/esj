@@ -64,7 +64,7 @@ class bitacora_model extends bitacora_msg_model {
 			$datos['id_empresa'] = $params[':id_empresa'];
 
 		$this->db->insert('bitacora', $datos);
-		$id_bitacora = $this->db->insert_id();
+		$id_bitacora = $this->db->insert_id('bitacora_id_seq');
     return $id_bitacora;
 	}
 

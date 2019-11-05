@@ -89,9 +89,13 @@
                 <ul class="tags" id="tagsCCIds">
                 <?php if (isset($_POST['centroCostoId'])) {
                   foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
-                    <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
+                    <li>
+                      <span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
                       <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
                       <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+
+                      <input type="hidden" name="centroCostoHec[]" class="centroCostoHec" value="<?php echo $_POST['centroCostoHec'][$key] ?>">
+                      <input type="hidden" name="centroCostoNoplantas[]" class="centroCostoNoplantas" value="<?php echo $_POST['centroCostoNoplantas'][$key] ?>">
                     </li>
                  <?php }} ?>
                 </ul>

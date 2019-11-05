@@ -90,7 +90,7 @@ class registro_movimientos_model extends CI_Model {
       );
     }
     $this->db->insert('otros.polizas', $data);
-    $id_poliza = $this->db->insert_id();
+    $id_poliza = $this->db->insert_id('otros.polizas_id_seq');
 
     $movimiento = $this->agregarMovimientos($id_poliza);
 

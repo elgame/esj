@@ -89,9 +89,13 @@
                 <ul class="tags" id="tagsCCIds">
                 <?php if (isset($receta['info']->centroCosto)) {
                 foreach ($receta['info']->centroCosto as $key => $centroCosto) { ?>
-                  <li class=""><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                  <li class="">
+                    <span class="tag"><?php echo $centroCosto->nombre ?></span>
                     <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
                     <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+
+                    <input type="hidden" name="centroCostoHec[]" class="centroCostoHec" value="<?php echo $centroCosto->hectareas ?>">
+                    <input type="hidden" name="centroCostoNoplantas[]" class="centroCostoNoplantas" value="<?php echo $centroCosto->no_plantas ?>">
                   </li>
                 <?php }} ?>
                 </ul>

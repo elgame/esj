@@ -189,7 +189,8 @@ class centros_costos_model extends CI_Model {
       $sql .= $sqlX;
 
     $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area
+        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
+          cc.hectareas, cc.no_plantas
         FROM otros.centro_costo cc
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'

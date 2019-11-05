@@ -39,7 +39,7 @@ class calibres_model extends CI_Model {
     else
     {
       $this->db->insert('calibres', array('nombre' => $nombre));
-      $id = $this->db->insert_id();
+      $id = $this->db->insert_id('calibres_id_calibre_seq');
 
       $existe = false;
     }

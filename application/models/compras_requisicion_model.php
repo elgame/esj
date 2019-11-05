@@ -166,7 +166,7 @@ class compras_requisicion_model extends CI_Model {
     $data['otros_datos'] = json_encode($data['otros_datos']);
 
     $this->db->insert('compras_requisicion', $data);
-    $ordenId = $this->db->insert_id();
+    $ordenId = $this->db->insert_id('compras_requisicion_id_requisicion_seq');
 
     // Bitacora
     $this->bitacora_model->_insert('compras_requisicion', $ordenId,

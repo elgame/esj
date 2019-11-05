@@ -177,7 +177,7 @@ class empresas_model extends CI_Model{
 		if($cer_caduca != '')
 			$data['cer_caduca'] = $cer_caduca;
 		$this->db->insert('empresas', $data);
-		$id_empresas = $this->db->insert_id();
+		$id_empresas = $this->db->insert_id('empresas_id_empresa_seq');
 
 		// Bitacora
     $this->bitacora_model->_insert('empresas', $id_empresas,

@@ -202,7 +202,7 @@ class productos_traspasos_model extends CI_Model {
     {
         $this->db->insert('productos_traspasos', $data);
 
-        return $this->db->insert_id();
+        return $this->db->insert_id('productos_traspasos_id_seq');
     }
 
     private function getInfoTraspaso($traspasoId)

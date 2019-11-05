@@ -119,7 +119,7 @@ class compras_areas_model extends CI_Model{
 		}
 
 		$this->db->insert('compras_areas', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('compras_areas_id_area_seq');
 
 		$data = array('nivel' => $this->getDescripCodigo($id_area, 'nivel'));
 		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");

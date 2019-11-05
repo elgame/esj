@@ -203,9 +203,8 @@
         setTimeout(function () {
           $centroCosto.val('');
         }, 200);
-        // $centroCosto.val(ui.item.id);
-        // $("#centroCostoId").val(ui.item.id);
-        // $centroCosto.css("background-color", "#A1F57A");
+
+        calcTotalHecPlant();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -219,6 +218,8 @@
         $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
           '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
           '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '<input type="hidden" name="centroCostoHec[]" class="centroCostoHec" value="'+(parseFloat(item.item.hectareas)||0)+'">'+
+          '<input type="hidden" name="centroCostoNoplantas[]" class="centroCostoNoplantas" value="'+(parseFloat(item.item.no_plantas)||0)+'">'+
           '</li>');
       } else {
         noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
@@ -227,6 +228,7 @@
 
     $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
       $(this).remove();
+      calcTotalHecPlant();
     });
   };
 
@@ -375,7 +377,7 @@
         $('.tipostyle').hide();
       } else {
         $('#no_plantas').removeAttr('readonly');
-        $('#ha_neta').attr('readonly', 'readonly');
+        $('#ha_neta, #carga1, #carga2').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Lts');
         $('.tipostyle').show();
       }
@@ -458,6 +460,7 @@
       $no_plantas        = $('#no_plantas'),
       $kg_totales        = $('#kg_totales'),
       $dosis_equipo      = $('#dosis_equipo'),
+      $carga1            = $('#carga1'),
       $carga2            = $('#carga2'),
       $dosis_equipo_car2 = $('#dosis_equipo_car2')
       ;
@@ -470,6 +473,13 @@
       } else {
         ha_neta = (parseFloat($no_plantas.val())||0)/((parseFloat($planta_ha.val())||1)>0? (parseFloat($planta_ha.val())||1): 1);
         $ha_neta.val(ha_neta.toFixed(2));
+
+        // Separa decimales para las cargas
+        let cargas = ha_neta.toFixed(2).split('.');
+        $carga1.val(cargas[0]);
+        if (cargas.length > 1) {
+          $carga2.val("0."+cargas[1]);
+        }
 
         lts_cargas2 = (parseFloat($dosis_equipo.val())||0)*(parseFloat($carga2.val())||0);
         $dosis_equipo_car2.val(lts_cargas2.toFixed(2));
@@ -629,6 +639,39 @@
     $('#ttaplicacion_total').text(total_aplicacion.toFixed(2));
     $('#ttimporte').text(total_importe.toFixed(2));
     $('#total_importe').val(total_importe.toFixed(2));
+  }
+
+  function calcTotalHecPlant() {
+    var $tipo     = $('#tipo'),
+      $ha_bruta   = $('#ha_bruta'),
+      $no_plantas = $('#no_plantas'),
+      $ha_neta    = $('#ha_neta'),
+      ha_netas    = 0,
+      ha_bruta    = 0,
+      no_plantas  = 0;
+
+    // Calculos de acuerdo al tipo de receta
+    if ($tipo.val() === 'kg') {
+      $('#tagsCCIds li').each(function(index, el) {
+        var $li = $(this);
+        ha_netas += (parseFloat($li.find('.centroCostoHec').val())||0);
+      });
+
+      $ha_neta.val(ha_netas.toFixed(2));
+
+      $ha_neta.keyup();
+    } else { // lts
+      $('#tagsCCIds li').each(function(index, el) {
+        var $li = $(this);
+        ha_bruta += (parseFloat($li.find('.centroCostoHec').val())||0);
+        no_plantas += (parseFloat($li.find('.centroCostoNoplantas').val())||0);
+      });
+
+      $ha_bruta.val(ha_bruta.toFixed(2));
+      $no_plantas.val(no_plantas.toFixed(0));
+
+      $ha_bruta.keyup();
+    }
   }
 
 

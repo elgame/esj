@@ -167,7 +167,7 @@ class bascula_model extends CI_Model {
         }
 
         $this->db->insert('bascula', $data);
-        $idb = $this->db->insert_id();
+        $idb = $this->db->insert_id('bascula_id_bascula_seq');
         $new_boleta = true;
 
         $this->addSnapshot($idb, $data['accion']);
@@ -968,7 +968,7 @@ class bascula_model extends CI_Model {
     );
 
     $this->db->insert('bascula_pagos', $bascula_pagos);
-    $id_bascula_pagos = $this->db->insert_id();
+    $id_bascula_pagos = $this->db->insert_id('bascula_pagos_id_pago_seq');
 
     $pesadas = array();
     $pesadas_update = array();
@@ -1024,7 +1024,7 @@ class bascula_model extends CI_Model {
       );
 
       $this->db->insert('bascula_pagos', $bascula_pagos);
-      $id_bascula_pagos = $this->db->insert_id();
+      $id_bascula_pagos = $this->db->insert_id('bascula_pagos_id_pago_seq');
 
       $this->db->insert('banco_movimientos_bascula', array('id_movimiento' => $resp['id_movimiento'], 'id_bascula_pago' => $id_bascula_pagos ));
 
@@ -3729,7 +3729,7 @@ class bascula_model extends CI_Model {
       $compra['xml'] = 'application'.$xmlFile[1];
     }
     $this->db->insert('bascula_facturas', $compra);
-    $compraId = $this->db->insert_id();
+    $compraId = $this->db->insert_id('bascula_facturas_id_factura_seq');
 
     if (is_array($this->input->post('pid_bascula'))) {
       $this->db->delete('bascula_facturas_boletas', "id_factura = {$compraId}");

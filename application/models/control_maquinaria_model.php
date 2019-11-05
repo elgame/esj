@@ -24,7 +24,7 @@ class control_maquinaria_model extends CI_Model {
       $this->db->update('compras_salidas_combustible', $data, array('id_combustible' => $datos['id_combustible']));
     else {
       $this->db->insert('compras_salidas_combustible', $data);
-      $datos['id_combustible'] = $this->db->insert_id();
+      $datos['id_combustible'] = $this->db->insert_id('compras_salidas_combustible_id_combustible_seq');
     }
 
     return array('passess' => true,

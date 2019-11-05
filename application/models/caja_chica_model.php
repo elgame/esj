@@ -819,7 +819,7 @@ class caja_chica_model extends CI_Model {
           );
 
           $this->db->insert('cajachica_ingresos', $ingresos);
-          $idingresoo = $this->db->insert_id();
+          $idingresoo = $this->db->insert_id('cajachica_ingresos_id_ingresos_seq');
 
           // Bitacora
           $this->bitacora_model->_insert('cajachica_ingresos', $idingresoo,
@@ -1025,7 +1025,7 @@ class caja_chica_model extends CI_Model {
             'id_activo'                => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('cajachica_gastos', $gastos);
-          $gastooidd = $this->db->insert_id();
+          $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
           $gastos_ids['adds'][] = $gastooidd;
 
           // Bitacora
@@ -1118,7 +1118,7 @@ class caja_chica_model extends CI_Model {
             'id_activo'                => (!empty($data['comprobar_activoId'][$key])? $data['comprobar_activoId'][$key]: NULL),
           );
           $this->db->insert('cajachica_gastos', $gastos);
-          $gastooidd = $this->db->insert_id();
+          $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
           $gastos_ids['adds'][] = $gastooidd;
 
           // Bitacora
@@ -1265,7 +1265,7 @@ class caja_chica_model extends CI_Model {
             'folio'         => $data_folio->folio,
           );
           $this->db->insert('public.cajachica_traspasos', $traspaso);
-          $traspasos_ids['adds'][] = $this->db->insert_id();
+          $traspasos_ids['adds'][] = $this->db->insert_id('cajachica_traspasos_id_traspaso_seq');
 
           // Afecta el saldo de la caja
           if ($data['traspaso_afectar_fondo'][$key] == 't') {
@@ -1347,7 +1347,7 @@ class caja_chica_model extends CI_Model {
             'folio'           => $data_folio->folio,
           );
           $this->db->insert('cajachica_deudores', $deudor);
-          $gastooidd = $this->db->insert_id();
+          $gastooidd = $this->db->insert_id('cajachica_deudores_id_deudor_seq');
           // $gastos_ids['adds'][] = $gastooidd;
 
           // Bitacora
@@ -1711,7 +1711,7 @@ class caja_chica_model extends CI_Model {
           'id_activo'       => $data_gasto->id_activo,
         );
         $this->db->insert('cajachica_gastos', $gastos);
-        $gastooidd = $this->db->insert_id();
+        $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
 
         // historial comprobaciones
         $this->db->insert('cajachica_gastos_comprobar', [
@@ -1764,7 +1764,7 @@ class caja_chica_model extends CI_Model {
           'tipo'            => 'rg',
         );
         $this->db->insert('cajachica_gastos', $gastos);
-        $gastooidd = $this->db->insert_id();
+        $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
 
         // historial comprobaciones
         $this->db->insert('cajachica_gastos_comprobar', [

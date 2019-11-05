@@ -531,7 +531,7 @@ class compras_model extends privilegios_model{
     }
 
     $this->db->insert('compras', $datos);
-    $id = $this->db->insert_id();
+    $id = $this->db->insert_id('compras_id_compra_seq');
 
     $productos = array();
     foreach ($data['concepto'] as $key => $concepto)

@@ -91,7 +91,7 @@ class gastos_model extends privilegios_model{
     $this->db->insert('compras', $datos);
 
     // obtiene el id de la compra insertada.
-    $compraId = $this->db->insert_id();
+    $compraId = $this->db->insert_id('compras_id_compra_seq');
 
     // Bitacora
     $this->bitacora_model->_insert('compras', $compraId,

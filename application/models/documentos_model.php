@@ -226,7 +226,7 @@ class documentos_model extends CI_Model {
     );
 
     $this->db->insert('facturacion_doc_embarque', $data);
-    $idEmbarque = $this->db->insert_id();
+    $idEmbarque = $this->db->insert_id('facturacion_doc_embarque_id_embarque_seq');
 
     $pallets = array();
 

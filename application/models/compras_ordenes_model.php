@@ -140,7 +140,7 @@ class compras_ordenes_model extends CI_Model {
       $data['ids_facrem'] = $_POST['remfacs'];
     }
     $this->db->insert('compras_ordenes', $data);
-    $ordenId = $this->db->insert_id();
+    $ordenId = $this->db->insert_id('compras_ordenes_id_orden_seq');
 
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
@@ -202,7 +202,7 @@ class compras_ordenes_model extends CI_Model {
   public function agregarData($data, $dataVeiculo=array(), $dataOrdenCats = [])
   {
     $this->db->insert('compras_ordenes', $data);
-    $id_orden = $this->db->insert_id();
+    $id_orden = $this->db->insert_id('compras_ordenes_id_orden_seq');
 
     $this->db->update('compras_ordenes', ['cont_x_dia' => $this->folioDia(substr($data['fecha_creacion'], 0, 10))], "id_orden = {$id_orden}");
     if(is_array($dataVeiculo) && count($dataVeiculo) > 0)
@@ -651,7 +651,7 @@ class compras_ordenes_model extends CI_Model {
     $this->db->insert('compras', $data);
 
     // obtiene el id de la compra insertada.
-    $compraId = $this->db->insert_id();
+    $compraId = $this->db->insert_id('compras_id_compra_seq');
 
     // Bitacora
     $this->load->model('empresas_model');

@@ -140,7 +140,7 @@ class productos_salidas_model extends CI_Model {
       $this->db->update('compras_salidas', $data, "id_salida = {$id_salida}");
     } else {
       $this->db->insert('compras_salidas', $data);
-      $id_salida = $this->db->insert_id();
+      $id_salida = $this->db->insert_id('compras_salidas_id_salida_seq');
     }
 
     // Inserta los ranchos

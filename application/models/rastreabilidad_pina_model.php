@@ -144,7 +144,7 @@ class rastreabilidad_pina_model extends CI_Model {
       $id_rendimiento = $_POST['fid_rendimiento'];
     } else {
       $this->db->insert('otros.rendimiento_pina_rend', $data);
-      $id_rendimiento = $this->db->insert_id();
+      $id_rendimiento = $this->db->insert_id('otros.rendimiento_pina_rend_id_rendimiento_seq');
     }
 
     return array('passess' => $passess,
@@ -182,7 +182,7 @@ class rastreabilidad_pina_model extends CI_Model {
       $id_pinia_rendtotal = $_POST['ftotal_id'];
     } else {
       $this->db->insert('otros.rendimiento_pina_rendtotal', $data);
-      $id_pinia_rendtotal = $this->db->insert_id();
+      $id_pinia_rendtotal = $this->db->insert_id('otros.rendimiento_pina_rendtotal_id_pinia_rendtotal_seq');
     }
 
     return array('passess' => $passess,
@@ -206,7 +206,7 @@ class rastreabilidad_pina_model extends CI_Model {
       $id_danio_ext = $_POST['dex_id'];
     } else {
       $this->db->insert('otros.rendimiento_pina_danos_ext', $data);
-      $id_danio_ext = $this->db->insert_id();
+      $id_danio_ext = $this->db->insert_id('otros.rendimiento_pina_danos_ext_id_danio_ext_seq');
     }
 
     return array('passess' => $passess,
@@ -239,7 +239,7 @@ class rastreabilidad_pina_model extends CI_Model {
       $id_obs_inter = $_POST['fid_obs_inter'];
     } else {
       $this->db->insert('otros.rendimiento_pina_obs_inter', $data);
-      $id_obs_inter = $this->db->insert_id();
+      $id_obs_inter = $this->db->insert_id('otros.rendimiento_pina_obs_inter_id_obs_inter_seq');
     }
 
     return array('passess' => $passess,
@@ -800,7 +800,7 @@ class rastreabilidad_pina_model extends CI_Model {
       'id_area'     => $id_area,
     ));
 
-    $id = $this->db->insert_id();
+    $id = $this->db->insert_id('rastria_rendimiento_id_rendimiento_seq');
 
     return $id;
   }

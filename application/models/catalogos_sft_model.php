@@ -101,7 +101,7 @@ class catalogos_sft_model extends CI_Model{
 		);
 
 		$this->db->insert('otros.cat_soft', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('otros.cat_soft_id_cat_soft_seq');
 
 		return array(true, '');
 	}
@@ -499,7 +499,7 @@ class catalogos_sft_model extends CI_Model{
 		);
 
 		$this->db->insert('otros.cat_codigos', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('otros.cat_codigos_id_cat_codigos_seq');
 
 		return array(true, '');
 	}

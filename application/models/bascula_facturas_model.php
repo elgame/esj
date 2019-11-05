@@ -57,7 +57,7 @@ class bascula_facturas_model extends CI_Model {
           'subtotal'     => $datos['dsubtotal'],
           'total'        => $datos['dtotal'],
           ));
-    $id_factura = $this->db->insert_id();
+    $id_factura = $this->db->insert_id('bascula_facturas_id_factura_seq');
     foreach ($datos['boletas'] as $key => $value)
     {
       $this->db->insert('bascula_facturas_boletas', array(

@@ -25,7 +25,7 @@ class vales_salida_model extends CI_Model {
 					);
 
 		$this->db->insert('otros.vales_salida', $data);
-    $id_vale = $this->db->insert_id();
+    $id_vale = $this->db->insert_id('otros.vales_salida_id_vale_salida_seq');
 
 		return $this->getValeInfo($id_vale);
 	}

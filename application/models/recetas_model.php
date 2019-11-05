@@ -132,7 +132,8 @@ class recetas_model extends CI_Model {
                                     INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
                                   WHERE csr.id_receta = {$data['info']->id_recetas}")->result();
 
-        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
+        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num,
+                                    cc.hectareas, cc.no_plantas
                                   FROM otros.recetas_centro_costo cscc
                                     INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
                                   WHERE cscc.id_receta = {$data['info']->id_recetas}")->result();

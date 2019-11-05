@@ -460,7 +460,7 @@ class rastreabilidad_model extends CI_Model {
       'id_area'     => $id_area,
     ));
 
-    $id = $this->db->insert_id();
+    $id = $this->db->insert_id('rastria_rendimiento_id_rendimiento_seq');
 
     return $id;
   }

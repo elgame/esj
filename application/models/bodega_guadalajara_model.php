@@ -492,7 +492,7 @@ class bodega_guadalajara_model extends CI_Model {
             'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('otros.bodega_gastos', $gastos);
-          $gastos_ids['adds'][] = $this->db->insert_id();
+          $gastos_ids['adds'][] = $this->db->insert_id('otros.bodega_gastos_id_gasto_seq');
         }
       }
 
@@ -546,7 +546,7 @@ class bodega_guadalajara_model extends CI_Model {
             'id_usuario' => $this->session->userdata('id_usuario'),
           );
           $this->db->insert('otros.bodega_traspasos', $traspaso);
-          $traspasos_ids['adds'][] = $this->db->insert_id();
+          $traspasos_ids['adds'][] = $this->db->insert_id('otros.bodega_traspasos_id_traspaso_seq');
         }
       }
     }

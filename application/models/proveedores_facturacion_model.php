@@ -365,7 +365,7 @@ class proveedores_facturacion_model extends privilegios_model{
           $datosFactura['id_nc'] = $_GET['id'];
         // Inserta los datos de la factura y obtiene el Id.
         $this->db->insert('proveedores_facturacion', $datosFactura);
-        $idFactura = $this->db->insert_id();
+        $idFactura = $this->db->insert_id('proveedores_facturacion_id_factura_seq');
 
         // Productos e Impuestos
         $productosCadOri    = array(); // Productos para la CadOriginal

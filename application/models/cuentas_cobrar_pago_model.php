@@ -185,7 +185,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
             'cfdi_ext'        => json_encode($datosApi),
           );
           $this->db->insert('banco_movimientos_com_pagos', $dataTimbrado);
-          $id_compago = $this->db->insert_id();
+          $id_compago = $this->db->insert_id('banco_movimientos_com_pagos_id_seq');
 
           foreach ($queryMov as $key => $pago) {
             $this->db->insert('facturacion_com_pagos', [
