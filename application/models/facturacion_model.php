@@ -856,7 +856,6 @@ class facturacion_model extends privilegios_model{
         $addProdApi = true;
         if($datosFactura['sin_costo'] == 't')
         {
-          var_dump('addProdApi sin costo', GastosProductos::searchGastosProductos($_POST['prod_did_prod'][$key]));
           if ( GastosProductos::searchGastosProductos($_POST['prod_did_prod'][$key]) )
             $addProdApi = false;
         }
@@ -1033,9 +1032,8 @@ class facturacion_model extends privilegios_model{
         !empty($this->input->post('comercioExterior')['certificadoOrigen']) ) {
       $_POST['comercioExteriorPros'] = $this->addComercioExterior($idFactura, $borrador);
     }
-echo "<pre>";
-  var_dump($productosApi);
-echo "</pre>";exit;
+
+
     // Si es un borrador
     if ($borrador) return true;
 
