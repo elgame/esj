@@ -54,6 +54,11 @@ class compras_ordenes_model extends CI_Model {
       $sql .= " AND co.status = '".$this->input->get('fstatus')."'";
     }
 
+    if($this->input->get('falmacen') != '')
+    {
+      $sql .= " AND co.id_almacen = ".$this->input->get('falmacen')."";
+    }
+
     $sql .= $autorizadas ? " AND co.autorizado = 't'" : " AND co.autorizado = 'f'";
 
     $sql .= $regresa_product ? " AND co.regresa_product = 't'" : " AND co.status <> 'n'";
@@ -80,14 +85,16 @@ class compras_ordenes_model extends CI_Model {
                 (
                   (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden) -
                   (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden AND id_compra IS NULL)
-                ) as prod_sincompras
+                ) as prod_sincompras,
+                ca.nombre AS almacen
         FROM compras_ordenes AS co
-        {$sql_fil_prod}
-        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
-        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
-        INNER JOIN usuarios AS u ON u.id = co.id_empleado
-        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
+          {$sql_fil_prod}
+          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
+          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
+          INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
+          INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
+          LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
         WHERE 1 = 1  {$sql}
         ORDER BY (co.fecha_creacion, co.folio) DESC
         ", $params, true);

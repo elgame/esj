@@ -57,6 +57,14 @@
                 <input type="text" name="fconcepto" value="<?php echo set_value_get('fconcepto'); ?>" id="fconcepto" class="input-xlarge search-query" placeholder="Producto / Descripción" style="margin-top: 15px;">
                 <input type="hidden" name="fconceptoId" id="fconceptoId" value="<?php echo set_value_get('fconceptoId'); ?>">
 
+                <label for="falmacen">Almacén</label>
+                  <select name="falmacen" class="input-medium" id="falmacen">
+                    <option value="">TODOS</option>
+                    <?php foreach ($almacenes['almacenes'] as $key => $value): ?>
+                    <option value="<?php echo $value->id_almacen; ?>" <?php echo set_select_get('falmacen', $value->id_almacen); ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
@@ -84,6 +92,7 @@
                   <th>Proveedor</th>
                   <th>Empresa</th>
                   <th>Importe</th>
+                  <th>Almacén</th>
                   <th>Autorizada</th>
                   <th>Estado</th>
                   <th>Opc</th>
@@ -106,6 +115,7 @@
                   <td><?php echo $orden->proveedor; ?></td>
                   <td><?php echo $orden->empresa; ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></td>
+                  <td><?php echo $orden->almacen; ?></td>
                   <td><span class="label label-info"><?php echo $orden->autorizado === 't' ? 'SI' : 'NO'?></span></td>
                   <td><?php
                           $texto = 'CANCELADA';

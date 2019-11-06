@@ -2913,15 +2913,15 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('productos_salidas_model');
 
-			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida)
+			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) AS rows
           FROM compras_salidas AS cs
             LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
           WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
-			if (isset($res_salidas->count)) //ya existe una salida nivelacion en el dia
+			if (isset($res_salidas->rows) && $res_salidas->rows > 0) //ya existe una salida nivelacion en el dia
 			{
-				$rows_salidas = $res_salidas->count;
+				$rows_salidas = $res_salidas->rows;
 				$id_salida    = $res_salidas->id_salida;
 			}else
 			{
@@ -2943,7 +2943,7 @@ class inventario_model extends privilegios_model{
 				$salida[$key]['id_salida'] = $id_salida;
 				$salida[$key]['no_row']    = $rows_salidas;
 			}
-			$this->productos_salidas_model->agregarProductos($id_salida, $salida);
+			$this->productos_salidas_model->agregarProductos($id_salida, $salida, false);
 		}
 
 		if (count($compra) > 0) //se registra una orden de compra

@@ -68,6 +68,9 @@ class compras_ordenes extends MY_Controller {
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
+    $this->load->model('almacenes_model');
+    $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
+
     $params['requisicion'] = false;
     $params['method']     = '';
     $params['titleBread'] = 'Ordenes de Compras';

@@ -216,7 +216,7 @@ class productos_salidas_model extends CI_Model {
    *
    * @return array
    */
-  public function agregarProductos($idSalida, $productos = null)
+  public function agregarProductos($idSalida, $productos = null, $delProd = true)
   {
     if ( ! $productos)
     {
@@ -246,7 +246,9 @@ class productos_salidas_model extends CI_Model {
       }
     }
 
-    $this->db->delete('compras_salidas_productos', "id_salida = {$idSalida}");
+    if ($delProd) {
+      $this->db->delete('compras_salidas_productos', "id_salida = {$idSalida}");
+    }
     $this->db->insert_batch('compras_salidas_productos', $productos);
 
     // si es transferencia de almacenes
