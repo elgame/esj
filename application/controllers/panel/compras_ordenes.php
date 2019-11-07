@@ -69,7 +69,10 @@ class compras_ordenes extends MY_Controller {
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     $this->load->model('almacenes_model');
+    $fstatus = $this->input->get('fstatus');
+    unset($_GET['fstatus']);
     $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
+    $_GET['fstatus'] = $fstatus;
 
     $params['requisicion'] = false;
     $params['method']     = '';
