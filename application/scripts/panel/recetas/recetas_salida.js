@@ -590,7 +590,7 @@
   };
 
   var eventCargasLts = function () {
-    $('#carga_salida').on('keyup', function(e) {
+    $('#carga_salida, #plantas_salida').on('keyup', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parents("tr.rowprod");
@@ -654,6 +654,11 @@
 
       // Calculos de acuerdo al tipo de receta
       if ($tipo.val() === 'kg') {
+        plantas_salida = (parseFloat($('#plantas_salida').val())||0);
+        plantas_saldo  = (parseFloat($('#plantas_saldo').text())||0);
+        apts           = (parseFloat($tr.find('#aplicacion_total_saldo').attr('data-saldo'))||0);
+        cantidad       = plantas_salida*apts/(plantas_saldo>0? plantas_saldo: 1);
+        $tr.find('#cantidad').val(parseFloat(cantidad.toFixed(4)).toString());
       } else { // lts
         carga_salida = (parseFloat($('#carga_salida').val())||0);
         carga1       = (parseFloat($tr.find('#pcarga1').val())||0);

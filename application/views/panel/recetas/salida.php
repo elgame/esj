@@ -35,7 +35,7 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo $receta['info']->empresa ?>" data-next="tipo" readonly autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo $receta['info']->empresa ?>" data-next="tipo" readonly><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
                   <input type="hidden" name="empresaId" id="empresaId" value="<?php echo $receta['info']->id_empresa ?>">
                 </div>
@@ -68,6 +68,18 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="almacenId">Almacén</label>
+                <div class="controls">
+                  <select name="almacenId" class="span9" id="almacenId" required data-next="carga_salida|plantas_salida">
+                    <option value=""></option>
+                    <?php foreach ($almacenes['almacenes'] as $key => $almacen): ?>
+                    <option value="<?php echo $almacen->id_almacen ?>" <?php echo set_select('almacenId', $almacen->id_almacen); ?>><?php echo $almacen->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">
@@ -79,6 +91,7 @@
                     <option value="kg" <?php echo set_select('tipo', 'kg', ($receta['info']->tipo==='kg')); ?>>Kg</option>
                     <option value="lts" <?php echo set_select('tipo', 'lts', ($receta['info']->tipo==='lts')); ?>>Lts</option>
                   </select>
+                  <input type="hidden" name="tipo" value="<?php echo $receta['info']->tipo ?>">
                 </div>
               </div>
 
@@ -118,14 +131,19 @@
 
                 <div class="row-fluid">
 
-                  <?php if ($receta['info']->tipo == 'lts'): ?>
                   <div class="span12 mquit">
-                    <div class="span4">
-                      <input type="number" id="carga_salida" name="carga_salida" step="any" min="0.01" max="<?php echo $receta['info']->saldo_cargas ?>" class="span7" placeholder="Carga" required style="float: left;">
-                      <span class="span3"> de <?php echo $receta['info']->saldo_cargas ?></span>
+                    <div class="span8">
+                      <?php if ($receta['info']->tipo == 'lts'): ?>
+                        <input type="number" id="carga_salida" name="carga_salida" value="<?php echo set_value('carga_salida') ?>"
+                          step="any" min="0.01" max="<?php echo $receta['info']->saldo_cargas ?>" class="span5" placeholder="Carga" required autofocus style="float: left;">
+                        <span class="span3"> de <?php echo $receta['info']->saldo_cargas ?> | Total de cargas: <?php echo $receta['info']->carga1+$receta['info']->carga2 ?></span>
+                      <?php else: ?>
+                        <input type="number" id="plantas_salida" name="plantas_salida" value="<?php echo set_value('plantas_salida') ?>"
+                          step="any" min="0.01" max="<?php echo $receta['info']->saldo_plantas ?>" class="span5" placeholder="Plantas" required autofocus style="float: left;">
+                        <span class="span3"> de <span id="plantas_saldo"><?php echo $receta['info']->saldo_plantas ?></span> | Total de plantas: <?php echo $receta['info']->no_plantas ?></span>
+                      <?php endif ?>
                     </div><!--/span3s -->
                   </div><!--/span12 -->
-                  <?php endif ?>
 
                 </div><!--/row-fluid -->
                 <br>
@@ -154,6 +172,7 @@
                             <td style="width: 50px;">
                               <span class="percent"><?php echo $prod->percent ?></span>
                               <input type="hidden" name="percent[]" value="<?php echo $prod->percent ?>" id="percent">
+                              <input type="hidden" name="rows" value="<?php echo $prod->rows ?>">
                             </td>
                             <td>
                               <?php echo $prod->producto ?>

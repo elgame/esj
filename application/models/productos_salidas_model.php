@@ -144,28 +144,10 @@ class productos_salidas_model extends CI_Model {
     }
 
     // Inserta los ranchos
-    $this->db->delete('compras_salidas_rancho', "id_salida = {$id_salida}");
-    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
-      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
-        $this->db->insert('compras_salidas_rancho', [
-          'id_rancho' => $id_rancho,
-          'id_salida' => $id_salida,
-          'num'       => count($_POST['ranchoId'])
-        ]);
-      }
-    }
+    $this->agregarRanchos($id_salida);
 
     // Inserta los centros de costo
-    $this->db->delete('compras_salidas_centro_costo', "id_salida = {$id_salida}");
-    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
-      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
-        $this->db->insert('compras_salidas_centro_costo', [
-          'id_centro_costo' => $id_centro_costo,
-          'id_salida'       => $id_salida,
-          'num'             => count($_POST['centroCostoId'])
-        ]);
-      }
-    }
+    $this->agregarCentrosCostos($id_salida);
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
   }
@@ -185,30 +167,64 @@ class productos_salidas_model extends CI_Model {
     $this->db->update('compras_salidas', $data, ['id_salida' => $id_salida]);
 
     // Inserta los ranchos
-    $this->db->delete('compras_salidas_rancho', ['id_salida' => $id_salida]);
-    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
-      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
-        $this->db->insert('compras_salidas_rancho', [
-          'id_rancho' => $id_rancho,
-          'id_salida' => $id_salida,
-          'num'       => count($_POST['ranchoId'])
-        ]);
-      }
-    }
+    $this->agregarRanchos($id_salida);
 
     // Inserta los centros de costo
-    $this->db->delete('compras_salidas_centro_costo', ['id_salida' => $id_salida]);
-    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
-      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
-        $this->db->insert('compras_salidas_centro_costo', [
-          'id_centro_costo' => $id_centro_costo,
-          'id_salida'       => $id_salida,
-          'num'             => count($_POST['centroCostoId'])
-        ]);
-      }
-    }
+    $this->agregarCentrosCostos($id_salida);
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
+  }
+
+  public function agregarCentrosCostos($idSalida, $centrosCostos = null)
+  {
+    $this->db->delete('compras_salidas_centro_costo', "id_salida = {$idSalida}");
+    if (!$centrosCostos) {
+      if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+        foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+          $this->db->insert('compras_salidas_centro_costo', [
+            'id_centro_costo' => $id_centro_costo,
+            'id_salida'       => $idSalida,
+            'num'             => count($_POST['centroCostoId'])
+          ]);
+        }
+      }
+    } else {
+      if (count($centrosCostos) > 0) {
+        foreach ($centrosCostos as $keyr => $id_centro_costo) {
+          $this->db->insert('compras_salidas_centro_costo', [
+            'id_centro_costo' => $id_centro_costo,
+            'id_salida'       => $idSalida,
+            'num'             => count($centrosCostos)
+          ]);
+        }
+      }
+    }
+  }
+
+  public function agregarRanchos($idSalida, $ranchos = null)
+  {
+    $this->db->delete('compras_salidas_rancho', "id_salida = {$idSalida}");
+    if (!$ranchos) {
+      if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+        foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+          $this->db->insert('compras_salidas_rancho', [
+            'id_rancho' => $id_rancho,
+            'id_salida' => $idSalida,
+            'num'       => count($_POST['ranchoId'])
+          ]);
+        }
+      }
+    } else {
+      if (count($ranchos) > 0) {
+        foreach ($ranchos as $keyr => $id_rancho) {
+          $this->db->insert('compras_salidas_rancho', [
+            'id_rancho' => $id_rancho,
+            'id_salida' => $idSalida,
+            'num'       => count($ranchos)
+          ]);
+        }
+      }
+    }
   }
 
   /**
@@ -313,6 +329,27 @@ class productos_salidas_model extends CI_Model {
     $this->db->query("SELECT refreshallmaterializedviews();");
 
     return array('passes' => true, 'msg' => 3);
+  }
+
+  public function validaProductosExistencia($id_almacen, $productos)
+  {
+    $this->load->model('inventario_model');
+    $response = array();
+    if (count($productos)) {
+      foreach ($productos as $key => $producto) {
+        $item = $this->inventario_model->getEPUData($producto['id'], $id_almacen, true);
+        if (isset($item[0]->saldo_anterior)) {
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          if ( MyString::float($existencia-$producto['cantidad']) < 0) {
+            $response[] = $item[0]->nombre_producto.' ('.($existencia-$producto['cantidad']).')';
+          }
+        }
+      }
+    }
+    if (count($response)>0) {
+      return ['passes' => false, 'msg' => 'No hay existencia suficiente en: '.implode(', ', $response)];
+    }
+    return ['passes' => true, 'msg' => 'ok'];
   }
 
   /**

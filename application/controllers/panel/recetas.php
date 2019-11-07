@@ -222,6 +222,7 @@ class recetas extends MY_Controller {
     ));
 
     $this->load->model('recetas_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -230,14 +231,14 @@ class recetas extends MY_Controller {
 
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
 
-    $this->configAddReceta();
+    $this->configSalidaReceta();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-      $response = $this->recetas_model->modificar($_GET['id']);
+      $response = $this->recetas_model->salida($_GET['id']);
 
       if ($response['passes'])
       {
@@ -246,6 +247,7 @@ class recetas extends MY_Controller {
     }
 
     $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+    $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -452,6 +454,51 @@ class recetas extends MY_Controller {
     {
       return true;
     }
+  }
+
+
+  public function configSalidaReceta($prereq = false)
+  {
+    $this->load->library('form_validation');
+
+    $val_datos = [
+      'carga_salida' => true, 'plantas_salida' => false
+    ];
+    if ($this->input->post('tipo') === 'kg') {
+      $val_datos = [
+        'carga_salida' => false, 'plantas_salida' => true
+      ];
+    }
+
+    $rules = array(
+      ['field' => 'empresa',                  'label' => 'Empresa',                  'rules' => 'required'],
+      ['field' => 'empresaId',                'label' => 'Empresa',                  'rules' => 'required|numeric'],
+      ['field' => 'formula',                  'label' => 'Formula',                  'rules' => 'required'],
+      ['field' => 'formulaId',                'label' => 'Formula',                  'rules' => 'required|numeric'],
+      ['field' => 'area',                     'label' => 'Cultivo',                  'rules' => 'required'],
+      ['field' => 'areaId',                   'label' => 'Cultivo',                  'rules' => 'required|numeric'],
+      ['field' => 'tipo',                     'label' => 'Tipo',                     'rules' => 'required'],
+      ['field' => 'folio_formula',            'label' => 'Folio formula',            'rules' => 'required|numeric'],
+      ['field' => 'folio',                    'label' => 'Folio',                    'rules' => 'required|numeric'],
+      ['field' => 'fecha',                    'label' => 'Fecha',                    'rules' => 'required'],
+      ['field' => 'almacenId',                'label' => 'Almacén',                  'rules' => 'required'],
+      ['field' => 'carga_salida',             'label' => 'Cargas',                   'rules' => ($val_datos['carga_salida']? 'required': '')],
+      ['field' => 'plantas_salida',           'label' => 'Cargas',                   'rules' => ($val_datos['plantas_salida']? 'required': '')],
+
+      ['field' => 'percent[]',                'label' => 'P %',                      'rules' => ''],
+      ['field' => 'concepto[]',               'label' => 'P concepto',               'rules' => ''],
+      ['field' => 'productoId[]',             'label' => 'P producto',               'rules' => ''],
+      ['field' => 'cantidad[]',               'label' => 'P cantidad',               'rules' => ''],
+      ['field' => 'aplicacion_total[]',       'label' => 'P A.total',                'rules' => ''],
+      ['field' => 'precio[]',                 'label' => 'P precio',                 'rules' => ''],
+      ['field' => 'importe[]',                'label' => 'P importe',                'rules' => ''],
+      ['field' => 'aplicacion_total_saldo[]', 'label' => 'P importe', 'rules' => ''],
+
+      ['field' => 'total_importe',            'label' => 'Importe',       'rules' => ''],
+
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
   /*

@@ -94,7 +94,8 @@ class recetas_model extends CI_Model {
         r.folio, r.objetivo, r.semana, r.dosis_planta, r.planta_ha, r.ha_neta, r.no_plantas, r.kg_totales,
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
-        r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas
+        r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
+        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -345,6 +346,101 @@ class recetas_model extends CI_Model {
     $this->db->update('otros.recetas', $data, "id_recetas = {$recetaId}");
 
     return array('passes' => true);
+  }
+
+  /**
+   * Recetas modificar
+   *
+   * @return array
+   */
+  public function salida($recetaId)
+  {
+    $this->load->model('productos_salidas_model');
+
+    $receta = $this->info($_GET['id'], true);
+    echo "<pre>";
+      var_dump($_POST, $receta);
+    echo "</pre>";exit;
+
+    // validamos las existencias de los productos
+    $id_almacen = $_POST['almacenId'];
+    $productos = [];
+    foreach ($_POST['productoId'] as $key => $id) {
+      $productos[] = [
+        'id'       => $id,
+        'cantidad' => $_POST['cantidad'],
+      ];
+    }
+    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos);
+    if (!$res['passes']) {
+      return $res;
+    }
+
+    // Creamos la salida de producto
+    $fecha = date("Y-m-d");
+    $res = $this->productos_salidas_model->agregar(array(
+        'id_empresa'      => $_POST['empresaId'],
+        'id_almacen'      => $id_almacen,
+        'id_empleado'     => $this->session->userdata('id_usuario'),
+        'folio'           => 0,
+        'concepto'        => 'Salida aut. de recetas',
+        'status'          => 's',
+        'fecha_creacion'  => $fecha,
+        'fecha_registro'  => $fecha,
+
+        'solicito'          => $receta['info']->solicito,
+        'recibio'           => $receta['info']->autorizo,
+        'no_receta'         => $receta['info']->folio,
+        'id_area'           => $receta['info']->id_area,
+      ));
+    $id_salida = $res['id_salida'];
+
+    // Se agregan los ranchos
+    if (count($receta['info']->rancho) > 0) {
+      $ranchos = [];
+      foreach ($receta['info']->rancho as $key => $value) {
+        $ranchos[] = $value->id_rancho;
+      }
+      $this->productos_salidas_model->agregarRanchos($id_salida, $ranchos);
+    }
+
+    // Se agregan los centros de costo
+    if (count($receta['info']->centroCosto) > 0) {
+      $centros = [];
+      foreach ($receta['info']->centroCosto as $key => $value) {
+        $centros[] = $value->id_centro_costo;
+      }
+      $this->productos_salidas_model->agregarCentrosCostos($id_salida, $centros);
+    }
+
+    // Se agregan los productos a la salida
+    $productos = [];
+    foreach ($_POST['productoId'] as $key => $id) {
+      $productos[] = [
+        'id_salida'       => $id_salida,
+        'id_producto'     => $id,
+        'no_row'          => $key,
+        'cantidad'        => $_POST['cantidad'][$key],
+        'precio_unitario' => $_POST['precio'][$key],
+      ];
+    }
+    $this->productos_salidas_model->agregarProductos($id_salida, $productos);
+
+
+    // Creamos la salida de receta y resta productos
+    $this->db->insert('otros.recetas_salidas', [
+      'id_recetas' => $receta['info']->id_recetas,
+      'id_salida' => $id_salida,
+      'cargas' => ($_POST['tipo']==='lts'? $_POST['carga_salida']: $_POST['plantas_salida']),
+    ]);
+    foreach ($_POST['productoId'] as $key => $id) {
+      $this->db->update('otros.recetas_productos', $object);
+      $result = $this->db->query("UPDATE otros.recetas_productos
+        SET aplicacion_total_saldo = aplicacion_total_saldo - {$_POST['cantidad'][$key]}
+        WHERE id_receta = {$receta['info']->id_recetas} AND id_producto = {$id} AND rows = {$_POST['rows'][$key]}");
+    }
+
+    return array('passes' => true, 'msg' => 3);
   }
 
   /**
