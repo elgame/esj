@@ -110,6 +110,14 @@
                     <input type="text" name="folio" class="span9" id="folio" value="<?php echo $receta['info']->folio ?>" size="25" readonly>
                   </div>
                 </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fecha_aplicacion">Fecha Aplicación</label>
+                  <div class="controls">
+                    <input type="date" name="fecha_aplicacion" class="span11" id="fecha_aplicacion" value="<?php echo $receta['info']->fecha_aplicacion ?>" size="25" readonly>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -165,7 +173,7 @@
                                 <?php echo $sal->recibio ?>
                               </td>
                               <td style="width: 50px;">
-                                <a class="btn btn-info" href="<?php echo base_url("panel/productos_salidas/imprimirticket/?id={$sal->id_salida}"); ?>" target="_BLANK" title="Imprimir">
+                                <a class="btn btn-info" href="<?php echo base_url("panel/recetas/imprimir_salida/?id={$sal->id_salida}&id_receta={$sal->id_recetas}"); ?>" target="_BLANK" title="Imprimir">
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>
                               </td>
                             </tr>

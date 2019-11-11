@@ -95,7 +95,7 @@ class recetas_model extends CI_Model {
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
-        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas
+        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -103,7 +103,9 @@ class recetas_model extends CI_Model {
         INNER JOIN usuarios rea ON rea.id = r.id_realizo
         INNER JOIN usuarios sol ON sol.id = r.id_solicito
         INNER JOIN otros.formulas f ON f.id_formula = r.id_formula
-        LEFT JOIN otros.recetas_salidas rs ON r.id_recetas = rs.id_recetas
+        LEFT JOIN (
+          SELECT id_recetas, Sum(cargas) AS cargas FROM otros.recetas_salidas GROUP BY id_recetas
+        ) rs ON r.id_recetas = rs.id_recetas
       WHERE r.id_recetas = {$recetaId}");
 
     $data = array();
@@ -192,6 +194,7 @@ class recetas_model extends CI_Model {
       'a_aplic'           => $_POST['a_aplic'],
       'a_equipo'          => $_POST['a_equipo'],
       'a_observaciones'   => $_POST['a_observaciones'],
+      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -272,6 +275,7 @@ class recetas_model extends CI_Model {
       'a_aplic'           => $_POST['a_aplic'],
       'a_equipo'          => $_POST['a_equipo'],
       'a_observaciones'   => $_POST['a_observaciones'],
+      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -465,7 +469,7 @@ class recetas_model extends CI_Model {
     $sql = '';
 
     $res = $this->db->query("SELECT cs.id_salida, Date(cs.fecha_creacion) AS fecha_creacion, Date(cs.fecha_registro) AS fecha_registro,
-        cs.folio, cs.concepto, rs.cargas, cs.solicito, cs.recibio
+        cs.folio, cs.concepto, rs.cargas, cs.solicito, cs.recibio, rs.id_recetas
       FROM public.compras_salidas cs
         INNER JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
       WHERE cs.status = 's' AND rs.id_recetas = {$recetaId}
@@ -1147,5 +1151,194 @@ class recetas_model extends CI_Model {
       $pdf->Output('receta'.date('Y-m-d').'.pdf', 'I');
       exit;
    }
+
+   public function print_salidaticket($salidaID, $recetaId, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+    $this->load->model('productos_salidas_model');
+
+    $orden = $this->productos_salidas_model->info($salidaID, true);
+    $receta = $this->info($recetaId, true);
+    // echo "<pre>";
+    //   var_dump($orden, $receta);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+    $pdf->AddPage();
+    $pdf->AddFont($pdf->fount_num, '');
+
+    // Título
+    $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
+    $pdf->SetXY(0, 3);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->SetFont($pdf->fount_txt, '', 7);
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+
+    $pdf->SetFont($pdf->fount_txt, 'B', 7);
+    $pdf->SetX(0);
+    $pdf->MultiCell(32, 4, 'SALIDA DE PRODUCTOS'.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'L');
+
+    $pdf->SetXY(35, $pdf->GetY()-4);
+    $pdf->MultiCell(27, 4, 'Folio: '.$orden['info'][0]->folio, 0, 'L');
+
+    $pdf->SetWidths(array(32, 31));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetFounts(array($pdf->fount_txt));
+    $pdf->SetX(0);
+    $pdf->Row2(array('Receta: '.$receta['info']->folio,
+        'Fecha S.: '.MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) ) ), false, false, 5);
+
+    $pdf->SetWidths(array(32, 32));
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array('Fecha R.: '.$receta['info']->fecha, 'Semana: '.$receta['info']->semana ), false, false, 5);
+
+    if ($receta['info']->tipo == 'lts') {
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->SetWidths(array(64));
+      $pdf->Row2(array('Cargas: '.$orden['info'][0]->receta_cargas.' de '.($receta['info']->carga1+$receta['info']->carga2)." | Saldo: {$receta['info']->saldo_cargas}"), false, false);
+    } else {
+      //
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->SetWidths(array(64));
+      $pdf->Row2(array('Plantas: '.$orden['info'][0]->receta_cargas.' de '.($receta['info']->no_plantas)." | Saldo: {$receta['info']->saldo_plantas}"), false, false);
+    }
+    $pdf->SetFont($pdf->fount_txt, '', 7);
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $ranchos = [];
+    foreach ($receta['info']->rancho as $keyr => $item) {
+      $ranchos[] = $item->nombre;
+    }
+    $pdf->Row2(array('Rancho: '.implode(', ', $ranchos) ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Objetivo: '.$receta['info']->objetivo ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Cultivo: '.$receta['info']->area ), false, false);
+    $pdf->SetXY(10, $pdf->GetY()-2);
+    $pdf->Row2(array("Has: {$receta['info']->ha_neta} | No Plantas: ".MyString::formatoNumero($receta['info']->no_plantas, 2, '', true)), false, false);
+
+    $pdf->SetWidths(array(32, 32));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Ciclo: '.$receta['info']->a_ciclo, 'Etapa: '.$receta['info']->a_etapa ), false, false);
+
+    $pdf->SetWidths(array(64));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $centrosc = [];
+    foreach ($receta['info']->centroCosto as $keyr => $item) {
+      $centrosc[] = $item->nombre;
+    }
+    $pdf->Row2(array('Centros de costo: '.implode(', ', $centrosc) ), false, false);
+
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('Etapa: '.$orden['info'][0]->etapa, 'Rancho: '.$orden['info'][0]->rancho_n ), false, false);
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('CC: '.$orden['info'][0]->centro_c, 'Hectareas: '.$orden['info'][0]->hectareas ), false, false);
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('Grupo: '.$orden['info'][0]->grupo, 'No melgas: '.$orden['info'][0]->no_secciones ), false, false);
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('DD FS: '.$orden['info'][0]->dias_despues_de, 'Metodo A: '.$orden['info'][0]->metodo_aplicacion ), false, false);
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    // if (isset($orden['info'][0]->traspaso)) {
+    //   $pdf->SetXY(0, $pdf->GetY()-2);
+    //   $pdf->Row2(array('Traspaso: '.$orden['info'][0]->traspaso->almacen, 'Fecha: '.MyString::fechaAT($orden['info'][0]->traspaso->fecha) ), false, false);
+    // }
+    // $pdf->SetWidths(array(65));
+    // $pdf->SetXY(0, $pdf->GetY()-2);
+    // $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
+
+    // $pdf->SetFont($pdf->fount_txt, '', 7);
+    // $pdf->SetX(0);
+    // $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
+    // $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-1);
+
+    $pdf->SetWidths(array(10, 28, 11, 14));
+    $pdf->SetAligns(array('L','L','R','R'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
+    $pdf->SetX(0);
+    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
+
+    $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                   array(0,-1.5,-1.3,-1.2));
+    $cantidad = $subtotal = $iva = $total = $retencion = $ieps = 0;
+    $tipoCambio = 0;
+    $codigoAreas = array();
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array(
+        $prod->cantidad.' '.$prod->abreviatura,
+        $prod->producto,
+        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+
+      $cantidad += $prod->cantidad;
+      $total += floatval($prod->precio_unitario*$prod->cantidad);
+    }
+
+    // $pdf->SetX(29);
+    $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(10, 25, 14, 14));
+    // $pdf->SetX(29);
+    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetX(0);
+    $pdf->Row2(array($cantidad, '', 'TOTAL', MyString::formatoNumero($total, 2, '', true)), false, 'T', 5);
+
+    if ($orden['info'][0]->concepto != '') {
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(66));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array($orden['info'][0]->concepto), false, false);
+    }
+
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(66, 0));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+
+    $pdf->Output();
+
+    $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->Row2(array('_____________________________________________'), false, false);
+    $yy2 = $pdf->GetY();
+    if(count($codigoAreas) > 0){
+      $yy2 = $pdf->GetY();
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+    }
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
 
 }

@@ -166,6 +166,13 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="fecha_aplicacion">Fecha Aplicación</label>
+                <div class="controls">
+                  <input type="date" name="fecha_aplicacion" class="span9" id="fecha_aplicacion" value="<?php echo $receta['info']->fecha_aplicacion ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>

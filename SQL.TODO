@@ -18,9 +18,9 @@
         ) WITH ( OIDS=FALSE );
         ALTER TABLE otros.recetas_salidas OWNER TO programa;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Salida producto',521,FALSE,'recetas/salida/','ok',FALSE);
-     -- pcc|lap
+     -- pcc|lap|pct
      COMMENT ON COLUMN otros.recetas_salidas.cargas IS 'Cargas para lts | No Plantas para kg';
-     -- pcc
+     -- pcc|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Lista de salidas',521,FALSE,'recetas/salidas/','ok',FALSE);
      ALTER TABLE otros.recetas ADD COLUMN fecha_aplicacion date DEFAULT now();
      ALTER TABLE compras_salidas ADD COLUMN turno character varying(20);

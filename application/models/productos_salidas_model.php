@@ -400,14 +400,15 @@ class productos_salidas_model extends CI_Model {
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
-              cs.id_area, cs.id_activo
+              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas
         FROM compras_salidas AS cs
-        INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
-        INNER JOIN usuarios AS u ON u.id = cs.id_empleado
-        INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
-        LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
-        LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
-        LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
+          INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
+          INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
+          LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
+          LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
+          LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
+          LEFT JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
         WHERE cs.id_salida = {$idSalida}");
 
     $data = array();

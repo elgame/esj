@@ -311,6 +311,8 @@ class MYpdf extends FPDF {
                 else {
                   if ($bordes === 'B') {
                     $this->Line($x,$y+$h,$x+$w,$y+$h);
+                  } elseif ($bordes === 'T') {
+                    $this->Line($x,$y,$x+$w,$y);
                   }
                 }
 

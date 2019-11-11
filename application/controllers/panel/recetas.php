@@ -11,6 +11,7 @@ class recetas extends MY_Controller {
 
     'recetas/ajax_get_folio/',
     'recetas/ajax_get_recetas/',
+    'recetas/imprimir_salida/',
 
 
 
@@ -22,7 +23,6 @@ class recetas extends MY_Controller {
     'compras_requisicion/ligar/',
     'compras_requisicion/imprimir_recibo_faltantes/',
     'compras_requisicion/ajaxGetFactRem/',
-    'compras_requisicion/imprimir_entrada/',
     );
 
   public function _remap($method){
@@ -306,6 +306,13 @@ class recetas extends MY_Controller {
     $this->recetas_model->print_receta($_GET['id']);
   }
 
+  public function imprimir_salida()
+  {
+    $this->load->model('recetas_model');
+
+    $this->recetas_model->print_salidaticket($_GET['id'], $_GET['id_receta']);
+  }
+
 
 
   public function faltantes_productos()
@@ -433,6 +440,7 @@ class recetas extends MY_Controller {
       ['field' => 'a_aplic',                'label' => 'Aplicación',           'rules' => ''],
       ['field' => 'a_equipo',               'label' => 'Equipo',               'rules' => ''],
       ['field' => 'a_observaciones',        'label' => 'Observaciones',        'rules' => ''],
+      ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
 
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
