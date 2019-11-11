@@ -243,6 +243,8 @@ class recetas extends MY_Controller {
       if ($response['passes'])
       {
         redirect(base_url('panel/recetas/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
+      } else {
+        $params['frm_errors'] = $this->showMsgs(2, $response['msg']);
       }
     }
 
@@ -259,6 +261,26 @@ class recetas extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/recetas/salida', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function salidas()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/compras_ordenes/ver.js'),
+    ));
+
+    $this->load->model('recetas_model');
+
+    // // Obtiene los datos de la empresa predeterminada.
+    // $this->load->model('empresas_model');
+    // $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+    $params['salidas'] = $this->recetas_model->getSalidas($_GET['id']);
+
+    $this->load->view('panel/recetas/salidas', $params);
   }
 
   public function cancelar()

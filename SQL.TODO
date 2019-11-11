@@ -20,6 +20,12 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Salida producto',521,FALSE,'recetas/salida/','ok',FALSE);
      -- pcc|lap
      COMMENT ON COLUMN otros.recetas_salidas.cargas IS 'Cargas para lts | No Plantas para kg';
+     -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Lista de salidas',521,FALSE,'recetas/salidas/','ok',FALSE);
+     ALTER TABLE otros.recetas ADD COLUMN fecha_aplicacion date DEFAULT now();
+     ALTER TABLE compras_salidas ADD COLUMN turno character varying(20);
+     ALTER TABLE compras_salidas ALTER COLUMN grupo TYPE character varying(30);
+     ALTER TABLE compras_salidas ALTER COLUMN observaciones TYPE character varying(600);
 
  ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc|pct|san
      CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones

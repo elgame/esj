@@ -172,7 +172,7 @@
                             <td style="width: 50px;">
                               <span class="percent"><?php echo $prod->percent ?></span>
                               <input type="hidden" name="percent[]" value="<?php echo $prod->percent ?>" id="percent">
-                              <input type="hidden" name="rows" value="<?php echo $prod->rows ?>">
+                              <input type="hidden" name="rows[]" value="<?php echo $prod->rows ?>">
                             </td>
                             <td>
                               <?php echo $prod->producto ?>

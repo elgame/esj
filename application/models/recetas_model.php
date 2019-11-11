@@ -349,7 +349,7 @@ class recetas_model extends CI_Model {
   }
 
   /**
-   * Recetas modificar
+   * Agregar salida de productos a receta
    *
    * @return array
    */
@@ -358,9 +358,9 @@ class recetas_model extends CI_Model {
     $this->load->model('productos_salidas_model');
 
     $receta = $this->info($_GET['id'], true);
-    echo "<pre>";
-      var_dump($_POST, $receta);
-    echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($_POST, $receta);
+    // echo "</pre>";exit;
 
     // validamos las existencias de los productos
     $id_almacen = $_POST['almacenId'];
@@ -368,7 +368,7 @@ class recetas_model extends CI_Model {
     foreach ($_POST['productoId'] as $key => $id) {
       $productos[] = [
         'id'       => $id,
-        'cantidad' => $_POST['cantidad'],
+        'cantidad' => $_POST['cantidad'][$key],
       ];
     }
     $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos);
@@ -377,21 +377,32 @@ class recetas_model extends CI_Model {
     }
 
     // Creamos la salida de producto
-    $fecha = date("Y-m-d");
+    $fecha      = date("Y-m-d");
+    $next_folio = $this->productos_salidas_model->folio();
     $res = $this->productos_salidas_model->agregar(array(
-        'id_empresa'      => $_POST['empresaId'],
-        'id_almacen'      => $id_almacen,
-        'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => 0,
-        'concepto'        => 'Salida aut. de recetas',
-        'status'          => 's',
-        'fecha_creacion'  => $fecha,
-        'fecha_registro'  => $fecha,
+        'id_empresa'        => $_POST['empresaId'],
+        'id_almacen'        => $id_almacen,
+        'id_empleado'       => $this->session->userdata('id_usuario'),
+        'folio'             => $next_folio,
+        'concepto'          => 'Salida aut. de recetas',
+        'status'            => 's',
+        'fecha_creacion'    => $fecha,
+        'fecha_registro'    => $fecha,
 
         'solicito'          => $receta['info']->solicito,
         'recibio'           => $receta['info']->autorizo,
         'no_receta'         => $receta['info']->folio,
         'id_area'           => $receta['info']->id_area,
+
+        'etapa'             => $receta['info']->a_etapa,
+        'ciclo'             => $receta['info']->a_ciclo,
+        'dias_despues_de'   => floatval($receta['info']->a_dds),
+        'metodo_aplicacion' => $receta['info']->a_aplic,
+        'tipo_aplicacion'   => $receta['info']->a_via,
+        'grupo'             => $receta['info']->a_equipo,
+        'observaciones'     => $receta['info']->a_observaciones,
+        'turno'             => $receta['info']->a_turno,
+        'fecha_aplicacion'  => $receta['info']->fecha_aplicacion,
       ));
     $id_salida = $res['id_salida'];
 
@@ -427,20 +438,44 @@ class recetas_model extends CI_Model {
     $this->productos_salidas_model->agregarProductos($id_salida, $productos);
 
 
+    $is_lts = ($_POST['tipo']==='lts');
     // Creamos la salida de receta y resta productos
     $this->db->insert('otros.recetas_salidas', [
       'id_recetas' => $receta['info']->id_recetas,
-      'id_salida' => $id_salida,
-      'cargas' => ($_POST['tipo']==='lts'? $_POST['carga_salida']: $_POST['plantas_salida']),
+      'id_salida'  => $id_salida,
+      'cargas'     => ($is_lts? $_POST['carga_salida']: $_POST['plantas_salida']),
     ]);
     foreach ($_POST['productoId'] as $key => $id) {
-      $this->db->update('otros.recetas_productos', $object);
       $result = $this->db->query("UPDATE otros.recetas_productos
         SET aplicacion_total_saldo = aplicacion_total_saldo - {$_POST['cantidad'][$key]}
         WHERE id_receta = {$receta['info']->id_recetas} AND id_producto = {$id} AND rows = {$_POST['rows'][$key]}");
     }
 
+    $entregado_todo = $this->db->query("SELECT Sum(aplicacion_total_saldo) AS saldo
+      FROM otros.recetas_productos
+      WHERE id_receta = {$receta['info']->id_recetas}")->row();
+
+    $this->db->update('otros.recetas', ['paso' => ((isset($entregado_todo->saldo) && $entregado_todo->saldo == 0)? 't': 'r')], "id_recetas = {$receta['info']->id_recetas}");
+
     return array('passes' => true, 'msg' => 3);
+  }
+
+  public function getSalidas($recetaId)
+  {
+    $sql = '';
+
+    $res = $this->db->query("SELECT cs.id_salida, Date(cs.fecha_creacion) AS fecha_creacion, Date(cs.fecha_registro) AS fecha_registro,
+        cs.folio, cs.concepto, rs.cargas, cs.solicito, cs.recibio
+      FROM public.compras_salidas cs
+        INNER JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
+      WHERE cs.status = 's' AND rs.id_recetas = {$recetaId}
+    ");
+
+    $salidas = [];
+    if($res->num_rows() > 0)
+      $salidas = $res->result();
+
+    return $salidas;
   }
 
   /**

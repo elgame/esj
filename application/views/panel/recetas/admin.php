@@ -121,6 +121,14 @@
                         );
                       }
 
+                      if ($receta->paso !== 'p') {
+                        echo $this->usuarios_model->getLinkPrivSm('recetas/salidas/', array(
+                          'params'   => 'id='.$receta->id_recetas,
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('rel' => 'superbox-70x550'))
+                        );
+                      }
+
                       if ($receta->paso == 'p' && $receta->status === 't')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('recetas/cancelar/', array(
@@ -128,7 +136,7 @@
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la receta?', 'recetas', this); return false;"))
                         );
-                      } else {
+                      } elseif ($receta->paso == 'p') {
                         echo $this->usuarios_model->getLinkPrivSm('recetas/activar/', array(
                           'params'   => 'id='.$receta->id_recetas,
                           'btn_type' => 'btn',
