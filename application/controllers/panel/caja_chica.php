@@ -333,6 +333,8 @@ class caja_chica extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Reporte de gastos');
 
+    $params['cajas'] = $this->caja_chica_model->getCajasChicas();
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

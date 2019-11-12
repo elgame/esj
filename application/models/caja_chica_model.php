@@ -3910,6 +3910,12 @@ class caja_chica_model extends CI_Model {
     return (!empty($caja)? $caja: 'Otros');
   }
 
+  public function getCajasChicas()
+  {
+    $caja = $this->db->query("SELECT * FROM cajachicas ORDER BY no_caja")->result();
+    return $caja;
+  }
+
 
   /**
    * Reporte gastos caja chica

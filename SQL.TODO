@@ -1,5 +1,5 @@
 
- ✔ Continueacion de recetas, control de saldo @done (19-11-05 13:29) pct|pcc|lap
+ ✔ Continueacion de recetas, control de saldo @done (19-11-05 13:29) pct|pcc|lap|san
      ALTER TABLE otros.recetas_productos ADD COLUMN aplicacion_total_saldo double precision NOT NULL DEFAULT 0;
      ALTER TABLE otros.recetas ADD COLUMN paso character varying(3) NOT NULL DEFAULT 'p'::character varying;
      COMMENT ON COLUMN otros.recetas.paso IS 'p: esta pendiente de salidas (solo registrada), r: ya se registraron salidas, t: terminada ya se entrego todo';
@@ -18,15 +18,13 @@
         ) WITH ( OIDS=FALSE );
         ALTER TABLE otros.recetas_salidas OWNER TO programa;
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Salida producto',521,FALSE,'recetas/salida/','ok',FALSE);
-     -- pcc|lap|pct
      COMMENT ON COLUMN otros.recetas_salidas.cargas IS 'Cargas para lts | No Plantas para kg';
-     -- pcc|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Lista de salidas',521,FALSE,'recetas/salidas/','ok',FALSE);
      ALTER TABLE otros.recetas ADD COLUMN fecha_aplicacion date DEFAULT now();
      ALTER TABLE compras_salidas ADD COLUMN turno character varying(20);
      ALTER TABLE compras_salidas ALTER COLUMN grupo TYPE character varying(30);
      ALTER TABLE compras_salidas ALTER COLUMN observaciones TYPE character varying(600);
-     -- pcc
+     -- pcc|lap|san
      ALTER TABLE otros.recetas_salidas ADD COLUMN id_bascula bigint;
      ALTER TABLE otros.recetas_salidas ADD CONSTRAINT recetas_salidas_id_bascula_fkey FOREIGN KEY (id_bascula) REFERENCES public.bascula (id_bascula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 

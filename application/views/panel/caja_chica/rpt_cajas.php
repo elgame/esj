@@ -17,10 +17,9 @@
                   <label class="control-label" for="fno_caja">Caja</label>
                   <div class="controls">
                     <select name="fno_caja" id="fno_caja">
-                      <option value="1">Caja 1</option>
-                      <option value="2">Caja 2</option>
-                      <option value="3">Caja 3</option>
-                      <option value="prest1">Caja prestamos</option>
+                      <?php foreach ($cajas as $key => $value): ?>
+                      <option value="<?php echo $value->no_caja ?>"><?php echo "({$value->no_caja}) {$value->nombre}" ?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
