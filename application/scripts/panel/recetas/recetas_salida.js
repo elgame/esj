@@ -6,21 +6,15 @@
   $(function(){
     $('#form').keyJump();
 
-    // autocompleteFormulas();
-    // autocompleteCultivo();
-    // autocompleteRanchos();
-    // autocompleteCentroCosto();
-    // autocompleteAutorizo();
     // autocompleteEmpresas();
-    // autocompleteConcepto();
 
-    // eventChangeTipo();
-    // eventCalcuDatos();
-    // eventBtnAddProducto();
     eventCargasLts();
     eventBtnDelProducto();
     eventCantidadProd();
     calculaCantidadCarga();
+
+    eventLigarBoletasSalida();
+    setBoletasSel();
 
     opcClear.datos = opcClear.formula = true;
     // $('#tipo').change();
@@ -31,207 +25,6 @@
    | Autocompletes
    |------------------------------------------------------------------------
    */
-
-  var autocompleteFormulas = function () {
-    $("#formula").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
-        params.tipo = $("#tipo").val();
-        $.ajax({
-            url: base_url + 'panel/recetas_formulas/ajax_get_formulas/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-                response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $formula =  $(this);
-
-        $("#formulaId").val(ui.item.id);
-        $('#folio_formula').val(ui.item.item.folio);
-        $('#area').val(ui.item.item.area);
-        $('#areaId').val(ui.item.item.id_area);
-
-        opcClear.datos = true;
-        opcClear.formula = false;
-        $('#tipo').change();
-        $formula.css("background-color", "#A1F57A");
-
-        // agrega los productos
-        $.ajax({
-            url: base_url + 'panel/recetas_formulas/ajax_get_formula/',
-            dataType: "json",
-            data: {id: ui.item.id},
-            success: function(data) {
-              if (data.info.productos) {
-                var producto = {};
-                for (var i = 0; i < data.info.productos.length; i++) {
-                  producto = {
-                    id: data.info.productos[i].id_producto,
-                    concepto: data.info.productos[i].producto,
-                    cantidad: data.info.productos[i].dosis_mezcla,
-                    precio: data.info.productos[i].precio_unitario,
-                    percent: data.info.productos[i].precio,
-                  };
-                  addProducto(producto, '');
-                }
-              }
-            }
-        });
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#formula").css("background-color", "#FFD071");
-        $("#formulaId").val('');
-        $('#folio_formula, #area, #areaId, #rancho, #centroCosto').val('');
-        $('#tagsRanchoIds, #tagsCCIds').html('');
-      }
-    });
-  };
-
-  var autocompleteCultivo = function () {
-    $("#area").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
-        $.ajax({
-            url: base_url + 'panel/areas/ajax_get_areas/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-                response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $area =  $(this);
-
-        $("#areaId").val(ui.item.id);
-        $area.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#area").css("background-color", "#FFD071");
-        $("#areaId").val('');
-      }
-    });
-  };
-
-  var autocompleteRanchos = function () {
-    $("#rancho").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
-        if(parseInt($("#areaId").val()) > 0)
-          params.area = $("#areaId").val();
-        $.ajax({
-            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-                response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $rancho =  $(this);
-
-        addRanchoTag(ui.item);
-        setTimeout(function () {
-          $rancho.val('');
-        }, 200);
-        // $rancho.val(ui.item.id);
-        // $("#ranchoId").val(ui.item.id);
-        // $rancho.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#rancho").css("background-color", "#FFD071");
-        // $("#ranchoId").val('');
-      }
-    });
-
-    function addRanchoTag(item) {
-      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
-        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
-          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
-          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
-          '</li>');
-      } else {
-        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
-      }
-    };
-
-    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
-      $(this).remove();
-    });
-  };
-
-  var autocompleteCentroCosto = function () {
-    $("#centroCosto").autocomplete({
-      source: function(request, response) {
-        var params = {term : request.term};
-
-        params.tipo = ['melga', 'tabla', 'seccion'];
-
-        $.ajax({
-            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
-            dataType: "json",
-            data: params,
-            success: function(data) {
-                response(data);
-            }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $centroCosto =  $(this);
-
-        addCCTag(ui.item);
-        setTimeout(function () {
-          $centroCosto.val('');
-        }, 200);
-
-        calcTotalHecPlant();
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#centroCosto").css("background-color", "#FFD071");
-        // $("#centroCostoId").val('');
-      }
-    });
-
-    function addCCTag(item) {
-      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
-        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
-          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
-          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
-          '<input type="hidden" name="centroCostoHec[]" class="centroCostoHec" value="'+(parseFloat(item.item.hectareas)||0)+'">'+
-          '<input type="hidden" name="centroCostoNoplantas[]" class="centroCostoNoplantas" value="'+(parseFloat(item.item.no_plantas)||0)+'">'+
-          '</li>');
-      } else {
-        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
-      }
-    };
-
-    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
-      $(this).remove();
-      calcTotalHecPlant();
-    });
-  };
 
   // Autocomplete para las empresas.
   var autocompleteEmpresas = function () {
@@ -254,241 +47,11 @@
     });
   };
 
-  var autocompleteConcepto = function () {
-    $("#productos #fconcepto").autocomplete({
-      source: function (request, response) {
-        if (isEmpresaSelected()) {
-          $.ajax({
-            url: base_url + 'panel/compras_ordenes/ajax_producto/',
-            dataType: 'json',
-            data: {
-              term : request.term,
-              ide: $('#empresaId').val(),
-              tipo: 'p',
-            },
-            success: function (data) {
-              response(data);
-            }
-          });
-        } else {
-          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-        }
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $fconcepto    = $(this),
-            idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", ""),
-            $fcodigo     = $('#productos #fcodigo'),
-            $fconceptoId   = $('#productos #fconceptoId'),
-            $fcantidad     = $('#productos #fcantidad');
-
-
-        $fconcepto.css("background-color", "#B6E7FF");
-        $fcodigo.val(ui.item.item.codigo);
-        $fconceptoId.val(ui.item.id);
-        $fcantidad.val('1');
-        $('#productos #fprecio').val(ui.item.item.last_precio);
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        var $fconcepto = $(this),
-        idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", "");
-
-        $(this).css("background-color", "#FDFC9A");
-        $("#productos #fcodigo").val("");
-        $('#productos #fconceptoId').val('');
-        $('#productos #fcantidad').val('');
-        $('#productos #fprecio').val('');
-      }
-    });
-  };
-
-  var autocompleteAutorizo = function () {
-    $("#solicito").autocomplete({
-      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $solicito =  $(this);
-
-        $solicito.css("background-color", "#A1F57A");
-        $("#solicitoId").val(ui.item.id);
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {$("#solicito").css("background-color", "#FFD071");
-        $("#solicitoId").val('');
-      }
-    });
-
-    $("#autorizo").autocomplete({
-      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $autorizo =  $(this);
-
-        $autorizo.css("background-color", "#A1F57A");
-        $("#autorizoId").val(ui.item.id);
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {$("#autorizo").css("background-color", "#FFD071");
-        $("#autorizoId").val('');
-      }
-    });
-  };
-
 
   /*********************************************
    * Eventos
    */
 
-  var eventChangeTipo = function () {
-    $('#tipo').on('change', function(event) {
-      var tipo = $(this).find('option:selected').val();
-      var ide = $('#empresaId').val();
-
-      if ($('.modificar-receta').length == 0) {
-        $.get(base_url + 'panel/recetas/ajax_get_folio/?tipo='+tipo+'&ide='+ide , function(folio) {
-          $('#folio').val(folio);
-        });
-
-        // Acomoda los campos de acuerdo al tipo de receta, se limpian los campos
-        if (opcClear.formula) {
-          $('#formulaId, #formula, #folio_formula, #area, #areaId, #rancho, #centroCosto').val('');
-          $('#tagsRanchoIds, #tagsCCIds').html('');
-        }
-        if (opcClear.datos) {
-          $('.datoskl').val('');
-          $('tbody.bodyproducs .rowprod').remove();
-          calculaTotal();
-        }
-      } else {
-        $('#form').removeClass('modificar-receta');
-      }
-
-      // Acomoda los campos de acuerdo al tipo de receta
-      $('#no_plantas').show();
-      $(".datos-lts, .datos-kg").hide();
-      $(".datos-"+tipo).show();
-      if (tipo === 'kg') {
-        $('#ha_neta').removeAttr('readonly');
-        $('#no_plantas').attr('readonly', 'readonly');
-        $('.titulo-box-kglts').text('Datos Kg');
-        $('.tipostyle').hide();
-      } else {
-        $('#no_plantas').removeAttr('readonly');
-        $('#ha_neta, #carga1, #carga2').attr('readonly', 'readonly');
-        $('.titulo-box-kglts').text('Datos Lts');
-        $('.tipostyle').show();
-      }
-
-      opcClear.datos = opcClear.formula = true;
-    });
-  }
-
-  var eventBtnAddProducto = function () {
-    $('#productos #btnAddProd').on('click', function(event) {
-      var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", ""),
-          $fcodigo       = $('#productos #fcodigo').css({'background-color': '#FFF'}),
-          $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
-          $fconceptoId   = $('#productos #fconceptoId'),
-          $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
-          $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
-          campos = [$fcantidad, $fprecio],
-          producto = {},
-          error = false;
-
-      // Recorre los campos para verificar si alguno esta vacio. Si existen
-      // campos vacios entonces los pinta de amarillo y manda una alerta.
-      for (var i in campos) {
-        if (campos[i].val() === '') {
-          campos[i].css({'background-color': '#FDFC9A'});
-          error = true;
-        } else {
-          campos[i].css({'background-color': '#FFF'});
-        }
-      }
-
-      // Si el tipo de orden es producto entonces verifica si se selecciono
-      // un producto, si no no deja agregar descripciones.
-      // if ($('#tipoOrden').find('option:selected').val() === 'p') {
-        if ($fconceptoId.val() === '') {
-          $fconcepto.css({'background-color': '#FDFC9A'});
-          error = true;
-        }
-      // }
-
-      // Valida si el campo cantida es 0.
-      if ($fcantidad.val() === '0') {
-        $fcantidad.css({'background-color': '#FDFC9A'});
-        error = true;
-      }
-
-      if ( ! error) {
-        producto = {
-          'id'       : $fconceptoId.val(),
-          'codigo'   : $fcodigo.val(),
-          'concepto' : $fconcepto.val(),
-          'cantidad' : $fcantidad.val(),
-          'precio'   : $fprecio.val(),
-        };
-
-        addProducto(producto, idval);
-
-        // Recorre los campos para limpiarlos.
-        for (var i in campos) {
-          campos[i].val('').css({'background-color': '#FFF'});
-        }
-
-        $fconcepto.val('').css({'background-color': '#FFF'}).focus();
-        $fconceptoId.val('').css({'background-color': '#FFF'});
-        $fcodigo.val('');
-        $("#productos #show_info_prod").show().find('span').text('');
-      } else {
-        noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
-        $fconcepto.focus();
-      }
-    });
-  };
-
-  var eventCalcuDatos = function () {
-    $('#dosis_planta, #ha_bruta, #planta_ha, #ha_neta, #no_plantas, #carga1, #carga2, #dosis_equipo').on('keyup', function(event) {
-      var $tipo          = $('#tipo'),
-      $dosis_planta      = $('#dosis_planta'),
-      $planta_ha         = $('#planta_ha'),
-      $ha_neta           = $('#ha_neta'),
-      $no_plantas        = $('#no_plantas'),
-      $kg_totales        = $('#kg_totales'),
-      $dosis_equipo      = $('#dosis_equipo'),
-      $carga1            = $('#carga1'),
-      $carga2            = $('#carga2'),
-      $dosis_equipo_car2 = $('#dosis_equipo_car2')
-      ;
-
-      if ($tipo.val() === 'kg') {
-        no_plantas = (parseFloat($ha_neta.val())||0) * (parseFloat($planta_ha.val())||0);
-        $no_plantas.val(no_plantas);
-        kg_totales = (parseFloat(no_plantas)||0) * (parseFloat($dosis_planta.val())||0);
-        $kg_totales.val(kg_totales);
-      } else {
-        ha_neta = (parseFloat($no_plantas.val())||0)/((parseFloat($planta_ha.val())||1)>0? (parseFloat($planta_ha.val())||1): 1);
-        $ha_neta.val(ha_neta.toFixed(2));
-
-        // Separa decimales para las cargas
-        let cargas = ha_neta.toFixed(2).split('.');
-        $carga1.val(cargas[0]);
-        if (cargas.length > 1) {
-          $carga2.val("0."+cargas[1]);
-        }
-
-        lts_cargas2 = (parseFloat($dosis_equipo.val())||0)*(parseFloat($carga2.val())||0);
-        $dosis_equipo_car2.val(lts_cargas2.toFixed(2));
-      }
-
-      calculaTotal();
-    });
-  };
 
 
 
@@ -702,6 +265,54 @@
     }
   }
 
+
+  // --------------------------------
+  // Buscar boletas
+  function eventLigarBoletasSalida() {
+    $("#show-boletasSalidas").on('click', function(event) {
+      $("#filBoleta").val("");
+
+      getBoletas(['en', 'sa', 'p', 'b']);
+      $("#modal-boletas").modal('show');
+      $("#modal-boletas #BtnAddBoleta").addClass('entrada');
+    });
+
+    $("#filBoleta").on('change', function(event) {
+      getBoletas(['en', 'sa', 'p', 'b']);
+    });
+  }
+
+  function getBoletas(accion){
+    var params = {
+      tipoo: 'sa',
+      accion: (accion? accion: ['en', 'p', 'b']),
+      filtro: $("#filBoleta").val()
+    };
+    $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
+      var html = '';
+      for (var i in json) {
+        html += '<tr class="radioBoleta" data-id="'+json[i].id_bascula+'" data-folio="'+json[i].folio+'" '+
+          'data-idempresa="'+json[i].id_empresa+'" data-empresa="'+json[i].empresa+'" style="cursor: pointer;">'+
+        '  <td>'+json[i].fecha+'</td>'+
+        '  <td>'+json[i].folio+'</td>'+
+        '  <td>'+json[i].cliente+'</td>'+
+        '  <td>'+json[i].area+'</td>'+
+        '</tr>';
+      }
+      $("#table-boletas tbody").html(html);
+    });
+  }
+
+  function setBoletasSel() {
+    $("#table-boletas").on('dblclick', 'tr.radioBoleta', function(event) {
+      var $this = $(this);
+
+      $('#boletasSalidasFolio').val($this.attr('data-folio'));
+      $('#boletasSalidasId').val($this.attr('data-id'));
+
+      $("#modal-boletas").modal('hide');
+    });
+  }
 
 
   // Regresa true si esta seleccionada una empresa si no false.

@@ -448,6 +448,7 @@ class recetas_model extends CI_Model {
       'id_recetas' => $receta['info']->id_recetas,
       'id_salida'  => $id_salida,
       'cargas'     => ($is_lts? $_POST['carga_salida']: $_POST['plantas_salida']),
+      'id_bascula' => ($this->input->post('boletasSalidasId')? $_POST['boletasSalidasId']: NULL),
     ]);
     foreach ($_POST['productoId'] as $key => $id) {
       $result = $this->db->query("UPDATE otros.recetas_productos
@@ -459,7 +460,7 @@ class recetas_model extends CI_Model {
       FROM otros.recetas_productos
       WHERE id_receta = {$receta['info']->id_recetas}")->row();
 
-    $this->db->update('otros.recetas', ['paso' => ((isset($entregado_todo->saldo) && $entregado_todo->saldo == 0)? 't': 'r')], "id_recetas = {$receta['info']->id_recetas}");
+    $this->db->update('otros.recetas', ['paso' => ((isset($entregado_todo->saldo) && number_format($entregado_todo->saldo, 2) <= 0)? 't': 'r')], "id_recetas = {$receta['info']->id_recetas}");
 
     return array('passes' => true, 'msg' => 3);
   }
@@ -1152,7 +1153,7 @@ class recetas_model extends CI_Model {
       exit;
    }
 
-   public function print_salidaticket($salidaID, $recetaId, $path = null)
+  public function print_salidaticket($salidaID, $recetaId, $pdf = null)
   {
     $this->load->model('compras_areas_model');
     $this->load->model('catalogos_sft_model');
@@ -1164,9 +1165,14 @@ class recetas_model extends CI_Model {
     //   var_dump($orden, $receta);
     // echo "</pre>";exit;
 
-    $this->load->library('mypdf');
-    // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    if (!$pdf) {
+      $tipo_imp = 'almacen';
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', array(63, 210));
+    } else {
+      $tipo_imp = 'vigilancia';
+    }
     $pdf->show_head = false;
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
@@ -1262,11 +1268,18 @@ class recetas_model extends CI_Model {
     // $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
     // $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-1);
 
-    $pdf->SetWidths(array(10, 28, 11, 14));
-    $pdf->SetAligns(array('L','L','R','R'));
-    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
     $pdf->SetX(0);
-    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
+    if ($tipo_imp === 'almacen') {
+      $pdf->SetWidths(array(10, 28, 11, 14));
+      $pdf->SetAligns(array('L','L','R','R'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
+      $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
+    } elseif ($tipo_imp === 'vigilancia') {
+      $pdf->SetWidths(array(10, 40, 11, 14));
+      $pdf->SetAligns(array('L','L','R','R'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
+      $pdf->Row2(array('CANT.', 'DESCRIPCION'), false, true, 5);
+    }
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
                    array(0,-1.5,-1.3,-1.2));
@@ -1275,24 +1288,31 @@ class recetas_model extends CI_Model {
     $codigoAreas = array();
     foreach ($orden['info'][0]->productos as $key => $prod) {
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array(
+      $pprod = [
         $prod->cantidad.' '.$prod->abreviatura,
-        $prod->producto,
-        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
-        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+        $prod->producto
+      ];
+
+      if ($tipo_imp === 'almacen') {
+        $pprod[] = MyString::formatoNumero($prod->precio_unitario, 2, '', true);
+        $pprod[] = MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true);
+      }
+
+      $pdf->Row2($pprod, false, false);
 
       $cantidad += $prod->cantidad;
       $total += floatval($prod->precio_unitario*$prod->cantidad);
     }
 
-    // $pdf->SetX(29);
     $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(10, 25, 14, 14));
-    // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(0);
-    $pdf->Row2(array($cantidad, '', 'TOTAL', MyString::formatoNumero($total, 2, '', true)), false, 'T', 5);
+    if ($tipo_imp === 'almacen') {
+      $pdf->Row2(array($cantidad, '', 'TOTAL', MyString::formatoNumero($total, 2, '', true)), false, 'T', 5);
+    } elseif ($tipo_imp === 'vigilancia') {
+      $pdf->Row2(array($cantidad, '', '', ''), false, 'T', 5);
+    }
 
     if ($orden['info'][0]->concepto != '') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
@@ -1310,35 +1330,51 @@ class recetas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+    $pdf->Row2(array('AUTORIZO: '.strtoupper($orden['info'][0]->recibio)), false, false);
 
-    $pdf->Output();
-
-    $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->SetXY(0, $pdf->GetY()-3);
     $pdf->Row2(array('_____________________________________________'), false, false);
-    $yy2 = $pdf->GetY();
-    if(count($codigoAreas) > 0){
-      $yy2 = $pdf->GetY();
-      $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
-    }
-
-    if ($orden['info'][0]->trabajador != '') {
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
-    }
 
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
+    $pdf->Row2(array('PLACAS: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion_placas : '') )), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('CAMION: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion : '') )), false, false);
 
-    $pdf->SetX(0);
-    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
-    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+    $pdf->SetWidths(array(63, 0));
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array('____________________________'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Firma de Recibido'), false, false);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaATexto(date("Y-m-d H:i:s"), 'in', true)), false, false);
 
-    $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
+    // if ($orden['info'][0]->trabajador != '') {
+    //   $pdf->SetXY(0, $pdf->GetY()-2);
+    //   $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+    // }
 
-    $pdf->AutoPrint(true);
-    $pdf->Output();
+    $pdf->SetWidths(array(11, 22, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L'));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(['Bascula', "No ".(isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->folio : ''),
+      MyString::fechaATexto((isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->fecha_tara : ''), 'in', true),
+    ], false, true);
+
+    $pdf->SetAligns(array('C', 'C'));
+    $pdf->SetWidths(array(30, 0));
+    $pdf->SetXY(30, $pdf->GetY()+4);
+    $pdf->Row(array(strtoupper($tipo_imp)), false, true);
+    $pdf->SetXY(30, $pdf->GetY());
+    $pdf->Row(array( ($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
+
+    if ($tipo_imp === 'almacen') {
+      $this->print_salidaticket($salidaID, $recetaId, $pdf);
+    } elseif ($tipo_imp === 'vigilancia') {
+      $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
+      $pdf->Output();
+    }
   }
 
 }

@@ -512,6 +512,7 @@ class recetas extends MY_Controller {
       ['field' => 'folio',                    'label' => 'Folio',                    'rules' => 'required|numeric'],
       ['field' => 'fecha',                    'label' => 'Fecha',                    'rules' => 'required'],
       ['field' => 'almacenId',                'label' => 'Almacén',                  'rules' => 'required'],
+      ['field' => 'boletasSalidasId',         'label' => 'Boleta',                   'rules' => 'required'],
       ['field' => 'carga_salida',             'label' => 'Cargas',                   'rules' => ($val_datos['carga_salida']? 'required': '')],
       ['field' => 'plantas_salida',           'label' => 'Cargas',                   'rules' => ($val_datos['plantas_salida']? 'required': '')],
 

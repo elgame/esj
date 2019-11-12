@@ -134,7 +134,6 @@ class productos_salidas_model extends CI_Model {
         $data['id_usuario'] = $_POST['fid_trabajador'];
       }
     }
-
     if ($this->input->post('id_salida') > 0) {
       $id_salida = $this->input->post('id_salida');
       $this->db->update('compras_salidas', $data, "id_salida = {$id_salida}");
@@ -380,6 +379,8 @@ class productos_salidas_model extends CI_Model {
     $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
     $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
 
+    $this->db->delete('otros.recetas_salidas', "id_salida = {$idOrden}");
+
     $this->db->query("SELECT refreshallmaterializedviews();");
 
     return array('passes' => true);
@@ -400,7 +401,7 @@ class productos_salidas_model extends CI_Model {
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
-              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas
+              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
@@ -434,6 +435,13 @@ class productos_salidas_model extends CI_Model {
              LEFT JOIN compras_areas AS ca ON ca.id_area = csp.id_area
              LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = csp.id_cat_codigos
            WHERE csp.id_salida = {$data['info'][0]->id_salida}");
+
+        $data['info'][0]->bascula = null;
+        if ($data['info'][0]->id_bascula > 0)
+        {
+          $this->load->model('bascula_model');
+          $data['info'][0]->bascula = $this->bascula_model->getBasculaInfo(false, 0, true, [], $data['info'][0]->id_bascula)['info'][0];
+        }
 
         $data['info'][0]->productos = array();
         if ($query->num_rows() > 0)
