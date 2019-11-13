@@ -8,7 +8,7 @@ class areas_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getAreas($paginados = true)
+	public function getAreas($paginados = true, $sql2='')
 	{
 		$sql = '';
 		//paginacion
@@ -36,7 +36,7 @@ class areas_model extends CI_Model {
 		$str_query = "
 				SELECT id_area, nombre, tipo, status, predeterminado
 				FROM areas
-				".$sql."
+				".$sql.$sql2."
 				ORDER BY nombre ASC
 				";
 		if($paginados){
@@ -159,12 +159,12 @@ class areas_model extends CI_Model {
 			$data['info']	= $sql_res->row();
 		$sql_res->free_result();
 
-		if ($basic_info == False) {
+		if ($basic_info == false) {
       $data['calidades'] = array();
 
       $sql_res = $this->db->select("id_calidad, id_area, nombre, precio_compra, status")
         ->from("calidades")
-        ->where("id_area", $data['info']->id_area)
+        ->where("id_area", (isset($data['info']->id_area)? $data['info']->id_area: 0))
         ->get();
 
       if ($sql_res->num_rows() > 0)

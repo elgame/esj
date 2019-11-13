@@ -1,12 +1,17 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Usuarios extends MY_Controller {
+class usuarios extends MY_Controller {
 
 	/**
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('ajax_get_siguiente_numero');
+	private $excepcion_privilegio = array(
+    'usuarios/ajax_get_usuarios/',
+    'usuarios/ajax_change_empresa/',
+    'usuarios/ajax_get_usuario_priv/',
+    'usuarios/ajax_update_priv/',
+  );
 
 	public function _remap($method){
 
@@ -58,6 +63,7 @@ class Usuarios extends MY_Controller {
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.treeview.js'),
+			array('libs/jquery.numeric.js'),
 			array('panel/usuarios/add_mod_frm.js')
 		));
 
@@ -79,6 +85,14 @@ class Usuarios extends MY_Controller {
 			if(!$res_mdl['error'])
 				redirect(base_url('panel/usuarios/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
+
+		$this->load->model('usuarios_puestos_model');
+		$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
+
+    $this->load->model('empresas_model');
+    $params['empresas'] = $this->empresas_model->getEmpresas(150);
+    $empresa_default = $this->empresas_model->getDefaultEmpresa();
+    $_POST['idEmpresa'] = $empresa_default->id_empresa;
 
 
 		if (isset($_GET['msg']))
@@ -127,7 +141,16 @@ class Usuarios extends MY_Controller {
 					redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
-			$params['data'] = $this->usuarios_model->get_usuario_info();
+      $this->load->model('empresas_model');
+      $params['empresas'] = $this->empresas_model->getEmpresas(150);
+      if (!isset($_POST['idEmpresa'])) {
+        $empresa_default = $this->empresas_model->getDefaultEmpresa();
+        $_POST['idEmpresa'] = $empresa_default->id_empresa;
+      }
+
+			$params['data'] = $this->usuarios_model->get_usuario_info(false, false, $_POST['idEmpresa']);
+			$this->load->model('usuarios_puestos_model');
+			$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -174,6 +197,39 @@ class Usuarios extends MY_Controller {
 	}
 
   /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+   public function ajax_get_usuarios()
+   {
+      $this->load->model('usuarios_model');
+      echo json_encode($this->usuarios_model->getUsuariosAjax());
+   }
+
+   public function ajax_change_empresa()
+   {
+      $this->load->model('usuarios_model');
+      echo json_encode($this->usuarios_model->changeEmpresaSel($_POST['empresa']));
+   }
+
+  public function ajax_get_usuario_priv()
+  {
+    $this->load->model('usuarios_model');
+    $data = $this->usuarios_model->get_usuario_info($_GET['id_usuario'], false, $_GET['id_empresa']);
+    $privilegios = isset($data['privilegios']) ? $data['privilegios']: [];
+    echo $this->usuarios_model->getFrmPrivilegios(0, true, $privilegios);
+  }
+
+  public function ajax_update_priv()
+  {
+    $this->load->model('usuarios_model');
+    $this->usuarios_model->updatePrivilegios($this->input->post('dprivilegios'), $this->input->post('id_usuario'), $this->input->post('id_empresa'));
+  }
+
+
+  /*
  	|	Asigna las reglas para validar un articulo al agregarlo
  	*/
 	public function config_add_usuario($accion='agregar')
@@ -182,7 +238,7 @@ class Usuarios extends MY_Controller {
 		$rules = array(
 							array('field' => 'fnombre',
 										'label' => 'Nombre',
-										'rules' => 'required|max_length[90]'),
+										'rules' => 'required|max_length[90]|max_length[90]'),
 							array('field' => 'fapellido_paterno',
 										'label' => 'Apellido paterno',
 										'rules' => 'max_length[25]'),
@@ -219,6 +275,9 @@ class Usuarios extends MY_Controller {
 							array('field' => 'ffecha_entrada',
 										'label' => 'Fecha de entrada',
 										'rules' => 'max_length[25]'),
+              array('field' => 'ffecha_imss',
+                    'label' => 'Fecha IMSS',
+                    'rules' => 'max_length[25]'),
 							array('field' => 'ffecha_salida',
 										'label' => 'Fecha de salida',
 										'rules' => 'max_length[25]'),
@@ -237,25 +296,76 @@ class Usuarios extends MY_Controller {
 							array('field' => 'fcuenta_cpi',
 										'label' => 'Cuenta contpaqi',
 										'rules' => 'max_length[12]'),
+
+							array('field' => 'did_empresa',
+										'label' => 'Empresa',
+										'rules' => 'required|numeric'),
+							array('field' => 'fempresa',
+										'label' => 'Empresa',
+										'rules' => 'required'),
+							array('field' => 'finfonavit',
+										'label' => 'Infonavit',
+										'rules' => 'numeric'),
+							array('field' => 'festa_asegurado',
+										'label' => 'Asegurado',
+										'rules' => ''),
 		);
 
 		if ($accion == 'agregar')
 		{
-			$rules[] = 	array('field' => 'fpass',
-												'label' => 'Password',
-												'rules' => 'required|max_length[32]');
-			$rules[] = 	array('field' => 'fusuario',
-												'label' => 'Usuario',
-												'rules' => 'required|max_length[30]|is_unique[usuarios.usuario]');
-		}
-		else
-		{
+      $rules[] = array('field' => 'fnombre',
+                      'label' => 'Nombre',
+                      'rules' => 'required|max_length[90]|max_length[90]|callback_valida_nombre_full');
+      $rules[] = array('field' => 'frfc',
+                      'label' => 'RFC',
+                      'rules' => 'is_unique[usuarios.rfc]');
 			$rules[] = 	array('field' => 'fpass',
 												'label' => 'Password',
 												'rules' => 'max_length[32]');
 			$rules[] = 	array('field' => 'fusuario',
 												'label' => 'Usuario',
-												'rules' => 'required|max_length[30]|callback_valida_email');
+												'rules' => 'max_length[30]|is_unique[usuarios.usuario]');
+		}
+		else
+		{
+			$rules[] = 	array('field' => 'fpass',
+								'label' => 'Password',
+								'rules' => 'max_length[32]');
+			$rules[] = 	array('field' => 'fusuario',
+								'label' => 'Usuario',
+								'rules' => 'max_length[30]|callback_valida_email');
+		}
+
+		if (isset($_POST['festa_asegurado']))
+		{
+			$rules[] = array('field' => 'fcurp',
+							'label' => 'CURP',
+							'rules' => 'required|max_length[30]');
+			$rules[11] = array('field' => 'ffecha_entrada',
+							'label' => 'Fecha de entrada',
+							'rules' => 'required|max_length[25]');
+			$rules[] = array('field' => 'fsalario_diario',
+							'label' => 'Salario diario',
+							'rules' => 'required|numeric');
+			$rules[] = array('field' => 'fsalario_diario_real',
+							'label' => 'Salario diario real',
+							'rules' => 'required|numeric');
+			$rules[] = array('field' => 'fregimen_contratacion',
+							'label' => 'Regimen contratacion',
+							'rules' => 'required|numeric');
+		}else{
+			$rules[] = array('field' => 'fcurp',
+							'label' => 'CURP',
+							'rules' => 'max_length[30]');
+			$rules[] = array('field' => 'fsalario_diario',
+							'label' => 'Salario diario',
+							'rules' => 'numeric');
+			$rules[] = array('field' => 'fsalario_diario_real',
+							'label' => 'Salario diario real',
+							'rules' => 'numeric');
+			$rules[] = array('field' => 'fregimen_contratacion',
+							'label' => 'Regimen contratacion',
+							'rules' => 'numeric');
 		}
 
 		$this->form_validation->set_rules($rules);
@@ -264,12 +374,30 @@ class Usuarios extends MY_Controller {
 
 	public function valida_email($email)
 	{
-		if ($this->usuarios_model->valida_email('usuarios', array('id !='=>$_GET['id'], 'usuario'=>$email))) {
-			$this->form_validation->set_message('valida_email', 'El %s no esta disponible, intenta con otro.');
-			return FALSE;
-		}
+		if(trim($email) != '')
+			if ($this->usuarios_model->valida_email('usuarios', array('id !='=>$_GET['id'], 'usuario'=>$email))) {
+				$this->form_validation->set_message('valida_email', 'El %s no esta disponible, intenta con otro.');
+				return FALSE;
+			}
 		return TRUE;
 	}
+
+  public function valida_nombre_full()
+  {
+    $query = $this->db->query("SELECT id
+                               FROM usuarios
+                               WHERE lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
+                                     lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
+                                     lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");
+
+    if ($query->num_rows() > 0)
+    {
+      $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado.');
+      return false;
+    }
+
+    return true;
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{

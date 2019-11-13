@@ -41,12 +41,14 @@ class polizas extends MY_Controller {
     );
 
     $this->load->model('empresas_model');
+    $this->load->model('areas_model');
     $this->load->model('polizas_model');
 
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['folio'] = $this->polizas_model->getFolio('3', 'v');
+    $params['areas'] = $this->areas_model->getAreas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -293,7 +295,7 @@ class polizas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
- 
+
 
 
   /**

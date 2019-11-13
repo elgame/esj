@@ -32,6 +32,14 @@
 
   <?php echo $template ?>
 
+
+  <?php if (isset($print_recibo)) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/cuentas_cobrar/imprimir_abono?p=' . $print_recibo."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
+
   <?php if ($closeModal) { ?>
     <script>
     $(function(){

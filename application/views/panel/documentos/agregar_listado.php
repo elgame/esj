@@ -3,7 +3,6 @@
   <?php
       $htmlLi = '';
       $htmlContent = '';
-
       $params['dataFactura']   = $factura; // Datos de la factura.
       $params['dataAreas']     = $areas;   // Areas.
       $params['dataPallets']   = $pallets; // Pallets disponibles.
@@ -18,6 +17,7 @@
         foreach ($documentos as $key => $doc)
         {
           $priv = str_replace('panel/', '', $doc->url_form).'/';
+          $active = '';
 
           // Si el usuario tiene el privilegio de editar el documento entra.
           if ($this->usuarios_model->tienePrivilegioDe('', $priv, false))
@@ -25,7 +25,17 @@
             $params['doc'] = $doc;
 
             $active = '';
-            if ($key === 0)
+
+            if (isset($_GET['ds']))
+            {
+              if ($_GET['ds'] == $doc->id_documento)
+              {
+                $active = 'active';
+
+                echo '<input type="hidden" id="documentoId" value="'.$doc->id_documento.'">';
+              }
+            }
+            else if ($key === 0)
             {
               $active = 'active';
 
@@ -45,7 +55,9 @@
 
             // Si el documento es el ACOMODO DEL EMBARQUE.
             if ($doc->nombre === 'ACOMODO DEL EMBARQUE')
+            {
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, $doc->id_documento);
+            }
 
             // Si el documento es el MANIFIESTO DEL CAMION entonces obtiene los datos de embarque y del manifiesto chofer.
             if ($doc->nombre === 'MANIFIESTO DEL CAMION')
@@ -54,8 +66,9 @@
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, 2);
 
               $params['dataClasificaciones'] = array('clasificaciones' => array());
-              if(count($params['dataEmbarque']) > 0)
-                $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
+              // var_dump($params['dataEmbarque']['info']);
+              if(isset($params['dataEmbarque']['info'][0]->id_embarque))
+                $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque, $factura['info']->id_factura);
             }
 
             // Carga la vista del documento.

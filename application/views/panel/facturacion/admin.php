@@ -25,7 +25,7 @@
             <form action="<?php echo base_url('panel/facturacion/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
-                <input type="text" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
+                <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
@@ -35,9 +35,12 @@
                 <label for="dcliente">Cliente</label>
                 <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
                 <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>">
+
+                <label for="dobserv">Obervaciones</label>
+                <input type="text" name="dobserv" class="input-large search-query" id="dobserv" value="<?php echo set_value_get('dobserv'); ?>" size="73">
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', $fecha); ?>" size="10">
+                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date("Y-m-01\TH:i")); ?>" size="10">
                 <label for="ffecha2">Al</label>
                 <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
@@ -47,6 +50,7 @@
                   <option value="pa" <?php echo set_select_get('fstatus', 'pa'); ?>>PAGADAS</option>
                   <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTE</option>
                   <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
+                  <option value="b" <?php echo set_select_get('fstatus', 'b'); ?>>PREFACTURAS</option>
                 </select>
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
@@ -67,18 +71,20 @@
                   <th>Serie-Folio</th>
                   <th>Cliente</th>
                   <th>Empresa</th>
+                  <th>Total</th>
                   <th>Forma de Pago</th>
                   <th>Estado</th>
                   <th>Estado Timbre</th>
+                  <th>Observaciones</th>
                   <th>Opc</th>
                 </tr>
               </thead>
               <tbody>
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
-                  <td><?php echo $fact->fecha; ?></td>
+                  <td style="width:70px;"><?php echo $fact->fecha; ?></td>
                   <td>
-                    <span class="label"><?php echo $fact->serie.' - '.$fact->folio; ?></span>
+                    <span class="label"><?php echo ($fact->serie ? $fact->serie.' - ' : '').$fact->folio; ?></span>
 
                     <?php if ($fact->id_nc !== null){ ?>
                       <br><span class="label label-warning">Nota de Crédito</span>
@@ -87,94 +93,125 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($fact->total, 2, '$', false); ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>
                   <td><?php
-                            $texto = 'Cancelada';
-                            $label = 'important';
-                            if ($fact->status === 'p') {
-                              $texto = 'Pendiente';
-                              $label = 'warning';
-                            } else if ($fact->status === 'pa') {
-                              $texto = 'Pagada';
-                              $label = 'success';
-                            }?>
+                        if ($fact->status === 'b')
+                      {
+                        $texto = 'Prefactura';
+                        $label = 'Inverse';
+                      } else {
+                        $texto = 'Cancelada';
+                        $label = 'important';
+                        if ($fact->status === 'p') {
+                          $texto = 'Pendiente';
+                          $label = 'warning';
+                        } else if ($fact->status === 'pa') {
+                          $texto = 'Pagada';
+                          $label = 'success';
+                        }
+                      }?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td><?php
-                            $texto = 'Cancelado';
-                            $label = 'Inverse';
-                            if ($fact->status_timbrado === 'p') {
-                              $texto = 'Pendiente';
-                              $label = 'warning';
-                            } else if ($fact->status_timbrado === 't') {
-                              $texto = 'Timbrado';
-                              $label = 'success';
-                            }?>
+                      if ($fact->status === 'b')
+                      {
+                        $texto = 'No Timbrado';
+                        $label = 'Inverse';
+                      } else {
+                        $texto = 'Cancelado';
+                        $label = 'Inverse';
+                        if ($fact->status_timbrado === 'p') {
+                          $texto = 'Pendiente';
+                          $label = 'warning';
+                        } else if ($fact->status_timbrado === 't') {
+                          $texto = 'Timbrado';
+                          $label = 'success';
+                        }
+                      }?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo $fact->observaciones; ?></td>
                   <td class="center">
                     <?php
 
-                      echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
-                        'params'   => 'id='.$fact->id_factura,
-                        'btn_type' => 'btn-info',
-                        'attrs' => array('target' => "_blank"))
-                      );
-
-                      if ($fact->status !== 'ca')
+                      if ($fact->status !== 'b')
                       {
-                         echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-success',
-                            'attrs'    => array())
-                        );
-
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
                           'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('target' => "_blank"))
                         );
-                      }
 
-                      if ($fact->id_nc === null && $fact->status !== 'ca') {
-                        echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
+                        if ($fact->status !== 'ca' && $fact->id_nc === null)
+                        {
+                          if ($fact->tipo_comprobante !== 'traslado') {
+                            echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => 'btn-success',
+                              'attrs'    => array())
+                            );
+                          }
+
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
                             'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => '',
-                            'attrs' => array('target' => "_blank"))
-                        );
-                      }
+                            'btn_type' => 'btn-danger',
+                            'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
+                          );
+                        }
 
-                      if ($fact->status_timbrado === 'p') {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/timbre_pending/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-warning',
-                            'attrs'    => array('onclick' => "msb.confirm('Esta acción realizara el timbrado de la factura, deses continuar?', 'Facturas', this); return false;"))
-                        );
-                      }
+                        if ($fact->id_nc === null && $fact->status !== 'ca' && $fact->tipo_comprobante !== 'traslado') {
+                          echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => '',
+                              'attrs' => array('target' => "_blank"))
+                          );
+                        }
 
-                      if ($fact->status === 'p')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
-                            'params'   => 'id='.$fact->id_factura.'&tipo=f',
-                            'btn_type' => 'btn btn-success',
-                            'attrs'    => array('rel' => 'superbox-50x500'))
-                        );
-                      }
+                        if ($fact->status_timbrado === 'p') {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/timbre_pending/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => 'btn-warning',
+                              'attrs'    => array('onclick' => "msb.confirm('Esta acción realizara el timbrado de la factura, deses continuar?', 'Facturas', this); return false;"))
+                          );
+                        }
 
-                      if ($fact->status_timbrado === 't')
-                      {
-                        echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
-                      }
+                        if ($fact->status === 'p' && $fact->id_nc === null)
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                              'params'   => 'id='.$fact->id_factura.'&tipo=f',
+                              'btn_type' => 'btn btn-success',
+                              'attrs'    => array('rel' => 'superbox-50x500'))
+                          );
+                        }
 
-                      if ($fact->id_nc === null)
-                      {
+                        if ($fact->status_timbrado === 't')
+                        {
+                          echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                        }
+
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
                           'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar los documentos?', 'Facturas', this); return false;"))
+                          'attrs' => array('rel' => 'superbox-50x450'))
                         );
+
+                        if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
+                            'params'   => 'idr='.$fact->id_factura,
+                            'btn_type' => 'btn-success')
+                          );
+                        } elseif ($fact->tipo_comprobante === 'traslado'){
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
+                            'params'   => 'idr='.$fact->id_factura,
+                            'btn_type' => 'btn-success')
+                          );
+                        }
+                      } else {
+                        echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
                       }
                     ?>
                   </td>
@@ -211,7 +248,6 @@
 
           <!-- content ends -->
     </div><!--/#content.span10-->
-
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

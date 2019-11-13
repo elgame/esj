@@ -42,6 +42,7 @@
 									<option value="todos" <?php echo set_select('ftipo', 'todos', false, $this->input->get('ftipo')); ?>>TODOS</option>
 									<option value="in" <?php echo set_select('ftipo', 'in', false, $this->input->get('ftipo')); ?>>INSUMOS</option>
 									<option value="fr" <?php echo set_select('ftipo', 'fr', false, $this->input->get('ftipo')); ?>>FRUTA</option>
+									<option value="ot" <?php echo set_select('ftipo', 'ot', false, $this->input->get('ftipo')); ?>>OTROS</option>
 								</select>
 
 								<input type="submit" name="enviar" value="Buscar" class="btn">
@@ -73,8 +74,11 @@
 										if($area->tipo == 'in'){
 											$v_status = 'Insumos';
 											$vlbl_status = 'label-info';
-										}else{
+										}elseif($area->tipo == 'fr'){
 											$v_status = 'Fruta';
+											$vlbl_status = 'label-info';
+										}else{
+											$v_status = 'Otros';
 											$vlbl_status = 'label-info';
 										}
 									?>

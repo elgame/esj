@@ -17,7 +17,19 @@ $(function(){
 
   // Autocomplete Cliente
   $("#dcliente").autocomplete({
-    source: base_url + 'panel/clientes/ajax_get_proveedores/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/clientes/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -31,8 +43,60 @@ $(function(){
     }
   });
 
+  // Autocomplete Proveedores
+  $("#dproveedor").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val(), 10) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_proveedor").val(ui.item.id);
+      $("#dproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#did_proveedor').val('');
+    }
+  });
+
   abonom.init();
+
+  modalAbonos.init();
+
+  comPagos.init();
 });
+
+//complemento de pagos
+var comPagos = (function($){
+  var objs = {};
+
+  function init(){
+    if ($("#btnRegComPago").length > 0)
+    {
+      $("#formCompago").on('submit', function () {
+        setTimeout(function () {
+          $("#btnRegComPago").attr('disabled', true);
+        }, 100);
+        $("#btnRegComPago .loader").show();
+      });
+    }
+  }
+
+  objs.init = init;
+  return objs;
+})(jQuery);
 
 
 //Abonos masivos
@@ -43,6 +107,15 @@ var abonom = (function($){
   function init(){
     $(".sel_abonom").on('click', selabono);
     btn_abonos_masivo = $(".btn_abonos_masivo");
+
+    if ($("#btnGuardarAbono").length > 0)
+    {
+      $("#form").on('submit', function () {
+        setTimeout(function () {
+          $("#btnGuardarAbono").prop('disabled', true);
+        }, 100);
+      });
+    }
   }
 
   function selabono(){
@@ -61,12 +134,67 @@ var abonom = (function($){
       total += parseFloat( util.quitarFormatoNum(vttis.text()) );
     });
     url = btn_abonos_masivo.attr("href").split("?");
-    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total;
+    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total.toFixed(2);
     btn_abonos_masivo.attr("href", url);
-    if($(".sel_abonom.active").length > 0)
+    if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
-    else
+      $("#sumaRowsSel").text(util.darFormatoNum( total.toFixed(2) )).show();
+    }else{
       btn_abonos_masivo.hide();
+      $("#sumaRowsSel").hide();
+    }
+  }
+
+  objs.init = init;
+  return objs;
+})(jQuery);
+
+//Modal Abonos
+var modalAbonos = (function($){
+  var objs = {},
+  btn_abonos_masivo,
+  $enviar = false;
+
+  function init()
+  {
+    if ($("#abonomasivo").length > 0)
+    {
+      $("#abonomasivo .monto_factura").on('change', calculaMonto);
+      $("#form").on('submit', sendFormMasivo);
+    }
+  }
+
+  function calculaMonto()
+  {
+    var monto = 0;
+    $("#abonomasivo .monto_factura").each(function(index, val) {
+      monto += parseFloat($(this).val());
+    });
+    $("#dmonto").val(monto);
+    $("#suma_monto").text(util.darFormatoNum(monto));
+  }
+
+  function sendFormMasivo(){
+    var pass=false;
+    if($enviar == false){
+      $(".monto_factura").each(function(index, val) {
+        var $this = $(this);
+        if(parseFloat($this.val()) > parseFloat($this.attr('data-max')) )
+          pass = true;
+      });
+      if(pass){ //es mayor el cargo a pagar
+        msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'Alerta', this, function(){
+          $enviar = true;
+          $("#form").submit();
+        }, function (){}, 'top: 30% !important;');
+        return false;
+      }else{ //es igual o menor el cargo
+        return true;
+      }
+    }else{
+      $enviar = false;
+      return true;
+    }
   }
 
   objs.init = init;

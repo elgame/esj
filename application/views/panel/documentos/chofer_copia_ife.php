@@ -12,6 +12,8 @@
         <label class="control-label" for="pife_file">Copia del IFE</label>
         <div class="controls">
           <input type="file" name="pife_file" class="span12" id="pife_file">
+          <label>Marcar como entregada sin subir el archivo:
+            <input type="checkbox" name="pife_check" value="si" <?php echo (isset($dataDocumento->check)? 'checked': '') ?>></label>
         </div>
       </div><!--/control-group -->
     </div>
@@ -23,7 +25,7 @@
 
             <?php
                 $span = '12';
-                if (count($dataDocumento) > 0) {
+                if (isset($dataDocumento->url{0})) {
                 $span = '6';
               ?>
                 <a href="<?php echo base_url($dataDocumento->url) ?>" class="btn btn-success btn-large span6" rel="superbox-80x600">Ver</a>

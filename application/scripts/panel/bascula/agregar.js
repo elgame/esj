@@ -4,7 +4,16 @@ var ppro_cont   = 0,
 
 $(function(){
 
-  actualFolio = $('#pfolio').val();
+  $.ajaxSetup({ cache: false });
+
+  actualFolio = $('#pfolio').focusin(function(){
+    if (this.setSelectionRange)
+    {
+      var len = $(this).val().length;
+      this.setSelectionRange(len, len);
+    }else
+      $(this).val($(this).val());
+  }).val();
   autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
   // //Fotos
@@ -35,15 +44,41 @@ $(function(){
           'area': $area.find('option:selected').val(),
         };
 
+    $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo') );
+
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
-        $('#pfolio').val(data)
+        $('#pfolio').val(data);
 
         actualFolio = data;
       });
     }
+
+    // cambia el tipo de cajas
+    if (getData.tipo == 'sa') {
+      $("#box-cajas").hide();
+      $("#box-cajas-salidas").show();
+    }else {
+      $("#box-cajas").show();
+      $("#box-cajas-salidas").hide();
+    }
   });
 
+  $('#newPesada').on('click', function(event) {
+    event.preventDefault();
+    var band = false;
+    if($("#pno_lote").length > 0) {
+      if ($("#pno_lote").val() != '')
+        band = true;
+    }else
+      band = true;
+
+    if(band) {
+      var href = $(this).attr('href');
+      window.location.href = href;
+    }else
+      noty({"text": 'Agrega el numero de lote a la boleta', "layout":"topRight", "type": 'error'});
+  });
 
   $('#form').keyJump({
     'next': 13,
@@ -58,8 +93,18 @@ $(function(){
       $('#icajas').focus();
     },
     '27': function () { // alt + n 78
-      var href = $('#newPesada').attr('href');
-      window.location.href = href;
+      var band = false;
+      if($("#pno_lote").length > 0) {
+        if ($("#pno_lote").val() != '')
+          band = true;
+      }else
+        band = true;
+
+      if(band) {
+        var href = $('#newPesada').attr('href');
+        window.location.href = href;
+      }else
+        noty({"text": 'Agrega el numero de lote a la boleta', "layout":"topRight", "type": 'error'});
     },
     'alt+71': function () { // alt + g
       $('#btnGuardar').trigger('click');
@@ -70,7 +115,8 @@ $(function(){
 
       var $form = $('#form');
 
-      if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      if ($('#autorizar').length === 0) {
         $form.attr('action', $form.attr('action') + '&p=t');
         $form.submit();
       } else {
@@ -82,20 +128,34 @@ $(function(){
 
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
-        option = $this.find('option:selected').val();
-
+        option = $this.find('option:selected').val(),
+        priv_modif_kilosbt = $("#modif_kilosbt").val();
     if (option === 'en') {
-      $('#groupProveedor').css({'display': 'block'});
+      $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
 
-      $('#pkilos_brutos').prop("readonly", '');
-      $('#pkilos_tara').prop("readonly", 'readonly');
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+
+      if (priv_modif_kilosbt == 'true') {
+        $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", '');
+      } else {
+        $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", 'readonly');
+      }
     } else {
-      $('#groupProveedor').css({'display': 'none'});
+      $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
 
-      $('#pkilos_brutos').prop("readonly", 'readonly');
-      $('#pkilos_tara').prop("readonly", '');
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
+
+      if (priv_modif_kilosbt == 'true') {
+        $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", '');
+      } else {
+        $('#pkilos_brutos').prop("readonly", 'readonly');
+        $('#pkilos_tara').prop("readonly", '');
+      }
     }
   });
 
@@ -137,12 +197,36 @@ $(function(){
 
   // Autocomplete Proveedor
   $("#pproveedor").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_proveedores/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#pid_empresa").val()) > 0)
+        params.did_empresa = $("#pid_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_proveedor").val(ui.item.id);
       $("#pproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+
+
+      if ($('#ptipo').find('option:selected').val() === 'en')
+      {
+        $.get(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
+
+          if (data === '1') {
+            noty({"text": 'El limite de facturacion del proveedor seleccionado ya esta superado. ', "layout":"topRight", "type": 'error'});
+          }
+
+        });
+      }
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -151,9 +235,63 @@ $(function(){
     }
   });
 
+  // Autocomplete Proveedor
+  $("#pproductor").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#pid_empresa").val()) > 0)
+        params.did_empresa = $("#pid_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/productores/ajax_get_productores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#pid_productor").val(ui.item.id);
+      $("#pproductor").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#pid_productor').val('');
+    }
+  });
+
+  // Autocomplete RANCHOS
+  $("#prancho").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_ranchos/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#prancho").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+    }
+  });
+
   // Autocomplete Cliente
   $("#pcliente").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_clientes/',
+    source: function(request, response) {
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_clientes/',
+          dataType: "json",
+          data: {
+              term : request.term,
+              did_empresa : $("#pid_empresa").val()
+          },
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -211,6 +349,18 @@ $(function(){
   });
 
   // Evento keypress para el input del folio.
+  $('#certificado').on('keypress', function(e) {
+    var $this = $(this);
+    if (e.charCode == '32') {
+      e.preventDefault();
+      if ($this.is(':checked'))
+        $this.removeAttr("checked");
+      else
+        $this.attr("checked", "checked");
+    }
+  });
+
+  // Evento keypress para el input del folio.
   $('#pfolio').on('keypress', function(e) {
     var $this = $(this);
     if (e.charCode == '13' && (actualFolio != $this.val())) {
@@ -245,19 +395,22 @@ $(function(){
       // if ( ! validaCalidad($calidad.find('option:selected').val())) {
       //   return false;
       // }
-
       // Construye string con el html del tr.
       trHtml = '<tr data-kneto=""><td>' + $caja.val() +
+                  '<input type="hidden" name="pnum_registro[]" value="" id="pnum_registro">' +
                   '<input type="hidden" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
                   '<input type="hidden" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
                   '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
-                  '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
+                  // '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
                   // '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
                   // '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
                   '<input type="hidden" name="pimporte[]" value="" id="pimporte">' +
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
-               '<td id="tdkilos"></td>' +
+               '<td id="tdkilos">' +
+                  '<span></span>' +
+                  '<input type="'+((parseFloat($('#pkilos_neto').val()) <= 300) ? 'text': 'hidden')+'" name="pkilos[]" value="" id="pkilos" style="width: 100px;">' +
+               '</td>' +
                '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" class="ppro'+(ppro_cont)+'" style="width: 80px;" data-next="ppro'+(++ppro_cont)+'"></td>' +
                '<td><input type="text" name="pprecio[]" value="'+$precio.val()+'" class="vpositive" id="pprecio" style="width: 80px;"></td>' +
                '<td id="tdimporte"></td>' +
@@ -285,6 +438,7 @@ $(function(){
     calculaTotales();
   });
 
+  var winFotos;
   // Evento click para el boton cargar folio.
   $('#loadFolio').on('click', function(event) {
     var $form = $('#form'),
@@ -315,6 +469,9 @@ $(function(){
         // location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar + focus;
 
         location.href = base_url + 'panel/bascula/agregar?idb=' + data + editar + focus;
+
+        winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
+        // winFotos.location.reload();
 
         } else {
           noty({"text": 'El folio no existe para el tipo y area especificado!', "layout":"topRight", "type": 'error'});
@@ -364,6 +521,29 @@ $(function(){
       calculaKilosNeto();
       calculaTotales();
     }
+  }).focusin(function(){
+    if (this.setSelectionRange)
+    {
+      var len = $(this).val().length;
+      this.setSelectionRange(len, len);
+    }else
+      $(this).val($(this).val());
+  });
+  $("#pkilos_tara").keydown(function(event) {
+    var key = event.which;
+    if (key == 13 && $('#ptipo option:selected').val() == 'sa') {
+      event.preventDefault();
+      $("#pcajas_prestadas").focus();
+    }
+  });
+
+  // Evento click para seleccionar cual kilos neto usar (kilos neto , kilos neto 2).
+  $('#info_kilos_netos').on('click', function(event) {
+    var pkilos_neto  = parseFloat($('#pkilos_neto').val() || 0);
+    $('#pkilos_neto').val( parseFloat($('#info_kilos_netos').text() || 0) );
+    $('#info_kilos_netos').text(pkilos_neto);
+    $("#ppesada").val( $('#pkilos_neto').val() );
+    calculaTotales();
   });
 
   // Obtiene el pesaje de los brutos al tener el foco el input.
@@ -389,6 +569,12 @@ $(function(){
 
         $('#pkilos_tara').on('focus', function(event) {
           $('#btnKilosTara').trigger('click');
+        }).on('focusout', function(event) {
+          var $this = $(this);
+
+          if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() == 'sa') {
+            $('#form').submit();
+          }
         });
   }
 
@@ -406,7 +592,7 @@ $(function(){
         kilosNeto  = parseFloat($tr.attr('data-kneto')),
 
         $kilos     = $tr.find('#pkilos'),
-        $tdkilos   = $tr.find('#tdkilos')
+        $tdkilos   = $tr.find('#tdkilos'),
         $precio    = $tr.find('#pprecio'),
         $importe   = $tr.find('#pimporte'),
         $tdimporte = $tr.find('#tdimporte');
@@ -414,10 +600,16 @@ $(function(){
     event.preventDefault();
 
     $kilos.val(kilos);
-    $tdkilos.html(kilos);
+    if (parseFloat($('#pkilos_neto').val()) > 300) {
+      $tr.find('#tdkilos').find('span').html(kilos);
+      $tr.find('#pkilos').get(0).type = 'hidden';
+    } else {
+      $tr.find('#tdkilos').find('span').html('');
+      $tr.find('#pkilos').get(0).type = 'text';
+    }
 
     precio = (parseFloat(kilos) * parseFloat($precio.val())).toFixed(2);
-    $importe.val(precio)
+    $importe.val(precio);
     $tdimporte.html(precio);
 
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
@@ -428,7 +620,8 @@ $(function(){
 
     var $form = $('#form');
 
-    if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+    // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+    if ($('#autorizar').length === 0) {
       $form.attr('action', $form.attr('action') + '&p=t');
       $form.submit();
     } else {
@@ -437,16 +630,20 @@ $(function(){
     }
   });
 
-  // $('button#btnGuardar').on('click' , function(event) {
-  //   if ($('input#pstatus').is(':checked')) {
-  //     var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-  //     {
-  //       $('#form').submit();
-  //     });
-  //   } else {
-  //     $('#form').submit();
-  //   }
-  // });
+  $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/puede_modificar/',
+      type: 'get',
+      dataType: 'json',
+      data: {pidb: $('#pidb').val()},
+    })
+    .done(function(response) {
+      if (response.puede_modificar == false)
+        location.reload();
+      else
+        $('#form').submit();
+    });
+  });
 
   // $('#form').submit(function ($t) {
 
@@ -454,15 +651,15 @@ $(function(){
 
   //   return false;
 
-    // if ($('input#pstatus').is(':checked')) {
-    //   var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-    //   {
-    //     $this.submit();
-    //   });
-    //   return false;
-    // } else {
-    //   return true;
-    // }
+  //   if ($('input#pstatus').is(':checked')) {
+  //     var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+  //     {
+  //       $this.submit();
+  //     });
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
   // });
 
   $('#pstatus').on('click', function(event) {
@@ -473,7 +670,17 @@ $(function(){
 
       msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
       {
-        $('#form').submit();
+        // $('#form').submit();
+        $.ajax({
+          url: base_url + 'panel/bascula/ajax_pagar_boleta/',
+          type: 'get',
+          dataType: 'json',
+          data: {idb: $('#pidb').val()},
+        })
+        .done(function() {
+          // location.reload();
+        });
+
       }, function () {
         $('#pstatus').trigger('click');
       });
@@ -486,6 +693,73 @@ $(function(){
 
     $('#pkilos_tara').focus();
 
+  });
+
+  $('#btn-auth').on('click', function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        usuario: $('#usuario').val(),
+        pass: $('#pass').val()
+      },
+    })
+    .done(function(resp) {
+      console.log(resp);
+      if (resp.passes) {
+        $('#autorizar').val(resp.user_id);
+        $('#form').submit();
+      } else {
+        noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
+      }
+    });
+  });
+
+  $('#tableCajas').on('change', 'input#pkilos', function(event) {
+    var $parent = $(this).parents('tr');
+
+    $parent.find('#pprecio').trigger('change');
+  });
+
+  var fechaDeCambio = '';
+  $("#cambiarFecha").click(function() {
+    $("#myModalFechaCh").modal('show');
+  });
+  $('#myModalFechaCh').on('show', function () {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+      },
+    })
+    .done(function(resp) {
+      fechaDeCambio = resp.fecha;
+      $('#fechaCh').val(fechaDeCambio);
+    });
+  });
+  $('#btn-auth2').on('click', function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        usuario: $('#usuarioCh').val(),
+        pass: $('#passCh').val(),
+        tipo: 'fecha'
+      },
+    })
+    .done(function(resp) {
+      if (resp.passes) {
+        $('#pfecha').val($('#fechaCh').val());
+        $('#usuarioCh').val('');
+        $('#passCh').val('');
+        $("#myModalFechaCh").modal('hide');
+      } else {
+        noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
+      }
+    });
   });
 
 });
@@ -520,27 +794,41 @@ var calculaKilosNeto = function () {
   var $inputBruto  = $('#pkilos_brutos'),
       $inputTara   = $('#pkilos_tara'),
       $inputCajasP = $('#pcajas_prestadas'),
-      $inputNeto   = $('#pkilos_neto');
+      $inputNeto   = $('#pkilos_neto'),
+      $inputNeto2  = $('#pkilos_neto2'),
 
-  $inputNeto.val( Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2) );
+      kilos_netos = Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2);
+
+  if ( parseFloat($inputNeto2.val() || 0) > 0) {
+    $inputNeto.val( parseFloat($inputNeto2.val() || 0) ); // - (parseFloat($inputCajasP.val() || 0) * 2)
+    $("#info_kilos_netos").text(kilos_netos);
+  } else {
+    $inputNeto.val( kilos_netos );
+  }
 };
 
 var recargaTipo = function () {
-  var option = $('#ptipo').find('option:selected').val();
-
+  var option = $('#ptipo').find('option:selected').val(),
+  priv_modif_kilosbt = $("#modif_kilosbt").val();
   if (option === 'en') {
-    $('#groupProveedor').css({'display': 'block'});
+    $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
 
-    if ($('#paccion').val() === 'n') {
+    $("#pproductor").attr('data-next2', 'pkilos_brutos');
+
+    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
+    } else if ($('#paccion').val() === 'sa') {
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
     }
   } else {
-    $('#groupProveedor').css({'display': 'none'});
+    $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
 
-    if ($('#paccion').val() === 'n') {
+    $("#pproductor").attr('data-next2', 'pkilos_tara');
+
+    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", 'readonly');
       $('#pkilos_tara').prop("readonly", '');
     }
@@ -594,7 +882,7 @@ var validaCalidad = function (calidad) {
 };
 
 var calculaTotales = function (trIndex, kilosNeto) {
-  var $ptotal_cajas = $('#ptotal_cajas')
+  var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
 
@@ -624,17 +912,24 @@ var calculaTotales = function (trIndex, kilosNeto) {
         importe  = 0,
         precio   = parseFloat($tr.find('#pprecio').val());
 
-    kilos = Math.floor( ((cajas * kilosNeto) / totalCajasP).toFixed(2) );
+    kilos = Math.round( ((cajas * kilosNeto) / totalCajasP).toFixed(2) );
+
     $tr.find('#pkilos').val(kilos);
-    $tr.find('#tdkilos').html(kilos);
+    if (parseFloat($('#pkilos_neto').val()) > 300) {
+      $tr.find('#tdkilos').find('span').html(kilos);
+      $tr.find('#pkilos').get(0).type = 'hidden';
+    } else {
+      $tr.find('#tdkilos').find('span').html('');
+      $tr.find('#pkilos').get(0).type = 'text';
+    }
 
     promedio = (kilos / cajas).toFixed(2);
-    $tr.find('#ppromedio').val(promedio)
+    $tr.find('#ppromedio').val(promedio);
     // $tr.find('#tdpromedio').html(promedio)
 
     importe = (kilos * precio).toFixed(2);
-    $tr.find('#pimporte').val(importe)
-    $tr.find('#tdimporte').html(importe)
+    $tr.find('#pimporte').val(importe);
+    $tr.find('#tdimporte').html(importe);
 
     $tr.attr('data-kneto', kilosNeto);
 
@@ -649,3 +944,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   $ptotal_cajas.val(totalCajas);
   $ptotal.val(total.toFixed(2));
 };
+
+function setLoteBoleta(){
+  $("#pno_lote").val("ok");
+}

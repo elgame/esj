@@ -43,13 +43,13 @@
                   <option value="pv" <?php echo set_select_get('ftipo', 'pv'); ?>>Plazo vencido</option>
                 </select><br>
 
-                <label for="dcliente">Cliente</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
-
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
+
+                <label for="dcliente">Cliente</label>
+                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
+                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
 
                 <input type="hidden" name="id_cliente" id="id_cliente" value="<?php echo set_value_get('id_cliente'); ?>">
 
@@ -85,6 +85,8 @@
 							</div>
             </div>
 
+            <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 100px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:14px;font-weight:bold;"></div>
+
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
@@ -94,7 +96,8 @@
 									<th>Concepto</th>
 									<th>Cargo</th>
 									<th>Abono</th>
-									<th>Saldo</th>
+                  <th>Saldo</th>
+									<th>Saldo TC</th>
 									<th>Estado</th>
 									<th>F. Vencimiento</th>
 									<th>D. Transcurridos</th>
@@ -106,12 +109,14 @@
 									<td></td>
 									<td></td>
 									<td>Saldo anterior a <?php echo $data['fecha1']; ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0) ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0), 2, '$', false ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0), 2, '$', false ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0), 2, '$', false ); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero(
+                      (isset($data['anterior'][0]->saldo_cambio)? $data['anterior'][0]->saldo_cambio: 0), 2, '$', false ); ?></td>
 									<td></td>
 									<td></td>
 									<td></td>
@@ -120,6 +125,7 @@
 						$total_cargo = 0;
 						$total_abono = 0;
 						$total_saldo = 0;
+            $total_saldo_cambio = 0;
 						// if(isset($data['anterior'][0]->saldo)){ //se suma a los totales saldo anterior
 						// 	$total_cargo += $data['anterior'][0]->total;
 						// 	$total_abono += $data['anterior'][0]->abonos;
@@ -129,9 +135,10 @@
 							$ver = true;
 
 							if($ver){
-								$total_cargo += $cuenta->cargo;
-								$total_abono += $cuenta->abono;
-								$total_saldo += $cuenta->saldo;
+                $total_cargo        += $cuenta->cargo;
+                $total_abono        += $cuenta->abono;
+                $total_saldo        += $cuenta->saldo;
+                $total_saldo_cambio += $cuenta->saldo_cambio;
 						?>
 								<tr>
 									<td><?php echo $cuenta->fecha; ?></td>
@@ -143,9 +150,10 @@
 										<a href="<?php echo base_url('panel/cuentas_cobrar/detalle/').'?id='.$cuenta->id_factura.'&tipo='.$cuenta->tipo.
 													'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
 									</td>
-									<td><?php echo String::formatoNumero($cuenta->cargo); ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td class="sel_abonom" data-id="<?php echo $cuenta->id_factura; ?>" data-tipo="<?php echo $cuenta->tipo ?>"><?php echo String::formatoNumero($cuenta->saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->cargo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
+                  <td style="text-align: right;" class="sel_abonom" data-id="<?php echo $cuenta->id_factura; ?>" data-tipo="<?php echo $cuenta->tipo ?>"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo_cambio, 2, '$', false); ?></td>
 									<td><?php echo $cuenta->estado; ?></td>
 									<td><?php echo $cuenta->fecha_vencimiento; ?></td>
 									<td><?php echo $cuenta->dias_transc; ?></td>
@@ -154,9 +162,10 @@
 						} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="4" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_cargo); ?></td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($total_cargo-$total_abono, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo_cambio, 2, '$', false); ?></td>
 									<td colspan="3"></td>
 								</tr>
               </tbody>

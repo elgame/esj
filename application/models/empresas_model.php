@@ -1,19 +1,21 @@
 <?php
 
 class empresas_model extends CI_Model{
+	private $pass_finkok = 'gamaL1!l'; //F4ctur4rt!
 
 	function __construct(){
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 	/**
 	 * Obtiene el listado de proveedores
 	 */
-	public function getEmpresas(){
+	public function getEmpresas($per_page=40){
 		$sql = '';
 		//paginacion
 		$params = array(
-				'result_items_per_page' => '30',
+				'result_items_per_page' => $per_page,
 				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
 		);
 		if($params['result_page'] % $params['result_items_per_page'] == 0)
@@ -82,10 +84,14 @@ class empresas_model extends CI_Model{
 	}
 
 	public function getDefaultEmpresa(){
-		$params = $this->db->select("id_empresa, nombre_fiscal")
-      ->from("empresas")
-      ->where("predeterminado", "t")
-      ->get()
+		$this->db->select("*")->from("empresas");
+
+      if ($this->session->userdata('selempresa') == false) {
+      	$this->db->where("predeterminado", "t");
+      } else {
+      	$this->db->where("id_empresa", $this->session->userdata('selempresa'));
+      }
+      $params = $this->db->get()
       ->row();
       if (isset($params->id_empresa))
       	return $params;
@@ -118,7 +124,7 @@ class empresas_model extends CI_Model{
 			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
 			$dcer_org   = $upload_res[0];
 			$dcer       = $upload_res[1];
-			
+
 			// $dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
 			// //se genera el archivo cer.pem
 			// $certificateCAcerContent = file_get_contents($dcer_org);
@@ -132,7 +138,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass   = 'gamaL1!l';
+		$new_pass   = $this->pass_finkok;
 		$dkey_path  = '';
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
@@ -143,29 +149,40 @@ class empresas_model extends CI_Model{
 		}
 
 		$data = array(
-			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
-			'calle'          => $this->input->post('dcalle'),
-			'no_exterior'    => $this->input->post('dno_exterior'),
-			'no_interior'    => $this->input->post('dno_interior'),
-			'colonia'        => $this->input->post('dcolonia'),
-			'localidad'      => $this->input->post('dlocalidad'),
-			'municipio'      => $this->input->post('dmunicipio'),
-			'estado'         => $this->input->post('destado'),
-			'cp'             => $this->input->post('dcp'),
-			'rfc'            => $this->input->post('drfc'),
-			'telefono'       => $this->input->post('dtelefono'),
-			'email'          => $this->input->post('demail'),
-			'pag_web'        => $this->input->post('dpag_web'),
-			'logo'           => $path_img,
-			'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
-			'cer_org'        => $dcer_org,
-			'cer'            => $dcer,
-			'key_path'       => $dkey_path,
-			'pass'           => $this->input->post('dpass'),
-			'cfdi_version'   => $this->input->post('dcfdi_version'),
-			'cer_caduca'     => $cer_caduca,
+      'nombre_fiscal'     => $this->input->post('dnombre_fiscal'),
+      'calle'             => $this->input->post('dcalle'),
+      'no_exterior'       => $this->input->post('dno_exterior'),
+      'no_interior'       => $this->input->post('dno_interior'),
+      'colonia'           => $this->input->post('dcolonia'),
+      'localidad'         => $this->input->post('dlocalidad'),
+      'municipio'         => $this->input->post('dmunicipio'),
+      'estado'            => $this->input->post('destado'),
+      'cp'                => $this->input->post('dcp'),
+      'rfc'               => $this->input->post('drfc'),
+      'telefono'          => $this->input->post('dtelefono'),
+      'email'             => $this->input->post('demail'),
+      'pag_web'           => $this->input->post('dpag_web'),
+      'logo'              => $path_img,
+      'regimen_fiscal'    => $this->input->post('dregimen_fiscal'),
+      'curp'              => $this->input->post('dcurp'),
+      'registro_patronal' => $this->input->post('dregistro_patronal'),
+      'cer_org'           => $dcer_org,
+      'cer'               => $dcer,
+      'key_path'          => $dkey_path,
+      'pass'              => $this->input->post('dpass'),
+      'cfdi_version'      => $this->input->post('dcfdi_version'),
+      'pais'              => $this->input->post('dpais'),
 		);
+		if($cer_caduca != '')
+			$data['cer_caduca'] = $cer_caduca;
 		$this->db->insert('empresas', $data);
+		$id_empresas = $this->db->insert_id();
+
+		// Bitacora
+    $this->bitacora_model->_insert('empresas', $id_empresas,
+                                    array(':accion'    => 'la empresa', ':seccion' => 'empresas',
+                                          ':folio'     => $data['nombre_fiscal'],
+                                          ':empresa'   => ''));
 
 		return array(true, '', 3);
 	}
@@ -210,7 +227,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass = 'gamaL1!l';
+		$new_pass = $this->pass_finkok;
 		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
@@ -223,28 +240,40 @@ class empresas_model extends CI_Model{
 		}
 
 		$data = array(
-			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
-			'calle'          => $this->input->post('dcalle'),
-			'no_exterior'    => $this->input->post('dno_exterior'),
-			'no_interior'    => $this->input->post('dno_interior'),
-			'colonia'        => $this->input->post('dcolonia'),
-			'localidad'      => $this->input->post('dlocalidad'),
-			'municipio'      => $this->input->post('dmunicipio'),
-			'estado'         => $this->input->post('destado'),
-			'cp'             => $this->input->post('dcp'),
-			'rfc'            => $this->input->post('drfc'),
-			'telefono'       => $this->input->post('dtelefono'),
-			'email'          => $this->input->post('demail'),
-			'pag_web'        => $this->input->post('dpag_web'),
-			'logo'           => $path_img,
-			'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
-			'cer_org'        => $dcer_org,
-			'cer'            => $dcer,
-			'key_path'       => $dkey_path,
-			'pass'           => $this->input->post('dpass'),
-			'cfdi_version'   => $this->input->post('dcfdi_version'),
-			'cer_caduca'     => $cer_caduca,
+      'nombre_fiscal'     => $this->input->post('dnombre_fiscal'),
+      'calle'             => $this->input->post('dcalle'),
+      'no_exterior'       => $this->input->post('dno_exterior'),
+      'no_interior'       => $this->input->post('dno_interior'),
+      'colonia'           => $this->input->post('dcolonia'),
+      'localidad'         => $this->input->post('dlocalidad'),
+      'municipio'         => $this->input->post('dmunicipio'),
+      'estado'            => $this->input->post('destado'),
+      'cp'                => $this->input->post('dcp'),
+      'rfc'               => $this->input->post('drfc'),
+      'telefono'          => $this->input->post('dtelefono'),
+      'email'             => $this->input->post('demail'),
+      'pag_web'           => $this->input->post('dpag_web'),
+      'logo'              => $path_img,
+      'regimen_fiscal'    => $this->input->post('dregimen_fiscal'),
+      'curp'              => $this->input->post('dcurp'),
+      'registro_patronal' => $this->input->post('dregistro_patronal'),
+      'cer_org'           => $dcer_org,
+      'cer'               => $dcer,
+      'key_path'          => $dkey_path,
+      'pass'              => $this->input->post('dpass'),
+      'cfdi_version'      => $this->input->post('dcfdi_version'),
+      'pais'              => $this->input->post('dpais'),
 		);
+		if($cer_caduca != '')
+			$data['cer_caduca'] = $cer_caduca;
+
+		// Bitacora
+    $id_bitacora = $this->bitacora_model->_update('empresas', $_GET['id'], $data,
+                              array(':accion'       => 'la empresa', ':seccion' => 'empresas',
+                                    ':folio'        => $data['nombre_fiscal'],
+                                    ':empresa'      => '',
+                                    ':id'           => 'id_empresa',
+                                    ':titulo'       => 'Empresa'));
 		$this->db->update('empresas', $data, "id_empresa = '".$_GET['id']."'");
 
 		return array(true, '', 4);
@@ -255,6 +284,13 @@ class empresas_model extends CI_Model{
 	 */
 	public function eliminarEmpresa(){
 		$this->db->update('empresas', array('status' => 'f'), "id_empresa = '".$_GET['id']."'");
+
+		// Bitacora
+		$empresa = $this->getInfoEmpresa($_GET['id']);
+		$this->bitacora_model->_cancel('empresas', $_GET['id'],
+                                    array(':accion'     => 'la empresa', ':seccion' => 'empresas',
+                                          ':folio'      => $empresa['info']->nombre_fiscal,
+                                          ':empresa'    => ''));
 		return array(true, '');
 	}
 
@@ -273,7 +309,7 @@ class empresas_model extends CI_Model{
 	public function getEmpresasAjax(){
 		$sql = '';
 		$res = $this->db->query("
-				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, pais
+				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, pais, predeterminado
 				FROM empresas
 				WHERE status = 't' AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
 				ORDER BY nombre_fiscal ASC
@@ -293,5 +329,42 @@ class empresas_model extends CI_Model{
 
 		return $response;
 	}
+
+  /**
+   * Obtiene el listado de proveedores para usar ajax
+   * @param term. termino escrito en la caja de texto, busca en el nombre
+   * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
+   */
+  public function getEmpresasAjaxFac($sqlX = null){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+      "SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
+        FROM empresas
+        WHERE status = 't'
+        {$sql}
+        ORDER BY nombre_fiscal ASC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_empresa,
+            'label' => $itm->nombre_fiscal,
+            'value' => $itm->nombre_fiscal,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
 
 }

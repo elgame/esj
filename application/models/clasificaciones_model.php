@@ -68,15 +68,35 @@ class clasificaciones_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'id_area'      => $this->input->post('farea'),
-						'nombre'       => $this->input->post('fnombre'),
-						// 'precio_venta' => $this->input->post('fprecio_venta'),
-						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
+            'id_area'         => $this->input->post('farea'),
+            'nombre'          => $this->input->post('fnombre'),
+            'iva'             => $this->input->post('diva'),
+            'id_unidad'       => $this->input->post('dunidad'),
+            // 'precio_venta' => $this->input->post('fprecio_venta'),
+            'cuenta_cpi'      => $this->input->post('fcuenta_cpi'),
+            'cuenta_cpi2'     => $this->input->post('fcuenta_cpi2'),
+            'codigo'          => $this->input->post('fcodigo'),
+            'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
+            'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
+            // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
 		}
 
 		$this->db->insert('clasificaciones', $data);
+
 		$id_clasificacion = $this->db->insert_id('clasificaciones', 'id_clasificacion');
+
+    // if (isset($_POST['fcalibres']))
+    // {
+    //   $calibres = array();
+
+    //   foreach ($_POST['fcalibres'] as $idCalibre)
+    //   {
+    //     $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+    //   }
+
+    //   $this->db->insert_batch('clasificaciones_calibres', $calibres);
+    // }
 
 		return array('error' => FALSE, $id_clasificacion);
 	}
@@ -89,15 +109,35 @@ class clasificaciones_model extends CI_Model {
 	 */
 	public function updateClasificacion($id_clasificacion, $data=NULL)
 	{
-
 		if ($data==NULL)
 		{
 			$data = array(
-						'nombre'       => $this->input->post('fnombre'),
-						'precio_venta' => $this->input->post('fprecio_venta'),
-						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
-						'id_area'      => $this->input->post('farea'),
+            'nombre'       => $this->input->post('fnombre'),
+            'precio_venta' => $this->input->post('fprecio_venta'),
+            'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
+            'id_area'      => $this->input->post('farea'),
+            'iva'          => $this->input->post('diva'),
+            'id_unidad'    => $this->input->post('dunidad'),
+            'cuenta_cpi2'  => $this->input->post('fcuenta_cpi2'),
+            'codigo'       => $this->input->post('fcodigo'),
+            'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
+            'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
+            // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
+
+      // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
+
+      // if (isset($_POST['fcalibres']))
+      // {
+      //   $calibres = array();
+
+      //   foreach ($_POST['fcalibres'] as $idCalibre)
+      //   {
+      //     $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+      //   }
+
+      //   $this->db->insert_batch('clasificaciones_calibres', $calibres);
+      // }
 		}
 
 		$this->db->update('clasificaciones', $data, array('id_clasificacion' => $id_clasificacion));
@@ -111,22 +151,42 @@ class clasificaciones_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getClasificacionInfo($id_clasificacion=FALSE, $basic_info=FALSE)
+	public function getClasificacionInfo($id_clasificacion=FALSE, $basic_info=FALSE, $firstP = true)
 	{
-		$id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
+    if ($firstP)
+      $id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
 
-		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status" )
+		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad,
+                                  cuenta_cpi2, codigo, inventario, clave_prod_serv, clave_unidad" )
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
+
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
 			$data['info']	= $sql_res->row();
-		$sql_res->free_result();
 
-		if ($basic_info == False) {
-			
+    $sql_res->free_result();
+
+		if ($basic_info == false)
+    {
+      $this->load->model('catalogos33_model');
+      $data['cprodserv'] = $this->catalogos33_model->claveProdServ($data['info']->clave_prod_serv);
+      $data['cunidad'] = $this->catalogos33_model->claveUnidad($data['info']->clave_unidad);
+
+      $sql_res = $this->db->query(
+        "SELECT cal.id_calibre, cal.nombre
+         FROM calibres as cal
+         INNER JOIN clasificaciones_calibres as clas_cal ON clas_cal.id_calibre = cal.id_calibre
+         WHERE clas_cal.id_clasificacion = {$id_clasificacion}");
+
+      $data['calibres'] = array();
+
+      if ($sql_res->num_rows() > 0)
+      {
+        $data['calibres'] = $sql_res->result();
+      }
 		}
 
 		return $data;
@@ -137,17 +197,19 @@ class clasificaciones_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. clasificaciones de una area
 	 */
-	public function ajaxClasificaciones(){
+	public function ajaxClasificaciones($limit=20){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		if($this->input->get('type') !== false)
 			$sql .= " AND id_area = {$this->input->get('type')}";
-		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status 
+    if($this->input->get('inventario') !== false)
+      $sql .= " AND inventario = 't'";
+		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad
 				FROM clasificaciones
 				WHERE status = true {$sql}
 				ORDER BY nombre ASC
-				LIMIT 20");
+				LIMIT {$limit}");
 
 		$response = array();
 		if($res->num_rows() > 0){
@@ -163,6 +225,60 @@ class clasificaciones_model extends CI_Model {
 
 		return $response;
 	}
+
+  public function clasificaciones_xls($id_area)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('areas_model');
+    $area = $this->areas_model->getAreaInfo($id_area, true);
+    $clasificaciones = $this->getClasificaciones($id_area, false);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Catalogo de productos";
+    $titulo3 = $area['info']->nombre;
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cta Contpaq</td>
+        </tr>';
+
+    foreach ($clasificaciones['clasificaciones'] as $key => $clasif)
+    {
+      $html .= '<tr>
+          <td style="width:100px;border:1px solid #000;">'.$clasif->nombre.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$clasif->precio_venta.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$clasif->cuenta_cpi.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
 
 }
 /* End of file usuarios_model.php */

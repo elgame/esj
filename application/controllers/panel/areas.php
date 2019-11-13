@@ -8,7 +8,11 @@ class areas extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'areas/ajax_get_calidades/',
-			'areas/ajax_get_clasificaciones/'
+      'areas/ajax_get_clasificaciones/',
+      'areas/ajax_get_calibres/',
+			'areas/ajax_add_new_calibre/',
+
+			'areas/clasificaciones_xls/',
 		);
 
 	public function _remap($method){
@@ -113,6 +117,8 @@ class areas extends MY_Controller {
 
 			$this->load->model('areas_model');
 			$this->load->model('clasificaciones_model');
+			$this->load->model('calidades_ventas_model');
+			$this->load->model('tamanos_ventas_model');
 			$this->load->model('calidades_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -140,6 +146,12 @@ class areas extends MY_Controller {
 
 			$params['clasificaciones']      = $this->clasificaciones_model->getClasificaciones($_GET['id']);
 			$params['html_clasificaciones'] = $this->load->view('panel/areas/clasificaciones/admin', $params, true);
+
+			$params['calidades_ventas']            = $this->calidades_ventas_model->getCalidades($_GET['id']);
+			$params['html_calidades_ventas']       = $this->load->view('panel/areas/calidades_ventas/admin', $params, true);
+
+			$params['tamanos_ventas']              = $this->tamanos_ventas_model->getTamanios($_GET['id']);
+			$params['html_tamanos_ventas']         = $this->load->view('panel/areas/tamanios/admin', $params, true);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -392,6 +404,21 @@ class areas extends MY_Controller {
 				));
 	}
 
+  public function ajax_get_calibres()
+  {
+    $this->load->model('calibres_model');
+    echo json_encode($this->calibres_model->getCalibresAjax());
+  }
+
+  public function ajax_add_new_calibre()
+  {
+    $this->load->model('calibres_model');
+
+    $response = $this->calibres_model->addCalibre($_GET['nombre']);
+
+    echo json_encode($response);
+  }
+
 	public function agregar_clasificacion(){
 		if (isset($_GET['id']))
 		{
@@ -405,6 +432,7 @@ class areas extends MY_Controller {
 				array('libs/jquery.numeric.js'),
 				array('general/msgbox.js'),
 				array('panel/areas/frmEditArea.js'),
+        array('panel/areas/calibres.js'),
 			));
 
 			$this->load->model('clasificaciones_model');
@@ -428,6 +456,8 @@ class areas extends MY_Controller {
 					redirect(base_url('panel/areas/modificar/?id='.$this->input->get('id').'&msg=14'));
 			}
 
+      $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -440,7 +470,8 @@ class areas extends MY_Controller {
 			redirect(base_url('panel/areas/modificar/?id='.$this->input->get('id').'&msg=1'));
 	}
 
-	public function modificar_clasificacion(){
+	public function modificar_clasificacion()
+  {
 		if (isset($_GET['id']))
 		{
 			$this->carabiner->css(array(
@@ -453,6 +484,7 @@ class areas extends MY_Controller {
 				array('libs/jquery.numeric.js'),
 				array('general/msgbox.js'),
 				array('panel/areas/frmEditArea.js'),
+        array('panel/areas/calibres.js'),
 			));
 
 			$this->load->model('clasificaciones_model');
@@ -478,6 +510,11 @@ class areas extends MY_Controller {
 
 			$params['data'] = $this->clasificaciones_model->getClasificacionInfo($_GET['id']);
 			$params['areas'] = $this->areas_model->getAreas(false);
+      $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
+      // echo "<pre>";
+      //   var_dump($params['data']);
+      // echo "</pre>";exit;
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -535,6 +572,15 @@ class areas extends MY_Controller {
 		echo json_encode($params);
 	}
 
+	public function clasificaciones_xls()
+	{
+		if (isset($_GET['id']))
+		{
+			$this->load->model('clasificaciones_model');
+			$this->clasificaciones_model->clasificaciones_xls( $this->input->get('id'));
+		}
+	}
+
 
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo
@@ -583,7 +629,10 @@ class areas extends MY_Controller {
 						'rules' => 'required|numeric|max_length[11]'),
 			array('field' => 'farea',
 						'label' => 'Area',
-						'rules' => 'required|numeric|max_length[11]'),
+						'rules' => 'required|numeric'),
+			array('field' => 'fcuenta_cpi',
+						'label' => 'Cuenta contpaq',
+						'rules' => 'required|numeric|max_length[12]'),
 		);
 
 		$this->form_validation->set_rules($rules);
@@ -596,15 +645,42 @@ class areas extends MY_Controller {
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
 						'rules' => 'required|max_length[40]'),
-			// array('field' => 'fprecio_venta',
-			// 			'label' => 'Precio venta',
-			// 			'rules' => 'numeric|max_length[11]'),
+			array('field' => 'fcodigo',
+						'label' => 'Codigo',
+						'rules' => 'max_length[15]'),
+			array('field' => 'fcuenta_cpi2',
+						'label' => 'Cuenta contpaq 2 (Orov)',
+						'rules' => 'numeric|max_length[40]'),
+
+			array('field' => 'dinventario',
+						'label' => 'Inventario',
+						'rules' => ''),
+
 			array('field' => 'farea',
 						'label' => 'Area',
 						'rules' => 'required|numeric|max_length[11]'),
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'numeric|max_length[12]'),
+      array('field' => 'fcalibres[]',
+            'label' => 'Calibres',
+            'rules' => ''),
+      array('field' => 'fcalibre_nombre[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'diva',
+            'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'dunidad',
+            'label' => 'Unidad / Medida',
+            'rules' => ''),
+
+      array('field' => 'dclave_producto_cod',
+            'label' => 'Clave de Productos/Servicios',
+            'rules' => 'required'),
+      // array('field' => 'dclave_unidad_cod',
+      //       'label' => 'Clave de unidad',
+      //       'rules' => 'required'),
 		);
 
 		$this->form_validation->set_rules($rules);

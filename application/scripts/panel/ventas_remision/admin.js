@@ -19,7 +19,19 @@ $(function(){
      });
 
   $("#dcliente").autocomplete({
-      source: base_url+'panel/clientes/ajax_get_proveedores',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#did_empresa").val()) > 0)
+          params.did_empresa = $("#did_empresa").val();
+          $.ajax({
+              url: base_url+'panel/clientes/ajax_get_proveedores',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                  response(data);
+              }
+          });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

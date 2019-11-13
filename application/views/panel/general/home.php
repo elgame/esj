@@ -11,32 +11,32 @@
 					</li>
 				</ul>
 			</div>
-<!-- 
+<!--
 			<div class="sortable row-fluid">
-        <a data-rel="tooltip" title="<?php echo $venta_dia; ?>" class="well span3 top-block">
+        <a data-rel="tooltip" title="<?php //echo $venta_dia; ?>" class="well span3 top-block">
           <span class="icon32 icon-red icon-shopping-cart"></span>
           <div>Ventas del dia</div>
-          <div><?php echo String::formatoNumero($venta_dia); ?></div>
+          <div><?php //echo String::formatoNumero($venta_dia); ?></div>
         </a>
 
-				<a data-rel="tooltip" title="<?php echo $venta_semana; ?>" class="well span3 top-block">
+				<a data-rel="tooltip" title="<?php //echo $venta_semana; ?>" class="well span3 top-block">
 					<span class="icon32 icon-red icon-shopping-cart"></span>
 					<div>Ventas semanal</div>
-					<div><?php echo String::formatoNumero($venta_semana); ?></div>
+					<div><?php //echo String::formatoNumero($venta_semana); ?></div>
 				</a>
 
-				<a data-rel="tooltip" title="<?php echo $venta_mes; ?>" class="well span3 top-block">
+				<a data-rel="tooltip" title="<?php //echo $venta_mes; ?>" class="well span3 top-block">
 					<span class="icon32 icon-color icon-shopping-cart"></span>
 					<div>Ventas del mes</div>
-					<div><?php echo String::formatoNumero($venta_mes); ?></div>
+					<div><?php //echo String::formatoNumero($venta_mes); ?></div>
 				</a>
-      <?php 
+      <?php
       $tienep = $this->usuarios_model->tienePrivilegioDe('', 'reportes/bajos_inventario/');
       ?>
-        <a <?php echo ($tienep? 'href="'.base_url('panel/reportes/bajos_inventario').'" target="_blank"': ''); ?> data-rel="tooltip" title="<?php echo $bajos_inventario; ?>" class="well span3 top-block">
+        <a <?php echo ($tienep? 'href="'.base_url('panel/reportes/bajos_inventario').'" target="_blank"': ''); ?> data-rel="tooltip" title="<?php //echo $bajos_inventario; ?>" class="well span3 top-block">
           <span class="icon32 icon-color icon-th-list"></span>
           <div>Productos bajos inventario</div>
-          <div><?php echo $bajos_inventario; ?></div>
+          <div><?php //echo $bajos_inventario; ?></div>
         </a>
 			</div> -->
       <?php echo $cuentas; ?>
@@ -57,7 +57,7 @@
                 </tr>
               </thead>
               <tbody id="product_mas_vend">
-            <?php 
+            <?php
             if (isset($cuentas_pagar))
               foreach($cuentas_pagar as $product) {?>
                 <tr>
@@ -73,27 +73,37 @@
 
         <div class="box span6">
           <div class="box-header well">
-            <h2>Inventario de cajas</h2>
+            <h2>Productos bajos de inventario</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
-          <div class="box-content">
-            <table class="table table-striped table-bordered bootstrap-datatable">
+          <div class="box-content" style="height:300px;overflow-y:auto;">
+            <table class="table table-condensed">
               <thead>
                 <tr>
-                  <th>Productor</th>
-                  <th>Saldo</th>
+                  <th>Producto</th>
+                  <th>Stock Min</th>
+                  <th>Existencia</th>
                 </tr>
               </thead>
-              <tbody id="product_menos_vend">
-            <?php 
-            if (isset($inventario))
-              foreach($inventario as $product) {?>
+              <tbody id="product_menos_vend" >
+            <?php
+            if (isset($empresas))
+              foreach($empresas as $product) {?>
                 <tr>
-                  <td><a href="<?php echo base_url('panel/cajas/productor/?id='.$product->id_productor.'&ffecha1='.date("Y-m").'-01&ffecha2='.date("Y-m-d")); ?>"><?php echo $product->nombre; ?></a></td>
-                  <td><?php echo String::formatoNumero($product->total_debe, 2, ''); ?></td>
+                  <td colspan="3" style="font-weight:bold;"><?php echo $product->nombre_fiscal; ?></td>
                 </tr>
+                  <?php foreach ($product->productos as $key => $value)
+                  {
+                  ?>
+                <tr>
+                  <td><?php echo $value->nombre_producto; ?></td>
+                  <td><?php echo String::formatoNumero($value->stock_min, 2, '', false); ?></td>
+                  <td><?php echo String::formatoNumero($value->saldo_anterior + $value->entradas - $value->salidas, 2, '', false); ?></td>
+                </tr>
+                  <?php
+                  } ?>
             <?php }?>
               </tbody>
             </table>

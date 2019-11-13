@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class empresas extends MY_Controller {
-	
+
 	/**
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
@@ -59,7 +59,7 @@ class empresas extends MY_Controller {
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.numeric.js'),
-			array('panel/clientes/frm_addmod.js')
+			array('panel/clientes/agregar.js')
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -81,6 +81,11 @@ class empresas extends MY_Controller {
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
 		}
 
+    // $this->load->model('nomina_catalogos_model');
+    // $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    $this->load->model('catalogos33_model');
+    $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
+
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -101,7 +106,7 @@ class empresas extends MY_Controller {
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.numeric.js'),
 			array('general/msgbox.js'),
-			array('panel/clientes/frm_addmod.js')
+			array('panel/clientes/agregar.js')
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -125,6 +130,11 @@ class empresas extends MY_Controller {
 			$params['info'] = $this->empresas_model->getInfoEmpresa($_GET['id']);
 		}else
 			$params['frm_errors'] = $this->showMsgs(1);
+
+    // $this->load->model('nomina_catalogos_model');
+    // $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    $this->load->model('catalogos33_model');
+    $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
 
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -218,6 +228,13 @@ class empresas extends MY_Controller {
 				array('field'	=> 'dpag_web',
 						'label'	=> 'Pag Web',
 						'rules'	=> 'max_length[80]'),
+
+        array('field' => 'dcurp',
+            'label' => 'Régimen fiscal',
+            'rules' => 'max_length[50]'),
+        array('field' => 'dregistro_patronal',
+            'label' => 'Régimen fiscal',
+            'rules' => 'max_length[20]'),
 
 				array('field'	=> 'dpass',
 						'label'	=> 'Clave',

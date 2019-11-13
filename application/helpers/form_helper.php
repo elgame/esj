@@ -692,15 +692,14 @@ if ( ! function_exists('set_value_get'))
 {
 	function set_value_get($field = '', $default = '')
 	{
-		if (FALSE === ($OBJ =& _get_validation_object()))
-		{
+		// if (FALSE === ($OBJ =& _get_validation_object()))
+		// {
 			if ( ! isset($_GET[$field]))
 			{
 				return $default;
 			}
-
 			return form_prep($_GET[$field], $field);
-		}
+		// }
 
 		return form_prep($OBJ->set_value($field, $default), $field);
 	}
@@ -770,10 +769,9 @@ if ( ! function_exists('set_select_get'))
 {
 	function set_select_get($field = '', $value = '', $default = FALSE)
 	{
-		$OBJ =& _get_validation_object();
-
-		if ($OBJ === FALSE)
-		{
+		// $OBJ =& _get_validation_object();
+		// if ($OBJ === FALSE)
+		// {
 			if ( ! isset($_GET[$field]))
 			{
 				if (count($_GET) === 0 AND $default == TRUE)
@@ -801,7 +799,7 @@ if ( ! function_exists('set_select_get'))
 			}
 
 			return ' selected="selected"';
-		}
+		// }
 
 		return $OBJ->set_select($field, $value, $default);
 	}

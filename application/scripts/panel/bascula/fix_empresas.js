@@ -1,5 +1,5 @@
 $(function(){
-  $('.breadcrumb').parent().remove()
+  $('.breadcrumb').parent().remove();
   $('#content').removeClass('span10').addClass('span12');
   $('.form-actions')
     // .append('<button type="button" class="btn" id="closeSupermodal">Cerrar</button>')

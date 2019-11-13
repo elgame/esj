@@ -1,0 +1,1575 @@
+    1  00-100-000      ACTIVO               A Activo Deu..         TitPeso..     
+     2 00-110-000      CIRCULANTE           A Activo Deu..         SubPeso..     
+      311-100-000      CAJA                 A Activo Deu..         Si Peso..     
+    .. 11-100-001      Caja                 A Activo Deu..Afe..       Peso..     
+      311-200-000      BANCOS               A Activo Deu..         Si Peso..     
+    .. 11-200-001      BANCOMER  CTA 92214  A Activo Deu..Afe..       Peso..     
+    .. 11-200-002      BANAMEX SA CTA 514.. A Activo Deu..Afe..       Peso..     
+    .. 11-200-003      SANTANDER CTA 5250.. A Activo Deu..Afe..       Peso..     
+    .. 11-200-004      SANTANDER NUEVA 98.. A Activo Deu..Afe..       Peso..     
+    .. 11-200-005      HSBC CTA 0763        A Activo Deu..Afe..       Peso..     
+    .. 11-200-006      BANORTE CTA 33360    A Activo Deu..Afe..       Peso..     
+    .. 11-200-007      BAJIO CTA 702014     A Activo Deu..Afe..       Peso..     
+    .. 11-200-008      SANTANDER CTA 2202   A Activo Deu..Afe..       Peso..     
+    .. 11-200-009      SANTANDER CTA 6117   A Activo Deu..Afe..       Peso..     
+    .. 11-200-010      HSBC CTA 4202        A Activo Deu..Afe..       Peso..     
+    .. 11-200-011      BANAMEX CTA 514166.. A Activo Deu..Afe..       Peso..     
+    .. 11-200-012      BANAMEX PRODUCTIVA.. A Activo Deu..Afe..       Peso..     
+    .. 11-200-013      AFIRME CTA 1114100.. A Activo Deu..Afe..       Peso..     
+      311-300-000      ISR RETENIDO         A Activo Deu..         Si Peso..     
+    .. 11-300-001      ISR RETENIDO BANCA.. A Activo Deu..Afe..       Peso..     
+      311-500-000      IVA SUJETO A DEVOL.. A Activo Deu..         Si Peso..     
+    .. 11-500-001      IVA SUJETO A DEVOL.. A Activo Deu..Afe..       Peso..     
+      311-600-000      IMPUESTOS ANTICIPA.. A Activo Deu..         Si Peso..     
+    .. 11-600-001      ISR                  A Activo Deu..Afe..       Peso..     
+    .. 11-600-002      ISR RETENIDO         A Activo Deu..Afe..       Peso..     
+    .. 11-600-003      IMPUESTO AL ACTIVO   A Activo Deu..Afe..       Peso..     
+    .. 11-600-004      IETU                 A Activo Deu..Afe..       Peso..     
+      311-700-000      SUBSIDIO AL EMPLEO.. A Activo Deu..         Si Peso..     
+    .. 11-700-001      SUBSIDIO AL EMPLEO.. A Activo Deu..Afe..       Peso..     
+      311-800-000      ANTICIPO A PROVEED.. A Activo Deu..         Si Peso..     
+    .. 11-801-023      Atlas Copco Mexica.. A Activo Deu..Afe..       Peso..     
+    .. 11-803-001      CORPORACION INDUST.. A Activo Deu..Afe..       Peso..     
+    .. 11-803-029      CARAMBOLA SERV. CR.. A Activo Deu..Afe..       Peso..     
+    .. 11-803-032      CBR PLUS MEXICO S .. A Activo Deu..Afe..       Peso..     
+    .. 11-804-001      DISTRIBUIDORA IM S.. A Activo Deu..Afe..       Peso..     
+    .. 11-805-001      EMPRESAS UNIDAS CO.. A Activo Deu..Afe..       Peso..     
+    .. 11-807-024      Gallegos Magadalen.. A Activo Deu..Afe..       Peso..     
+    .. 11-813-009      Mettler Toledo SA .. A Activo Deu..Afe..       Peso..     
+      311-900-000      IMPUESTOS A FAVOR    A Activo Deu..         Si Peso..     
+    .. 11-900-001      ISR DEL EJERCICIO    A Activo Deu..Afe..       Peso..     
+    .. 11-900-002      IVA RETENIDO         A Activo Deu..Afe..       Peso..     
+    .. 11-900-003      IDE                  A Activo Deu..Afe..       Peso..     
+    .. 11-900-004      ISR RETENCIONES DE.. A Activo Deu..Afe..       Peso..     
+    .. 11-900-005      IETU A FAVOR         A Activo Deu..Afe..       Peso..     
+      312-100-000      CLIENTES             A Activo Deu..         Si Peso..     
+    .. 12-101-001      ABASTECEDORA DE FR.. A Activo Deu..Afe..       Peso..     
+    .. 12-101-009      ARMENTA SOTO ABRAHAM A Activo Deu..Afe..       Peso..     
+    .. 12-101-022      ALVAREZ GARCIA ROD.. A Activo Deu..Afe..       Peso..     
+    .. 12-101-026      ARMENTA SOTO JOSE    A Activo Deu..Afe..       Peso..     
+    .. 12-101-028      ARMENTA ALAPISCO J.. A Activo Deu..Afe..       Peso..     
+    .. 12-101-031      ACEVES ROCHA MARIA.. A Activo Deu..Afe..       Peso..     
+    .. 12-101-032      AGRO MEXICANA GAIT.. A Activo Deu..Afe..       Peso..     
+    .. 12-101-033      ARMENTA MEZA PORFI.. A Activo Deu..Afe..       Peso..     
+    .. 12-102-009      BIMBO SA DE CV       A Activo Deu..Afe..       Peso..     
+    .. 12-103-001      CITROJUGO SA DE CV   A Activo Deu..Afe..       Peso..     
+    .. 12-103-002      COMESTIBLES MALDON.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-003      COLIMAN DISTRIBUID.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-004      COLIMAN PACIFIC CO.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-005      DE LA COSTA FRUTAS.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-006      CASTA?OS RUELAS MA.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-010      CARRILLO MENDOZA R.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-025      CENTRAL DE VERDURA.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-030      COLIMAN FRUTAS FIN.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-033      COMERCIALIZADORA T.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-034      CHAVARIN NAVARRO F.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-035      CENTRAL DETALLISTA.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-036      CUANANASHI SPR DE .. A Activo Deu..Afe..       Peso..     
+    .. 12-103-037      CONSEJO ESTATAL DE.. A Activo Deu..Afe..       Peso..     
+    .. 12-103-038      CENTRAL PLATANERA .. A Activo Deu..Afe..       Peso..     
+    .. 12-104-012      DEPOSITO DE CLIENT.. A Activo Deu..Afe..       Peso..     
+    .. 12-104-013      DIRECTOS DEL CAMPO.. A Activo Deu..Afe..       Peso..     
+    .. 12-105-007      EL COCHO PRODUCE     A Activo Deu..Afe..       Peso..     
+    .. 12-106-001      FRUTAS COLIMAN DE .. A Activo Deu..Afe..       Peso..     
+    .. 12-106-004      FRUTAS FINAS DEL N.. A Activo Deu..Afe..       Peso..     
+    .. 12-106-007      FRUTAS FINAS DEL N.. A Activo Deu..Afe..       Peso..     
+    .. 12-106-021      FERNANDEZ CAZAREZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-106-025      FRESCAR SA DE CV     A Activo Deu..Afe..       Peso..     
+    .. 12-106-026      FRUTAS Y LEGUMBRES.. A Activo Deu..Afe..       Peso..     
+    .. 12-106-027      FRONTERA PRODUCE LTD A Activo Deu..Afe..       Peso..     
+    .. 12-106-029      FRUTAS PERLA SA DE.. A Activo Deu..Afe..       Peso..     
+    .. 12-106-030      FIDEICOMISO DE RIE.. A Activo Deu..Afe..       Peso..     
+    .. 12-106-031      FRESCO PRODUCE LLC   A Activo Deu..Afe..       Peso..     
+    .. 12-106-032      FRANCO OROZCO VICT.. A Activo Deu..Afe..       Peso..     
+    .. 12-107-009      GOMEZ LOPEZ EDITH    A Activo Deu..Afe..       Peso..     
+    .. 12-107-016      GARCIA BENITEZ JUA.. A Activo Deu..Afe..       Peso..     
+    .. 12-107-018      GERARDO RIOS JESUS.. A Activo Deu..Afe..       Peso..     
+    .. 12-107-021      GUTIERREZ MERCADO .. A Activo Deu..Afe..       Peso..     
+    .. 12-107-022      GRACIAN MADRIGAL R.. A Activo Deu..Afe..       Peso..     
+    .. 12-109-004      IMPORTADORA Y EXPO.. A Activo Deu..Afe..       Peso..     
+    .. 12-109-005      INMOBILIARIA VILLA.. A Activo Deu..Afe..       Peso..     
+    .. 12-112-003      LIMONES DEL VALLE .. A Activo Deu..Afe..       Peso..     
+    .. 12-112-012      LIMONES COLIMAN SA.. A Activo Deu..Afe..       Peso..     
+    .. 12-112-015      LIMONES TITO SA DE.. A Activo Deu..Afe..       Peso..     
+    .. 12-112-017      LA VERDULERIA DE T.. A Activo Deu..Afe..       Peso..     
+    .. 12-112-018      LOPEZ ARAUJO ROBERTO A Activo Deu..Afe..       Peso..     
+    .. 12-115-015      MAGA?A VELAZQUEZ J.. A Activo Deu..Afe..       Peso..     
+    .. 12-115-021      MONICA PRODUCE SA .. A Activo Deu..Afe..       Peso..     
+    .. 12-115-080      NOLAZCO COTA CANDI.. A Activo Deu..Afe..       Peso..     
+    .. 12-115-082      MORENO ZURITA LIZETH A Activo Deu..Afe..       Peso..     
+    .. 12-115-083      MENDEZ MEJIA GERARDO A Activo Deu..Afe..       Peso..     
+    .. 12-116-001      OLIVERA ESTRADA JA.. A Activo Deu..Afe..       Peso..     
+    .. 12-116-009      OROZCO ARREGUIN FR.. A Activo Deu..Afe..       Peso..     
+    .. 12-116-010      OCHOA URE?A JAIME    A Activo Deu..Afe..       Peso..     
+    .. 12-116-013      ORTIZ QUI?ORES RIC.. A Activo Deu..Afe..       Peso..     
+    .. 12-116-014      ORTIZ QUI?ONES CAR.. A Activo Deu..Afe..       Peso..     
+    .. 12-116-015      OJEDA SALCIDO MARI.. A Activo Deu..Afe..       Peso..     
+    .. 12-116-016      OCHOA URE?A JOSE A.. A Activo Deu..Afe..       Peso..     
+    .. 12-117-007      PUBLICO EN GENERAL   A Activo Deu..Afe..       Peso..     
+    .. 12-117-009      PEREZ OCON MANUEL    A Activo Deu..Afe..       Peso..     
+    .. 12-117-010      PITHER SA DE CV      A Activo Deu..Afe..       Peso..     
+    .. 12-117-012      PROLIM DE COLIMA S.. A Activo Deu..Afe..       Peso..     
+    .. 12-117-013      PADILLA RIVERA SIL.. A Activo Deu..Afe..       Peso..     
+    .. 12-117-014      PROMOTORA MEXICANA.. A Activo Deu..Afe..       Peso..     
+    .. 12-118-001      QUALI FRUIT SA DE CV A Activo Deu..Afe..       Peso..     
+    .. 12-120-001      RAMBHERAP SA DE CV   A Activo Deu..Afe..       Peso..     
+    .. 12-120-010      RENTERIA LARIOS JO.. A Activo Deu..Afe..       Peso..     
+    .. 12-120-013      REYNA RAMIREZ OLIV.. A Activo Deu..Afe..       Peso..     
+    .. 12-120-014      ROMAS R US INC (EX.. A Activo Deu..Afe..       Peso..     
+    .. 12-120-017      ROSSINI TELLEZ ROMAN A Activo Deu..Afe..       Peso..     
+    .. 12-120-018      RAMIREZ BERNAL VIC.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-010      SICAR SA DE CV       A Activo Deu..Afe..       Peso..     
+    .. 12-121-012      SERRANO VARELA MAR.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-015      Super Fenix SA de CV A Activo Deu..Afe..       Peso..     
+    .. 12-121-017      SONORA PRODUCE (EX.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-019      SM FRUTOS SELECTOS.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-020      SUPER MERCADOS ORG.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-021      SANCHEZ GONZALEZ J.. A Activo Deu..Afe..       Peso..     
+    .. 12-121-022      SELECTOS ELIZONDO .. A Activo Deu..Afe..       Peso..     
+    .. 12-122-003      TIENDAS DE AUTOSER.. A Activo Deu..Afe..       Peso..     
+    .. 12-124-011      VILLALVAZO CONTRER.. A Activo Deu..Afe..       Peso..     
+    .. 12-128-001      ZARATE CHAVEZ MIGU.. A Activo Deu..Afe..       Peso..     
+    .. 12-128-003      ZARAGOZA MURILLO A.. A Activo Deu..Afe..       Peso..     
+      312-300-000      DEUDORES DIVERSOS    A Activo Deu..         Si Peso..     
+    .. 12-300-001      GOMEZ BECERRA MARI.. A Activo Deu..Afe..       Peso..     
+    .. 12-300-002      GOMEZ TERRONES RAU.. A Activo Deu..Afe..       Peso..     
+    .. 12-300-010      ALCARAZ GUERRERO J.. A Activo Deu..Afe..       Peso..     
+    .. 12-300-011      HERRERA CRUZ PEDRO   A Activo Deu..Afe..       Peso..     
+    .. 12-303-001      CAMACHO CASAS GENARO A Activo Deu..Afe..       Peso..     
+    .. 12-303-002      CONTRERAS JAIME      A Activo Deu..Afe..       Peso..     
+    .. 12-303-003      CITROJUGO SA DE CV   A Activo Deu..Afe..       Peso..     
+    .. 12-303-004      CEJA RAZO JUAN       A Activo Deu..Afe..       Peso..     
+    .. 12-303-010      CARDENAS MENDEZ LU.. A Activo Deu..Afe..       Peso..     
+    .. 12-303-011      CARDENAS MARTINEZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-303-012      ESCOBEDO PE?ALOZA .. A Activo Deu..Afe..       Peso..     
+    .. 12-303-013      CORPORACION INDUST.. A Activo Deu..Afe..       Peso..     
+    .. 12-308-001      GASOLINERA DEL PAC.. A Activo Deu..Afe..       Peso..     
+    .. 12-308-002      GOMEZ CORNEJO SANDRA A Activo Deu..Afe..       Peso..     
+    .. 12-308-011      GUDI?O TOSCANO VIA.. A Activo Deu..Afe..       Peso..     
+    .. 12-308-028      GOMEZ GUDI?O SPR D.. A Activo Deu..Afe..       Peso..     
+    .. 12-308-031      GUDI?O OCHOA CARME.. A Activo Deu..Afe..       Peso..     
+    .. 12-309-001      INDUSTRIAS DEL PAR.. A Activo Deu..Afe..       Peso..     
+    .. 12-312-018      MORENO RODRIGUEZ R.. A Activo Deu..Afe..       Peso..     
+    .. 12-312-019      MORENO MAGA?A GRAC.. A Activo Deu..Afe..       Peso..     
+    .. 12-312-029      MENDOZA GOMEZ JAVIER A Activo Deu..Afe..       Peso..     
+    .. 12-312-030      MAGA?A DELGADO ALE.. A Activo Deu..Afe..       Peso..     
+    .. 12-312-033      MAGA?A HERNANDEZ M.. A Activo Deu..Afe..       Peso..     
+    .. 12-312-034      MATERIALES Y COMPL.. A Activo Deu..Afe..       Peso..     
+    .. 12-313-001      LOPEZ ORTEGA CARLO.. A Activo Deu..Afe..       Peso..     
+    .. 12-315-004      ORO VERDE SA DE CV   A Activo Deu..Afe..       Peso..     
+    .. 12-315-007      OSEGUERA RIOS JUAN.. A Activo Deu..Afe..       Peso..     
+    .. 12-316-001      PLASTICOS ROMO DE .. A Activo Deu..Afe..       Peso..     
+    .. 12-318-001      RAMIREZ FLORES VIC.. A Activo Deu..Afe..       Peso..     
+    .. 12-318-002      SURTIDORA DE FERRE.. A Activo Deu..Afe..       Peso..     
+    .. 12-318-003      SALDA?A ZEPEDA NAD.. A Activo Deu..Afe..       Peso..     
+    .. 12-318-004      RODRIGUEZ JOSE DE .. A Activo Deu..Afe..       Peso..     
+    .. 12-318-005      RODRIGUEZ ACEVEDO .. A Activo Deu..Afe..       Peso..     
+    .. 12-319-001      TORRES GONZALEZ MA.. A Activo Deu..Afe..       Peso..     
+    .. 12-319-002      RAMIREZ ROBLES CLA.. A Activo Deu..Afe..       Peso..     
+    .. 12-322-007      VELAZQUEZ TORRES P.. A Activo Deu..Afe..       Peso..     
+    .. 12-322-015      VERDUZCO VILLANUEV.. A Activo Deu..Afe..       Peso..     
+    .. 12-327-001      ZARAGOZA ARREDONDO.. A Activo Deu..Afe..       Peso..     
+    .. 12-400-000      PRESTAMOS SOBRE NO.. A Activo Deu..            Peso..     
+    .. 12-401-001      ALCARAZ ASCENCIO A.. A Activo Deu..Afe..       Peso..     
+    .. 12-401-002      AVILES FELIX OCTAV.. A Activo Deu..Afe..       Peso..     
+    .. 12-401-003      ALCARAZ ASCENCIO H.. A Activo Deu..Afe..       Peso..     
+    .. 12-401-004      ACOSTA CAZARES JES.. A Activo Deu..Afe..       Peso..     
+    .. 12-402-001      BALTAZAR CORONA ME.. A Activo Deu..Afe..       Peso..     
+    .. 12-403-001      CABRERA MORENO JESUS A Activo Deu..Afe..       Peso..     
+    .. 12-403-002      CONTRERAS GUARDADO.. A Activo Deu..Afe..       Peso..     
+    .. 12-403-003      CAZAREZ VELA ERIKA.. A Activo Deu..Afe..       Peso..     
+    .. 12-403-004      CHAVEZ ORTIZ JOSE .. A Activo Deu..Afe..       Peso..     
+    .. 12-403-005      CONTRERAS HINOJOZA.. A Activo Deu..Afe..       Peso..     
+    .. 12-403-006      CARDENAS GONZALEZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-403-007      CONTRERAS VAZQUEZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-403-008      CORONA ZAMBRANO MA.. A Activo Deu..Afe..       Peso..     
+    .. 12-403-009      CAMPOS BENITEZ JOS.. A Activo Deu..Afe..       Peso..     
+    .. 12-404-001      DOMINGUEZ GARCIA V.. A Activo Deu..Afe..       Peso..     
+    .. 12-404-002      DIAZ ARREZOLA AIDEE  A Activo Deu..Afe..       Peso..     
+    .. 12-405-001      ESPINOZA RUIZ BENJ.. A Activo Deu..Afe..       Peso..     
+    .. 12-406-001      FLOREZ COLLAZO RAUL  A Activo Deu..Afe..       Peso..     
+    .. 12-406-002      FLORES VAZQUEZ SOFIA A Activo Deu..Afe..       Peso..     
+    .. 12-406-003      FIERROS ARRIOLA BL.. A Activo Deu..Afe..       Peso..     
+    .. 12-407-001      GOMEZ ALVARADO ANT.. A Activo Deu..Afe..       Peso..     
+    .. 12-407-002      GUDI?O MOJICA JOSE.. A Activo Deu..Afe..       Peso..     
+    .. 12-407-003      GUERRERO GALLEGOS .. A Activo Deu..Afe..       Peso..     
+    .. 12-407-004      GONZALEZ CARDENAS .. A Activo Deu..Afe..       Peso..     
+    .. 12-407-005      GOMEZ GUDI?O FRANC.. A Activo Deu..Afe..       Peso..     
+    .. 12-407-006      GOMEZ GUDI?O MARIA.. A Activo Deu..Afe..       Peso..     
+    .. 12-408-001      HERNANDEZ MANRIQUE.. A Activo Deu..Afe..       Peso..     
+    .. 12-410-001      JIMENEZ AVILEZ CRI.. A Activo Deu..Afe..       Peso..     
+    .. 12-410-002      JAIMES MENDOZA JOS.. A Activo Deu..Afe..       Peso..     
+    .. 12-412-001      LOPEZ AGUILAR RAMIRO A Activo Deu..Afe..       Peso..     
+    .. 12-412-002      LUZ MARISCAL TERESA  A Activo Deu..Afe..       Peso..     
+    .. 12-413-001      MIRELES VELAZCO MA.. A Activo Deu..Afe..       Peso..     
+    .. 12-413-002      MORONES GUTIERREZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-413-003      MONTES DE OCA MORA.. A Activo Deu..Afe..       Peso..     
+    .. 12-413-004      MUNGUIA ESCALERA J.. A Activo Deu..Afe..       Peso..     
+    .. 12-413-005      MARTINEZ GARCIA MA.. A Activo Deu..Afe..       Peso..     
+    .. 12-413-006      MARROQUIN MENDOZA .. A Activo Deu..Afe..       Peso..     
+    .. 12-416-001      ORDAZ ARTEAGA ROSA   A Activo Deu..Afe..       Peso..     
+    .. 12-416-002      ORTEGA JIMENEZ VIR.. A Activo Deu..Afe..       Peso..     
+    .. 12-416-003      ORDAZ ARTEAGA SALV.. A Activo Deu..Afe..       Peso..     
+    .. 12-418-001      REYNAGA CHAVIRA JU.. A Activo Deu..Afe..       Peso..     
+    .. 12-419-001      ROJAS MARIA          A Activo Deu..Afe..       Peso..     
+    .. 12-419-002      RODRIGUEZ GALVEZ J.. A Activo Deu..Afe..       Peso..     
+    .. 12-419-003      RIOS ALVAREZ PEDRO   A Activo Deu..Afe..       Peso..     
+    .. 12-419-004      RESENDIZ AVALOS RAUL A Activo Deu..Afe..       Peso..     
+    .. 12-420-001      SOTERIO LOPEZ ALBE.. A Activo Deu..Afe..       Peso..     
+    .. 12-420-002      SANDOVAL COVARRUBI.. A Activo Deu..Afe..       Peso..     
+    .. 12-421-001      TORRES CARDENAS SA.. A Activo Deu..Afe..       Peso..     
+    .. 12-422-001      URZUA VILLEGAS FER.. A Activo Deu..Afe..       Peso..     
+    .. 12-423-001      VELASCO HERNANDEZ .. A Activo Deu..Afe..       Peso..     
+    .. 12-423-002      VAZQUEZ JUAN ANTONIO A Activo Deu..Afe..       Peso..     
+    .. 12-423-003      VILLA FREGOSO ROSA.. A Activo Deu..Afe..       Peso..     
+    .. 12-423-004      VAZQUEZ MENDOZA JU.. A Activo Deu..Afe..       Peso..     
+    .. 12-423-005      VEGA HERNANDEZ CAR.. A Activo Deu..Afe..       Peso..     
+    .. 12-423-006      VAZQUEZ FLORES SOFIA A Activo Deu..Afe..       Peso..     
+    .. 12-423-007      VERA BRICE?O ELISEO  A Activo Deu..Afe..       Peso..     
+    .. 12-426-001      YAGUACA CARDENAS S.. A Activo Deu..Afe..       Peso..     
+    .. 12-427-001      ZAMUDIO CAZAREZ CA.. A Activo Deu..Afe..       Peso..     
+      312-700-000      IVA ACREDITABLE      A Activo Deu..         Si Peso..     
+    .. 12-701-001      IVA ACREDITABLE PO.. A Activo Deu..Afe..       Peso..     
+    .. 12-701-002      IVA ACREDITABLE PA.. A Activo Deu..Afe..       Peso..     
+      313-000-000      INVENTARIOS          A Activo Deu..         Si Peso..     
+    .. 13-000-001      REJAS DE MADERA TR.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-002      ARPILLAS             A Activo Deu..Afe..       Peso..     
+    .. 13-000-003      PAPEL                A Activo Deu..Afe..       Peso..     
+    .. 13-000-004      BOLSA DE PLASTICO .. A Activo Deu..Afe..       Peso..     
+    .. 13-000-005      CERA                 A Activo Deu..Afe..       Peso..     
+    .. 13-000-007      FLEJE                A Activo Deu..Afe..       Peso..     
+    .. 13-000-008      ETIQUETAS            A Activo Deu..Afe..       Peso..     
+    .. 13-000-009      HARINA               A Activo Deu..Afe..       Peso..     
+    .. 13-000-011      GRAPAS               A Activo Deu..Afe..       Peso..     
+    .. 13-000-012      SELLOS               A Activo Deu..Afe..       Peso..     
+    .. 13-000-013      CAJA DE CARTON       A Activo Deu..Afe..       Peso..     
+    .. 13-000-014      CAJA DE PLASTICO     A Activo Deu..Afe..       Peso..     
+    .. 13-000-015      ESQUINEROS           A Activo Deu..Afe..       Peso..     
+    .. 13-000-016      ROLLO DE ALAMBRE C.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-017      PROGIB               A Activo Deu..Afe..       Peso..     
+    .. 13-000-018      TARIMAS              A Activo Deu..Afe..       Peso..     
+    .. 13-000-019      CAJA COLIMA 30K      A Activo Deu..Afe..       Peso..     
+    .. 13-000-022      PELICULA ESTIRABLE.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-023      CITRUS FIX           A Activo Deu..Afe..       Peso..     
+    .. 13-000-026      ETIQUETA  CIU (MAL.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-027      MALLA VERDE CIU (M.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-028      FILM GENERICO  (CIU) A Activo Deu..Afe..       Peso..     
+    .. 13-000-029      TARIMA CERTIFICADA   A Activo Deu..Afe..       Peso..     
+    .. 13-000-030      CITRUS BRITE 350     A Activo Deu..Afe..       Peso..     
+    .. 13-000-031      ACIDO SULF. BUFFER.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-033      LIMON                A Activo Deu..Afe..       Peso..     
+    .. 13-000-034      TARIMAS EXPORTACION  A Activo Deu..Afe..       Peso..     
+    .. 13-000-035      PLANTAS GPA          A Activo Deu..Afe..       Peso..     
+    .. 13-000-036      PLANTAS SNJO         A Activo Deu..Afe..       Peso..     
+    .. 13-000-037      PLANTAS PI?AS        A Activo Deu..Afe..       Peso..     
+    .. 13-000-038      PROD. QUIMICOS GPA   A Activo Deu..Afe..       Peso..     
+    .. 13-000-039      PROD.QUIMICOS SNJO   A Activo Deu..Afe..       Peso..     
+    .. 13-000-040      PROD.QUIMICOS PI?AS  A Activo Deu..Afe..       Peso..     
+    .. 13-000-041      CINTA TECOLIMA PI?AS A Activo Deu..Afe..       Peso..     
+    .. 13-000-042      ETIQ GOLD PI?A TEC.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-043      AGUJA SUJETADOR P/.. A Activo Deu..Afe..       Peso..     
+    .. 13-000-044      SUJETADOS STAN PINAS A Activo Deu..Afe..       Peso..     
+    .. 13-000-045      ROLLO DE PLASTICO .. A Activo Deu..Afe..       Peso..     
+    .. 13-000-046      PISTOLA STD GENERICA A Activo Deu..Afe..       Peso..     
+    .. 13-000-047      CERA SEMDER FRESH    A Activo Deu..Afe..       Peso..     
+    .. 13-000-048      PROD QUIMICOS EL M.. A Activo Deu..Afe..       Peso..     
+      314-000-000      ACCIONISTAS          A Activo Deu..         Si Peso..     
+    .. 14-000-001      Gomez Terrones Tau.. A Activo Deu..Afe..       Peso..     
+    .. 14-000-002      Gudi?o Toscano  Vi.. A Activo Deu..Afe..       Peso..     
+     2 00-130-000      FIJO                 A Activo Deu..         SubPeso..     
+      315-000-000      TERRENOS             A Activo Deu..         Si Peso..     
+    .. 15-000-001      TERRENOS             A Activo Deu..Afe..       Peso..     
+      315-100-000      EDIFICIO             A Activo Deu..         Si Peso..     
+    .. 15-100-001      EDIFICIO             A Activo Deu..Afe..       Peso..     
+    .. 15-100-002      NIVELADOR ORILLADO.. A Activo Deu..Afe..       Peso..     
+    .. 15-100-003      AMPLIACION DE NAVE.. A Activo Deu..Afe..       Peso..     
+    .. 15-100-004      ESTACIONAMIENTO      A Activo Deu..Afe..       Peso..     
+    .. 15-100-005      FUENTE               A Activo Deu..Afe..       Peso..     
+    .. 15-100-006      MEJORAS A BODEGA 3.. A Activo Deu..Afe..       Peso..     
+    .. 15-100-007      EMPEDRADO 2011       A Activo Deu..Afe..       Peso..     
+    .. 15-100-008      EDIFICIO P           A Activo Deu..Afe..       Peso..     
+    .. 15-100-009      AMPLIACION DE NAVE.. A Activo Deu..Afe..       Peso..     
+      315-150-000      REVALUACION DE EDI.. A Activo Deu..Afe..    Si Peso..     
+      315-200-000      MAQUINARIA Y EQUIPO  A Activo Deu..         Si Peso..     
+    .. 15-200-001      PRENFRIADO 18/03/2.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-002      FLEJADORA SEMIAUTO.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-003      SOLDADORA MI250LCE.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-004      BASCULA 100 KG.      A Activo Deu..Afe..       Peso..     
+    .. 15-200-005      20 MTS DE TRANSP D.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-006      FLEJADORA SEMIAUTO.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-007      BASCULA 400 KG  TO.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-009      MONTACARGAS MARCA .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-010      MOTOSIERRA MOD340 .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-011      PATIN HIDRAULICO D.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-012      PATIN HIDRAULICO D.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-013      COMPRESOR  GA 15FF.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-014      COMPRESOR GA15FF 1.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-015      EXTRACTOR ATMOSF T.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-016      EXT AXIALES MOD AX.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-017      SISTEMA ELECTRICO .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-018      ENMALLADORA SORMA .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-019      CARGADOR DE MALLA .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-020      TUBO COLOCADOR DE .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-021      4 SALIDAS PARA MAQ.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-022      MODULO DE 4 SALIDA.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-023      CAMARA DE CONSERVA.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-024      CAMARA DE REFRIGER.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-025      ELEVADOR MOD 66850.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-026      REMOLQUE CAMA BAJA.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-027      EXTRACTOR HGT 1000.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-028      CAMARA DE REFRIGER.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-029      CAMARA DE REFRIGER.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-030      EPO DE REFRIGERACI.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-031      EPO DE REFRIGERACI.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-032      CARRETILLA HIDRAHU.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-033      ROLLO DE MALLA INT.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-034      BOMBA VERTICAL TIP.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-035      TURBINA DE 19X19 P.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-036      CALIBRADORA  CIU 2.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-037      BASCULA ELECTRONIC.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-038      MAQUINA SELECCIONA.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-039      COMPRESOR SEMI HER.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-040      PATIN HIDRAULICA 2.. A Activo Deu..Afe..       Peso..     
+    .. 15-200-041      BASCULA TORREY NS .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-042      BASCULA TORREY NS .. A Activo Deu..Afe..       Peso..     
+    .. 15-200-043      BASCULA TORREY NS .. A Activo Deu..Afe..       Peso..     
+      315-250-000      REVALUACION DE MAQ.. A Activo Deu..Afe..    Si Peso..     
+      315-300-000      MOBILIARIO Y EQUIPO  A Activo Deu..         Si Peso..     
+    .. 15-300-001      ANTENA DE REJILLAS.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-002      AIRE ACONDICIONADO.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-003      2 AIRE ACOND MULTI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-004      TORRE 100MTS 12-09.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-005      2 MODULO SECRETARI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-006      TELEFONOS Y EPO DE.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-007      CONMUTADOR PANASON.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-008      INSTALACION DE TAR.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-009      EXTRACTOR MOD HGT1.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-010      CIRC  AIRE MARCA S.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-011      EXTRACTOR ELICORDI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-012      AIRE ACOND TIPO MI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-013      1 CREDENZA DE USOS.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-014      1 MESA DE JUNTAS 2.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-015      LIBRERO PARA AREA .. A Activo Deu..Afe..       Peso..     
+    .. 15-300-016      SOFA DE 2 PZS TAPI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-017      LIBRERO PARA RECOP.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-018      MUEBLE ESP.3.03MTS.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-019      2 BANCAS TUBULARES.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-020      MODULOS DE TRABAJO.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-021      4 SILLAS SECRETARI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-022      AIRE ACONDICIONADO.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-023      MESA OVALADA 1.60 .. A Activo Deu..Afe..       Peso..     
+    .. 15-300-024      PANTALLA LCD 22 HD   A Activo Deu..Afe..       Peso..     
+    .. 15-300-025      AREA DE TRABAJO CU.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-026      MESA REDONDA DE 1M.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-027      3 SILLAS SECRETARI.. A Activo Deu..Afe..       Peso..     
+    .. 15-300-028      2 LIBRERO 5 REPISAS  A Activo Deu..Afe..       Peso..     
+    .. 15-300-029      COMEDORES TRABAJAD.. A Activo Deu..Afe..       Peso..     
+      315-400-000      AMORTIZACIONES ACU.. A Activo Deu..            Peso..     
+    .. 15-400-100      AMORTIZACION DE ED.. A Activo Deu..Afe..    Si Peso..     
+    .. 15-400-110      AMORTIZACION DE MO.. A Activo Deu..Afe..    Si Peso..     
+    .. 15-400-115      AMORTIZACION DE MA.. A Activo Deu..Afe..    Si Peso..     
+    .. 15-400-200      AMORTIZACION DE EQ.. A Activo Deu..Afe..    Si Peso..     
+      315-500-000      EQUIPO DE TRANSPORTE A Activo Deu..         Si Peso..     
+    .. 15-500-001      EQUIPO DE TRANSPORTE A Activo Deu..Afe..       Peso..     
+    .. 15-500-002      CAMION DINA CITUS .. A Activo Deu..Afe..       Peso..     
+    .. 15-500-003      TACOMA 2006  27/11.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-004      CUATRIMOTO SUZUKI .. A Activo Deu..Afe..       Peso..     
+    .. 15-500-005      CAMIONETA NISSAN M.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-006      CAMIONETA SEQUOIA .. A Activo Deu..Afe..       Peso..     
+    .. 15-500-007      TACOMA 2010 10/09/.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-008      INTERNACIONAL 2004.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-009      CAMIONETA HYLUX TO.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-010      MAZDA 3 4P 2011 24.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-011      MINI BUS MERCEDES .. A Activo Deu..Afe..       Peso..     
+    .. 15-500-012      CAMIONETA NISSAN M.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-013      UNIDAD USADA FORD .. A Activo Deu..Afe..       Peso..     
+    .. 15-500-014      CAMIONETA USADA NI.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-015      COROLLA 2013 XLE 0.. A Activo Deu..Afe..       Peso..     
+    .. 15-500-016      CASETA TRACTOR       A Activo Deu..Afe..       Peso..     
+    .. 15-500-017      CAMION FREIGHTLINE.. A Activo Deu..Afe..       Peso..     
+      315-500-110      DEP ACUM DE EQUIPO.. A Activo Deu..Afe..    Si Peso..     
+      315-600-000      EQUIPO DE COMPUTO    A Activo Deu..         Si Peso..     
+    .. 15-600-001      MONITOR 17  DELL C.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-002      MONITOR DELL 17   .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-003      HP EMP SR1918LA A6.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-004      IMPRESORA EPSON FX.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-005      COMPUTADORA COMPAQ.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-006      HP PRESARIO SR 191.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-007      IMPRESORA EPSON FX.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-008      IMPRESORA  HP LASE.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-009      FOTOCOPIADORA MUL .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-010      IMPRESORAS EPSON F.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-011      SISTEMA PARA CONTR.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-012      PORTAL WE PROD Y O.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-013      COMPUTADORA HEWLET.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-014      COMPUTADORA HP DX2.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-015      COMPUTADORA PORTAT.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-016      COMPUTADORA TOSHIB.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-017      COMPUTADORA TOSHIB.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-018      CPU CON TARJETAS D.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-019      COPIADORA DIGITAL .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-020      COMPUTADORA CON DELL A Activo Deu..Afe..       Peso..     
+    .. 15-600-021      CPU VOSTRO 230MT, .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-022      CAMARAS DE VIGILAN.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-023      COMPUTADORA DELL I.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-024      DISPOSITIVO DE SEG.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-025      PROYECTOR SONY       A Activo Deu..Afe..       Peso..     
+    .. 15-600-026      SONIDO Y MICROFONO   A Activo Deu..Afe..       Peso..     
+    .. 15-600-027      CPU DELL INSPIRON .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-028      CPU DELL INSPIRON .. A Activo Deu..Afe..       Peso..     
+    .. 15-600-029      MONITOR SAMSUNG LE.. A Activo Deu..Afe..       Peso..     
+    .. 15-600-030      CPU ENSAMBLADO DUA.. A Activo Deu..Afe..       Peso..     
+      315-700-000      EQUIPO DIVERSO       A Activo Deu..         Si Peso..     
+    .. 15-700-001      EQUIPO DIVERSO       A Activo Deu..Afe..       Peso..     
+    .. 15-700-002      ESTUFA COMPACTA 4 .. A Activo Deu..Afe..       Peso..     
+    .. 15-700-111      PODADORA ROTATIVA .. A Activo Deu..Afe..       Peso..     
+      315-700-110      DEP ACUM DE EQUIPO.. A Activo Deu..Afe..    Si Peso..     
+      315-800-000      CONSTRUCCIONES EN .. A Activo Deu..         Si Peso..     
+    .. 15-800-001      CONSTRUCCION EN PR.. A Activo Deu..Afe..       Peso..     
+    .. 15-800-002      HONORARIOS A PROFE.. A Activo Deu..Afe..       Peso..     
+    .. 15-800-003      MATERIAL ELECTRICO   A Activo Deu..Afe..       Peso..     
+    .. 15-800-004      DIVERSOS             A Activo Deu..Afe..       Peso..     
+      315-900-000      EQUIPO AGRICOLA      A Activo Deu..         Si Peso..     
+    .. 15-900-001      SPRAY BOOM 26/10/2.. A Activo Deu..Afe..       Peso..     
+      315-950-000      REVALUACION DE ARE.. A Activo Deu..Afe..    Si Peso..     
+     2 16-000-000      DIFERIDO             A Activo Deu..         SubPeso..     
+      316-100-000      DEPOSITOS EN GARAN.. A Activo Deu..         Si Peso..     
+    .. 16-100-001      CANACINTRA           A Activo Deu..Afe..       Peso..     
+    .. 16-100-002      PRIMAS DE SEGUROS .. A Activo Deu..Afe..       Peso..     
+    .. 16-100-003      CFE                  A Activo Deu..Afe..       Peso..     
+    .. 16-100-004      DEPOSITO POR USO D.. A Activo Deu..Afe..       Peso..     
+    1  00-200-000      PASIVO               D Pasivo Acr..         TitPeso..     
+     2 00-210-000      CIRCULANTE           D Pasivo Acr..         SubPeso..     
+      321-100-000      PROVEEDORES DIVERSOS D Pasivo Acr..         Si Peso..     
+    .. 21-101-001      ASOCIACION CONTRA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-002      ACEVES CORTES CLEM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-003      AVALOS HERNANDEZ U.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-004      ACERO SUECO PALME .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-005      AVILES HERNANDEZ S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-006      ALONSO VILLASANTE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-010      AUTOCHECK DE TECOM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-011      AUTOMOTRIZ RANCAGU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-012      AYALA RODRIGUEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-140      ASOCIASION DE USUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-159      ALVAREZ MORALES IL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-164      AGUI?A IBARRA MA C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-165      AYALA EQUIPOS DE B.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-175      AGROSERVICIOS DE M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-177      ALARCON MORALES ES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-178      AUTOZONE DE MEXICO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-180      ALVAREZ CARDOSO PE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-181      AGUILAR HEREDIA BE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-182      AXA SEGUROS SA DE CV D Pasivo Acr..Afe..       Peso..     
+    .. 21-101-183      ANALISIS TECNICOS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-001      BOMBAS Y MOTORES D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-002      BYMTESA IRRIGATION.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-016      BRACAMONTES CEBALL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-017      BJD LUBRICANTES ES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-018      BRIZUELA ROSALES G.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-020      BANAMEX SA           D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-021      BANCO SANTANDER SA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-022      BANCOMER SA          D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-023      BITAL SA             D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-024      BANORTE SA           D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-025      BANCA AFIRME S A     D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-026      BANCO DEL BAJIO SA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-030      BARAJAS BARAJAS SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-031      BERNAL GUTIERREZ A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-032      BARON CHAVEZ SUSANA  D Pasivo Acr..Afe..       Peso..     
+    .. 21-102-033      BURGOS GARCIA MARI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-001      CAUDILLO TORRES AR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-002      CRUZ DE LA CRUZ GE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-003      CARGA COLIMAN SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-004      CONTRERAS CAMPOS E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-005      CARDENAS MARTINEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-006      COMISION FEDERAL D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-007      CAMACHO VALERIO MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-008      CARDENAS MARTINEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-009      CARDENAS MARTINEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-010      COCITEC MEXICANA S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-011      COMER Y DIST DE PL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-012      COMPA?IA IMPORTADO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-013      CABRERA MAGA?A OSC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-014      CASAREZ ESTRADA MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-015      CAMPANAS EXTRACTOR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-016      CARDENAS ORTEGA RO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-017      COVARRUBIAS CUELLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-018      COMISION NACIONAL .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-019      COMPETITIVE PRESS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-020      CASA GALLARDO SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-027      CERVANTES GUZMAN R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-028      CENTRO DE REHABILI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-029      CARDENAS MARTINEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-030      CERVANTES ESQUIVEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-103-031      CRUZ ROJA MEXICANA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-001      CHAVEZ SOLORIO FEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-015      COMUNICACIONES NEX.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-022      CASA AGRICOLA DE T.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-023      CASTA?EDA MORAN RA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-024      CASTA?EDA MORAN MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-025      CASILLAS CONTRERAS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-032      CORPORACION INDUST.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-037      CARRILLO MARTEL JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-038      CASTILLO JUAREZ HU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-049      COMITE ESTATAL DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-050      COMERCIALIZACION D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-062      CENTRO INTERNACION.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-063      CERVANTES GUZMAN I.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-064      CONCRETOS APASCO S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-070      CAMPOS DURAN ANGEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-071      CONSEJO ESTATAL DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-072      CBR PLUS MEXICO S .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-073      CALDERON TORRES AN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-074      CERVANTES AHUMADA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-075      CERVANTES LOPEZ ID.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-077      CONSEJO PARA EL DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-078      CALDERON ESTRADA M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-079      CONSTRUCCIONES Y T.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-080      CARDENAS MARTINEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-081      CONTRERAS MEZA MAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-082      CORTEZ VELAZQUEZ S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-083      CORONA TORRES ARMA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-084      CRUZ CASTILLO ANITA  D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-085      CASTRO MENDOZA DAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-087      CARRISALES VIRGEN .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-088      COMERCIALIZADORA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-089      CISNEROS SANCHEZ J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-090      CASTILLO ARTEGA JA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-091      CONCIENCIA DE TU E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-092      CASTREJON GOMEZ JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-093      COVARRUBIAS CARRAS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-094      CUEVAS VERDUZCO LU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-095      CYRSA CONSTRUCCION.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-104-096      CURIEL VILLALVAZO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-001      DE LOERA LOPEZ MOI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-002      DISCOMELPA SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-003      DIAZ GONZALEZ SERGIO D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-004      EMBOTELLADORA LA F.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-005      DISTRIBUIDORA DE J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-006      DISTRIBUIDORA Y TR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-007      DIAZ VILLA JESUS G.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-008      DELGADO PRECIADO M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-009      DIAZ ARIAS REFUGIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-010      DURAN TRUCKING S D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-011      DISTRIBUIDORA ARCA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-012      DISTRIBUIDORA ELEC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-021      DE ANDA MARTINEZ A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-023      DERIVADOS DE COCOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-026      Durand Barba Rosa .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-027      DE LA MADRID DE LA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-028      DEL TORO PARRA FEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-029      DIAZ DE LEON BUEND.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-032      DISTRIBUIDORA IM S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-105-036      DECCO JIFKINS MEXI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-001      ELECTRONIC DATA IN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-002      EMPRESAS UNIDAS CO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-003      EMPAQUE SAN JORGE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-007      ESTAFETA MEXICANA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-009      EL ENLACE COM SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-020      ERI GARELI SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-106-021      EXPLOTRANSPORTES E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-001      FERNANDEZ CAZAREZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-002      FARMACIAS DE SIMIL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-003      FELGAX SA DE CV      D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-004      FAVELA SAMANO JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-005      FAJARDO JIMENEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-010      FIGUEROA RODRIGUEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-011      FERRETERIA JEROMAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-012      FLORES MORALES FLO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-107-018      FABRICACION DE TAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-001      GASOLINERA DEL PAC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-002      GAS MENGUC SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-003      GALLEGOS TORRES GE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-004      GONZALEZ AVALOS JU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-005      GONZALEZ HERNANDEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-006      GALLARDO VALDOVINO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-007      GONZALEZ RAMIREZ J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-008      GOMEZ BECERRA MARI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-009      GRUPO CORPORATIVO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-010      GARCIA CORONA JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-011      GRAN CAFE DE LA PA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-012      GARCIA MURO ARACELI  D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-013      GASTELUM SOBAMPO G.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-014      GRUPO INDUSTRIAL G.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-015      GARCIA GARCIA KARE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-016      GDL MISION SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-017      GAETA NAVA MARTHA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-018      GOMEZ MARTINEZ CLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-019      GOMEZ GUDI?O FRANC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-020      GONZALEZ GARCIA GA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-021      GASTELUM GALLARDO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-022      GALVEZ SOLIS MELAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-023      GARCIA LARA MIGUEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-024      GONZALEZ OROZCO ER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-025      GOMEZ GUERRA ANGELA  D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-026      GONZALEZ ESPINOSA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-028      GUDI?O CHAVEZ CHRI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-029      GUDI?O TOSCANO J J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-030      GRUPO FERRETERO EL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-031      GUTIERREZ GONZALEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-032      GRUPO CANAVE SA DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-055      GONZALEZ HUERTA DA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-056      GONZALEZ MORALES J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-076      GEO MALLAS SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-108-078      GRUPO DOBLE RR REF.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-001      HOGAR DEL NI?O TEC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-002      HURTADO BORBOA CES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-003      HURTADO FELIX HUMB.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-004      HOLAN ARG SA DE CV   D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-005      HIDRO CONSULTA SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-006      HUERTA QUEIJEIRO M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-014      HERNANDEZ GUDI?O R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-109-017      HOME DEPOT MEXICO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-001      INDUSTRIAS ROCHIN .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-002      I?IGUEZ QUI?ONEZ J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-003      INDUSTRIAL CORDELE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-004      INOVVA MOBILIARIO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-005      I?IGUEZ MENDEZ MA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-006      INOXIDABLES REFRIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-007      INTESYS SA DE CV     D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-008      INNOVACION Y VANGU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-009      IMPORTACIONES A DI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-010      INSTITUTO MEXICANO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-016      HERNANDEZ LOPEZ CL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-017      JARDIN HUSQVARNA Y.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-110-018      JUAREZ BANDA MA DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-001      LOPEZ RODRIGUEZ JE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-002      LARIOS DAVILA DANIEL D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-003      LOPEZ COLOR S DE R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-004      LOPEZ RODRIGUEZ JU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-005      LUBRICANTES DE LA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-006      LLANTAS Y REFACCIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-007      LLAMAS GARCIA ROSA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-008      LARA VEGA ANUAR GU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-009      LA CASA DE SOCORRI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-010      LOPEZ FLORES REYNA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-011      LOPEZ DIAZ IGNACIO   D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-013      LLANTERA COSTERA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-018      LOPEZ RODRIGUEZ BL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-019      LUGO MALDONADO CES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-020      LOPEZ GONZALEZ RAM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-022      LIZARRAGA ZATARAIN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-023      LIZARRAGA LIZARRAG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-111-024      LARIOS ADAME MA ES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-001      MARTIN CASILLAS EF.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-002      MICHEL BARAJAS JOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-003      MAQUILADORA Y EXPO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-004      MEDINA MADERO GUIL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-005      MARTINEZ LOPEZ CEC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-006      MERCANTIL DE LAIME.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-007      MODA CERAMICA SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-008      MEXICO CALIDAD SUP.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-009      MARTINEZ JARA HECT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-010      MOSQUEDA PEREZ FRA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-011      MARTINEZ LOPEZ FEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-012      MEDINA PRECIADO AN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-013      MARTINEZ SIERRA VI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-014      MENDEZ CARDENAS JU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-015      MATERIALES Y COMPL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-016      MENDOZA SOLIS GAMA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-024      MICROS PAPELERIA Y.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-025      METTLER TOLEDO SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-026      MENDOZA GUZMAN MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-027      MELENDEZ GONZALEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-028      MENDOZA GONZALEZ B.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-035      MAGA?A DELGADO ALE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-036      MADRIGAL LOPEZ LET.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-040      MARIANO FERRERIRA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-041      MORENO FERNANDEZ A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-042      MORA NARANJO ALFREDO D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-045      MENDEZ RODRIGUEZ R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-046      MENDEZ ROJO MARIA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-048      MENDEZ GONZALEZ JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-049      MORALES QUILES MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-051      MAYER MARTINEZ Y A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-066      MAYOREO DE COPIADO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-070      MANTENIMIENTO INDU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-074      MIRELES AGUI?AGA M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-075      MADRIGAL TABARES F.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-076      MUNICIPIO DE TECOM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-077      MALDONADO IBA?EZ M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-078      MU?IZ ESTRADA EUST.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-079      MAYORISTAS ASOCIAD.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-113-080      MUNGUIA SOTO LUIS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-001      NEUMATICOS DE OCCI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-002      NORMEX DE MICHOACA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-003      NAVA PIMENTEL FRAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-007      NAVARRO ALTAMIRANO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-008      NAVARRO ARROYO MA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-009      NOVELA HERNANDEZ R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-010      NEGRETE RUELAS ANG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-012      NUEVA WALMART DE M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-013      NAVA GOMEZ HERIBER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-114-014      NU?EZ AGUIRRE MA I.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-115-001      KPJT CONSULTORES SC  D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-001      OROZCO VARGAS JULI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-002      OSEGUERA PARRA JOR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-004      OZ AUTOMOTRIZ DE C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-006      OCHOA HINOJOSA ARN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-007      OFFICE DEPOT DE ME.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-008      OPERADORA VIPS S D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-116-009      OSUNA HERNANDEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-001      PEREZ HERNANDEZ PE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-002      PARTIDA ALCALA MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-003      PREMIER LOGISTIC S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-004      PATRONATO PROEDUAC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-005      PROVEEDORA AGRICOL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-006      PLASCENCIA ACUEDUC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-007      PROYECTOS Y SISTEM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-008      PRIMUS LABORATORIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-009      PAPELERIA PROGRESO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-010      PANDURO CALVARIO E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-011      PINTO RODRIGUEZ EN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-012      PADILLA CARDENAS V.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-027      PEREGRINA CEBALLOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-028      PEREZ TAPIA TERESA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-029      PEREZ AGUILAR JUAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-030      PEREZ VILLA SAUL A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-035      PARRA RODRIGUEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-036      PROCURADORIA GENER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-037      PINTO GOMEZ MIGUEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-038      POLIACEROS SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-039      PARRA BECERRA LIBR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-040      POSADAS DE LATINOA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-048      PINO CELAYA BLANCA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-049      PACE INTERNATIONAL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-117-050      PRADO CERNA BENITO   C Pasivo Deu..Afe..       Peso..     
+    .. 21-117-051      PANDURO ESCARE?O J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-000      RAMIREZ PRIEGO DIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-001      RAMIREZ GUZMAN CON.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-002      RODRIGUEZ CONTRERA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-003      RODRIGUEZ DE LOERA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-004      ROMO FLORES FRANCI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-005      RODRIGUEZ ESCAMILL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-006      RIVERA MICHEL JUAN   D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-007      REFRIGERACION  Y A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-008      RAMIREZ RAMIREZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-009      RAMOS RAMOS JOSUE    D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-010      ROJAS GOMEZ LETICI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-011      ROCHA FLORES MARIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-012      RESTAURANTES ANGEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-013      RAMIREZ LUNA KARLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-014      RODRIGUEZ GONZALEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-015      RAMIREZ PONCE ANTO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-016      RODRIGUEZ CANDELAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-017      RODRIGUEZ SARABIA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-018      RIVERA ANGULO JORG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-019      RAMIREZ AGUIRRE JA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-020      RIVERA PI?ON AARON   D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-021      ROMERO ALBERTO       D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-022      RAMIREZ DELGADO JA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-119-023      ROJAS MARTINEZ MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-001      SISTEMAS DE INFORM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-002      SOCIEDAD COOPERATI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-003      SERVICIOS INTEGRAL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-004      SERVICIOS PARA REF.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-005      SORMA MEXICO S DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-008      SANCHEZ DENIZ JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-009      SOCIEDAD COOPERATI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-010      SANCHEZ PRECIADO M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-011      SOLIS TRUJILLO IRENE D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-012      SUITES CARIBE SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-013      SILVA NOYOLA MARIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-014      SOLANO ALCARAZ JOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-015      SANDOVAL LARA MIGU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-016      SOLANO VERA ROBERTO  D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-017      SILVA MEDINA PEDRO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-120-018      SANCHEZ GONZALEZ A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-001      TREJO NAVARRO MIGUEL D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-002      TELEFONOS DE MEXIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-003      TORRES CERVANTES M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-004      TRANSPORTES ORCIS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-005      TEODORO MEJIA ANTO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-006      TUBERIAS VENEGAS E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-007      URQUIETA ALONSO ER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-008      TRANS PRODUCE SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-009      URIBE CASTILLO OME.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-010      TRANSPORTADORA DEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-011      TALLER DECUIR SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-012      SERV DE RETROEXCAV.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-013      SANCHEZ GOMEZ JORG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-078      TRAMO CARRETERO GU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-080      TOYOTA FINANCIAL S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-081      TORRES AYALA BENJA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-086      TRANSPORTES MANZO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-088      TIENDA SORIANA SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-089      TAPIA GONZALEZ ROS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-090      TM DE AMERICA SA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-121-091      TRABAL S DE RL DE CV D Pasivo Acr..Afe..       Peso..     
+    .. 21-122-001      VAZQUEZ PEREZ JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-122-002      VERGARA HERNADEZ C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-125-024      RADIOMOVIL DIPSA S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-035      RODRIGUEZ MALDONAD.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-036      ROSALES SOTO DANIEL  D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-046      REFACCIONES Y RECT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-061      RODRIGUEZ BUENO GR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-071      RAMIREZ SUAREZ EDW.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-074      REFACCIONES PARA M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-085      ROMO FUENTES YOLANDA D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-086      REYNAGA ZU?IGA GER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-087      RETES STEPHENS LUI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-088      REYNAGA FLORES GER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-126-090      RIZZO GARCIA SARA    D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-003      SEGUROS INBURSA SA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-004      SEGUROS BANORTE GE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-010      SERVILLANTAS DE TE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-011      SOLUCIONES LOGISTI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-016      SUPER LLANTAS DEL .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-031      SERVICIOS PROFESIO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-033      SUAREZ CRUZ MARGAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-040      SAGARPA              D Pasivo Acr..Afe..       Peso..     
+    .. 21-127-051      SANCHEZ LUPIAN MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-128-001      TORRES SALAZAR AND.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-128-006      TRANSPORTES REFRIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-128-012      TRANSPORTES REFRIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-128-014      TRANSPORTE ESPECIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-129-004      UNION DE FLETEROS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-001      VAZQUEZ GRANADOS M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-002      VELAZQUEZ FELIPE M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-003      VAZQUEZ VALENZUELA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-004      VERDUZCO VILLANUEV.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-005      VERDUZCO BOJORQUEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-006      VERDUZCO MORENO JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-007      VALLE AGUILAR MA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-008      VAZQUEZ FERNANDEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-021      VALADEZ CARDENAS A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-032      VARGAS BRACAMONTES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-033      VALDEZ VALDEZ FABI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-130-034      VAZQUEZ DUARTE OLG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-001      VAJOJA SA DE CV      D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-046      VILLA CORTEZ REYNA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-047      VILLALVAZO SERRANO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-049      VALENCIA SALAZAR S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-055      VALDIVIA CARBAJAL .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-131-056      VALLE LOPEZ FAUSTINO D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-001      ZEPEDA HEREDIA JOR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-002      ZAVALA SALAZAR JES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-003      ZAMORA DELGADO ART.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-004      ZURICH SANTANDER S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-005      ZAPIEN SANCHEZ SAL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-134-009      ZEPHIA CASA CONSTR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-200-000      PROVEEDORES FRUTA    D Pasivo Acr..            Peso..     
+    .. 21-201-001      ALCARAZ CHAVEZ AMA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-002      AGRICOLA EL SIFON .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-003      AGRO MEXICANA GAIT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-005      ARREGUIN AGUILAR E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-006      ARREGUIN AGUILAR R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-007      AGRICOLA COLOMOS S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-008      AYALA RIVERA MANUE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-027      AVE MARIA SPR DE RL  D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-056      AYALA RIVERA ALMA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-060      ANGUIANO JUAREZ PE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-064      ARELLANO ANSELMO J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-065      ALVAREZ ALCARAZ BE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-083      AMEZQUITA BAENA AL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-089      ARELLANO GOMEZ FER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-091      ARIAS GODINEZ ABEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-201-093      ARAMBULA TORRES JOSE D Pasivo Acr..Afe..       Peso..     
+    .. 21-202-001      BELTRAN FELIX DOMI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-202-026      BANANAS LUNA HERMA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-202-028      BUENO AGUILERA ADR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-202-036      BAUTISTA GONZALEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-001      CANDELARIO ROMERO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-052      CERVANTES ESQUIVEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-054      CERVANTES CHAGOLLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-056      CABELLOS TORRES J .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-063      CARDENAS MENDEZ LU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-065      CARDENAS RODRIGUEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-072      CONTRERAS MORENO R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-073      COPEMASA SA DE CV    D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-074      CONTRERAS VERDUZCO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-075      CERVANTES ESQUIVEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-078      CARRION CISNEROS M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-085      CHAVEZ TORRES FRAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-086      CHAVIRA OROZCO CLO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-089      CONTRERAS DIAZ RAY.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-090      CISNEROS RANGEL ED.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-091      CONTRERAS JAIME      D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-092      CABELLOS FERNANDEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-094      CAMPOS REYES ROBERTO D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-095      CHAVEZ GUILLEN JOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-096      CABALLERO ANAYA MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-203-097      CORNEJO GODINEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-204-014      DO?A FRANCISCA S D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-204-015      DIAZ VILLA RAMIRO    D Pasivo Acr..Afe..       Peso..     
+    .. 21-204-016      DIAZ GONZALEZ SERGIO D Pasivo Acr..Afe..       Peso..     
+    .. 21-205-013      ESQUIVEL ZABALA LI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-205-014      ESQUIVEL GARCIA MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-205-015      ESCOBEDO PE?ALOZA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-205-016      EUFRACIO VILLEGAS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-001      FERNANDEZ MARTINEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-003      FERNANDEZ MARTINEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-010      FERNANDEZ MARTINEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-011      FERNANDEZ MARTINEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-016      FERNANDEZ MARTINEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-018      FUENTES MELCHOR RO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-036      FLORES HERNANDEZ A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-041      FRUTAS Y HORTALIZA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-207-044      FARIAS ESPARZA JOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-001      GOMEZ TERRONES RAU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-002      GOMEZ ZARAGOZA LET.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-003      GARCIA VAZQUEZ MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-062      GOMEZ ROSA DELIA     D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-064      DIAZ LARA GLORIA     D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-065      GUDI?O TOSCANO VIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-074      GARCIA NEGRETE RIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-075      GARCIA PALEO ALAN    D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-080      GUTIERREZ HERNANDE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-081      GARCIA NEGRETE JOS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-082      GARCIA NEGRETE JUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-088      GOMEZ GUDI?O SPR d.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-089      GARCIA TORRES ZAIL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-090      GRANADOS MORA JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-092      GRUPO ORFRI S DE P.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-093      GOMEZ GONZALEZ JUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-094      GOMEZ TERRONES MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-095      GARCIA SANDOVAL RO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-096      GOMEZ CORNEJO SANDRA D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-097      GOMEZ CORNEJO ADRI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-098      GOMEZ SANCHEZ AURE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-099      GODINEZ PANTOJA MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-100      GUDI?O OCHOA CARME.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-101      GOMEZ GUDI?O LUIS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-102      GOMEZ GUDI?O MARCO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-103      GRANADOS GUTIERREZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-104      GUTIERREZ DIAZ ABR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-105      GARCIA NEGRETE MIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-106      GUERRERO GARCIA FR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-108      GOMEZ GUDI?O FRANC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-109      GOMEZ GUDI?O MARIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-110      GONZALEZ DUE?AS AL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-111      GUIZAR BUGARIN FRA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-208-112      GONZALEZ GUTIERREZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-209-001      HERNANDEZ RAMOS ID.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-209-002      HERRERA MU?OZ LUZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-001      LIMONES DE TECOMAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-003      LIMONES COLIMAN SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-004      LIMONES DEL VALLE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-035      LIMONES TITO SA de.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-040      LARIOS FARIAS FRAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-041      LIMONES LA JOYA SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-048      LARIOS FARIAS NAZA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-052      LIMONES SANTA FLOR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-213-055      LLAMAS RAMOS GERMA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-001      MALDONADO MENDOZA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-002      MENDOZA VEGA ROBERTO D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-003      MARTINEZ CAZARES F.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-004      MARTINEZ CAZARES J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-051      MALDONADO CASTELLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-056      MALDONADO CASTELLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-057      MARRUCHO  S DE PR .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-065      MALDONADO GALVEZ J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-066      MENDOZA VIRGEN SAUL  D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-067      MENDOZA GUERRERO R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-068      MENDOZA GUERRERO H.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-070      MOSELEY OCHOA ROBE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-071      MENDOZA GUERRERO F.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-074      MENDOZA VIRGEN MA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-075      MENDOZA GOMEZ JAVIER D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-094      MALDONADO GALVEZ F.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-096      MORENO MAGA?A GRAC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-097      MORENO ZURITA LIZETH D Pasivo Acr..Afe..       Peso..     
+    .. 21-214-099      MORENO CONTRERAS J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-014      NAVEL MEDINA J JESUS D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-015      NAVARRO CARRANZA O.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-017      NU?EZ MURILLO BERTHA D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-018      NU?EZ ESQUEDA ADAN   D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-046      MARQUEZ ALCOCER RU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-047      MARTINEZ PUENTE SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-215-048      MEDINA RODRIGUEZ L.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-218-015      OSEGUERA RIOS NOE    D Pasivo Acr..Afe..       Peso..     
+    .. 21-218-019      OSEGUERA RIOS JUAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-218-021      ORTEGA SANCHEZ YES.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-001      PUENTE HERNANDEZ D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-002      PLANTACIONES CAMRU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-036      PADILLA MU?IZ DANIEL D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-055      PROLIM DE COLIMA S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-058      PALEO NEGRETE MA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-060      PRODUCTORES DE PAP.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-219-061      PE?A OCHOA EFREN     D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-001      RODRIGUEZ JOSE DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-002      RODRIGUEZ CARDENAS.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-012      RAMIREZ BERNAL VIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-013       RAMIREZ ROBLES CL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-014      RAMIREZ VALENCIA  .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-063      RIVAS PACHECO YENI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-071      RUIZ RAMOS MIGUEL    D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-091      RUIZ MENDEZ RAUL     D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-093      ROBLES ESTRELLA AL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-096      RODRIGUEZ DIAZ MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-097      RAYON MORENO ELVIA   D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-098      RAMIREZ FLORES VIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-099      ROBLES ESTRELLA PE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-100      RICO MENDOZA ISAEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-221-101      RANCHO EL PANDELO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-001      SOLANO OLMOS RAFAEL  D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-054      SANDOVAL COVARRUBI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-067      SANCHEZ SANCHEZ SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-068      SANCHEZ SAAVEDRA A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-069      SANCHEZ MORENO SARA  D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-071      SAN CARLOS DE TECO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-222-074      SANTOS ALCARAZ MOI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-001      TECNOLOGIA DEL CAM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-002      TREJO GOMEZ LUIS H.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-020      TRUJILLO ANDRADE R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-021      TORRES VELASCO JUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-024      TORRES REYNOSO DOR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-025      TORRES CHAVEZ AARO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-033      TORRES FLORES JUAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-034      TOSCANO GONZALEZ E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-037      TORRES CHAVEZ CARLOS D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-038      TORRES FLORES BERO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-039      TISCARE?O CARMONA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-040      TISCARE?O CARMONA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-043      TORRES ANAYA ARTURO  D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-044      TORRES CABALLERO N.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-045      TORRES GONZALEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-223-046      TELLO VEJARANO MIR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-002      VERDE CALIDAD GRUP.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-009      VILLALVAZO CONTRER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-032      VERDUZCO VERDUZCO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-048      VILLASE?OR AYALA A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-053      VELAZQUEZ TORRES P.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-054      VARGAS GALVAN JOSE   D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-055      VIRRUETA CARRANZA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-057      VERDUZCO VELAZCO H.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-058      VAZQUEZ GARCIA EUT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-225-059      VERDUZCO VILLANUEV.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-229-001      ZARAGOZA GODINES EVA D Pasivo Acr..Afe..       Peso..     
+    .. 21-229-009      ZARAGOZA ARREDONDO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-270-042      FRUTAS FRESCAS DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-250-000      PROVEEDORES DE MAT.. D Pasivo Acr..            Peso..     
+    .. 21-251-001      ORDAZ GONZALEZ JUL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-002      TARIMA EXPRESS SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-007      ALMACENES VALENCIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-008      INDUSTRIAS DEL PAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-009      AGRI STAR DE MEXIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-010      ACEROS MURILLO SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-011      PADILLA RIVERA SIL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-012      RIESTRA BARBOZA MI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-014      AGRI-ESTRELLA S DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-016      ARMADORA DE CAJAS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-017      ALEJANDRO URZUA HO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-251-018      ALCARAZ CABRERA JU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-253-001      COMERCIALIZADORA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-253-028      COLIMAN PLASTICOS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-253-031      CORPORATIVO PEACE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-254-002      DELGADO ANDRADE CY.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-255-001      ECOPACK DE MEXICO .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-257-002      FERREAGRICOLA DEL .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-258-014      GRUPO VERMEX SA DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-258-017      GRUPO PREMIER DE O.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-259-003      HILOS Y RAFIAS SAN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-260-001      INNOVATIVE AGRICUL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-260-005      IMPORTADORA EMPORI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-261-003      JIFKINS SA DE CV     D Pasivo Acr..Afe..       Peso..     
+    .. 21-265-002      NOVATEC PAGANI SA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-267-001      PARRA AGROPRODUCTO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-267-005      PLASTICOS ROMO DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-267-006      PLASTICOS DE CUPAT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-267-008      PANDURO CALVARIO C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-267-009      PLASTICOL SA DE CV   D Pasivo Acr..Afe..       Peso..     
+    .. 21-269-001      SUSTENTABILIDAD IN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-269-010      RECICLADOS MEDINA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-270-004      SURTIDORA DE FERRE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-272-001      UNION GENERAL DE E.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-274-003      ZARATE PONS JESUS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-000      PROV. DE INS RANCHOS D Pasivo Acr..            Peso..     
+    .. 21-280-001      FERTILIZANTES GOME.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-002      FIGUEROA RODRIGUEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-003      GARCIA PE?A JOSE R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-004      NOVELA HERNANDEZ R.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-005      SURTIDORA DE FERRE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-006      CASA DEL AGRICULTOR  D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-007      TREJO RODRIGUEZ UL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-008      AYALA RODRIGUEZ MA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-009      PINTO GOMEZ MIGUEL   D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-010      MALDONADO BARBA VI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-011      CASA AGRICOLA DE T.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-012      GUDI?O TOSCANO J J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-013      ASOCIACION DE USUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-014      ZEPHIA CASA CONSTR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-015      COMISION DE AGUA P.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-016      GARCIA NEGRETE JUA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-017      CASTILLO JUAREZ HU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-018      OCHOA HINOJOSA ARN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-019      ROSAS DELGADO LEON.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-020      GONZALEZ HUERTA DA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-021      ORGANISMOS BENEFIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-022      GASOLINERA DEL PAC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-023      ASPERSORAS AGRICOL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-024      VELAZQUEZ FELIPE M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-025      POLIACERO SA DE CV   D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-026      CONSEJO ESTATAL DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-027      ROMO FLORES FRANCI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-028      MARIANO FERREIRA A.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-029      FERTILIZANTES VIGO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-030      LUBRICANTES DE LA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-031      VALENCIA SALAZAR S.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-032      MARRUCHO S DE PR D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-033      GAS MENGUC SA DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-034      RODRIGUEZ BUENO GR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-036      TELEFONOS DE MEXIC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-037      COMISION DEFERAL D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-038      INSUMOS ORGANICOS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-039      VELASCO HERNANDEZ .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-040      MARTINEZ LOPEZ CEC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-041      SERVICIOS DE RETRO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-043      REFACCIONARIA AGRI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-044      CAZARES BRAVO JOSE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-045      PROVEEDORA AGRICOL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-046      CHAVEZ SOLORIO FEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-047      LOPEZ RODRIGUEZ JE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-048      ORTEGA ESQUEDA HUI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-049      RODRIGUEZ ESCAMILL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-050      CALDERON ESTRADA M.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-051      INFRA SA DE CV       D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-053      REX IRRIGACION DE .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-054      DUCORAGRO SA DE CV   D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-055      MU?OZ SENTENO SANDRA D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-056      GARCIA DAGDA MARIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-057      PAQA SC DE RL DE CV  D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-058      HERNANDEZ MU?OZ BR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-059      MARTINEZ LOPEZ FEL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-060      PHYTOMONITOR SA DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-061      MANUFACTURERA DE C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-062      AUTOPARTES JIMENEZ.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-063      RAMIREZ LUNA KARLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-064      CARRILLO MARTEL JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-065      ACEITES GRASAS Y D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-066      RODRIGUEZ CORTINA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-067      PRODUCTORA DE FERT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-068      CORPORATIVO FLEXOG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-069      SOLANO VERA ROBERTO  D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-070      EXPORTADORA DE PLA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-071      CARTOGRAPHIC SA DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-072      NEUMATICOS DE OCCI.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-073      BOMBAS Y MOTORES D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-074      TOLEDO MORENO ANDRES D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-075      REFACCIONES Y RECT.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-076      RINCON CARDENAS JO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-077      LLANTERA COSTERA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-078      MEDINA VILLANUEVA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-079      PACE INTERNATIONAL.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-080      QUIMICA FRAALSI SA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-081      DISTRIBUIDORA ARCA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-082      DUE?AS CRUZ JESUS .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-083      DOMINGUEZ GARCIA T.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-084      VALENZUELA MOLINA .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-085      PEREZ MARQUEZ J JE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-086      MENDEZ CARDENAS JU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-087      GARCIA SANCHEZ SER.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-280-088      RANCHO EL PANDELO .. D Pasivo Acr..Afe..       Peso..     
+      321-110-000      GASTOS POR PAGAR     D Pasivo Acr..         Si Peso..     
+    .. 21-111-000      NOMINAS POR PAGAR    D Pasivo Acr..Afe..       Peso..     
+      321-300-000      ANTICIPO DE CLIENTES D Pasivo Acr..         Si Peso..     
+    .. 21-300-001      SANCHEZ GONZALEZ J.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-300-002      CITROJUGO SA DE CV   D Pasivo Acr..Afe..       Peso..     
+      321-400-000      ACREEDORES DIVERSOS  D Pasivo Acr..         Si Peso..     
+    .. 21-407-001      GOMEZ TERRONES RAU.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-002      GOMEZ GUDI?O FRANC.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-003      GUDI?O TOSCANO VIA.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-004      IMPORTADORA Y EXPO.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-005      SURTIDORA DE FERRR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-006      CITROJUGO SA DE CV   D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-007      GUDI?O TOSCANO SIG.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-008      GOMEZ TERRONES MAR.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-407-009      GOMEZ GUDI?O SPR D.. D Pasivo Acr..Afe..       Peso..     
+      321-500-000      ACREEDORES BANCARIOS D Pasivo Acr..         Si Peso..     
+    .. 21-502-001      SANTANDER            D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-002      HSBC                 D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-003      BCO  SANT  TARJ DE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-004      BANCOMER TARJETA D.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-005      CREDITO PYME BMX C.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-006      CREDITO SANTANDER .. D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-008      CREDITO BAJIO 1 LE.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-502-009      BANCOMER CRED $4,0.. D Pasivo Acr..Afe..       Peso..     
+      321-600-000      DOCTOS. POR PAGAR .. D Pasivo Acr..Afe..    Si Peso..     
+      321-700-000      DOCTO. POR PAGAR L/P D Pasivo Acr..      2  Si Peso..     
+    .. 21-700-004      HSBC                 D Pasivo Acr..Afe..       Peso..     
+    .. 21-700-005      BANCO DEL BAJIO CR.. D Pasivo Acr..Afe..       Peso..     
+      321-800-000      IMPUESTOS POR PAGAR  D Pasivo Acr..         Si Peso..     
+    .. 21-800-010      ISPT ANTES DEL SUB.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-020      SAR                  D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-030      INFONAVIT            D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-031      CREDITO INFONAVIT    D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-032      CUOTA CENSATIA Y V.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-040      IMSS RETENIDO EN N.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-041      IMSS PATRONAL        D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-050      10% SOBRE HONORARIOS D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-055      2% SOBRE NOMINA      D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-060      10% SOBRE ARRENDAM.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-070      IVA RETENIDO         D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-075      ISR DECLARACION AN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-080      ISR DECLARACION AN.. D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-090      PTU POR PAGAR        D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-091      ISR POR PAGAR        D Pasivo Acr..Afe..       Peso..     
+    .. 21-800-092      4% RETENCION IVA     D Pasivo Acr..Afe..       Peso..     
+      321-900-000      IVA TRASLADADO       D Pasivo Acr..         Si Peso..     
+    .. 21-900-100      IVA TRASLADADO       D Pasivo Acr..Afe..       Peso..     
+     2 00-220-000      FIJO                 D Pasivo Acr..Afe..    SubPeso..     
+     2 00-230-000      DIFERIDO             D Pasivo Acr..Afe..    SubPeso..     
+    1  00-300-000      CAPITAL              F Capital A..          TitPeso..     
+     2 00-310-000      CAPITAL SOCIAL       F Capital A..          SubPeso..     
+      331-100-000      CAPITAL SOCIAL       F Capital A..          Si Peso..     
+    .. 31-100-002      RAUL JORGE GOMEZ T.. F Capital A.. Afe..       Peso..     
+    .. 31-100-003      VIANEY ROCIO GUDI?.. F Capital A.. Afe..       Peso..     
+    .. 31-100-006      FRANCIS VIANEY GOM.. F Capital A.. Afe..       Peso..     
+      331-100-004      APORTACIONES PARA .. F Capital A.. Afe..    Si Peso..     
+      331-100-005      APORTACIONES DE GO.. F Capital A.. Afe..    Si Peso..     
+     2 31-200-000      CAPITAL SOCIAL NO .. F Capital A..             Peso..     
+      331-200-002      GOMEZ TERRONES RAU.. F Capital A.. Afe..    Si Peso..     
+      331-200-003      GUDI?O TOSCANO VIA.. F Capital A.. Afe..    Si Peso..     
+      331-200-004      FIRCO                F Capital A.. Afe..    Si Peso..     
+     2 32-000-000      RESULTADOS EJERC. .. F Capital A..          Si Peso..     
+      332-000-100      RESULTADOS EJERC.97  F Capital A.. Afe.. 1     Peso..     
+      332-000-200      RESULTADOS EJERC.96  F Capital A.. Afe..       Peso..     
+      332-000-300      Resultado del ejer.. F Capital A.. Afe..       Peso..     
+      332-000-400      Resultado de ejerc.. F Capital A.. Afe..       Peso..     
+      332-000-500      RESULTADOS EJERC.2.. F Capital A.. Afe..       Peso..     
+      332-000-600      Resultados de Ejer.. F Capital A.. Afe..       Peso..     
+      332-000-700      Resultado ejercici.. F Capital A.. Afe..       Peso..     
+      332-000-800      Resultado Ejercici.. F Capital A.. Afe..       Peso..     
+      332-000-900      Resultado del ejer.. F Capital A.. Afe..       Peso..     
+      333-000-000      Resultado 2005       F Capital A.. Afe..       Peso..     
+      333-000-001      Resultado 2006       F Capital A.. Afe..       Peso..     
+      333-000-002      Resultado 2007       F Capital A.. Afe..       Peso..     
+      333-000-003      Resultado 2008       F Capital A.. Afe..       Peso..     
+      333-000-004      Resultado 2009       F Capital A.. Afe..       Peso..     
+      333-000-005      Resultado 2010       F Capital A.. Afe..       Peso..     
+      333-000-006      RESULTADO 2011       F Capital A.. Afe..       Peso..     
+     2 34-000-001      SUPERAVIT POR REVA.. F Capital A.. Afe..    Si Peso..     
+    1  00-400-000      INGRESOS             H Resultado..          TitPeso..     
+     2 00-410-000      VENTAS               H Resultado..          Si Peso..     
+      341-040-000      LIMON FRUTA TASA 0%  H Resultado.. Afe..       Peso..     
+      341-040-001      LIMON FRUTA EXPORT.. H Resultado.. Afe..       Peso..     
+      341-050-000      LIMON INDUSTRIAL T.. H Resultado.. Afe..       Peso..     
+      341-060-000      TAMARINDO            H Resultado.. Afe..       Peso..     
+      341-070-000      COCO JIMADO          H Resultado.. Afe..       Peso..     
+      341-080-000      PINA MIEL            H Resultado.. Afe..       Peso..     
+      341-081-000      PI?A MIEL EXPORTAC.. H Resultado.. Afe..       Peso..     
+     2 41-090-000      REB. Y BONIF. S/VT.. G Resultado..          Si Peso..     
+      341-090-001      REBAJAS Y BONIFICA.. G Resultado.. Afe..       Peso..     
+      341-090-002      REB. Y BONIF S/VTA.. G Resultado.. Afe..       Peso..     
+     2 41-100-000      VENTAS RANCHOS       H Resultado..          Si Peso..     
+      341-100-001      VTAS . LA GUADALUP.. H Resultado.. Afe..       Peso..     
+      341-100-002      VTAS. SAN JORGE      H Resultado.. Afe..       Peso..     
+      341-100-003      VTAS. PI?AS          H Resultado.. Afe..       Peso..     
+     2 42-100-000      PRODUCTOS FINANCIE.. H Resultado..          Si Peso..     
+      342-200-201      INTERESES BANCARIO.. H Resultado.. Afe..       Peso..     
+      342-200-202      UTILIDAD CAMBIARIA   H Resultado.. Afe..       Peso..     
+      342-200-203      DEPOSITOS MISCELAN.. H Resultado.. Afe..       Peso..     
+     2 42-200-000      OTROS INGRESOS       H Resultado..          Si Peso..     
+      342-200-100      SEGUROS TASA AL 16%  H Resultado.. Afe..       Peso..     
+      342-200-101      CERTIFICADOS FITOS.. H Resultado.. Afe..       Peso..     
+      342-200-102      REVISION CARGA       H Resultado.. Afe..       Peso..     
+      342-200-103      TARIMAS              H Resultado.. Afe..       Peso..     
+      342-200-104      CAJA DE PLASTICO     H Resultado.. Afe..       Peso..     
+      342-200-105      APOYO GUBERNAMENTA.. H Resultado.. Afe..       Peso..     
+      342-200-200      DIVERSOS             H Resultado.. Afe..       Peso..     
+      342-200-300      ACTUALIZACION        H Resultado.. Afe..       Peso..     
+      342-200-400      OTROS INGRESOS       H Resultado.. Afe..       Peso..     
+      342-200-500      CONCRETO HIDRAULICO  H Resultado.. Afe..       Peso..     
+     2 42-400-000      VENTA DE ACTIVO FIJO H Resultado..          Si Peso..     
+      342-400-001      EQUIPO DE TRANSPORTE H Resultado.. Afe..       Peso..     
+    1  00-430-000      EGRESOS              G Resultado..          TitPeso..     
+     2 00-431-000      COMPRAS              G Resultado..          Si Peso..     
+      343-000-010      LIMON FRUTA FACTUR.. G Resultado.. Afe..       Peso..     
+      343-000-011      PI?A MIEL            G Resultado.. Afe..       Peso..     
+      343-000-013      COCO JIMADO          G Resultado.. Afe..       Peso..     
+      343-000-082      no deducibles        G Resultado.. Afe..       Peso..     
+      343-000-090      REB. Y BONF. S/C.    H Resultado.. Afe..       Peso..     
+     2 00-432-000      COSTO DE VENTAS      G Resultado.. Afe..    Si Peso..     
+     2 00-435-000      COSTO VTA RANCHOS    G Resultado..          Si Peso..     
+      343-500-001      PLANTAS GPA          G Resultado.. Afe..       Peso..     
+      343-500-002      PLANTAS SNJO         G Resultado.. Afe..       Peso..     
+      343-500-003      PLANTAS PI?AS        G Resultado.. Afe..       Peso..     
+      343-500-004      PROD. QUIMICOS GPA   G Resultado.. Afe..       Peso..     
+      343-500-005      PROD.QUIMICOS SNJO   G Resultado.. Afe..       Peso..     
+      343-500-006      PROD.QUIMICOS PI?AS  G Resultado.. Afe..       Peso..     
+      343-500-007      PROD QUIMICOS EL M.. G Resultado.. Afe..       Peso..     
+     2 00-600-000      I.S.R.               G Resultado.. Afe..    Si Peso..     
+     2 42-300-000      PERDIDA VTA. DE AC.. G Resultado.. Afe..    Si Peso..     
+     2 80-000-000      P.T.U.               G Resultado..       5  Si Peso..     
+      380-000-001      PTU DE DEDUCIBLE     G Resultado.. Afe.. 5     Peso..     
+    1  00-500-000      GASTOS GENERALES     G Resultado..          Si Peso..     
+     2 50-000-000      GASTOS EMPAQUE       G Resultado..             Peso..     
+      350-000-010      SUELDOS              G Resultado.. Afe..       Peso..     
+      350-000-011      AGUINALDOS           G Resultado.. Afe..       Peso..     
+      350-000-012      VACACIONES           G Resultado.. Afe..       Peso..     
+      350-000-013      PRIMA VACACIONAL     G Resultado.. Afe..       Peso..     
+      350-000-014      PRIMA DE ANTIGUEDAD  G Resultado.. Afe..       Peso..     
+      350-000-015      VALES DE DESPENSA    G Resultado.. Afe..       Peso..     
+      350-000-016      GRATIFICACIONES      G Resultado.. Afe..       Peso..     
+      350-000-017      INDEMNIZACIONES      G Resultado.. Afe..       Peso..     
+      350-000-018      ASISTENCIA           G Resultado.. Afe..       Peso..     
+      350-000-019      PUNTUALIDAD          G Resultado.. Afe..       Peso..     
+      350-000-020      CUOTAS INFONAVIT     G Resultado.. Afe..       Peso..     
+      350-000-021      CREDITO AL SALARIO   G Resultado.. Afe..       Peso..     
+      350-000-022      2% SOBRE NOMINA      G Resultado.. Afe..       Peso..     
+      350-000-023      LIQUIDACIONES        G Resultado.. Afe..       Peso..     
+      350-000-030      RCV                  G Resultado.. Afe..       Peso..     
+      350-000-040      CUOTAS PATRONALES .. G Resultado.. Afe..       Peso..     
+      350-000-050      HONORARIOS PERSONA.. G Resultado.. Afe..       Peso..     
+      350-000-051      HONORARIOS ASIMILA.. G Resultado.. Afe..       Peso..     
+      350-000-052      HONORARIOS PERSONA.. G Resultado.. Afe..       Peso..     
+      350-000-053      HORAS EXTRAS         G Resultado.. Afe..       Peso..     
+      350-000-054      HONORARIOS SOBRE C.. G Resultado.. Afe..       Peso..     
+      350-000-060      ENERGIA ELECTRICA    G Resultado.. Afe..       Peso..     
+      350-000-061      TRAMITES Y PROYECTOS G Resultado.. Afe..       Peso..     
+      350-000-062      INOCUIDAD            G Resultado.. Afe..       Peso..     
+      350-000-063      HERRAMIENTA Y EQPO.. G Resultado.. Afe..       Peso..     
+      350-000-064      SERVICIOS DE CAPAC.. G Resultado.. Afe..       Peso..     
+      350-000-090      ARRENDAMIENTO DE I.. G Resultado.. Afe..       Peso..     
+      350-000-091      ASESORIA EN INFORM.. G Resultado.. Afe..       Peso..     
+      350-000-100      MANT Y CONSERVACIO.. G Resultado.. Afe..       Peso..     
+      350-000-101      MANIOBRAS            G Resultado.. Afe..       Peso..     
+      350-000-110      PAPELERIA            G Resultado.. Afe..       Peso..     
+      350-000-120      ARTICULOS DE LIMPI.. G Resultado.. Afe..       Peso..     
+      350-000-121      UNIFORMES            G Resultado.. Afe..       Peso..     
+      350-000-130      PUBLICIDAD           G Resultado.. Afe..       Peso..     
+      350-000-131      LIBROS Y REVISTAS    G Resultado.. Afe..       Peso..     
+      350-000-140      FLETES Y ACARREOS    G Resultado.. Afe..       Peso..     
+      350-000-141      MENSAJERIA           G Resultado.. Afe..       Peso..     
+      350-000-142      PERMISO DE CONSTRU.. G Resultado.. Afe..       Peso..     
+      350-000-143      PTU PAGADA           G Resultado.. Afe..       Peso..     
+      350-000-144      SISTEMA WEB SAN JO.. G Resultado.. Afe..       Peso..     
+      350-000-150      TELEFONO             G Resultado.. Afe..       Peso..     
+      350-000-160      CASETAS              G Resultado.. Afe..       Peso..     
+      350-000-170      COMBUSTIBLE Y LUBR.. G Resultado.. Afe..       Peso..     
+      350-000-172      GAS                  G Resultado.. Afe..       Peso..     
+      350-000-173      IMPUESTO A LA GASO.. G Resultado.. Afe..       Peso..     
+      350-000-174      DIESEL               G Resultado.. Afe..       Peso..     
+      350-000-175      CUOTAS AL CONSEJO .. G Resultado.. Afe..       Peso..     
+      350-000-180      REP Y MTTO DE MOB .. G Resultado.. Afe..       Peso..     
+      350-000-181      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+      350-000-182      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+      350-000-185      RECARGOS             G Resultado.. Afe..       Peso..     
+      350-000-190      GASTOS DE PREVISIO.. G Resultado.. Afe..       Peso..     
+      350-000-191      GUIAS DE ENVIO       G Resultado.. Afe..       Peso..     
+      350-000-192      GASTOS DE POSADA     G Resultado.. Afe..       Peso..     
+      350-000-193      GASTOS POR COBRANZ.. G Resultado.. Afe..       Peso..     
+      350-000-194      GASTOS FORANEOS      G Resultado.. Afe..       Peso..     
+      350-000-200      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+      350-000-201      PLACAS Y TENENCIA    G Resultado.. Afe..       Peso..     
+      350-000-203      BOTIQUIN             G Resultado.. Afe..       Peso..     
+      350-000-204      TERMOGRAFOS          G Resultado.. Afe..       Peso..     
+      350-000-205      CERTIFICACION PARA.. G Resultado.. Afe..       Peso..     
+      350-000-206      MTTO. DE AREAS VER.. G Resultado.. Afe..       Peso..     
+      350-000-207      PREDIAL              G Resultado.. Afe..       Peso..     
+      350-000-230      CERTIFICADOS FITOS.. G Resultado.. Afe..       Peso..     
+      350-000-232      CERTIFICACION DE T.. G Resultado.. Afe..       Peso..     
+      350-000-240      REP Y MTTO DE MAQU.. G Resultado.. Afe..       Peso..     
+      350-000-250      AGUA PURIFICADA      G Resultado.. Afe..       Peso..     
+      350-000-270      SEGURO DE EMPAQUE    G Resultado.. Afe..       Peso..     
+      350-000-280      AJUSTE POR REDONDEO  G Resultado.. Afe..       Peso..     
+      350-000-290      CURSOS CUOTAS Y SU.. G Resultado.. Afe..       Peso..     
+      350-000-300      OTROS GASTOS         G Resultado.. Afe..       Peso..     
+      350-000-301      DIVERSOS             G Resultado.. Afe..       Peso..     
+      350-000-310      VIATICOS             G Resultado.. Afe..       Peso..     
+      350-000-320      DONATIVOS            G Resultado.. Afe..       Peso..     
+      350-000-321      DAP                  G Resultado.. Afe..       Peso..     
+      350-000-330      SEGURIDAD Y VIGILA.. G Resultado.. Afe..       Peso..     
+      350-000-331      DEP ACUM DE MAQUIN.. G Resultado.. Afe..       Peso..     
+      350-000-332      DEP ACUMULADA DE M.. G Resultado.. Afe..       Peso..     
+      350-000-333      DEP ACUMULADA DE E.. G Resultado.. Afe..       Peso..     
+      350-000-334      DEP ACUMULADA DE E.. G Resultado.. Afe..       Peso..     
+      350-000-335      AMORTIZACION DE ED.. G Resultado.. Afe..       Peso..     
+      350-000-336      IMPUESTO AL DIESEL   G Resultado.. Afe..       Peso..     
+      350-000-337      DEP ACUM EQPO DIVE.. G Resultado.. Afe..       Peso..     
+      350-000-338      DEDUCCION INMEDIATA  G Resultado.. Afe..       Peso..     
+      350-000-340      SEGURO DE VEHICULO   G Resultado.. Afe..       Peso..     
+      350-000-341      SEGURO DE ACCIDENTE  G Resultado.. Afe..       Peso..     
+      350-000-342      SEGURO DE HOGAR      G Resultado.. Afe..       Peso..     
+      350-000-343      SEGURO DE VIDA       G Resultado.. Afe..       Peso..     
+      350-000-344      SEGURO DE CARGA DE.. G Resultado.. Afe..       Peso..     
+      350-000-345      SEPTIMO DIA          G Resultado.. Afe..       Peso..     
+      350-000-346      SISTEMA ELECTRICO .. G Resultado.. Afe..       Peso..     
+      350-000-347      TRATAMIENTO Y ACON.. G Resultado.. Afe..       Peso..     
+      350-000-348      PAGINA WEB           G Resultado.. Afe..       Peso..     
+      350-000-350      COMIDAS              G Resultado.. Afe..       Peso..     
+      350-000-351      2% SOBRE HOSPEDAJE   G Resultado.. Afe..       Peso..     
+      350-000-352      HOSPEDAJE            G Resultado.. Afe..       Peso..     
+      350-000-353      GASTOS POR PEDIMEN.. G Resultado.. Afe..       Peso..     
+      350-000-354      FUMIGACION DE EMPA.. G Resultado.. Afe..       Peso..     
+      350-000-355      SAL                  G Resultado.. Afe..       Peso..     
+      350-000-356      GASTOS DE EJECUCUC.. G Resultado.. Afe..       Peso..     
+      350-000-357      MULTAS               G Resultado.. Afe..       Peso..     
+      350-003-570      ACTUALIZACION        G Resultado.. Afe..       Peso..     
+     2 55-000-000      GASTOS GENERALES R.. G Resultado..             Peso..     
+      355-100-000      GASTOS LA GUADALUP.. G Resultado..             Peso..     
+    .. 55-100-001      SUELDOS              G Resultado.. Afe..       Peso..     
+    .. 55-100-002      AGUINALDOS           G Resultado.. Afe..       Peso..     
+    .. 55-100-003      VACACIONES           G Resultado.. Afe..       Peso..     
+    .. 55-100-004      PRIMA VACACIONAL     G Resultado.. Afe..       Peso..     
+    .. 55-100-005      PRIMA DE ANTIGUEDAD  G Resultado.. Afe..       Peso..     
+    .. 55-100-006      VALES DE DESPENSA    G Resultado.. Afe..       Peso..     
+    .. 55-100-007      GRATIFICACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-100-008      INDEMNIZACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-100-009      ASISTENCIA           G Resultado.. Afe..       Peso..     
+    .. 55-100-010      PUNTUALIDAD          G Resultado.. Afe..       Peso..     
+    .. 55-100-011      CUOTAS INFONAVIT     G Resultado.. Afe..       Peso..     
+    .. 55-100-012      CREDITO AL SALARIO   G Resultado.. Afe..       Peso..     
+    .. 55-100-013      2% SOBRE NOMINA      G Resultado.. Afe..       Peso..     
+    .. 55-100-014      LIQUIDACIONES        G Resultado.. Afe..       Peso..     
+    .. 55-100-015      RCV                  G Resultado.. Afe..       Peso..     
+    .. 55-100-016      CUOTAS PATRONALES .. G Resultado.. Afe..       Peso..     
+    .. 55-100-017      ENERGIA ELECTRICA    G Resultado.. Afe..       Peso..     
+    .. 55-100-018      HERRAMIENTA Y EQPO.. G Resultado.. Afe..       Peso..     
+    .. 55-100-020      COMBUSTIBLE Y LUBR.. G Resultado.. Afe..       Peso..     
+    .. 55-100-021      GAS                  G Resultado.. Afe..       Peso..     
+    .. 55-100-022      IMPUESTO A LA GASO.. G Resultado.. Afe..       Peso..     
+    .. 55-100-023      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+    .. 55-100-024      PLACAS Y TENENCIA    G Resultado.. Afe..       Peso..     
+    .. 55-100-025      DAP                  G Resultado.. Afe..       Peso..     
+    .. 55-100-026      SEPTIMO DIA          G Resultado.. Afe..       Peso..     
+    .. 55-100-027      MANT. Y CONSERVACI.. G Resultado.. Afe..       Peso..     
+    .. 55-100-028      ACEITE               G Resultado.. Afe..       Peso..     
+    .. 55-100-029      MANT. DE SISTEMA D.. G Resultado.. Afe..       Peso..     
+      355-200-000      GASTOS SAN JORGE     G Resultado..             Peso..     
+    .. 55-200-001      SUELDOS              G Resultado.. Afe..       Peso..     
+    .. 55-200-002      AGUINALDOS           G Resultado.. Afe..       Peso..     
+    .. 55-200-003      VACACIONES           G Resultado.. Afe..       Peso..     
+    .. 55-200-004      PRIMA VACACIONAL     G Resultado.. Afe..       Peso..     
+    .. 55-200-005      PRIMA DE ANTIGUEDAD  G Resultado.. Afe..       Peso..     
+    .. 55-200-006      VALES DE DESPENSA    G Resultado.. Afe..       Peso..     
+    .. 55-200-007      GRATIFICACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-200-008      INDEMNIZACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-200-009      ASISTENCIA           G Resultado.. Afe..       Peso..     
+    .. 55-200-010      PUNTUALIDAD          G Resultado.. Afe..       Peso..     
+    .. 55-200-011      CUOTAS INFONAVIT     G Resultado.. Afe..       Peso..     
+    .. 55-200-012      CREDITO AL SALARIO   G Resultado.. Afe..       Peso..     
+    .. 55-200-013      2% SOBRE NOMINA      G Resultado.. Afe..       Peso..     
+    .. 55-200-014      LIQUIDACIONES        G Resultado.. Afe..       Peso..     
+    .. 55-200-015      RCV                  G Resultado.. Afe..       Peso..     
+    .. 55-200-016      CUOTAS PATRONALES .. G Resultado.. Afe..       Peso..     
+    .. 55-200-017      ENERGIA ELECTRICA    G Resultado.. Afe..       Peso..     
+    .. 55-200-018      HERRAMIENTA Y EQPO.. G Resultado.. Afe..       Peso..     
+    .. 55-200-020      COMBUSTIBLE Y LUBR.. G Resultado.. Afe..       Peso..     
+    .. 55-200-021      GAS                  G Resultado.. Afe..       Peso..     
+    .. 55-200-022      IMPUESTO A LA GASO.. G Resultado.. Afe..       Peso..     
+    .. 55-200-023      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+    .. 55-200-024      PLACAS Y TENENCIA    G Resultado.. Afe..       Peso..     
+    .. 55-200-025      DAP                  G Resultado.. Afe..       Peso..     
+    .. 55-200-026      SEPTIMO DIA          G Resultado.. Afe..       Peso..     
+    .. 55-200-027      MANT. DE SISTEMA D.. G Resultado.. Afe..       Peso..     
+    .. 55-200-028      DIVERSOS             G Resultado.. Afe..       Peso..     
+    .. 55-200-029      MANT. Y CONSERVACI.. G Resultado.. Afe..       Peso..     
+      355-300-000      GASTOS PI?AS         G Resultado..             Peso..     
+    .. 55-300-001      SUELDOS              G Resultado.. Afe..       Peso..     
+    .. 55-300-002      AGUINALDOS           G Resultado.. Afe..       Peso..     
+    .. 55-300-003      VACACIONES           G Resultado.. Afe..       Peso..     
+    .. 55-300-004      PRIMA VACACIONAL     G Resultado.. Afe..       Peso..     
+    .. 55-300-005      PRIMA DE ANTIGUEDAD  G Resultado.. Afe..       Peso..     
+    .. 55-300-006      VALES DE DESPENSA    G Resultado.. Afe..       Peso..     
+    .. 55-300-007      GRATIFICACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-300-008      INDEMNIZACIONES      G Resultado.. Afe..       Peso..     
+    .. 55-300-009      ASISTENCIA           G Resultado.. Afe..       Peso..     
+    .. 55-300-010      PUNTUALIDAD          G Resultado.. Afe..       Peso..     
+    .. 55-300-011      CUOTAS INFONAVIT     G Resultado.. Afe..       Peso..     
+    .. 55-300-012      CREDITO AL SALARIO   G Resultado.. Afe..       Peso..     
+    .. 55-300-013      2% SOBRE NOMINA      G Resultado.. Afe..       Peso..     
+    .. 55-300-014      LIQUIDACIONES        G Resultado.. Afe..       Peso..     
+    .. 55-300-015      RCV                  G Resultado.. Afe..       Peso..     
+    .. 55-300-016      CUOTAS PATRONALES .. G Resultado.. Afe..       Peso..     
+    .. 55-300-017      ENERGIA ELECTRICA    G Resultado.. Afe..       Peso..     
+    .. 55-300-018      HERRAMIENTA Y EQPO.. G Resultado.. Afe..       Peso..     
+    .. 55-300-019      MENSAJERIA           G Resultado.. Afe..       Peso..     
+    .. 55-300-020      COMBUSTIBLE Y LUBR.. G Resultado.. Afe..       Peso..     
+    .. 55-300-021      GAS                  G Resultado.. Afe..       Peso..     
+    .. 55-300-022      IMPUESTO A LA GASO.. G Resultado.. Afe..       Peso..     
+    .. 55-300-023      REP Y MTTO DE EQUI.. G Resultado.. Afe..       Peso..     
+    .. 55-300-024      PLACAS Y TENENCIA    G Resultado.. Afe..       Peso..     
+    .. 55-300-025      DAP                  G Resultado.. Afe..       Peso..     
+    .. 55-300-026      SEPTIMO DIA          G Resultado.. Afe..       Peso..     
+    .. 55-300-027      ANALISIS DE PLANTA.. G Resultado.. Afe..       Peso..     
+    .. 55-300-029      DIVERSOS             G Resultado.. Afe..       Peso..     
+    .. 55-300-030      AGUA PURIFICADA      G Resultado.. Afe..       Peso..     
+    .. 55-300-033      IMPUESTO ALA GASOL.. G Resultado.. Afe..       Peso..     
+      355-400-000      GASTOS EL MILAGRO    G Resultado..             Peso..     
+    .. 55-300-031      COMBUSTIBLE          G Resultado.. Afe..       Peso..     
+    .. 55-300-032      REP. Y MANTTO DE E.. G Resultado.. Afe..       Peso..     
+    .. 55-400-001      MANTTO DE EQ AGRIC.. G Resultado.. Afe..       Peso..     
+    1  00-700-000      GASTOS FINANCIEROS   G Resultado..          Si Peso..     
+     2 70-000-021      COMISION POR SOBRE.. G Resultado.. Afe..       Peso..     
+     2 70-000-022      COMISION POR DEPOS.. G Resultado.. Afe..       Peso..     
+     2 70-000-023      COMISION CHEQUES G.. G Resultado.. Afe..       Peso..     
+     2 70-000-024      COMISION POR SERVI.. G Resultado.. Afe..       Peso..     
+     2 70-000-025      COMISION POR MANEJ.. G Resultado.. Afe..       Peso..     
+     2 70-000-026      COMISION POR DEPOS.. G Resultado.. Afe..       Peso..     
+     2 70-000-027      COMISION POR TRASP.. G Resultado.. Afe..       Peso..     
+     2 70-000-028      COMISION POR CREDITO G Resultado.. Afe..       Peso..     
+     2 70-000-029      COMISION POR CHEQU.. G Resultado.. Afe..       Peso..     
+     2 70-000-030      INTERESES DE GRUPO.. G Resultado.. Afe..       Peso..     
+     2 70-000-031      COMISION POR CONFI.. G Resultado.. Afe..       Peso..     
+     2 70-000-032      COMISION POR SPEI    G Resultado.. Afe..       Peso..     
+     2 70-000-033      CREDITO DE TARJ 54.. G Resultado.. Afe..       Peso..     
+     2 70-000-034      COMISION PAQ PYME    G Resultado.. Afe..       Peso..     
+     2 70-000-040      COMISION POR PAGO .. G Resultado.. Afe..       Peso..     
+     2 70-000-041      COMISION DE FINTERRA G Resultado.. Afe..       Peso..     
+     2 70-000-042      COMISION POR TOKEN   G Resultado.. Afe..       Peso..     
+     2 70-100-000      INTERESES BANCARIOS  G Resultado.. Afe..       Peso..     
+     2 70-200-000      INTERESES CREDITO .. G Resultado.. Afe..       Peso..     
+     2 70-200-002      INTERESES CREDITO .. G Resultado.. Afe..       Peso..     
+     2 70-200-003      INTERESES DE CREDI.. G Resultado.. Afe..       Peso..     
+     2 70-200-032      COMISION POR ANUAL.. G Resultado.. Afe..       Peso..     
+     2 70-200-033      PERDIDA CAMBIARIA    G Resultado.. Afe..       Peso..     
+     2 70-200-034      COMISION CHEQUE DE.. G Resultado.. Afe..       Peso..     
+     2 70-200-035      COMISION ESTADO DE.. G Resultado.. Afe..       Peso..     
+     2 70-200-037      COMISION ENLACE      G Resultado.. Afe..       Peso..     
+     2 70-200-038      COMISION POR ORDEN.. G Resultado.. Afe..       Peso..     
+     2 70-200-039      RENTA MENSUAL        G Resultado.. Afe..       Peso..     
+     2 70-200-040      COMISION INTERNA     G Resultado.. Afe..       Peso..     
+     2 70-200-041      MEMBRESIA SERVICIOS  G Resultado.. Afe..       Peso..     
+     2 70-200-042      COMISION BANCA EN .. G Resultado.. Afe..       Peso..     
+     2 70-200-043      COMISION POR CONSU.. G Resultado.. Afe..       Peso..     
+     2 70-200-044      COMISION PAGO INT .. G Resultado.. Afe..       Peso..     
+     2 70-200-045      COMISION ANTICIPO .. G Resultado.. Afe..       Peso..     
+     2 70-200-046      COMISIONES POR DEP.. G Resultado.. Afe..       Peso..     
+     2 70-200-047      COMISION POR APERT.. G Resultado.. Afe..       Peso..     
+     2 70-200-048      COMISION POR FACTI.. G Resultado.. Afe..       Peso..     
+     2 70-200-049      COMISION DEPOSITO .. G Resultado.. Afe..       Peso..     
+    1  00-750-000      GTOS FINANCIEROS R.. G Resultado..          Si Peso..     
+     2 75-000-001      COMISIONES BCO GPA   G Resultado.. Afe..       Peso..     
+     2 75-000-002      COMISIONES BCO SNJO  G Resultado.. Afe..       Peso..     
+     2 75-000-003      COMIISIONES BCO PI.. G Resultado.. Afe..       Peso..     
+    1  00-800-000      GASTOS NO DEDUCIBLES G Resultado.. Afe..    Si Peso..     
+    1  00-900-000      GASTOS DE VENTA      G Resultado..          Si Peso..     
+     2 90-000-001      REJAS                G Resultado.. Afe..       Peso..     
+     2 90-000-002      ARPILLAS             G Resultado.. Afe..       Peso..     
+     2 90-000-003      PAPEL                G Resultado.. Afe..       Peso..     
+     2 90-000-004      BOLSA DE PLASTICO .. G Resultado.. Afe..       Peso..     
+     2 90-000-005      CERA                 G Resultado.. Afe..       Peso..     
+     2 90-000-007      FLEJE                G Resultado.. Afe..       Peso..     
+     2 90-000-008      ETIQUETAS            G Resultado.. Afe..       Peso..     
+     2 90-000-009      HARINA               G Resultado.. Afe..       Peso..     
+     2 90-000-010      TINTA                G Resultado.. Afe..       Peso..     
+     2 90-000-011      GRAPAS               G Resultado.. Afe..       Peso..     
+     2 90-000-012      SELLOS               G Resultado.. Afe..       Peso..     
+     2 90-000-013      CAJAS DE CARTON      G Resultado.. Afe..       Peso..     
+     2 90-000-014      CAJAS DE PLASTICOS   G Resultado.. Afe..       Peso..     
+     2 90-000-015      ESQUINEROS           G Resultado.. Afe..       Peso..     
+     2 90-000-016      ROLLO DE ALAMBRE C.. G Resultado.. Afe..       Peso..     
+     2 90-000-017      PROGIB               G Resultado.. Afe..       Peso..     
+     2 90-000-018      TARIMAS              G Resultado.. Afe..       Peso..     
+     2 90-000-019      TAPAS DE PLASTICO    G Resultado.. Afe..       Peso..     
+     2 90-000-020      CAJA CERTIFICADA     G Resultado.. Afe..       Peso..     
+     2 90-000-021      PERFIL               G Resultado.. Afe..       Peso..     
+     2 90-000-022      PELICULA ESTIRABLE.. G Resultado.. Afe..       Peso..     
+     2 90-000-023      CITRUS FIX           G Resultado.. Afe..       Peso..     
+     2 90-000-024      BULTO DE TAPA EXTRA  G Resultado.. Afe..       Peso..     
+     2 90-000-025      CAJA COLIMA 30KG P.. G Resultado.. Afe..       Peso..     
+     2 90-000-026      ETIQUETA CIU MALLA.. G Resultado.. Afe..       Peso..     
+     2 90-000-027      MALLA VERDE CIU (M.. G Resultado.. Afe..       Peso..     
+     2 90-000-028      FILM GENERICO (CiU)  G Resultado.. Afe..       Peso..     
+     2 90-000-029      TARIMA CERTIFICADA   G Resultado.. Afe..       Peso..     
+     2 90-000-030      CITRUS BRITE 350     G Resultado.. Afe..       Peso..     
+     2 90-000-031      ACIDO SULF BUFFER    G Resultado.. Afe..       Peso..     
+     2 90-000-032      CAJA DE MADERA DE .. G Resultado.. Afe..       Peso..     
+     2 90-000-034      TARIMAS EXPORTACION  G Resultado.. Afe..       Peso..     
+     2 90-000-041      CINTA FLEXO  PI?AS   G Resultado.. Afe..       Peso..     
+     2 90-000-042      ETIQ GOLD PI?AS TE.. G Resultado.. Afe..       Peso..     
+     2 90-000-043      AGUJA SUJETADOR PI.. G Resultado.. Afe..       Peso..     
+     2 90-000-044      SUJETADOR STAN PI?AS G Resultado.. Afe..       Peso..     
+     2 90-000-046      PISTOLA STD GENERICA G Resultado.. Afe..       Peso..     
+     2 90-000-047      CERA FRESH PI?AS     G Resultado.. Afe..       Peso..     

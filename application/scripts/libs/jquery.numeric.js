@@ -253,6 +253,14 @@ $.fn.removeNumeric = function()
 	return this.data("numeric.decimal", null).data("numeric.negative", null).data("numeric.callback", null).unbind("keypress", $.fn.numeric.keypress).unbind("blur", $.fn.numeric.blur);
 }
 
+$.fn.setNumericDefault = function()
+{
+	$(".vnumeric").numeric(); //numero
+	$(".vinteger").numeric({ decimal: false }); //Valor entero
+	$(".vpositive").numeric({ negative: false }); //Numero positivo
+	$(".vpos-int").numeric({ decimal: false, negative: false }); //Numero entero positivo
+}
+
 // Based on code from http://javascript.nwbox.com/cursor_position/ (Diego Perini <dperini@nwbox.com>)
 $.fn.getSelectionStart = function(o)
 {
@@ -296,9 +304,6 @@ $.fn.setSelection = function(o, p)
 
 /*Asigno los eventos*/
 $(document).ready(function(){
-	$(".vnumeric").numeric(); //numero
-	$(".vinteger").numeric({ decimal: false }); //Valor entero
-	$(".vpositive").numeric({ negative: false }); //Numero positivo
-	$(".vpos-int").numeric({ decimal: false, negative: false }); //Numero entero positivo
+	$.fn.setNumericDefault();
 });
 

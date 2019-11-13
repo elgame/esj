@@ -9,6 +9,7 @@ class rastreabilidad_pallets extends MY_Controller {
   private $excepcion_privilegio = array(
     'rastreabilidad_pallets/ajax_get_rendimientos/',
     'rastreabilidad_pallets/dd/',
+    'rastreabilidad_pallets/ajax_get_folio/',
     );
 
   public function _remap($method){
@@ -30,6 +31,7 @@ class rastreabilidad_pallets extends MY_Controller {
   {
     $this->carabiner->js(array(
         array('general/msgbox.js'),
+        array('panel/rastreabilidad/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -38,8 +40,10 @@ class rastreabilidad_pallets extends MY_Controller {
     );
 
     $this->load->model('rastreabilidad_pallets_model');
+    $this->load->model('areas_model');
 
     $params['pallets'] = $this->rastreabilidad_pallets_model->getPallets(true);
+    $params['areas']   = $this->areas_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -58,9 +62,11 @@ class rastreabilidad_pallets extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('libs/jquery.chosen.css', 'screen'),
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.chosen.min.js'),
       array('libs/jquery.numeric.js'),
       array('general/keyjump.js'),
       array('panel/rastreabilidad/pallets_agregar.js'),
@@ -72,6 +78,8 @@ class rastreabilidad_pallets extends MY_Controller {
     );
 
     $this->load->model('rastreabilidad_pallets_model');
+    $this->load->model('calibres_model');
+    $this->load->model('areas_model');
 
     $this->configAddModPallet();
     if ($this->form_validation->run() == FALSE)
@@ -81,11 +89,30 @@ class rastreabilidad_pallets extends MY_Controller {
     else
     {
       $res_mdl = $this->rastreabilidad_pallets_model->addPallet();
-      
+
       redirect(base_url('panel/rastreabilidad_pallets/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
 
-    $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio();
+    $params['areas'] = $this->areas_model->getAreas();
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    if(isset($_POST['parea']{0}))
+      $params['area_default'] = $_POST['parea'];
+    else{
+      foreach ($params['areas']['areas'] as $key => $value)
+      {
+        if($value->predeterminado == 't')
+        {
+          $params['area_default'] = $value->id_area;
+          break;
+        }
+      }
+    }
+
+    $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($params['area_default']);
+
+    // $params['calibres'] = $this->calibres_model->getCalibres();
+
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -106,10 +133,12 @@ class rastreabilidad_pallets extends MY_Controller {
     {
       $this->carabiner->css(array(
         array('libs/jquery.uniform.css', 'screen'),
+        array('libs/jquery.chosen.css', 'screen'),
         array('panel/general_sanjorge.css', 'screen'),
       ));
       $this->carabiner->js(array(
         array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.chosen.min.js'),
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('panel/rastreabilidad/pallets_agregar.js'),
@@ -121,6 +150,8 @@ class rastreabilidad_pallets extends MY_Controller {
       );
 
       $this->load->model('rastreabilidad_pallets_model');
+      $this->load->model('calibres_model');
+      $this->load->model('areas_model');
 
       $this->configAddModPallet();
       if ($this->form_validation->run() == FALSE)
@@ -130,11 +161,26 @@ class rastreabilidad_pallets extends MY_Controller {
       else
       {
         $res_mdl = $this->rastreabilidad_pallets_model->updatePallet($_GET['id']);
-        
+
         redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=5'));
       }
 
       $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
+
+      // $params['calibres'] = $this->calibres_model->getCalibres();
+
+
+      $params['areas'] = $this->areas_model->getAreas();
+      // Obtenemos area predeterminada
+      $params['area_default'] = null;
+      foreach ($params['areas']['areas'] as $key => $value)
+      {
+        if($value->predeterminado == 't')
+        {
+          $params['area_default'] = $value->id_area;
+          break;
+        }
+      }
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -154,7 +200,20 @@ class rastreabilidad_pallets extends MY_Controller {
   public function imprimir()
   {
     $this->load->model('rastreabilidad_pallets_model');
-    $this->rastreabilidad_pallets_model->pallet_pdf($this->input->get('id'));
+    $this->rastreabilidad_pallets_model->palletBig_pdf($this->input->get('id'));
+  }
+
+  public function eliminar()
+  {
+    if (isset($_GET['id']))
+    {
+      $this->load->model('rastreabilidad_pallets_model');
+      $delAll = isset($_GET['d']) ? true : false;
+      $res_mdl = $this->rastreabilidad_pallets_model->deletePallet( $this->input->get('id'), $delAll );
+      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+    }
+    else
+      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -162,7 +221,20 @@ class rastreabilidad_pallets extends MY_Controller {
    */
   public function ajax_get_rendimientos(){
     $this->load->model('rastreabilidad_pallets_model');
-    $params = $this->rastreabilidad_pallets_model->getRendimientoLibre($this->input->get('id'));
+    $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
+                $this->input->get('id'), $this->input->get('idunidad'),
+                $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_folio(){
+    $params = array('folio' => null);
+    if(isset($_GET['darea']{0}))
+    {
+      $this->load->model('rastreabilidad_pallets_model');
+      $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($_GET['darea']);
+    }
 
     echo json_encode($params);
   }
@@ -181,7 +253,7 @@ class rastreabilidad_pallets extends MY_Controller {
     $rules = array(
       array('field' => 'ffolio',
             'label' => 'Folio',
-            'rules' => 'required|is_natural_no_zero|callback_chkfolio'),
+            'rules' => 'required|is_natural_no_zero|callback_chkfolio|callback_productos_existencia'),
       array('field' => 'fid_clasificacion',
             'label' => 'Clasificacion',
             'rules' => ''),
@@ -201,6 +273,28 @@ class rastreabilidad_pallets extends MY_Controller {
       array('field' => 'idclasificacion[]',
             'label' => 'Clasificacion',
             'rules' => 'is_natural_no_zero'),
+
+      array('field' => 'idcalibre[]',
+            'label' => 'Calibres',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'fcliente',
+            'label' => 'Cliente',
+            'rules' => ''),
+      array('field' => 'fid_cliente',
+            'label' => 'Cliente',
+            'rules' => 'is_natural_no_zero'),
+      // array('field' => 'fhojaspapel',
+      //       'label' => 'Hojas de papel',
+      //       'rules' => 'required|is_natural'),
+      array('field' => 'ps[]',
+            'label' => 'Producto',
+            'rules' => ''),
+      array('field' => 'ps_id[]',
+            'label' => 'Producto',
+            'rules' => ''),
+      array('field' => 'ps_num[]',
+            'label' => 'Cantidad',
+            'rules' => ''),
     );
 
 
@@ -209,12 +303,34 @@ class rastreabilidad_pallets extends MY_Controller {
 
   public function chkfolio($folio){
     $result = $this->db->query("SELECT Count(id_pallet) AS num FROM rastria_pallets
-      WHERE folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
+      WHERE id_area = {$_POST['parea']} AND folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
     if($result->num > 0){
       $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
       return false;
     }else
       return true;
+  }
+
+  public function productos_existencia($str)
+  {
+    $this->load->model('inventario_model');
+    $productos = array();
+    if (is_array($_POST['ps_id']) && count($_POST['ps_id']) > 0) {
+      foreach ($_POST['ps_id'] as $key => $value) {
+        if (floatval($value) > 0) {
+          $item = $this->inventario_model->getEPUData($value);
+          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( String::float($existencia-$_POST['ps_num'][$key]) < 0) {
+            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')';
+          }
+        }
+      }
+    }
+    if (count($productos)>0) {
+      $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
+      return FALSE;
+    }
+    return true;
   }
 
 
@@ -249,6 +365,14 @@ class rastreabilidad_pallets extends MY_Controller {
       case 6:
         $txt = 'El camión se activó correctamente.';
         $icono = 'success';
+        break;
+      case 7:
+        $txt = 'El pallet se elimino correctamente.';
+        $icono = 'success';
+        break;
+      case 8:
+        $txt = 'El pallet se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $icono = 'error';
         break;
     }
 

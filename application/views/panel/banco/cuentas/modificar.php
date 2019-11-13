@@ -52,10 +52,29 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fnumero">Numero </label>
+                  <label class="control-label" for="ftipo">Tipo </label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" required>
+                      <option value="M.N." <?php echo set_select('ftipo', 'M.N.', false, (isset($data->tipo)?$data->tipo:'') ); ?>>M.N.</option>
+                      <option value="USD" <?php echo set_select('ftipo', 'USD', false, (isset($data->tipo)?$data->tipo:'') ); ?>>USD</option>
+                      <option value="EURO" <?php echo set_select('ftipo', 'EURO', false, (isset($data->tipo)?$data->tipo:'') ); ?>>EURO</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fsucursal">Sucursal </label>
+                  <div class="controls">
+                    <input type="text" name="fsucursal" id="fsucursal" class="span6" maxlength="12"
+                    value="<?php echo isset($data->sucursal)?$data->sucursal:''; ?>" placeholder="12352">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fnumero">Cuenta/CLABE </label>
                   <div class="controls">
                     <input type="text" name="fnumero" id="fnumero" class="span6" maxlength="20"
-                    value="<?php echo isset($data->numero)?$data->numero:''; ?>" placeholder="12352">
+                    value="<?php echo isset($data->cuenta)?$data->cuenta:''; ?>" placeholder="12352">
                   </div>
                 </div>
 
@@ -72,6 +91,14 @@
                   <div class="controls">
                     <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6" value="<?php echo isset($data->cuenta_cpi)?$data->cuenta_cpi:''; ?>"
                       maxlength="12" placeholder="1250015">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fnumero_cheque">No Cheque </label>
+                  <div class="controls">
+                    <input type="text" name="fnumero_cheque" id="fnumero_cheque" class="span6" value="<?php echo isset($data->numero_cheque)?$data->numero_cheque:''; ?>"
+                      maxlength="9" placeholder="5">
                   </div>
                 </div>
 

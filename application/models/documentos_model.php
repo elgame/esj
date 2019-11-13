@@ -35,7 +35,7 @@ class documentos_model extends CI_Model {
     * @param  string $idDocumento
     * @return boolean
     */
-  private function updateDocumento($data, $idFactura, $idDocumento, $status = 't')
+  public function updateDocumento($data, $idFactura, $idDocumento, $status = 't')
   {
     // Convierte los datos del documento a json.
     if (is_array($data))
@@ -65,8 +65,9 @@ class documentos_model extends CI_Model {
    *
    * @return mixed array|boolean
    */
-  public function getClienteDocs($idFactura)
+  public function getClienteDocs($idFactura, $id_documento=null)
   {
+    $sql = ($id_documento!==null? " AND fd.id_documento = {$id_documento}": '');
     $query = $this->db->query(
       "SELECT fd.id_documento,
               fd.data,
@@ -78,7 +79,7 @@ class documentos_model extends CI_Model {
               rd.orden
        FROM rastria_documentos AS rd
        INNER JOIN facturacion_documentos AS fd ON fd.id_documento = rd.id_documento
-       WHERE fd.id_factura = {$idFactura} AND rd.status = true
+       WHERE fd.id_factura = {$idFactura} AND rd.status = true {$sql}
        ORDER BY rd.orden ASC"
     );
 
@@ -241,7 +242,8 @@ class documentos_model extends CI_Model {
           'id_pallet'   => $_POST['pid_pallet'][$key] !== '' ? $_POST['pid_pallet'][$key] : null ,
           'marca'       => $_POST['pid_pallet'][$key] !== '' ? $_POST['pmarca'][$key] : null,
           'descripcion' => $_POST['pid_pallet'][$key] === '' ? $_POST['pmarca'][$key] : null,
-          'temperatura' => $_POST['pid_pallet'][$key] !== '' ? $_POST['ptemperatura'][$key] : null,
+          // 'temperatura' => $_POST['pid_pallet'][$key] !== '' ? $_POST['ptemperatura'][$key] : null,
+          'temperatura' => $_POST['ptemperatura'][$key],
         );
       }
     }
@@ -292,7 +294,7 @@ class documentos_model extends CI_Model {
              id_documento = {$idDocumento}"
     );
 
-    $data = array();
+    $data = array('info' => array(), 'pallets' => array());
     if ($sql->num_rows() > 0)
     {
       $data['info'] = $sql->result();
@@ -306,9 +308,14 @@ class documentos_model extends CI_Model {
                 fep.descripcion,
                 fep.temperatura,
                 rp.no_cajas AS cajas,
-                string_agg(clasi.nombre::text, ', '::text) AS clasificaciones
+                rp.kilos_pallet,
+                string_agg(clasi.nombre::text, ', '::text) AS clasificaciones,
+                cali.calibres
+
          FROM facturacion_doc_embarque_pallets fep
+
          LEFT JOIN rastria_pallets rp ON rp.id_pallet = fep.id_pallet
+
          LEFT JOIN (
             SELECT rpr.id_pallet, cl.nombre
             FROM rastria_pallets_rendimiento rpr
@@ -316,14 +323,40 @@ class documentos_model extends CI_Model {
             GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
             ORDER BY rpr.id_pallet
          ) AS clasi ON clasi.id_pallet = fep.id_pallet
-         WHERE id_embarque = {$data['info'][0]->id_embarque}
-         GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas
-         ORDER BY fep.no_posicion ASC"
+
+        LEFT JOIN (
+            SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
+            FROM rastria_pallets_calibres rpc
+            INNER JOIN calibres cal ON  rpc.id_calibre = cal.id_calibre
+            GROUP BY rpc.id_pallet
+            ORDER BY rpc.id_pallet
+        ) cali ON cali.id_pallet = fep.id_pallet
+
+        WHERE id_embarque = {$data['info'][0]->id_embarque}
+        GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas, cali.calibres, rp.kilos_pallet
+        ORDER BY fep.no_posicion ASC"
       );
 
       if ($sql->num_rows() > 0)
         $data['pallets'] = $sql->result();
     }
+
+    // Obtiene los kilos de la pesada segun el ticket seleccionado en el documento
+    // manifiesto de chofer.
+    $infoManifiesto = $this->getJsonDataDocus($idFactura, 1);
+    $data['kilos_pesada'] = 'Ticket no asignado';
+    if ($infoManifiesto && $infoManifiesto->no_ticket !== '')
+    {
+      $data['kilos_pesada'] = $this->db->select('kilos_neto')
+        ->from('bascula')
+        ->where('id_area', $infoManifiesto->area_id)
+        ->where('folio', $infoManifiesto->no_ticket)
+        ->get()->row()->kilos_neto;
+    }
+
+    // echo "<pre>";
+    //   var_dump($data['kilos_pesada']);
+    // echo "</pre>";exit;
 
     return $data;
   }
@@ -420,7 +453,7 @@ class documentos_model extends CI_Model {
    * @param  string $idEmbarque
    * @return array
    */
-  public function getEmbarqueClasifi($idEmbarque)
+  public function getEmbarqueClasifi($idEmbarque, $id_factura=null)
   {
     $query = $this->db->query(
       "SELECT rpr.id_clasificacion, SUM(rpr.cajas) AS cajas, cl.nombre AS clasificacion
@@ -431,9 +464,20 @@ class documentos_model extends CI_Model {
         GROUP BY rpr.id_clasificacion, cl.nombre"
     );
 
-    $data = array();
+    $data['clasificaciones'] = array();
     if ($query->num_rows() > 0)
       $data['clasificaciones'] = $query->result();
+    elseif($id_factura != null)
+    {
+      $query = $this->db->query(
+        "SELECT fep.id_clasificacion, SUM(fep.cantidad) AS cajas, fep.descripcion AS clasificacion
+          FROM facturacion_productos fep
+          WHERE fep.id_factura = {$id_factura}
+          GROUP BY fep.id_clasificacion, fep.descripcion"
+      );
+      if ($query->num_rows() > 0)
+        $data['clasificaciones'] = $query->result();
+    }
 
     return $data;
   }
@@ -445,46 +489,50 @@ class documentos_model extends CI_Model {
    */
   public function saveChoferCopiaIfe($idFactura, $idDocumento)
   {
-    if ($_FILES['pife_file']['tmp_name'] !== '')
+    if ($_FILES['pife_file']['tmp_name'] !== '' || isset($_POST['pife_check']))
     {
-      $this->load->library('my_upload');
+      if ($_FILES['pife_file']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path, //APPPATH.$path_lic
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'CHOFER COPIA DEL IFE',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('pife_file');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path, //APPPATH.$path_lic
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'CHOFER COPIA DEL IFE',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('pife_file');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url'   => $path,
+        'check' => (isset($_POST['pife_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -498,46 +546,51 @@ class documentos_model extends CI_Model {
    */
   public function saveChoferCopiaLicencia($idFactura, $idDocumento)
   {
-    if ($_FILES['plicencia_file']['tmp_name'] !== '')
+    if ($_FILES['plicencia_file']['tmp_name'] !== '' || isset($_POST['plicencia_check']))
     {
-      $this->load->library('my_upload');
+      $path = '';
+      if ($_FILES['plicencia_file']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'CHOFER COPIA LICENCIA',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('plicencia_file');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'CHOFER COPIA LICENCIA',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('plicencia_file');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url'   => $path,
+        'check' => (isset($_POST['plicencia_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -551,46 +604,50 @@ class documentos_model extends CI_Model {
    */
   public function saveSeguroCamion($idFactura, $idDocumento)
   {
-    if ($_FILES['fseguro_camion']['tmp_name'] !== '')
+    if ($_FILES['fseguro_camion']['tmp_name'] !== '' || isset($_POST['fseguro_check']))
     {
-      $this->load->library('my_upload');
+      if ($_FILES['fseguro_camion']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'SEGURO CAMION',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('fseguro_camion');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'SEGURO CAMION',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('fseguro_camion');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url' => $path,
+        'check' => (isset($_POST['fseguro_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -678,6 +735,53 @@ class documentos_model extends CI_Model {
     }
   }
 
+  private function acomodaStringClasificacion($clasifi)
+  {
+    if ( ! $clasifi) return '';
+
+    $arrayPalabras = explode(' ', $clasifi);
+
+    $newArrayPalabras = array();
+
+    foreach ($arrayPalabras as $key => $palabra)
+    {
+      if ($key === 0)
+      {
+        array_push($newArrayPalabras, strtoupper(substr($arrayPalabras[0], 0 , 1)).'.');
+      }
+      else
+      {
+        $abreviacion = '';
+
+        switch ($palabra)
+        {
+          case 'LIMON':
+            $abreviacion = 'LMON.';
+            break;
+          case 'ALIMONADO':
+            $abreviacion = 'ALIM.';
+            break;
+          case 'VERDE':
+            $abreviacion = 'VER.';
+            break;
+          case 'INDUSTRIAL':
+            $abreviacion = 'INDUS.';
+            break;
+          case 'ECONOMICO':
+            $abreviacion = 'ECON.';
+            break;
+          default:
+            $abreviacion = $palabra;
+            break;
+        }
+
+        array_push($newArrayPalabras, $abreviacion);
+      }
+    }
+
+    return implode(' ', $newArrayPalabras);
+  }
+
   /*
    |-------------------------------------------------------------------------
    |  AJAX
@@ -708,6 +812,46 @@ class documentos_model extends CI_Model {
     $this->generaDoc($idFactura, $idDocumento, $path);
 
     return array('passes' => true);
+  }
+
+  public function ajaxGetPalletsLibres($sqlX = null){
+    $sql = '';
+    if ($this->input->get('folios') != '') {
+      $folios = explode('al', $this->input->get('folios'));
+      if (isset($folios[0]) && isset($folios[1]) && is_numeric(trim($folios[0])) && is_numeric(trim($folios[1]))) {
+        $sql = " AND folio BETWEEN ".trim($folios[0])." AND ".trim($folios[1])."";
+      } elseif (is_numeric(trim($folios[0]))) {
+        $sql = " AND folio = ".trim($folios[0])."";
+      }
+    }
+    if ($this->input->get('term') != '')
+      $sql .= " AND (lower(c.clasificaciones) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+        "SELECT *
+        FROM embarque_pallets_libres AS c
+        WHERE 1 = 1
+          {$sql}
+        ORDER BY c.folio DESC
+        LIMIT 30"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_pallet,
+            'label' => $itm->clasificaciones,
+            'value' => $itm->clasificaciones,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
   }
 
   /*
@@ -855,7 +999,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(130, 6, 'DIRECCION : ' . $data->direccion, 1, 0, 'L', 1);
 
     $pdf->SetXY(140, 57);
-    $pdf->Cell(35, 6, '', 1, 0, 'C', 1);
+    $pdf->Cell(35, 6, date('Y-m-d'), 1, 0, 'C', 1);
 
     $pdf->SetXY(175, 57);
     $pdf->Cell(35, 6, '', 1, 0, 'C', 1);
@@ -1073,7 +1217,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(40, 6, $data['info'][0]->ctrl_embarque, 1, 0, 'C', 1);
 
     $pdf->SetXY(167, 22);
-    $pdf->Cell(40, 6, $jsonData->fecha, 1, 0, 'C', 1);
+    $pdf->Cell(40, 6, String::fechaAT($jsonData->fecha), 1, 0, 'C', 1);
 
     $pdf->SetXY(7, 33);
     $pdf->SetFillColor(146,208,80);
@@ -1091,6 +1235,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetFont('Arial','',9);
     // TRACK
+    $totalKilosPallets = 0;
     for ($i=1; $i < 24 ; $i = $i + 2)
     {
       $y = $pdf->GetY();
@@ -1109,7 +1254,10 @@ class documentos_model extends CI_Model {
         if ($pallet->no_posicion == $i)
         {
           if ($pallet->id_pallet != null)
+          {
             $txtTrack1 = $pallet->cajas;
+            $totalKilosPallets += floatval($pallet->kilos_pallet);
+          }
           else
             $txtTrack1 = $pallet->descripcion;
         }
@@ -1117,7 +1265,10 @@ class documentos_model extends CI_Model {
         if ($pallet->no_posicion == $i+1)
         {
           if ($pallet->id_pallet != null)
+          {
             $txtTrack2 = $pallet->cajas;
+            $totalKilosPallets += floatval($pallet->kilos_pallet);
+          }
           else
             $txtTrack2 = $pallet->descripcion;
         }
@@ -1133,19 +1284,24 @@ class documentos_model extends CI_Model {
       $pdf->Cell(20, 6, $txtTrack2, 1, 0, 'C', 1);
     }
 
+    $pdf->SetFont('Arial','B', 12);
+    $pdf->SetXY(104, 44);
+    $pdf->Cell(100, 6, 'Total Kilos: ' . $totalKilosPallets, 0, 0, 'R', 1);
+
     $pdf->SetTextColor(0,0,0);
     $pdf->SetXY(50, 52);
     $pdf->SetFont('Arial','B',9);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(10, 30, 72, 15, 30));
-    $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CAJAS', 'TEMPERATURA'), true);
+    $pdf->SetAligns(array('C', 'C', 'L', 'L', 'C', 'C'));
+    $pdf->SetWidths(array(10, 30, 60, 29, 13, 12));
+    $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CALIBRE', 'CAJAS', 'TEMP'), true);
 
-    $pdf->SetFont('Arial','',9);
+    $pdf->SetFont('Arial','',7);
     for ($i = 1; $i < 25 ; $i++)
     {
       $marca         = '';
       $clasificacion = '';
+      $calibres      = '';
       $cajas         = '';
       $temperatura   = '';
 
@@ -1155,17 +1311,21 @@ class documentos_model extends CI_Model {
           {
             $marca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
             $clasificacion = $pallet->clasificaciones;
+            $calibres      = $pallet->calibres;
             $cajas         = $pallet->cajas;
             $temperatura   = $pallet->temperatura;
             break;
           }
         }
 
+      $clasificacion = $this->acomodaStringClasificacion($clasificacion);
+
       $pdf->SetX(50);
         $pdf->Row(array(
           $i,
           $marca,
           $clasificacion,
+          $calibres,
           $cajas,
           $temperatura,
         ), false);
@@ -1174,25 +1334,25 @@ class documentos_model extends CI_Model {
     $pdf->SetFont('Arial','B',8);
     $y = $pdf->GetY();
 
-    $pdf->SetXY(50, $y + 6);
-    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . $data['info'][0]->fecha_carga, 0, 0, 'L', 1);
+    $pdf->SetXY(50, $y + 2);
+    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . String::fechaAT($data['info'][0]->fecha_carga), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 13);
+    $pdf->SetXY(50, $y + 7);
     $pdf->Cell(50, 6, 'INICIO: ' . $jsonData->inicio, 0, 0, 'L', 1);
 
-    $pdf->SetXY(105, $y + 13);
+    $pdf->SetXY(105, $y + 7);
     $pdf->Cell(50, 6, 'TERMINO: ' . $jsonData->termino, 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 20);
-    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . $data['info'][0]->fecha_embarque, 0, 0, 'L', 1);
+    $pdf->SetXY(50, $y + 12);
+    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . String::fechaAT($data['info'][0]->fecha_embarque), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 27);
+    $pdf->SetXY(50, $y + 17);
     $pdf->Cell(105, 6, 'ELABORO: ' . strtoupper($jsonData->elaboro), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 34);
+    $pdf->SetXY(50, $y + 22);
     $pdf->Cell(105, 6, 'DESTINO: ' . strtoupper($jsonData->destino), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 41);
+    $pdf->SetXY(50, $y + 27);
     $pdf->Cell(157, 6, 'DESTINATARIO: ' . strtoupper($jsonData->destinatario), 0, 0, 'L', 1);
 
     return array('pdf' => $pdf, 'texto' => 'ACOMODO DEL EMBARQUE.pdf');
@@ -1853,7 +2013,7 @@ class documentos_model extends CI_Model {
       ->where('id_factura', $idFactura)
       ->get()->row()->id_embarque;
 
-    $clasificaciones = $this->getEmbarqueClasifi($idEmbarque);
+    $clasificaciones = $this->getEmbarqueClasifi($idEmbarque, $idFactura);
 
     $pdf->SetXY(110, $pdf->GetY() + 27);
     $pdf->SetFillColor(184, 78, 78);
@@ -1926,6 +2086,7 @@ class documentos_model extends CI_Model {
 
     return array('pdf' => $pdf, 'texto' => 'MANIFIESTO DEL CAMION.pdf');
   }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

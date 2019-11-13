@@ -17,7 +17,7 @@
         </ul>
       </div>
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -33,15 +33,52 @@
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40" 
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40"
                   value="<?php echo (isset($data['info']->nombre)? $data['info']->nombre: ''); ?>" required autofocus placeholder="Limon verde, limon industrial">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fcodigo">Codigo </label>
+                <div class="controls">
+                  <input type="text" name="fcodigo" id="fcodigo" class="span6" maxlength="15"
+                  value="<?php echo (isset($data['info']->codigo)? $data['info']->codigo: ''); ?>" placeholder="AL2, EXT, 500">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fnombre">IVA </label>
+                <div class="controls">
+                  <select name="diva" id="diva" class="span3">
+                    <option value="0" <?php echo set_select('diva', '0', $data['info']->iva == '0' ? true : false); ?>>0%</option>
+                    <option value="11" <?php echo set_select('diva', '11', $data['info']->iva == '11' ? true : false); ?>>11%</option>
+                    <option value="16" <?php echo set_select('diva', '16', $data['info']->iva == '16' ? true : false); ?>>16%</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fnombre">Unidad / Medida </label>
+                <div class="controls">
+                  <select name="dunidad" id="dunidad" class="span3">
+                    <?php foreach ($unidades as $key => $u) { ?>
+                      <option value="<?php echo $u->id_unidad ?>" <?php echo set_select('dunidad', $u->id_unidad, $data['info']->id_unidad == $u->id_unidad ? true : false); ?>><?php echo $u->nombre ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dinventario">Inventario </label>
+                <div class="controls">
+                  <input type="checkbox" name="dinventario" id="dinventario" value="t" <?php echo set_checkbox('dinventario', 't', ($data['info']->inventario=='t'?true:false)); ?>>
                 </div>
               </div>
 
               <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">
-                  <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11" 
+                  <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11"
                   value="<?php echo (isset($data['info']->precio_venta)? $data['info']->precio_venta: ''); ?>" required placeholder="4.4, 33">
                 </div>
               </div> -->
@@ -54,7 +91,7 @@
                 foreach ($areas['areas'] as $key => $value) {
                 ?>
                     <option value="<?php echo $value->id_area; ?>" <?php echo set_select('farea', $value->id_area, false, (isset($data['info']->id_area)? $data['info']->id_area: '') ); ?>><?php echo $value->nombre; ?></option>
-                <?php 
+                <?php
                 }?>
                   </select>
                 </div>
@@ -63,10 +100,65 @@
               <div class="control-group">
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
-                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11" 
-                  value="<?php echo (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: ''); ?>" required placeholder="123212, 332123">
+                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11"
+                  value="<?php echo (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: ''); ?>" placeholder="123212, 332123">
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fcuenta_cpi2">Cuenta contpaq 2 (Orov)</label>
+                <div class="controls">
+                  <input type="text" name="fcuenta_cpi2" id="fcuenta_cpi2" class="span6 vpositive" maxlength="11"
+                  value="<?php echo (isset($data['info']->cuenta_cpi2)? $data['info']->cuenta_cpi2: ''); ?>" placeholder="123212, 332123">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dclave_producto">Clave de Productos/Servicios </label>
+                <div class="controls">
+                  <input type="text" name="dclave_producto" class="span9" id="dclave_producto"
+                    value="<?php echo (!empty($data['info']->clave_prod_serv)? $data['cprodserv']->label: ''); ?>" size="73">
+                  <input type="hidden" name="dclave_producto_cod" class="span9" id="dclave_producto_cod"
+                    value="<?php echo (!empty($data['info']->clave_prod_serv)? $data['cprodserv']->c_clave_prodserv: ''); ?>" size="73">
+                </div>
+              </div>
+
+              <!-- <div class="control-group">
+                <label class="control-label" for="dclave_unidad">Clave de unidad </label>
+                <div class="controls">
+                  <input type="text" name="dclave_unidad" class="span9" id="dclave_unidad"
+                    value="<?php echo (!empty($data['info']->clave_unidad)? $data['cunidad']->label: ''); ?>" size="73">
+                  <input type="hidden" name="dclave_unidad_cod" class="span9" id="dclave_unidad_cod"
+                    value="<?php echo (!empty($data['info']->clave_unidad)? $data['cunidad']->c_clave_unidad: ''); ?>" size="73">
+                </div>
+              </div> -->
+
+               <!-- <div class="control-group">
+                <label class="control-label" for="fcalibres">Autocomplete Calibres </label>
+                <div class="controls">
+                  <input type="text" id="auto-calibres" class="span3"
+                    value="" placeholder="Nombre del Calibre">
+                </div> -->
+              </div>
+
+               <!-- <div class="control-group">
+                <label class="control-label" for="fcalibres">Calibres Seleccionados</label>
+                <div class="controls" id="list-calibres"> -->
+                  <!-- <label><input type="checkbox" name="fcalibres[]" value="1" class="sel-calibres"><input type="hidden" name="fcalibre_nombre[]" value="Calibre 1">Calibre 1</label> -->
+
+                  <?php
+                    /*if (isset($_POST['fcalibres'])) {
+                      foreach ($_POST['fcalibres'] as $key => $value) { ?>
+                        <label><input type="checkbox" name="fcalibres[]" value="<?php echo $value ?>" class="sel-calibres" checked><input type="hidden" name="fcalibre_nombre[]" value="<?php echo $_POST['fcalibre_nombre'][$key] ?>"><?php echo $_POST['fcalibre_nombre'][$key] ?></label>
+                  <?php }}
+
+                    else if (isset($data['calibres'])) {
+                      foreach ($data['calibres'] as $key => $calibre) { ?>
+                        <label><input type="checkbox" name="fcalibres[]" value="<?php echo $calibre->id_calibre ?>" class="sel-calibres" checked><input type="hidden" name="fcalibre_nombre[]" value="<?php echo $calibre->nombre ?>"><?php echo $calibre->nombre ?></label>
+                  <?php }} */?>
+
+                <!-- </div>
+              </div> -->
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Guardar</button>

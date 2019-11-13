@@ -28,7 +28,7 @@
             	<fieldset class="span6" style="color: #555; font-size: .9em; border-bottom: none;">
 								<legend style="margin: 0;">Datos del cliente</legend>
 								<strong>Nombre:</strong> <?php echo $data['cliente']->nombre_fiscal; ?> <br>
-								<strong>Dirección: </strong> 
+								<strong>Dirección: </strong>
 										<?php
 											$info = $data['cliente']->calle!=''? $data['cliente']->calle: '';
 											$info .= $data['cliente']->no_exterior!=''? ' #'.$data['cliente']->no_exterior: '';
@@ -39,7 +39,7 @@
 											$info .= $data['cliente']->estado!=''? ', '.$data['cliente']->estado: '';
 											echo $info;
 										?> <br>
-								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?> 
+								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?>
 								<strong>Email: </strong> <?php echo $data['cliente']->email; ?>
 							</fieldset>
 
@@ -48,7 +48,7 @@
 								<strong>Fecha:</strong> <?php echo $data['cobro'][0]->fecha; ?> <br>
 								<strong>Serie:</strong> <?php echo $data['cobro'][0]->serie; ?> <br>
 								<strong>Folio:</strong> <?php echo $data['cobro'][0]->folio; ?> <br>
-								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?> 
+								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?>
 								<strong>Plazo credito: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 0: $data['cobro'][0]->plazo_credito; ?> <br>
 								<strong>Estado:</strong> <span id="inf_fact_estado">
 									<?php echo $data['cobro'][0]->status=='pa'? 'Pagada': 'Pendiente'; ?></span>
@@ -81,8 +81,8 @@
 								<tr>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->concepto; ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td class="">
 									<?php
 									if ($_GET['tipo'] == 'v')
@@ -100,6 +100,11 @@
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
+
+                    if($data['cobro'][0]->is_factura == 't' && $cuenta->facturado == 0 && $cuenta->tipo != 'nc')
+                      echo '<a class="btn btn-info" href="'.base_url().'panel/cuentas_cobrar/factura_abono_parci/?ida='.$cuenta->id_abono.'&'.String::getVarsLink(array('ida','msg','nc')).'"
+                              onclick="msb.confirm(\'Estas seguro de Facturar el abono?\', \'Facturas\', this); return false;" title="Facturar">
+                            <i class="icon-file-text-alt icon-white"></i> <span class="hidden-tablet">Facturar</span></a>';
 									}
 									?>
 									</td>
@@ -108,8 +113,8 @@
 								} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="2" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
+									<td style="text-align: right;" id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td></td>
 								</tr>
               </tbody>

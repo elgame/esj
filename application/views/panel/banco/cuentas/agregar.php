@@ -48,8 +48,27 @@
 								  </div>
 								</div>
 
+                <div class="control-group">
+                  <label class="control-label" for="ftipo">Tipo </label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" required>
+                      <option value="M.N." <?php echo set_select('ftipo', 'M.N.'); ?>>M.N.</option>
+                      <option value="USD" <?php echo set_select('ftipo', 'USD'); ?>>USD</option>
+                      <option value="EURO" <?php echo set_select('ftipo', 'EURO'); ?>>EURO</option>
+                    </select>
+                  </div>
+                </div>
+
 								<div class="control-group">
-								  <label class="control-label" for="fnumero">Numero </label>
+				                  <label class="control-label" for="fsucursal">Sucursal </label>
+				                  <div class="controls">
+				                    <input type="text" name="fsucursal" id="fsucursal" class="span6" maxlength="12"
+				                    value="<?php echo set_value('fsucursal'); ?>" placeholder="12352">
+				                  </div>
+				                </div>
+
+								<div class="control-group">
+								  <label class="control-label" for="fnumero">Cuenta/CLABE </label>
 								  <div class="controls">
 										<input type="text" name="fnumero" id="fnumero" class="span6" maxlength="20"
 										value="<?php echo set_value('fnumero'); ?>" placeholder="12352">

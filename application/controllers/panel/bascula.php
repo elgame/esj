@@ -12,10 +12,18 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_proveedores/',
     'bascula/ajax_get_clientes/',
     'bascula/ajax_get_choferes/',
+    'bascula/ajax_get_productor/',
     'bascula/ajax_get_camiones/',
     'bascula/ajax_get_calidades/',
     'bascula/ajax_get_precio_calidad/',
     'bascula/ajax_get_kilos/',
+    'bascula/ajax_check_limite_proveedor/',
+    'bascula/ajax_get_ranchos/',
+
+    'bascula/fotos/',
+    'bascula/ajax_pagar_boleta/',
+    'bascula/auth_modify/',
+    'bascula/puede_modificar/',
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
@@ -24,10 +32,15 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_camion/',
 
     'bascula/show_view_agregar_lote/',
+    'bascula/show_view_ligar_orden/',
 
     'bascula/rde_pdf/',
+    'bascula/rde_xls/',
     'bascula/r_acumulados_pdf/',
+    'bascula/r_acumulados_xls/',
 	  'bascula/rmc_pdf/',
+    'bascula/rbp_pdf/',
+    'bascula/rbp_xls/',
 
     'bascula/imprimir_pagadas/',
 
@@ -38,6 +51,16 @@ class bascula extends MY_Controller {
 
     'bascula/imprimir2/',
     'bascula/rmc_pdf2/',
+
+    'bascula/bonificaciones_pdf/',
+    'bascula/bonificaciones_xls/',
+    'bascula/bitacora_pdf/',
+
+    'bascula/imprimir_recepcion/',
+    'bascula/get_boleta/',
+
+    'bascula/get_calidades/',
+    'bascula/rdefull_xls/',
     );
 
   public function _remap($method){
@@ -64,7 +87,7 @@ class bascula extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Administración de Pesadas'
+      'titulo' => 'Administración de Movimientos'
     );
 
     $this->load->model('bascula_model');
@@ -98,8 +121,10 @@ class bascula extends MY_Controller {
       array('general/supermodal.js'),
       array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('general/util.js'),
       array('panel/bascula/agregar.js'),
       array('panel/bascula/bonificacion.js'),
+      array('panel/bascula/clasif.js'),
     ));
 
     $this->load->model('bascula_model');
@@ -110,8 +135,11 @@ class bascula extends MY_Controller {
       'titulo' => 'Agregar Bascula'
     );
 
+    $params['modkbt'] = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar_kilosbt/');
+
     $params['next_folio'] = $this->bascula_model->getSiguienteFolio('en');
     $params['areas']      = $this->areas_model->getAreas();
+    $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
     $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
       ->from("empresas")
@@ -127,24 +155,39 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->addBascula();
 
-      $ticket = '';
+      $log = false;
+      $authId = false;
+      if (isset($_POST['autorizar']))
+      {
+        $log = true;
+        $authId = $_POST['autorizar'];
+      }
+
+      $res_mdl = $this->bascula_model->addBascula(null, false, $log, $authId);
+
+      $boletar = $ticket = '';
       // if (isset($_POST['pstatus']))
       //   $ticket = '&p=t';
 
       if (isset($_GET['p']))
         $ticket = '&p=t';
 
+      if ($this->input->post('ptipo') === 'en') {
+        $boletar = $res_mdl['new_boleta']? '&br='.$res_mdl['idb']: '';
+      }
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
-      if( ! $res_mdl['error'])
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$ticket));
+      if( $res_mdl['error'] == false){
+        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
+      }
     }
 
     $params['accion']      = 'n'; // indica que es nueva entrada
     $params['idb']         = '';
     $params['param_folio'] = '';
     $params['fecha']       = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['autorizar']   = false;
+    $params['fecha_pago']  = '';
 
     $params['e'] = false;
 
@@ -170,6 +213,7 @@ class bascula extends MY_Controller {
 
           $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
           $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+          $_POST['prancho']       = $info['info'][0]->rancho;
         }
         else
         {
@@ -178,6 +222,12 @@ class bascula extends MY_Controller {
 
           $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
           $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+        }
+
+        if ($info['info'][0]->id_productor != null)
+        {
+          $_POST['pproductor']    = $info['info'][0]->productor;
+          $_POST['pid_productor'] = $info['info'][0]->id_productor;
         }
 
         if ($info['info'][0]->id_chofer != null)
@@ -203,7 +253,14 @@ class bascula extends MY_Controller {
         $params['accion']      = $info['info'][0]->accion;
 
         if (isset($_GET['p']))
+        {
           $params['ticket'] = $info['info'][0]->id_bascula;
+
+          if ($info['info'][0]->no_impresiones == 0)
+          {
+            $info['info'][0]->no_impresiones = 1;
+          }
+        }
 
         if (isset($_GET['e']))
           if ($_GET['e'] === 't')
@@ -211,19 +268,31 @@ class bascula extends MY_Controller {
 
         $_POST['ptipo']         = $info['info'][0]->tipo;
         $_POST['parea']         = $info['info'][0]->id_area;
+        $_POST['parea_nom']     = $info['info'][0]->area;
         $_POST['pempresa']      = $empresa['info']->nombre_fiscal;
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
 
         $params['next_folio'] = $info['info'][0]->folio;
-        if($info['info'][0]->fecha_tara != '')
-          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
-        else
-          $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i:s"), 0, 16));
+        if ($info['info'][0]->tipo == 'en') {
+          if($info['info'][0]->fecha_tara != '')
+            $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
+          if($info['info'][0]->fecha_bruto != '')
+            $params['fecha']      =  substr($info['info'][0]->fecha_bruto, 0, 10).'T'.date("H:i");
+          else
+            $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i"), 0, 16));
+        } else {
+          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
+        }
+
+        $params['fecha_pago']   = str_replace(' ', 'T', substr($info['info'][0]->fecha_pago, 0, 16) );
 
         $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;
         $_POST['pcajas_prestadas'] = $info['info'][0]->cajas_prestadas;
-        $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto;
+        $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto2 > 0? $info['info'][0]->kilos_neto2 : $info['info'][0]->kilos_neto;
+        $_POST['pkilos_neto2']     = $info['info'][0]->kilos_neto2;
+
+        $_POST['pno_lote']         = $info['info'][0]->no_lote;
 
         if ( ! isset($_POST['pcajas']) )
         {
@@ -236,6 +305,25 @@ class bascula extends MY_Controller {
             $_POST['ppromedio'][]    = $c->promedio;
             $_POST['pprecio'][]      = $c->precio;
             $_POST['pimporte'][]     = $c->importe;
+            $_POST['pnum_registro'][] = $c->num_registro;
+          }
+        }
+
+        if ( isset($info['cajas_clasf']) && count($info['cajas_clasf']) > 0) {
+          foreach ($info['cajas_clasf'] as $key => $p) {
+            $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
+            $_POST['prod_importe'][$key]            = $p->importe;
+            $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
+            $_POST['prod_dmedida'][$key]            = $p->unidad;
+            $_POST['prod_dcantidad'][$key]          = $p->cantidad;
+            $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
+            $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva;
+            $_POST['prod_diva_total'][$key]         = $p->iva;
+            $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
+            $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+
+
+            $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
           }
         }
 
@@ -244,6 +332,11 @@ class bascula extends MY_Controller {
         $_POST['ptotal']         = $info['info'][0]->importe;
         $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
 
+        // Indicara si se necesita autorizacion para modificar.
+        $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
+        $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
+
+        $params['fotos'] = $info['bascula_fotos'];
       }
       else
       {
@@ -289,7 +382,7 @@ class bascula extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'));
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
       if($res_mdl)
         redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=8'));
     }
@@ -314,6 +407,16 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
 
+  public function puede_modificar()
+  {
+    if (isset($_GET['pidb'])) {
+      $this->load->model('bascula_model');
+      $info = $this->bascula_model->getBasculaInfo($_GET['pidb']);
+      echo json_encode(array('puede_modificar' => $info['info'][0]->no_impresiones > 0 ? false : true));
+    } else
+      echo json_encode(array('puede_modificar' => false));
+  }
+
   /**
    * Muestra el pdf del ticket.
    * @return void
@@ -332,6 +435,41 @@ class bascula extends MY_Controller {
 
     $params['data'] = $data = $this->bascula_model->getBasculaInfo($this->input->get('id'));
     $this->load->view('panel/bascula/print_ticket2', $params);
+  }
+
+  /**
+   * Muestra el pdf de BOLETA DE RECEPCION.
+   * @return void
+   */
+  public function imprimir_recepcion()
+  {
+    $this->load->model('bascula_model');
+    if($this->input->get('p') == 'true')
+      $this->bascula_model->imprimir_boletaR($this->input->get('id'));
+    else
+      $this->load->view('panel/bascula/print_boleta_recepcion');
+  }
+
+  /**
+   * Ver las fotos capturadas
+   * @return [type] [description]
+   */
+  public function fotos()
+  {
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Fotos Bascula'
+    );
+
+    $this->load->model('bascula_model');
+    $info = $this->bascula_model->getBasculaInfo($_GET['idb']);
+    $params['fotos'] = $info['bascula_fotos'];
+    $params['noHeader'] = true;
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/fotos', $params);
+    $this->load->view('panel/footer');
   }
 
   /**
@@ -415,6 +553,7 @@ class bascula extends MY_Controller {
 
             $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
             $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+            $_POST['prancho']       = $info['info'][0]->rancho;
           }
           else
           {
@@ -423,6 +562,7 @@ class bascula extends MY_Controller {
 
             $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
             $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+            $_POST['prancho']     = '';
           }
 
           if ($info['info'][0]->id_chofer != null)
@@ -479,6 +619,7 @@ class bascula extends MY_Controller {
               $_POST['ppromedio'][]    = $c->promedio;
               $_POST['pprecio'][]      = $c->precio;
               $_POST['pimporte'][]     = $c->importe;
+              $_POST['pnum_registro'][] = $c->num_registro;
             }
           }
 
@@ -521,7 +662,6 @@ class bascula extends MY_Controller {
     echo $base64;
   }
 
-
   /**
    * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
    *
@@ -559,7 +699,77 @@ class bascula extends MY_Controller {
   public function rde_pdf()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->rde_pdf();
+    if ($this->input->get('ftipo') == 'sa') {
+      $this->bascula_model->rdes_pdf();
+    } else
+      $this->bascula_model->rde_pdf();
+  }
+
+  public function rde_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rde_xls();
+  }
+
+  public function rdefull_xls()
+  {
+    $this->load->model('bascula_model');
+    if ($this->input->get('ftipo') == 'sa')
+      $this->bascula_model->rdesfull_xls();
+    else
+      $this->bascula_model->rdefull_xls();
+  }
+
+  public function get_calidades()
+  {
+    $this->load->model('calidades_model');
+    $response = $this->calidades_model->get_calidades($this->input->get('id_area'));
+    echo json_encode($response);
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE BOLETAS PAGADAS"
+   *
+   * @return void
+   */
+  public function rbp()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Boletas Pagadas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rbp', $params);
+    $this->load->view('panel/footer');
+  }
+
+ /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rbp_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rbp_pdf();
+  }
+  public function rbp_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rbp_xls();
   }
 
   /**
@@ -585,12 +795,13 @@ class bascula extends MY_Controller {
    */
   public function movimientos()
   {
-    if (isset($_GET['fid_proveedor']))
-      if ($_GET['fid_proveedor'] == '')
-        redirect(base_url('panel/bascula/movimientos/?msg=13'));
-
+    // if (isset($_GET['fid_proveedor']))
+    //   if ($_GET['fid_proveedor'] == '')
+    //     redirect(base_url('panel/bascula/movimientos/?msg=13'));
     $this->carabiner->js(array(
-      // array('general/msgbox.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
       array('panel/bascula/movimientos_cuenta.js'),
     ));
 
@@ -602,8 +813,9 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->load->model('areas_model');
 
-    $params['movimientos'] = $this->bascula_model->getMovimientos();
     $params['areas'] = $this->areas_model->getAreas();
+    $_GET['farea'] = empty($_GET['farea'])? $params['areas']['areas'][0]->id_area: $_GET['farea'];
+    $params['movimientos'] = $this->bascula_model->getMovimientos();
 
     // echo "<pre>";
     //   var_dump($params['movimientos']);
@@ -622,6 +834,49 @@ class bascula extends MY_Controller {
     // $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/bascula/movimientos_cuenta', $params);
     $this->load->view('panel/footer');
+  }
+
+  /**
+   * Muestra la vista para realizar movimientos de cuenta.
+   * @return void
+   */
+  public function admin_movimientos()
+  {
+    $this->carabiner->js(array(
+        array('general/msgbox.js'),
+        array('panel/bascula/admin.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Pesadas'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['basculas'] = $this->bascula_model->getPagos();
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/admin_movimientos', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function cancelar_movimiento()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('bascula_model');
+
+      $res_mdl = $this->bascula_model->cancelar_pago($_GET['id'], true);
+      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
+    }else
+      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
   }
 
   public function pago_basculas()
@@ -682,6 +937,71 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->bascula_model->r_acumulados_pdf();
   }
+  public function r_acumulados_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->r_acumulados_xls();
+  }
+
+  /**
+   * Muestra la vista para el reporte bonificaciones.
+   * @return void
+   */
+  public function bonificaciones()
+  {
+    if (isset($_GET['fid_proveedor']))
+      if ($_GET['fid_proveedor'] == '')
+        redirect(base_url('panel/bascula/movimientos/?msg=13'));
+
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/reportes/r_bonificaciones.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de bonificaciones'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['movimientos'] = $this->bascula_model->getMovimientos();
+    $params['areas'] = $this->areas_model->getAreas();
+
+    // echo "<pre>";
+    //   var_dump($params['movimientos']);
+    // echo "</pre>";exit;
+
+    if (isset($_GET['p']) && isset($_GET['pe']))
+    {
+      $params['p'] = true;
+      $params['pe'] = $_GET['pe'];
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/bascula/reportes/r_bonificaciones', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte bonificaciones en pdf
+   * @return void
+   */
+  public function bonificaciones_pdf()
+  {
+    $this->load->model('bascula_rpts_model');
+    $this->bascula_rpts_model->bonificaciones_pdf();
+  }
+  public function bonificaciones_xls()
+  {
+    $this->load->model('bascula_rpts_model');
+    $this->bascula_rpts_model->bonificaciones_xls();
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -752,6 +1072,8 @@ class bascula extends MY_Controller {
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('general/keyjump.js'),
+      array('panel/proveedores/addmod.js'),
       array('panel/bascula/fix_proveedores.js'),
     ));
 
@@ -793,6 +1115,8 @@ class bascula extends MY_Controller {
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('general/keyjump.js'),
+      array('panel/proveedores/addmod.js'),
       array('panel/bascula/fix_clientes.js')
     ));
 
@@ -821,6 +1145,12 @@ class bascula extends MY_Controller {
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->model('documentos_model');
+    $params['documentos'] = $this->documentos_model->getDocumentos();
 
     $params['template'] = $this->load->view('panel/clientes/agregar', $params, true);
 
@@ -948,10 +1278,23 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->updateBascula($_GET['idb'], array(
-        'no_lote' => $this->input->post('pno_lote'),
-        'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
-      ));
+
+      $bascula = $this->bascula_model->getBasculaInfo($_GET['idb']);
+
+      // Determina si se hara el registro en la bitacora.
+      $regBitacora = $bascula['info'][0]->no_lote === null ? false : true;
+
+      $res_mdl = $this->bascula_model->updateBascula(
+        $_GET['idb'],
+        array(
+          'no_lote' => $this->input->post('pno_lote'),
+          'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
+        ),
+        null,
+        $regBitacora,
+        $this->session->userdata['id_usuario'],
+        false
+      );
 
       if($res_mdl['passes'])
         redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
@@ -974,6 +1317,69 @@ class bascula extends MY_Controller {
     $this->load->view('panel/bascula/supermodal', $params);
   }
 
+  /**
+   * Muestra formulario para ligar ordenes compra.
+   * @return void
+   */
+  public function show_view_ligar_orden()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('panel/compras_ordenes/admin.js'),
+      // array('panel/bascula/fix_camiones.js'),
+    ));
+
+    $this->load->model('bascula_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar camion'
+    );
+
+    $this->configAddLigOrden();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->load->model('bascula_model');
+
+      $res_mdl = $this->bascula_model->ligarOrdenes($_GET['idb'], $_POST);
+
+      if($res_mdl)
+        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.String::getVarsLink(array('msg')).'&msg=30&close=1'));
+    }
+
+    if (isset($_GET['Buscar'])) {
+      $this->load->model('compras_ordenes_model');
+      $_GET['fstatus'] = 'a';
+      $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
+    }
+
+    $data = $this->bascula_model->getOrdenesLigadas($_GET['idb']);
+
+    $params['ordenes_lig'] = $data;
+    $params['lig_entrego'] = isset($data[0]->entrego)? $data[0]->entrego: '';
+    $params['lig_recibio'] = isset($data[0]->recicio)? $data[0]->recicio: '';
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['template'] = $this->load->view('panel/bascula/ligar_orden', $params, true);
+
+    $this->load->view('panel/bascula/supermodal', $params);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos con validaciones de formulario.
@@ -985,6 +1391,9 @@ class bascula extends MY_Controller {
     $this->load->library('form_validation');
 
     $rules = array(
+      array('field' => 'certificado',
+            'label' => 'Certificado',
+            'rules' => ''),
       array('field' => 'ptipo',
             'label' => 'Tipo',
             'rules' => 'required'),
@@ -1091,12 +1500,19 @@ class bascula extends MY_Controller {
           $rules[] = array('field' => 'pkilos_brutos',
                            'label' => 'Kilos Brutos',
                            'rules' => 'required');
+
+          $rules[] = array('field' => 'prancho',
+                           'label' => 'Rancho',
+                           'rules' => '');
         }
         else
         {
           $rules[] = array('field' => 'pkilos_tara',
                            'label' => 'Kilos tara',
                            'rules' => 'required');
+          $rules[] = array('field' => 'prancho',
+                           'label' => 'Rancho',
+                           'rules' => '');
         }
       }
       else if ($_POST['paccion'] == 'en' || $_POST['paccion'] == 'sa')
@@ -1140,12 +1556,14 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
-    public function chkfolio($folio){
+  public function chkfolio($folio)
+  {
     if ( ! isset($_GET['idb']) && ! isset($_GET['e']))
     {
       $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
         WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}'
         AND id_area = {$this->input->post('parea')}")->row();
+      // var_dump($result->num);exit();
       if($result->num > 0){
         $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
         return false;
@@ -1391,6 +1809,24 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configAddLigOrden()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'lig_entrego',
+            'label' => 'Entrego',
+            'rules' => 'required'),
+      array('field' => 'lig_recibio',
+            'label' => 'Recibio',
+            'rules' => 'required'),
+      array('field' => 'lig_ordenes[]',
+            'label' => 'Recibio',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos para peticiones Ajax.
@@ -1428,6 +1864,16 @@ class bascula extends MY_Controller {
   }
 
   /**
+    * Obtiene los ranchos por peticion Ajax.
+    * @return void
+    */
+  public function ajax_get_ranchos()
+  {
+    $this->load->model('proveedores_model');
+    echo json_encode($this->proveedores_model->getRanchosAjax());
+  }
+
+  /**
     * Obtiene los proveedores por peticion Ajax.
     * @return void
     */
@@ -1445,6 +1891,12 @@ class bascula extends MY_Controller {
   {
     $this->load->model('choferes_model');
     echo json_encode($this->choferes_model->getChoferesAjax());
+  }
+
+  public function ajax_get_productor()
+  {
+    $this->load->model('productores_model');
+    echo json_encode($this->productores_model->getProductorAjax());
   }
 
   /**
@@ -1496,6 +1948,12 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     echo $this->bascula_model->getIdfolio($_GET['folio'], $_GET['tipo'], $_GET['area']);
+  }
+
+  public function ajax_check_limite_proveedor()
+  {
+    $this->load->model('bascula_model');
+    echo $this->bascula_model->checkLimiteProveedor($_GET['idp']);
   }
 
   /*
@@ -1569,12 +2027,315 @@ class bascula extends MY_Controller {
         $txt = 'El lote se agrego correctamente!';
         $icono = 'success';
         break;
+
+      case 30:
+        $txt = 'Las ordenes se ligaron correctamente!';
+        $icono = 'success';
+        break;
+
+      case 20:
+        $txt = 'Se modifico correctamente la compra!';
+        $icono = 'success';
+        break;
     }
 
     return array(
         'title' => $title,
         'msg' => $txt,
         'ico' => $icono);
+  }
+
+  public function ajax_pagar_boleta()
+  {
+    $this->load->model('bascula_model');
+
+    $fechaPago = $this->db->query(
+      "SELECT fecha_pago
+       FROM bascula
+       WHERE id_bascula = {$_GET['idb']}"
+    )->row()->fecha_pago;
+
+    if ($fechaPago !== null)
+    {
+      $this->bascula_model->logBitacora(
+        true,
+        $_GET['idb'],
+        array('accion' => 'p'),
+        $this->session->userdata['id_usuario'],
+        null,
+        false
+      );
+    }
+
+    $this->bascula_model->pagarBoleta($_GET['idb']);
+    echo json_encode(array('passes' => true));
+  }
+
+  public function auth_modify()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'usuario',
+        'label'   => 'Usuario',
+        'rules'   => 'required'),
+      array('field' => 'pass',
+        'label'   => 'Contraseña',
+        'rules'   => 'required')
+    );
+
+    $this->form_validation->set_rules($rules);
+    if ($this->form_validation->run() == false)
+    {
+      $resp = array(
+        'passes' => false,
+        'title'  => 'Error al Autorizar el Usuario!',
+        'msg'    => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
+        'ico'    => 'error',
+        'fecha'  => date("Y-m-d\TH:i"),
+      );
+    }
+    else
+    {
+      $data = "usuario = '".$this->input->post('usuario')."' AND password = '".$this->input->post('pass')."' AND status = '1' ";
+      $sql = $this->db->get_where('usuarios', $data);
+
+      if ($sql->num_rows() > 0)
+      {
+        $user = $sql->result();
+        // echo "<pre>";
+        //   var_dump($user);
+        // echo "</pre>";exit;
+
+        $this->load->model('usuarios_model');
+        $tienePriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar-auth/', false, $user[0]->id);
+
+        $fechaPriv = true;
+        if ($this->input->post('tipo') === 'fecha') {
+          $fechaPriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/', false, $user[0]->id);
+        }
+
+        if ($tienePriv && $fechaPriv)
+        {
+           $resp = array(
+            'passes'  => true,
+            'title'   => '',
+            'msg'     => 'Usuario autenticado!',
+            'ico'     => 'successs',
+            'user_id' => $user[0]->id
+          );
+        }
+        else
+        {
+           $resp = array(
+            'passes' => false,
+            'title'  => 'Error!',
+            'msg'    => 'El usuario no cuenta con el privilegio de editar!',
+            'ico'    => 'error'
+          );
+        }
+      }
+      else
+      {
+        $resp = array(
+          'passes' => false,
+          'title' => 'Error al Autorizar el Usuario!',
+          'msg'   => 'El usuario y/o contraseña son incorrectos',
+          'ico'   => 'error'
+        );
+      }
+    }
+
+    echo json_encode($resp);
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE ACUMULADOS DE PRODUCTOS"
+   *
+   * @return void
+   */
+  public function bitacora()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de Acumulados de Productos'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/bitacora', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function bitacora_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->bitacora_pdf();
+  }
+
+  /**
+   * ***************************************************************
+   * ************* FACTURAS *******************
+   * @return [type] [description]
+   */
+  public function facturas()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/compras_ordenes/admin.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Compras'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('bascula_model');
+
+    $params['compras'] = $this->bascula_model->getFacturas();
+
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/admin_facturas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function facturas_agregar()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/bascula/admin_facturas.js'),
+    ));
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Factura'
+    );
+
+    $this->load->model('proveedores_model');
+    $this->load->model('bascula_model');
+    $this->load->model('compras_ordenes_model');
+    $this->load->model('areas_model');
+    $this->load->model('empresas_model');
+
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->bascula_model->addFactura($_POST, $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(20);
+    }
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['areas']  = $this->areas_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/agregar_facturas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function facturas_ver()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/bascula/admin_facturas.js'),
+    ));
+
+    $this->load->model('proveedores_model');
+    $this->load->model('bascula_model');
+    $this->load->model('compras_ordenes_model');
+
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(20);
+    }
+
+    $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
+
+    $params['compra'] = $this->bascula_model->getInfoFactura($_GET['id'], true);
+
+    $this->load->view('panel/bascula/ver_facturas', $params);
+  }
+
+  public function facturas_cancelar()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->cancelarFactura($_GET['id']);
+
+    redirect(base_url('panel/bascula/facturas/?' . String::getVarsLink(array('id')).'&msg=3'));
+  }
+
+  public function get_boleta()
+  {
+    $this->load->model('bascula_model');
+    $res = $this->bascula_model->getBasculaInfo(false, $_GET['pfolio'], false, array('b.tipo' => $_GET['ptipo'], 'b.id_area' => $_GET['parea']));
+    echo json_encode($res);
+  }
+
+  public function configUpdateXml()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'xml',
+            'label' => 'XML',
+            'rules' => 'callback_xml_check'),
+      array('field' => 'aux',
+            'label' => '',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function xml_check($file)
+  {
+    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    {
+      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
   }
 
 }

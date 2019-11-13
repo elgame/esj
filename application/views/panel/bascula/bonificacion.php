@@ -34,7 +34,7 @@
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span>
         </a>
 
-        <button type="submit" class="btn btn-primary pull-right" id="btnGuardar" style="margin-right: 5px;">
+        <button type="submit" class="btn btn-primary pull-right bonificar" id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
         </button>
@@ -101,6 +101,7 @@
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_proveedor" value="<?php echo set_value('pid_proveedor', $this->input->post('pid_proveedor')) ?>" id="pid_proveedor">
+                      <input type="hidden" name="prancho" value="<?php echo set_value('prancho', $this->input->post('prancho')) ?>" id="prancho">
                     </div>
                   </div>
 
@@ -311,6 +312,7 @@
                       ?>
                                 <tr data-kneto="">
                                   <td><?php echo $caja ?>
+                                    <input type="hidden" name="pnum_registro[]" value="<?php echo $_POST['pnum_registro'][$key] ?>" id="pnum_registro">
                                     <input type="hidden" name="pcajas[]" value="<?php echo $caja ?>" id="pcajas">
                                     <input type="hidden" name="pcalidad[]" value="<?php echo $_POST['pcalidad'][$key] ?>" id="pcalidad">
                                     <input type="hidden" name="pcalidadtext[]" value="<?php echo $_POST['pcalidadtext'][$key] ?>" id="pcalidadtext">

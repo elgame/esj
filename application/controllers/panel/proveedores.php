@@ -6,7 +6,13 @@ class proveedores extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('proveedores/ajax_get_proveedores/');
+	private $excepcion_privilegio = array(
+    'proveedores/ajax_get_proveedores/',
+    'proveedores/rpt_seg_cert_pdf/',
+    'proveedores/rpt_listado_cuentas/',
+    'proveedores/rpt_listado_cuentas_pdf/',
+    'proveedores/rpt_listado_cuentas_xls/',
+  );
 
 	public function _remap($method){
 
@@ -26,7 +32,8 @@ class proveedores extends MY_Controller {
   public function index()
   {
 		$this->carabiner->js(array(
-				array('general/msgbox.js')
+			array('general/msgbox.js'),
+			array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -34,8 +41,10 @@ class proveedores extends MY_Controller {
 			'titulo' => 'Administración de Proveedores'
 		);
 
+		$this->load->model('empresas_model');
 		$this->load->model('proveedores_model');
 		$params['proveedores'] = $this->proveedores_model->getProveedores();
+		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -47,7 +56,7 @@ class proveedores extends MY_Controller {
 // 		    	$bufer = utf8_encode($bufer);
 // 		    	echo "INSERT INTO proveedores (
 // nombre_fiscal, rfc, curp, cuenta_cpi)
-// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."', 
+// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."',
 // '".trim(substr($bufer, 132, 51))."', '".trim(substr($bufer, 186, 31))."');\n";
 
 // 		        // echo trim(substr($búfer, 10, 101))."<br>"; //nombre
@@ -78,12 +87,17 @@ class proveedores extends MY_Controller {
 		));
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
+			array('libs/jquery.numeric.js'),
+			array('general/keyjump.js'),
+			array('panel/proveedores/addmod.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
 			'titulo' => 'Agregar Proveedor'
 		);
+
+		$this->load->model('banco_cuentas_model');
 
 		$this->configAddModProveedor();
 		if ($this->form_validation->run() == FALSE)
@@ -99,6 +113,8 @@ class proveedores extends MY_Controller {
 				redirect(base_url('panel/proveedores/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
 
+		//bancos
+    $params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -123,10 +139,14 @@ class proveedores extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('libs/jquery.treeview.js'),
+				array('libs/jquery.numeric.js'),
+				array('general/keyjump.js'),
+				array('panel/proveedores/addmod.js'),
 				array('panel/usuarios/add_mod_frm.js')
 			));
 
 			$this->load->model('proveedores_model');
+			$this->load->model('banco_cuentas_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
@@ -147,6 +167,14 @@ class proveedores extends MY_Controller {
 			}
 
 			$params['data'] = $this->proveedores_model->getProveedorInfo();
+			//Cuentas del proeveedor
+  		$params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_GET['id']);
+  		//bancos
+  		$params['bancos'] = $this->banco_cuentas_model->getBancos(false);
+
+      $params['editar_cuenta'] = 'readonly';
+      if($this->usuarios_model->tienePrivilegioDe('', 'proveedores/editar_cuentas/'))
+        $params['editar_cuenta'] = '';
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -204,8 +232,6 @@ class proveedores extends MY_Controller {
 		echo json_encode($params);
 	}
 
-
-
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo
  	*/
@@ -238,9 +264,16 @@ class proveedores extends MY_Controller {
 						'label' => 'Estado',
 						'rules' => 'max_length[45]'),
 
+			array('field' => 'fempresa',
+						'label' => 'Empresa',
+						'rules' => 'required'),
+			array('field' => 'did_empresa',
+						'label' => 'Empresa',
+						'rules' => 'required'),
+
 			array('field' => 'frfc',
 						'label' => 'RFC',
-						'rules' => 'max_length[13]'),
+						'rules' => 'min_length[12]|max_length[13]'),
 			array('field' => 'fcurp',
 						'label' => 'CURP',
 						'rules' => 'max_length[35]'),
@@ -263,11 +296,114 @@ class proveedores extends MY_Controller {
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),
+
+			array('field'	=> 'dregimen_fiscal',
+						'label'	=> 'Régimen fiscal',
+						'rules'	=> 'max_length[100]'),
+			array('field'	=> 'dpass',
+						'label'	=> 'Clave',
+						'rules'	=> 'max_length[20]'),
+			array('field'	=> 'dcfdi_version',
+					'label'	=> 'Version CFDI',
+					'rules'	=> 'max_length[6]'),
+
+			array('field'	=> 'cuentas_banamex[]',
+					'label'	=> 'Cuenta banamex',
+					'rules'	=> 'max_length[6]'),
+			array('field'	=> 'cuentas_id[]',
+					'label'	=> 'Id cuenta',
+					'rules'	=> 'max_length[9]'),
+			array('field'	=> 'cuentas_alias[]',
+					'label'	=> 'ALIAS',
+					'rules'	=> 'max_length[60]'),
+			array('field'	=> 'cuentas_sucursal[]',
+					'label'	=> 'SUCURSAL',
+					'rules'	=> 'max_length[9]'),
+			array('field'	=> 'cuentas_cuenta[]',
+					'label'	=> 'CUENTA/CLABE',
+					'rules'	=> 'max_length[18]'),
+			array('field'	=> 'fbanco[]',
+					'label'	=> 'Banco',
+					'rules'	=> 'max_length[5]'),
+
+			array('field'	=> 'condicionPago',
+					'label'	=> 'Condición de Pago',
+					'rules'	=> 'max_length[2]'),
+			array('field'	=> 'plazoCredito',
+					'label'	=> 'Plazo de Crédito',
+					'rules'	=> 'max_length[3]'),
 		);
 
 		$this->form_validation->set_rules($rules);
 	}
 
+  public function rpt_seg_cert()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/proveedores/rpt_seg_cert.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas remisiones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/proveedores/rpt_seg_cert',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_seg_cert_pdf()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->reporteSegCert();
+  }
+
+  public function rpt_listado_cuentas()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/rastreabilidad/reportes/rrs.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Listado de cuentas'
+    );
+    $this->load->model('empresas_model');
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/proveedores/rpt_listado_cuentas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rpt_listado_cuentas_pdf()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->rpt_listado_cuentas_pdf();
+  }
+
+  public function rpt_listado_cuentas_xls()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->rpt_listado_cuentas_xls();
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{

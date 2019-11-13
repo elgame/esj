@@ -35,53 +35,135 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
-		// $gestor = @fopen("Catalogo de Cuentas.txt", "r");
-		// if ($gestor) {
-		// 	$idconta = 1;
-		// 	$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
-		//     while (($bufer = fgets($gestor, 4096)) !== false) {
-		//     	$nivel = trim(substr($bufer, 4, 3));
-		//     	if($nivel == '1'){
-		//     		$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}elseif ($nivel == '2') {
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}elseif ($nivel == '3') {
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}else
-		//     		$nivel = 4;
+		// $result = $this->db->query("SELECT *
+		//                            FROM proveedores
+		//                            WHERE id_empresa = 4");
+		// foreach ($result->result() as $key => $value) {
+		// 	$dda = $this->db->query("SELECT Count(*) AS num
+		// 	                           FROM proveedores
+		// 	                           WHERE id_empresa = 3 AND rfc <> '' AND UPPER(rfc) = '".strtoupper($value->rfc)."'")->row();
+		// 	if($dda->num == 0) {
+		// 		echo "INSERT INTO proveedores(
+  //           nombre_fiscal, calle, no_exterior, no_interior,
+  //           colonia, localidad, municipio, estado, cp, telefono, celular,
+  //           email, pag_web, status, cuenta_cpi, tipo_proveedor, rfc, curp,
+  //           cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal,
+  //           pais, id_empresa, condicion_pago, dias_credito)
+		// 	    VALUES (
+		// 	    	'{$value->nombre_fiscal}', '{$value->calle}', '{$value->no_exterior}', '{$value->no_interior}',
+		// 	    	'{$value->colonia}', '{$value->localidad}', '{$value->municipio}', '{$value->estado}',
+		// 	    	'{$value->cp}', '{$value->telefono}', '{$value->celular}', '{$value->email}', '{$value->pag_web}',
+		// 	    	'{$value->status}', '{$value->cuenta_cpi}', '{$value->tipo_proveedor}', '{$value->rfc}',
+		// 	    	'{$value->curp}', '{$value->cer_org}', '{$value->cer}', '{$value->key_path}', '{$value->pass}',
+		// 	    	'{$value->cfdi_version}', '{$value->cer_caduca}', '{$value->regimen_fiscal}', '{$value->pais}',
+		// 	    	'3', '{$value->condicion_pago}', '{$value->dias_credito}'
+		// 	    	);<br>";
+		// 	}
+		// }
 
-		//     	$bufer = utf8_encode($bufer);
-		//     	echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
-		//     	$idconta++;
-		//     }
-		//     if (!feof($gestor)) {
-		//         echo "Error: fallo inesperado de fgets()\n";
+		// if($this->session->userdata('usuario') == 'admin')
+		// {
+		// 	$gestor = @fopen("CATALAGO SNJ.txt", "r");
+		// 	if ($gestor) {
+		// 		$idconta = 1;
+		// 		$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
+		// 	    while (($bufer = fgets($gestor, 4096)) !== false) {
+		// 	    	$cuenta = trim(substr($bufer, 3, 8));
+		// 	    	$padre = trim(substr($bufer, 136, 8));
+
+		// 	    	$query = $this->db->query("SELECT Count(id_cuenta) as num,
+		// 	    														(SELECT id_cuenta FROM cuentas_contpaq
+		// 	    															WHERE cuenta = '{$padre}' and id_empresa = 2) AS id_cuenta
+		// 	    	                           FROM cuentas_contpaq
+		// 	    	                           WHERE cuenta = '{$cuenta}' and id_empresa = 2")->row();
+		// 	    	if($query->num == 0){
+		// 	    		echo $cuenta.' - '.utf8_encode(trim(substr($bufer, 35, 102))).'<br>';
+		// 	    		// echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$query->id_cuenta.", '1', '".$cuenta."', '".utf8_encode(trim(substr($bufer, 35, 102)))."', '' );\n<br>";
+		// 	    		$idconta++;
+		// 	    	}
+
+
+		// 	    	// $nivel = trim(substr($bufer, 4, 3));
+		// 	    	// if($nivel == '1'){
+		// 	    	// 	$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }elseif ($nivel == '2') {
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }elseif ($nivel == '3') {
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }else
+		// 	    	// 	$nivel = 4;
+
+		// 	    	// $bufer = utf8_encode($bufer);
+		// 	    	// echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
+		// 	    }
+		// 	    echo $idconta;
+		// 	    if (!feof($gestor)) {
+		// 	        echo "Error: fallo inesperado de fgets()\n";
+		// 	    }
+		// 	    fclose($gestor);
+		// 	}
+		// }
+		// $departamento = array('ADMINISTRACION' => 1, 'EMPAQUE' => 2, 'MANTENIMIENTO INDUSTRIAL' => 3, 'RANCHOS' => 4);
+		// $puestos = array('AUXILIAR CONTABLE' => 5, 'RECEPCION DE FRUTA' => 6, 'GERENTE GENERAL' => 7, 'GERENTE ADMINISTRATIVO' => 8, 'RECEPCIONISTA' => 9, 'CONTADORA' => 10, 'AUXILIAR ADMINISTRATIVO' => 11, 'MENSAJERO' => 12, 'ASISTENTE INOCUIDAD' => 13, 'EMPACADOR' => 14, 'CAJONERA' => 15, 'ALMACENISTA' => 16, 'MONTACARGUISTA' => 17, 'CONTROL DE PRODUCCION' => 18, 'GERENTE DE PRODUCCION' => 19, 'SELECCIONADORA' => 20, 'SUPERVISOR DE PRODUCCION' => 21, 'JEFE DE PERSONAL' => 22, 'INTENDENTE' => 23, 'VIGILANTE' => 24, 'EMPAPELADORA' => 25, 'CAJONERO' => 26, 'SUPERVISOR DE MANTENIMIENTO' => 27, 'JEFE DE PROYECTOS' => 28, 'AUXILIAR MECANICO' => 29, 'SOLDADOR' => 30, 'REGADOR' => 31, 'MAYORDOMO' => 32, 'TRACTORISTA' => 33, 'JARDINERO' => 34);
+		// if (($gestor = fopen("CATALOGO DE EMPLEADOS EMPAQUE.csv", "r")) !== FALSE) {
+		//     while (($datos = fgetcsv($gestor, 1000, ",")) !== FALSE) {
+		//     	$datos[2] = utf8_encode($datos[2]);
+		//     	$nombre = explode(" ", $datos[2]);
+		//     	$appe1 = $nombre[0];
+		//     	$appe2 = $nombre[1];
+		//     	unset($nombre[0], $nombre[1]);
+		//     	$nombre = implode(' ', $nombre);
+
+		//     	// if(array_search($datos[3], $puestos) === false)
+		//     	// 	$puestos[] = $datos[3];
+
+		//     	echo "UPDATE usuarios SET salario_diario='{$datos[9]}', salario_diario_real='{$datos[10]}', rfc='{$datos[5]}' WHERE no_seguro = '{$datos[0]}';<br>";
+		//       //   echo "INSERT INTO usuarios(nombre, apellido_paterno, apellido_materno, curp, fecha_nacimiento, fecha_entrada, nacionalidad,
+		//       //   	estado_civil, id_empresa, id_puesto, esta_asegurado, regimen_contratacion, rfc, cuenta_banco, user_nomina, no_seguro, email, id_departamente)
+  //   				// VALUES ('{$nombre}', '{$appe1}', '{$appe2}', '{$datos[4]}', '".date("Y-m-d", strtotime(str_replace('/', '-', $datos[6])))."',
+  //   				// 	'".date("Y-m-d", strtotime(str_replace('/', '-', $datos[7])))."', 'MEXICANA', 'soltero', 1, ".(isset($puestos[$datos[3]])? $puestos[$datos[3]]: 'NULL').", 't', '2', '',
+  //   				// 	'{$datos[8]}', 't', '$datos[0]', '', ".$departamento[$datos[1]].");<br><br>";
 		//     }
 		//     fclose($gestor);
+
+		//     // $cont = 5;
+		//     // foreach ($puestos as $key => $value)
+		//     // {
+		//     // 	if($value != ''){
+		//     // 		echo "'{$value}' => {$cont}, ";
+		//     // 		$cont++;
+		//     // 	}
+		//     // }
 		// }
-		/*$gestor = @fopen("Todos los Productos2.txt", "r");
-		if ($gestor) {
-		    while (($bufer = fgets($gestor, 4096)) !== false) {
-		    	// $bufer = utf8_encode($bufer);
-		    	$nombre = trim(substr($bufer, 33, 57));
-		    	if(strpos($nombre, 'LIMON') !== FALSE)
-		    		echo "INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, '".$nombre."', '".trim(substr($bufer, 242, 10))."' );\n";
-		    }
-		    if (!feof($gestor)) {
-		        echo "Error: fallo inesperado de fgets()\n";
-		    }
-		    fclose($gestor);
-		}*/
 
-		$params['cuentas'] = $this->getArbolCuenta();
+		$params['cuentas'] = '';//$this->getArbolCuenta();
 
-		$this->load->library('cfdi');
-		$this->cfdi->cargaDatosFiscales(2);
+		// $this->load->library('cfdi');
+		// $this->cfdi->cargaDatosFiscales(1076, 'proveedores');
+		// $this->cfdi->obtenSello("dasdasdasd");
 		// echo $this->cfdi->obtenCertificado($this->cfdi->path_certificado, false);
 		// echo $this->cfdi->obtenLlave($this->cfdi->path_key);
 
-		$this->load->view('panel/header', $params);
+    $this->load->model('inventario_model');
+    $this->load->model('empresas_model');
+    $empresas = $this->empresas_model->getEmpresas();
+    foreach ($empresas['empresas'] as $keye => $empresa)
+    {
+      $_GET['did_empresa'] = $empresa->id_empresa;
+      $productos = $this->inventario_model->getEPUData();
+      $empresa->productos = array();
+      foreach ($productos as $key => $value)
+      {
+        if($value->stock_min > ($value->saldo_anterior + $value->entradas - $value->salidas) )
+          $empresa->productos[] = $value;
+      }
+      if(count($empresa->productos) == 0)
+        unset($empresas['empresas'][$keye]);
+    }
+    $params['empresas'] = $empresas['empresas'];
+
+    $this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/general/home', $params);
 		$this->load->view('panel/footer');
@@ -147,6 +229,52 @@ class home extends MY_Controller {
 
 
 
+	/**
+	 * CONFIGURACIONES DE NOMINA IMPUESTOS Y ESO
+	 * @return [type] [description]
+	 */
+	public function configuraciones()
+	{
+		$this->carabiner->css(array(
+			array('libs/jquery.uniform.css', 'screen'),
+		));
+		$this->carabiner->js(array(
+			array('libs/jquery.uniform.min.js'),
+			array('libs/jquery.numeric.js'),
+		));
+
+		$this->load->model('configuraciones_model');
+
+		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
+		$params['seo'] = array(
+			'titulo' => 'Modificar usuario'
+		);
+
+		$this->config_configs('modificar');
+		if ($this->form_validation->run() == FALSE)
+		{
+			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+		}
+		else
+		{
+			$res_mdl = $this->configuraciones_model->modificarConfiguracion();
+
+			if($res_mdl['error'] == FALSE)
+				redirect(base_url('panel/home/configuraciones/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+		}
+
+		$params['data'] = $this->configuraciones_model->getConfiguraciones();
+
+		if (isset($_GET['msg']))
+			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+		$this->load->view('panel/header', $params);
+		$this->load->view('panel/general/menu', $params);
+		$this->load->view('panel/configuraciones/modificar', $params);
+		$this->load->view('panel/footer');
+	}
+
+
 
 	/**
 	 * carga el login para entrar al panel
@@ -166,13 +294,14 @@ class home extends MY_Controller {
 				'label'		=> 'Contraseña',
 				'rules'		=> 'required')
 		);
-		$this->form_validation->set_rules($rules);
-		if($this->form_validation->run() == FALSE){
-			$params['frm_errors'] = array(
-					'title' => 'Error al Iniciar Sesión!',
-					'msg' => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
-					'ico' => 'error');
-		}else{
+
+    $this->form_validation->set_rules($rules);
+    if($this->form_validation->run() == FALSE){
+      $params['frm_errors'] = array(
+          'title' => 'Error al Iniciar Sesión!',
+          'msg' => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
+          'ico' => 'error');
+    }else{
 			$data = array('usuario' => $this->input->post('usuario'), 'pass' => $this->input->post('pass'));
 			$mdl_res = $this->usuarios_model->setLogin($data);
 			if ($mdl_res[0] && $this->usuarios_model->checkSession()) {
@@ -221,6 +350,84 @@ class home extends MY_Controller {
 	public function logout(){
 		$this->session->sess_destroy();
 		redirect(base_url('panel/home'));
+	}
+
+
+
+	public function config_configs($accion='agregar')
+	{
+		$this->load->library('form_validation');
+		$rules = array(
+			array('field' => 'daguinaldo',
+						'label' => 'Aguinaldo',
+						'rules' => 'required|numeric'),
+			array('field' => 'dprima_vacacional',
+						'label' => 'Prima Vacacional',
+						'rules' => 'required|numeric'),
+			array('field' => 'dpuntualidad',
+						'label' => 'Puntualidad',
+						'rules' => 'required|numeric'),
+			array('field' => 'dasistencia',
+						'label' => 'Asistencia',
+						'rules' => 'required|numeric'),
+			array('field' => 'ddespensa',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+
+			array('field' => 'anio1[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'anio2[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'dias[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+
+			array('field' => 'dzona_a',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'dzona_b',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+		);
+
+		$this->form_validation->set_rules($rules);
+	}
+
+	private function showMsgs($tipo, $msg='', $title='Usuarios')
+	{
+		switch($tipo){
+			case 1:
+				$txt = 'El campo ID es requerido.';
+				$icono = 'error';
+				break;
+			case 2: //Cuendo se valida con form_validation
+				$txt = $msg;
+				$icono = 'error';
+				break;
+			case 3:
+				$txt = 'El usuario se agregó correctamente.';
+				$icono = 'success';
+				break;
+			case 4:
+				$txt = 'Se actualizaron correctamente.';
+				$icono = 'success';
+				break;
+			case 5:
+				$txt = 'El usuario se eliminó correctamente.';
+				$icono = 'success';
+				break;
+			case 6:
+				$txt = 'El usuario se activó correctamente.';
+				$icono = 'success';
+				break;
+		}
+
+		return array(
+				'title' => $title,
+				'msg' => $txt,
+				'ico' => $icono);
 	}
 }
 

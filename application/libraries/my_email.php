@@ -54,13 +54,13 @@ class my_email {
     $mail = new PHPMailer;
 
     $mail->IsSMTP();
-    $mail->SMTPDebug  = 0;
-    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPDebug  = 1;
+    $mail->Host       = 'smtp.sparkpostmail.com'; // 'smtp.mailgun.org'; //smtp.gmail.com
     $mail->SMTPAuth   = true;
     $mail->Username   = $this->data['correoEmisor'];
     $mail->Password   = $this->data['contrasena'];
-    $mail->SMTPSecure = 'ssl';
-    $mail->Port       = 465;
+    $mail->SMTPSecure = 'tls'; //ssl
+    $mail->Port       = 587; //465
 
     $mail->From     = $this->data['correoEmisorEm'];
     $mail->FromName = $this->data['nombreEmisor'];
@@ -88,6 +88,13 @@ class my_email {
           $pathZip = $this->makeZip();
 
           $mail->AddAttachment($pathZip, 'Documentos.zip');
+        }
+        else
+        {
+          foreach ($this->data['adjuntos'] as $fileName => $pathFile)
+          {
+            $mail->AddAttachment($pathFile, $fileName);
+          }
         }
       }
     }

@@ -25,7 +25,7 @@
                   <div class="controls">
                     <select name="farea" class="span12">
                       <?php foreach ($areas['areas'] as $area) { ?>
-                        <option value="<?php echo $area->id_area ?>" <?php echo set_select('farea', $area->id_area, false, $this->input->get('farea')) ?>><?php echo $area->nombre ?></option>
+                        <option value="<?php echo $area->id_area ?>" <?php echo set_select_get('farea', $area->id_area) ?>><?php echo $area->nombre ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -35,9 +35,18 @@
                   <label class="control-label" for="ftipop">Tipo</label>
                   <div class="controls">
                     <select name="ftipop" id="ftipop">
-                      <option value="en" <?php echo set_select('ftipop', 'en', false, $this->input->get('ftipop')) ?>>ENTRADAS</option>
-                      <option value="sa" <?php echo set_select('ftipop', 'sa', false, $this->input->get('ftipop')) ?>>SALIDAS</option>
+                      <option value="en" <?php echo set_select_get('ftipop', 'en') ?>>ENTRADAS</option>
+                      <option value="sa" <?php echo set_select_get('ftipop', 'sa') ?>>SALIDAS</option>
                     </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="fempresa"
+                      value="<?php echo set_value_get('fempresa') ?>" id="fempresa" class="span12 getjsval" placeholder="Empresa">
+                    <input type="hidden" name="fid_empresa" value="<?php echo set_value_get('fid_empresa') ?>" id="fid_empresa" class="getjsval">
                   </div>
                 </div>
 
@@ -51,22 +60,21 @@
                   </div>
                 </div>
 
-                <!-- <div class="control-group">
-                  <label class="control-label" for="fempresa">Empresa</label>
+                <div class="control-group">
+                  <label class="control-label" for="prancho">Rancho</label>
                   <div class="controls">
-                    <input type="text" name="fempresa"
-                      value="<?php //echo set_value('fempresa') ?>" id="fempresa" class="span12" placeholder="Empresa">
-                    <input type="hidden" name="fid_empresa" value="<?php //echo set_value('fid_empresa') ?>" id="fid_empresa">
+                    <input type="text" name="prancho"
+                      value="<?php echo set_value_get('prancho') ?>" id="prancho" class="span12" placeholder="Rancho">
                   </div>
-                </div> -->
+                </div>
 
                 <div class="control-group">
                   <label class="control-label" for="fstatusp">Status</label>
                   <div class="controls">
                     <select name="fstatusp">
-                      <option value="" <?php echo set_select('fstatusp', '', false, $this->input->get('fstatusp')) ?>>TODOS</option>
-                      <option value="1" <?php echo set_select('fstatusp', '1', false, $this->input->get('fstatusp')) ?>>PAGADOS</option>
-                      <option value="2" <?php echo set_select('fstatusp', '2', false, $this->input->get('fstatusp')) ?>>NO PAGADOS</option>
+                      <option value="" <?php echo set_select_get('fstatusp', '') ?>>TODOS</option>
+                      <option value="1" <?php echo set_select_get('fstatusp', '1') ?>>PAGADOS</option>
+                      <option value="2" <?php echo set_select_get('fstatusp', '2') ?>>NO PAGADOS</option>
                     </select>
                   </div>
                 </div>
@@ -130,8 +138,8 @@
                   <?php if (isset($_GET['fid_proveedor'])) { ?>
                     <div class="row-fluid">
                       <div class="span12">
-                        <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button>
-                        <!-- <a href="#modalPagos" class="btn btn-success span3 pull-right" role="button" data-toggle="modal">Pagar</a> -->
+                        <!-- <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button> -->
+                        <a href="#modalPagos" class="btn btn-success span3 pull-right <?php echo ($_GET['fid_proveedor']>0? '': 'hidden') ?>" role="button" data-toggle="modal">Pagar</a>
                         <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
                       </div>
                     </div>
@@ -158,6 +166,7 @@
                           <th>TOTAL</th>
                           <th>TIPO PAGO</th>
                           <th>CONCEPTO</th>
+                          <th style="width:15px;"><input type="checkbox" id="checkPesadas2"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -206,6 +215,14 @@
                             <?php if ($mov->folio != $lastboleta) { ?>
                               <?php echo $mov->concepto ?>
                             <?php } ?>
+                          </td>
+                          <td>
+                            <?php if ($mov->folio != $lastboleta) { ?>
+                              <?php if ($mov->status === 'b' || $mov->status === 'p') { ?>
+                              <?php } else { ?>
+                                <input type="checkbox" class="change_spago" <?php echo ($mov->en_pago>0? 'checked': ''); ?>
+                                  data-idcompra="<?php echo $mov->id_bascula; ?>" data-idproveedor="<?php echo $this->input->get('fid_proveedor'); ?>" data-monto="<?php echo $mov->importe_todas; ?>">
+                              <?php }} ?>
                           </td>
                         </tr>
                       <?php

@@ -21,6 +21,7 @@
     // Chofer Foto Firma Manifiesto
     doc_cffm.btnSnapshot();
     doc_cffm.btnSnapshotSave();
+    doc_cffm.btnDelCaptura();
 
     // Acomodo de Embarque
     doc_acoemb.init();
@@ -29,6 +30,10 @@
     doc_tlc.init();
 
     dataTable();
+
+    // Asigna la funcionalidad de ligar remisiones a facturas
+    eventsRemisiones();
+
   });
 
   var config = function () {
@@ -69,6 +74,109 @@
       }
     });
   };
+
+  var eventsRemisiones = function(){
+    // Boton guardar remisiones
+    $('#save-remisiones').on('click', function(event) {
+      var $this = $(this), paramas={
+        id_factura: $("#facturaId").val(),
+        remisionesIds: [], palletsIds: []
+      }; // boton
+      $("#remisiones-selected .remision-selected").each(function(index, el) {
+        paramas.remisionesIds.push($(this).val());
+      });
+      $("#pallets-selected .pallet-selected").each(function(index, el) {
+        paramas.palletsIds.push($(this).val());
+      });
+
+      if (paramas.remisionesIds.length > 0) {
+        msb.confirm("Estas seguro de ligar las remisiones a la factura?", "", this, function(){
+          $.post(base_url + 'panel/facturacion/ajax_ligar_remisiones', paramas, function(data, textStatus, xhr) {
+            noty({"text": data.msg, "layout":"topRight", "type": 'success'});
+          }, 'json');
+        });
+      };
+    });
+
+    // Boton Ventas de Remision.
+    $('#show-remisiones').on('click', function(event) {
+      var $this = $(this); // boton
+      $('#modal-remisiones').modal('show');
+    });
+
+    $("#remisiones-selected").on('click', '.quitRemision', function(event) {
+      event.preventDefault();
+      var $parent = $(this).parent(),
+      modal_sel = $("#chk-cli-remision-"+$parent.find('.remision-selected').val());
+      modal_sel.removeAttr('style');
+      modal_sel.find('.chk-cli-remisiones').removeAttr('disabled').removeAttr('checked');
+      $parent.remove();
+    });
+
+    $('#BtnAddRemisiones').on('click', function(event) {
+      if ($('.chk-cli-remisiones:checked').length > 0) {
+        $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+          $('.chk-cli-remisiones:checked').each(function(index, el) {
+            var $chkRemision = $(this),
+                $parent = $chkRemision.parent(),
+                jsonObj = jQuery.parseJSON($parent.find('#jsonData').val()),
+                $parent_tr = $parent.parent();
+
+            var existRemision = false;
+            $('.remision-selected').each(function(index, el) {
+              if ($(this).val() === $chkRemision.val()) {
+                existRemision = true;
+                return false;
+              }
+            });
+
+            // Si no existe la remision en el listado entonces la agrega.
+            if ( ! existRemision) {
+
+              $parent.parent().css('background-color', '#FF9A9D');
+              $chkRemision.prop('disabled', true);
+
+              $('#remisiones-selected').append('<label><i class="icon-remove quitRemision"></i> '+$parent_tr.find('td:nth-child(2)').text()+' <input type="hidden" value="' + $chkRemision.val() + '" name="remisionesIds[]" class="remision-selected" id="remision' + $chkRemision.val() + '"></label>');
+
+              var existPallet;
+              for (var i in jsonObj) {
+                existPallet = false;
+                $('.pallet-selected').each(function(index, el) {
+                  if ($(this).val() === jsonObj[i]['id_pallet']) {
+                    existPallet = true;
+                    return false;
+                  }
+                });
+
+                if (! existPallet) {
+                  $('#pallets-selected').append('<input type="hidden" value="' + jsonObj[i]['id_pallet'] + '" name="palletsIds[]" class="pallet-selected" id="pallet' + jsonObj[i]['id_pallet'] + '">');
+                }
+
+                addProducto(unidades, {
+                  'id': jsonObj[i]['id_clasificacion'],
+                  'nombre': jsonObj[i]['nombre'],
+                  'cajas': jsonObj[i]['cajas'],
+                  'id_pallet': jsonObj[i]['id_pallet'],
+                  'id_unidad': jsonObj[i]['id_unidad'],
+                  'unidad': jsonObj[i]['unidad'],
+                  'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
+                  'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
+                  'kilos': jsonObj[i]['kilos'],
+                  'id_size': jsonObj[i]['id_size'],
+                  'size': jsonObj[i]['size'],
+                  'id_remision': $chkRemision.val(),
+                });
+              }
+            }
+          });
+
+          $('#modal-remisiones').modal('hide');
+        }, 'json');
+      } else {
+        noty({"text": 'Seleccione al menos una remisión para agregarla al listado.', "layout":"topRight", "type": 'error'});
+      }
+    });
+  }
 
   var dataTable = function () {
     $('.datatable').dataTable({
@@ -279,8 +387,9 @@
           if (data.passes) {
             noty({"text": 'El documento se actualizo correctamente', "layout":"topRight", "type": 'success'});
 
-            setTimeout("location.reload(true);", 500);
+            // setTimeout("location.reload(true);", 500);
 
+            refreshWithDoc();
 
             // Actualiza el listado de los documentos.
             // $('#listadoDocs').html(data.htmlDocs)
@@ -294,7 +403,7 @@
     return {
       'loadTicket': loadTicket,
       'btnSave': btnSave
-    }
+    };
 
   })(window.jQuery, window);
 
@@ -340,7 +449,8 @@
               // Actualiza el listado de los documentos.
               // $('#listadoDocs').html(data.htmlDocs)
 
-              setTimeout("location.reload(true);", 1000);
+              // setTimeout("location.reload(true);", 1000);
+              refreshWithDoc();
             }
 
           }, 'json');
@@ -352,13 +462,33 @@
       });
     }
 
+    function btnDelCaptura () {
+      $('#btn-del-captura').on('click', function(event) {
+        if ($('#imgCapture').attr('src') !== '') {
+          $('#imgCapture').attr('src', '');
+          $('#inputImgCapture').val('');
+
+          var json = {};
+
+          // Id de la factura y documento a actualizar.
+          json.factura_id   = $('#facturaId').val();
+          json.documento_id = $('#documentoId').val();
+          json.url    = '';
+
+          $.post(base_url + 'panel/documentos/ajax_del_snaptshot/', json, function(data) {
+            $('#btn-show-captura').remove();
+          }, 'json');
+        }
+      });
+    }
+
     return {
       'btnSnapshot': btnSnapshot,
-      'btnSnapshotSave': btnSnapshotSave
+      'btnSnapshotSave': btnSnapshotSave,
+      'btnDelCaptura': btnDelCaptura,
     };
 
   })(window.jQuery, window);
-
 
   // Funciones para el documento acomodo embarque.
   var doc_acoemb = (function ($, window) {
@@ -372,24 +502,43 @@
       otrosCheckbox();
       otrosAdd();
       sendForm();
+      loadPalletsLibres();
+
+      if ($('#total-kilos-pallets').val() !== '0') {
+        $('#kilos-pallets').html($('#total-kilos-pallets').val());
+      }
     }
 
     function draggable () {
       $("div.draggableitem").draggable({
         scroll: true,
-        // helper: 'clone',
+        // start: function(){
+        //   $(this).data("startingScrollTop",$(this).parent().scrollTop());
+        // },
+        // drag: function(event,ui){
+        //   var st = parseInt($(this).data("startingScrollTop"));
+        //   ui.position.top -= $(this).parent().scrollTop() - st;
+        // },
+        // // helper: 'clone',
         revert : function(event, ui) {
+          var $this = $(this);
           // on older version of jQuery use "draggable"
           // $(this).data("draggable")
-          $(this).data("uiDraggable").originalPosition = {
-              top : 0,
-              left : 0
+          $this.data("uiDraggable").originalPosition = {
+            top : $this.attr('data-pos-top'),
+            left : $this.attr('data-pos-left')
           };
           // return boolean
           return !event;
           // that evaluate like this:
           // return event !== false ? false : true;
         }
+        // revert : true
+      });
+
+      $("#tblPalletsLibres .draggableitem").each(function(index, el) {
+        var $this = $(this), poss = $this.position();
+        $this.attr('data-pos-top', poss.top).attr('data-pos-left', poss.left);
       });
     }
 
@@ -409,6 +558,7 @@
 
               noPosicion,
               idPallet        = '',
+              etiquetas       = '',
               clasificaciones = '',
               cajas           = 0;
 
@@ -418,17 +568,26 @@
 
           $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
 
+          $totalKilosPallet = $('#kilos-pallets');
+
           idPallet        = $draggable.attr('data-id-pallet');
+          etiquetas       = $draggable.attr('data-etiquetas');
           clasificaciones = $draggable.attr('data-clasificaciones');
+          calibres        = $draggable.attr('data-calibres');
           cajas           = $draggable.attr('data-cajas');
+          kilosPallet     = $draggable.attr('data-kilos-pallet');
 
           $tableDETr.find('#pid_pallet').val(idPallet);
+          $tableDETr.find('#pmarca').val(etiquetas);
           $tableDETr.find('#pclasificacion').val(clasificaciones);
+          $tableDETr.find('#pcalibres').val(calibres);
           $tableDETr.find('#pcajas').val(cajas);
-
+          $tableDETr.find('#pcajas-span').html(cajas);
 
           $droppable.find('p').html(cajas).css('color', 'red');
           $droppable.attr("data-drag", $draggable.attr('data-id-pallet'));
+
+          $totalKilosPallet.html(parseFloat($totalKilosPallet.html()) + parseFloat(kilosPallet));
         },
         out: function( event, ui ) {
           // console.log(this);
@@ -451,8 +610,15 @@
             $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
 
             $tableDETr.find('#pid_pallet').val('');
+            $tableDETr.find('#pmarca').val('SAN JORGE');
             $tableDETr.find('#pclasificacion').val('');
+            $tableDETr.find('#pcalibres').val('');
             $tableDETr.find('#pcajas').val('');
+            $tableDETr.find('#pcajas-span').html('0');
+
+            $totalKilosPallet = $('#kilos-pallets');
+            kilosPallet = $draggable.attr('data-kilos-pallet');
+            $totalKilosPallet.html(parseFloat($totalKilosPallet.html()) - parseFloat(kilosPallet));
 
             $droppable.attr("data-drag", '');
           }
@@ -526,6 +692,41 @@
 
       });
     }
+
+    function loadPalletsLibres() {
+      $("#txtPalletsFolios, #txtPalletsClasif").on('keyup', function(event) {
+        $.ajax({
+            url: base_url + 'panel/documentos/ajax_get_pallets_libres/',
+            dataType: "json",
+            data: {
+                folios: $("#txtPalletsFolios").val(),
+                term : $("#txtPalletsClasif").val()
+            },
+            success: function(data) {
+              var html = '';
+              for (var i in data) {
+                html += '<tr>'+
+                  '<td>'+data[i].item.folio+'</td>'+
+                  '<td>'+data[i].item.fecha+'</td>'+
+                  '<td>'+
+                    '<div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="'+data[i].item.id_pallet+'" '+
+                      'data-kilos-pallet="'+data[i].item.kilos_pallet+'" data-cajas="'+data[i].item.no_cajas+'" '+
+                      'data-clasificaciones="'+data[i].item.clasificaciones+'" data-calibres="'+data[i].item.calibres+'" '+
+                      'data-etiquetas="'+data[i].item.etiquetas+'" style="z-index: 10;position: absolute;height: 29px;">'+
+                      '<p>'+data[i].item.no_cajas+'</p>'+
+                    '</div>'+
+                  '</td>'+
+                  '<td>'+data[i].item.clasificaciones+'</td>'+
+                '</tr>';
+              }
+              $("#tblPalletsLibres").html(html);
+
+              draggable();
+            }
+        });
+      });
+    }
+
     return {
       'init': init
     };
@@ -597,7 +798,6 @@
 
   })(jQuery);
 
-
   function buildDomicilio (data) {
     var domicilio = [];
 
@@ -612,5 +812,11 @@
 
     return domicilio.join(' ', domicilio);
   }
+
+  var refreshWithDoc = function () {
+    setTimeout(function () {
+      window.location.href = base_url + 'panel/documentos/agregar/?id='+$('#facturaId').val()+'&ds='+$('#documentoId').val();
+    }, 500);
+  };
 
 });

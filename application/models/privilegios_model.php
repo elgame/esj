@@ -103,7 +103,7 @@ class privilegios_model extends CI_Model{
 	 * Elimina un privilegio de la bd
 	 */
 	public function deletePrivilegio(){
-		$this->db->delete('privilegios', "id_privilegio = '".$_GET['id']."'");
+		$this->db->delete('privilegios', "id = '".$_GET['id']."'");
 		return array(true, '');
 	}
 
@@ -125,12 +125,13 @@ class privilegios_model extends CI_Model{
 		$priv = $this->tienePrivilegioDe('', $url_accion, true);
 		if(is_object($priv)){
 			$conf = array(
+        'nombre'    => $priv->nombre,
 				'params'    => '',
 				'btn_type'  => '',
 				'icon_type' => 'icon-white',
 				'attrs'     => array(),
 				'text_link' => 'hidden-tablet',
-        'html'      => '',
+        		'html'      => '',
 				);
 			$conf = array_merge($conf, $config);
 
@@ -140,7 +141,7 @@ class privilegios_model extends CI_Model{
 			}
 
 			$txt = '<a class="btn '.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
-							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$priv->nombre.'</span>'.$conf['html'].'</a>';
+							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>';
 		}
 		return $txt;
 	}
@@ -166,18 +167,23 @@ class privilegios_model extends CI_Model{
 	 * @param unknown_type $url_accion
 	 * @param unknown_type $returninfo
 	 */
-	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false){
+	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false, $id_usuario = null){
+    $this->load->model('empresas_model');
+    $id_empresa = $this->empresas_model->getDefaultEmpresa()->id_empresa;
+
 		$band = false;
 		$url_accion = str_replace('index/', '', $url_accion);
 
 		$excluir = array_search($url_accion, $this->excepcion_privilegio);
+
+    $id_usuario = $id_usuario?:$this->session->userdata('id_usuario');
 
 		$sql = $id_privilegio!=''? "p.id = '".$id_privilegio."'": "lower(url_accion) = lower('".$url_accion."')";
 		$res = $this->db
 			->select('p.id, p.nombre, p.url_accion, p.mostrar_menu, p.url_icono')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep', 'p.id = ep.privilegio_id', 'inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND ".$sql."")
+			->where("ep.usuario_id = '".$id_usuario."' AND ep.id_empresa = '".$id_empresa."' AND ".$sql."")
 			->limit(1)
 		->get();
 		if($res->num_rows() > 0){
@@ -263,7 +269,8 @@ class privilegios_model extends CI_Model{
 			->select('p.id, p.nombre, p.id_padre, p.url_accion, p.url_icono, p.target_blank')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep','p.id = ep.privilegio_id','inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'")
+			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'
+        AND ep.id_empresa = ".$this->session->userdata('selempresa'))
 			->order_by('p.nombre', 'asc')
 		->get();
 		foreach($res->result() as $data){
@@ -281,7 +288,7 @@ class privilegios_model extends CI_Model{
 			if($data1->num > 0){
 				$txt .= '
 				<li'.($firs==false? ' class="submenu parent"': ' class="parent"').'>
-					<a class="ajax-link" '.($firs? 'onclick="panel.menu('.$data->id.');"': '').' href="'.base_url('panel/'.$data->url_accion).'"'.$link_tar.'>
+					<a class="ajax-link" '.($firs? 'onclick="panel.menu('.$data->id.');"': '').' href="'.($data->url_accion=='#'? 'javascript:void(0);':base_url('panel/'.$data->url_accion)).'"'.$link_tar.'>
 						<i class="icon-'.$data->url_icono.'"></i><span class="hidden-tablet"> '.$data->nombre.'</span>
 					</a>
 					<div class="menu-flotante">
@@ -301,7 +308,7 @@ class privilegios_model extends CI_Model{
 			}else{
 				$txt .= '
 				<li'.($firs==false? ' class="submenu"': '').'>
-					<a class="ajax-link" href="'.base_url('panel/'.$data->url_accion).'"'.$link_tar.'>
+					<a class="ajax-link" href="'.($data->url_accion=='#'? 'javascript:void(0);':base_url('panel/'.$data->url_accion)).'"'.$link_tar.'>
 						<i class="icon-'.$data->url_icono.'"></i><span class="hidden-tablet"> '.$data->nombre.'</span>
 					</a>
 				</li>';

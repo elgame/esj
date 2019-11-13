@@ -46,6 +46,14 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
+                <div class="controls">
+                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="12" 
+                  value="<?php echo set_value('fcuenta_cpi'); ?>" required placeholder="43000010">
+                </div>
+              </div>
+
               <input type="hidden" name="farea" id="farea" value="<?php echo $this->input->get('id'); ?>">
 
               <div class="form-actions">

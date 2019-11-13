@@ -27,11 +27,20 @@
 								<legend>Filtros</legend>
 
 								<label for="fnombre">Buscar</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
-									class="input-large search-query" placeholder="Limon verde, 212" autofocus> |
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
+									class="input-large search-query" placeholder="Cliente, Folio" autofocus> |
 
 								<label for="ffecha">Buscar</label>
-								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> | 
+								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> |
+
+								<label for="parea">Area</label>
+								<select name="parea" id="parea">
+									<option value=""></option>
+                  <?php foreach ($areas['areas'] as $area){ ?>
+                    <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                      <?php echo set_select_get('parea', $area->id_area); ?>><?php echo $area->nombre ?></option>
+                  <?php } ?>
+                </select>
 
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">
@@ -44,7 +53,7 @@
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 							echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/agregar/', array(
 											'params'   => '',
 											'btn_type' => 'btn-success pull-right',
@@ -56,7 +65,7 @@
 							  <tr>
 							  	<th>Folio</th>
 							  	<th>Fecha</th>
-								  <th>Clasificacion</th>
+								  <th>Cliente</th>
 									<th>Cajas</th>
 									<th>Cajas agregs</th>
 									<th>Cajas Falt</th>
@@ -69,7 +78,7 @@
 							<tr>
 								<td><?php echo $pallet->folio; ?></td>
 								<td><?php echo $pallet->fecha; ?></td>
-								<td><?php echo ''; ?></td>
+								<td><?php echo $pallet->nombre_fiscal; ?></td>
 								<td><?php echo $pallet->no_cajas; ?></td>
 								<td><?php echo $pallet->cajas; ?></td>
 								<td><?php echo ($pallet->no_cajas-$pallet->cajas); ?></td>
@@ -86,17 +95,22 @@
 									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 								</td>
 								<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/modificar/', array(
 												'params'   => 'id='.$pallet->id_pallet,
 												'btn_type' => 'btn-success')
 										);
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/imprimir/', array(
 												'params'   => 'id='.$pallet->id_pallet,
-												'btn_type' => 'btn-info', 
+												'btn_type' => 'btn-info',
 												'attrs' => array('target' => '_BLANCK') )
 										);
-										
+										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/eliminar/', array(
+												'params'   => 'id='.$pallet->id_pallet,
+												'btn_type' => 'btn-danger',
+												'attrs' => array('id' => 'pallet'.$pallet->id_pallet, 'onclick' => "msb.confirm('Estas seguro de eliminar el pallet? <br> <p><input type=&quot;checkbox&quot; class=&quot;del-all&quot; data-pallet=&quot;".$pallet->id_pallet."&quot;>Eliminar los rendimiento ligados al pallet</p>', 'pallet', this); return false;"))
+										);
+
 										?>
 								</td>
 							</tr>

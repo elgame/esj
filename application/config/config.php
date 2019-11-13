@@ -14,11 +14,31 @@
 | path to your installation.
 |
 */
-$config['base_url'] = 'http://localhost/sanjorge/'; //http://192.168.1.100/sanjorge/
-$config['base_url_bascula'] = 'http://localhost/sanjorge_bascula/';
+//$config['base_url'] = 'http://192.168.1.35/sanjorge/'; //http://192.168.1.100/sanjorge/
+function getBaseUrl()
+{
+  // output: /myproject/index.php
+  $currentPath = $_SERVER['PHP_SELF'];
 
-$config['base_url_cam_salida_stream']  = 'http://192.168.1.107:8053/videostream.cgi?user=admin&pwd=&resolution=32&rate=0';
-$config['base_url_cam_salida_snapshot']	= 'http://192.168.1.107:8053/snapshot.cgi?user=admin&pwd=';
+  // output: Array ( [dirname] => /myproject [basename] => index.php [extension] => php [filename] => index )
+  $pathInfo = pathinfo($currentPath);
+
+  // output: localhost
+  $hostName = $_SERVER['HTTP_HOST'];
+
+  // output: http://
+  $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https://'?'https://':'http://';
+
+  // return: http://localhost/myproject/
+  // .$pathInfo['dirname']."/"
+  return $protocol.$hostName;
+}
+$config['base_url'] = getBaseUrl().'/sanjorge/';//'http://201.155.246.163/sanjorge/'; //http://192.168.1.100/sanjorge/
+$config['base_url_bascula'] = 'http://192.168.1.35/sanjorge_bascula/';
+
+
+$config['base_url_cam_salida_stream']  = 'http://192.168.1.42:8053/videostream.cgi?user=admin&pwd=&resolution=32&rate=0';
+$config['base_url_cam_salida_snapshot']	= 'http://192.168.1.42:8053/snapshot.cgi?user=admin&pwd=';
 
 /*
 |--------------------------------------------------------------------------
@@ -123,7 +143,8 @@ function __autoload($class_name) {
 			"core/",
 			"core/system/",
 			"libraries/",
-			'libraries/fpdf/',
+      'libraries/fpdf/',
+			'libraries/catalogos/',
 			"models/"
 	);
 
@@ -139,6 +160,28 @@ function __autoload($class_name) {
 			}
 		}
 	}
+
+  $clasesPath = array(
+      "vendor/tightenco/collect/src/Illuminate/Support/",
+      "vendor/tightenco/collect/src/Illuminate/Traits/",
+      "vendor/tightenco/collect/src/Illuminate/Contracts/Support/",
+      "vendor/tightenco/collect/src/Illuminate/Support/Traits/",
+  );
+
+  foreach ($clasesPath as $clasePath){
+    // echo $clasePath.$class_name.'.php'.'<br>';
+    if(file_exists($clasePath.$class_name.'.php')){
+      // var_dump(file_exists($clasePath.$class_name.'.php'));
+      include_once($clasePath.$class_name.'.php');
+    }else{
+      $class_name_lower = strtolower($class_name);
+
+      //hacemos un ?ltimo intento pero con FirstCharUpper
+      if(file_exists($clasePath.$class_name_lower.'.php')){
+        include_once($clasePath.$class_name_lower.'.php');
+      }
+    }
+  }
 }
 
 
@@ -213,7 +256,7 @@ $config['directory_trigger']	= 'd'; // experimental not currently in use
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 0;
+$config['log_threshold'] = 1;
 
 /*
 |--------------------------------------------------------------------------
@@ -277,7 +320,7 @@ $config['encryption_key'] = '3=D';
 | 'sess_time_to_update'		= how many seconds between CI refreshing Session Information
 |
 */
-$config['sess_cookie_name']     = 'ci_session';
+$config['sess_cookie_name']     = 'cisession';
 $config['sess_expiration']      = 7200; //60*60*24*365
 $config['sess_expire_on_close'] = FALSE;
 $config['sess_encrypt_cookie']  = FALSE;
@@ -285,7 +328,7 @@ $config['sess_use_database']    = TRUE;
 $config['sess_table_name']      = 'ci_sessions';
 $config['sess_match_ip']        = FALSE;
 $config['sess_match_useragent'] = TRUE;
-$config['sess_time_to_update']  = 60;
+$config['sess_time_to_update']  = 240;
 
 /*
 |--------------------------------------------------------------------------

@@ -1,0 +1,53 @@
+
+
+ ☐ Contrarecibos
+    CREATE TABLE otros.contrarecibos
+    (
+      id_contrarecibo bigserial NOT NULL,
+      fecha date NOT NULL DEFAULT now(),
+      folio bigint NOT NULL,
+      id_proveedor bigint NOT NULL,
+      total double precision NOT NULL DEFAULT 0,
+      status boolean NOT NULL DEFAULT true,
+      id_empresa integer NOT NULL,
+      id_usuario bigint,
+      CONSTRAINT contrarecibos_pkey PRIMARY KEY (id_contrarecibo),
+      CONSTRAINT contrarecibos_id_empresa_fkey FOREIGN KEY (id_empresa)
+          REFERENCES empresas (id_empresa) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT contrarecibos_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+          REFERENCES proveedores (id_proveedor) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT contrarecibos_id_usuario_fkey FOREIGN KEY (id_usuario)
+          REFERENCES usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.contrarecibos
+      OWNER TO programa;
+
+    CREATE TABLE otros.contrarecibos_facturas
+    (
+      id_contrarecibo bigint NOT NULL,
+      norow integer NOT NULL DEFAULT 0,
+      folio character varying(15) NOT NULL,
+      fecha date NOT NULL DEFAULT now(),
+      importe double precision NOT NULL DEFAULT 0,
+      observacion character varying(200),
+      CONSTRAINT contrarecibos_facturas_pkey PRIMARY KEY (id_contrarecibo, norow),
+      CONSTRAINT contrarecibos_facturas_id_contrarecibo_fkey FOREIGN KEY (id_contrarecibo)
+          REFERENCES otros.contrarecibos (id_contrarecibo) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.contrarecibos_facturas
+      OWNER TO programa;
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contrarecibos', 149, TRUE, 'contrarecibo/', 'th-large', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar contrarecibo', 414, TRUE, 'contrarecibo/agregar/', 'plus', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar', 414, FALSE, 'contrarecibo/modificar/', 'edit', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar', 414, FALSE, 'contrarecibo/cancelar/', 'remove', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir', 414, FALSE, 'contrarecibo/imprimir/', 'print', FALSE);

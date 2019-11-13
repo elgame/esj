@@ -26,18 +26,33 @@
 
               <form action="<?php echo base_url('panel/rastreabilidad/rendimiento_lote?'.String::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
-                <div class="control-group span6">
+                <div class="control-group span7">
                   <table class="table">
                     <thead>
                       <tr class="center">
+                        <th style="background-color: #FFF; text-align: center;" class="center">Area</th>
+                        <th style="background-color: #FFF; text-align: center;">Certificado</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Fecha</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Semana</th>
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
+                        <th style="background-color: #FFF; text-align: center;">Actualizar</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
+                        <td>
+                          <select name="parea" id="parea" class="span12" style="margin: -7px auto 0 auto;">
+                            <?php foreach ($areas['areas'] as $area){ ?>
+                              <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                                <?php $set_select=($area->id_area == (isset($clasificaciones['info']->id_area) ? $clasificaciones['info']->id_area : ($area->predeterminado == 't' ? $area->id_area: '')));
+                                 echo ($set_select? 'selected': ''); ?>><?php echo $area->nombre ?></option>
+                            <?php } ?>
+                          </select>
+                        </td>
+                        <td style="text-align: center;">
+                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
+                        </td>
                         <td>
                           <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span8"
                             style="margin: -7px auto 0 auto; text-align: center;" maxlength="10" autofocus>
@@ -48,26 +63,35 @@
                           <select name="glote" id="glote" class="span12" style="margin: -7px auto 0 auto;">
                             <option value=""></option>
                             <?php foreach ($lotes as $key => $lote) { ?>
-                              <option value="<?php echo $lote->id_rendimiento ?>" <?php echo set_select_get('glote', $lote->id_rendimiento, false); ?>><?php echo $lote->lote ?></option>
+                              <option value="<?php echo $lote->id_rendimiento ?>" <?php echo set_select_get('glote', $lote->id_rendimiento, false); ?>><?php echo $lote->lote_ext ?></option>
                             <?php } ?>
                           </select>
                         </td>
+
+                        <td style="text-align: center;">
+                          <span class="input-append" style="max-width: 100px;">
+                            <input class="span5 vpositive" id="txtActualizaLote" type="text" value="<?php echo $lote_actual_ext; ?>" data-lote="<?php echo $lote_actual_ext; ?>">
+                            <button class="btn" type="button" id="btnActualizaLote">Ok</button>
+                            <input type="hidden" id="id_lote_actual" value="<?php echo $id_lote_actual; ?>">
+                          </span>
+                        </td>
+
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <div class="span2">
+                <div class="span2 nomarg">
 
                   <?php if ($ant_lote >= 1) { ?>
-                    <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha); ?>">Anterior Lote</a>
+                    <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Anterior Lote</a>
                   <?php } ?>
 
                 </div>
-                <div class="span2">
-                  <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha); ?>">Siguiente Lote</a>
+                <div class="span2 nomarg">
+                  <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Siguiente Lote</a>
                 </div>
-                <div class="span2">
+                <div class="span1 nomarg">
                   <?php if (count($clasificaciones['clasificaciones']) > 0) { ?>
                     <a class="btn btn-danger" href="<?php echo base_url('panel/rastreabilidad/rpl_pdf/?glote='.$_GET['glote']); ?>" target="_BLANK">Imprimir</a>
                   <?php } ?>
@@ -80,9 +104,14 @@
                 <thead>
                   <tr>
                     <th>CLASIFICACIÓN</th>
-                    <th>EXISTENTE</th>
-                    <th>LINEA 1</th>
-                    <th>LINEA 2</th>
+                    <th style="width:110px;">CAJA</th>
+                    <th style="width:55px;">TAMAÑO</th>
+                    <th style="width:55px;">PRET</th>
+                    <th style="width:110px;">ETIQUETA</th>
+                    <th style="width:55px;">KILOS</th>
+                    <th style="width:55px;">EXISTENTE</th>
+                    <th style="width:55px;">LINEA 1</th>
+                    <th style="width:55px;">LINEA 2</th>
                     <th>TOTAL</th>
                     <th>RENDIMIENTO</th>
                     <th>ACCIONES</th>
@@ -95,6 +124,31 @@
                       <td>
                         <input type="text" id="fclasificacion" value="<?php echo $c->clasificacion ?>" class="span12">
                         <input type="hidden" id="fidclasificacion" value="<?php echo $c->id_clasificacion ?>" class="span12">
+                        <input type="hidden" id="fidclasificacion_old" value="<?php echo $c->id_clasificacion ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="funidad" value="<?php echo $c->unidad ?>" class="span12">
+                        <input type="hidden" id="fidunidad" value="<?php echo $c->id_unidad ?>" class="span12">
+                        <input type="hidden" id="fidunidad_old" value="<?php echo $c->id_unidad ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fcalibre" value="<?php echo $c->calibre ?>" class="span12">
+                        <input type="hidden" id="fidcalibre" value="<?php echo $c->id_calibre ?>" class="span12">
+                        <input type="hidden" id="fidcalibre_old" value="<?php echo $c->id_calibre ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fsize" value="<?php echo $c->size ?>" class="span12">
+                        <input type="hidden" id="fidsize" value="<?php echo $c->id_size ?>" class="span12">
+                        <input type="hidden" id="fidsize_old" value="<?php echo $c->id_size ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fetiqueta" value="<?php echo $c->etiqueta ?>" class="span12">
+                        <input type="hidden" id="fidetiqueta" value="<?php echo $c->id_etiqueta ?>" class="span12">
+                        <input type="hidden" id="fidetiqueta_old" value="<?php echo $c->id_etiqueta ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fkilos" value="<?php echo $c->kilos ?>" class="span12 vpositive">
+                        <input type="hidden" id="fkilos_old" value="<?php echo $c->kilos ?>" class="span12 vpositive">
                       </td>
                       <td>
                         <input type="text" id="fexistente" value="<?php echo $c->existente ?>" class="span12 vpositive">
@@ -124,6 +178,31 @@
                     <td>
                       <input type="text" id="fclasificacion" value="" class="span12">
                       <input type="hidden" id="fidclasificacion" value="" class="span12">
+                      <input type="hidden" id="fidclasificacion_old" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="funidad" value="" class="span12">
+                      <input type="hidden" id="fidunidad" value="" class="span12">
+                      <input type="hidden" id="fidunidad_old" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fcalibre" value="" class="span12">
+                      <input type="hidden" id="fidcalibre" value="" class="span12">
+                      <input type="hidden" id="fidcalibre_old" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fsize" value="" class="span12">
+                      <input type="hidden" id="fidsize" value="" class="span12">
+                      <input type="hidden" id="fidsize_old" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fetiqueta" value="" class="span12">
+                      <input type="hidden" id="fidetiqueta" value="" class="span12">
+                      <input type="hidden" id="fidetiqueta_old" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fkilos" value="0" class="span12 vpositive">
+                      <input type="hidden" id="fkilos_old" value="0" class="span12 vpositive">
                     </td>
                     <td>
                       <input type="text" id="fexistente" value="0" class="span12 vpositive">

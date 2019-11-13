@@ -51,7 +51,7 @@
 								  <label class="control-label" for="fcuenta">Cuenta </label>
 								  <div class="controls">
 										<select name="fcuenta" id="fcuenta" required>
-								<?php  
+								<?php
 								foreach ($cuentas['cuentas'] as $key => $value) {
 									$select = set_select('fcuenta', $value->id_cuenta);
 									if($select == ' selected="selected"')
@@ -97,9 +97,17 @@
 								  <label class="control-label" for="fmonto">Monto </label>
 								  <div class="controls">
 										<input type="number" step="any" name="fmonto" id="fmonto" class="span5" value="<?php echo set_value('fmonto'); ?>"
-											maxlength="12" min="0.1" placeholder="1052" required>
+											maxlength="12" min="0.001" placeholder="1052" required>
 								  </div>
 								</div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="dempresa" class="span5" id="dempresa" value="" size="">
+                    <input type="hidden" name="did_empresa" id="did_empresa" value="">
+                  </div>
+                </div>
 
 								<div class="control-group">
 									<label class="control-label" for="dcliente">Cliente</label>
@@ -108,6 +116,14 @@
                   	<input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value('did_cliente'); ?>">
 									</div>
 								</div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dcuenta_cpi">Cuenta Contpaq</label>
+                  <div class="controls">
+                    <input type="text" name="dcuenta_cpi" class="span5" id="dcuenta_cpi" value="<?php echo set_value('dcuenta_cpi'); ?>">
+                    <input type="hidden" name="did_cuentacpi" id="did_cuentacpi" value="<?php echo set_value('did_cuentacpi'); ?>">
+                  </div>
+                </div>
 
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>

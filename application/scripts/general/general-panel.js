@@ -1,5 +1,14 @@
 $(function(){
 	panel.init();
+
+	$("input.empresasSelects").change(function(){
+		$.post(base_url + 'panel/usuarios/ajax_change_empresa/',
+		{empresa: $(this).val()},
+		function(data, textStatus, xhr) {
+      var url = location.href.split('?');
+      location.href = url[0];
+		});
+	});
 });
 
 
@@ -12,11 +21,18 @@ var panel = (function($){
 			//var url = String(window.location).split("?");
 			var url = String(window.location).replace(base_url, ''), url1 = url.split('/'), url2 = url.split("?"),
 			link = $($(this))[0].href.replace(base_url, ''), link1 = link.split('/');
+
+			var ss = $(this).parents('li.parent').not('.submenu'),
+			parent = false;
+			if($("a:first", ss).attr('href'))
+				parent = $("a:first", ss).attr('href').replace(base_url, '') == 'panel/reportes';
+
 			if(link==url || (link1[0]==url1[0] && link1[1]==url1[1]) || link==url2[0])
-				$(this).parents('li').addClass('active');
+				if(!parent || url == 'panel/reportes')
+					$(this).parents('li').addClass('active');
 		});
 		// $('ul.main-menu > li.active > a').click();
-		
+
 		var mmdat = $("#menu_dat");
 		mmdat.on('click', function(){
 			var vthis = $(this);
@@ -93,9 +109,9 @@ var panel = (function($){
  */
 var loader = {
 	create: function(wrapper){
-		var css = 'style="position: fixed;left:40%; top:0px;background-color:#F9EDBE;padding:5px 10px; z-index:600;-webkit-border-bottom-right-radius: 5px;-webkit-border-bottom-left-radius: 5px;-moz-border-radius-bottomright: 5px;-moz-border-radius-bottomleft: 5px;border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;"', 
+		var css = 'style="position: fixed;left:40%; top:0px;background-color:#F9EDBE;padding:5px 10px; z-index:600;-webkit-border-bottom-right-radius: 5px;-webkit-border-bottom-left-radius: 5px;-moz-border-radius-bottomright: 5px;-moz-border-radius-bottomleft: 5px;border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;"',
 		html = '<div id="ajax-loader" {css}> <img src="'+base_url+'application/images/bootstrap/ajax-loaders/ajax-loader-9.gif" width="24" height="24"> Cargando...</div>';
-		
+
 		if (wrapper){
 			$(wrapper).append(html.replace("{css}", ""));
 		}else{

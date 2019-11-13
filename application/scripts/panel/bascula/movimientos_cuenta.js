@@ -1,4 +1,60 @@
 $(function(){
+
+  // Autocomplete Empresas
+  $("#fempresa").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_empresas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#fid_empresa").val(ui.item.id);
+      $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#fid_empresa').val('');
+    }
+  });
+
+  /**
+   * asigna o quita la compra en los pagos de banco
+   */
+  $(".change_spago").on('click', function(event) {
+    var $this = $(this);
+    if($this.is(':checked')){
+      $.post(base_url + 'panel/banco_pagos/set_bascula/',
+        {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+      // msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
+      // }, function(){ $this.removeAttr('checked'); });
+    }else{
+      $.post(base_url + 'panel/banco_pagos/set_bascula/',
+        {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      // msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
+      // }, function(){ $this.attr('checked', 'true'); });
+    }
+  });
+
+  // Autocomplete RANCHOS
+  $("#prancho").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_ranchos/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#prancho").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+    }
+  });
+
+
   $('#fechaini').datepicker({
     dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
     //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha
@@ -40,6 +96,23 @@ $(function(){
       });
 
     });
+
+    $('#checkPesadas2').on('change', function(event) {
+      var check = '';
+
+      if ($(this).is(':checked')) check = "checked";
+      else check = "";
+
+      $('input.change_spago').each(function(index) {
+        // $(this).prop('checked', check);
+        if( !$(this).is(':checked') && check == "checked")
+          $(this).trigger('click');
+        else if($(this).is(':checked') && check === "")
+          $(this).trigger('click');
+      });
+
+    });
+
   });
 
   $('input#pesadas').on('change', function(event) {
@@ -82,7 +155,20 @@ function setAutocomplet(tipo, first){
   }
   if (tipo == "en") {
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      // source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -97,7 +183,20 @@ function setAutocomplet(tipo, first){
     });
   }else if(tipo == "sa"){
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_clientes/',
+      // source: base_url + 'panel/bascula/ajax_get_clientes/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_clientes/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

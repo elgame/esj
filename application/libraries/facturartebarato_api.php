@@ -1,5 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+
 class facturartebarato_api {
 
   /**
@@ -7,21 +8,21 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $user = 'admin';
+  protected $user = 'sanjorge'; //sanjorge
 
   /**
    * Password.
    *
    * @var string
    */
-  protected $password = '123456';
+  protected $password = 'S4nj0rg3'; //S4nj0rg3
 
   /**
    * URL base de la api.
    *
    * @var string
    */
-  protected $apiURL = 'facturartebarato.com/api/v1/';
+  protected $apiURL = 'https://api.kubox.mx/v2/';
 
   /**
    * Almacena la informacion de la peticion por curl.
@@ -57,6 +58,7 @@ class facturartebarato_api {
    * @var Object(stdClass)
    */
   protected $resultAPI;
+  public $token = '';
 
   /**
    * UUID.
@@ -72,7 +74,35 @@ class facturartebarato_api {
    */
   public function __construct()
   {
+  }
 
+  public function login()
+  {
+    if ($this->token != '') {
+      return json_decode(json_encode(array(
+        'status' => true,
+        'msg'    => 'Ok',
+        'token'  => $this->token
+      )));
+    }
+
+    $apiURL = "{$this->apiURL}auth/login";
+    $postData = array('usuario' => $this->user, 'password' => $this->password);
+    // Checa si ahi conexion a internet.
+    $this->resultAPI = $this->post($apiURL, $postData);
+    if (isset($this->resultAPI->data->token)) {
+      $this->token = $this->resultAPI->data->token;
+      return json_decode(json_encode(array(
+        'status' => true,
+        'msg'    => 'Ok',
+        'token'  => $this->token
+      )));
+    } else {
+      return json_decode(json_encode(array(
+        'status' => false,
+        'msg'    => 'Error al hacer el login a kubox'
+      )));
+    }
   }
 
   /**
@@ -81,42 +111,25 @@ class facturartebarato_api {
    * @param strin $xml
    * @return mixed boolean|object
    */
-  public function timbrar()
+  public function timbrar($postData)
   {
-    libxml_use_internal_errors(true);
-
-    // Obtiene el contenido del XML.
-    $this->xml = $this->getContentXML();
-
-    $is_xml = simplexml_load_string($this->xml);
-
-    // Verifica si es un XML valido.
-    if ($is_xml)
-    {
-      $this->xml64 = base64_encode($this->xml);
-
-      $postData = array('xml' => $this->xml64);
-
-      $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}timbre";
-
-      // Checa si ahi conexion a internet.
-      $this->resultAPI = $this->post($apiURL, $postData);
-
-      $checkResult = $this->checkResultTimbrado();
-
-      // echo "<pre>";
-      //   var_dump($this->resultAPI);
-      // echo "</pre>";exit;
-
-      return $checkResult;
+    $resLogin = $this->login();
+    if (!$resLogin->status) {
+      return $resLogin;
     }
-    else
-    {
-      return json_decode(json_encode(array(
-        'status' => false,
-        'msg'    => 'El XML proporcionado no es un XML.'
-      )));
-    }
+
+    $apiURL = "{$this->apiURL}timbre/factura33";
+
+    $postData = json_encode($postData);
+    // Checa si ahi conexion a internet.
+    $this->resultAPI = $this->post($apiURL, $postData);
+
+    $checkResult = $this->checkResultTimbrado();
+    // echo "<pre>";
+    //   var_dump($this->resultAPI->errors, $postData, $this->xml);
+    // echo "</pre>";exit;
+
+    return $checkResult;
   }
 
   /**
@@ -149,37 +162,141 @@ class facturartebarato_api {
     }
     else
     {
+      $codigo = $this->resultAPI->status_code;
       // Obtiene el codigo de incidencia.
-      $codigo = $this->resultAPI->msg->incidencias[0]->codigo;
-
-      // Si hay un error en el timbrado.
-      if ($this->resultAPI->msg->error)
-      {
-        $incidencias =  array(
-          'status'  => false,
-          'codigo'  => $codigo,
-          'mensaje' => $this->resultAPI->msg->incidencias[0]->mensaje
-        );
+      if (isset($this->resultAPI->errors) && $this->resultAPI->errors) {
+        foreach ($this->resultAPI->errors as $key => $value) {
+          $incidencias =  array(
+            'status'  => false,
+            'codigo'  => $codigo,
+            'mensaje' => $value[0]
+          );
+        }
       }
       else
       {
         // Entra Si no hubo un error en el timbrado. Este caso tambien aplica
         // para cuando el timbrado queda "pendiente".
 
-        // Obtiene el XML ya timbrado.
-        $this->xml  = $this->resultAPI->data->xml;
+        // // Obtiene el XML ya timbrado.
+        // $this->xml  = $this->resultAPI->data->xml;
 
-        // Obtiene el UUID del timbrado.
-        $this->uuid = $this->resultAPI->data->uuid;
+        // // Obtiene el UUID del timbrado.
+        // $this->uuid = $this->resultAPI->data->uuid;
 
-        // Sobreescriobe el XML.
-        $this->rewriteXML();
+        // // Sobreescriobe el XML.
+        // $this->rewriteXML();
 
         $incidencias =  array(
           'status'  => true,
           'codigo'  => $codigo,
-          'mensaje' => $this->resultAPI->msg->incidencias[0]->mensaje
+          'mensaje' => $this->resultAPI->data->msg,
+          'data'    => $this->resultAPI->data
         );
+      }
+    }
+
+    return json_decode(json_encode($incidencias));
+  }
+
+  public function nomina($postData)
+  {
+    $resLogin = $this->login();
+    if (!$resLogin->status) {
+      return $resLogin;
+    }
+
+    $apiURL = "{$this->apiURL}timbre/nomina33";
+
+    $postData = json_encode($postData);
+    // Checa si ahi conexion a internet.
+    $this->resultAPI = $this->post($apiURL, $postData);
+
+    $checkResult = $this->checkResultNomina();
+    // echo "<pre>";
+    //   var_dump($this->resultAPI, $postData, $checkResult);
+    // echo "</pre>";exit;
+
+    return $checkResult;
+  }
+
+  /**
+   * Verifica el resultado del timbrado, si no hubo errores entonces
+   * sobrescribe el XML con el que retorna el webservice.
+   *
+   * @return object(stdClass)
+   */
+  private function checkResultNomina()
+  {
+    // Si es null significa que hubo un error de conexion de internet.
+    if (is_null($this->resultAPI))
+    {
+      $incidencias =  array(
+        'status'  => false,
+      );
+
+      switch ($this->statusRequest['http_code']) {
+        case 0:
+          $incidencias['codigo'] = 'ERR_INTERNET_DISCONNECTED';
+          $incidencias['mensaje'] = 'Error: Internet Desconectado. Verifique su conexión.';
+          break;
+        case 500:
+          $incidencias['codigo'] = '500';
+          $incidencias['mensaje'] = 'Error en el servidor.';
+          break;
+        default:
+          break;
+      }
+    }
+    else
+    {
+      // Obtiene el codigo de incidencia.
+      if (isset($this->resultAPI->errors) && $this->resultAPI->errors) {
+        if (!isset($this->resultAPI->errors->data)) {
+          foreach ($this->resultAPI->errors as $key => $value) {
+            $value = is_array($value)? $value[0]: $value;
+            $incidencias =  array(
+              'status'  => false,
+              'codigo'  => $this->resultAPI->status_code,
+              'mensaje' => $value
+            );
+          }
+        } else {
+          foreach ($this->resultAPI->errors->data as $key => $value) {
+            $incidencias =  array(
+              'status'  => false,
+              'codigo'  => $this->resultAPI->status_code,
+              'mensaje' => $value->{'Empleado 1'}[0]
+            );
+          }
+        }
+      }
+      else
+      {
+        if (isset($this->resultAPI->{'Empleado 1'})) {
+          if (isset($this->resultAPI->{'Empleado 1'}->errors) && $this->resultAPI->{'Empleado 1'}->errors) {
+            $incidencias =  array(
+              'status'  => false,
+              'codigo'  => $this->resultAPI->{'Empleado 1'}->data->statusCode,
+              'mensaje' => $this->resultAPI->{'Empleado 1'}->data->msg,
+              'data'    => $this->resultAPI->{'Empleado 1'}->data
+            );
+          } else {
+            $incidencias =  array(
+              'status'  => true,
+              'codigo'  => $this->resultAPI->{'Empleado 1'}->data->statusCode,
+              'mensaje' => $this->resultAPI->{'Empleado 1'}->data->msg,
+              'data'    => $this->resultAPI->{'Empleado 1'}->data
+            );
+          }
+        } else {
+          $incidencias =  array(
+            'status'  => false,
+            'codigo'  => $codigo,
+            'mensaje' => $this->resultAPI->data->msg,
+            'data'    => $this->resultAPI->data
+          );
+        }
       }
     }
 
@@ -193,7 +310,7 @@ class facturartebarato_api {
    */
   public function verificarPendiente()
   {
-    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
+    $apiURL = "{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
 
     // Obtiene la respues del webservice.
     $this->resultAPI = $this->get($apiURL);
@@ -209,11 +326,16 @@ class facturartebarato_api {
    */
   public function cancelar(Array $params)
   {
-    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}cancel";
+    $resLogin = $this->login();
+    if (!$resLogin->status) {
+      return $resLogin;
+    }
 
+    $apiURL = "{$this->apiURL}timbre/cancelar";
+    $params = json_encode($params);
     $resultAPI = $this->post($apiURL, $params);
 
-    //  echo "<pre>";
+    // echo "<pre>";
     //   var_dump($params, $resultAPI);
     // echo "</pre>";exit;
 
@@ -312,19 +434,28 @@ class facturartebarato_api {
       curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-      curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
+      $headers = array('Expect:');
+      if ($this->token != '') {
+        $headers[] = "Authorization: Bearer {$this->token}";
+        $headers[] = "Content-Type: application/json";
+      }
+
+      curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
       curl_setopt($curl, CURLOPT_POST, true);
       curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
 
       // Obtiene el resultado de la peticion.
-      $response = json_decode(curl_exec($curl));
+      $curlResp = curl_exec($curl);
+      $response = json_decode($curlResp);
 
       // Obtiene la informacion de la peticion.
       $this->statusRequest = curl_getinfo($curl);
 
-      // echo "<pre>";
-      //   var_dump($response, $this->statusRequest);
-      // echo "</pre>";exit;
+      // if ($this->token != '') {
+      //   echo "<pre>";
+      //     var_dump($curlResp, $response, $this->statusRequest);
+      //   echo "</pre>";exit;
+      // }
 
       curl_close($curl);
 

@@ -5,7 +5,7 @@ require_once APPPATH.'libraries/excel2/Root.php';
 include(APPPATH.'libraries/excel2/Writer.php');
 
 class MYexcel {
-	var $titulo1 = 'FRUTAS Y LEGUMBRES DE LA ACOSTA SUR DE JALISCO S.A. DE C.V.';
+	var $titulo1 = 'EMPAQUE SAN JORGE S.A DE C.V.';
 	var $titulo2 = '';
 	var $titulo3 = '';
 	var $titulo4 = '';

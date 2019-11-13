@@ -19,6 +19,7 @@ class documentos extends MY_Controller {
     'documentos/ajax_update_doc/',
     'documentos/ajax_get_snapshot/',
     'documentos/ajax_save_snaptshot/',
+    'documentos/ajax_del_snaptshot/',
     'documentos/ajax_check_ctrl/',
 
     'documentos/imprime_manifiesto_chofer/',
@@ -27,6 +28,7 @@ class documentos extends MY_Controller {
     'documentos/imprime_manifiesto_camion/',
 
     'documentos/acomodo_embarque/',
+    'documentos/ajax_get_pallets_libres/',
   );
 
   public function _remap($method)
@@ -86,6 +88,7 @@ class documentos extends MY_Controller {
           array('general/supermodal.js'),
           array('general/keyjump.js'),
           array('general/util.js'),
+          array('general/msgbox.js'),
           array('panel/documentos/agregar.js'),
       ));
 
@@ -99,8 +102,21 @@ class documentos extends MY_Controller {
 
       // Obtiene la informacion de la factura.
       $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['id']);
+      // Se obtienen las remisiones
+      $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
       // Carga la vista de la factura con sus datos.
+      $metodosPago       = new MetodosPago();
+      $formaPago         = new FormaPago();
+      $usoCfdi           = new UsoCfdi();
+      $tipoDeComprobante = new TipoDeComprobante();
+      // $monedas           = new Monedas();
+
+      $params['metodosPago']       = $metodosPago->get()->all();
+      $params['formaPago']         = $formaPago->get()->all();
+      $params['usoCfdi']           = $usoCfdi->get()->all();
+      $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+      // $params['monedas']           = $monedas->get()->all();
       $params['facturaView'] = $this->load->view('panel/facturacion/ver', $params, true);
 
       $is_finalizados = $this->db
@@ -127,8 +143,19 @@ class documentos extends MY_Controller {
             $params['finalizar'] = true;
         }
       }
-      else
+      else {
         $params['finalizados'] = true;
+        // si se completaron todos los documentos crea el vale
+        $params['vale'] = $this->db->query("SELECT * FROM otros.vales_salida
+                                   WHERE id_remision = {$params['factura']['info']->id_factura}")->row();
+        if (!isset($params['vale']->id_vale_salida)) { // crea el vale
+          $this->load->model('vales_salida_model');
+          $params['vale'] = $this->vales_salida_model->addVale([
+              'tipo'        => 'venta',
+              'id_remision' => $params['factura']['info']->id_factura
+            ]);
+        }
+      }
 
       // Obtiene la vista de los documentos del cliente.
       $params['documentos'] = $this->generaDocsView($params['factura']['info']->id_factura);
@@ -154,6 +181,7 @@ class documentos extends MY_Controller {
   {
     $this->load->model('documentos_model');
     $this->load->model('areas_model');
+    $this->load->model('empresas_model');
 
     if ( ! isset($this->facturacion_model))
     {
@@ -165,8 +193,12 @@ class documentos extends MY_Controller {
     // Obtiene la informacion de la factura.
     $params['factura'] = $this->facturacion_model->getInfoFactura($idFactura);
 
+
     // Obtiene los documentos del cliente.
     $params['documentos'] = $this->documentos_model->getClienteDocs($idFactura);
+    // echo "<pre>";
+    //   var_dump($params['documentos']);
+    // echo "</pre>";exit;
 
     // Obtiene los documentos de las areas.
     $params['areas'] = $this->areas_model->getAreas();
@@ -177,24 +209,21 @@ class documentos extends MY_Controller {
       ->where('id_factura', $idFactura)
       ->get()->row()->docs_finalizados;
 
-    // Obtiene los documentos de las areas.
-    $params['pallets'] = $this->db
-      ->select('*')
-      ->from("embarque_pallets_libres")
-      ->get()
-      ->result();
+    // Obtiene los pallets libres.
+    $params['pallets'] = []; //$this->db->select('*')->from("embarque_pallets_libres")->get()->result();
 
     // echo "<pre>";
     //   var_dump($params['pallets']);
     // echo "</pre>";exit;
 
     // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("id_empresa, nombre_fiscal, rfc, calle, no_exterior, colonia, localidad, municipio, estado")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("id_empresa, nombre_fiscal, rfc, calle, no_exterior, colonia, localidad, municipio, estado")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
 
     // Construye la vista del listado de documentos.
     return $this->load->view('panel/documentos/agregar_listado', $params, true);
@@ -224,7 +253,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveChoferCopiaIfe($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -242,7 +271,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveChoferCopiaLicencia($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
    }
@@ -260,7 +289,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveSeguroCamion($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -279,7 +308,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeEmbarque();
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -298,7 +327,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeCertificadoTlc($_POST['embIdFac'], $_POST['embIdDoc']);
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -317,7 +346,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeManifiestoCamion($_POST['embIdFac'], $_POST['embIdDoc']);
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -381,11 +410,6 @@ class documentos extends MY_Controller {
    */
   public function ajax_save_snaptshot()
   {
-
-    // echo "<pre>";
-    //   var_dump($_POST);
-    // echo "</pre>";exit;
-
     $this->load->model('facturacion_model');
     $this->load->model('documentos_model');
 
@@ -410,6 +434,27 @@ class documentos extends MY_Controller {
     $this->ajax_update_doc();
   }
 
+  /**
+   * elimina el snapshot.
+   */
+  public function ajax_del_snaptshot()
+  {
+    $this->load->model('facturacion_model');
+    $this->load->model('documentos_model');
+
+    $idFactura = $_POST['factura_id'];
+
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+
+    $filename = 'CHOFER FOTO FIRMA MANIFIESTO';
+    unlink($path.$filename.'.jpg');
+    echo json_encode($this->documentos_model->updateDocumento($_POST, $_POST['factura_id'], $_POST['documento_id'], 'f'));
+  }
+
   public function ajax_check_ctrl()
   {
     $query = $this->db
@@ -430,6 +475,15 @@ class documentos extends MY_Controller {
     }
     else
       echo 0;
+  }
+
+  public function ajax_get_pallets_libres()
+  {
+    $this->load->model('documentos_model');
+
+    $data = $this->documentos_model->ajaxGetPalletsLibres();
+
+    echo json_encode($data);
   }
 
   /*

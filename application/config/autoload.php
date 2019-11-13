@@ -80,7 +80,7 @@ $autoload['helper'] = array('isajax');
 |
 */
 
-$autoload['config'] = array();
+$autoload['config'] = array('config_user');
 
 
 /*

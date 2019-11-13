@@ -5,11 +5,20 @@ class MYpdf extends FPDF {
 	var $titulo1 = "EMPAQUE SAN JORGE S.A. DE C.V.";
 	var $titulo2 = '';
 	var $titulo3 = '';
+    var $reg_fed = 'REG. ESJ97052763A0620061646';
+    var $logo = '/images/logo.png';
+
+    var $fount_txt = 'helvetica';
+    var $fount_num = 'SciFly-Sans'; // SciFly-Sans
+    var $font_size = 8;
+    var $pag_size = array();
 
 	var $hheader = '';
 
     var $limiteY     = 0;
     var $noShowPages = true;
+
+    var $auxy = 0;
 
 	/**
 	 * P:Carta Vertical, L:Carta Horizontal, lP:Legal vertical, lL:Legal Horizontal
@@ -20,6 +29,8 @@ class MYpdf extends FPDF {
 	function __construct($orientation='P', $unit='mm', $size='Letter'){
 		parent::__construct($orientation, $unit, $size);
 
+        $this->pag_size = $size;
+
         if(!is_array($size))
 		  $this->hheader = 'header'.$size.$orientation;
 
@@ -29,7 +40,8 @@ class MYpdf extends FPDF {
     public function Header() {
     	if($this->show_head){
 	        // Logo
-		    $this->Image(APPPATH.'/images/logo.png', 6, 5, 20);
+            if($this->logo != '')
+		      $this->Image(APPPATH.(str_replace(APPPATH, '', $this->logo)), 6, 5, 20);
 		    $this->SetFont('Arial','',5);
 		    //$this->Text(6, 15, 'EXTINTORES Y SISTEMAS CONTRA INCENDIOS');
 
@@ -38,6 +50,8 @@ class MYpdf extends FPDF {
 		    // Salto de línea
 		    $this->Ln(20);
     	}
+
+        $this->auxy = 0;
     }
 
     // Page footer
@@ -51,15 +65,15 @@ class MYpdf extends FPDF {
     	// Título
     	$this->SetFont('Arial','B',14);
     	$this->SetXY(46, 6);
-    	$this->Cell(141, 6, $this->titulo1, 0, 0, 'C');
+    	$this->MultiCell(141, 6, $this->titulo1, 0, 'C', false);
 
     	$this->SetFont('Arial','B',11);
-    	$this->SetXY(46, 11);
-    	$this->Cell(141, 6, $this->titulo2, 0, 0, 'C');
+    	$this->SetX(46);
+    	$this->MultiCell(141, 6, $this->titulo2, 0, 'C', false);
 
     	if($this->titulo3 != ''){
     		$this->SetFont('Arial','B',8);
-    		$this->SetXY(46, 17);
+    		$this->SetX(46);
     		$this->MultiCell(141, 4, $this->titulo3, 0, 'C', false);
     	}
 
@@ -70,7 +84,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(194, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
-    	$this->Line(6, 26, 210, 26);
+    	// $this->Line(6, 26, 210, 26);
 
     	$this->limiteY = 235; //limite de alto
     }
@@ -196,6 +210,8 @@ class MYpdf extends FPDF {
     var $widths;
     var $aligns;
     var $links;
+    var $font;
+    var $fontz;
 
     function SetWidths($w){
     	$this->widths=$w;
@@ -209,29 +225,40 @@ class MYpdf extends FPDF {
     	$this->links=$a;
     }
 
-    function Row($data, $header=false, $bordes=true, $colortxt=null){
+    function SetFounts($a, $z=array()){
+        $this->font=$a;
+        $this->fontz=$z;
+    }
+
+    function Row($data, $header=false, $bordes=true, $colortxt=null, $height=3, $positionY=2){
     	$nb=0;
     	for($i=0;$i<count($data);$i++)
     		$nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
-    		$h=$this->FontSize*$nb+3;
+    		$h=$this->FontSize*$nb+$height;
     		// if($header)
     		// 	$h += 2;
     		$this->CheckPageBreak($h);
     		for($i=0;$i<count($data);$i++){
 	    		$w=$this->widths[$i];
-	    		$a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+          $a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+	    		$bord=0;
 	    		$x=$this->GetX();
 	    		$y=$this->GetY();
 
-	    		if($header && $bordes)
+	    		if($header===true && $bordes===true)
 	    			$this->Rect($x,$y,$w,$h,'DF');
-	    		elseif($bordes)
+	    		elseif($bordes===true)
 	    			$this->Rect($x,$y,$w,$h);
+          else {
+            if ($bordes === 'B') {
+              $this->Line($x,$y+$h,$x+$w,$y+$h);
+            }
+          }
 
 	    		if($header)
-	    			$this->SetXY($x,$y+2);
+	    			$this->SetXY($x,$y+$positionY);
 	    		else
-	    			$this->SetXY($x,$y+2);
+	    			$this->SetXY($x,$y+$positionY);
 
                 if (isset($colortxt[$i])) {
                     $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);
@@ -239,20 +266,70 @@ class MYpdf extends FPDF {
 
 	    		if(isset($this->links[$i]{0}) && $header==false){
 	    			$this->SetTextColor(35, 95, 185);
-	    			$this->Cell($w, $this->FontSize, $data[$i], 0, strlen($data[$i]), $a, false, $this->links[$i]);
+	    			$this->Cell($w, $this->FontSize, $data[$i], $bord, strlen($data[$i]), $a, false, $this->links[$i]);
 	    			$this->SetTextColor(0,0,0);
 	    		}else
-    				$this->MultiCell($w,$this->FontSize, $data[$i],0,$a);
+    				$this->MultiCell($w,$this->FontSize, $data[$i],$bord,$a);
 
     			$this->SetXY($x+$w,$y);
     		}
     		$this->Ln($h);
     }
 
+
+    function Row2($data, $header=false, $bordes=true, $h=NULL){
+        $nb=0;
+        for($i=0;$i<count($data);$i++)
+            $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
+            $h= $h==NULL? $this->FontSize*$nb+3: $h;
+            if($header)
+                $h += 2;
+            $this->CheckPageBreak($h);
+            for($i=0;$i<count($data);$i++){
+                $w=$this->widths[$i];
+                $a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+                $bord=0;
+                $x=$this->GetX();
+                $y=$this->GetY();
+
+                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), '', ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
+
+                if($header===true && $bordes===true)
+                  $this->Rect($x,$y,$w,$h,'DF');
+                elseif($bordes===true)
+                  $this->Rect($x,$y,$w,$h);
+                else {
+                  if ($bordes === 'B') {
+                    $this->Line($x,$y+$h,$x+$w,$y+$h);
+                  }
+                }
+
+                if($header)
+                    $this->SetXY($x,$y+3);
+                else
+                    $this->SetXY($x,$y+2);
+
+                if(isset($this->links[$i]{0}) && $header==false){
+                    $this->SetTextColor(35, 95, 185);
+                    $this->Cell($w, $this->FontSize, $data[$i], $bord, strlen($data[$i]), $a, false, $this->links[$i]);
+                    $this->SetTextColor(0,0,0);
+                }else
+                    $this->MultiCell($w,$this->FontSize, $data[$i],$bord,$a);
+
+                $this->SetXY($x+$w,$y);
+            }
+            $this->Ln($h);
+    }
+
     function CheckPageBreak($h, $limit=0){
     	$limit = $limit==0? $this->PageBreakTrigger: $limit;
-    	if($this->GetY()+$h>$limit)
-    		$this->AddPage($this->CurOrientation);
+    	if($this->GetY()+$h>$limit) {
+        if (count($this->pages) > $this->page) {
+          $this->page++;
+          $this->SetXY(111, 10);
+        } else
+          $this->AddPage($this->CurOrientation);
+      }
     }
 
     function NbLines($w,$txt){
@@ -297,6 +374,101 @@ class MYpdf extends FPDF {
     	}
     	return $nl;
     }
+
+
+    function RotatedText($x, $y, $txt, $angle)
+    {
+        //Text rotated around its origin
+        $this->Rotate($angle, $x, $y);
+        $this->Text($x, $y, $txt);
+        $this->Rotate(0);
+    }
+
+
+    var $angle=0;
+
+    function Rotate($angle, $x=-1, $y=-1)
+    {
+        if($x==-1)
+            $x=$this->x;
+        if($y==-1)
+            $y=$this->y;
+        if($this->angle!=0)
+            $this->_out('Q');
+        $this->angle=$angle;
+        if($angle!=0)
+        {
+            $angle*=M_PI/180;
+            $c=cos($angle);
+            $s=sin($angle);
+            $cx=$x*$this->k;
+            $cy=($this->h-$y)*$this->k;
+            $this->_out(sprintf('q %.5f %.5f %.5f %.5f %.2f %.2f cm 1 0 0 1 %.2f %.2f cm', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy));
+        }
+    }
+
+    function _endpage()
+    {
+        if($this->angle!=0)
+        {
+            $this->angle=0;
+            $this->_out('Q');
+        }
+        parent::_endpage();
+    }
+
+
+    /**
+     * indica si se abre el dialogo de imprecion inmediatamente
+     * @param boolean $dialog [description]
+     */
+    function AutoPrint($dialog=false){
+        //Open the print dialog or start printing immediately on the standard printer
+        $param=($dialog ? 'true' : 'false');
+        $script="print({$param});";
+        $this->IncludeJS($script);
+    }
+
+
+    /**
+     * SOPORTE PARA INTRODUCIR JAVASCRIPT
+     */
+    var $javascript;
+    var $n_js;
+
+    function IncludeJS($script) {
+        $this->javascript=$script;
+    }
+
+    function _putjavascript() {
+        $this->_newobj();
+        $this->n_js=$this->n;
+        $this->_out('<<');
+        $this->_out('/Names [(EmbeddedJS) '.($this->n+1).' 0 R]');
+        $this->_out('>>');
+        $this->_out('endobj');
+        $this->_newobj();
+        $this->_out('<<');
+        $this->_out('/S /JavaScript');
+        $this->_out('/JS '.$this->_textstring($this->javascript));
+        $this->_out('>>');
+        $this->_out('endobj');
+    }
+
+    function _putresources() {
+        parent::_putresources();
+        if (!empty($this->javascript)) {
+            $this->_putjavascript();
+        }
+    }
+
+    function _putcatalog() {
+        parent::_putcatalog();
+        if (!empty($this->javascript)) {
+            $this->_out('/Names <</JavaScript '.($this->n_js).' 0 R>>');
+        }
+    }
+
 }
 
 
