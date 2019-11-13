@@ -1,0 +1,95 @@
+Total 202.46 hrs + lo de abajo que no tiene
+
+- 2.2h Capturar fotos al registrar las boletas de bascula
+- 1.3h Poder crear notas de credito en dolares en facturacion y notas de remision
+- 6h Crear la caja No 3 (caja de prestamos) que es para controlar los prestamos a trabajadores
+- 2.2h Crear caja 4 para el registro de ingresos y gastos de coco hermana de la señora, mandar correo en cada gasto e imprimir en ticket
+- 1.66h En cuentas por cobrar poner la opcion de que muestre los estados de cuenta en dolares, que salga otra columna con esa informacion
+- .16h En la boleta de bascula poner quien imprimio, el usuario que registro la boleta
+- .33h En el ticket de gasto en caja chica, que salga de que empresa es el gasto, y que salga detallada la info de los codigos
+- 0.73h En las cajas chicas 1 y 2 poner en el apartado de gastos una opcion para marcar el gasto como reposicion, en reporte de gasto poder visualizar el total de reposicion
+- 4h Apartado para generar contra recibo de las facturas de compras como la hoja que me dio triana
+- .42h En imprimir las ordenes para cada producto y codigo poner columna con la fecha de la ultima compra
+- 8.66h Crear el reporte de piña para registrar las entradas, rendimientos y muestras como en la hoja que me dio paola
+- 2h Reporte para consultar los saldos de las cuentas del catalogo nuevo (como el reporte que esta del catalogo viejo)
+- 11h Cargar de nuevo los codigos de catalogo que va pasar la señora y en cajas chicas, reportes de cajas chicas, ordenes de requisicion, ordenes de compra, reportes de compras, en registro de actividades x trabajador (nomina), modificar para que use el nuevo catalogo
+- 2h Generar vale para los gastos en las cajas chicas
+- .30h En reporte de prestamos poner filtro de empresa y mostrar los prestamos agrupados por empresa
+- 2h Crear catalogo de lavores para el modulo de actividades por trabajador
+- 22.5h Nomina registro de actividad por trabajadores agregar actividades por dia, poder agregar multiples ranchos, lavores y horas extras por empleado,
+  el catalogo de lavores pasarlo al menu nomina, Agregar una columna para seleccionar falta, asistencia, oncapasidad, permiso,
+  y que modifique el modulo de asistencia de nomina. Las horas extras que se agreguen como bonos en la nomina.
+- 2.5h Normex y Sagarpa (en sagarpa se capturaran gastos y en cuentas por pagar de Normex mostrar el reporte de certificados y demas productos ligados a las compras de los 2 proveedores), separar los totales por proveedor
+- 3h Crear poliza de diarios de productos
+- 2h En los recibos de nomina poner el subsidio del lado de deducciones en negativo
+- 7.5h Crear los catalogos de software y sistema con las opciones del archivo que me pasaron
+- 10h En bascula en las boletas de salida que agreguen las clasificaciones y las de entradas las areas, modificar reportes
+- 6h En remisiones y facturacion poder registrar en dolares, pedir el tipo de cambio para hacer la conversion
+- 15h Hacer de nuevo la caja chica de bodega como el archivo que me dieron
+- 2h Imprimir las remisiones en formato de ticket
+- 8h Crear un catalogo de productores y poner la opcion en bascula para que los seleccionen
+- 14h Poner un boton para que borreo toda la informacion del sistema, programar para que la informacion se respalde diario en dropbox y genere un respaldo mensual
+- 9h Exportar a excel los demas reportes faltantes
+- 7h Crear un catalogo independiente para la bodega
+- 13h Agregar opcion para seleccionar una empresa y en los modulos (ordenes, compras, facturacion, etc) que cargue en automatico la empresa seleccionada
+- 1h Descargar en excel los reportes de existencias
+- 2h Crear reporte de las boletas que el chofer son productores
+
+- Poner en trabajadores un numero de empleado y validar que no se repita
+- Modificar el reporte de prestamos de trabajadores para poder mostrar todos los trabajadores y su saldo
+- Agregar la opcion de finiquito fiscal por despido (calculo de indemnizaciones) y en el recibo de finiquito con sueldo real.
+- En las incapasidades que pida el % que se va subsidiar
+- En los reportes de nomina poner nombre completo del trabajador y el SDI
+- No dejar modificar las boletas cuendo ya se capturaron los kilos de salida, asi no se modifiquen desde el empaque
+- En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no cobranza) y que tenga saldo
+  a favor el proveedor de los anticipos y de ese saldo que se pague las facturas o ventas.
+- En ordenes de compra y de requisicion poner impuestos de retencion de iva e isr y ponerlo en las polizas en compras tambien
+- Estados de cuenta bancos poner filtros de ingresos y gastos
+- Reporte diario de entrada de bascula poner que salgan todas las areas
+- Ordenes de flete poner la fecha de la factura ligada
+- En cuentas por pagar pedir el tipo de cambio y las ordenes que sean en dolares registrar el nuevo costo deacuerdo al tipo de cambio para realizar los pagos
+- En polizas de Gomez gudiño usar las cuentas de los productos de oroverde
+- En nomina y empleados se agrego la generación de diferentes layouts para las trasferencias, se agrego premios de asistencia y bono de despensa
+- Remisiones separar los productos como las ventas del dia, en los gastos poner el folio de los seguro, certificado, etc.
+- Remisiones poner historial de movimientos (a que factura se ligo, si se cancelo que factura la sustituyo, notas de credito, y abonos ya sea a la remision o a la factura ligada), es un pequeño resumen de movimientos.
+- Validar que no puedan facturar si una remision ya esta facturada
+- Modificar las unidades y clasificaciones para que tengan las abreviaciones y cantidades de la hoja que paso la señora y eliminar las anteriores clasificaciones de limon.
+	Agregar un segundo codigo de contpaq para empresa oro verde
+  En las facturas y remisiones mostrar las abreviaciones de las clasificaciones y unidades
+- En remisiones y facturacion prorratear el costo de seguro, certificados, etc. repartiendo el costo en los demas productos de la factura
+- En almacen poner filtro en almacen para que inicie apartir del 01/01/2015
+- Menu crear un apartado para reportes y ahi meter todos separados por area
+- Reporte de compra poner filtro de tipo de orden y separar las compras por tipo
+- Crear reporte de Notas de credito de facturas y remisiones poner a que factura afecto
+- Reporte de productos facturados, agregar los de las remisiones (ver si se estan cargando las remisiones) y ponerle columna de No poliza que se captura al facturar, ver la forma de poder seleccionar varios productos a la ves con checkboxs
+- Reporte de ventas poder seleccionar varias empresas y que ponga un total general de las empresas
+- Bascula poner boton de reimprimir la boleta de entrada
+- Poliza de nomina cambiaron la agrupacion de las cuentas de ingreso
+- Compras al ligar las facturas que seleccionen la empresa para que agreguen los certificados, en el reporte de cuentas por pagar que cargue los certificados de diferentes empresas
+- En todos los codigos del catalogo en caja chica, ordenes, salidas almacen, busque por codigo y por nombre en la caja de texto
+- Reporte de ingresos y gastos de caja chica
+- Rastreabilidad agregar pallet que salga los clientes de todas las empresas
+- Imprimir el catalogo de codigos
+- En la nomina agregar deduccion "fondo de ahorro", en empleados agregar campo para que indiquen la cantidad a descontar
+- Los codigos del catalogo ponerlos en las caja chicas para asignar en los gasto
+- Exportar clientes a exel y productos
+- Exportar a exel los reportes de caja chica, rastriabilidad y Ventas/Facturas y NC (separar en otro total los pagos en parcialidades)
+- Poliza de gastos, poder seleccionar una cuenta y en la cuenta que selecciona poner el subtotal
+- En reporte de rendimiento meter el limon suelo en los totales de industrial
+- Al dar de alta un proveedor poner pordefault de credito 15 dias
+- Ordenes de compra validar que no se dupliquen los codigos
+- De jorge gomez y vianey gudiño pasar los proveedores y productos a gomez gudiño
+- En salida de productos
+	- Poner el importe de la salida, imprimir recibo de salida, agregar quien lo solicita
+	- Seleccionar codigos del catalogo por producto para los reportes
+	- Poner opcion para copiar el codigo a todos los productos de la salida y no sea uno por uno
+	- Poliza de ventas, quitar las facturas de pagos en parcialidades solo tienen que salir las totales no parciales
+- Pago en parcialidades para poder ligar los xml a las polizas por cada abono que realice el cliente
+  - Al momento de agregar el abono generar en automatico la factura de pago en parcialidades si es que no se pago el total o si ya se habia agregado un abono indicar el consecutivo de dicho pago
+  - Poner esas facturas en un apartado diferente para visualizar el listado de pagos en parcialidades
+  - En Estado de cuenta poner las facturas de pagos en parcialidades y que ponga el folio de la factura e importes
+- Poner segunda cajas chica lo que capturen en una que no salga en la otra pero que los reportes sea lo mismo, manejaria 2 saldos diferentes una por cada caja
+- Se creo modulo de ventas del día, después se cambio a remisiones obligatorias, validación de productos requeridos al facturar
+- Bascula se agrego otro niveles de seguridad en las modificaciones, se agrego segunda impresora para las boletas de entrada
+- Apartado de ordenes de requisición, comparación de hasta 3 proveedores en la orden y generación de orden de compra, se agrego la impresora selladora de documentos para las entradas de almacén.
+- En cuentas por pagar y bancos se rediseño los pagos masivos

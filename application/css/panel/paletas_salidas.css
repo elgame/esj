@@ -1,0 +1,70 @@
+
+#select_pallets .slots,
+#select_pallets .nums {
+  border: 1px solid #888;
+  margin: 0px;
+  vertical-align: middle;
+  height: 60px;
+  text-align: center;
+}
+#select_pallets .slots {
+  width: 185px !important;
+  color: #888;
+}
+#select_pallets .nums {
+  width: 38px !important;
+  border: none;
+}
+
+#show-table-pallets {
+  display: block;
+  border-top: 1px solid #ccc;
+}
+#show-table-pallets fieldset label {
+  display: inline;
+}
+
+
+#select_pallets .pallet.ui-draggable-dragging {
+  -moz-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  -webkit-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  width: 185px;
+}
+#select_pallets .pallet.correct {
+  background: #ccc;
+  margin-left: -1px;
+  opacity: 1;
+  color: #000;
+  position: relative;
+  border: 1px solid #000;
+}
+#select_pallets .pallet .quit{
+  cursor: pointer;
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  color: red;
+}
+#select_pallets .dataInSlot {
+  position: absolute;
+  top: 15px;
+  left: 0;
+}
+#select_pallets .slots.hovered,
+#table_pallets.hovered {
+  background: #aaa;
+}
+#table_pallets .pallet {
+  border: 1px solid #888;
+  margin: 0px;
+}
+#table_pallets .pallet.ui-draggable-dragging {
+  -moz-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  -webkit-box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  box-shadow: 0 0 .5em rgba(0, 0, 0, .8);
+  width: 185px;
+}
+#table_pallets .dataInSlot {
+  display: none;
+}

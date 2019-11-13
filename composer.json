@@ -1,0 +1,32 @@
+{
+    "name": "Sanjorge",
+    "description": "Sanjorge.",
+    "keywords": ["Sanjorge"],
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "php": ">=5.6.4",
+        "tightenco/collect": "5.4.*",
+        "nesbot/carbon": "^1.22",
+        "tecnickcom/tcpdf": "^6.2",
+        "setasign/fpdf": "1.8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Catalogos\\": "application/libraries/catalogos"
+        },
+        "classmap": [
+          "application/core/",
+          "application/core/system/",
+          "application/libraries/",
+          "application/models/"
+        ]
+    },
+    "autoload-dev": {
+        "classmap": [
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
+    }
+}

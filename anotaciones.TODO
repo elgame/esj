@@ -1,3 +1,694 @@
+
+ ☐ Plasticos y mamita en semana 41 se borro
+   -plasticos = claudia valdiavia mirodn
+   -mamita = sacarias marin
+
+ ☐ Reporte de existencia de limon, poner los productos en los gastos
+ ✔ Reportes de facturas vencidas, apartado de resguardos, pólizas asociar uuid, pago masivo bajio @done (19-10-29 15:53)
+ ✔ En papeleta de salida ligar el folio de la orden de flete ligada a la remision @done (19-10-29 18:21)
+ ✔ productos buscar por codigo, validar hasta el consecutivo @done (19-10-29 12:54)
+ ✔ En los reportes del iva de devoluciones, tomar la fecha de pago, si no tiene que no salgan y un reporte que salga las 3 tasas de iva @done (19-10-29 13:02)
+ ✔ En las notas de credito de compras poner el xml, poner filtro de xml en el listado @done (19-09-14 10:47)
+ ✔ Resguardos @done (19-09-03 13:56)
+ ✔ rfc(3)0001fecha(6 digitos) @done (19-08-27 15:35)
+ ✔ En las cajas imprimir tiket en traspasos y prestamos @done (19-07-13 14:29)
+ ✔ hacer que los reposicion de gastos no se quiten cuando se comprueben @done (19-07-12 19:36)
+ ✔ En ordenes poner el precio de la ultima compra @done (19-07-12 15:19)
+ ✔ REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO cambiar a volumenes de masas -> # bit-41 @done (19-06-19 18:12)
+ ☐ REPORTE RENDIMIENTO crear uno nuevo por rango de fechas por dia
+ ✔ REPORTE RASTREABILIDAD DEL PRODUCTO poner en el titulo # bit-40 @done (19-06-19 18:14)
+ ✔ Poder imprimir salidas de almacen en blanco @done (19-06-24 19:46)
+ ✔ Salidas de Productos poner filtro de productos @done (19-06-19 19:47)
+ ☐ Que puedan cargar en las compras el xml para guardar el uuid y certificado para los reportes:
+
+ ✔ En las ordenes de req Poner activo por producto y proveedor, en el formato de imprecion quitar area, unir cantidad y unidad, poner fecha y precio de la ultima compra, y lista de activos, @done (19-06-09 17:11)
+     poner la cotizacion, poner los campos iniciales del formato de la orden de compra
+ ✔ Poner un apartado de pre ventas para que las puedan modificar y despues esas ventas se puedan remisionar, serian lo mismo porque tendrian el mismo folio, en marca de agua que diga documento no valido @done (19-06-11 19:13)
+ ✔ Poner # de rastreabilidad en las remisiones el cual se pasaria a factura @done (19-06-11 19:13)
+ ✔ En las boletas de salida y en las facturas poner un campo de # Traz, en reporte de auditoria (movimientos) poner la factura el # traz @done (19-06-11 19:33)
+ ☐ Reporte de balance de masas, de los datos de rastreabilidad de limon, compararia las boletas que entran (kilos) con los quilos que salen en las lineas
+ ☐ En rastreabilidad de limon poder imprimir en blanco con folio, Acomodo de tarimas en trailer, ver foto
+ ☐ impresora zebra zt230 etiquetas
+
+ ✔ En la aplicacion poner opcion para que pueda seleccionar los gastos por reponer de la caja 2 @done (19-06-04 14:09)
+ ✔ El listado de piezas de los activos que sean seleccionados productos @done (19-06-04 14:09)
+ ✔ poner folio de factura en los gastos x reponer de la caja 2 @done (19-05-21 23:06)
+ ☐ no deja hacer mas de 1 traspaso en las cajas
+ ✔ En la imprecion de las ordenes la obserbacion ponerla abajo y que solo salga en la ultima copia, tambien en la ultima copia quitar el codigo de la tabla y poner fecha y precio de la ultima compra, poner la empresa en los codigos al final @done (19-04-29 22:24)
+ ✔ En las ordenes de requisicion que puedan imprimir en blanco y queden registrado el folio y despues la puedan capturar (pre requisicion cuando se imprima y si es directa es orden de requisicion), saldria al final los codigos que salen en la orden @done (19-05-02 22:30)
+ ☐ Crear programas de actividades anuales de trabajos, verificar si cumple con las actividades de ese dia y si no poner porque no cumplieron
+   Lunes ver als actividades de la semana, Los ingeniero programan las actividades adicionales aparte del programa.
+   Poner bloqueo en las actividades para que esa actividad no se puede cumplir hasta que se terminen las actividades
+   En las aplicaciones las boleadas (es cuando se tiene que hacer una correccion) hay que detectarlas para autorizarlas y al ceptarla crear una actividad de tarea
+ ☐ Crear programa de aplicaciones de productos
+ ☐ Incorpor las recetas en el programa
+ ☐ Reporte de muestreo con foto
+ ☐ Control de muestreos, es un programa tambien
+   Muestreo de cresimiento de plantas
+   Muestreo de cresimiento de fruta
+   Muestreo de partes por millon de niveles de potacio
+ ☐ Al cosechar notificar minimo 15 dias antes al de ventas cuantas toneladas se van a cortar
+   al cortar ver cuantas frutas se cortaron por melga (estibas e indicar que calidad) y cuantos kilos (los kilos se ponrian en la boleta)
+   cada corte es un carro que se pesa y cargar evidencia en foto,
+   Entra al proceso de empaque (reporte de produccion) capturar por camion el rendimiento de lo que se empaca de primera y cuanto se va a segunda y tercera
+   y cuanto de desperdicio y cuanto de merma
+   Se hacen un reporte de inventarios de la fruta por semana para determinar cuentos kilos son los que hay de fruta, y poder registrar mermas de la diferencia de lo que se vende
+ ☐ Programa semillera, tambien se programa las actividades
+ ☐ Actividades de mantenimiento, quien solicito, a que se aplico, cuanto costo
+
+
+ ☐ Reporte de acumulado de actividades por trabajador, que ponga por dia y semana lo que gano el trabajador de acuero a las actividades
+ ☐ Reacomodar las cajas chicas
+   - Al comprobar los gastos que pueda capturar remisiones (Folio, Proveedor y monto) y poder ligar facturas de gasto directos
+   - Cuando se guarde, registraria las remisiones como gastos generales y las facturas en gastos por reponer fiscal (esas facturas que se registre en automantico el pago en cuentas x pagar)
+   - En gastos por reponer fiscal que arrastre el saldo de las pendientes y cuando las marquen como repuestas que inserte un ingreso por reposicion.
+   checar los archivos de la señora
+ ☐ Crear Balance general
+ ☐ Reporte estado de resultados
+ ☐ Poliza de nominas que se guenere por trabajador las percepcion y deduccion
+ ☐ Conectar con la BD del checador (https://dbeaver.io/download/, https://help.ubuntu.com/community/Firebird2.5)
+     sudo apt-get install php7.0-interbase
+     sudo service apache2 restart
+ ☐ En las fotos ver como esta el reporte de estado de resultado
+ ☐ En el listado de trabajadores poders subir arhivos (credencial, curp), agregar departamento externos
+ ☐ Poder ligar las actividades capturadas de la nomina en google map, para que se colorie el mapa de lo que se esta avansando
+ ☐ En los movimientos directos de poliza meter formato de cheques y de impresion de movimientos
+ ☐ En caja de bodega agregar los nuevos catálogos al registrar gastos y poderlos exportar e importar con un archivo de texto.
+ ☐ Poner las actividades de la nómina con costó y crear modulo para capturarlas en la nomina
+ ☐ Ligar las actividades a la nomina
+ ☐ Generar los recibos de nómina por actividad
+ ☐ Capturar las recetas de producción
+ ☐ En caja chica de tryana cargar las nóminas por fuera de las actividades registradas y que puedan abonar, restaría la caja
+ ✔ Correciones de nomina para el timbrado correcto @done (19-02-19 16:49)
+ ✔ Crear familias de tipo Activos en los productos @done (18-09-26 20:54)
+ ✔ Agregar a los productos el tipo de color para distinguir para cultivos orgánicos @done (18-09-26 20:54)
+ ✔ Crear catalogo de ranchos @done (18-10-01 10:19)
+ ✔ Crear catalogo de centros de costo y asignar a proveedores multi costos @done (18-10-01 22:03)
+ ✔ En Ordenes de requisición, ordenes de compra y gastos agregar los nuevos catalogos para reportes @done (18-10-16 10:10)
+ ✔ activos agregar tipo de activo (Mobiliario, vehículo, etc), Cambiar nombre al area a cultivo y productos poner otra lista de precios @done (18-10-16 20:35)
+ ✔ En salidas agregar los nuevos catálogos @done (18-10-16 20:35)
+ ✔ En bancos agregar los nuevos catálogos en retiros y depósitos directos @done (18-10-24 20:49)
+ ✔ En caja chica en los gastos agregar los nuevos catálogos @done (18-10-24 20:45)
+ ✔ En bascula agregar casilla para agregar las boletas intangibles y poner un privilegio para que solo Francis pueda agregarlas @done (18-10-24 20:46)
+ ✔ En la caja chica de rosy que no pueda agregar gastos ni ingresos por remisión y dejar con un fondo fijo esa caja para controlar bien su saldo. @done (18-11-06 21:03)
+ ✔ En caja chica agregar apartado de prestamos @done (18-11-06 19:01)
+ ✔ En apartado de asistencias de nomina al agregar prestamos cuando sea fiscal que aplique el movimiento directo en bancos. Agregar un nuevo tipo de prestamos "Materiales" @done (18-11-06 20:36)
+ ✔ Modificar caja de prestamos acomodar los saldos de los prestamos que se descuentan desde nomina @done (18-11-06 20:37)
+ ✔ Agregar en cultivos (áreas) Bodega Gdl, Intangibles, Administrativos, Fletes. Para el control de costos @done (18-11-06 21:17)
+ ✔ Agregar el catalogo de cultivos (áreas) al catalogo de trabajadores para poder asignar en cual área labora y separar los costos @done (18-11-07 09:46)
+ ✔ En la caja chica y en la caja de bodega agregar apartado de traspaso de dinero, para poder enviar dinero entre cajas @done (18-11-07 15:59)
+ ✔ En las ordenes de compra agregar original y copia @done (18-12-26 12:54)
+ ✔ Fondo de 50 mil en la caja de tryana 2 @done (19-01-12 12:37)
+ ✔ Crear caja 4 es igual a la de tryana es para la señora @done (19-01-12 12:37)
+ ✔ Poner folio (consecutivo id) de cada movimiento de ingreso, gasto en todas las cajas @done (19-01-12 15:18)
+ ✔ Cambios rpt Asistencias @done (19-01-13 21:14)
+ ✔ Reacomodar las cajas chicas de Boletas, Gastos y General, agregar gastos x comprobar y poder cancelar sin eliminar los registros @done (19-02-04 13:41)
+ ✔ Formato de captura piña en las boletas de bascula @done (19-02-04 13:41)
+ ✔ En ordenes de compras (listado) meter filtro de busqueda x producto y que puedan previsualizar la orden sin entrar a ella @done (19-02-04 15:25)
+ ✔ Que no puedan quitar abonos solo en ese dia al menos que tengan un privilegio @done (19-01-12 12:38)
+ ✔ En la aplicacion de exritorio en la pestaña de limon y bascula poner la empresa @done (19-01-02 09:30)
+ ✔ Caja tryana Agregar los tipos de órdenes a los gastos de caja para validar los campos cuáles son obligatorios @done (18-11-27 14:37)
+ ✔ Caja tryana, poner select para indicar que es caja de Rosy y le salga en su caja @done (18-11-27 14:14)
+ ✔ Agregar los centros de costo (catalogo de rodrigo y de melgas) @done (18-11-08 12:22)
+ ☐ Quitar los retiro y depósitos de bancos, porque se registrarían desde el apartado de Registro manual de movimientos (contable)
+ ✔ Crear apartado de Registro manual de movimientos utilizando el catalogo de centros de costo, @done (18-11-06 19:00)
+   y en centro de costo el tipo "banco" se cambiaría por Gastos financieros y se agregaría el tipo "banco" que
+   serian para las cuentas de banco (esas se tienen que ligar con las cuentas de banco), Agregar en centro de costo
+   el tipo "Resultado" (resultados e ejercicios anteriores) esos al dar cerrar el ejercicio de un año se registraría
+   en Movimientos manuales el ingreso de la utilidad o perdida del ejercicio. Agregar en centros de costo el tipo
+   "Créditos bancarios" en el cual debe de pedir los años del crédito (para separar lo de corto y largo plazo)
+   ese centro de costo se tiene que ligar con las cuentas de banco para registrar depósitos y salidas en banco,
+   Agregar tipo de "Otros ingresos" ellos agregarían, Agregar el ptu e isr en gastos (catalogo),
+   Agregar tipo de "Impuestos por pagar" son para disminuir los impuestos acumulados de nomina y facturas,
+   Agregar tipo "Productos financieros" ellos agregarían,
+   Agregar tipo "Impuestos a favor" son para disminuir,
+
+
+
+
+ ✔ Validaciones de complemento de pago @done (18-09-07 19:11)
+ ✔ Agregar a Bodega Guadalajara, las facturas ligadas a las remisiones que se están pagando. @done (18-09-05 20:53)
+ ✔ Calculo de costo promedio en inventarios @done (18-09-05 19:43)
+ ✔ Validaciones en caja chica para evitar manipulaciones de las cantidades @done (18-08-29 10:30)
+ ✔ En la bascula poner que capturen el lote y si se factura el productor antes de guardar la boleta @done (18-08-24 12:38)
+ ✔ Agregar privilegios de modificar ingresos y gastos en cajas chicas @done (18-08-22 21:13)
+ ✔ Poder agregar varios codigos a las clasificaciones y cargarlo en las polizas @done (18-08-22 21:12)
+ ✔ Correccion de polizas para gubalu produce y plasticos @done (18-08-13 15:33)
+ ✔ Correccion reporte de vacaciones @done (18-08-13 15:34)
+ ☐ Modificar el formato de impresion de la boleta y agregar los campos requeridos para mostrar los datos
+ ☐ Modificar la caja chica de limon como las hojas de la señora
+ ☐ Modificar la caja chica de prestamos como las hojas de la señora
+ ✔ Acomodar reporte y recibo de vacaciones, la fecha toma el de la ultima vacaciones que tomo el trabajador. @done (18-08-06 19:11)
+ ✔ Detalle en bascula al cargar los proveedores duplicados, si cambias de empresa que limpie @done (18-06-21 18:59)
+ ✔ En las remisiones si esta cancelada acepta el folio repetido, que no lo acepte @done (18-06-23 15:14)
+ ✔ Cuando se liga remisiones a una factura timbrada que se quite de cuentas por cobrar @done (18-06-24 13:58)
+ ✔ Checar que no agregue remisiones y facturas sin clasificación @done (18-06-23 12:18)
+ ✔ Poner el tipo de prestamo en la caja de prestamos, solo en los de largo plazo @done (18-06-21 16:56)
+ ✔ Aumentar la fuente en el tickets de los contrarecibos @done (18-06-21 15:12)
+ ✔ Poner los logos a las empresas @done (18-06-21 14:57)
+ ✔ Crear apartado para cargar los reportes de asistencia del checador y se asignen las asistencias, si tiene una entrada o salida solamente poner asistencia pero indicar una nota @done (18-06-20 15:08)
+ ✔ Imprimir recibos de nomina en formato de tikect con el desglose de las actividades agrupadas por dia @done (18-06-20 15:08)
+ ✔ En nomina poner fijo los campos de nombre de la tabla para que no se mueva @done (18-06-12 13:28)
+ ✔ Al editar una compra que sume los importes al total @done (18-06-12 14:40)
+
+ ✔ Bitacora de cajas chicas @done (18-06-15 21:07)
+ ✔ Caja de prestamo quitar el renglon por default @done (18-05-17 13:34)
+ ✔ Bascula se cierra la ventana de imprimir @done (18-08-24 12:38)
+ ✔ Historial de empleados agregar fniquitos, vacaciones @done (18-05-17 16:25)
+Cuentas por cobrar en primer listado si todas están pagadas no sale el cliente si pone todas
+ ✔ En asistencias el botón de imprimir no imprime las asistencias como se marcan y total de asistencias @done (18-03-15 17:19)
+ ✔ En póliza de nómina no cargar los trabajadores que no estén asegurados de los descuentos y poner las cuentas en mamita @done (18-03-17 11:56)
+ ✔ En póliza de nómina no carga los finiquitos @done (18-03-17 15:13)
+ ✔ En cuentas por pagar cuando se agregan abonos a facturas que tienen IVA en la póliza de ingresos poner el IVA proporcional no total @done (18-03-18 11:32)
+ ✔ En cuentas por cobrar al abonar factura poner opción para que seleccionen la forma de pago (efectivo, cheque, trans, etc) y en los complementos de pago detectar si es efectivo no pedir la cuenta del cliente (timbrar en público en general) @done (18-03-18 14:19)
+ ✔ En movimiento de cuenta poner filtro de empresa para que muestre de todas no solo d empaque @done (18-03-18 14:42)
+ ✔ Nomina Cuando están en vacaciones el jueves no lo pone como falta y no lo deja poner @done (18-03-19 12:39)
+ ✔ Nomina Al poner incapacidades de repente no las guarda @done (18-04-22 18:22)
+     - Primero agregar incapacidades
+ ✔ Nomina De repente se quita un trabajador al guardar la nómina @done (18-04-22 18:21)
+ ✔ Nominas guardadas borra a los trabajadores que estan despedidos @done (18-03-27 22:59)
+ ✔ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves @done (18-03-22 17:16)
+ ✔ Checar los pagos masivos a pasado que duplica los pagos de una sola factura @done (18-06-15 21:08)
+ ✔ Acomodar la impresion de las facturas con comercio exterior @done (18-04-04 12:52)
+ ✔ De repente se registra doble en banco cuando se abona una factura de venta desde el listado @done (18-04-03 13:33)
+ ✔ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar @done (18-04-03 20:54)
+ ✔ En caja chica dan de baja remisiones y el abono se registra doble en cuentas pagar @done (18-04-03 14:37)
+ ✔ En la aplicación de cheques marca error al imprimir el cheque en las cuentas nuevas (dio error con gubalu) @done (18-04-19 14:06)
+ ✔ Camaras (admin, 12345abc, 1234abcd) IP 243 y 244 @done (18-03-15 17:35)
+ ✔ En el listado de empresas de la sesión agregar mamita. @done (18-04-03 13:34)
+   - Agregar los privilegios de la empresa
+ ✔ Báscula de repente no imprime, no abre la ventana de imprimir se tiene que dar imprimir de nuevo @done (18-04-10 10:52)
+ ✔ Acomodar los formatos de los cheques de las cuentas, cuando agrega una cuenta nueva dependiendo el banco que asigne el formato de cheque @done (18-04-19 14:06)
+ ✔ En las boletas de coco cambiar la forma de calcular el importe que es cajas por precio y en la app visual dar de bajas por esos importes @done (18-06-15 21:07)
+
+ ✔ 6h Optimizar reporte de estado de cuentas @done (17-09-12 22:39)
+ ✔ 1.8h Crear listado de cuentas de proveedores @done (17-09-06 23:57)
+ ✔ 3.33h En el nuevo reporte de banco acumulado por empresa pintar de color los cheques en transito y no afectar el saldo, cuando desmarquen la opcion de transito poner fecha para mostrarlos en el reporte ya afectando el saldo @done (17-08-19 10:20)
+ ✔ 7.61h Cambiar sistema de privilegios por empresa y usuarios, sincronizar la empresa seleccionada con los filtros @done (17-08-08 19:06)
+ ☐ En bascula para autorizar las modificaciones que genera una contraseña dinámica cuando se utilice generar otra y enviarla al correo fvgg08@gmail.com
+ ☐ En reporte de prestamos no sale el empleado si en esa semana liquida el préstamo.
+ ☐ Crear productos bajos de inventario cargarlos en ordenes de requisición
+ ☐ Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada
+ ☐ En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente
+   "Saldo deudor actualizado" y en las remisiones también mostrarlo, poder indicar en que clientes mostrarlos
+ ☐ En bascula agregar un tipo de pesada "Hojas de limón, desecho plátano, piña" para pesar las hojas de limón y crear un Reporte de kilos de las remisiones y restarle los kilos de bascula de las pesadas de desecho
+ ☐ En el listado de productos poner una opción para marcar los productos que tienen que regresar el producto dañado, y en las salidas en los tickets poner "Refacciones al cambio" y indicar que se tienen que regresar esos productos dañados
+ ✔ .48h Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada @done (17-06-10 15:30)
+
+ ********************************************* Facturado
+
+
+ ✔ 2.16h En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente @done (17-06-11 10:53)
+   "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
+ ✔ 1.63h En compras validar que solo puedan modificar decimales en los totales @done (17-06-28 12:25)
+ ✔ .22h El reporte de productos facturados que no cargue la remisión 443 de plásticos bubalu para que cuadre con el inventario de producción @done (17-06-23 22:35)
+
+ ✔ 1.96h En salidas de almacén y tickets agregar los 15 datos que la señora me paso para @done (17-02-27 20:37)
+ ✔ 0.53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques en transito @done (17-02-21 16:06)
+ ✔ 1.5h En caja chica 2 poner los saldos de los clientes de remisiones de enero 2017 en adelante @done (17-03-09 15:39)
+ ✔ 7.31h Caja chica de préstamo poner fondo de caja y dejarlo como el formato del archivo @done (17-03-15 13:37)
+ ✔ 2.68h Reporte de saldos bancarios, saldo inicial, y al saldo final es quitando los cheques de transito, filtros de la hoja @done (17-03-01 18:28)
+ ✔ 3.16h Reporte de bancos acumulado por empresas, como la hoja de ejemplo @done (17-02-25 12:58)
+ ✔ 0.81h En todos los reportes cambiar la fecha a formato dia/mes/año @done (17-02-28 00:23)
+ ✔ 3.31h En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios, agregar privilegio para mostrar los totales @done (17-02-22 10:31)
+ ✔ 2.5h En ordenes de flete seleccionar el tipo de orden (de venta, de compra) en ventas es ligar factura o remisión (ya lo tiene), en compra es ligar una boleta de tipo entrada @done (17-03-07 20:12)
+ ✔ 1.5h En ordenes poner selección de almacén para registrar la entrada @done (17-03-07 20:12)
+ ✔ 3.5h En tickets de ordenes de compras acomodar como los ejemplos, (agregar autorizo, En cod área poner solo los últimos 2, poner lo de almacén, Entrada mas grande, consecutivo por dia y fecha, ligar boleta) @done (17-03-22 20:47)
+ ✔ 0.5h En boleta de recepción cuando sea de insumo material cambia los datos de abajo como ejemplo @done (17-03-07 20:41)
+ ✔ 5.51h En bascula poder capturar los datos de la boleta de recepción en el tipo de insumo material y ligar la orden de la entrada de material @done (17-03-22 20:47)
+
+ ✔ 1.68h Reporte de código de salidas @done (17-02-07 21:17)
+ ✔ 0.1h En los tickets de la orden poner Entrada @done (17-02-07 21:22)
+
+ ✔ 5h En bodega guadalajara acomodar el formato como la hoja de la señora, agregar cálculos de acumulados @done (17-01-17 21:39)
+ ✔ 0.88h En reportes de caja incluir la caja de prestamos, prestamos = gastos y pagos = ingresos @done (17-01-18 19:07)
+ ✔ 2.9h En cada de prestamos poner el saldo por trabajador, opción para poder saldar los prestamos de un trabajador @done (17-01-18 22:01)
+ ✔ 2.86H En caja poner las boletas que se pagaron en efectivo y aun no se recupera el dinero a la caja, poner los cheques en transito @done (17-01-23 13:56)
+ ✔ 1h Crear reportes de gastos y ventas en Bodega @done (17-01-23 16:27)
+ ✔ 5.2h Agregar apartado en almacenes para regresar productos al inventario, parecido a salidas de productos @done (17-01-30 19:28)
+ ✔ 12.7h Apartado producción de productos, crear productos a partir de materia prima, tener inventario de esos productos, descontar al vender (remisiones y facturas), afectar inventario de materia prima @done (17-02-01 16:21)
+
+ ✔ 23.5h Nomina 1.2 @done (17-01-23 14:20)
+   ✔ Ejecutar backup catálogos @done (17-01-23 14:20)
+ ✔ 7.20h Agregar a ordenes, salidas y reportes múltiple inventario, hacer traspaso de mercancía @done (17-01-05 20:55)
+ ✔ 3.66h En entrada de almacén (al crear las ordenes) que imprima en formato ticket @done (16-12-27 19:51)
+ ✔ 1.56h En bodega guadalajara agregar apartado de ingresos como en caja chica @done (16-12-27 18:13)
+ ✔ 1.66h En cajas chicas imprimir recibo en ingresos por reposición, y poner titulo en los tickets "Ingresos" @done (16-12-12 14:55)
+ ✔ Reporte de bodega guadalajara, en cuentas por pagar si el saldo es 0 que no salga @done (16-12-12 15:04)
+ ✔ 2.33h En cajas chicas crear reporte de gastos e ingresos juntos como estado de cuenta @done (16-12-12 22:45)
+ ✔ 3h Crear nueva caja chica "Ventas de contado", poner titulo a cada caja chica @done (16-12-15 22:17)
+ ✔ En caja chica no salen las remisiones que se hacen ese dia hasta el dia siguiente @done (16-12-12 23:37)
+
+ ✔ 1.26h Reporte de caja chica, quitar la columna de folio y agregar otra para poner el productor @done (16-10-21 15:24)
+ ✔ 1.2h En ticket de salida poner lo de original y copia @done (16-10-21 19:12)
+ ✔ 1.33h Entrega de fruta cargar los datos de la boleta @done (16-10-16 13:34)
+ ✔ 1.36h En las remisiones cuando sea a contado que agregue el abono para que se pague automáticamente @done (16-10-16 20:07)
+ ✔ Revisar reporte de compras por proveedor que no cargue las ordenes canceladas @done (16-10-16 20:08)
+ ✔ En bancos en las transferencias poder cambiar el movimiento transito @done (16-10-13 16:22)
+ ✔ En catalogo de productores en tipo agregar "con factura pago bancario" @done (16-10-13 16:00)
+ ✔ Ticket de salida de productos agregar folio y fechas @done (16-10-13 13:55)
+ ✔ 1.23h Catalogo de productores agregar campos extras (Coeplim, hectáreas, etc) @done (16-10-04 15:46)
+ ✔ 4.16h Bodega Guadalajara en los tickets poner lo de original y copias, Al agregar remisión si seleccionan bodega cargar folio automático y cursor en clientes, poner boton de imprimir ticket y guardar la remisión @done (16-09-28 14:41)
+
+ ✔ En productos agregar para poder cambiar los productos de familia @done (16-09-26 13:16)
+ ✔ En el apartado entrada de fruta cambiar el formato como la hoja (agregar mas renglones, poner copia aun lado, agregar boleta y q ponga los kilos, agregar campos extras) @done (16-09-26 17:55)
+ ✔ En bascula reporte de movimientos poner opcional el seleccionar el cliente o proveedor @done (16-09-26 10:24)
+ ✔ 2.5h Agregar a reporte de combustible reporte concentrado y unir con el desglosado como esta ahorita @done (16-09-27 10:37)
+ ✔ En cuentas de proveedores agregar bancos de inbursa, bajio, bancopel @done (16-08-19 08:29)
+ ✔ 2.3h En cajas chicas reportes de gastos e ingresos meter filtros de concepto (para buscar proveedor y cliente) y filtro de caja @done (16-08-17 15:40)
+ ✔ En contrarecivos ordenarlo por folio descendente @done (16-08-04 12:37)
+ ✔ 3.75h En reporte diario de entrada agregar filtro para que cargue el reporte con los kilos de bascula si es limón industrial o suelo que use los kilos pagados y la diferencia los mande a limón fruta y si no que promedio por cajas @done (16-08-17 18:29)
+ ✔ 0.13h boleta de recepción que diga si es original o copias @done (16-08-17 18:43)
+ ☐ Ver el programa de cheques (compras a cheques), en cheques de reposicion ver donde se inserta y que la póliza de cheques solo tenga un movimiento en bancos que no registre por proveedor y también que cargue los cheques cancelados
+
+
+******************************************** Facturado
+
+
+
+✔ .51h Reporte de cuentas por pagar en los productos facturados poner el numero de certificado o poliza de seguro @done (16-07-17 13:51)
+  que se pone en los datos de la factura y el numero de operacion
+✔ 2.16h En supervisor de carga en facturacion y notas de venta agregar un campo para capturar numero de operacion y  @done (16-07-17 12:39)
+  en filtrosanitario agregar el numero de operacion y capturar 2 veses esos datos para que pongan los 2 proveedores y certificados
+✔ En notas de venta no carga los datos de metodo de pago y digitos de cuentas al seleccionar el cliente @done (16-07-13 17:57)
+✔ En bascula no pone bien la fecha de bruto y tara de salida @done (16-07-13 15:21)
+
+✔ 0.65h En bascula poner privilegio para poder modificar o no los kilos de bruto y tara @done (16-07-12 20:06)
+✔ 9.4h Agregar el complemento de comercio exterior en facturacion  @done (16-07-12 19:22)
+✔ 2.21h Agregar el nuevo catalogo de metodos de pago en facturacion y nomina @done (16-07-12 19:22)
+✔ 0.66h En bascula poner privilegio para que puedan editar o no los kilos @done (16-07-04 12:13)
+✔ 0.33h Poner fecha y usuario de creacion en caja chica @done (16-07-03 11:09)
+✔ 0.16h que se puedan imprimir las demas cajas chicas @done (16-07-01 13:21)
+✔ 0.25h Poner en las facturas y remisiones lo de capturar la huella @done (16-07-13 18:28)
+✔ 1.3h Crear reporte de ordenes de flete dentro de cuentas x pagar @done (16-06-01 16:36)
+✔ 1.5h En remisiones ligar un numero de boleta de bascula y al imprimir la remision que imprima los archivos adjuntos de la ife y licencia conducir @done (16-05-18 14:15)
+✔ 1.1 Acomodar los datos del pagare y manifiesto de chofer en remisiones y facturas como indico la señora @done (16-05-18 16:27)
+✔ 14h En bascula en las boletas obtener los kilos de la bascula del empaque e imprimir una boleta con esos datos, en bascula seleccionar cuales kilos tomar para el pago, se creo una aplicacion de escritorio @done (16-05-25 11:32)
+✔ 1h Instalar el sistema en la maquina de guadalajara @done (16-05-25 15:11)
+
+✔ 2.16h Agregar catalogos de Calidad y tamaños en las areas para seleccionar en facturacion y ventas @done (16-07-12 19:27)
+✔ .5h Reporte de Productos Facturados con Kilos utilizando la Calidad, Tamaño y Unidad de medida que se captura en ventas y facturacion @done (16-07-12 19:27)
+✔ 3.8h Modificar en ventas de remision y facturacion para que puedan espesificar la calidad y tamaño, asi como poder poner una descripcion en la clasificacion @done (16-07-12 19:27)
+- Los correos en los gastos de cajas chica
+- *en bascula agrandar la letra de original y copia
+
+*************************************************************************************************************************************
+
+--2.7h *En caja chica al registrar una remision que genere un ticket del abono, poner original o copias en gastos y ingresos remisiones
+--10h *Control de acceso y Vales de salida de ventas como check list de los documentos
+
+6.55h
+1. *EN LAS REMISIONES APARECER IMPRESO LA LEYENDA DE : ORIGINAL, COPIA 1, COPIA 2….. DEPENDE DEL NUMERO DE IMPRESIONES
+2. *EN CASO DE QUE LA VENTA DE CREDITO SEA DE CREDITO DEBE DE IR LA LEYENDA DEL PAGARE.
+3. *DEBE LLEVAR LA LEYENDA DEL MANIFISTO DE EMBARQUE.
+4. *SI ES VENTA DE CONTADO DEBE DE INDICAR LA LEYENDA DE CONTADO
+5. *EL DESGLOSE DE LOS GASTOS AUNQUE SEAN SIN COSTO DEBEN DE IR IMPRESOS EN LA REMISION COMO LO SON:
+   LOS CERTIFICADOS DE ORIGEN
+   NO DE POLIZA DEL SEGURO
+   CERTIFICADO SUPERVISOR DE CARGAS, ETC.
+6.*EN LAS REMISIONES SE PONDRA EL NOMBRE,FIRMA Y HUELLA DE QUIEN RECIBE LA MERCANCIA CON SU
+  NUMERO DE IFE O LICENCIA IMPRESO Y ESTA PERSONA DE ANTEMANO DEBERA ESTAR REGISTRADA,
+  CON FOTOGRAFIA EN EL CONTROL DE ACEESO A LA EMPRESA.
+7. *En caja chica al registrar una remision que genere un ticket del abono, A LAS REMISIONES DE PAGO DE CONTADO Y ABONOS A REMISIONES SE ADICIONARA A LA MISMA LOS
+DATOS DEL TICKET DE RECIBIDO DE CAJA, LOGISTICA NO EMITIRA EL
+VALE DE SALIDA P/VIGILANCIA HASTA QUE TODOS ESTOS REQUISITOS SE CUMPLAN.
+8. *EN LA REMISION DEBE INDICAR FECHA Y HORA DE IMPRESIÓN.
+9. *EL TICKET DE GASTOS DE CAJA CHICA DEBE DECIR ORIGINAL Y COPIA 1,2…
+10. *LA BOLETA DE BASCULA DE ENTRADA Y SALIDA LA LEYENDA DE OCRIGINAL Y COPIA
+CAMBIAR EL NUMERO DE LA LETRA, PARA QUE SE VEA MAS GRANDE.
+11. *LA LEYANDA DEL PAGARE TAMBIEN DEBE IR EN LAS FACTURAS DE CREDITO ASI COMO
+LA LEYENDA DE ORIGINAL Y COPIA EN MARCA DE AGUA. ANEXO EJEMPLO.
+12. HACER UN FORMATO SIMILAR AL DE ORDEN DE COMPRAS PARA QUE NOSOTROS
+GENEREMOS UNA ORDEN DE PEDIDO PARA EL CLIENTE Y QUE NOS REGRESE EL
+CLIENTE EL FORMATO FIRMADO Y ASI ELLOS AUTORIZAN LA VENTA.
+13. *¿VER SI SE PUEDE MANDAR A IMPRIMIR DESDE OTRA MAQUINA LOS TICKETS DE
+BASCULA? LOS OTROS EQUIPOS ESTAN EN EL EMPAQUE Y EN OFICINAS NUEVAS.
+14. *QUE LA REMISION NO SE TENGA QUE CANCELAR PARA PODERLA FACTURAR, SOLO SE
+CANCELA CUANDO SEA UNA VENTA QUE NO SE EFECTUO O PORQUE TENGA UN
+ERROR, CREO QUE IBAS A PONER UNA OPCION NO SE SI QUEDO LISTO?
+
+-*Cuentas x cobrar el saldo de JOSE JAVIER RENTERIA LARIOS no da
+-*Cuentas x pagar el saldo de GOMEZ GUDIÑO SPR DE RL DE CV y SURTIDORA DE FERRETERIA Y MATERIALES SA DE CV no da
+- .5h Reporte Productos Facturados que pueda mostrar las descripciones de las ventas
+- 3.8h *Bitacora de trabajo agricola de vehiculos, los vehiculos seleccionarlos del catalogo y el centro de costo, las lavores son del catalogo de empleados
+- 5.8h *Entrega de fruta de empaque (Piña y papaya), generar formatos para que capturen la informacion, imprimirlos en blanco y despues poder llenarlos
+-.66h *En Ventas de remision en imprimir tickets q salga el pagaret cuendo es a credito
+- En salidas de almacen y ventas de remicion generar boletas de salida para el control de acceso con codigo de barras
+- Modulo en caceta para registrar las entradas y salidas de las boletas de salida
+- *Boleta de salida poner firma de recibido y del chofer
+
+
+2.2h-- *Capturar fotos al registrar las boletas de bascula
+1.3h-- *Poner notas de credito en dolares en facturacion
+6h--*Crear la caja No 3 que es para controlar los prestamos a trabajadores
+2.2h--*Crear caja 4 para el registro de ingresos y gastos de coco hermana de la señora, mandar correo en cada gasto e imprimir en ticket
+1.66h--*en cuentas por cobrar poner la opcion de que muestre los estados de cuenta en dolares que sea otra columna
+.16h--*En la boleta de bascula poner quien imprimio, el usuario
+.33h--*En el ticket de gasto en caja chica que salga de que empresa es en el encabezado,
+   y que salga detallada la info de las areas
+0.73h--*En las cajas chicas 1 y 2 poner en el apartado de gastos una opcion para marcar el gasto como reposicion, en reporte de gasto poder visualizar el total de reposicion
+4h--*Apartado para generar contra recibo de las facturas de compras como la hoja
+.42h--En ordenes para cada producto y codigo poner la fecha de la ultima compra al imprimirla
+8.66h--El reporte de piña que me dio pao
+2h--*Reporte para consultar los saldos y del nuevo catalogo (como el reporte que esta del catalogo viejo)
+11h--Cargar de nuevo los codigos que va pasar la señora y en cajas chicas, reportes de cajas chicas,
+  en ordenes de requisicion, ordenes de compra, reportes de compras, en registro de actividades x trabajador (nomina),
+  modificar para que use el nuevo catalogo
+
+
+2h--Vale de caja chica como en el correo y bodega
+.30h--*reporte de prestamos poner mostrar los prestamos por empresa de cada trabajador (filtro de empresa)
+1h--*Cuentas por pagar en normex, 1er total general es la suma de los 2 proveedores de lo que se muestra,
+  2do total general agregarle la suma del iva de los productos = total final,
+  la diferencia = total final - 1er total general
+2h--*Parte para administrar las labores que agreguen las que esta en la hoja
+18.5h--*nomina registro de actividad x trabajadores agregar actividades por dia, poner otros ranchos por empleado,
+  el catalogo de lavores pasarlo a nomina Agregar una columna para seleccionar si ese dia es falta,
+  incapa, permis, asiste y que modifique el modulo de asistencia, cuando le agreguen hrs extras registrar bonos en mod asistencias
+--*Poner en trabajadores un numero de empleado y validar que no se repita
+2h*--Pder agregar clasificaciones de prestamo o de pago cuando les presten limon
+
+1.5h*--normex y sagarpa (de sagarpa se capturaran gastos en consepto ira nacional o internacional con esto en cuentas por pagar de normex separar por estos 2 tipos y agregar las facturas de sagarpa al final calcular la diferencia)
+2h*--Crear poliza de diarios de productos como el reporte de acumulados de productos
+1h*--En los recibos de nomina poner el subsidio en el lado de deducciones en negativo, checar imss
+*--caja chica checar las duplicadas, chuy agregarle permisis de gomez gudiño
+*--poliza de ingresos checar carga remisiones
+4h*--Agregar lo de dolares en ventas de remision
+9h*--En bascula acomodar los tickets de entrada y salida como la hoja de la señora
+*--Reporte inventario/epc el total general no suma solo pone lo de la ultima familia
+*--Reporte facturacion/rventasc tarda mucho en cargar por el saldo checar
+*--En las cajas chicas ver porq tarda en cargar
+*--Cuentas por cobrar y pagar checar lo del saldo inicial no arrastra bien el saldo, checar con javier renteria
+7.5h--Agregar catalogos y lo que tiene el archivo de exel que me explico triana lo puse en indie-sanjorge
+
+
+15h--Hacer de nuevo la caja chica de bodega guadalajara como el archivo que pasaron
+
+2h--*Imprimir formato de remiciones en ticket
+8h--*Generar Catalogo de Productores y agregarlo a bascula y reportes => Cambiar el campo tipo a 40 chars
+
+--Checar el reporte de diario con las nuevas cosas
+14h--*Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
+9h--*Todos los reportes q se exporten a excel
+---commit No 2
+7h--*otro catalogo de como el de la maquinaria para el punto de venta
+4h--*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar
+9h--*Que seleccionen una empresa y trabaje en esa empresa por default como si fuera sanjorge
+-en bascula poner limon apatzingan
+--en las ordenes de flete poder poner una descripcion, y q ponga el nombre del cliente y la fecha y hr de salida del producto q es el de la remision, numero de manifiesto de embarque
+--*el reporte de prestamos de trabajadores poder mostrar todos los trabajadores y su saldo
+-*Bascula al registrar boletas de salida se sale
+-*En reporte de nomina checar no suma el premio de asistencia cuando se calcula las vacaciones (semana 29 MALDONADO GALVEZ FRANCISCO JAVIER)
+1h--*descargar en exel los reportes de existencias
+-*Cambiar los reportes de nomina al apartado de nomina
+--*al momento de hacer pagos tener la opcion de imprimir el sello de acuerdo a los formatos que la señora paso (va mandar otros)
+-*caja chica que no muestre todo el listado de cheques
+---commit No 1
+-*Agregar en facturacion facturar en dolares con tipo de cambio y que en cuentas por pagar se registre en pesos
+-*Agregar el finiquito por despido fiscal timbrado y un recibo de finiquito con sueldo real
+-*Checar el recibo de finiquito, las vacaciones no salieron bien a norma
+-*En el recibo de incapasidad poner caja de % para q no calcule siempre con el 100%
+-*En nomina, en los reportes, cuando carga los finiquitos no pone el nombre completo del trabajador y falta el SDI
+2h--*Bascula crear reporte de las boletas que el chofer son productores
+-*Bascula validar q si rosy ya puso los quilos no modifique la informacion desde el empaque
+-*en nomina de gomez marca error al exportar en exel el reporte
+-*en remisiones no esta separando los productos de fletes, seguros y esos
+-siap
+
+
+-*En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no hay ventas) y que tenga saldo
+  el proveedor de los anticipos y de ahi pueda pagar facturas o ventas echas sin que se refleje en el banco
+-*En ordenes de compra y de requi poner impuestos de retencion de iva e isr y ponerlo en las polizas
+  en compras tambien
+
+
+-*Nitrofoska especial -> checar
+-*En nomina sanjorge poner premio de asistencia (10% proporcional a los dias trabajados) que todo sea gravado en persepciones
+  y en imms que sea exento
+-*Tambien poner en la nomina el bono de despensa (40% del salario minimo zona A proporcionales a los dias trabajados) 40%xdias es gravado en percepciones
+  y en imms que sea exento
+
+
+
+-*Estados de cuenta bancos poner filtros de ingresos y gastos
+-*Reporte diario de entrada poner que salgan todas las areas
+-*ordenes de flete poner la fecha de la factura ligada
+-*cuentas x pagar poner el tipo de cambio y las ordenes con dolares registrar el nuevo costo
+-COMPRAS LIMON TECOMAN: las bonificaciones si es sumada, los kilos y bultos no se suman ni resten
+  Egresos de apatzingan: poder agregar diversis gastos
+  Costo de venta: limon facturado+existencia del dia - existenia anterior - compra empacada; restar las clasificaciones q son iguales
+-*Gomez gudiño: en polizas tomar las cuentas de los productos de oroverde ahora en gomez
+
+
+
+
+
+-*Poner dos bancos para dispersar la nomina
+-*Remisiones separar los productos como las ventas del dia, en los gastos poner el folio (seguro, certificado)
+-*Remisiones poner historial de movimientos (a que factura se ligo, si se cancelo que factura la sustituyo, notas de credito, y abonos ya sea a la remision o a la factura ligada), es un pequeño resumen de movimientos
+-*Falta validar que no puedan facturar si la remision ya lo esta
+-*Modificar las unidades y clasificaciones para que tengan los codigos de la hoja, eliminar todas las demas clasificaciones de limon, poner codigo 2 de contpaq para empresa oroverde
+  En las unidades agregar los codigos para q en las remisiones salgan esos codigos como unidades, al facturar el codigo es la unidad del codigo
+-*Poner lo de prorratear el costo de seguro, certificados, etc. en remisiones y facturacion
+-*poner filtro en almacen para q tome apartir del 01/01/2015
+-*Menu crear un apartado para reportes y ahi meter todos separados por area
+-*Reporte de compra poner filtro de tipo de orden y separar las compras por tipo
+-*Crear reporte de Notas de credito, Estilo como el reporte de ventas por cliente, nc de facturas y nc de remisiones (poner a que factura afecto)
+-*Reporte de productos facturados, agregar los de las remisiones (ver si se estan cargando las remisiones) y ponerle columna de No poliza que se captura al facturar, ver la forma de poder seleccionar varios productos a la ves con checkboxs
+-*Reporte de ventas poder seleccionar varias empresas y que ponga un total general de las empresas
+-*Bascula poner boton de reimprimir la boleta de entrada
+-*Poliza de nomina va confirmar tryana como quedaran las cuentas de ingreso
+
+
+
+
+compras_facturacion_prodc Quitar pkey, agregar los campos news-*Compras, en ligar productos de certificados agregarle para poner productos cancelados, fecha, cliente, costo
+-Terminar de acomodar lo de maquinaria, bodega y labores para crear el reporte de costos
+
+
+
+
+-*compras al ligar las facturas que seleccionen la empresa para que agreguen los certificados, en el reporte de cuentas por pagar checar el reporte para que cargue los certificados de diferente empresa
+-*En todos los codigos de gastos (caja chica, ordenes, salidas almacen) que busque por codigo y por nombre en la caja de texto
+-*Reportes de caja chika
+-*Rastreabilidad agregar pallet que salga los clientes de oroverde para q se lo asignen
+-*Imprimir el listado de codigos de compras
+
+
+Sueldos, salarios, rayas y jornales (Gravado) - sueldo completo
+Gratificación anual (Exento) - es el aguinaldo
+
+sueldo y vacaciones y finiquito - gravado
+
+Impuesto retenido durante el ejercicio - isr
+
+
+
+
+
+-Agregar a la nomina deducciones "fondo de ahorro" como lo de infonavit lo que pone norma se descuenta
+-*Reporte metodo de pago (separar en no pagadas, efectivo, trasnferencia, cheque) poner las boletas de cada una en una fecha o rango de fechas
+-Costos de almacen en upes
+-Los reportes q mando
+-*Los codigos ponerlos en las caja chicas para asignar el gasto
+
+
+-*Exportar clientes a exel y productos
+-*Exportar a exel *reportes de caja chica, rastriabilidad y *Ventas/Facturas y NC (separar en otro total los pagos en parcialidades)
+-*Costos de salida checar
+-*Salidaalidas agregar quien recicio el material y poner asignar a un trabajador, generar un reporte de herramienta prestada al trabajador pornerlo en empleados
+-Entrada y salida en vigilancia, para los productores y de mas q comento la señora
+
+-*Poliza de ventas Quitar las que no salgan los pagos en parcialidades
+-*Poliza de gastos en la cuenta q selecciona que ponga el subtotal
+-*Esquineros 4 chui, en los fleje poder poner varios en pallet
+-*En Estado de cuenta poner pago en parcialidades y poner el folio de la factura, que no salgan como ventas las parcialidades
+-*Limon suelo meterlo en insdustrial en reporte de rendimientos
+-*Al dar de alta un proveedor poner pordefault de credito 15 dias
+-*Ordenes de compra lo de los codigos q no se dupliquen
+-*de jorge gomez y vianey gudiño pasar los proveedores y productos a gomez gudiño
+-*salidas poner opcion para copiar codigo q no sea uno x uno
+
+-*Salida de productos ponerles total, imprimir recibo de salida, quien lo solicita, a que codigo se va ir ese producto
+  -*en conbustible agregar odometro, veiculo de codigos y generar reporte
+  -*Reporte por codigo de las cantidades q se fueron
+-Nomina
+  -*Parte para administrar las labores que agreguen las que esta en la hoja
+  -*Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
+  -Reportes de eso
+
+
+-*Pago en parcialidades para poder ligar los xml a las polizas por cada abono
+  -*Al momento de agregar el abono generar en automatico la factura de pago en parcialidades si es que no se
+  pago el total o si ya se habia agregado un abono
+  -*Poner esas facturas en un apartado aparte como notas de credito
+
+-*Poner 2 cajas chicas lo que capturen en una que no salga en la otra pero q los reportes sea lo mismo
+manejaria 2 saldos diferentes una x caja
+
+-*prestamos reporte no sale esa semana
+  *JUAN FARIAS CUELLAR - semana 40 de vianey
+
+-Pallets salidas de productos
+  *productos q faltaron
+  -*esquineros
+  -*Bolsa perforada
+  -*Malla
+  -*Filverde
+  productos q puede agregar multiple
+  -*etiquetas
+  -*cajas
+  -*arpilla
+
+
+
+-*Recibo de pago en cuentas x cobrar poner la referencia del deposito
+
+-*Reporte de rendimiento, poner un consentrado de los lotes (Lote, Cajas entraron, Kilos entraron, Cajas rendimiento, kilos rendimi, desecho indust), al final la suma y la tabla de las clasificaciones y sus totales
+-*Cambiar la salida de los productos al momento de registrar los pallets no al facturar, poner decimales en los productos
+-*Crear una orde de compra aceptada y todo los datos de la orden con los faltantes que le capturen y restar los faltantes a la orden que entro
+-*Ordenar las notas de credito de remisiones por fecha y folio poderlas modificar
+-Marcar a victor de las camaras y lector
+
+
+-Mano de hobra
+-Maqinaria
+-Material
+-Prestamos de de productos a empleados y externos de productos, maquinaria,
+-Costos ueps
+
+-*Lo de chui
+-**En las empresas distintas a sanjorge se tienen 2 veses el cliente sanjorge y con facturas unificarlos
+
+
+
+-*Supervisor de carga en los productos especiales de facturacion, q los datos en los certificados sean independientes
+-*Poner privilegio para q solo factures y ventas productos agregados y no descripciones
+-*Lo de la nomina de ranchos y asegurados si se eliminan ya no salen en ninguna nomina anterior, si cambian de empresa
+los trabajadores las nominas pasadas de la empresa a la q se cambio sale ese trabajador y sin guardar
+-*En facturacion al entrar poner modal q pregunte si quiere agregar certificados, seguro etc y q no lo deje facturar hasta que los agregue
+-*Nomina en los fiscal tomar la fecha del imss para hacer los calculos en finiquito y en semanal reportes etc.
+-*Reporte de nomina no lo pone bien las sumatorias
+
+-*Modificar el serie y folio de las compras
+-*Reporte productos facturados en piña de numero no los pone bien, varios productos a la ves
+-*Hacer administrable agregar cuentas de contpaq, depurar catalogo
+-Agregar pallets poner letrero de en area de piña
+-*Checar lo de chui en rendimiento, q no duplique las cantidades al editar un lote anterior o no permitir lotes consecutivos
+-*En ordenes de requisicion poner opcion para agregar los productos desde ahi sin salirce de la orden, y validar en todas
+las ordenes q seleccionen un producto
+
+
+-*En las nominas si se dio finiquito que salga en las pasadas y el puesto que no cambie por nomina
+-*Poner total en recibos de compra cuando pagan
+-Reporte de samuel sacar lo certificado y lo no certificado
+-*Caja chica reporte de tryana de egresos
+-*Caja chica reporte de tryana de ingresos
+-*Rastreabilidad y pallets para diferentes frutas
+-*marcar para pagar masivo si ya esta pagada q no lo ponga para marcar
+
+-Archivo Dim Aun no pasa nada
+-*Modificar la app de visual para q tome todas las empresas y clasificaciones, quitar de movimientos de cuentas lo de pagos
+-*Incapacidades dobles en una misma semana, empleados nomina
+-*Orden de servicio agregar orden de compra
+-*Traspaso de productos entre empresas, el reporte de seguimiento x producto las salidas
+  tipo traspaso que no afecte el precio solo la existencia, imprimir una orden de donde salio
+  y adonde entro, con una descripcion
+-*Pallets si es mixta no pone las 2 clasificaciones al editar el pallet
+-*Cuentas cobrar reporte de exel en los abonos tomar todo el iva en el primer pago
+-*Reporte de compras x proveedor poder mostrar todos los proveedores que tienen movimiento (compras)
+-*Ordenes de requisicion hacerlo como la señora quiere
+-*Polizas de egreso ordenar por fecha de pago para norma y para ana como esta ahorita
+-*Facturacion productos certificados
+-*Dieron un finiquito a un empleado, le desconto lo que debia en un prestamo, despues lo dieron de alta de nuevo y en la nomina le sigio descontando
+-*De repente tienen problemas al agregar incapacidades y faltas no las toma en la nomina, creo q es cuando se cruzan 2 semanas
+-*Poner un consecutivo para los empleados de cada empresa, q se incremente solo cuando se inserte uno nuevo, cambiar en los reportes de nomina poner ese campo en lugar del id
+-*Historial de modificaciones en empleados, sueldos, altas, bajas, etc, checar si al despedir (finiquito) se registra la fecha de salida, al activar cambiar la fecha de entrada y de salida ponerla en null, los sueldos se modifica tambien en apartado de sueldos
+-*Caja chica agregar nomenclaturas
+-*Remisiones los productos que cargue el iva e impuestos si tiene
+-*Checar pago masivo de limon en tarjetas debito banamex, y cambiar la funcion de obtener apellidos, y de error del nombre
+-*Reporte de historial de nivelacion que ponga, como estaba, la fisica y como quedo
+-*Poliza de diario de ventas los productos sin costo en la factura salen q no salgan
+-*Caja chica que ordene los registros como se agregaron.
+-*En pallets poner presentacion directo en modificar y que se imprima ese en el recibo
+-*Pallets En los clientes autocomplete ponerle la ciudad para diferenciarlo
+-*Pago masivo si le quitan la cuenta q la deje en blanco
+-*En banco movimientos ordenar x fecha y id_mov
+-*cambiar fecha de la factura 20498 por 2 de julio blanca
+
+
+
+Furby:
+  ✔ Agregar factura proveedor, en empresa cargar por default la marcada default @done (13-09-09 11:14)
+  ✔ Al gregar los tickets a la factura, al ir dando enter se queda en el select de calidad, al dar enter en el select que pase el foco al btn "cargar" y al dar enter en ese btn que se agregue el ticket, y que regrese el foco al campo ticket si se agrego bien o si marco error @done (13-09-09 11:18)
+  ☐ Las facturas de los proveedores ponerlas en otro directorio, y que se agrupen por proveedor (la carpeta padre sea el id del proveedor), esas no se copian a documentos ni nada
+  ✔ Al agregar una factura no se quita el borrador previamente guardado, se siguen cargando los datos, cuando se timbre que se borre el borrador ya no se ocupa @done (13-09-09 11:47)
+  ✔ Al agregar una factura validar que no exeda el limite x proveedor, en proveedores_facturacion_model hay un metodo getLimiteProveedores(), regresa limite y facturado, si facturado+total_new_factura<=limite? si guardar: no guardar; @done (13-09-09 12:44)
+  ✔ El logo de las facturas no hay q ponercelo, en facturacion (ventas) falto que fuera de la empresa seleccionada no fijo el de sanjorge @done (13-09-09 12:00)
+
+2013-09-02
+  ✔ Agregar cuenta de compaq en calidades, poner default la de limon fruta de compras @done (13-09-03 18:31)
+  ☐ SQL:
+
+      CREATE TABLE nomina_salarios_minimos
+      (
+        id serial NOT NULL,
+        zona_a real,
+        zona_b real,
+        zona_c real,
+        CONSTRAINT nomina_salarios_minimos_pkey PRIMARY KEY (id)
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE nomina_salarios_minimos OWNER TO programa;
+      INSERT INTO nomina_salarios_minimos   (zona_a, zona_b, zona_c) VALUES (64.76, 61.38, 61.38);
+
+      cuenta_cpi character varying(12) NOT NULL DEFAULT 43000010,
+      COMMENT ON COLUMN calidades.cuenta_cpi IS 'cuenta afectable del contpaqi';
+      limon 43000010
+      piña 43000011
+      coco 43000013
+
+      Productos piña:
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#5)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#6)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#7)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#8)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #5(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #5(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #6(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #6(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #7(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL#7(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #8(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #8(CARTON)', '41080000' );
+      otros:
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TAMARINDO DE PRIMERA', '41060000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TAMARINDO DE SEGUNDA', '41060000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'SEGURO', '42200100' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'AJUSTE PRECIO', '41050000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TARIMA NACIONAL', '42200103' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'ARPILLAS 18KG', '41040000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'COMISION AUTO-VENTA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'SUPERVISOR DE CARGAS', '42200102' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TARIMA CERTIFICADA', '42200103' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CERTIFICADO FITOSANITARIO', '42200101' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CERTIFICADO DE ORIGEN', '42200101' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CONCRETO HID C/RESISTENCIA 250', '42200500' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'AJUSTE DE PRECIO', '41050000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'COCO DESTOPADO', '41070000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'FIRCO', '42200105' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TUBO ALCANTARILLADO', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CEMENTO', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'HRS RETRO EXCAVADORA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'HORAS VIBRO COMPACTADOR', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'ARENA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'GRAVA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'BALASTRE', '42200400' );
+
+
 SQL
   Tabla facturacion:
     poliza_diario boolean NOT NULL DEFAULT false,
