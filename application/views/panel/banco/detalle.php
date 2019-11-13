@@ -22,13 +22,13 @@
             </div>
           </div>
           <div class="box-content">
-          	<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta/?'.String::getVarsLink(array('msg'))); ?>" class="linksm">
+          	<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm">
 								<i class="icon-chevron-left"></i> Atras</a>
             <div class="row-fluid">
             	<fieldset class="span6" style="color: #555; font-size: .9em; border-bottom: none;">
 								<legend style="margin: 0;">Datos del cliente</legend>
 								<strong>Nombre:</strong> <?php echo $data['cliente']->nombre_fiscal; ?> <br>
-								<strong>Dirección: </strong> 
+								<strong>Dirección: </strong>
 										<?php
 											$info = $data['cliente']->calle!=''? $data['cliente']->calle: '';
 											$info .= $data['cliente']->no_exterior!=''? ' #'.$data['cliente']->no_exterior: '';
@@ -39,7 +39,7 @@
 											$info .= $data['cliente']->estado!=''? ', '.$data['cliente']->estado: '';
 											echo $info;
 										?> <br>
-								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?> 
+								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?>
 								<strong>Email: </strong> <?php echo $data['cliente']->email; ?>
 							</fieldset>
 
@@ -48,7 +48,7 @@
 								<strong>Fecha:</strong> <?php echo $data['cobro'][0]->fecha; ?> <br>
 								<strong>Serie:</strong> <?php echo $data['cobro'][0]->serie; ?> <br>
 								<strong>Folio:</strong> <?php echo $data['cobro'][0]->folio; ?> <br>
-								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?> 
+								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?>
 								<strong>Plazo credito: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 0: $data['cobro'][0]->plazo_credito; ?> <br>
 								<strong>Estado:</strong> <span id="inf_fact_estado">
 									<?php echo $data['cobro'][0]->status=='pa'? 'Pagada': 'Pendiente'; ?></span>
@@ -81,14 +81,14 @@
 								<tr>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->concepto; ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td><?php echo MyString::formatoNumero($cuenta->abono); ?></td>
+									<td><?php echo MyString::formatoNumero($total_saldo); ?></td>
 									<td class="">
 									<?php
 									if ($_GET['tipo'] == 'v')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}&".String::getVarsLink(array('ida','msg','nc')),
+                        'params'   => "ida={$cuenta->id_abono}&".MyString::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
@@ -96,7 +96,7 @@
 									elseif ($_GET['tipo'] == 'f')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}".($cuenta->tipo=='nc'? '&nc=si': '')."&".String::getVarsLink(array('ida','msg','nc')),
+                        'params'   => "ida={$cuenta->id_abono}".($cuenta->tipo=='nc'? '&nc=si': '')."&".MyString::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
@@ -108,8 +108,8 @@
 								} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="2" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td><?php echo MyString::formatoNumero($total_abono); ?></td>
+									<td id="dtalle_total_saldo"><?php echo MyString::formatoNumero($total_saldo); ?></td>
 									<td></td>
 								</tr>
               </tbody>

@@ -492,10 +492,10 @@ class cuentas_rendimiento_model extends CI_Model {
         $factura->nombre_fiscal,
         $factura->ccodigo,
         $factura->ucodigo,
-        String::formatoNumero($factura->cantidad, 2, ''),
-        String::formatoNumero($factura->kgs, 2, ''),
-        String::formatoNumero($factura->precio_unitario, 2, '$'),
-        String::formatoNumero($factura->importe, 2, '$'),
+        MyString::formatoNumero($factura->cantidad, 2, ''),
+        MyString::formatoNumero($factura->kgs, 2, ''),
+        MyString::formatoNumero($factura->precio_unitario, 2, '$'),
+        MyString::formatoNumero($factura->importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -505,10 +505,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(20, 20, 20, 20));
     $pdf->Row(array(
-        String::formatoNumero($total_bultos, 2, ''),
-        String::formatoNumero($total_kilos, 2, ''),
+        MyString::formatoNumero($total_bultos, 2, ''),
+        MyString::formatoNumero($total_kilos, 2, ''),
         '',
-        String::formatoNumero($total_facturas, 2, '$'),
+        MyString::formatoNumero($total_facturas, 2, '$'),
         ), true, true);
 
     // EXISTENCIA
@@ -545,10 +545,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->Row(array(
         $existencia->cnombre,
         $existencia->ucodigo,
-        String::formatoNumero($existencia->bultos, 2, ''),
-        String::formatoNumero($existencia->kgs, 2, ''),
-        String::formatoNumero($existencia->precio, 2, '$'),
-        String::formatoNumero($existencia->importe, 2, '$'),
+        MyString::formatoNumero($existencia->bultos, 2, ''),
+        MyString::formatoNumero($existencia->kgs, 2, ''),
+        MyString::formatoNumero($existencia->precio, 2, '$'),
+        MyString::formatoNumero($existencia->importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -558,10 +558,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(100, 25, 25, 25, 25));
     $pdf->Row(array('TOTAL',
-        String::formatoNumero($total_exis_bultos, 2, ''),
-        String::formatoNumero($total_exis_kilos, 2, ''),
+        MyString::formatoNumero($total_exis_bultos, 2, ''),
+        MyString::formatoNumero($total_exis_kilos, 2, ''),
         '--',
-        String::formatoNumero($total_existencias, 2, '$'),
+        MyString::formatoNumero($total_existencias, 2, '$'),
         ), true, true);
     $pdf->SetX(6);
     $descuento_parcial_ventas = (isset($rpt['info']->descuento_parcial)? $rpt['info']->descuento_parcial: 0);
@@ -569,14 +569,14 @@ class cuentas_rendimiento_model extends CI_Model {
         '--',
         '--',
         '--',
-        String::formatoNumero($descuento_parcial_ventas, 2, '$'),
+        MyString::formatoNumero($descuento_parcial_ventas, 2, '$'),
         ), true, true);
     $pdf->SetX(6);
     $pdf->Row(array('SUMA TOTALES',
-        String::formatoNumero($total_exis_bultos+$total_bultos, 2, ''),
-        String::formatoNumero($total_exis_kilos+$total_kilos, 2, ''),
+        MyString::formatoNumero($total_exis_bultos+$total_bultos, 2, ''),
+        MyString::formatoNumero($total_exis_kilos+$total_kilos, 2, ''),
         '--',
-        String::formatoNumero($total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$'),
+        MyString::formatoNumero($total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$'),
         ), true, true);
 
     // OTROS INGRESOS
@@ -611,10 +611,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array(
         "({$otr_ingreso->ccodigo}) ".$otr_ingreso->cnombre,
-        String::formatoNumero($otr_ingreso->cantidad, 2, ''),
+        MyString::formatoNumero($otr_ingreso->cantidad, 2, ''),
         $otr_ingreso->unidad,
-        String::formatoNumero($otr_ingreso->precio_unitario, 2, '$'),
-        String::formatoNumero($otr_ingreso->importe, 2, '$')
+        MyString::formatoNumero($otr_ingreso->precio_unitario, 2, '$'),
+        MyString::formatoNumero($otr_ingreso->importe, 2, '$')
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -624,10 +624,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'L', 'R', 'R'));
     $pdf->SetWidths(array(30, 50, 30, 30));
     $pdf->Row(array(
-        String::formatoNumero($total_otsingr_bultos, 2, ''),
+        MyString::formatoNumero($total_otsingr_bultos, 2, ''),
         '',
         '',
-        String::formatoNumero($total_otsingr, 2, '$'),
+        MyString::formatoNumero($total_otsingr, 2, '$'),
         ), true, true);
 
     // TOTAL DE INGRESOS
@@ -638,8 +638,8 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R'));
     $pdf->SetWidths(array(120, 40, 40));
     $pdf->Row(array('TOTAL DE INGRESOS',
-      String::formatoNumero($total_otsingr_bultos+$total_exis_bultos+$total_bultos, 2, ''),
-      String::formatoNumero($total_otsingr+$total_existencias+$total_facturas, 2, '$')
+      MyString::formatoNumero($total_otsingr_bultos+$total_exis_bultos+$total_bultos, 2, ''),
+      MyString::formatoNumero($total_otsingr+$total_existencias+$total_facturas, 2, '$')
     ), true, true);
 
     // ************************************************
@@ -678,10 +678,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->Row(array(
         $existen_anterior->ccodigo,
         $existen_anterior->ucodigo,
-        String::formatoNumero($existen_anterior->cantidad, 2, ''),
-        String::formatoNumero($existen_anterior->kgs, 2, ''),
-        String::formatoNumero($existen_anterior->precio, 2, '$'),
-        String::formatoNumero($existen_anterior->importe, 2, '$'),
+        MyString::formatoNumero($existen_anterior->cantidad, 2, ''),
+        MyString::formatoNumero($existen_anterior->kgs, 2, ''),
+        MyString::formatoNumero($existen_anterior->precio, 2, '$'),
+        MyString::formatoNumero($existen_anterior->importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -691,10 +691,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(25, 25, 25, 25));
     $pdf->Row(array(
-        String::formatoNumero($total_exis_anterior_bultos, 2, ''),
-        String::formatoNumero($total_exis_anterior_kgs, 2, ''),
+        MyString::formatoNumero($total_exis_anterior_bultos, 2, ''),
+        MyString::formatoNumero($total_exis_anterior_kgs, 2, ''),
         '',
-        String::formatoNumero($total_exis_anterior, 2, '$'),
+        MyString::formatoNumero($total_exis_anterior, 2, '$'),
         ), true, true);
 
     // COMPRA EMPACADA
@@ -731,10 +731,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->Row(array(
         $comp_emp->ccodigo,
         $comp_emp->ucodigo,
-        String::formatoNumero($comp_emp->bultos, 2, ''),
-        String::formatoNumero($comp_emp->kgs, 2, ''),
-        String::formatoNumero($comp_emp->precio, 2, '$'),
-        String::formatoNumero($comp_emp->importe, 2, '$'),
+        MyString::formatoNumero($comp_emp->bultos, 2, ''),
+        MyString::formatoNumero($comp_emp->kgs, 2, ''),
+        MyString::formatoNumero($comp_emp->precio, 2, '$'),
+        MyString::formatoNumero($comp_emp->importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -744,25 +744,25 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(100, 25, 25, 25, 25));
     $pdf->Row(array('TOTAL',
-        String::formatoNumero($total_compra_empa_bultos, 2, ''),
-        String::formatoNumero($total_compra_empa_kilos, 2, ''),
+        MyString::formatoNumero($total_compra_empa_bultos, 2, ''),
+        MyString::formatoNumero($total_compra_empa_kilos, 2, ''),
         '--',
-        String::formatoNumero($total_compra_empa, 2, '$'),
+        MyString::formatoNumero($total_compra_empa, 2, '$'),
         ), true, true);
     $pdf->SetX(6);
     $descuento_parcial_ventas = (isset($rpt['info']->descuento_parcial)? $rpt['info']->descuento_parcial: 0);
     $pdf->Row(array('SUMA TOTALES',
-        String::formatoNumero($total_exis_anterior_bultos+$total_compra_empa_bultos, 2, ''),
-        String::formatoNumero($total_exis_anterior_kgs+$total_compra_empa_kilos, 2, ''),
+        MyString::formatoNumero($total_exis_anterior_bultos+$total_compra_empa_bultos, 2, ''),
+        MyString::formatoNumero($total_exis_anterior_kgs+$total_compra_empa_kilos, 2, ''),
         '--',
-        String::formatoNumero($total_exis_anterior+$total_compra_empa, 2, '$'),
+        MyString::formatoNumero($total_exis_anterior+$total_compra_empa, 2, '$'),
         ), true, true);
     $pdf->SetX(6);
     $pdf->Row(array('VENTA NETA DEL DIA',
-        String::formatoNumero(($total_exis_bultos+$total_bultos)-($total_exis_anterior_bultos+$total_compra_empa_bultos), 2, ''),
-        String::formatoNumero(($total_exis_kilos+$total_kilos)-($total_exis_anterior_kgs+$total_compra_empa_kilos), 2, ''),
+        MyString::formatoNumero(($total_exis_bultos+$total_bultos)-($total_exis_anterior_bultos+$total_compra_empa_bultos), 2, ''),
+        MyString::formatoNumero(($total_exis_kilos+$total_kilos)-($total_exis_anterior_kgs+$total_compra_empa_kilos), 2, ''),
         '--',
-        String::formatoNumero(($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas)-($total_exis_anterior+$total_compra_empa), 2, '$'),
+        MyString::formatoNumero(($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas)-($total_exis_anterior+$total_compra_empa), 2, '$'),
         ), true, true);
 
     // COMPRAS LIMON TECOMAN
@@ -798,10 +798,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array(
         $compra->nombre,
-        String::formatoNumero($compra->cajas, 2, ''),
-        String::formatoNumero($compra->kilos, 2, ''),
-        String::formatoNumero($compra->precio, 2, '$'),
-        String::formatoNumero($compra->importe, 2, '$')
+        MyString::formatoNumero($compra->cajas, 2, ''),
+        MyString::formatoNumero($compra->kilos, 2, ''),
+        MyString::formatoNumero($compra->precio, 2, '$'),
+        MyString::formatoNumero($compra->importe, 2, '$')
         ), false, true);
     }
     if(count($rpt['ingresos_movimientos_bascula']) > 0) {
@@ -816,10 +816,10 @@ class cuentas_rendimiento_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array(
           'INGRESOS X MOVIMIENTOS',
-          String::formatoNumero($compra->cajas, 2, ''),
-          String::formatoNumero($compra->kilos, 2, ''),
-          String::formatoNumero($compra->precio, 2, '$'),
-          String::formatoNumero($compra->importe, 2, '$')
+          MyString::formatoNumero($compra->cajas, 2, ''),
+          MyString::formatoNumero($compra->kilos, 2, ''),
+          MyString::formatoNumero($compra->precio, 2, '$'),
+          MyString::formatoNumero($compra->importe, 2, '$')
           ), false, true);
       }
     }
@@ -830,10 +830,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(80, 30, 30, 30, 30));
     $pdf->Row(array('TOTAL',
-        String::formatoNumero($total_compra_bascula_bultos, 2, ''),
-        String::formatoNumero($total_compra_bascula_kgs, 2, ''),
+        MyString::formatoNumero($total_compra_bascula_bultos, 2, ''),
+        MyString::formatoNumero($total_compra_bascula_kgs, 2, ''),
         '',
-        String::formatoNumero($total_compra_bascula, 2, '$'),
+        MyString::formatoNumero($total_compra_bascula, 2, '$'),
         ), true, true);
 
     // OTROS EGRESOS DE APATZINGAN
@@ -868,8 +868,8 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->Row(array(
         $apatzin->nombre,
         $apatzin->unidad,
-        String::formatoNumero($apatzin->precio, 2, '$'),
-        String::formatoNumero($apatzin->importe, 2, '$'),
+        MyString::formatoNumero($apatzin->precio, 2, '$'),
+        MyString::formatoNumero($apatzin->importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -879,7 +879,7 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array( 'R'));
     $pdf->SetWidths(array( 30));
     $pdf->Row(array(
-        String::formatoNumero($total_apatzin, 2, '$'),
+        MyString::formatoNumero($total_apatzin, 2, '$'),
         ), true, true);
 
     // COSTO DE VENTA
@@ -917,10 +917,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->Row(array(
         $costo_venta->ucodigo,
         $costo_venta->kilos/$costo_venta->bultos,
-        String::formatoNumero($costo_venta->bultos, 2, ''),
-        String::formatoNumero($costo_venta->kilos, 2, ''),
-        String::formatoNumero($costo_venta->precio, 2, '$'),
-        String::formatoNumero($importe, 2, '$'),
+        MyString::formatoNumero($costo_venta->bultos, 2, ''),
+        MyString::formatoNumero($costo_venta->kilos, 2, ''),
+        MyString::formatoNumero($costo_venta->precio, 2, '$'),
+        MyString::formatoNumero($importe, 2, '$'),
         ), false, true);
     }
     if($pdf->GetY() >= $pdf->limiteY)
@@ -930,10 +930,10 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(30, 30, 30, 30));
     $pdf->Row(array(
-        String::formatoNumero($total_costo_venta_bultos, 2, ''),
-        String::formatoNumero($total_costo_venta_kgs, 2, ''),
+        MyString::formatoNumero($total_costo_venta_bultos, 2, ''),
+        MyString::formatoNumero($total_costo_venta_kgs, 2, ''),
         '',
-        String::formatoNumero($total_costo_venta, 2, '$'),
+        MyString::formatoNumero($total_costo_venta, 2, '$'),
         ), true, true);
 
     // INDUSTRIAL PROCESO
@@ -968,9 +968,9 @@ class cuentas_rendimiento_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R', 'R'));
     $pdf->SetWidths(array(67, 67, 66));
     $pdf->Row(array(
-        String::formatoNumero($total_industrial_kilos, 2, ''),
-        String::formatoNumero($total_industrial_precio, 2, ''),
-        String::formatoNumero($total_industrial, 2, '$'),
+        MyString::formatoNumero($total_industrial_kilos, 2, ''),
+        MyString::formatoNumero($total_industrial_precio, 2, ''),
+        MyString::formatoNumero($total_industrial, 2, '$'),
         ), true, true);
 
     // TABLA GENERAL DE RENDIMIENTOS
@@ -1001,10 +1001,10 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array(
         $rendimiento->cnombre,
-        String::formatoNumero($rendimiento->kilos*100/$total_porsn_kilos, 2, '').' %',
+        MyString::formatoNumero($rendimiento->kilos*100/$total_porsn_kilos, 2, '').' %',
         $rendimiento->ccodigo,
-        String::formatoNumero($rendimiento->bultos, 2, ''),
-        String::formatoNumero($rendimiento->kilos, 2, ''),
+        MyString::formatoNumero($rendimiento->bultos, 2, ''),
+        MyString::formatoNumero($rendimiento->kilos, 2, ''),
         ), false, true);
     }
 
@@ -1123,7 +1123,7 @@ class cuentas_rendimiento_model extends CI_Model {
         $producto->nomenclatura,
         $producto->folio,
         $producto->concepto,
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -1233,7 +1233,7 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -1258,14 +1258,14 @@ class cuentas_rendimiento_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(75, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -1425,7 +1425,7 @@ class cuentas_rendimiento_model extends CI_Model {
         $producto->nomenclatura,
         $producto->poliza,
         $producto->concepto,
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -1547,7 +1547,7 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Reposicion',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -1572,14 +1572,14 @@ class cuentas_rendimiento_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(75, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -1623,7 +1623,7 @@ class cuentas_rendimiento_model extends CI_Model {
           $producto->serie.$producto->folio,
           $producto->observacion,
           $producto->folio_factura,
-          String::formatoNumero($producto->monto, 2, '', false),
+          MyString::formatoNumero($producto->monto, 2, '', false),
           );
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->SetAligns($aligns);
@@ -1640,7 +1640,7 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Remisiones',
-      String::formatoNumero(($remisiones_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -1651,7 +1651,7 @@ class cuentas_rendimiento_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));

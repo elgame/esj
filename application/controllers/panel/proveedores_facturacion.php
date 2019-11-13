@@ -51,8 +51,11 @@ class proveedores_facturacion extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Facturas');
 
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = !empty($_GET['did_empresa'])? $_GET['did_empresa']: $params['empresa']->id_empresa;
     $_GET['ffecha1']    = (isset($_GET['ffecha1']{8})? $_GET['ffecha1']: date("Y-m-d"));
     $params['datos_s'] = $this->proveedores_facturacion_model->getProveedores( $_GET['ffecha1'] );
+
 
     // if(isset($_GET['id_mov']{0}))
     //   $params['id_mov'] = $_GET['id_mov'];
@@ -104,6 +107,7 @@ class proveedores_facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/proveedores/facturacion/frm_addmod.js'),
     ));
 
@@ -173,6 +177,8 @@ class proveedores_facturacion extends MY_Controller {
       $params['getId'] = 'id='.$idBorrador;
 
       $params['borrador'] = $this->proveedores_facturacion_model->getInfoFactura($idBorrador);
+    } elseif($this->input->get('fid_proveedor') > 0 && $this->input->get('did_empresa') > 0) {
+      $params['borrador'] = $this->proveedores_facturacion_model->getInfoPredatosFactura($this->input->get('fid_proveedor'), $this->input->get('did_empresa'));
     }
 
     // echo "<pre>";
@@ -228,7 +234,7 @@ class proveedores_facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $this->facturacion_model->pagaFactura();
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=7'));
+      redirect(base_url('panel/facturacion/?'.MyString::getVarsLink(array('msg','id')).'&msg=7'));
     }
   }
 
@@ -244,7 +250,7 @@ class proveedores_facturacion extends MY_Controller {
       $this->load->model('proveedores_facturacion_model');
       $response = $this->proveedores_facturacion_model->cancelaFactura($_GET['id']);
 
-      redirect(base_url("panel/proveedores_facturacion/admin/?msg={$response['msg']}&".String::getVarsLink(array('msg', 'id')) ));
+      redirect(base_url("panel/proveedores_facturacion/admin/?msg={$response['msg']}&".MyString::getVarsLink(array('msg', 'id')) ));
     }
   }
 
@@ -390,10 +396,10 @@ class proveedores_facturacion extends MY_Controller {
               'rules'   => 'required|numeric|callback_seriefolio_check'),
         array('field'   => 'dno_aprobacion',
               'label'   => 'Numero de aprobacion',
-              'rules'   => $required.'|numeric'),
+              'rules'   => ''),
         array('field'   => 'dano_aprobacion',
               'label'   => 'Fecha de aprobacion',
-              'rules'   => $required.'|max_length[10]|'.$callback_isValidDate),
+              'rules'   => ''),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
@@ -499,11 +505,11 @@ class proveedores_facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'dcer_caduca',
               'label'   => 'Proveedor',
-              'rules'   => $callback_chk_cer_caduca),
+              'rules'   => ''),
 
         array('field'   => 'dno_certificado',
               'label'   => 'No. Certificado',
-              'rules'   => $required),
+              'rules'   => ''),
         array('field'   => 'dtipo_comprobante',
               'label'   => 'Tipo comproante',
               'rules'   => $required),
@@ -592,7 +598,7 @@ class proveedores_facturacion extends MY_Controller {
   public function isValidDate($str)
   {
     if($str != ''){
-      if(String::isValidDate($str) == false){
+      if(MyString::isValidDate($str) == false){
         $this->form_validation->set_message('isValidDate', 'El campo %s no es una fecha valida');
         return false;
       }
@@ -672,7 +678,7 @@ class proveedores_facturacion extends MY_Controller {
       $model_resp = $this->proveedores_facturacion_model->addSerieFolio();
 
       if($model_resp['passes'])
-        redirect(base_url('panel/proveedores_facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/proveedores_facturacion/agregar_serie_folio/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
     }
 
     if(isset($_GET['msg']{0}))
@@ -721,7 +727,7 @@ class proveedores_facturacion extends MY_Controller {
         $this->load->view('panel/footer',$params);
     }
     else
-      redirect(base_url('panel/proveedores_facturacion/index_serie_folios/').String::getVarsLink(array('msg')).'&msg=1');
+      redirect(base_url('panel/proveedores_facturacion/index_serie_folios/').MyString::getVarsLink(array('msg')).'&msg=1');
   }
 
   /**

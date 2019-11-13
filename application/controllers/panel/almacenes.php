@@ -78,7 +78,7 @@ class almacenes extends MY_Controller {
 			$res_mdl = $this->almacenes_model->addAlmacen();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/almacenes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/almacenes/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 
@@ -125,7 +125,7 @@ class almacenes extends MY_Controller {
 				$res_mdl = $this->almacenes_model->updateAlmacen($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->almacenes_model->getAlmacenInfo();
@@ -139,7 +139,7 @@ class almacenes extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -153,10 +153,10 @@ class almacenes extends MY_Controller {
 			$this->load->model('almacenes_model');
 			$res_mdl = $this->almacenes_model->updateAlmacen( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -170,10 +170,10 @@ class almacenes extends MY_Controller {
 			$this->load->model('almacenes_model');
 			$res_mdl = $this->almacenes_model->updateAlmacen( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/almacenes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/almacenes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -231,6 +231,33 @@ class almacenes extends MY_Controller {
 			array('field' => 'nombre',
 						'label' => 'Nombre',
 						'rules' => 'required|max_length[60]'),
+      array('field' => 'dcalle',
+            'label' => 'Calle',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dno_exterior',
+            'label' => 'No exterior',
+            'rules' => 'max_length[8]'),
+        array('field' => 'dno_interior',
+            'label' => 'No interior',
+            'rules' => 'max_length[8]'),
+        array('field' => 'dcolonia',
+            'label' => 'Colonia',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dlocalidad',
+            'label' => 'Localidad',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dmunicipio',
+            'label' => 'Municipio',
+            'rules' => 'max_length[60]'),
+        array('field' => 'destado',
+            'label' => 'Estado',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dcp',
+            'label' => 'CP',
+            'rules' => 'max_length[12]'),
+        array('field' => 'dtelefono',
+            'label' => 'Teléfono',
+            'rules' => 'max_length[15]'),
 		);
 
 		$this->form_validation->set_rules($rules);

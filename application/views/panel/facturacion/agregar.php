@@ -133,6 +133,15 @@
                     </div>
                   </div>
 
+                  <div class="control-group" style="background-color: #fffed7">
+                    <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                    <div class="controls">
+                      <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad"
+                        value="<?php echo set_value('dno_trazabilidad', isset($borrador) ? $borrador['info']->no_trazabilidad : ''); ?>" placeholder="">
+                      <input type="hidden" name="id_paleta_salida" value="<?php echo (isset($borrador) ? $borrador['info']->id_paleta_salida : ''); ?>">
+                    </div>
+                  </div>
+
                   <div class="control-group">
                     <label class="control-label" for="es_carta_porte">Carta Porte</label>
                     <div class="controls">
@@ -321,6 +330,14 @@
                   </div>
                   <?php }?>
 
+                  <div style="text-align: center;">
+                    <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>
+                    <input type="hidden" name="cfdiRelPrev" id="cfdiRelPrev" value="<?php echo set_value('cfdiRelPrev'); ?>">
+                    <br>
+                    <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
+                    <br>
+                  </div>
+
                   <div class="control-group">
                     <div class="controls">
                       <div class="well span9">
@@ -463,7 +480,7 @@
                                     <td>
                                         <select name="diva" id="diva" class="span12">
                                           <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : ''; ?>>0%</option>
-                                          <option value="11" <?php echo $_POST['prod_diva_porcent'][$k] == 11 ? 'selected' : ''; ?>>11%</option>
+                                          <option value="8" <?php echo $_POST['prod_diva_porcent'][$k] == 8 ? 'selected' : ''; ?>>8%</option>
                                           <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
                                         </select>
 
@@ -561,7 +578,7 @@
                               <td>
                                   <select name="diva" id="diva" class="span12">
                                     <option value="0">0%</option>
-                                    <option value="11">11%</option>
+                                    <option value="8">8%</option>
                                     <option value="16">16%</option>
                                   </select>
 
@@ -635,32 +652,32 @@
                       </tr>
                       <tr>
                         <td><em>Subtotal</em></td>
-                        <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                        <td id="importe-format"><?php echo MyString::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
                         <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                       </tr>
                       <tr>
                         <td>Descuento</td>
-                        <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0))?></td>
+                        <td id="descuento-format"><?php echo MyString::formatoNumero(set_value('total_descuento', 0))?></td>
                         <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
                       </tr>
                       <tr>
                         <td>SUBTOTAL</td>
-                        <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                        <td id="subtotal-format"><?php echo MyString::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
                         <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                       </tr>
                       <tr>
                         <td>IVA</td>
-                        <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
+                        <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
                         <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
                       </tr>
                       <tr>
                         <td>Ret. IVA</td>
-                        <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0))?></td>
+                        <td id="retiva-format"><?php echo MyString::formatoNumero(set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0))?></td>
                         <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0); ?>">
                       </tr>
                       <tr style="font-weight:bold;font-size:1.2em;">
                         <td>TOTAL</td>
-                        <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
+                        <td id="totfac-format"><?php echo MyString::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
                         <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0); ?>">
                       </tr>
                     </tbody>
@@ -1701,7 +1718,10 @@
   <div id="modal-remisiones" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Remisiones</h3>
+      <h3 id="myModalLabel">Remisiones
+        <input type="text" id="empresarem" placeholder="Empresas">
+        <input type="hidden" id="idempresarem">
+      </h3>
     </div>
     <div class="modal-body">
       <div class="row-fluid">
@@ -1715,9 +1735,11 @@
               <!-- <th>Clasificacion</th> -->
             </tr>
           </thead>
-          <tbody>
+          <tbody id="mdlRemisiones">
 
-            <?php foreach ($remisiones as $key => $remision) {
+            <?php
+            if (isset($remisiones)) {
+              foreach ($remisiones as $key => $remision) {
                     $rendimientos = array();
                     foreach ($remision->pallets as $pallet) {
                       $rendimientos = array_merge($rendimientos, $pallet['rendimientos']);
@@ -1731,7 +1753,8 @@
                 <td><?php echo $remision->fecha ?></td>
                 <!-- <td></td> -->
               </tr>
-            <?php } ?>
+            <?php }
+            } ?>
           </tbody>
         </table>
       </div>
@@ -1739,6 +1762,23 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddRemisiones">Agregar Remisiones</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal -->
+  <div id="modal-cfdiRelPrev" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Sustitución de CFDI</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="file" id="fileCfdiRelPrev" placeholder="XML Factura" accept="text/xml">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary hide" id="BtnClearCfdiRel">Quitar</button>
     </div>
   </div><!--/modal pallets -->
 

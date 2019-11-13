@@ -1,7 +1,7 @@
 
 		<div id="content" class="span10">
 			<!-- content starts -->
-			
+
 
 			<div>
 				<ul class="breadcrumb">
@@ -14,7 +14,7 @@
 				</ul>
 			</div>
 
-			<div class="row-fluid">		
+			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-file"></i> Privilegios</h2>
@@ -27,15 +27,15 @@
 							<fieldset>
 								<legend>Filtros</legend>
 
-								<label for="fnombre">buscar:</label> 
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" class="input-large" 
+								<label for="fnombre">buscar:</label>
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" class="input-large"
 									placeholder="Modificar, usuarios/agregar" autofocus>
-								
+
 								<button class="btn">Buscar</button>
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 						echo $this->usuarios_model->getLinkPrivSm('privilegios/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
@@ -50,7 +50,7 @@
 								  <th>Mostrar menu</th>
 								  <th>Opciones</th>
 							  </tr>
-						  </thead>   
+						  </thead>
 						  <tbody>
 						<?php foreach($privilegios['privilegios'] as $priv){ ?>
 								<tr>
@@ -58,7 +58,7 @@
 									<td><?php echo $priv->url_accion; ?></td>
 									<td><?php echo $priv->mostrar_menu; ?></td>
 									<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('privilegios/modificar/', array(
 												'params'   => 'id='.$priv->id_privilegio,
 												'btn_type' => 'btn-success')
@@ -78,7 +78,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $privilegios['total_rows'],
 								'per_page'			=> $privilegios['items_per_page'],
 								'cur_page'			=> $privilegios['result_page']*$privilegios['items_per_page'],
@@ -91,13 +91,13 @@
 								'cur_tag_close' => '</a></li>'
 						));
 						$pagination = $this->pagination->create_links();
-						echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>'; 
+						echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
 						?>
 					</div>
 				</div><!--/span-->
-			
+
 			</div><!--/row-->
-				  
+
 
 					<!-- content ends -->
 		</div><!--/#content.span10-->
@@ -105,7 +105,7 @@
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
-	if($frm_errors['msg'] != ''){ 
+	if($frm_errors['msg'] != ''){
 ?>
 <script type="text/javascript" charset="UTF-8">
 	$(document).ready(function(){

@@ -47,7 +47,7 @@
           </div>
         </div>
         <div class="box-content">
-          <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+          <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
 
               <div class="row-fluid">
                 <div class="span6">
@@ -139,11 +139,22 @@
 
                   <?php //if ( ! $gasto['info']->xml){ ?>
                     <div class="control-group">
+                      <div class="controls span9">
+                        <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$_GET['idp'].'') ?>"
+                          rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                          <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                        <span style="float: right;">
+                          UUID: <input type="text" name="uuid" value="<?php echo $gasto['info']->uuid; ?>" id="buscarUuid"><br>
+                          No Certificado: <input type="text" name="noCertificado" value="<?php echo $gasto['info']->no_certificado; ?>" id="buscarNoCertificado">
+                        </span>
+                      </div>
+                    </div>
+                    <!-- <div class="control-group">
                       <label class="control-label" for="xml">XML</label>
                       <div class="controls">
                         <input type="file" name="xml" class="span9" id="xml" data-uniform="false" accept="text/xml">
                       </div>
-                    </div>
+                    </div> -->
                   <?php //} ?>
 
                   <div class="control-group">
@@ -179,6 +190,91 @@
                   </div>
                 </div>
               </div> -->
+
+            <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($gasto['info']->isgasto == 't' ? 'block' : 'none') ?>;">  <!-- Box catalogos-->
+              <div class="box span12">
+                <div class="box-header well" data-original-title>
+                  <h2><i class="icon-truck"></i> Catálogos</h2>
+                  <div class="box-icon">
+                    <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                  </div>
+                </div><!--/box-header -->
+                <div class="box-content">
+                  <div class="row-fluid">
+                    <div class="span6">
+                      <div class="control-group" id="cultivosGrup">
+                        <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($gasto['info']->area->nombre) ? $gasto['info']->area->nombre : '') ?>" placeholder="Limon, Piña" readonly>
+                          </div>
+                          <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($gasto['info']->area->id_area) ? $gasto['info']->area->id_area : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+
+                      <div class="control-group" id="ranchosGrup">
+                        <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1" readonly>
+                          </div>
+                        </div>
+                        <ul class="tags" id="tagsRanchoIds">
+                        <?php if (isset($gasto['info']->rancho)) {
+                          foreach ($gasto['info']->rancho as $key => $rancho) { ?>
+                            <li class="disable"><span class="tag"><?php echo $rancho->nombre ?></span>
+                              <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                              <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                            </li>
+                         <?php }} ?>
+                        </ul>
+                      </div><!--/control-group -->
+
+                      <div class="control-group">
+                        <label class="control-label" for="intangible">Gasto intangible</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="checkbox" name="intangible" id="intangible" data-uniform="false" value="si" data-next="subtotal" <?php echo set_checkbox('intangible', 'si', $gasto['info']->intangible == 't' ? true : false); ?> disabled></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="span6">
+                      <div class="control-group" id="centrosCostosGrup">
+                        <label class="control-label" for="centroCosto">Centro de costo </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" readonly>
+                          </div>
+                        </div>
+                        <ul class="tags" id="tagsCCIds">
+                        <?php if (isset($gasto['info']->centroCosto)) {
+                          foreach ($gasto['info']->centroCosto as $key => $centroCosto) { ?>
+                            <li class="disable"><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                              <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                              <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+                            </li>
+                         <?php }} ?>
+                        </ul>
+                      </div><!--/control-group -->
+
+                      <div class="control-group" id="activosGrup">
+                        <label class="control-label" for="activos">Activos </label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($gasto['info']->activo->nombre) ? $gasto['info']->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" readonly>
+                          </div>
+                          <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($gasto['info']->activo->id_producto) ? $gasto['info']->activo->id_producto : '') ?>">
+                        </div>
+                      </div><!--/control-group -->
+                    </div>
+
+                  </div>
+
+                 </div> <!-- /box-body -->
+              </div> <!-- /box -->
+            </div><!-- /row-fluid -->
 
             <div class="row-fluid">
               <div class="span4">

@@ -53,6 +53,18 @@
                   </select>
                 <?php } ?>
 
+                <br>
+                <input type="text" name="fconcepto" value="<?php echo set_value_get('fconcepto'); ?>" id="fconcepto" class="input-xlarge search-query" placeholder="Producto / Descripción" style="margin-top: 15px;">
+                <input type="hidden" name="fconceptoId" id="fconceptoId" value="<?php echo set_value_get('fconceptoId'); ?>">
+
+                <label for="falmacen">Almacén</label>
+                  <select name="falmacen" class="input-medium" id="falmacen">
+                    <option value="">TODOS</option>
+                    <?php foreach ($almacenes['almacenes'] as $key => $value): ?>
+                    <option value="<?php echo $value->id_almacen; ?>" <?php echo set_select_get('falmacen', $value->id_almacen); ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
@@ -80,6 +92,7 @@
                   <th>Proveedor</th>
                   <th>Empresa</th>
                   <th>Importe</th>
+                  <th>Almacén</th>
                   <th>Autorizada</th>
                   <th>Estado</th>
                   <th>Opc</th>
@@ -95,10 +108,14 @@
                     <?php } ?>
                   </td>
                   <td><?php echo substr($orden->fecha, 0, 10); ?></td>
-                  <td><span class="label"><?php echo $orden->folio; ?></span></td>
+                  <td><span class="label">
+                    <a href="#modalOrden" data-toggle="modal" data-idOrden="<?php echo $orden->id_orden ?>"
+                      data-tipo="<?php echo ($orden->status === 'a'? 'modificar': '') ?>" class="linkOrdenView" style="color: #fff;"><?php echo $orden->folio; ?></a>
+                    </span></td>
                   <td><?php echo $orden->proveedor; ?></td>
                   <td><?php echo $orden->empresa; ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($orden->total, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></td>
+                  <td><?php echo $orden->almacen; ?></td>
                   <td><span class="label label-info"><?php echo $orden->autorizado === 't' ? 'SI' : 'NO'?></span></td>
                   <td><?php
                           $texto = 'CANCELADA';
@@ -211,7 +228,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $ordenes['total_rows'],
                 'per_page'      => $ordenes['items_per_page'],
                 'cur_page'      => $ordenes['result_page']*$ordenes['items_per_page'],
@@ -231,6 +248,14 @@
 
       </div><!--/row-->
 
+
+      <!-- Modal -->
+      <div id="modalOrden" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" style="width: 80%;left: 25%;top: 40%;height: 600px;">
+        <div class="modal-body" style="max-height: 1500px;">
+          <iframe id="frmOrdenView" src="" style="width: 100%;height: 800px;"></iframe>
+        </div>
+      </div>
 
 
 

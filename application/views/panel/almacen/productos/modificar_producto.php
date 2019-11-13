@@ -54,7 +54,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/productos/modificar/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/productos/modificar/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
 
               <div class="span6">
                 <div class="control-group">
@@ -70,7 +70,9 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fcodigo">Codigo </label>
+                  <label class="control-label" for="fcodigo">Codigo
+                    <?php echo ($data['familia']->tipo == 'a'? '<br>RFC(3)-FOLIO-FECHA(YYMMDD)': '') ?>
+                  </label>
                   <div class="controls">
                     <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', (isset($data['info']->codigo)? $data['info']->codigo: '')) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required autofocus>
                   </div>
@@ -81,6 +83,8 @@
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
+
+                    <input type="hidden" id="did_empresa" value="<?php echo $data['familia']->id_empresa ?>">
                   </div>
                 </div>
 
@@ -102,7 +106,7 @@
                   <label class="control-label" for="fstock_min">Stock min </label>
                   <div class="controls">
                     <input type="text" name="fstock_min" id="fstock_min" class="span12 vpositive" maxlength="40"
-                    value="<?php echo set_value('fcodigo', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
+                    value="<?php echo set_value('fstock_min', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
                   </div>
                 </div>
 
@@ -110,7 +114,7 @@
                   <label class="control-label" for="ubicacion">Ubicacion </label>
                   <div class="controls">
                     <input type="text" name="ubicacion" id="ubicacion" class="span12" maxlength="70"
-                    value="<?php echo set_value('fcodigo', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
+                    value="<?php echo set_value('ubicacion', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
                   </div>
                 </div>
 
@@ -129,8 +133,69 @@
                     value="<?php echo set_value('fcodigo', (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: '')) ?>" placeholder="Cuenta afectable contpaq">
                   </div>
                 </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="ftipo">Tipo lista</label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" class="span12">
+                      <option value=""></option>
+                      <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
+                      <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
+                      <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
+              <div class="span6">
+                <div class="control-group">
+                  <label class="control-label" for="ftipo_apli">Tipo</label>
+                  <div class="controls">
+                    <select name="ftipo_apli" id="ftipo_apli" class="span12">
+                      <option value=""></option>
+                      <option value="n" <?php echo set_select('ftipo_apli', 'n', false, (isset($data['info']->tipo_apli)? $data['info']->tipo_apli: '')); ?>>Nutrición</option>
+                      <option value="fs" <?php echo set_select('ftipo_apli', 'fs', false, (isset($data['info']->tipo_apli)? $data['info']->tipo_apli: '')); ?>>Fito sanidad</option>
+                    </select>
+                  </div>
+                </div>
+
+                <?php if ($data['familia']->tipo == 'a'): ?>
+                <div class="control-group">
+                  <label class="control-label" for="ftipo_activo">Tipo activo</label>
+                  <div class="controls">
+                    <select name="ftipo_activo" id="ftipo_activo" class="span12">
+                      <option value=""></option>
+                      <option value="et" <?php echo set_select('ftipo_activo', 'et', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Equipo De Transporte</option>
+                      <option value="ec" <?php echo set_select('ftipo_activo', 'ec', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Equipo De Computo</option>
+                      <option value="meo" <?php echo set_select('ftipo_activo', 'meo', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Mobiliario Y Equipo De Oficina</option>
+                      <option value="me" <?php echo set_select('ftipo_activo', 'me', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Maquinaria Y Equipo</option>
+                      <option value="ec" <?php echo set_select('ftipo_activo', 'ec', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Edificios Y Construcciones</option>
+                      <option value="t" <?php echo set_select('ftipo_activo', 't', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Terrenos</option>
+                      <option value="ia" <?php echo set_select('ftipo_activo', 'ia', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Inversiones Agrícolas</option>
+                      <option value="gpo" <?php echo set_select('ftipo_activo', 'gpo', false, (isset($data['info']->tipo_activo)? $data['info']->tipo_activo: '')); ?>>Gastos Pre-operativos</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="fmonto">Monto</label>
+                  <div class="controls">
+                    <input type="text" name="fmonto" id="fmonto" class="span12" maxlength="12"
+                        value="<?php echo set_value('fmonto', (isset($data['info']->monto)? $data['info']->monto: '')) ?>" placeholder="Monto">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fdescripcion">Descripción</label>
+                  <div class="controls">
+                    <textarea name="fdescripcion" class="span12" rows="4"><?php echo set_value('fdescripcion', (isset($data['info']->descripcion)? $data['info']->descripcion: '')); ?></textarea>
+                  </div>
+                </div>
+                <?php endif ?>
+              </div>
+
+              <input type="hidden" name="tipo_familia" value="<?php echo $data['familia']->tipo ?>">
+
+              <?php if ($data['familia']->tipo != 'a'): ?>
               <div class="row-fluid">
                 <a href="#" onclick="productos.add(); return false;" title="Agregar Presentacion">Agregar Presentacion</a>
                 <table class="table table-condensed">
@@ -142,14 +207,14 @@
                     </tr>
                   </thead>
                   <tbody id="tblproductosrow">
-              <?php
-              if(isset($data['presentaciones']))
-              {
-                foreach ($data['presentaciones'] as $key => $value)
-                {
-                  if ($value != '')
-                  {
-              ?>
+                    <?php
+                    if(isset($data['presentaciones']))
+                    {
+                      foreach ($data['presentaciones'] as $key => $value)
+                      {
+                        if ($value != '')
+                        {
+                    ?>
                     <tr class="rowprod">
                       <td><input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Presentacion">
                         <input type="hidden" name="pidpresentacion[]" value="<?php echo $value->id_presentacion; ?>"></td>
@@ -158,10 +223,10 @@
                           <input type="checkbox" name="pquitar<?php echo $value->id_presentacion; ?>"
                             id="pquitar<?php echo $value->id_presentacion; ?>" value="si">Eliminar</label></td>
                     </tr>
-              <?php
-                  }
-                }
-              } ?>
+                    <?php
+                        }
+                      }
+                    } ?>
                     <tr class="rowprod">
                       <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Presentacion">
                         <input type="hidden" name="pidpresentacion[]" value=""></td>
@@ -172,6 +237,56 @@
                   </tbody>
                 </table>
               </div>
+              <?php endif ?>
+
+              <?php if ($data['familia']->tipo == 'a'): ?>
+              <div class="row-fluid">
+                <a href="#" onclick="productos.add('pz'); return false;" title="Agregar Piezas">Agregar Piezas</a>
+                <table class="table table-condensed" id="tblPiezasProductos">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Cantidad</th>
+                      <th>Opc</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblproductosrow">
+                    <?php
+                    if(isset($data['piezas']))
+                    {
+                      foreach ($data['piezas'] as $key => $value)
+                      {
+                        if ($value != '')
+                        {
+                    ?>
+                    <tr class="rowprod">
+                      <td>
+                        <input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Productos (Partes)">
+                        <input type="hidden" name="pidpresentacion[]" value="<?php echo $value->id_pieza; ?>">
+                        <input type="hidden" name="pidproducto[]" value="<?php echo $value->id_producto_pieza; ?>" class="pidproducto">
+                      </td>
+                      <td><input type="text" name="pcantidad[]" value="<?php echo $value->cantidad; ?>" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
+                      <td><label for="pquitar<?php echo $value->id_pieza; ?>">
+                          <input type="checkbox" name="pquitar<?php echo $value->id_pieza; ?>"
+                            id="pquitar<?php echo $value->id_pieza; ?>" value="si">Eliminar</label></td>
+                    </tr>
+                    <?php
+                        }
+                      }
+                    } ?>
+                    <tr class="rowprod">
+                      <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Productos (Partes)">
+                        <input type="hidden" name="pidpresentacion[]" value="">
+                        <input type="hidden" name="pidproducto[]" value="" class="pidproducto">
+                      </td>
+                      <td><input type="text" name="pcantidad[]" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
+                      <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <?php endif ?>
 
               <input type="hidden" name="fproducto" id="fproducto" value="<?php echo $this->input->get('id'); ?>">
 

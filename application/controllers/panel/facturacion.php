@@ -36,6 +36,8 @@ class facturacion extends MY_Controller {
 
     'facturacion/xml/',
     'facturacion/nomina/',
+
+    'facturacion/getRemisiones/'
   );
 
   public function _remap($method)
@@ -130,7 +132,7 @@ class facturacion extends MY_Controller {
     $params['seo'] = array('titulo' => 'Complementos de Pago (Pago en parcialidades o Diferido)');
 
     //obtenemos las notas de credito
-    if (isset($_POST['ftipo']) && $_POST['ftipo'] == 'parcial') {
+    if (isset($_GET['ftipo']) && $_GET['ftipo'] == 'parcial') {
       $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_abono_factura IS NOT NULL");
     } else
       $params['datos_cp'] = $this->cuentas_cobrar_pago_model->getComPagoData();
@@ -162,6 +164,7 @@ class facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
     ));
@@ -266,7 +269,7 @@ class facturacion extends MY_Controller {
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
-    $params['remisiones'] = $this->facturacion_model->getRemisiones();
+    // $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
     $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
 
@@ -315,6 +318,13 @@ class facturacion extends MY_Controller {
     }
   }
 
+  public function getRemisiones()
+  {
+    $this->load->model('facturacion_model');
+    $remisiones = $this->facturacion_model->getRemisiones();
+    echo json_encode($remisiones);
+  }
+
   /**
    * Agrega una factura a la bd
    *
@@ -326,6 +336,7 @@ class facturacion extends MY_Controller {
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
+        array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
     ));
@@ -405,7 +416,7 @@ class facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $this->facturacion_model->pagaFactura();
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=7'));
+      redirect(base_url('panel/facturacion/?'.MyString::getVarsLink(array('msg','id')).'&msg=7'));
     }
   }
 
@@ -582,6 +593,10 @@ class facturacion extends MY_Controller {
               'label'   => 'Fecha de aprobacion',
               'rules'   => $required.'|max_length[10]|'.$callback_isValidDate),
 
+        array('field'   => 'cfdiRelPrev',
+              'label'   => 'CFDIREl',
+              'rules'   => ''),
+
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
               'rules'   => $required.'|max_length[25]'), //|callback_isValidDate
@@ -716,6 +731,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'dobservaciones',
               'label'   => 'Observaciones',
               'rules'   => ''),
+        array('field'   => 'dno_trazabilidad',
+              'label'   => 'No Trazabilidad',
+              'rules'   => 'max_length[15]|callback_check_trazabilidad'),
 
         array('field'   => 'remitente_nombre',
               'label'   => 'Nombre Remitente',
@@ -1270,7 +1288,7 @@ class facturacion extends MY_Controller {
   public function isValidDate($str)
   {
     if($str != ''){
-      if(String::isValidDate($str) == false){
+      if(MyString::isValidDate($str) == false){
         $this->form_validation->set_message('isValidDate', 'El campo %s no es una fecha valida');
         return false;
       }
@@ -1312,6 +1330,31 @@ class facturacion extends MY_Controller {
     {
       $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
       return false;
+    }
+
+    return true;
+  }
+
+  public function check_trazabilidad($value)
+  {
+    if (trim($value) != '') {
+      $sql = !empty($_GET['id_nr'])? " AND f.id_factura <> {$_GET['id_nr']}": '';
+      $error = false;
+      $query = $this->db->query("SELECT f.id_factura, fp.no_trazabilidad
+                                   FROM facturacion_otrosdatos fp
+                                   INNER JOIN facturacion f ON f.id_factura = fp.id_factura
+                                   WHERE fp.no_trazabilidad = '{$value}'
+                                    AND f.id_empresa = {$this->input->post('did_empresa')}
+                                    AND f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'b'
+                                    {$sql}");
+
+      if ($query->num_rows() > 0)
+      {
+        $data = $query->row();
+
+        $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
+        return false;
+      }
     }
 
     return true;
@@ -1842,7 +1885,7 @@ class facturacion extends MY_Controller {
       $model_resp = $this->facturacion_model->addSerieFolio();
 
       if($model_resp['passes'])
-        redirect(base_url('panel/facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/facturacion/agregar_serie_folio/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
     }
 
     if(isset($_GET['msg']{0}))
@@ -1891,7 +1934,7 @@ class facturacion extends MY_Controller {
         $this->load->view('panel/footer',$params);
     }
     else
-      redirect(base_url('panel/facturacion/index_serie_folios/').String::getVarsLink(array('msg')).'&msg=1');
+      redirect(base_url('panel/facturacion/index_serie_folios/').MyString::getVarsLink(array('msg')).'&msg=1');
   }
 
   /**
@@ -1919,18 +1962,8 @@ class facturacion extends MY_Controller {
     {
       $tipo = isset($_GET['tipof'])? $_GET['tipof']: 'f';
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->getSeriesEmpresa($_GET['ide']);
-      $quit = array('f' => array('NCR' => 0, 'R' => 0, 'AB' => 0, 'VD' => 0), 'r' => array('D' => 0, 'AB' => 0, 'VD' => 0),
-                    'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
-      foreach ($res[0] as $key => $value)
-      {
-        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
-          unset($res[0][$key]);
-      }
-
-      $param =  $this->showMsgs(2, $res[1]);
-      $param['data'] = $res[0];
-      echo json_encode($param);
+      $res = $this->facturacion_model->get_series($_GET['ide'], $tipo);
+      echo json_encode($res);
     }
   }
 
@@ -2144,7 +2177,7 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
 
-    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true);
+    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true, true);
 
     echo json_encode($response);
   }

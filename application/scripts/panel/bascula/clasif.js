@@ -911,7 +911,8 @@ function recalculaCosto () {
   $('input#prod_did_prod').each(function(i, e) {
     var $this = $(this), $parent = $this.parent().parent(), idProd;
     idProd = $this.val();
-    if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+    // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+    if ( !searchGastosProductos(idProd) ) {
       num_cantidad += parseFloat($parent.find('#prod_dcantidad').val());
     } else {
       total_repartir += parseFloat($parent.find('#prod_importe').val()) +
@@ -925,7 +926,8 @@ function recalculaCosto () {
     var $this = $(this), $parent = $this.parent().parent(), idProd;
     if (parseFloat($this.val()) > 0) {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         $this.val( (parseFloat($this.val()) + (parseFloat(repartir_costo)*(isCheckedSinCosto? 1: -1))).toFixed(4) );
         calculaTotalProducto($parent, false);
       }
@@ -953,7 +955,8 @@ function calculaTotal ($calculaT) {
       total_importes += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_importes += parseFloat($(this).val());
       }
     }
@@ -966,7 +969,8 @@ function calculaTotal ($calculaT) {
       total_cajas += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_cajas += parseFloat($(this).val());
       }
     }
@@ -979,7 +983,8 @@ function calculaTotal ($calculaT) {
       total_descuentos += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_descuentos += parseFloat($(this).val());
       }
     }
@@ -994,7 +999,8 @@ function calculaTotal ($calculaT) {
       total_ivas += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_ivas += parseFloat($(this).val());
       }
     }
@@ -1007,7 +1013,8 @@ function calculaTotal ($calculaT) {
       total_retenciones += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_retenciones += parseFloat($(this).val());
       }
     }
@@ -1044,7 +1051,7 @@ function calculaTotal ($calculaT) {
 //   loader.create();
 //     $.getJSON(base_url+'panel/facturacion/get_series/?tipof=f&ide='+ide,
 //       function(res){
-//         if(res.msg === 'ok') {
+//         if(res.data) {
 //           var html_option = '<option value="void"></option>',
 //               selected = '', serieSelected = 'void',
 //               loadDefault = false;

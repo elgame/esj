@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="box-content">
-              <form class="form-horizontal" action="<?php echo base_url('panel/bascula/facturas_agregar/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
+              <form class="form-horizontal" action="<?php echo base_url('panel/bascula/facturas_agregar/?'.MyString::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
                     <div class="row-fluid">
                       <div class="span4">
                         <div class="control-group">

@@ -17,6 +17,8 @@
           'cajas_pres' => '',
           'pagar'      => '',
           'cajas'      => array('',''),
+          'metodo_pago' => '',
+          'intangible'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')? 'block': 'none'),
         );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';
@@ -30,21 +32,22 @@
           echo '<input type="hidden" id="isEditar" value="t" />';
           $autorizarInput = '<input type="hidden" name="autorizar" id="autorizar" value="" />';
           $bmod = array(
-          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
-          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
-          'area'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
-          'empresa'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
-          'proveedor'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mproveedor/')?'':' readonly'),
-          'rancho'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
-          'camion'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
-          'chofer'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
-          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
-          'k_bruto'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
-          'k_tara'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
-          'cajas_pres' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
-          'pagar'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
-          'fecha_pago' => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
-          'cajas'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
+          'tipo'        => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
+          'metodo_pago' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
+          'area'        => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
+          'empresa'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
+          'proveedor'   => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mproveedor/')?'':' readonly'),
+          'rancho'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
+          'camion'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
+          'chofer'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
+          'fecha'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
+          'k_bruto'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
+          'k_tara'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
+          'cajas_pres'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
+          'pagar'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
+          'fecha_pago'  => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
+          'cajas'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
+          'intangible'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')? 'block': 'none'),
           );
         }
       ?>
@@ -61,7 +64,7 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/agregar?'.MyString::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
 
         <?php if ($accion === 'en') { ?>
           <button type="button" class="btn btn-info" id="btnSetFocoKilosTara">Cargar Kilos Tara</button>
@@ -69,6 +72,9 @@
 
         <?php if ($accion !== 'n' && $accion !== 'en' && isset($_POST['pcajas'])) { ?>
           <a href="<?php echo base_url('panel/bascula/show_view_agregar_lote/?idb='.$_GET['idb']) ?>" class="btn btn-warning" rel="superbox-40x480">Agregar Lote</a>
+          <?php if (isset($_POST['parea_nom']) && $_POST['parea_nom'] == 'PIÑA MIEL'): ?>
+            <a href="<?php echo base_url('panel/bascula_pina/show_view_guardar_pina/?idb='.$_GET['idb']) ?>" class="btn" rel="superbox-80x500">Agregar Entrada Piña</a>
+          <?php endif ?>
         <?php } ?>
 
         <?php if ($accion !== 'n' && $accion !== 'en' && $_POST['parea_nom'] == 'INSUMOS MT' && isset($_POST['pcajas'])) { ?>
@@ -98,11 +104,14 @@
           <div class="btn-group">
             <button class="btn dropdown-toggle" data-toggle="dropdown">Fotos <span class="caret"></span></button>
             <ul class="dropdown-menu">
-          <?php foreach ($fotos as $key => $value) {
-            $nombre = ($value->tipo=='en'? 'Entrada': 'Salida')." Cam {$value->no_camara}";
+          <?php
+          if (isset($fotos)) {
+            foreach ($fotos as $key => $value) {
+              $nombre = ($value->tipo=='en'? 'Entrada': 'Salida')." Cam {$value->no_camara}";
           ?>
               <li><a href="<?php echo base_url($value->url_foto) ?>" target="_blank"><?php echo $nombre ?></a></li>
           <?php
+            }
           } ?>
             </ul>
           </div>
@@ -154,10 +163,18 @@
                             ($this->input->post('ptipo') === 'en') ){ ?>
                   <input type="hidden" name="pno_lote" id="pno_lote" value="<?php echo $_POST['pno_lote']; ?>">
                   <?php } ?>
-                  <div class="control-group" style="margin:0px 0px 2px 0px;">
-                    <label class="control-label" for="ptipo">Certificado</label>
-                    <div class="controls">
-                      <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                  <div class="span12">
+                    <div class="control-group span4" style="margin:0px 0px 2px 0px;">
+                      <label class="control-label" for="ptipo">Certificado</label>
+                      <div class="controls">
+                        <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                      </div>
+                    </div>
+                    <div class="control-group span4" style="margin:0px 0px 2px 0px; display: <?php echo $bmod['intangible'] ?>">
+                      <label class="control-label" for="intangible">Intangible</label>
+                      <div class="controls">
+                        <input type="checkbox" name="intangible" id="intangible" value="1" data-uniform="false"  <?php echo set_checkbox('intangible', "1", isset($intangible) && $intangible == '1' ? true : false) ?>>
+                      </div>
                     </div>
                   </div>
 
@@ -177,7 +194,7 @@
                       <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled; ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
                         <option value="" <?php echo $bmod['area']; ?>></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
-                          <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                          <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>" data-coco="<?php echo ($area->nombre == 'COCOS'? 't': 'f') ?>"
                             <?php $set_select=set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') );
                              echo $set_select.($set_select==' selected="selected"'? '': $bmod['area']); ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
@@ -221,11 +238,20 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente" value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente"
-                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="Cliente" <?php echo $disabled.$bmod['proveedor']; ?>>
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="dno_trazabilidad" placeholder="Cliente" <?php echo $disabled.$bmod['proveedor']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_cliente" value="<?php echo set_value('pid_cliente', $this->input->post('pid_cliente')) ?>" id="pid_cliente">
+                    </div>
+                  </div>
+
+                  <div class="control-group" id="groupTrazabilidad" style="display: none;background-color: #fffed7;">
+                    <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                    <div class="controls">
+                      <input type="text" name="dno_trazabilidad" value="<?php echo set_value('dno_trazabilidad', $this->input->post('dno_trazabilidad')) ?>" id="dno_trazabilidad"
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="No Trazabilidad" <?php echo $disabled.$bmod['proveedor']; ?>>
+                      <input type="hidden" name="id_paleta_salida" value="<?php echo set_value('id_paleta_salida', $this->input->post('id_paleta_salida')) ?>">
                     </div>
                   </div>
 
@@ -245,7 +271,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pproductor" <?php echo $disabled.$bmod['chofer']; ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pmetodo_pago" <?php echo $disabled.$bmod['chofer']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-40x600">Agregar</a>
                       </span>
@@ -297,6 +323,16 @@
                     </div>
                   </div>
                   <?php } ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="pmetodo_pago">Método de pago</label>
+                    <div class="controls">
+                      <select name="pmetodo_pago" class="input-xlarge" id="pmetodo_pago" <?php echo $disabled; ?>>
+                        <option value="co" <?php $set_select=set_select('pmetodo_pago', 'co', false, $this->input->post('pmetodo_pago')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['metodo_pago']); ?>>Contado</option>
+                        <option value="ot" <?php $set_select=set_select('pmetodo_pago', 'ot', false, $this->input->post('pmetodo_pago')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['metodo_pago']); ?>>Otro</option>
+                      </select>
+                    </div>
+                  </div>
 
                   <div class="control-group">
                     <label class="control-label" for="pproductor">Productor</label>
@@ -689,27 +725,27 @@
                     </tr>
                     <tr>
                       <td><em>Subtotal</em></td>
-                      <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                      <td id="importe-format"><?php echo MyString::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
                       <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                     </tr>
                     <tr>
                       <td>Descuento</td>
-                      <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0))?></td>
+                      <td id="descuento-format"><?php echo MyString::formatoNumero(set_value('total_descuento', 0))?></td>
                       <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
                     </tr>
                     <tr>
                       <td>SUBTOTAL</td>
-                      <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                      <td id="subtotal-format"><?php echo MyString::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
                       <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                     </tr>
                     <tr>
                       <td>IVA</td>
-                      <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
+                      <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
                       <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
                     </tr>
                     <tr style="font-weight:bold;font-size:1.2em;">
                       <td>TOTAL</td>
-                      <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
+                      <td id="totfac-format"><?php echo MyString::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
                       <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0); ?>">
                     </tr>
                   </tbody>
@@ -721,10 +757,29 @@
 
 
         <div class="row-fluid">
-          <div class="span12">
+          <div class="span8">
             <label class="" for="pobcervaciones">Descripción</label>
             <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5" <?php echo $disabled ?>><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
           </div>
+
+          <?php if ($accion === 'en' && $this->input->post('ptipo') === 'en') { ?>
+            <div class="span4">
+              <div class="control-group">
+                <label class="control-label" for="pno_lote">No. Lote</label>
+                <div class="controls">
+                  <input type="text" name="pno_lote" id="pno_lote" class="span6 vpos-int"
+                  value="<?php echo set_value('pno_lote', $this->input->post('pno_lote')); ?>" autofocus placeholder="1, 2, 40, 100">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="pchofer_es_productor">Chofer es productor </label>
+                <div class="controls">
+                  <input type="checkbox" name="pchofer_es_productor" value="t" id="pchofer_es_productor" class="" <?php echo set_checkbox('pchofer_es_productor', 't', $this->input->post('pchofer_es_productor')=='t'?true:false); ?>>
+                </div>
+              </div>
+            </div>
+          <?php } ?>
         </div>
 
         <div class="form-actions">

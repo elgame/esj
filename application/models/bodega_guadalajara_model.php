@@ -14,6 +14,7 @@ class bodega_guadalajara_model extends CI_Model {
       'existencia_dia'    => array(),
       'denominaciones'    => array(),
       'gastos'            => array(),
+      'traspasos'         => array(),
       'categorias'        => array(),
       'a_bultos_vendidos' => $this->getVentas($fecha, true),
       'costo_venta'       => 0,
@@ -54,9 +55,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos la existencia anterior
     foreach ($info['existencia_ant'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
@@ -64,9 +63,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos los ingresos del dia
     foreach ($info['remisiones'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
@@ -77,9 +74,7 @@ class bodega_guadalajara_model extends CI_Model {
     //   var_dump($info['prestamos']);
     // echo "</pre>";exit;
     foreach ($info['prestamos'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53' AND $value->tipo == 'false')
+      if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) AND $value->tipo == 'false')
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
@@ -241,6 +236,13 @@ class bodega_guadalajara_model extends CI_Model {
     if (count($gastos) > 0)
     {
       $info['gastos'] = $gastos;
+    }
+
+    // Traspasos
+    $traspasos = $this->getTraspasos($fecha, $noCaja);
+    if (count($traspasos) > 0)
+    {
+      $info['traspasos'] = $traspasos;
     }
 
     $info['categorias'] = $this->db->query(
@@ -466,6 +468,10 @@ class bodega_guadalajara_model extends CI_Model {
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
 
           $this->db->update('otros.bodega_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
@@ -480,9 +486,13 @@ class bodega_guadalajara_model extends CI_Model {
             'no_caja'         => $data['fno_caja'],
             'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_areac'        => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('otros.bodega_gastos', $gastos);
-          $gastos_ids['adds'][] = $this->db->insert_id();
+          $gastos_ids['adds'][] = $this->db->insert_id('otros.bodega_gastos_id_gasto_seq');
         }
       }
 
@@ -504,6 +514,41 @@ class bodega_guadalajara_model extends CI_Model {
       // }
 
       // $this->db->insert_batch('otros.bodega_gastos', $gastos);
+    }
+
+    // Traspasos
+    if (isset($data['traspaso_concepto']))
+    {
+      $traspasos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['traspaso_concepto'] as $key => $concepto)
+      {
+        if (isset($data['traspaso_del'][$key]) && $data['traspaso_del'][$key] == 'true' &&
+          isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          // $traspasos_ids['delets'][] = $this->getDataGasto($data['traspaso_id_traspaso'][$key]);
+
+          $this->db->delete('otros.bodega_traspasos', "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } elseif (isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
+          $gastos_udt = array(
+            'concepto' => $concepto,
+            'monto'    => $data['traspaso_importe'][$key],
+            'tipo'     => $data['traspaso_tipo'][$key],
+          );
+
+          $this->db->update('otros.bodega_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+        } else {
+          $traspaso = array(
+            'concepto'   => $concepto,
+            'monto'      => $data['traspaso_importe'][$key],
+            'tipo'       => $data['traspaso_tipo'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'id_usuario' => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('otros.bodega_traspasos', $traspaso);
+          $traspasos_ids['adds'][] = $this->db->insert_id('otros.bodega_traspasos_id_traspaso_seq');
+        }
+      }
     }
 
     return true;
@@ -631,16 +676,42 @@ class bodega_guadalajara_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
-          'id_area' AS campo
+          'id_area' AS campo, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
        FROM otros.bodega_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN bodega_catalogo ca ON ca.id_area = cg.id_area
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_areac
+         LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
+         LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
+         LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
        WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
 
     return $gastos->result();
+  }
+
+  public function getTraspasos($fecha, $noCaja, $total=false)
+  {
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM otros.bodega_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.no_caja = {$noCaja}"
+      )->row();
+      return $traspaso->monto;
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones, bt.id_usuario, bt.fecha_creacion, bt.tipo
+       FROM otros.bodega_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND bt.no_caja = {$noCaja}
+       ORDER BY bt.id_traspaso ASC"
+    );
+
+    return $traspaso->result();
   }
 
   public function getUtilidades($fecha, $noCaja)
@@ -707,7 +778,7 @@ class bodega_guadalajara_model extends CI_Model {
     // ");
 
     $ventas = $this->db->query(
-      "SELECT id_factura, nombre_fiscal, fecha, serie, folio, total, cliente, id_cliente
+      "SELECT t.id_factura, t.nombre_fiscal, t.fecha, t.serie, t.folio, t.total, t.cliente, t.id_cliente, rh.folio_factura
       FROM (
         SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
            c.id_cliente, f.status, (f.total-Coalesce(Sum(fa.total),0)) AS saldo, '1' AS tipo
@@ -731,8 +802,16 @@ class bodega_guadalajara_model extends CI_Model {
               AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
       ) t
-      WHERE (tipo = '1' OR (tipo = '2' AND saldo = 0))
-      ORDER BY (id_cliente, fecha, serie, folio) DESC
+      LEFT JOIN (
+        SELECT fr.id_remision, (f.serie || f.folio) AS folio_factura
+        FROM facturacion f
+          INNER JOIN facturacion_remision_hist fr ON f.id_factura = fr.id_factura
+        WHERE f.status <> 'b' AND f.status <> 'ca'
+        GROUP BY fr.id_remision, f.serie, f.folio
+        HAVING Count(fr.id_remision) = 1
+      ) rh ON t.id_factura = rh.id_remision
+      WHERE (t.tipo = '1' OR (t.tipo = '2' AND t.saldo = 0))
+      ORDER BY (t.id_cliente, t.fecha, t.serie, t.folio) DESC
     ");
 
     $response = $ventas->result();
@@ -1061,13 +1140,13 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetXY(36, $pdf->GetY() - 22);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(62));
-    $pdf->Row(array('FECHA ' . String::fechaAT($fecha)), false, false);
+    $pdf->Row(array('FECHA ' . MyString::fechaAT($fecha)), false, false);
 
     // // Saldo inicial
     // $pdf->SetXY(6, $pdf->GetY() + 5);
     // $pdf->SetAligns(array('R'));
     // $pdf->SetWidths(array(104));
-    // $pdf->Row(array('SALDO INICIAL '.String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    // $pdf->Row(array('SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
 
     // nomenclatura
     // $this->printCajaNomenclatura($pdf, $nomenclaturas);
@@ -1097,9 +1176,9 @@ class bodega_guadalajara_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6.5);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
-    $pdf->SetWidths(array(75, 18, 18, 20, 20, 28, 25));
-    $pdf->Row(array('CLIENTE', 'FECHA', 'REM No.', 'S/INICIAL.', 'INGRESOS', 'No Ticket', 'S/FINAL'), false, 'B');
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(75, 16, 18, 16, 18, 18, 20, 25));
+    $pdf->Row(array('CLIENTE', 'FECHA', 'REM No.', 'FAC No.', 'S/INICIAL.', 'INGRESOS', 'No Ticket', 'S/FINAL'), false, 'B');
 
     $pdf->SetFont('Arial','', 6);
     $totalSalAnt = $totalCont = $totalSal = 0;
@@ -1110,30 +1189,32 @@ class bodega_guadalajara_model extends CI_Model {
       $totalSal += floatval($ct_cobrar->saldo);
 
       if ($ct_cobrar->id_cliente != $aux_client) {
-        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
-        $pdf->SetWidths(array(75, 18, 18, 20, 20, 28, 25));
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(75, 16, 18, 16, 18, 18, 20, 25));
         $pdf->SetX(6);
         $pdf->Row(array(
           $ct_cobrar->cliente,
-          String::fechaAT($ct_cobrar->fecha),
+          MyString::fechaAT($ct_cobrar->fecha),
           $ct_cobrar->serie.$ct_cobrar->folio,
-          String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
-          String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
+          $ct_cobrar->folio_factura,
+          MyString::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
+          MyString::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
           $ct_cobrar->tickets_hoy,
-          String::formatoNumero($ct_cobrar->saldo, 2, '', false),
+          MyString::formatoNumero($ct_cobrar->saldo, 2, '', false),
         ), false, 'B');
         $aux_client = $ct_cobrar->id_cliente;
       } else {
-        $pdf->SetAligns(array('L', 'L', 'R', 'R', 'C', 'R'));
-        $pdf->SetWidths(array(18, 18, 20, 20, 28, 25));
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(16, 18, 16, 18, 18, 20, 25));
         $pdf->SetX(81);
         $pdf->Row(array(
-          String::fechaAT($ct_cobrar->fecha),
+          MyString::fechaAT($ct_cobrar->fecha),
           $ct_cobrar->serie.$ct_cobrar->folio,
-          String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
-          String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
+          $ct_cobrar->folio_factura,
+          MyString::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
+          MyString::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
           $ct_cobrar->tickets_hoy,
-          String::formatoNumero($ct_cobrar->saldo, 2, '', false),
+          MyString::formatoNumero($ct_cobrar->saldo, 2, '', false),
         ), false, 'B');
       }
     }
@@ -1143,10 +1224,10 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(81);
     $pdf->Row(array('SUMAS: ',
-      String::formatoNumero($totalSalAnt, 2, '', false),
-      String::formatoNumero($totalCont, 2, '', false),
+      MyString::formatoNumero($totalSalAnt, 2, '', false),
+      MyString::formatoNumero($totalCont, 2, '', false),
       '',
-      String::formatoNumero($totalSal, 2, '', false)), false, false);
+      MyString::formatoNumero($totalSal, 2, '', false)), false, false);
 
     // EXISTENCIA ANTERIOR
     $pdf->SetFont('Arial','B', 7);
@@ -1173,12 +1254,12 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->Row(array(
           $exis_ant->nombre_fiscal,
           $exis_ant->serie.$exis_ant->folio,
-          String::fechaAT($exis_ant->fecha),
+          MyString::fechaAT($exis_ant->fecha),
           $exis_ant->codigo,
           $exis_ant->kilos,
-          String::formatoNumero($exis_ant->cantidad, 2, '', false),
-          String::formatoNumero($exis_ant->precio_unitario, 2, '', false),
-          String::formatoNumero($exis_ant->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($exis_ant->cantidad, 2, '', false),
+          MyString::formatoNumero($exis_ant->precio_unitario, 2, '', false),
+          MyString::formatoNumero($exis_ant->importe, 2, '', false)), false, 'B');
         $aux = $exis_ant->id_factura;
       } else {
         $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
@@ -1186,10 +1267,10 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->SetX(106);
         $pdf->Row(array(
           $exis_ant->codigo,
-          String::formatoNumero($exis_ant->kilos, 2, '', false),
-          String::formatoNumero($exis_ant->cantidad, 2, '', false),
-          String::formatoNumero($exis_ant->precio_unitario, 2, '', false),
-          String::formatoNumero($exis_ant->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($exis_ant->kilos, 2, '', false),
+          MyString::formatoNumero($exis_ant->cantidad, 2, '', false),
+          MyString::formatoNumero($exis_ant->precio_unitario, 2, '', false),
+          MyString::formatoNumero($exis_ant->importe, 2, '', false)), false, 'B');
       }
       $totalExisAnt += floatval($exis_ant->importe);
       $bultosExisAnt += floatval($exis_ant->cantidad);
@@ -1200,10 +1281,10 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(22, 19, 18, 18, 27));
     $pdf->SetX(106);
     $pdf->Row(array('SUMAS: ',
-      String::formatoNumero($kilosExisAnt, 2, '', false),
-      String::formatoNumero($bultosExisAnt, 2, '', false),
-      String::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '', false),
-      String::formatoNumero($totalExisAnt, 2, '', false)), false, 'B');
+      MyString::formatoNumero($kilosExisAnt, 2, '', false),
+      MyString::formatoNumero($bultosExisAnt, 2, '', false),
+      MyString::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '', false),
+      MyString::formatoNumero($totalExisAnt, 2, '', false)), false, 'B');
 
     // INGRESOS DE MERCANCIAS
     $pdf->SetFont('Arial','B', 7);
@@ -1230,12 +1311,12 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->Row(array(
           $remision->nombre_fiscal,
           $remision->serie.$remision->folio,
-          String::fechaAT($remision->fecha),
+          MyString::fechaAT($remision->fecha),
           $remision->codigo,
-          String::formatoNumero($remision->kilos, 2, '', false),
-          String::formatoNumero($remision->cantidad, 2, '', false),
-          String::formatoNumero($remision->precio_unitario, 2, '', false),
-          String::formatoNumero($remision->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($remision->kilos, 2, '', false),
+          MyString::formatoNumero($remision->cantidad, 2, '', false),
+          MyString::formatoNumero($remision->precio_unitario, 2, '', false),
+          MyString::formatoNumero($remision->importe, 2, '', false)), false, 'B');
         $aux = $remision->id_factura;
       } else {
         $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
@@ -1243,10 +1324,10 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->SetX(106);
         $pdf->Row(array(
           $remision->codigo,
-          String::formatoNumero($remision->kilos, 2, '', false),
-          String::formatoNumero($remision->cantidad, 2, '', false),
-          String::formatoNumero($remision->precio_unitario, 2, '', false),
-          String::formatoNumero($remision->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($remision->kilos, 2, '', false),
+          MyString::formatoNumero($remision->cantidad, 2, '', false),
+          MyString::formatoNumero($remision->precio_unitario, 2, '', false),
+          MyString::formatoNumero($remision->importe, 2, '', false)), false, 'B');
       }
       $totalIngresos += floatval($remision->importe);
       $bultosIngresos += floatval($remision->cantidad);
@@ -1257,10 +1338,10 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(22, 19, 18, 18, 27));
     $pdf->SetX(106);
     $pdf->Row(array('SUMAS: ',
-      String::formatoNumero($kilosIngresos, 2, '', false),
-      String::formatoNumero($bultosIngresos, 2, '', false),
-      String::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '', false),
-      String::formatoNumero($totalIngresos, 2, '', false)), false, false);
+      MyString::formatoNumero($kilosIngresos, 2, '', false),
+      MyString::formatoNumero($bultosIngresos, 2, '', false),
+      MyString::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '', false),
+      MyString::formatoNumero($totalIngresos, 2, '', false)), false, false);
 
     // Ingresos por reposicion
     $pdf->SetFont('Arial','B', 7);
@@ -1292,7 +1373,7 @@ class bodega_guadalajara_model extends CI_Model {
         $ingreso->categoria,
         $ingreso->id_ingresos,
         $ingreso->concepto,
-        String::formatoNumero($ingreso->monto, 2, '', false)), false, 'B');
+        MyString::formatoNumero($ingreso->monto, 2, '', false)), false, 'B');
 
       $totalIngresosExt += floatval($ingreso->monto);
     }
@@ -1301,7 +1382,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(70, 30));
     $pdf->SetX(109);
     $pdf->Row(array('SUMA: ',
-      String::formatoNumero($totalIngresosExt, 2, '', false)), false, false);
+      MyString::formatoNumero($totalIngresosExt, 2, '', false)), false, false);
 
     // VENTAS DEL DIA
     $pdf->SetFont('Arial','B', 7);
@@ -1337,14 +1418,14 @@ class bodega_guadalajara_model extends CI_Model {
           $venta->cliente,
           $venta->serie.$venta->folio,
           $venta->codigo,
-          String::formatoNumero($venta->kilos, 2, '', false),
-          String::formatoNumero($venta->cantidad, 2, '', false),
-          String::formatoNumero($venta->precio_unitario, 2, '', false),
-          String::formatoNumero($venta->importe, 2, '', false),
-          String::formatoNumero($venta->abonos_hoy, 2, '', false),
-          // String::formatoNumero($venta->abonos, 2, '', false),
+          MyString::formatoNumero($venta->kilos, 2, '', false),
+          MyString::formatoNumero($venta->cantidad, 2, '', false),
+          MyString::formatoNumero($venta->precio_unitario, 2, '', false),
+          MyString::formatoNumero($venta->importe, 2, '', false),
+          MyString::formatoNumero($venta->abonos_hoy, 2, '', false),
+          // MyString::formatoNumero($venta->abonos, 2, '', false),
           $venta->tickets_hoy,
-          String::formatoNumero($venta->saldo, 2, '', false),
+          MyString::formatoNumero($venta->saldo, 2, '', false),
         ), false, 'B');
         $aux = $venta->id_factura;
       } else {
@@ -1353,12 +1434,12 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->SetX(68);
         $pdf->Row(array(
           $venta->codigo,
-          String::formatoNumero($venta->kilos, 2, '', false),
-          String::formatoNumero($venta->cantidad, 2, '', false),
-          String::formatoNumero($venta->precio_unitario, 2, '', false),
-          String::formatoNumero($venta->importe, 2, '', false),
+          MyString::formatoNumero($venta->kilos, 2, '', false),
+          MyString::formatoNumero($venta->cantidad, 2, '', false),
+          MyString::formatoNumero($venta->precio_unitario, 2, '', false),
+          MyString::formatoNumero($venta->importe, 2, '', false),
           '',
-          // String::formatoNumero($venta->abonos, 2, '', false),
+          // MyString::formatoNumero($venta->abonos, 2, '', false),
           $venta->tickets_hoy,
           '',
         ), false, 'B');
@@ -1369,14 +1450,14 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(68);
     $pdf->Row(array('SUMAS: ',
-      String::formatoNumero($kilosVentas, 2, '', false),
-      String::formatoNumero($bultosVentas, 2, '', false),
-      String::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '', false),
-      String::formatoNumero($totalVentas, 2, '', false),
-      String::formatoNumero($abonoshVentas, 2, '', false),
-      // String::formatoNumero($abonosVentas, 2, '', false),
+      MyString::formatoNumero($kilosVentas, 2, '', false),
+      MyString::formatoNumero($bultosVentas, 2, '', false),
+      MyString::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '', false),
+      MyString::formatoNumero($totalVentas, 2, '', false),
+      MyString::formatoNumero($abonoshVentas, 2, '', false),
+      // MyString::formatoNumero($abonosVentas, 2, '', false),
       '',
-      String::formatoNumero($saldoVentas, 2, '', false),
+      MyString::formatoNumero($saldoVentas, 2, '', false),
     ), false, false);
 
     // PRESTAMOS Y DEVOLUCIONES
@@ -1407,10 +1488,10 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->Row(array(
         $prestamo->concepto,
         $prestamo->codigo,
-        String::formatoNumero($prestamo->kilos, 2, '', false),
-        String::formatoNumero($prestamo->cantidad, 2, '', false),
-        String::formatoNumero($prestamo->precio_unitario, 2, '', false),
-        String::formatoNumero($prestamo->importe, 2, '', false),
+        MyString::formatoNumero($prestamo->kilos, 2, '', false),
+        MyString::formatoNumero($prestamo->cantidad, 2, '', false),
+        MyString::formatoNumero($prestamo->precio_unitario, 2, '', false),
+        MyString::formatoNumero($prestamo->importe, 2, '', false),
         ($prestamo->tipo=='true'? 'Prestamo': ($prestamo->tipo=='false'? 'Pago': 'Devolucion'))
       ), false, 'B');
     }
@@ -1419,11 +1500,11 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(66);
     $pdf->Row(array('SUMAS:',
-      String::formatoNumero($totalPrestamosKilos, 2, '', false),
-      String::formatoNumero($totalPrestamosBultos, 2, '', false),
-      String::formatoNumero($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1), 2, '', false),
-      String::formatoNumero($totalPrestamos, 2, '', false),
-      String::formatoNumero($totalPrestamosRestas, 2, '', false)), false, false);
+      MyString::formatoNumero($totalPrestamosKilos, 2, '', false),
+      MyString::formatoNumero($totalPrestamosBultos, 2, '', false),
+      MyString::formatoNumero($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1), 2, '', false),
+      MyString::formatoNumero($totalPrestamos, 2, '', false),
+      MyString::formatoNumero($totalPrestamosRestas, 2, '', false)), false, false);
 
     // EXISTENCIA DEL DIA
     $pdf->SetFont('Arial','B', 7);
@@ -1450,12 +1531,12 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->Row(array(
           $exis_dia->nombre_fiscal,
           $exis_dia->serie.$exis_dia->folio,
-          String::fechaAT($exis_dia->fecha),
+          MyString::fechaAT($exis_dia->fecha),
           $exis_dia->codigo,
-          String::formatoNumero($exis_dia->kilos, 2, '', false),
-          String::formatoNumero($exis_dia->cantidad, 2, '', false),
-          String::formatoNumero($exis_dia->precio_unitario, 2, '', false),
-          String::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($exis_dia->kilos, 2, '', false),
+          MyString::formatoNumero($exis_dia->cantidad, 2, '', false),
+          MyString::formatoNumero($exis_dia->precio_unitario, 2, '', false),
+          MyString::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
         $aux = $exis_dia->id_factura;
       } else {
         $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
@@ -1463,10 +1544,10 @@ class bodega_guadalajara_model extends CI_Model {
         $pdf->SetX(106);
         $pdf->Row(array(
           $exis_dia->codigo,
-          String::formatoNumero($exis_dia->kilos, 2, '', false),
-          String::formatoNumero($exis_dia->cantidad, 2, '', false),
-          String::formatoNumero($exis_dia->precio_unitario, 2, '', false),
-          String::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
+          MyString::formatoNumero($exis_dia->kilos, 2, '', false),
+          MyString::formatoNumero($exis_dia->cantidad, 2, '', false),
+          MyString::formatoNumero($exis_dia->precio_unitario, 2, '', false),
+          MyString::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
       }
       $totalExisD += floatval($exis_dia->importe);
       $bultosExisD += floatval($exis_dia->cantidad);
@@ -1477,10 +1558,10 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(22, 19, 18, 18, 27));
     $pdf->SetX(106);
     $pdf->Row(array('SUMAS: ',
-      String::formatoNumero($kilosExisD, 2, '', false),
-      String::formatoNumero($bultosExisD, 2, '', false),
-      String::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '', false),
-      String::formatoNumero($totalExisD, 2, '', false)), false, false);
+      MyString::formatoNumero($kilosExisD, 2, '', false),
+      MyString::formatoNumero($bultosExisD, 2, '', false),
+      MyString::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '', false),
+      MyString::formatoNumero($totalExisD, 2, '', false)), false, false);
 
     // $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetXY(135, $pdf->GetY()+3);
@@ -1488,7 +1569,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(50, 25));
 
     if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
-      $pdf->Row(array('COSTO DE VENTA DEL DIA:', String::formatoNumero( $caja['costo_venta'] , 2, '$', false)), false, false);
+      $pdf->Row(array('COSTO DE VENTA DEL DIA:', MyString::formatoNumero( $caja['costo_venta'] , 2, '$', false)), false, false);
     }
 
     // Gastos del Dia
@@ -1530,7 +1611,7 @@ class bodega_guadalajara_model extends CI_Model {
         $nomenclaturas['n'.$gasto->nomenclatura]->nombre,
         $gasto->id_gasto,
         $gasto->concepto,
-        String::float(String::formatoNumero($gasto->monto, 2, '', false))), false, 'B');
+        MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))), false, 'B');
 
       // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
       //   $codigoAreas[$gasto->id_area] = $this->bodega_catalogo_model->getDescripCodigo($gasto->id_area);
@@ -1541,7 +1622,41 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(50, 30));
-    $pdf->Row(array('SUMA: ', String::formatoNumero($totalGastos, 2, '$', false)), false, false);
+    $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalGastos, 2, '$', false)), false, false);
+
+    // Traspasos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(170, 25));
+    $pdf->Row(array('TRASPASOS'), false, false);
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(50, 123, 30));
+    $pdf->Row(array('TIPO', 'CONCEPTO', 'IMPORTE'), false, 'B');
+    $pdf->SetFont('Arial','', 6);
+
+    $codigoAreas = array();
+    $totalTraspasos = 0;
+    foreach ($caja['traspasos'] as $key => $traspaso)
+    {
+      $totalTraspasos += floatval($traspaso->monto);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
+        $traspaso->concepto,
+        MyString::float(MyString::formatoNumero($traspaso->monto, 2, '', false))), false, 'B');
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(129);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(50, 30));
+    $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
 
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);
@@ -1575,7 +1690,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->Row(array(
         $denominacion['denominacion'],
         $denominacion['cantidad'],
-        String::formatoNumero($denominacion['total'], 2, '', false)), false, 'B');
+        MyString::formatoNumero($denominacion['total'], 2, '', false)), false, 'B');
 
       $totalEfectivo += floatval($denominacion['total']);
     }
@@ -1583,7 +1698,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'R'));
     $pdf->SetWidths(array(32, 25));
-    $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
+    $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetXY(80, $auxy);
@@ -1591,39 +1706,71 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(50, 25));
 
     if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
-      $pdf->Row(array('UTILIDAD O PERDIDA:', String::formatoNumero( $caja['utilidad'] , 2, '$', false)), false, false);
+      $pdf->Row(array('UTILIDAD O PERDIDA:', MyString::formatoNumero( $caja['utilidad'] , 2, '$', false)), false, false);
       $pdf->SetXY(80, $pdf->GetY()+5);
-      $pdf->Row(array('ACUMULADO BULTOS VENDIDOS:', String::formatoNumero( $caja['a_bultos_vendidos'] , 2, '$', false)), false, false);
+      $pdf->Row(array('ACUMULADO BULTOS VENDIDOS:', MyString::formatoNumero( $caja['a_bultos_vendidos'] , 2, '$', false)), false, false);
       $pdf->SetX(80);
-      $pdf->Row(array('ACUMULADO DE GASTOS:', String::formatoNumero( $caja['a_gastos'] , 2, '$', false)), false, false);
+      $pdf->Row(array('ACUMULADO DE GASTOS:', MyString::formatoNumero( $caja['a_gastos'] , 2, '$', false)), false, false);
       $pdf->SetX(80);
-      $pdf->Row(array('PRECIO PROMEDIO BULTOS:', String::formatoNumero( $caja['a_gastos']/($caja['a_bultos_vendidos']>0? $caja['a_bultos_vendidos'] : 1) , 2, '$', false)), false, false);
+      $pdf->Row(array('PRECIO PROMEDIO BULTOS:', MyString::formatoNumero( $caja['a_gastos']/($caja['a_bultos_vendidos']>0? $caja['a_bultos_vendidos'] : 1) , 2, '$', false)), false, false);
       $pdf->SetX(80);
-      $pdf->Row(array('UTILIDAD ACUMULADA', String::formatoNumero( $caja['a_utilidad'] , 2, '$', false)), false, false);
+      $pdf->Row(array('UTILIDAD ACUMULADA', MyString::formatoNumero( $caja['a_utilidad'] , 2, '$', false)), false, false);
     }
     $pdf->SetXY(80, $pdf->GetY()+5);
-    $pdf->Row(array('SALDO DE CLIENTES', String::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO DE CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
 
     $pdf->SetXY(80, $pdf->GetY()+10);
-    $pdf->Row(array('SALDO AL CORTE', String::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO AL CORTE', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
 
     $pdf->SetX(80);
-    $pdf->Row(array('DIFERENCIA', String::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
+
+    if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(75));
+      $pdf->SetXY(80, $pdf->GetY()+10);
+      $pdf->Row(array('IMPORTES'), false, false);
+
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(50, 25));
+      $pdf->SetX(80);
+      $pdf->Row(array('VENTAS:', MyString::formatoNumero( $totalVentas , 2, '$', false)), false, false);
+      $pdf->SetXY(80, $pdf->GetY()+5);
+      $pdf->Row(array('(+) EXIS. ANT', MyString::formatoNumero( $totalExisAnt , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(+) COMPRAS', MyString::formatoNumero( $totalIngresos , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(-) EXIS. ACTUAL', MyString::formatoNumero( $totalExisD , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(-) DEV S/COMPRA', MyString::formatoNumero( $totalPrestamos , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(=) COSTO DE VTA', MyString::formatoNumero( ($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos) , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(-) GASTOS', MyString::formatoNumero( $totalGastos , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('(=) UTILIDAD', MyString::formatoNumero( $totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('BULTOS VENDIDOS', MyString::formatoNumero( $bultosVentas , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1) , 2, '$', false)), false, false);
+      $pdf->SetX(80);
+      $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
+    }
 
     // $pdf->SetFont('Arial', 'B', 6);
     // $pdf->SetXY(168, $pdf->GetY() - 32);
     // $pdf->SetAligns(array('R', 'R'));
     // $pdf->SetWidths(array(25, 19));
-    // $pdf->Row(array('SALDO INICIAL', String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    // $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
 
     // $pdf->SetX(168);
-    // $pdf->Row(array('TOTAL INGRESOS', String::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
+    // $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
     // $pdf->SetX(168);
-    // $pdf->Row(array('PAGO TOT LIMON ', String::formatoNumero($totalBoletas, 2, '$', false)), false, false);
+    // $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletas, 2, '$', false)), false, false);
     // $pdf->SetX(168);
-    // $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
+    // $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     // $pdf->SetX(168);
-    // $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
+    // $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
 
     // if(count($codigoAreas) > 0){
     //   $pdf->SetFont('Arial', '', 6);
@@ -1706,14 +1853,14 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(25, 38));
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetX(0);
-    $pdf->Row(array('Caja: BODEGA '.$gastos->no_caja, String::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
+    $pdf->Row(array('Caja: BODEGA '.$gastos->no_caja, MyString::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
 
     $pdf->SetX(0);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     $pdf->Row(array('CANTIDAD:'), false, false);
     $pdf->SetX(0);
-    $pdf->Row(array(String::num2letras($gastos->monto)), false, false);
+    $pdf->Row(array(MyString::num2letras($gastos->monto)), false, false);
     $pdf->SetX(0);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
@@ -1739,7 +1886,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', String::fechaAT($gastos->fecha)), false, false);
+    $pdf->Row(array('', '', MyString::fechaAT($gastos->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1749,7 +1896,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', String::fechaAT($gastos->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaAT($gastos->fecha_creacion)), false, false);
 
     $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('otros.bodega_gastos');
 
@@ -1814,11 +1961,11 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->Row(array('Caja: '.$ingreso->no_caja, '' ), false, false);
 
     $pdf->SetX(0);
-    $pdf->Row(array('CANTIDAD:', String::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
+    $pdf->Row(array('CANTIDAD:', MyString::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     $pdf->SetX(0);
-    $pdf->Row(array(String::num2letras($ingreso->monto)), false, false);
+    $pdf->Row(array(MyString::num2letras($ingreso->monto)), false, false);
     $pdf->SetX(0);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
@@ -1834,7 +1981,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', String::fechaAT($ingreso->fecha)), false, false);
+    $pdf->Row(array('', '', MyString::fechaAT($ingreso->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1844,7 +1991,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', String::fechaAT($ingreso->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaAT($ingreso->fecha_creacion)), false, false);
 
     $this->db->update('otros.bodega_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
         "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");
@@ -1963,7 +2110,7 @@ class bodega_guadalajara_model extends CI_Model {
         $producto->nomenclatura,
         $producto->folio,
         $producto->concepto,
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -2073,7 +2220,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -2098,14 +2245,14 @@ class bodega_guadalajara_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(75, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -2274,7 +2421,7 @@ class bodega_guadalajara_model extends CI_Model {
         $producto->nomenclatura,
         $producto->poliza,
         $producto->concepto,
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -2396,7 +2543,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Reposicion',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -2421,14 +2568,14 @@ class bodega_guadalajara_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(75, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -2480,9 +2627,9 @@ class bodega_guadalajara_model extends CI_Model {
           $producto->serie.$producto->folio,
           $producto->cliente,
           $producto->codigo,
-          String::formatoNumero($producto->cantidad, 2, '', false),
-          String::formatoNumero($producto->precio_unitario, 2, '', false),
-          String::formatoNumero($producto->importe, 2, '', false),
+          MyString::formatoNumero($producto->cantidad, 2, '', false),
+          MyString::formatoNumero($producto->precio_unitario, 2, '', false),
+          MyString::formatoNumero($producto->importe, 2, '', false),
           );
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->SetAligns($aligns);
@@ -2499,7 +2646,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Remisiones',
-      String::formatoNumero(($remisiones_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -2510,7 +2657,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));

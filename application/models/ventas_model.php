@@ -54,7 +54,7 @@ class Ventas_model extends privilegios_model{
         SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
                 f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada,
-                COALESCE(fh.id_remision, 0) AS facturada
+                COALESCE(fh.id_remision, 0) AS facturada, f.cfdi_ext
         FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -84,10 +84,11 @@ class Ventas_model extends privilegios_model{
 	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
-            ->select("*")
-            ->from('facturacion')
-            ->where("id_factura = {$id}")
-            ->get();
+      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida, fo.no_salida_fruta")
+      ->from('facturacion as f')
+      ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
+      ->where("f.id_factura = {$id}")
+      ->get();
 
     if($res->num_rows() > 0)
     {
@@ -267,6 +268,10 @@ class Ventas_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
 
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
+
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
@@ -316,7 +321,26 @@ class Ventas_model extends privilegios_model{
       $datosFactura['tipo_cambio'] = '1';
 
     $this->db->insert('facturacion', $datosFactura);
-    $id_venta = $this->db->insert_id();
+    $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'       => $id_venta,
+        'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
+        'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
+        'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
+      ]);
+    }
+
+    // Si tiene el # de Salida de fruta
+    if ($this->input->post('dno_salida_fruta') !== false) {
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'       => $id_venta,
+
+        'id_paleta_salida' => $this->input->post('id_paleta_salida')
+      ]);
+    }
 
     // si probiene de una venta se asigna
     if (isset($_GET['id_vd'])) {
@@ -406,7 +430,7 @@ class Ventas_model extends privilegios_model{
           'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
@@ -513,7 +537,7 @@ class Ventas_model extends privilegios_model{
 
     // Obtiene los documentos que el cliente tiene asignados.
     $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
 
     // Inserta los documentos del cliente con un status false.
     if ($docsCliente)
@@ -569,6 +593,33 @@ class Ventas_model extends privilegios_model{
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 
+  public function addNotaVentaData($data)
+  {
+    foreach ($data as $key => $remision) {
+      $serfolio = $this->getFolio($remision['remision']['id_empresa'], $remision['remision']['serie']);
+      $remision['remision']['serie']          = $serfolio[0]->serie;
+      $remision['remision']['folio']          = $serfolio[0]->folio;
+      $remision['remision']['no_aprobacion']  = $serfolio[0]->no_aprobacion;
+      $remision['remision']['ano_aprobacion'] = substr($serfolio[0]->ano_aprobacion, 0, 4);
+
+      $this->db->insert('facturacion', $remision['remision']);
+      $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
+
+      $remision['otrosdatos']['id_factura'] = $id_venta;
+      $this->db->insert('facturacion_otrosdatos', $remision['otrosdatos']);
+
+      $remision['cliente']['id_factura'] = $id_venta;
+      $this->db->insert('facturacion_cliente', $remision['cliente']);
+
+      foreach ($remision['productos'] as $keyp => $producto) {
+        $producto['id_factura'] = $id_venta;
+        $this->db->insert('facturacion_productos', $producto);
+      }
+    }
+
+    return true;
+  }
+
   public function updateNotaVenta($id_venta)
   {
     $this->load->model('clientes_model');
@@ -584,6 +635,10 @@ class Ventas_model extends privilegios_model{
       'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
+
+    if ($this->input->post('cerrarVenta') == 'true') {
+      $cfdi_ext['cerrarVenta'] = true;
+    }
 
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
@@ -639,7 +694,18 @@ class Ventas_model extends privilegios_model{
                                     ':id'           => 'id_factura',
                                     ':titulo'       => 'Venta'));
     $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
-    // $id_venta = $this->db->insert_id();
+    // $id_venta = $this->db->insert_id('facturacion_id_factura_seq');
+
+    // Si tiene el # de trazabilidad
+    if ($this->input->post('dno_trazabilidad') !== false || $this->input->post('dno_salida_fruta') !== false) {
+      $this->db->delete('facturacion_otrosdatos', "id_factura = {$id_venta}");
+      $this->db->insert('facturacion_otrosdatos', [
+        'id_factura'       => $id_venta,
+        'no_trazabilidad'  => $this->input->post('dno_trazabilidad'),
+        'id_paleta_salida' => ($this->input->post('id_paleta_salida')? $this->input->post('id_paleta_salida'): NULL),
+        'no_salida_fruta'  => $this->input->post('dno_salida_fruta'),
+      ]);
+    }
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
@@ -713,7 +779,7 @@ class Ventas_model extends privilegios_model{
           'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
@@ -827,7 +893,7 @@ class Ventas_model extends privilegios_model{
 
     // // Obtiene los documentos que el cliente tiene asignados.
     // $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
 
     // // Inserta los documentos del cliente con un status false.
     // if ($docsCliente)
@@ -942,7 +1008,7 @@ class Ventas_model extends privilegios_model{
     $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $id_venta), true);
 
     // Regenera el PDF de la factura.
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio, substr($remision['info']->fecha, 0, 10));
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
     // Elimina la salida de productos q se dio si se ligaron pallets
@@ -1141,8 +1207,8 @@ class Ventas_model extends privilegios_model{
  //        $item->cantidad,
  //        $item->unidad,
  //        $item->descripcion,
- //        String::formatoNumero($item->precio_unitario, 3),
- //        String::formatoNumero(floatval($item->importe) + floatval($item->iva), 3),
+ //        MyString::formatoNumero($item->precio_unitario, 3),
+ //        MyString::formatoNumero(floatval($item->importe) + floatval($item->iva), 3),
  //      ), false);
  //    }
 
@@ -1182,13 +1248,13 @@ class Ventas_model extends privilegios_model{
  //    // $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
 
  //    // $pdf->SetXY(186, $pdf->GetY());
- //    // $pdf->Cell(30, 6, String::formatoNumero($venta['info']->subtotal), 1, 0, 'C', 1);
+ //    // $pdf->Cell(30, 6, MyString::formatoNumero($venta['info']->subtotal), 1, 0, 'C', 1);
 
  //    $pdf->SetXY(156, $pdf->GetY() - 23);
  //    $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
 
  //    $pdf->SetXY(186, $pdf->GetY());
- //    $pdf->Cell(30, 6,String::formatoNumero($venta['info']->total, 2), 1, 0, 'C', 1);
+ //    $pdf->Cell(30, 6,MyString::formatoNumero($venta['info']->total, 2), 1, 0, 'C', 1);
 
  //    ///////////////////
  //    // Observaciones //
@@ -1388,7 +1454,7 @@ class Ventas_model extends privilegios_model{
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
+    $pdf->Cell(108, 4, MyString::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
 
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
@@ -1402,7 +1468,7 @@ class Ventas_model extends privilegios_model{
     $municipio   = strtoupper($factura['info']->empresa->municipio);
     $estado = strtoupper($factura['info']->empresa->estado);
     $cp = strtoupper($factura['info']->empresa->cp);
-    $fecha = String::fechaATexto($factura['info']->fecha);
+    $fecha = MyString::fechaATexto($factura['info']->fecha);
 
     $pdf->Cell(108, 4, "{$municipio}, {$estado} ({$cp}) | {$fecha}", 0, 0, 'R', 0);
 
@@ -1414,7 +1480,9 @@ class Ventas_model extends privilegios_model{
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "{$factura['info']->usoCfdi['key']} - {$factura['info']->usoCfdi['value']}", 0, 0, 'R', 0);
+    if (isset($factura['info']->usoCfdi)) {
+      $pdf->Cell(108, 4, "{$factura['info']->usoCfdi['key']} - {$factura['info']->usoCfdi['value']}", 0, 0, 'R', 0);
+    }
 
     //////////////////
     // domicilioEmisor //
@@ -1557,9 +1625,7 @@ class Ventas_model extends privilegios_model{
       $pdf->SetWidths($widths);
 
       $printRow = true;
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($factura['info']->sin_costo_nover == 'f')
         {
           $printRow = false;
@@ -1580,9 +1646,7 @@ class Ventas_model extends privilegios_model{
           $traslado16 += $item->iva;
 
         $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($item->id_clasificacion == '49' && isset($factura['seguro']))
             $descripcion_ext .= " (No {$factura['seguro']->pol_seg})";
           elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '52') && isset($factura['certificado'.$item->id_clasificacion]))
@@ -1598,8 +1662,8 @@ class Ventas_model extends privilegios_model{
           $item->descripcion.$descripcion_ext,
           ($item->und_kg*$item->cantidad),
           // $item->certificado === 't' ? 'Certificado' : '',
-          String::formatoNumero( $item->precio_unitario, 2, '$', false),
-          String::formatoNumero( $item->importe, 2, '$', false),
+          MyString::formatoNumero( $item->precio_unitario, 2, '$', false),
+          MyString::formatoNumero( $item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
       }
     }
@@ -1648,9 +1712,7 @@ class Ventas_model extends privilegios_model{
         $hay_prod_certificados = true;
 
       $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($item->id_clasificacion == '49' && isset($factura['seguro'])){
           $seguro = array_map(function($e) {
               return $e->pol_seg;
@@ -1676,8 +1738,8 @@ class Ventas_model extends privilegios_model{
         $item->unidad,
         $item->descripcion.$descripcion_ext,
         $item->certificado === 't' ? 'Certificado' : '',
-        String::formatoNumero( $item->precio_unitario, 2, '$', false),
-        String::formatoNumero( $item->importe, 2, '$', false),
+        MyString::formatoNumero( $item->precio_unitario, 2, '$', false),
+        MyString::formatoNumero( $item->importe, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -1737,14 +1799,14 @@ class Ventas_model extends privilegios_model{
     if ($factura['info']->version > 3.2)
       $pdf->Cell(78, 4, "{$factura['info']->metodosPago['key']} - {$factura['info']->metodosPago['value']}", 0, 0, 'L', 1);
     else
-      $pdf->Cell(78, 4, "Pago en ".String::getMetodoPago($factura['info']->metodo_pago), 0, 0, 'L', 1);
+      $pdf->Cell(78, 4, "Pago en ".MyString::getMetodoPago($factura['info']->metodo_pago), 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(156, $pdf->GetY() - 11);
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero( $factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5, MyString::formatoNumero( $factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
     // Pinta traslados, retenciones
 
     if ($traslado11 != 0)
@@ -1753,14 +1815,14 @@ class Ventas_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero( $traslado11, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,MyString::formatoNumero( $traslado11, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero( $traslado16, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero( $traslado16, 2, '$', false), 1, 0, 'R', 1);
 
     if ($factura['info']->retencion_iva != 0)
     {
@@ -1768,14 +1830,14 @@ class Ventas_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero( $factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,MyString::formatoNumero( $factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero( $factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero( $factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Observaciones //
@@ -1825,7 +1887,7 @@ class Ventas_model extends privilegios_model{
     if ($factura['info']->condicion_pago == 'cr') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
       $pdf->SetXY(10, $pdf->GetY()+3);
-      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: '.String::suma_fechas(substr($factura['info']->fecha, 0, 10), $factura['info']->plazo_credito).' Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a 3 % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false, 18);
+      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.MyString::formatoNumero($factura['info']->total, 2, '', true).' VENCE: '.MyString::suma_fechas(substr($factura['info']->fecha, 0, 10), $factura['info']->plazo_credito).' Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a 3 % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false, 18);
 
       if($pdf->GetY() + 15 >= $pdf->limiteY) //salta de pagina si exede el max
         $pdf->AddPage();
@@ -1846,11 +1908,12 @@ class Ventas_model extends privilegios_model{
        ), false, false);
       $pdf->SetXY(10, $pdf->GetY());
       $pdf->SetAligns(array('L'));
-      $pdf->Row2(array('CIUDAD: '.$factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->Row2(array('CIUDAD: '.$factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.MyString::fechaATexto(date("Y-m-d")) ), false, false);
 
       if ($factura['info']->cliente->show_saldo == 't') {
         $pdf->SetXY(10, $pdf->GetY());
-        $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
+        $saldodelcliente = count($saldo['cuentas']) > 0? $saldo['cuentas'][0]->saldo : 0;
+        $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. MyString::formatoNumero($saldodelcliente, 2, '$', false)), false, false);
       }
 
       $pdf->SetWidths(array(70));
@@ -1947,7 +2010,7 @@ class Ventas_model extends privilegios_model{
           $status = 'Cancelada';
         elseif($value->status == 'b')
           $status = 'Borrador';
-        $pdf->Row(array(String::fechaAT($value->fecha), $value->serie.$value->folio, $status), false, false);
+        $pdf->Row(array(MyString::fechaAT($value->fecha), $value->serie.$value->folio, $status), false, false);
         $pdf->SetXY(5, $pdf->GetY()-2);
       }
     }
@@ -1967,7 +2030,7 @@ class Ventas_model extends privilegios_model{
               $value->fecha,
               $hist['abonos_remision']['cobro'][0]->serie.$hist['abonos_remision']['cobro'][0]->folio,
               $value->concepto,
-              String::formatoNumero($value->abono, 2, '$', false)), false, false);
+              MyString::formatoNumero($value->abono, 2, '$', false)), false, false);
           $total_abanos += $value->abono;
           $pdf->SetXY(75, $pdf->GetY()-2);
         }
@@ -1977,14 +2040,14 @@ class Ventas_model extends privilegios_model{
               $value->fecha,
               $hist['abonos_factura']['cobro'][0]->serie.$hist['abonos_factura']['cobro'][0]->folio,
               $value->concepto,
-              String::formatoNumero($value->abono, 2, '$', false)), false, false);
+              MyString::formatoNumero($value->abono, 2, '$', false)), false, false);
           $total_abanos += $value->abono;
           $pdf->SetXY(75, $pdf->GetY()-2);
         }
       $pdf->SetFont('helvetica', 'B', 8);
       $pdf->SetX(184);
       $pdf->SetWidths(array(19, 20, 70, 25));
-      $pdf->Row(array(String::formatoNumero($total_abanos, 2, '$', false)), false, false);
+      $pdf->Row(array(MyString::formatoNumero($total_abanos, 2, '$', false)), false, false);
     }
 
     //------------ IMAGEN CANDELADO --------------------
@@ -1994,6 +2057,11 @@ class Ventas_model extends privilegios_model{
     }
 
     // $this->printValeSalida($factura, $conceptos, $pdf);
+
+    // if (!empty($factura['info']->id_paleta_salida)) {
+    //   $this->load->model('rastreabilidad_paletas_model');
+    //   $this->rastreabilidad_paletas_model->paleta_pdf($factura['info']->id_paleta_salida, $pdf);
+    // }
 
     if ($path) {
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
@@ -2118,7 +2186,7 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('L'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->SetX(0);
-    $pdf->Row2(array( "FECHA: ".String::fechaATexto($factura['info']->fecha, '/c') ), false, false, 4);
+    $pdf->Row2(array( "FECHA: ".MyString::fechaATexto($factura['info']->fecha, '/c') ), false, false, 4);
     $pdf->SetX(0);
     $pdf->Row2(array( "CLIENTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
 
@@ -2165,9 +2233,7 @@ class Ventas_model extends privilegios_model{
     foreach($conceptos as $key => $item)
     {
       $printRow = true;
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($factura['info']->sin_costo_nover == 'f')
         {
           $printRow = false;
@@ -2188,9 +2254,7 @@ class Ventas_model extends privilegios_model{
           $traslado16 += $item->iva;
 
         $descripcion_ext = '';
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($item->id_clasificacion == '49' && isset($factura['seguro']))
             $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
           elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '52') && isset($factura['certificado'.$item->id_clasificacion]))
@@ -2204,8 +2268,8 @@ class Ventas_model extends privilegios_model{
         $pdf->Row2(array(
           $item->cantidad, //.' '.$item->unidad
           substr($item->descripcion, 0, 25), //.$descripcion_ext
-          String::formatoNumero($item->precio_unitario, 2, '', true),
-          String::formatoNumero($item->importe, 2, '', true),), false, false);
+          MyString::formatoNumero($item->precio_unitario, 2, '', true),
+          MyString::formatoNumero($item->importe, 2, '', true),), false, false);
       }
     }
 
@@ -2227,9 +2291,7 @@ class Ventas_model extends privilegios_model{
         $hay_prod_certificados = true;
 
       $descripcion_ext = '';
-      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-          $item->id_clasificacion == '53'){
+      if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
         if($item->id_clasificacion == '49' && isset($factura['seguro'])){
           $seguro = array_map(function($e) {
               return $e->pol_seg;
@@ -2254,8 +2316,8 @@ class Ventas_model extends privilegios_model{
       $pdf->Row2(array(
         $item->cantidad, //.' '.$item->unidad
         substr($item->descripcion, 0, 25), //.$descripcion_ext
-        String::formatoNumero($item->precio_unitario, 2, '', true),
-        String::formatoNumero($item->importe, 2, '', true),), false, false);
+        MyString::formatoNumero($item->precio_unitario, 2, '', true),
+        MyString::formatoNumero($item->importe, 2, '', true),), false, false);
     }
 
     // /////////////
@@ -2270,27 +2332,27 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(0, 0));
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array("Subtotal", String::formatoNumero($factura['info']->subtotal, 2, '', true) ), false, false, 5);
+    $pdf->Row2(array("Subtotal", MyString::formatoNumero($factura['info']->subtotal, 2, '', true) ), false, false, 5);
 
     // Pinta traslados, retenciones
 
     if ($traslado11 != 0)
     {
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array("IVA(11%)", String::formatoNumero($traslado11, 2, '', true) ), false, false, 5);
+      $pdf->Row2(array("IVA(11%)", MyString::formatoNumero($traslado11, 2, '', true) ), false, false, 5);
     }
 
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array("IVA(16%)", String::formatoNumero($traslado16, 2, '', true) ), false, false, 5);
+    $pdf->Row2(array("IVA(16%)", MyString::formatoNumero($traslado16, 2, '', true) ), false, false, 5);
 
     if ($factura['info']->retencion_iva != 0)
     {
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array("IVA Retenido", String::formatoNumero($factura['info']->retencion_iva, 2, '', true) ), false, false, 5);
+      $pdf->Row2(array("IVA Retenido", MyString::formatoNumero($factura['info']->retencion_iva, 2, '', true) ), false, false, 5);
     }
 
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array("TOTAL", String::formatoNumero($factura['info']->total, 2, '', true) ), false, false, 5);
+    $pdf->Row2(array("TOTAL", MyString::formatoNumero($factura['info']->total, 2, '', true) ), false, false, 5);
 
     $pdf->SetXY(0, $pdf->GetY());
     $pdf->SetFont($pdf->fount_txt, '', 9);
@@ -2305,10 +2367,10 @@ class Ventas_model extends privilegios_model{
     if ($factura['info']->condicion_pago == 'cr') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
+      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.MyString::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
       $pdf->SetXY(0, $pdf->GetY()-18);
       $pdf->SetAligns(array('R'));
-      $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.MyString::fechaATexto(date("Y-m-d")) ), false, false);
       $pdf->SetAligns(array('L'));
       $pdf->SetXY(0, $pdf->GetY()-1);
       $pdf->Row2(array( "OTORGANTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
@@ -2332,13 +2394,13 @@ class Ventas_model extends privilegios_model{
       $pdf->Row2(array($factura['info']->forma_pago ), false, false, 5);
 
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array(String::getMetodoPago($factura['info']->metodo_pago) ), false, false, 5);
+      $pdf->Row2(array(MyString::getMetodoPago($factura['info']->metodo_pago) ), false, false, 5);
     }
 
     if ($factura['info']->cliente->show_saldo == 't') {
       $pdf->SetAligns(array('L'));
       $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
+      $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. MyString::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
     }
 
 
@@ -2412,8 +2474,8 @@ class Ventas_model extends privilegios_model{
       $pdf->Row2(array(
         $prod->cantidad.' '.$prod->abreviatura,
         $prod->producto,
-        String::formatoNumero($prod->precio_unitario, 2, '', true),
-        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
 
       $total += floatval($prod->precio_unitario*$prod->cantidad);
 
@@ -2425,10 +2487,10 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(13, 20));
     // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(30);
-    $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+    $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '', true)), false, true, 5);
 
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetAligns(array('L', 'R'));
@@ -2569,7 +2631,7 @@ class Ventas_model extends privilegios_model{
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = $_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS';
-      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
@@ -2604,12 +2666,12 @@ class Ventas_model extends privilegios_model{
           $total_total += $factura->cargo;
         }
 
-        $datos = array(String::fechaATexto($factura->fecha, '/c'),
+        $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
                 $factura->serie,
                 $factura->folio,
                 $factura->nombre_fiscal.$txt,
-                String::formatoNumero($txt!=''? 0:$factura->cargo, 2, '', false),
-                String::formatoNumero( ($txt!=''?0:$factura->saldo) , 2, '', false),
+                MyString::formatoNumero($txt!=''? 0:$factura->cargo, 2, '', false),
+                MyString::formatoNumero( ($txt!=''?0:$factura->saldo) , 2, '', false),
               );
 
         $pdf->SetXY(6, $pdf->GetY()-1);
@@ -2625,8 +2687,8 @@ class Ventas_model extends privilegios_model{
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(30, 30));
       $pdf->Row(array(
-          String::formatoNumero($total_total, 2, '', false),
-          String::formatoNumero($total_saldo, 2, '', false)), false);
+          MyString::formatoNumero($total_total, 2, '', false),
+          MyString::formatoNumero($total_saldo, 2, '', false)), false);
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');
@@ -2771,7 +2833,7 @@ class Ventas_model extends privilegios_model{
 
       // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = 'Notas de credito';
-      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -2846,12 +2908,12 @@ class Ventas_model extends privilegios_model{
               $total_cantidad_g2 += $factura->cantidad;
               $total_total_g2 += $factura->total;
 
-              $datos = array(String::fechaATexto($factura->fecha, '/c'),
+              $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
                       $factura->serie,
                       $factura->folio,
                       $factura->descripcion,
-                      String::formatoNumero($factura->cantidad, 2, '', false),
-                      String::formatoNumero($factura->total, 2, '', false),
+                      MyString::formatoNumero($factura->cantidad, 2, '', false),
+                      MyString::formatoNumero($factura->total, 2, '', false),
                       $factura->factura,
                     );
 
@@ -2871,8 +2933,8 @@ class Ventas_model extends privilegios_model{
             $pdf->SetAligns(array('R', 'R'));
             $pdf->SetWidths(array(23, 23));
             $pdf->Row(array(
-                String::formatoNumero($total_cantidad, 2, '', false),
-                String::formatoNumero($total_total, 2, '', false)), false);
+                MyString::formatoNumero($total_cantidad, 2, '', false),
+                MyString::formatoNumero($total_total, 2, '', false)), false);
 
             // $total_saldo_cliente += $saldo_cliente;
           }
@@ -2883,8 +2945,8 @@ class Ventas_model extends privilegios_model{
         $pdf->SetAligns(array('R', 'R', 'R'));
         $pdf->SetWidths(array(30, 23, 23));
         $pdf->Row(array('TOTAL EMPRESA',
-            String::formatoNumero($total_cantidad_g, 2, '', false),
-            String::formatoNumero($total_total_g, 2, '', false)), false);
+            MyString::formatoNumero($total_cantidad_g, 2, '', false),
+            MyString::formatoNumero($total_total_g, 2, '', false)), false);
       }
 
       if($pdf->GetY()+10 >= $pdf->limiteY)
@@ -2893,12 +2955,12 @@ class Ventas_model extends privilegios_model{
       $pdf->SetAligns(array('R', 'R', 'R'));
       $pdf->SetWidths(array(30, 23, 23));
       $pdf->Row(array('TOTAL GRAL',
-          String::formatoNumero($total_cantidad_g2, 2, '', false),
-          String::formatoNumero($total_total_g2, 2, '', false)), false);
+          MyString::formatoNumero($total_cantidad_g2, 2, '', false),
+          MyString::formatoNumero($total_total_g2, 2, '', false)), false);
 
 
       // $pdf->SetXY(66, $pdf->GetY()+4);
-      // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+      // $pdf->Row(array('TOTAL SALDO DE CLIENTES', MyString::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');
@@ -2993,7 +3055,7 @@ class Ventas_model extends privilegios_model{
               $total_total_g2 += $factura->total;
 
               $html .= '<tr>
-                  <td style="width:150px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+                  <td style="width:150px;border:1px solid #000;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->serie.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->folio.'</td>
                   <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.'</td>
@@ -3097,8 +3159,8 @@ class Ventas_model extends privilegios_model{
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-      $pdf->titulo2 = String::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
-      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo2 = MyString::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
+      $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
@@ -3145,9 +3207,9 @@ class Ventas_model extends privilegios_model{
         $datos = array($factura->rfc,
                 $factura->serie,
                 $factura->folio,
-                String::fechaATexto($factura->fecha, '/c'),
-                String::formatoNumero($factura->cargo, 2, '', false),
-                String::formatoNumero( $factura->iva , 2, '', false),
+                MyString::fechaATexto($factura->fecha, '/c'),
+                MyString::formatoNumero($factura->cargo, 2, '', false),
+                MyString::formatoNumero( $factura->iva , 2, '', false),
                 ($factura->status=='ca'? '0': '1'),
               );
 
@@ -3165,43 +3227,43 @@ class Ventas_model extends privilegios_model{
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('FACTURAS ADMIN', String::formatoNumero( $total_factura+$total_factura_cancel , 2, '', false) ), false);
+      $pdf->Row(array('FACTURAS ADMIN', MyString::formatoNumero( $total_factura+$total_factura_cancel , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('IVA ADMIN', String::formatoNumero( $total_iva+$total_iva_cancel , 2, '', false) ), false);
+      $pdf->Row(array('IVA ADMIN', MyString::formatoNumero( $total_iva+$total_iva_cancel , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('FACT  CANCELADAS', String::formatoNumero( $total_factura_cancel , 2, '', false) ), false);
+      $pdf->Row(array('FACT  CANCELADAS', MyString::formatoNumero( $total_factura_cancel , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('IVA CANCELADO', String::formatoNumero( $total_iva_cancel , 2, '', false) ), false);
+      $pdf->Row(array('IVA CANCELADO', MyString::formatoNumero( $total_iva_cancel , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('FACT. CONTAB', String::formatoNumero( $total_factura-$total_iva , 2, '', false) ), false);
+      $pdf->Row(array('FACT. CONTAB', MyString::formatoNumero( $total_factura-$total_iva , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('IVA TRASLADADO CONTAB', String::formatoNumero( $total_iva , 2, '', false) ), false);
+      $pdf->Row(array('IVA TRASLADADO CONTAB', MyString::formatoNumero( $total_iva , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('NOTAS DE CREDITO', String::formatoNumero( $total_nc , 2, '', false) ), false);
+      $pdf->Row(array('NOTAS DE CREDITO', MyString::formatoNumero( $total_nc , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('NC CANCELADAS', String::formatoNumero( $total_nc_cancel , 2, '', false) ), false);
+      $pdf->Row(array('NC CANCELADAS', MyString::formatoNumero( $total_nc_cancel , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('PAGO PARCIALIDADES', String::formatoNumero( $total_pp , 2, '', false) ), false);
+      $pdf->Row(array('PAGO PARCIALIDADES', MyString::formatoNumero( $total_pp , 2, '', false) ), false);
       if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
-      $pdf->Row(array('PAGO PARCIA CANCELADAS', String::formatoNumero( $total_pp_cancel , 2, '', false) ), false);
+      $pdf->Row(array('PAGO PARCIA CANCELADAS', MyString::formatoNumero( $total_pp_cancel , 2, '', false) ), false);
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');
@@ -3218,7 +3280,7 @@ class Ventas_model extends privilegios_model{
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
       $titulo1 = $empresa['info']->nombre_fiscal;
-      $titulo2 = String::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
+      $titulo2 = MyString::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
       $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 
       $html = '<table>
@@ -3371,11 +3433,11 @@ class Ventas_model extends privilegios_model{
 
 
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
       elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha1']);
       elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha2']);
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -3406,7 +3468,7 @@ class Ventas_model extends privilegios_model{
 
         $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
         $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
-        $datos = array(String::fechaAT($item->fecha), $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
+        $datos = array(MyString::fechaAT($item->fecha), $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, MyString::formatoNumero($item->total));
         $total += floatval($item->total);
 
         $pdf->SetX(6);
@@ -3418,7 +3480,7 @@ class Ventas_model extends privilegios_model{
       $pdf->SetX(6);
       $pdf->SetFont('Arial','B',8);
       $pdf->SetTextColor(255,255,255);
-      $pdf->Row(array('', '', '', '', '', '', 'Total:', String::formatoNumero($total)), true);
+      $pdf->Row(array('', '', '', '', '', '', 'Total:', MyString::formatoNumero($total)), true);
 
       $pdf->Output('Reporte_Ventas_Cliente.pdf', 'I');
   }
@@ -3434,11 +3496,11 @@ class Ventas_model extends privilegios_model{
       $pdf->titulo2 = 'Reporte Ventas Productos';
 
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
       elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha1']);
       elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 = "Del ".MyString::fechaAT($_GET['ffecha2']);
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -3467,7 +3529,7 @@ class Ventas_model extends privilegios_model{
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
 
-        $datos = array($item->codigo, $item->producto, $item->total_cantidad, String::formatoNumero($item->total_importe));
+        $datos = array($item->codigo, $item->producto, $item->total_cantidad, MyString::formatoNumero($item->total_importe));
 
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
@@ -3626,7 +3688,7 @@ class Ventas_model extends privilegios_model{
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = ($_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS').' VENCIDAS';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
     $pdf->AliasNbPages();
     // $pdf->AddPage();
@@ -3650,7 +3712,7 @@ class Ventas_model extends privilegios_model{
         $pdf->SetWidths($widths);
         $pdf->Row($header, true, false);
       }
-      $saldoo = String::float( String::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false) );
+      $saldoo = MyString::float( MyString::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false) );
 
       if ($con_saldo==false || $saldoo > 0)
       {
@@ -3660,9 +3722,9 @@ class Ventas_model extends privilegios_model{
         $total_total    += $factura->saldo;
 
         $datos = array($factura->nombre_fiscal,
-                String::formatoNumero($factura->saldo_anterior, 2, '', false),
-                String::formatoNumero($factura->saldo, 2, '', false),
-                String::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false),
+                MyString::formatoNumero($factura->saldo_anterior, 2, '', false),
+                MyString::formatoNumero($factura->saldo, 2, '', false),
+                MyString::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false),
               );
 
         $pdf->SetXY(6, $pdf->GetY()-1);
@@ -3679,9 +3741,9 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('R', 'R', 'R'));
     $pdf->SetWidths(array(30, 30, 30));
     $pdf->Row(array(
-        String::formatoNumero($total_saldo, 2, '', false),
-        String::formatoNumero($total_total, 2, '', false),
-        String::formatoNumero($total_total+$total_saldo, 2, '', false),
+        MyString::formatoNumero($total_saldo, 2, '', false),
+        MyString::formatoNumero($total_total, 2, '', false),
+        MyString::formatoNumero($total_total+$total_saldo, 2, '', false),
         ), false);
 
     $pdf->Output('reporte_ventas.pdf', 'I');
@@ -3729,7 +3791,7 @@ class Ventas_model extends privilegios_model{
     $total_total = 0;
     $total_saldo = 0;
     foreach($res as $key => $factura){
-      $saldoo = String::float( String::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false) );
+      $saldoo = MyString::float( MyString::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false) );
 
       if ($con_saldo==false || $saldoo > 0)
       {

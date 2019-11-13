@@ -10,7 +10,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_pagar/agregar_abono?'.String::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_pagar/agregar_abono?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
 
           <input type="hidden" name="tcambio" value="<?php echo $this->input->get('tcambio') ?>">
           <div class="row-fluid">
@@ -30,7 +30,7 @@
                 <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
-                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                 <?php
                 }
                 ?>
@@ -124,8 +124,8 @@
               ?>
                 <tr style="font-weight:bold;">
                   <td>Totales</td>
-                  <td><?php echo String::formatoNumero($suma_saldo, 2, '$', false); ?></td>
-                  <td id="suma_monto"><?php echo String::formatoNumero($suma_monto, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($suma_saldo, 2, '$', false); ?></td>
+                  <td id="suma_monto"><?php echo MyString::formatoNumero($suma_monto, 2, '$', false); ?></td>
                 </tr>
               </tbody>
               </table>

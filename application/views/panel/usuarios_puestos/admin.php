@@ -27,7 +27,7 @@
 								<legend>Filtros</legend>
 
 								<label for="fnombre">Buscar</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
 									class="input-large search-query" placeholder="Tractorista, XDia" autofocus> |
 
 								<label for="fstatus">Estado</label>
@@ -41,7 +41,7 @@
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 						echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
@@ -77,7 +77,7 @@
 									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 								</td>
 								<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/modificar/', array(
 												'params'   => 'id='.$puesto->id_puesto,
 												'btn_type' => 'btn-success')
@@ -95,7 +95,7 @@
 													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el puesto?', 'usuarios_puestos', this); return false;"))
 											);
 										}
-										
+
 										?>
 								</td>
 							</tr>
@@ -106,7 +106,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $puestos['total_rows'],
 								'per_page'			=> $puestos['items_per_page'],
 								'cur_page'			=> $puestos['result_page']*$puestos['items_per_page'],

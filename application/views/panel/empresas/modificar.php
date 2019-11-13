@@ -14,7 +14,7 @@
 				</ul>
 			</div>
 
-			<form action="<?php echo base_url('panel/empresas/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="post"
+			<form action="<?php echo base_url('panel/empresas/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="post"
 				class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
 					<div class="box span12">

@@ -23,7 +23,7 @@
           <div class="box-content" id="box-content">
             <div class="row-fluid">
 
-              <form action="<?php echo base_url('panel/rastreabilidad_pinia?'.String::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
+              <form action="<?php echo base_url('panel/rastreabilidad_pinia?'.MyString::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
                 <div class="control-group span7">
                   <table class="table">
@@ -107,7 +107,7 @@
                 <tfoot>
                   <tr id="total_entradas">
                     <th colspan="2" style="text-align: right;">
-                      <span id="ftkilos_entrada_spn"><?php echo String::formatoNumero($total_kilos, 2, '', false) ?></span>
+                      <span id="ftkilos_entrada_spn"><?php echo MyString::formatoNumero($total_kilos, 2, '', false) ?></span>
                       <input type="hidden" id="ftkilos_entrada" value="<?php echo $total_kilos ?>" class="span12">
                     </th>
                     <th colspan="4">
@@ -205,7 +205,7 @@
                     <th colspan="2">
                     </th>
                     <th colspan="2" style="text-align: right;">
-                      <span id="ftkilos_rendimientos_spn"><?php echo String::formatoNumero($total_rendimientos, 2, '', false) ?></span>
+                      <span id="ftkilos_rendimientos_spn"><?php echo MyString::formatoNumero($total_rendimientos, 2, '', false) ?></span>
                       <input type="hidden" id="ftkilos_rendimientos" value="<?php echo $total_rendimientos ?>" class="span12">
                     </th>
                     <th></th>

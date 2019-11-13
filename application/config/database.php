@@ -55,8 +55,8 @@ $db['default']['database'] = 'sanjorge'; //
 $db['default']['dbdriver'] = 'postgre';
 $db['default']['port']	   = '5432';
 $db['default']['dbprefix'] = '';
-$db['default']['pconnect'] = TRUE;
-$db['default']['db_debug'] = TRUE;
+$db['default']['pconnect'] = FALSE;
+$db['default']['db_debug'] = FALSE;
 $db['default']['cache_on'] = FALSE;
 $db['default']['cachedir'] = '';
 $db['default']['char_set'] = 'utf8';
@@ -64,6 +64,23 @@ $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
+
+$db['firebird']['hostname'] = 'localhost';
+$db['firebird']['username'] = 'SYSDBA'; //
+$db['firebird']['password'] = 'masterkey'; //
+$db['firebird']['database'] = '/home/elgame/www/sanjorge/BDChecador/ACCESODB.FDB'; //
+$db['firebird']['dbdriver'] = 'firebird';
+$db['firebird']['port']     = '3050';
+$db['firebird']['dbprefix'] = '';
+$db['firebird']['pconnect'] = FALSE;
+$db['firebird']['db_debug'] = FALSE;
+$db['firebird']['cache_on'] = FALSE;
+$db['firebird']['cachedir'] = '';
+$db['firebird']['char_set'] = 'utf8';
+$db['firebird']['dbcollat'] = 'utf8_general_ci';
+$db['firebird']['swap_pre'] = '';
+$db['firebird']['autoinit'] = TRUE;
+$db['firebird']['stricton'] = FALSE;
 
 
 /* End of file database.php */

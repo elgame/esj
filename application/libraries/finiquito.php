@@ -500,8 +500,12 @@ class finiquito
     if ($this->despido_det['prima']) {
       // Prima de antigüedad 12 días de salario por cada año de servicio
       // SalariozonaB*2*años_trabajados*12
-      $prima_antiguedad = floatval($this->salariosZonasConfig->zona_b)*2*$this->empleado->anios_trabajados*12;
-      $prima_antiguedad += floatval($this->salariosZonasConfig->zona_b)*2*($this->empleado->dias_anio_vacaciones/365)*12;
+      $salario = floatval($this->salariosZonasConfig->zona_b)*2;
+      if ($salario > $this->empleado->salario_diario_integrado) {
+        $salario = $this->empleado->salario_diario_integrado;
+      }
+      $prima_antiguedad = $salario*$this->empleado->anios_trabajados*12;
+      $prima_antiguedad += $salario*($this->empleado->dias_anio_vacaciones/365)*12;
     }
 
     return round($despido_injustificado+$indemnisacion_negativa+$prima_antiguedad, 4);
@@ -608,7 +612,7 @@ class finiquito
     if (floatval($this->empleado->horas_extras_dinero) !== 0)
     {
       // $horasExtras = floatval($this->empleado->horas_extras_dinero) / $sueldoPorHora;
-      $topeExcento = 5 * $this->salariosZonasConfig->zona_b;
+      $topeExcento = 5 * $this->salariosZonasConfig->zona_a;
       $gravado = $excento = $this->empleado->horas_extras_dinero / 2;
 
       if ($excento > $topeExcento)
@@ -636,7 +640,7 @@ class finiquito
    */
   public function pAguinaldo()
   {
-    $topeExcento = 30 * floatval($this->salariosZonasConfig->zona_b);
+    $topeExcento = 30 * floatval($this->salariosZonasConfig->zona_a);
 
     // Si los que se le dara de aguinaldo al empleado excede el tope excento.
     if ($this->empleado->nomina->aguinaldo > $topeExcento)
@@ -686,7 +690,7 @@ class finiquito
    */
   public function pPrimaVacacional()
   {
-    $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_b);
+    $topeExcento = 15 * floatval($this->salariosZonasConfig->zona_a);
 
     // Si los que se le dara de aguinaldo al empleado excede el tope excento.
     if ($this->empleado->nomina->prima_vacacional > $topeExcento)
@@ -768,7 +772,7 @@ class finiquito
       $ptuTrabajador = $percepciones + $dias;
 
       // 15 * 61.38 = 920.7
-      $topeExcento = 15 * $this->salariosZonasConfig->zona_b;
+      $topeExcento = 15 * $this->salariosZonasConfig->zona_a;
 
       if ($ptuTrabajador > $topeExcento)
       {

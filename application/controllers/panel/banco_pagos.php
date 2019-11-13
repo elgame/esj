@@ -91,7 +91,12 @@ class banco_pagos extends MY_Controller {
   {
     $this->load->model('banco_pagos_model');
     $_GET['did_empresa'] = $_GET['ide'];
-    $this->banco_pagos_model->layoutBanamex();
+
+    if ($this->input->get('layout') === 'banamex') {
+      $this->banco_pagos_model->layoutBanamex();
+    } elseif ($this->input->get('layout') === 'bajio') {
+      $this->banco_pagos_model->layoutBajio();
+    }
   }
 
   public function aplica_pagos()

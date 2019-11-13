@@ -61,25 +61,6 @@ class caja_chica_prest extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
-  // public function caja2()
-  // {
-  //   $this->load->library('pagination');
-  //   $this->load->model('caja_chica_model');
-
-  //   $params['info_empleado']  = $this->info_empleado['info'];
-  //   $params['seo']        = array('titulo' => 'Caja chica 2');
-  //   $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
-
-  //   $this->db->query("SELECT refreshallmaterializedviews();");
-
-  //   if(isset($_GET['msg']{0}))
-  //     $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-  //   $this->load->view('panel/header',$params);
-  //   $this->load->view('panel/caja_chica/index2',$params);
-  //   $this->load->view('panel/footer',$params);
-  // }
-
   public function cargar()
   {
     $this->carabiner->js(array(
@@ -105,7 +86,7 @@ class caja_chica_prest extends MY_Controller {
       $res_mdl = $this->caja_chica_prest_model->guardar($_POST);
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/caja_chica_prest/cargar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+        redirect(base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
     }
 
     $params['info_empleado']  = $this->info_empleado['info'];
@@ -122,9 +103,7 @@ class caja_chica_prest extends MY_Controller {
     // $params['movimientos'] = $this->caja_chica_model->getMovimientos();
     $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
 
-    // echo "<pre>";
-    //   var_dump($params['remisiones']);
-    // echo "</pre>";exit;
+    $params['priv_saldar_prestamo'] = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica_prest/saldar_prestamos/');
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -169,6 +148,18 @@ class caja_chica_prest extends MY_Controller {
       if(!$res_mdl['error'])
         redirect(base_url('panel/caja_chica_prest/cargar?ffecha='.$_POST['fecha'].'&fno_caja='.$_POST['no_caja']));
     }
+  }
+
+  /**
+   * Saldar adeudos de prestamos a largo plazo
+   * @return [type] [description]
+   */
+  public function saldar_prestamos()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->saldarPrestamo($this->input->get('id'), $this->input->get('fecha'));
+
+    redirect(base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function ajax_saldar_adeudos()
@@ -424,7 +415,7 @@ class caja_chica_prest extends MY_Controller {
 
   //     if ($res_mdl)
   //     {
-  //       redirect(base_url('panel/caja_chica/categorias_agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+  //       redirect(base_url('panel/caja_chica/categorias_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
   //     }
   //   }
 
@@ -472,7 +463,7 @@ class caja_chica_prest extends MY_Controller {
 
   //     if ($res_mdl)
   //     {
-  //       redirect(base_url('panel/caja_chica/categorias_modificar/?'.String::getVarsLink(array('msg')).'&msg=5'));
+  //       redirect(base_url('panel/caja_chica/categorias_modificar/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
   //     }
   //   }
 
@@ -590,7 +581,7 @@ class caja_chica_prest extends MY_Controller {
 
   //     if ($res_mdl)
   //     {
-  //       redirect(base_url('panel/caja_chica/nomenclaturas_agregar/?'.String::getVarsLink(array('msg')).'&msg=8'));
+  //       redirect(base_url('panel/caja_chica/nomenclaturas_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
   //     }
   //   }
 
@@ -632,7 +623,7 @@ class caja_chica_prest extends MY_Controller {
 
   //     if ($res_mdl)
   //     {
-  //       redirect(base_url('panel/caja_chica/nomenclaturas_modificar/?'.String::getVarsLink(array('msg')).'&msg=9'));
+  //       redirect(base_url('panel/caja_chica/nomenclaturas_modificar/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
   //     }
   //   }
 
@@ -674,7 +665,7 @@ class caja_chica_prest extends MY_Controller {
     $this->load->model('caja_chica_prest_model');
     $this->caja_chica_prest_model->cerrarCaja($_GET['id'], $_GET['fno_caja']);
 
-    redirect(base_url('panel/caja_chica_prest/cargar/?'.String::getVarsLink(array('id', 'msg')).'&msg=7'));
+    redirect(base_url('panel/caja_chica_prest/cargar/?'.MyString::getVarsLink(array('id', 'msg')).'&msg=7'));
   }
 
   public function print_caja()

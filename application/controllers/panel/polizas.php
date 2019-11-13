@@ -139,7 +139,7 @@ class polizas extends MY_Controller {
 
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
       if( ! $res_mdl['error'])
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$ticket));
+        redirect(base_url('panel/bascula/agregar/?'.MyString::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$ticket));
     }
 
     $params['accion']      = 'n'; // indica que es nueva entrada

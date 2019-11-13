@@ -8,7 +8,8 @@ class productos extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'productos/ajax_get_familias/',
-			'productos/ajax_get_productos/',
+      'productos/ajax_get_productos/',
+			'productos/ajax_aut_productos/',
 			'productos/acomoda_codigos/',
 		);
 
@@ -17,7 +18,7 @@ class productos extends MY_Controller {
 		$this->load->model("usuarios_model");
 		if($this->usuarios_model->checkSession()){
 			$this->usuarios_model->excepcion_privilegio = $this->excepcion_privilegio;
-			$this->info_empleado                         = $this->usuarios_model->get_usuario_info($this->session->userdata('id_usuario'), true);
+			$this->info_empleado                        = $this->usuarios_model->get_usuario_info($this->session->userdata('id_usuario'), true);
 
 			if($this->usuarios_model->tienePrivilegioDe('', get_class($this).'/'.$method.'/')){
 				$this->{$method}();
@@ -151,7 +152,7 @@ class productos extends MY_Controller {
 			$this->load->view('panel/almacen/productos/modificar_familia', $params);
 		}
 		else
-			redirect(base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productos/modificar_familia/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -254,7 +255,7 @@ class productos extends MY_Controller {
 
 		$params['unidades'] = $this->productos_model->getUnidades(false);
 		$params['folio'] = $this->productos_model->getFolioNext($this->input->get('fid_familia'));
-
+    $params['familia'] = $this->productos_model->getFamiliaInfo($this->input->get('fid_familia'), true);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -274,7 +275,7 @@ class productos extends MY_Controller {
 				array('libs/jquery.uniform.css', 'screen'),
 			));
 			$this->carabiner->js(array(
-				array('libs/jquery.uniform.min.js'),
+				// array('libs/jquery.uniform.min.js'),
 				array('general/msgbox.js'),
         		array('libs/jquery.numeric.js'),
 				array('panel/almacen/agregar_familias.js'),
@@ -312,7 +313,7 @@ class productos extends MY_Controller {
 			$this->load->view('panel/almacen/productos/modificar_producto', $params);
 		}
 		else
-			redirect(base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productos/modificar_familia/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -369,6 +370,13 @@ class productos extends MY_Controller {
 				));
 	}
 
+  public function ajax_aut_productos(){
+    $this->load->model('productos_model');
+    $params = $this->productos_model->getProductosAjax();
+
+    echo json_encode($params);
+  }
+
 
 
   /*
@@ -402,6 +410,12 @@ class productos extends MY_Controller {
 	public function configAddModProducto($accion='agregar')
 	{
 		$this->load->library('form_validation');
+
+    $val_activo = false;
+    if (isset($_POST['tipo_familia']) && $_POST['tipo_familia'] == 'a') {
+      $val_activo = true;
+    }
+
 		$rules = array(
 			array('field' => 'fcodigo',
 						'label' => 'Codigo',
@@ -418,12 +432,22 @@ class productos extends MY_Controller {
 			array('field' => 'ubicacion',
 						'label' => 'Ubicacion',
 						'rules' => 'max_length[70]'),
-	      array('field' => 'fieps',
-			            'label' => 'IEPS',
-			            'rules' => 'numeric'),
+	    array('field' => 'fieps',
+            'label' => 'IEPS',
+            'rules' => 'numeric'),
 			array('field' => 'cuenta_contpaq',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'max_length[12]'),
+      array('field' => 'ftipo',
+            'label' => 'Tipo',
+            'rules' => ''),
+
+      array('field' => 'ftipo_activo',
+            'label' => 'Tipo',
+            'rules' => $val_activo? 'required': ''),
+      array('field' => 'fmonto',
+            'label' => 'Monto',
+            'rules' => $val_activo? 'required': ''),
 
 			array('field' => 'pnombre[]',
 						'label' => 'Presentacion',
@@ -452,9 +476,15 @@ class productos extends MY_Controller {
 			$id_familia = $this->input->post('ffamilia');
 		}
 
+    $str = mb_strtolower($str, 'UTF-8');
+    $codigo = explode('-', $str);
+    if (count($codigo) > 1) {
+      $str = "{$codigo[0]}-{$codigo[1]}";
+    }
+
 		$res = $this->db->select('Count(id_producto) AS num')
 			->from('productos')
-			->where("status <> 'e' AND id_familia = ".$id_familia." AND codigo = '".$str."'".$sql)->get()->row();
+			->where("status <> 'e' AND id_familia = ".$id_familia." AND lower(codigo) LIKE '".$str."%'".$sql)->get()->row();
 		if($res->num == '0')
 			return true;
 

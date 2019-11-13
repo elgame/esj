@@ -11,11 +11,13 @@
     eventOnChangeHorasExtras();
     eventOnChangeDescuentoPlayeras();
     eventOnChangeDescuentoOtros();
+    eventOnChangeDescuentoCocina();
     eventClickCheckVacaciones();
     eventClickCheckAguinaldo();
     eventOnSubmitForm();
     eventOnClickButtonPtu();
     eventOnKeyPressUtilidadEmpresas();
+    // calculoAnual();
 
     if (parseFloat($('#totales-ptu-input').val()) > 0) {
       $('#ptu').val($('#totales-ptu-input').val());
@@ -73,6 +75,13 @@
 
   var eventOnChangeDescuentoOtros = function () {
     $('.descuento-otros').on('change', function(event) {
+      recalculaEmpleado($(this).parents('tr'));
+      guardaPreNominaEmpleado($(this).parents('tr'));
+    });
+  };
+
+  var eventOnChangeDescuentoCocina = function () {
+    $('.descuento-cocina').on('change', function(event) {
       recalculaEmpleado($(this).parents('tr'));
       guardaPreNominaEmpleado($(this).parents('tr'));
     });
@@ -183,12 +192,27 @@
         idUltimoError = 0;
         // Ciclo para recorrer todos los <tr> de los empleado.
         $('.tr-empleado').each(function(index, el) {
-          console.log($(this).find('.generar-nomina').val());
           if ($(this).find('.generar-nomina').val() === '1') {
             guardaNominaEmpleado($(this));
           }
         });
         // guardaNominaEmpleado($("#empleado6"));
+      }
+    });
+
+    $('#timbrarNomina').on('click', function(event) {
+      if ($('.sin-curp').length !== 0) {
+        event.preventDefault();
+        noty({"text": 'No se puede timbrar la nomina porque existen empleados que no cuentan con su CURP.', "layout":"topRight", "type": 'error'});
+      } else {
+        errorTimbrar = false;
+        idUltimoError = 0;
+        // Ciclo para recorrer todos los <tr> de los empleado.
+        $('.tr-empleado').each(function(index, el) {
+          if ($(this).find('.generar-nomina').val() === '1') {
+            guardaNominaEmpleado($(this), 'timbrar');
+          }
+        });
       }
     });
   };
@@ -259,6 +283,7 @@
         $prestamos  = $parent.find('.prestamos'),
         $playeras   = $parent.find('.descuento-playeras'),
         $dotros     = $parent.find('.descuento-otros'),
+        $dcocina    = $parent.find('.descuento-cocina'),
         $isr        = $parent.find('.isr'),
         $fondo_ahorro = $parent.find('.fondo_ahorro'),
 
@@ -299,6 +324,10 @@
 
     if ($dotros.val() === '') {
       $dotros.val(0);
+    }
+
+    if ($dcocina.val() === '') {
+      $dcocina.val(0);
     }
 
     // Si activa las vacaciones entonces sumas las vacaciones y la prima
@@ -360,7 +389,8 @@
                        parseFloat($infonavit.val())-
                        parseFloat($prestamos.val()) -
                        parseFloat($playeras.val()) -
-                       parseFloat($dotros.val());
+                       parseFloat($dotros.val()) -
+                       parseFloat($dcocina.val());
 
     $totalComplementoSpan.text(util.darFormatoNum(util.trunc2Dec(totalComplemento)));
     $totalComplemento.val(util.trunc2Dec(totalComplemento));
@@ -381,6 +411,7 @@
         $tdTotalesPercepciones = $('#totales-percepciones'),
         $tdTotalesDescuentoPlayeras = $('#totales-descuento-playeras'),
         $tdTotalesDescuentoOtros = $('#totales-descuento-otros'),
+        $tdTotalesDescuentoCocina = $('#totales-descuento-cocina'),
         $tdTotalesIsrs = $('#totales-isrs'),
         $tdTotalesDeducciones = $('#totales-deducciones'),
         $tdTotalesTransferencias = $('#totales-transferencias'),
@@ -394,6 +425,7 @@
         totalesPercepciones = 0,
         totalesDescuentoPlayeras = 0,
         totalesDescuentoOtros = 0,
+        totalesDescuentoCocina = 0,
         totalesIsrs = 0,
         totalesDeducciones = 0,
         totalesTransferencias = 0,
@@ -416,6 +448,7 @@
       totalesPercepciones += parseFloat($tr.find('.total-percepciones').val());
       totalesDescuentoPlayeras += parseFloat($tr.find('.descuento-playeras').val());
       totalesDescuentoOtros += parseFloat($tr.find('.descuento-otros').val());
+      totalesDescuentoCocina += parseFloat($tr.find('.descuento-cocina').val());
       totalesDeducciones += parseFloat($tr.find('.total-deducciones').val());
       totalesTransferencias += parseFloat($tr.find('.total-nomina').val());
       totalesComplementos += parseFloat($tr.find('.total-complemento').val());
@@ -430,6 +463,7 @@
     $tdTotalesPercepciones.text(util.darFormatoNum(totalesPercepciones));
     $tdTotalesDescuentoPlayeras.text(util.darFormatoNum(totalesDescuentoPlayeras));
     $tdTotalesDescuentoOtros.text(util.darFormatoNum(totalesDescuentoOtros));
+    $tdTotalesDescuentoCocina.text(util.darFormatoNum(totalesDescuentoCocina));
     $tdTotalesIsrs.text(util.darFormatoNum(totalesIsrs));
     $tdTotalesDeducciones.text(util.darFormatoNum(totalesDeducciones));
     $tdTotalesTransferencias.text(util.darFormatoNum(totalesTransferencias));
@@ -484,12 +518,13 @@
 
 
   var errorTimbrar = false, // Auxiliar para saber si ocurrio algun error al timbrar.
-      idUltimoError = 0; // Auxiliar para saber cual id de empleado fue el ultimo que no se timbro.
+      idUltimoError = 0, // Auxiliar para saber cual id de empleado fue el ultimo que no se timbro.
+      closeNomina = false;
 
-  var guardaNominaEmpleado = function ($tr) {
+  var guardaNominaEmpleado = function ($tr, $tipo = 'guardar') {
     loader.create();
     $.ajax({
-      url: base_url + 'panel/nomina_fiscal/ajax_add_nomina_empleado/',
+      url: base_url + 'panel/nomina_fiscal/'+($tipo === 'guardar'? 'ajax_add_nomina_empleado/': 'ajax_timbrar_nomina_empleado/'),
       type: 'POST',
       dataType: 'json',
       data: {
@@ -501,7 +536,9 @@
         horas_extras: $tr.find('.horas-extras').val(),
         descuento_playeras: $tr.find('.descuento-playeras').val(),
         descuento_otros: $tr.find('.descuento-otros').val(),
+        descuento_cocina: $tr.find('.descuento-cocina').val(),
         subsidio: $tr.find('.subsidio').val(),
+        subsidioCausado: $tr.find('.subsidioCausado').val(),
         isr: $tr.find('.isr').val(),
         utilidad_empresa: $('#ptu').val(),
         con_vacaciones: $tr.find('.con-vacaciones').val(),
@@ -522,23 +559,38 @@
       }
 
       // Si el empleado que se timbro es el ultimo que se tenia que timbrar
-      if (result.ultimoNoGenerado == result.empleadoId) {
-        if (errorTimbrar === false) {
-          // agrega la nomina a terminadas
-          $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
-            empresa_id: $('#empresaId').val(),
-            anio: $('#anio').val(),
-            semana: $('#semanas').find('option:selected').val(),
-            tipo: 'se'
-          }, function(data, textStatus, xhr) {
-            alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
-            // location.reload();
-          });
-        } else {
-          $('#ultimo-no-generado').val(idUltimoError);
-          alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
+      setTimeout(function () {
+        if (!closeNomina) {
+          if (errorTimbrar === false) {
+            if ($('.tr-empleado .generar-nomina[value=1]').length == 0) {
+              closeNomina = true;
+
+              if ($tipo === 'guardar') {
+                // agrega la nomina a terminadas
+                $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
+                  empresa_id: $('#empresaId').val(),
+                  anio: $('#anio').val(),
+                  semana: $('#semanas').find('option:selected').val(),
+                  tipo: 'se'
+                }, function(data, textStatus, xhr) {
+                  alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
+                  location.reload();
+                });
+              } else {
+                alert('Terminado. Las nomina se timbraron correctamente. De click en Aceptar!!!');
+                location.reload();
+              }
+            } else {
+              console.log(result);
+            }
+          } else {
+            if (result.ultimoNoGenerado == result.empleadoId) {
+              $('#ultimo-no-generado').val(idUltimoError);
+              alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
+            }
+          }
         }
-      }
+      }, Math.floor((Math.random() * 350) + 90));
 
       loader.close();
     })
@@ -561,6 +613,7 @@
         horas_extras: $tr.find('.horas-extras').val(),
         descuento_playeras: $tr.find('.descuento-playeras').val(),
         descuento_otros: $tr.find('.descuento-otros').val(),
+        descuento_cocina: $tr.find('.descuento-cocina').val(),
       },
     })
     .done(function(result) {
@@ -582,6 +635,13 @@
           html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
         }
         $('#semanas').html(html);
+    });
+  };
+
+
+  var calculoAnual = function () {
+    $('#calculoAnual').on('click', function(event) {
+
     });
   };
 

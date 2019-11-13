@@ -10,6 +10,8 @@ class rastreabilidad_pallets extends MY_Controller {
     'rastreabilidad_pallets/ajax_get_rendimientos/',
     'rastreabilidad_pallets/dd/',
     'rastreabilidad_pallets/ajax_get_folio/',
+    'rastreabilidad_pallets/ajax_get_pallets/',
+    'rastreabilidad_pallets/ajax_get_info_pallet/',
     );
 
   public function _remap($method){
@@ -90,7 +92,7 @@ class rastreabilidad_pallets extends MY_Controller {
     {
       $res_mdl = $this->rastreabilidad_pallets_model->addPallet();
 
-      redirect(base_url('panel/rastreabilidad_pallets/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      redirect(base_url('panel/rastreabilidad_pallets/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
 
     $params['areas'] = $this->areas_model->getAreas();
@@ -110,6 +112,9 @@ class rastreabilidad_pallets extends MY_Controller {
     }
 
     $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($params['area_default']);
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
     // $params['calibres'] = $this->calibres_model->getCalibres();
 
@@ -162,7 +167,7 @@ class rastreabilidad_pallets extends MY_Controller {
       {
         $res_mdl = $this->rastreabilidad_pallets_model->updatePallet($_GET['id']);
 
-        redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/rastreabilidad_pallets/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
       }
 
       $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
@@ -182,6 +187,9 @@ class rastreabilidad_pallets extends MY_Controller {
         }
       }
 
+      // Obtiene los datos de la empresa predeterminada.
+      $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -190,7 +198,7 @@ class rastreabilidad_pallets extends MY_Controller {
       $this->load->view('panel/rastreabilidad/pallets/modificar', $params);
       $this->load->view('panel/footer');
     }else
-      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/rastreabilidad_pallets/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -210,10 +218,10 @@ class rastreabilidad_pallets extends MY_Controller {
       $this->load->model('rastreabilidad_pallets_model');
       $delAll = isset($_GET['d']) ? true : false;
       $res_mdl = $this->rastreabilidad_pallets_model->deletePallet( $this->input->get('id'), $delAll );
-      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      redirect(base_url('panel/rastreabilidad_pallets/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
     else
-      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/rastreabilidad_pallets/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -235,6 +243,22 @@ class rastreabilidad_pallets extends MY_Controller {
       $this->load->model('rastreabilidad_pallets_model');
       $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($_GET['darea']);
     }
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_pallets(){
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $params = $this->rastreabilidad_pallets_model->getPallets(false);
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_info_pallet(){
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $params = $this->rastreabilidad_pallets_model->getInfoPallet($this->input->get('id_pallet'));
 
     echo json_encode($params);
   }
@@ -319,8 +343,8 @@ class rastreabilidad_pallets extends MY_Controller {
       foreach ($_POST['ps_id'] as $key => $value) {
         if (floatval($value) > 0) {
           $item = $this->inventario_model->getEPUData($value);
-          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( String::float($existencia-$_POST['ps_num'][$key]) < 0) {
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( MyString::float($existencia-$_POST['ps_num'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')';
           }
         }

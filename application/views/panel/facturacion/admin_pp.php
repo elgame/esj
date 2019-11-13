@@ -40,9 +40,9 @@
                 <input type="text" name="dobserv" class="input-large search-query" id="dobserv" value="<?php echo set_value_get('dobserv'); ?>" size="73">
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date("Y-m-01\TH:i")); ?>" size="10">
+                <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date("Y-m-01")); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
+                <input type="date" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
                 <label for="fstatus">Estado</label>
                 <select name="fstatus" class="input-medium" id="fstatus">
@@ -94,7 +94,7 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><?php echo String::formatoNumero($fact->total, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($fact->total, 2, '$', false); ?></td>
                   <td><?php echo $fact->observaciones; ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
@@ -186,7 +186,7 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><?php echo String::formatoNumero($fact->monto, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($fact->monto, 2, '$', false); ?></td>
                   <td></td>
                   <td></td>
                   <td><?php
@@ -205,13 +205,15 @@
 
                     <a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
                       <i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
+                    <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/xml_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
+                      <i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>
                     <?php
-                      if ($fact->status !== 'cancelada')
-                      {
+                      // if ($fact->status !== 'cancelada')
+                      // {
                         echo '<a class="btn btn-danger" href="'.base_url('panel/cuentas_cobrar/cancelar_com_pago/?id='.$fact->id).'"
                           onclick="msb.confirm(\'Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>\', \'Facturas\', this); return false;" title="Cancelar">
                         <i class="icon-ban-circle icon-white"></i> <span class="hidden-tablet">Cancelar</span></a>';
-                      }
+                      // }
 
                       // if ($fact->status !== 'b')
                       // {
@@ -243,10 +245,27 @@
             if (isset($datos_s)) {
               //Paginacion
               $this->pagination->initialize(array(
-                  'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                   'total_rows'    => $datos_s['total_rows'],
                   'per_page'      => $datos_s['items_per_page'],
                   'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],
+                  'page_query_string' => TRUE,
+                  'num_links'     => 1,
+                  'anchor_class'  => 'pags corner-all',
+                  'num_tag_open'  => '<li>',
+                  'num_tag_close' => '</li>',
+                  'cur_tag_open'  => '<li class="active"><a href="#">',
+                  'cur_tag_close' => '</a></li>'
+              ));
+              $pagination = $this->pagination->create_links();
+              echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+            } elseif (isset($datos_cp)) {
+              //Paginacion
+              $this->pagination->initialize(array(
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
+                  'total_rows'    => $datos_cp['total_rows'],
+                  'per_page'      => $datos_cp['items_per_page'],
+                  'cur_page'      => $datos_cp['result_page']*$datos_cp['items_per_page'],
                   'page_query_string' => TRUE,
                   'num_links'     => 1,
                   'anchor_class'  => 'pags corner-all',

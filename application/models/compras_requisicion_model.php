@@ -68,9 +68,9 @@ class compras_requisicion_model extends CI_Model {
                 co.autorizado
         FROM compras_requisicion AS co
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
-        INNER JOIN compras_requisicion_productos AS crp ON co.id_requisicion = crp.id_requisicion
-        INNER JOIN proveedores AS p ON p.id_proveedor = crp.id_proveedor
+        LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
+        LEFT JOIN compras_requisicion_productos AS crp ON co.id_requisicion = crp.id_requisicion
+        LEFT JOIN proveedores AS p ON p.id_proveedor = crp.id_proveedor
         INNER JOIN usuarios AS u ON u.id = co.id_empleado
         LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
         WHERE co.status <> 'n'  {$sql}
@@ -102,7 +102,7 @@ class compras_requisicion_model extends CI_Model {
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
       // 'id_proveedor' => $_POST['proveedorId'],
-      'id_departamento' => $_POST['departamento'],
+      'id_departamento' => (is_numeric($_POST['departamento'])? $_POST['departamento']: NULL),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $_POST['folio'],
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
@@ -111,8 +111,26 @@ class compras_requisicion_model extends CI_Model {
       'solicito'        => $_POST['solicito'],
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       'descripcion'     => $_POST['descripcion'],
-      'id_almacen'      => $_POST['id_almacen'],
+      'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
     );
+
+    // Si es un gasto son requeridos los campos de catálogos
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+        || $_POST['tipoOrden'] == 'p') {
+      $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+      // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
+      // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+
+      // if ($_POST['tipoOrden'] !== 'a') {
+      //   $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
+      // }
+    }
+
+    //si es una receta
+    if (isset($_POST['es_receta']))
+    {
+      $data['es_receta'] = $_POST['es_receta'];
+    }
 
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
@@ -126,8 +144,29 @@ class compras_requisicion_model extends CI_Model {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
     }
+
+    // Si trae datos extras
+    $data['otros_datos'] = [];
+    if ($this->input->post('infRecogerProv') != false) {
+      $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+      $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+    }
+    if ($this->input->post('infPasarBascula') != false) {
+      $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+    }
+    if ($this->input->post('infEntOrdenCom') != false) {
+      $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+    }
+    if ($this->input->post('infCotizacion') != false) {
+      $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+    }
+    if ($this->input->post('no_recetas') != false) {
+      $data['otros_datos']['noRecetas'] = explode(',', $_POST['no_recetas']);
+    }
+    $data['otros_datos'] = json_encode($data['otros_datos']);
+
     $this->db->insert('compras_requisicion', $data);
-    $ordenId = $this->db->insert_id();
+    $ordenId = $this->db->insert_id('compras_requisicion_id_requisicion_seq');
 
     // Bitacora
     $this->bitacora_model->_insert('compras_requisicion', $ordenId,
@@ -135,6 +174,32 @@ class compras_requisicion_model extends CI_Model {
                                           ':folio'      => $data['folio'],
                                           ':id_empresa' => $data['id_empresa'],
                                           ':empresa'    => 'en '.$this->input->post('empresa')));
+
+    // Si es un gasto son requeridos los campos de catálogos
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+        || $_POST['tipoOrden'] == 'p') {
+      // Inserta los ranchos
+      if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+        foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+          $this->db->insert('compras_requisicion_rancho', [
+            'id_rancho'      => $id_rancho,
+            'id_requisicion' => $ordenId,
+            'num'            => count($_POST['ranchoId'])
+          ]);
+        }
+      }
+
+      // Inserta los centros de costo
+      if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+        foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+          $this->db->insert('compras_requisicion_centro_costo', [
+            'id_centro_costo' => $id_centro_costo,
+            'id_requisicion'  => $ordenId,
+            'num'             => count($_POST['centroCostoId'])
+          ]);
+        }
+      }
+    }
 
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
@@ -152,50 +217,49 @@ class compras_requisicion_model extends CI_Model {
     }
 
     $productos = array();
-    foreach (array('1', '2', '3') as $value)
+    foreach (array('1') as $value)
     {
-      $id_proveedor = $_POST['proveedorId'.$value];
-      if($id_proveedor != '')
+      foreach ($_POST['concepto'] as $key => $concepto)
       {
-        foreach ($_POST['concepto'] as $key => $concepto)
-        {
-          if ($_POST['presentacionCant'][$key] !== '')
-          {
-            $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-            $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
-          }
-          else
-          {
-            $cantidad = $_POST['cantidad'][$key];
-            $pu       = $_POST['valorUnitario'.$value][$key];
-          }
+        $id_proveedor = $_POST['proveedorId'][$key];
 
-          $productos[] = array(
-            'id_requisicion'       => $ordenId,
-            'id_proveedor'         => $id_proveedor,
-            'num_row'              => $key,
-            'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-            'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-            'descripcion'          => $concepto,
-            'cantidad'             => $cantidad,
-            'precio_unitario'      => $pu,
-            'importe'              => $_POST['importe'.$value][$key],
-            'iva'                  => $_POST['trasladoTotal'.$value][$key],
-            'retencion_iva'        => $_POST['retTotal'.$value][$key],
-            'total'                => $_POST['total'.$value][$key],
-            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-            'porcentaje_retencion' => $_POST['ret_iva'][$key],
-            // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-            'observacion'          => $_POST['observacion'][$key],
-            'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-            'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-            // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-            'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-            'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-          );
+        if ($_POST['presentacionCant'][$key] !== '')
+        {
+          $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+          $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
         }
+        else
+        {
+          $cantidad = $_POST['cantidad'][$key];
+          $pu       = $_POST['valorUnitario'.$value][$key];
+        }
+
+        $productos[] = array(
+          'id_requisicion'       => $ordenId,
+          'id_proveedor'         => $id_proveedor,
+          'num_row'              => $key,
+          'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
+          'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
+          'descripcion'          => $concepto,
+          'cantidad'             => $cantidad,
+          'precio_unitario'      => $pu,
+          'importe'              => $_POST['importe'.$value][$key],
+          'iva'                  => $_POST['trasladoTotal'.$value][$key],
+          'retencion_iva'        => $_POST['retTotal'.$value][$key],
+          'total'                => $_POST['total'.$value][$key],
+          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+          'porcentaje_retencion' => $_POST['ret_iva'][$key],
+          // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
+          'observacion'          => $_POST['observacion'][$key],
+          'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
+          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+          'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+        );
       }
     }
 
@@ -269,6 +333,42 @@ class compras_requisicion_model extends CI_Model {
         'id_almacen'      => $_POST['id_almacen'],
       );
 
+      // Si es un gasto son requeridos los campos de catálogos
+      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
+          || $_POST['tipoOrden'] == 'p') {
+        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+        // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
+        // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
+
+        // Inserta los ranchos
+        $this->db->delete('compras_requisicion_rancho', ['id_requisicion' => $idOrden]);
+        if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+          foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+            $this->db->insert('compras_requisicion_rancho', [
+              'id_rancho'      => $id_rancho,
+              'id_requisicion' => $idOrden,
+              'num'            => count($_POST['ranchoId'])
+            ]);
+          }
+        }
+
+        // Inserta los centros de costo
+        $this->db->delete('compras_requisicion_centro_costo', ['id_requisicion' => $idOrden]);
+        if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+          foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+            $this->db->insert('compras_requisicion_centro_costo', [
+              'id_centro_costo' => $id_centro_costo,
+              'id_requisicion'  => $idOrden,
+              'num'             => count($_POST['centroCostoId'])
+            ]);
+          }
+        }
+
+        if ($_POST['tipoOrden'] !== 'a') {
+          $data['id_activo'] = $this->input->post('activoId')? $this->input->post('activoId'): NULL;
+        }
+      }
+
       if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true')
       {
         $data['id_autorizo']        = $_POST['autorizoId']; //$this->session->userdata('id_usuario');
@@ -284,6 +384,13 @@ class compras_requisicion_model extends CI_Model {
       //   $data['status']      = 'p';
       // //   $data['autorizado']  = 'f';
       // }
+
+      //si es una receta
+      $data['es_receta'] = 'f';
+      if (isset($_POST['es_receta']))
+      {
+        $data['es_receta'] = 't';
+      }
 
       //si se registra a un vehiculo
       if (isset($_POST['es_vehiculo']))
@@ -302,6 +409,26 @@ class compras_requisicion_model extends CI_Model {
         $data['flete_de'] = $_POST['fleteDe'];
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       }
+
+      // Si trae datos extras
+      $data['otros_datos'] = [];
+      if ($this->input->post('infRecogerProv') != false) {
+        $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
+        $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
+      }
+      if ($this->input->post('infPasarBascula') != false) {
+        $data['otros_datos']['infPasarBascula'] = $_POST['infPasarBascula'];
+      }
+      if ($this->input->post('infEntOrdenCom') != false) {
+        $data['otros_datos']['infEntOrdenCom'] = $_POST['infEntOrdenCom'];
+      }
+      if ($this->input->post('infCotizacion') != false) {
+        $data['otros_datos']['infCotizacion'] = $_POST['infCotizacion'];
+      }
+      if ($this->input->post('no_recetas') != false) {
+        $data['otros_datos']['noRecetas'] = explode(',', $_POST['no_recetas']);
+      }
+      $data['otros_datos'] = json_encode($data['otros_datos']);
 
       // Bitacora
       $id_bitacora = $this->bitacora_model->_update('compras_requisicion', $idOrden, $data,
@@ -335,59 +462,58 @@ class compras_requisicion_model extends CI_Model {
       }
 
       $productos = array();
-      foreach (array('1', '2', '3') as $value)
+      foreach (array('1') as $value)
       {
-        $id_proveedor = $_POST['proveedorId'.$value];
-        if($id_proveedor != '')
+        foreach ($_POST['concepto'] as $key => $concepto)
         {
-          foreach ($_POST['concepto'] as $key => $concepto)
+          $id_proveedor = $_POST['proveedorId'][$key];
+          if ($_POST['presentacionCant'][$key] !== '')
           {
-            if ($_POST['presentacionCant'][$key] !== '')
-            {
-              $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
-              $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
-            }
-            else
-            {
-              $cantidad = $_POST['cantidad'][$key];
-              $pu       = $_POST['valorUnitario'.$value][$key];
-            }
-
-            $prod_sel = 'f';
-            if (isset($_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0]) &&
-                $_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0] == $id_proveedor &&
-                isset($data['autorizado']))
-            {
-              $prod_sel = 't';
-            }
-
-            $productos[] = array(
-              'id_requisicion'       => $idOrden,
-              'id_proveedor'         => $id_proveedor,
-              'num_row'              => $key,
-              'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-              'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-              'descripcion'          => $concepto,
-              'cantidad'             => $cantidad,
-              'precio_unitario'      => $pu,
-              'importe'              => $_POST['importe'.$value][$key],
-              'iva'                  => $_POST['trasladoTotal'.$value][$key],
-              'retencion_iva'        => $_POST['retTotal'.$value][$key],
-              'total'                => $_POST['total'.$value][$key],
-              'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-              'porcentaje_retencion' => $_POST['ret_iva'][$key],
-              // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-              'observacion'          => $_POST['observacion'][$key],
-              'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-              'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-              'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-              // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-              $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-              'prod_sel'             => $prod_sel,
-              'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-              'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-            );
+            $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+            $pu       = floatval($_POST['valorUnitario'.$value][$key]) / floatval($_POST['presentacionCant'][$key]);
           }
+          else
+          {
+            $cantidad = $_POST['cantidad'][$key];
+            $pu       = $_POST['valorUnitario'.$value][$key];
+          }
+
+          $prod_sel = 'f';
+          if (isset($_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0]) &&
+              $_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0] == $id_proveedor &&
+              isset($data['autorizado']))
+          {
+            $prod_sel = 't';
+          }
+
+          $productos[] = array(
+            'id_requisicion'       => $idOrden,
+            'id_proveedor'         => $id_proveedor,
+            'num_row'              => $key,
+            'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
+            'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
+            'descripcion'          => $concepto,
+            'cantidad'             => $cantidad,
+            'precio_unitario'      => $pu,
+            'importe'              => $_POST['importe'.$value][$key],
+            'iva'                  => $_POST['trasladoTotal'.$value][$key],
+            'retencion_iva'        => $_POST['retTotal'.$value][$key],
+            'total'                => $_POST['total'.$value][$key],
+            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+            'porcentaje_retencion' => $_POST['ret_iva'][$key],
+            // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
+            'observacion'          => $_POST['observacion'][$key],
+            'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
+            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+            'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+            // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            // $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            'prod_sel'             => $prod_sel,
+            'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+            'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+            'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+          );
         }
       }
 
@@ -396,10 +522,8 @@ class compras_requisicion_model extends CI_Model {
                                 array(':id'             => 'id_requisicion',
                                       ':titulo'         => 'Productos',
                                       ':updates_fields' => 'compras_requisicion_productos'));
-
       $this->db->delete('compras_requisicion_productos', array('id_requisicion' => $idOrden));
       $this->db->insert_batch('compras_requisicion_productos', $productos);
-
 
       // Generar las ordenes compra
       if(isset($data['autorizado']))
@@ -436,6 +560,7 @@ class compras_requisicion_model extends CI_Model {
     {
       if(isset($value['productos']) && count($value['productos']) > 0)
       {
+        $dataOrdenCats = null;
         $dataOrden = array(
           'id_empresa'         => $data->id_empresa,
           'id_proveedor'       => $value['id_proveedor'],
@@ -445,7 +570,7 @@ class compras_requisicion_model extends CI_Model {
           'status'             => 'p',
           'autorizado'         => 't',
           'fecha_autorizacion' => $data->fecha_autorizacion,
-          'fecha_aceptacion'   => $data->fecha_aceptacion,
+          'fecha_aceptacion'   => substr($data->fecha_aceptacion, 0, 19),
           'fecha_creacion'     => $data->fecha,
           'tipo_pago'          => $data->tipo_pago,
           'tipo_orden'         => $data->tipo_orden,
@@ -454,7 +579,74 @@ class compras_requisicion_model extends CI_Model {
           'descripcion'        => $data->descripcion,
           'id_autorizo'        => $data->id_autorizo,
           'id_almacen'         => $data->id_almacen,
+          'es_receta'          => $data->es_receta,
         );
+
+        $dataOrdenCats['requisiciones'][] = [
+          'id_requisicion' => $idOrden,
+          'id_orden'       => '',
+          'num_row'        => 0
+        ];
+
+        // Si es un gasto son requeridos los campos de catálogos
+        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
+            || $data->tipo_orden == 'p') {
+          // $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+          // Inserta las areas
+          if (isset($data->id_area) && $data->id_area > 0) {
+            $dataOrdenCats['area'][] = [
+              'id_area' => $data->id_area,
+              'id_orden'  => '',
+              'num'       => 1
+            ];
+          }
+
+          // Inserta los ranchos
+          if (isset($data->rancho) && count($data->rancho) > 0) {
+            foreach ($data->rancho as $keyr => $drancho) {
+              $dataOrdenCats['rancho'][] = [
+                'id_rancho' => $drancho->id_rancho,
+                'id_orden'  => '',
+                'num'       => $drancho->num
+              ];
+            }
+          }
+
+          // Inserta los centros de costo
+          if (isset($data->centroCosto) && count($data->centroCosto) > 0) {
+            foreach ($data->centroCosto as $keyr => $dcentro_costo) {
+              $dataOrdenCats['centroCosto'][] = [
+                'id_centro_costo' => $dcentro_costo->id_centro_costo,
+                'id_orden'        => '',
+                'num'             => $dcentro_costo->num
+              ];
+            }
+          }
+
+          // Inserta los activos
+          $or_activos = array();
+          foreach ($value['productos'] as $keypr => $prod)
+          {
+            // activos
+            if (isset($prod->activos) && !empty($prod->activos)) {
+              foreach ($prod->activos as $kact => $activ) {
+                if (!isset($or_activos[$kact])) {
+                  $or_activos[$activ->id] = $activ;
+                }
+              }
+            }
+          }
+          if (isset($or_activos) && count($or_activos) > 0) {
+            foreach ($or_activos as $orkey => $activ) {
+              $dataOrdenCats['activo'][] = [
+                'id_activo' => $orkey,
+                'id_orden'  => '',
+                'num'       => count($or_activos)
+              ];
+            }
+          }
+        }
+
         //si se registra a un vehiculo
         if (is_numeric($data->id_vehiculo))
         {
@@ -484,7 +676,15 @@ class compras_requisicion_model extends CI_Model {
           }
         }
 
-        $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData);
+        // Si trae datos extras
+        $dataOrden['otros_datos'] = [];
+        if (isset($data->otros_datos->infRecogerProv) || isset($data->otros_datos->infPasarBascula) ||
+            isset($data->otros_datos->infEntOrdenCom)) {
+          $dataOrden['otros_datos'] = $data->otros_datos;
+        }
+        $dataOrden['otros_datos'] = json_encode($dataOrden['otros_datos']);
+
+        $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
         $id_orden = $res['id_orden'];
 
         // Productos
@@ -709,25 +909,31 @@ class compras_requisicion_model extends CI_Model {
               co.solicito as empleado_solicito, co.descripcion,
               co.id_vehiculo,
               co.tipo_vehiculo,
+              co.es_receta,
               COALESCE(cv.placa, null) as placa,
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
-              co.flete_de, co.id_almacen
-       FROM compras_requisicion AS co
+              co.flete_de, co.id_almacen, ca.nombre AS almacen,
+              co.id_area, co.id_activo,
+              otros_datos
+      FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-       INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
+       LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
-       WHERE co.id_requisicion = {$idOrden}");
+       LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
+      WHERE co.id_requisicion = {$idOrden}");
 
     $data = array();
     if ($query->num_rows() > 0)
     {
       $data['info'] = $query->result();
+
+      $data['info'][0]->otros_datos = json_decode($data['info'][0]->otros_datos);
 
       $query->free_result();
       if ($full)
@@ -735,7 +941,7 @@ class compras_requisicion_model extends CI_Model {
         $sql_produc = $prodAcep? " AND cp.prod_sel = 't'": '';
         // $sql_produc .= $idCompra!==NULL? " AND (cp.id_compra = {$idCompra} OR (cp.id_compra IS NULL AND Date(cp.fecha_aceptacion) <= '2014-05-26'))": '';
         $query = $this->db->query(
-          "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal,
+          "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal AS proveedor,
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
@@ -743,7 +949,8 @@ class compras_requisicion_model extends CI_Model {
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo,
+                  activos
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
@@ -760,47 +967,38 @@ class compras_requisicion_model extends CI_Model {
         if ($query->num_rows() > 0)
         {
           $productos = $query->result();
-          $provee = $productos[0]->id_proveedor;
           foreach ($productos as $key => $value)
           {
+            if (!empty($value->activos)) {
+              $value->activos = json_decode($value->activos);
+            }
             $data['info'][0]->productos2[] = clone $value;
 
             $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor,
-                                                          'nombre_fiscal' => $value->nombre_fiscal);
+                                                          'nombre_fiscal' => $value->proveedor);
 
-            if($provee == $value->id_proveedor)
-            {
-                // $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
-                // $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
-              if($value->id_area != '')
-                $data['info'][0]->data_desCodigos[] = $this->{($value->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($value->id_area);
+              // $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
+              // $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
+            if($value->id_area != '')
+              $data['info'][0]->data_desCodigos[] = $this->{($value->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($value->id_area);
 
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'importe'.$value->id_proveedor}         = $value->importe;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'iva'.$value->id_proveedor}             = $value->iva;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
+            // var_dump ($value->id_producto.$value->num_row, $value);
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'importe'.$value->id_proveedor}         = $value->importe;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'iva'.$value->id_proveedor}             = $value->iva;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
 
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->iva                                      = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_iva                            = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->total                                    = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->ieps                                     = 0;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_isr                            = 0;
-            }else
-            {
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'importe'.$value->id_proveedor}         = $value->importe;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'iva'.$value->id_proveedor}             = $value->iva;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
-              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
-            }
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->iva                                      = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_iva                            = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->total                                    = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->ieps                                     = 0;
+            $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_isr                            = 0;
           }
 
           foreach ($data_proveedores as $key => $value)
@@ -856,16 +1054,29 @@ class compras_requisicion_model extends CI_Model {
           }
         }
 
-        // //Compras de la orden
-        // $this->load->model('compras_model');
-        // $compras_data = $this->db->query("SELECT id_compra
-        //                            FROM compras_facturas
-        //                            WHERE id_orden = {$data['info'][0]->id_orden}");
-        // $data['info'][0]->compras = $compras_data->result();
+        $data['info'][0]->area = null;
+        if ($data['info'][0]->id_area)
+        {
+          $this->load->model('areas_model');
+          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
+        }
 
-        // //eNTRADA ALMACEN
-        // $data['info'][0]->entrada_almacen = array();
-        // $data['info'][0]->entrada_almacen = $this->getInfoEntrada(0,0, $data['info'][0]->id_orden);
+        $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
+                                   FROM compras_requisicion_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_requisicion = {$data['info'][0]->id_requisicion}")->result();
+
+        $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
+                                   FROM compras_requisicion_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_requisicion = {$data['info'][0]->id_requisicion}")->result();
+
+        $data['info'][0]->activo = null;
+        if ($data['info'][0]->id_activo)
+        {
+          $this->load->model('productos_model');
+          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
+        }
       }
     }
     return $data;
@@ -1274,12 +1485,16 @@ class compras_requisicion_model extends CI_Model {
    {
       $orden = $this->info($ordenId, true);
 
+      $this->load->model('compras_ordenes_model');
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('L', 'mm', 'Letter');
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
-      $tipo_orden = 'ORDEN DE REQUISICION';
+
+      $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
+
+      $tipo_orden = $tipo_requisicion? 'ORDEN DE REQUISICION': 'PRE REQUISICION';
 
 
       $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
@@ -1293,17 +1508,285 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetAligns(array('L', 'C', 'R'));
       $pdf->SetWidths(array(50, 160, 50));
       $pdf->Row(array(
-        String::fechaATexto($orden['info'][0]->fecha, '/c'),
+        MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
         $tipo_orden,
-        'No '.String::formatoNumero($orden['info'][0]->folio, 2, ''),
+        'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
       ), false, false);
 
+      $yyy = $pdf->GetY();
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array('Modo de Facturación'), false, false);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetWidths(array(30, 50));
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Condiciones:', "Crédito"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Forma de Pago:', "99 (Por Definir)"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Uso del CFDI:', "G03 (Gastos en General)"), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-1.5);
+      $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
+      $yyy1 = $pdf->GetY();
+
+      $pdf->SetXY(95, $yyy);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array('Requisitos para la Entrega de Mercancía'), false, false);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('( '.(isset($orden['info'][0]->otros_datos->infPasarBascula)? 'Si': 'No').' ) Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.'), false, false);
+      $pdf->SetXY(95, $pdf->GetY()-1.5);
+      $pdf->Row(array('( '.(isset($orden['info'][0]->otros_datos->infEntOrdenCom)? 'Si': 'No').' ) Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura.'), false, false);
+
+      $pdf->SetY($yyy1+2);
+
+      $subtotal = $iva = $total = $retencion = 0;
+
+      if ($tipo_requisicion) {
+        $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'L', 'L');
+        $widths2 = array(43, 43, 43);
+        $widths = array(10, 20, 46, 65, 18, 25, 18, 25, 40);
+        $header = array('PROD', 'CANT', 'PROVEEDOR', 'PRODUCTO', 'P.U.', 'IMPORTE', 'ULTIMA/COM', 'PRECIO', 'Activos');
+
+        $orden['info'][0]->totales['subtotal']  = 0;
+        $orden['info'][0]->totales['iva']       = 0;
+        $orden['info'][0]->totales['ieps']      = 0;
+        $orden['info'][0]->totales['total']     = 0;
+        $orden['info'][0]->totales['retencion'] = 0;
+
+        $tipoCambio = 0;
+        $first = true;
+        $pdf->SetXY(6, $pdf->GetY()+2);
+        foreach ($orden['info'][0]->productos as $key => $prod)
+        {
+          $tipoCambio = 1;
+          if ($prod->tipo_cambio != 0)
+          {
+            $tipoCambio = $prod->tipo_cambio;
+          }
+
+          $band_head = false;
+          if($pdf->GetY() >= $pdf->limiteY || $first) { //salta de pagina si exede el max
+            $first = false;
+            if($pdf->GetY()+5 >= $pdf->limiteY)
+              $pdf->AddPage();
+            $pdf->SetFont('Arial','B',7);
+            // $pdf->SetTextColor(255,255,255);
+            // $pdf->SetFillColor(160,160,160);
+
+            // $pdf->SetX(144);
+            // $pdf->SetAligns($aligns);
+            // $pdf->SetWidths($widths2);
+            // $pdf->Row(array($orden['info'][0]->proveedores[0]['nombre_fiscal'],
+            //                 $orden['info'][0]->proveedores[1]['nombre_fiscal'],
+            //                 $orden['info'][0]->proveedores[2]['nombre_fiscal']), false);
+
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, false);
+          }
+
+
+          $precio_unitario1 = $prod->{'precio_unitario'.$prod->id_proveedor}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+          $activos = '';
+          if (isset($prod->activos) && !empty($prod->activos)) {
+            foreach ($prod->activos as $keya => $act) {
+              $activos .= '-'.$act->text." \n";
+            }
+          }
+
+          $ultimaCompra = $this->compras_ordenes_model->getUltimaCompra($prod->id_producto);
+
+          $pdf->SetFont('Arial','',7);
+          $pdf->SetTextColor(0,0,0);
+          $datos = array(
+            $prod->codigo,
+            ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)).''.($prod->presentacion==''? $prod->unidad: $prod->presentacion),
+            $prod->proveedor,
+            $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+            MyString::formatoNumero($precio_unitario1, 2, '$', false),
+            MyString::formatoNumero($prod->{'importe'.$prod->id_proveedor}/$tipoCambio, 2, '$', false),
+            (isset($ultimaCompra->fecha_creacion)? substr($ultimaCompra->fecha_creacion, 0, 10): ''),
+            (isset($ultimaCompra->precio_unitario)? MyString::formatoNumero($ultimaCompra->precio_unitario, 2, '$', false): ''),
+            $activos,
+          );
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
+
+          $orden['info'][0]->totales['subtotal']  += floatval($prod->{'importe'.$prod->id_proveedor}/$tipoCambio);
+          $orden['info'][0]->totales['iva']       += floatval($prod->{'iva'.$prod->id_proveedor}/$tipoCambio);
+          $orden['info'][0]->totales['ieps']      += floatval($prod->{'ieps'.$prod->id_proveedor}/$tipoCambio);
+          $orden['info'][0]->totales['total']     += floatval($prod->{'total'.$prod->id_proveedor}/$tipoCambio);
+          $orden['info'][0]->totales['retencion'] += floatval($prod->{'retencion_iva'.$prod->id_proveedor}/$tipoCambio);
+        }
+
+        // Totales
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(82);
+        $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(65, 43, 43, 43));
+        $pdf->Row(array('SUB-TOTAL', MyString::formatoNumero($orden['info'][0]->totales['subtotal'], 2, '$', false)), false, true);
+        $pdf->SetX(82);
+        $pdf->Row(array('IVA', MyString::formatoNumero($orden['info'][0]->totales['iva'], 2, '$', false)), false, true);
+        if ($orden['info'][0]->totales['ieps'] > 0)
+        {
+          $pdf->SetX(82);
+          $pdf->Row(array('IEPS', MyString::formatoNumero($orden['info'][0]->totales['ieps'], 2, '$', false)), false, true);
+        }
+        if ($orden['info'][0]->totales['retencion'] > 0)
+        {
+          $pdf->SetX(82);
+          $pdf->Row(array('Ret. IVA', MyString::formatoNumero($orden['info'][0]->totales['retencion'], 2, '$', false)), false, true);
+        }
+        $pdf->SetX(82);
+        $pdf->Row(array('TOTAL', MyString::formatoNumero($orden['info'][0]->totales['total'], 2, '$', false)), false, true);
+      }
+
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(60, 50));
+      $pdf->SetXY(6, $pdf->GetY()-15);
+      $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : ($tipoCambio==''? 'TIPO DE CAMBIO: ': '')) ), false, false);
+
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(75));
+      $pdf->SetXY(6, $pdf->GetY()+6);
+      $pdf->Row(array('SOLICITA: __________________________________________'), false, false);
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns(array('C', 'L'));
+      $pdf->Row(array(strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+
+      // $pdf->SetAligns(array('L', 'R'));
+      // $pdf->SetWidths(array(104, 50));
+      // $pdf->SetXY(6, $pdf->GetY());
+      // $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(250));
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+
+      // if ($tipo_requisicion) {
+      //   $pdf->SetWidths(array(250));
+      //   $pdf->SetXY(6, $pdf->GetY());
+      //   $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+      // } else {
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+
+        // El dato de la requisicion
+        // if (!empty($orden['info'][0]->folio_requisicion)) {
+        //   $pdf->SetFont('Arial','',8);
+        //   $pdf->SetXY(5, $pdf->GetY());
+        //   $pdf->SetAligns(array('L', 'L'));
+        //   $pdf->SetWidths(array(25, 80));
+        //   $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
+        // }
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('Cultivo / Actividad / Producto',
+          (!empty($orden['info'][0]->area)? $orden['info'][0]->area->nombre: '')), false, true);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $ranchos = [];
+        foreach ($orden['info'][0]->rancho as $key => $value) {
+          $ranchos[] = $value->nombre;
+        }
+        $pdf->Row(array('Areas / Ranchos / Lineas',
+          (!empty($orden['info'][0]->rancho)? implode(' | ', $ranchos): '')), false, true);
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetXY(5, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(25, 80));
+        $centroCosto = [];
+        foreach ($orden['info'][0]->centroCosto as $key => $value) {
+          $centroCosto[] = $value->nombre;
+        }
+        $pdf->Row(array('Centro de costo',
+          (!empty($orden['info'][0]->centroCosto)? implode(' | ', $centroCosto): '')), false, true);
+
+        // $pdf->SetFont('Arial','',8);
+        // $pdf->SetXY(5, $pdf->GetY());
+        // $pdf->SetAligns(array('L', 'L'));
+        // $pdf->SetWidths(array(25, 80));
+        // $pdf->Row(array('Activo',
+        //   (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+      // }
+
+
+      if ($path)
+      {
+        $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+        $pdf->Output($file, 'F');
+        return $file;
+      }
+      else
+      {
+        $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+      }
+   }
+
+  public function print_pre_orden_compra($ordenId, $path = null)
+  {
+    $orden = $this->info($ordenId, true);
+    $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
+    if (!$tipo_requisicion && $orden['info'][0]->es_receta == 't') {
+      return $this->print_pre_receta($orden, $path); // pre recetas
+    } elseif ($tipo_requisicion) {
+      return $this->print_orden_compra($ordenId, $path); // requisiciones con datos
+    }
+    // else imprime la pre orden requisición sin datos
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $orden['info'][0]->empresa;
+
+    $tipo_orden = $tipo_requisicion? 'ORDEN DE REQUISICION': 'PRE REQUISICION';
+
+
+    $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->SetXY(6, $pdf->GetY()-10);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'C', 'R'));
+    $pdf->SetWidths(array(50, 160, 50));
+    $pdf->Row(array(
+      MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
+      $tipo_orden,
+      'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
+    ), false, false);
+
+    $subtotal = $iva = $total = $retencion = 0;
+
+    if ($tipo_requisicion) {
       $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
       $widths2 = array(43, 43, 43);
       $widths = array(15, 10, 18, 30, 65, 18, 25, 18, 25, 18, 25);
       $header = array('AREA', 'PROD', 'CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
 
-      $subtotal = $iva = $total = $retencion = 0;
       foreach ($orden['info'][0]->proveedores as $keypp => $value)
       {
         $orden['info'][0]->proveedores[$keypp]['subtotal']  = 0;
@@ -1359,12 +1842,12 @@ class compras_requisicion_model extends CI_Model {
           ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)),
           ($prod->presentacion==''? $prod->unidad: $prod->presentacion),
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          String::formatoNumero($precio_unitario1, 2, '$', false),
-          String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          String::formatoNumero($precio_unitario2, 2, '$', false),
-          String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          String::formatoNumero($precio_unitario3, 2, '$', false),
-          String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          MyString::formatoNumero($precio_unitario1, 2, '$', false),
+          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          MyString::formatoNumero($precio_unitario2, 2, '$', false),
+          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          MyString::formatoNumero($precio_unitario3, 2, '$', false),
+          MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
         );
 
         $pdf->SetX(6);
@@ -1381,77 +1864,367 @@ class compras_requisicion_model extends CI_Model {
         }
       }
 
-      //Totales
+      // Totales
       $pdf->SetFont('Arial','B',7);
       $pdf->SetX(79);
       $pdf->SetAligns(array('R', 'R', 'R', 'R'));
       $pdf->SetWidths(array(65, 43, 43, 43));
-      $pdf->Row(array('SUB-TOTAL', String::formatoNumero($orden['info'][0]->proveedores[0]['subtotal'], 2, '$', false),
-                                  String::formatoNumero($orden['info'][0]->proveedores[1]['subtotal'], 2, '$', false),
-                                  String::formatoNumero($orden['info'][0]->proveedores[2]['subtotal'], 2, '$', false)), false, true);
+      $pdf->Row(array('SUB-TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['subtotal'], 2, '$', false),
+                                  MyString::formatoNumero($orden['info'][0]->proveedores[1]['subtotal'], 2, '$', false),
+                                  MyString::formatoNumero($orden['info'][0]->proveedores[2]['subtotal'], 2, '$', false)), false, true);
       $pdf->SetX(79);
-      $pdf->Row(array('IVA', String::formatoNumero($orden['info'][0]->proveedores[0]['iva'], 2, '$', false),
-                            String::formatoNumero($orden['info'][0]->proveedores[1]['iva'], 2, '$', false),
-                            String::formatoNumero($orden['info'][0]->proveedores[2]['iva'], 2, '$', false)), false, true);
+      $pdf->Row(array('IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['iva'], 2, '$', false),
+                            MyString::formatoNumero($orden['info'][0]->proveedores[1]['iva'], 2, '$', false),
+                            MyString::formatoNumero($orden['info'][0]->proveedores[2]['iva'], 2, '$', false)), false, true);
       if ($orden['info'][0]->proveedores[0]['ieps'] > 0)
       {
         $pdf->SetX(79);
-        $pdf->Row(array('IEPS', String::formatoNumero($orden['info'][0]->proveedores[0]['ieps'], 2, '$', false),
-                                    String::formatoNumero($orden['info'][0]->proveedores[1]['ieps'], 2, '$', false),
-                                    String::formatoNumero($orden['info'][0]->proveedores[2]['ieps'], 2, '$', false)), false, true);
+        $pdf->Row(array('IEPS', MyString::formatoNumero($orden['info'][0]->proveedores[0]['ieps'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[1]['ieps'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[2]['ieps'], 2, '$', false)), false, true);
       }
       if ($orden['info'][0]->proveedores[0]['retencion'] > 0)
       {
         $pdf->SetX(79);
-        $pdf->Row(array('Ret. IVA', String::formatoNumero($orden['info'][0]->proveedores[0]['retencion'], 2, '$', false),
-                                    String::formatoNumero($orden['info'][0]->proveedores[1]['retencion'], 2, '$', false),
-                                    String::formatoNumero($orden['info'][0]->proveedores[2]['retencion'], 2, '$', false)), false, true);
+        $pdf->Row(array('Ret. IVA', MyString::formatoNumero($orden['info'][0]->proveedores[0]['retencion'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[1]['retencion'], 2, '$', false),
+                                    MyString::formatoNumero($orden['info'][0]->proveedores[2]['retencion'], 2, '$', false)), false, true);
       }
       $pdf->SetX(79);
-      $pdf->Row(array('TOTAL', String::formatoNumero($orden['info'][0]->proveedores[0]['total'], 2, '$', false),
-                              String::formatoNumero($orden['info'][0]->proveedores[1]['total'], 2, '$', false),
-                              String::formatoNumero($orden['info'][0]->proveedores[2]['total'], 2, '$', false)), false, true);
+      $pdf->Row(array('TOTAL', MyString::formatoNumero($orden['info'][0]->proveedores[0]['total'], 2, '$', false),
+                              MyString::formatoNumero($orden['info'][0]->proveedores[1]['total'], 2, '$', false),
+                              MyString::formatoNumero($orden['info'][0]->proveedores[2]['total'], 2, '$', false)), false, true);
+    } else { // *********** cuando es una pre requisición
+      $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+      $aligns2 = array('R', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+      $widths2 = array(20, 51, 51, 51);
+      $widths = array(18, 30, 65, 21, 30, 21, 30, 21, 30);
+      $header = array('CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
 
+      for ($i=0; $i < 15; $i++) {
+        if($pdf->GetY() >= $pdf->limiteY || $i === 0) { //salta de pagina si exede el max
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
 
-      $pdf->SetAligns(array('L', 'R'));
-      $pdf->SetWidths(array(60, 50));
-      $pdf->SetXY(6, $pdf->GetY()-15);
-      $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+          $pdf->SetXY(6, $pdf->GetY()+3);
+          $pdf->SetFont('Arial','B',7);
+          // $pdf->SetTextColor(255,255,255);
+          // $pdf->SetFillColor(160,160,160);
 
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(75));
-      $pdf->SetXY(6, $pdf->GetY()+6);
-      $pdf->Row(array('SOLICITA: __________________________________________'), false, false);
-      $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->SetAligns(array('C', 'L'));
-      $pdf->Row(array(strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+          $pdf->SetX(99);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row(array('Cotizaciones:', '', '', ''), false);
+          $pdf->SetX(99);
+          $pdf->Row(array('Proveedores:', '', '', ''), false, true, null, 6);
 
-      // $pdf->SetAligns(array('L', 'R'));
-      // $pdf->SetWidths(array(104, 50));
-      // $pdf->SetXY(6, $pdf->GetY());
-      // $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(6, $pdf->GetY()-6);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(17, 70));
+          $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
 
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(250));
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, false);
+        }
 
-      $pdf->SetWidths(array(250));
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+        $pdf->SetFont('Arial','',7);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array('','','','','','','','','');
 
-
-      if ($path)
-      {
-        $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
-        $pdf->Output($file, 'F');
-        return $file;
+        $pdf->SetX(6);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
       }
-      else
-      {
-        $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+
+      // Totales
+      $pdf->SetFont('Arial','B',7);
+      $pdf->SetX(99);
+      $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(20, 51, 51, 51));
+      $pdf->Row(array('SUB-TOTAL', '', '', ''), false, true);
+      $pdf->SetX(99);
+      $pdf->Row(array('IVA', '', '', ''), false, true);
+      $pdf->SetX(99);
+      $pdf->Row(array('TOTAL', '', '', ''), false, true);
+
+      $tipoCambio = '';
+    }
+
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 50));
+    $pdf->SetXY(6, $pdf->GetY()-15);
+    $pdf->Row(array(($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : ($tipoCambio==''? 'TIPO DE CAMBIO: ': '')) ), false, false);
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(75));
+    $pdf->SetXY(6, $pdf->GetY()+6);
+    $pdf->Row(array('SOLICITA: __________________________________________'), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->SetAligns(array('C', 'L'));
+    $pdf->Row(array(strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+
+    // $pdf->SetAligns(array('L', 'R'));
+    // $pdf->SetWidths(array(104, 50));
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>0? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(250));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+    $pdf->SetXY(6, $pdf->GetY()+4);
+
+    // if ($tipo_requisicion) {
+    //   $pdf->SetWidths(array(250));
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
+    // } else {
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+
+      // El dato de la requisicion
+      // if (!empty($orden['info'][0]->folio_requisicion)) {
+      //   $pdf->SetFont('Arial','',8);
+      //   $pdf->SetXY(5, $pdf->GetY());
+      //   $pdf->SetAligns(array('L', 'L'));
+      //   $pdf->SetWidths(array(25, 80));
+      //   $pdf->Row(array('ENLACE', "Requisicion No {$orden['info'][0]->folio_requisicion}"), false, true);
+      // }
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('Cultivo / Actividad / Producto',
+        (!empty($orden['info'][0]->area)? $orden['info'][0]->area->nombre: '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $ranchos = [];
+      foreach ($orden['info'][0]->rancho as $key => $value) {
+        $ranchos[] = $value->nombre;
       }
-   }
+      $pdf->Row(array('Areas / Ranchos / Lineas',
+        (!empty($orden['info'][0]->rancho)? implode(' | ', $ranchos): '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $centroCosto = [];
+      foreach ($orden['info'][0]->centroCosto as $key => $value) {
+        $centroCosto[] = $value->nombre;
+      }
+      $pdf->Row(array('Centro de costo',
+        (!empty($orden['info'][0]->centroCosto)? implode(' | ', $centroCosto): '')), false, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(5, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 80));
+      $pdf->Row(array('Activo', (!empty($orden['info'][0]->activo)? $orden['info'][0]->activo->nombre: '')), false, true);
+
+    // }
+
+
+    if ($path)
+    {
+      $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
+
+  public function print_pre_receta($orden, $path = null)
+  {
+    // $orden = $this->info($ordenId, true);
+    $tipo_requisicion = count($orden['info'][0]->productos)>0? true: false; // requisicion, pre-requisicion
+
+    $tipo_orden = 'PRE REQUISICION';
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = ''; // $orden['info'][0]->empresa;
+    $pdf->titulo2 = $tipo_orden;
+
+    $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+    $pdf->noShowPages = false;
+    $pdf->noShowDate = false;
+    $pdf->AddPage();
+
+    // /home/gama/www/sanjorge/application/images/mas
+    $pdf->Image(APPPATH.'images/mas/pre-recetas.png', 205, 72, 60);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'C', 'R'));
+    $pdf->SetWidths(array(50));
+    $pdf->SetXY(222, $pdf->GetY()-20);
+    $pdf->Row(array('PRE-REQ: '.MyString::formatoNumero($orden['info'][0]->folio, 2, '')), false, true);
+    $pdf->SetXY(222, $pdf->GetY());
+    $pdf->Row(array('RECETA: '.(isset($orden['info'][0]->otros_datos->noRecetas)? implode(',', $orden['info'][0]->otros_datos->noRecetas): '')), false, true);
+
+    $pdf->SetFont('helvetica','B', 7);
+    $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R', 'L', 'R', 'L', ));
+    $pdf->SetWidths(array(16, 63, 16, 25, 20, 25, 12, 25, ));
+    $pdf->SetXY(6, $pdf->GetY()+12);
+    $auxt = $pdf->GetY();
+    $pdf->Row(array(
+      'EMPRESA:', $orden['info'][0]->empresa,
+      '# HAS:', '______________',
+      'PLANTA X HA:', '______________',
+      'SEM:', '______________',
+    ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array(
+      'RANCHO:', '____________________________________________',
+      '# CARGAS:', '______________',
+      'KG PLANTAS:', '______________',
+      'CICLO:', '______________',
+    ), false, false);
+
+    $pdf->SetWidths(array(16, 63, 20, 21, 20, 25, 12, 25, ));
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array(
+      'SECCION:', '____________________________________________',
+      '_____________', '____________',
+      'PH FORMULA:', '______________',
+      '', '',
+    ), false, false);
+    $pdf->SetTextColor(200, 200, 200);
+    $pdf->SetXY(6, $pdf->GetY()-6);
+    $pdf->Row(array(
+      '', '',
+      'COMPLETA', 'MEDIA',
+      '', '',
+      '', '',
+    ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(45));
+    $pdf->SetXY(220, $auxt-5);
+    $pdf->Row(array('FECHA'), false, TRUE);
+    $pdf->SetWidths(array(15, 15, 15));
+    $pdf->SetXY(220, $auxt+1);
+    $pdf->Row(array('', '', ''), false, TRUE);
+
+    $pdf->SetWidths(array(11));
+    $pdf->SetXY(209, $pdf->GetY()+5);
+    $pdf->Row(array('ETAPA'), false, false);
+    $pdf->SetWidths(array(11, 34));
+    $pdf->SetXY(220, $pdf->GetY()-9);
+    $pdf->Row(array('DP', ''), false, true);
+    $pdf->SetXY(220, $pdf->GetY()+1);
+    $pdf->Row(array('DF', ''), false, true);
+
+    $pdf->SetFont('helvetica','B', 7);
+    $pdf->SetWidths(array(16, 81));
+    $pdf->SetXY(170, $pdf->GetY()+1);
+    $pdf->Row(array('OBJETIVO: ', '_________________________________________________________'), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+
+    $subtotal = $iva = $total = $retencion = 0;
+
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $aligns2 = array('R', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths2 = array(20, 51, 51, 51);
+    $widths = array(18, 65, 21, 22, 25, 30, 85);
+    $header = array('(%) (Pz) MEZCLA', 'ORDEN DE APLICACION', 'DOSIS', 'APLICACIÓN TOTAL', 'PRECIO', 'IMPORTE', 'DATOS DE APLICACION');
+
+    $auxy = $pdf->GetY();
+    for ($i=0; $i < 15; $i++) {
+      if($pdf->GetY() >= $pdf->limiteY || $i === 0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetXY(6, $pdf->GetY()+3);
+        $pdf->SetFont('Arial','B',7);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('Arial','',7);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array('','','','','','');
+
+      $pdf->SetX(6);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    // Totales
+    $pdf->SetFont('Arial','B',7);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'C', 'C'));
+    $pdf->SetWidths(array(83, 21, 22, 25, 30, 85));
+    $pdf->Row(array('SUMAS', '', '', 'TOTAL', '', 'FIRMA'), false, true);
+
+    $pdf->SetY($auxy+11);
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 21, 15, 17, 17, 15, 15));
+    $pdf->SetX(187);
+    $pdf->Row(array("   TURNO    ", 'AMANECER', 'DIA', 'TARDE', 'NOCHE'), false, true);
+    $pdf->SetWidths(array(15, 14, 12, 15, 14, 15, 15));
+    $pdf->SetX(187);
+    $pdf->Row(array('VIA', 'SISTEMA', 'FOLIAR', 'SOLIDA PISO', 'DRENCH', 'UNTADO'), false, true);
+    $pdf->SetWidths(array(17, 17, 15, 20, 16, 14, 12));
+    $pdf->SetX(187);
+    $pdf->Row(array('APLICACION', 'MANUAL', 'RUEGO', 'TERRESTRE', 'ACERO'), false, true);
+    $pdf->SetWidths(array(17, 17, 15, 20, 16, 14, 12));
+    $pdf->SetX(187);
+    $pdf->Row(array('EQUIPOS', 'BOOM', 'PIPA', 'AGUILON', 'TANQUITA'), false, true);
+    $pdf->SetX(187);
+    $pdf->Row(array('', 'DRON', 'TAMBO', 'MOCHILA', 'OTROS'), false, true);
+
+    $pdf->SetWidths(array(17, 50));
+    $pdf->SetX(187);
+    $pdf->Row(array('LITROS DE AGUA', '__________________________________'), false, false);
+    $pdf->SetWidths(array(17, 68));
+    $pdf->SetX(187);
+    $pdf->Row(array('OBSERVACIONES', '________________________________________________'), false, false);
+    $pdf->SetX(187);
+    $pdf->Row(array('', '________________________________________________'), false, false);
+    $pdf->SetXY(187, $pdf->GetY()+2);
+    $pdf->Row(array('', '________________________________________________'), false, false);
+    $pdf->SetXY(187, $pdf->GetY()+2);
+    $pdf->Row(array('', '________________________________________________'), false, false);
+
+    $pdf->SetXY(187, $pdf->GetY()+2);
+    $pdf->Row(array('SOLICITA', '________________________________________________'), false, false);
+
+    if ($path)
+    {
+      $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
 
   public function getInfoEntrada($folio, $empresa, $id_orden=null)
   {
@@ -1490,7 +2263,7 @@ class compras_requisicion_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(30, 30));
-    $pdf->Row(array('FECHA: '.String::fechaATexto($data->fecha, '/c'), 'REG. No '.$data->folio_almacen), false, false);
+    $pdf->Row(array('FECHA: '.MyString::fechaATexto($data->fecha, '/c'), 'REG. No '.$data->folio_almacen), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
@@ -1498,7 +2271,7 @@ class compras_requisicion_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(25, 40));
-    $pdf->Row(array('FOLIO: '.String::formatoNumero($data->folio, 2, ''), 'IMPORTE: '.String::formatoNumero($data->total)), false, false);
+    $pdf->Row(array('FOLIO: '.MyString::formatoNumero($data->folio, 2, ''), 'IMPORTE: '.MyString::formatoNumero($data->total)), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));

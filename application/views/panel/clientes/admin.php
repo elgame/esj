@@ -53,7 +53,7 @@
 						</form>
 
 
-						<a href="<?php echo base_url('panel/clientes/catalogo_xls/?'.String::getVarsLink(array('fnombre')) ); ?>"
+						<a href="<?php echo base_url('panel/clientes/catalogo_xls/?'.MyString::getVarsLink(array('fnombre')) ); ?>"
                 class="pull-left">
               <i class="icon-table"></i> Catalogo</a>
 						<?php
@@ -121,7 +121,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $clientes['total_rows'],
 								'per_page'			=> $clientes['items_per_page'],
 								'cur_page'			=> $clientes['result_page']*$clientes['items_per_page'],

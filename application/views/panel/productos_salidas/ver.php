@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/ver/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -33,6 +33,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $salida['info'][0]->empresa) ?>" placeholder="" readonly>
+                    <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $salida['info'][0]->id_empresa) ?>">
                   </div>
                 </div>
               </div><!--/control-group -->
@@ -79,6 +80,82 @@
                 </div>
             </div>
           </div>
+
+          <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($salida['info'][0]->area->nombre) ? $salida['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($salida['info'][0]->area->id_area) ? $salida['info'][0]->area->id_area : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($salida['info'][0]->rancho)) {
+                        foreach ($salida['info'][0]->rancho as $key => $rancho) { ?>
+                          <li class="<?php echo $modificar? '': 'disable' ?>"><span class="tag"><?php echo $rancho->nombre ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($salida['info'][0]->centroCosto)) {
+                        foreach ($salida['info'][0]->centroCosto as $key => $centroCosto) { ?>
+                          <li class="<?php echo $modificar? '': 'disable' ?>"><span class="tag"><?php echo $centroCosto->nombre ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($salida['info'][0]->activo->nombre) ? $salida['info'][0]->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" <?php echo $modificar ? '' : 'readonly' ?>>
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($salida['info'][0]->activo->id_producto) ? $salida['info'][0]->activo->id_producto : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
 
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">
@@ -132,7 +209,7 @@
                       <tfoot>
                         <tr>
                           <th colspan="4"></th>
-                          <th><?php echo String::formatoNumero($total, 2, '$', false); ?></th>
+                          <th><?php echo MyString::formatoNumero($total, 2, '$', false); ?></th>
                         </tr>
                       </tfoot>
                     </table>
@@ -148,6 +225,13 @@
   </div><!--/row-->
 
 </div>
+
+<?php if (floatval($prints) > 0) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/productos_salidas/imprimir/?id=' . $prints."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

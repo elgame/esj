@@ -89,7 +89,7 @@ class rastreabilidad_pinia extends MY_Controller {
       $this->load->model('rastreabilidad_pina_model');
       $this->rastreabilidad_pina_model->rpl_pdf($_GET['parea'], $_GET['gfecha']);
     }
-    else redirect(base_url('panel/rastreabilidad_pinia/?'.String::getVarsLink(array('msg'))));
+    else redirect(base_url('panel/rastreabilidad_pinia/?'.MyString::getVarsLink(array('msg'))));
   }
 
   /*

@@ -84,6 +84,9 @@ class bodega_guadalajara extends MY_Controller {
       array('panel/bodega_guadalajara/cargar.js'),
       array('panel/bodega_guadalajara/catalogo_bodega.js'),
     ));
+    $this->carabiner->css(array(
+      array('panel/caja_chica.css', 'screen'),
+    ));
 
     $this->load->library('pagination');
     $this->load->model('bodega_guadalajara_model');
@@ -99,7 +102,7 @@ class bodega_guadalajara extends MY_Controller {
       $res_mdl = $this->bodega_guadalajara_model->guardar($_POST);
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bodega_guadalajara/cargar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+        redirect(base_url('panel/bodega_guadalajara/cargar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
     }
 
     $params['info_empleado']  = $this->info_empleado['info'];
@@ -364,7 +367,7 @@ class bodega_guadalajara extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/caja_chica/categorias_agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+        redirect(base_url('panel/caja_chica/categorias_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
       }
     }
 
@@ -412,7 +415,7 @@ class bodega_guadalajara extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/caja_chica/categorias_modificar/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/caja_chica/categorias_modificar/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
       }
     }
 
@@ -530,7 +533,7 @@ class bodega_guadalajara extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/caja_chica/nomenclaturas_agregar/?'.String::getVarsLink(array('msg')).'&msg=8'));
+        redirect(base_url('panel/caja_chica/nomenclaturas_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
       }
     }
 
@@ -572,7 +575,7 @@ class bodega_guadalajara extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/caja_chica/nomenclaturas_modificar/?'.String::getVarsLink(array('msg')).'&msg=9'));
+        redirect(base_url('panel/caja_chica/nomenclaturas_modificar/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
       }
     }
 
@@ -614,7 +617,7 @@ class bodega_guadalajara extends MY_Controller {
     $this->load->model('bodega_guadalajara_model');
     $this->bodega_guadalajara_model->cerrarCaja($_GET['id'], $_GET['fno_caja']);
 
-    redirect(base_url('panel/bodega_guadalajara/cargar/?'.String::getVarsLink(array('id', 'msg')).'&msg=7'));
+    redirect(base_url('panel/bodega_guadalajara/cargar/?'.MyString::getVarsLink(array('id', 'msg')).'&msg=7'));
   }
 
   public function print_caja()

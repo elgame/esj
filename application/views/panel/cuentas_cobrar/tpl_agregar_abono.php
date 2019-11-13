@@ -10,7 +10,8 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.String::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.MyString::getVarsLink(array())); ?>"
+            method="post" id="form" enctype="multipart/form-data">
 
           <div class="row-fluid">
             <div class="span12">
@@ -29,7 +30,7 @@
                 <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
-                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                 <?php
                 }
                 ?>
@@ -70,6 +71,13 @@
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
                   <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" data-max="<?php echo $data['saldo'] ?>">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="comprobante">Comprobante</label>
+                <div class="controls">
+                  <input type="file" name="comprobante" id="comprobante">
                 </div>
               </div>
 
@@ -116,8 +124,8 @@
               ?>
                 <tr style="font-weight:bold;">
                   <td>Totales</td>
-                  <td><?php echo String::formatoNumero($suma_saldo, 2, '$', false); ?></td>
-                  <td id="suma_monto"><?php echo String::formatoNumero($suma_monto, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($suma_saldo, 2, '$', false); ?></td>
+                  <td id="suma_monto"><?php echo MyString::formatoNumero($suma_monto, 2, '$', false); ?></td>
                 </tr>
               </tbody>
               </table>

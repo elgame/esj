@@ -24,7 +24,7 @@ class control_maquinaria_model extends CI_Model {
       $this->db->update('compras_salidas_combustible', $data, array('id_combustible' => $datos['id_combustible']));
     else {
       $this->db->insert('compras_salidas_combustible', $data);
-      $datos['id_combustible'] = $this->db->insert_id();
+      $datos['id_combustible'] = $this->db->insert_id('compras_salidas_combustible_id_combustible_seq');
     }
 
     return array('passess' => true,
@@ -186,9 +186,9 @@ class control_maquinaria_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->implemento,
-        String::formatoNumero($vehiculo->lts_combustible, 2, '', false),
-        String::formatoNumero($vehiculo->horas_totales, 2, '', false),
-        String::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
+        MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
+        MyString::formatoNumero($vehiculo->horas_totales, 2, '', false),
+        MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->lts_combustible);
@@ -218,9 +218,9 @@ class control_maquinaria_model extends CI_Model {
             $item->fecha,
             $item->centro_costo,
             $item->labor,
-            String::formatoNumero($item->lts_combustible, 2, '', false),
-            String::formatoNumero($item->horas_totales, 2, '', false),
-            String::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
+            MyString::formatoNumero($item->lts_combustible, 2, '', false),
+            MyString::formatoNumero($item->horas_totales, 2, '', false),
+            MyString::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -239,9 +239,9 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false),
-        String::formatoNumero($horas_totales, 2, '', false),
-        String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false),
+        MyString::formatoNumero($horas_totales, 2, '', false),
+        MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_combustible.pdf', 'I');
@@ -299,7 +299,7 @@ class control_maquinaria_model extends CI_Model {
           <td style="width:500px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->implemento.'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->lts_combustible.'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->horas_totales.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.String::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
         </tr>';
       if (isset($vehiculo->detalle)) {
         foreach ($vehiculo->detalle as $key2 => $item)
@@ -316,7 +316,7 @@ class control_maquinaria_model extends CI_Model {
               </td>
               <td style="width:150px;border:1px solid #000;">'.$item->lts_combustible.'</td>
               <td style="width:150px;border:1px solid #000;">'.$item->horas_totales.'</td>
-              <td style="width:150px;border:1px solid #000;">'.String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+              <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
             </tr>';
         }
       }
@@ -328,7 +328,7 @@ class control_maquinaria_model extends CI_Model {
           <td>TOTALES</td>
           <td style="border:1px solid #000;">'.$lts_combustible.'</td>
           <td style="border:1px solid #000;">'.$horas_totales.'</td>
-          <td style="border:1px solid #000;">'.String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
         </tr>
       </tbody>
     </table>';

@@ -30,7 +30,7 @@
               $quit_params[] = 'fid_proveedor';
             }
             ?>
-            <a href="<?php echo base_url('panel/proveedores_facturacion?'.String::getVarsLink($quit_params) ); ?>" class="linksm">
+            <a href="<?php echo base_url('panel/proveedores_facturacion?'.MyString::getVarsLink($quit_params) ); ?>" class="linksm">
               <i class="icon-chevron-left"></i> Atras</a>
             <form action="<?php echo base_url('panel/proveedores_facturacion/admin'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
@@ -63,7 +63,7 @@
 
             <?php
             echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/agregar/', array(
-                    'params'   => '',
+                    'params'   => MyString::getVarsLink(['ffecha1']),
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )
                 );
@@ -134,7 +134,7 @@
                       if ($fact->status !== 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/cancelar/', array(
-                          'params'   => 'id='.$fact->id_factura.'&'.String::getVarsLink(array('msg')),
+                          'params'   => 'id='.$fact->id_factura.'&'.MyString::getVarsLink(array('msg')),
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Proveedores Facturación', this); return false;"))
                         );
@@ -157,19 +157,19 @@
                       //   );
                       // }
 
-                      if ($fact->status_timbrado === 't')
-                      {
-                        echo '<a class="btn" href="'.base_url('panel/proveedores_facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
-                      }
+                      // if ($fact->status_timbrado === 't')
+                      // {
+                      //   echo '<a class="btn" href="'.base_url('panel/proveedores_facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                      // }
 
-                      if ($fact->id_nc === null)
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/enviar_documentos/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('rel' => 'superbox-50x450'))
-                        );
-                      }
+                      // if ($fact->id_nc === null)
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/enviar_documentos/', array(
+                      //     'params'   => 'id='.$fact->id_factura,
+                      //     'btn_type' => 'btn-success',
+                      //     'attrs' => array('rel' => 'superbox-50x450'))
+                      //   );
+                      // }
                     ?>
                   </td>
                 </tr>
@@ -180,7 +180,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $datos_s['total_rows'],
                 'per_page'      => $datos_s['items_per_page'],
                 'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],

@@ -34,6 +34,7 @@ var addpallets = (function($){
     fetiqueta         = $("#fetiqueta");
     fidetiqueta       = $("#fidetiqueta");
 
+    autocompleteEmpresas();
     asignaAutocomplets();
     changeAreas();
 
@@ -111,6 +112,28 @@ var addpallets = (function($){
      });
   }
 
+  // Autocomplete para las empresas.
+  function autocompleteEmpresas () {
+    $("#empresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $("#empresaId").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+        $("#fcliente, #fid_cliente").val("");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresa").css("background-color", "#FFD071");
+        $("#empresaId").val('');
+        $("#fcliente, #fid_cliente").val("");
+      }
+    });
+  }
+
   function asignaAutocomplets(){
     // Autocomplete de productos dar de baja
     $("#modalProdutosSal").on('keyup.autocomplete', '.prod_salida', function(event) {
@@ -118,12 +141,16 @@ var addpallets = (function($){
       /* Act on the event */
       $(".prod_salida").autocomplete({
         source: function (request, response) {
+          var iid_empresa = '2';
+          if(parseInt($("#empresaId").val()) > 0)
+            iid_empresa = $("#empresaId").val();
+
           $.ajax({
             url: base_url + 'panel/compras_ordenes/ajax_producto/',
             dataType: 'json',
             data: {
               term : request.term,
-              ide: '2',
+              ide: iid_empresa,
               tipo: 'p'
             },
             success: function (data) {
@@ -276,13 +303,18 @@ var addpallets = (function($){
     //Clientes
     $("#fcliente").autocomplete({
       source: function(request, response) {
+        var iid_empresa = '2';
+        if(parseInt($("#empresaId").val()) > 0)
+          iid_empresa = $("#empresaId").val();
+
         $.ajax({
             url: base_url + 'panel/bascula/ajax_get_clientes/',
             dataType: "json",
             data: {
               term : request.term,
-              did_empresa : '2,3,4,5,7',
-              empresa: 'si'
+              did_empresa : iid_empresa,
+              empresa: 'si',
+              dir_emp: 'l'
             },
             success: function(data) {
                 response(data);

@@ -93,7 +93,7 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><?php echo String::formatoNumero($fact->total, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($fact->total, 2, '$', false); ?></td>
                   <td><?php echo $fact->observaciones; ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
@@ -216,7 +216,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $datos_s['total_rows'],
                 'per_page'      => $datos_s['items_per_page'],
                 'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],

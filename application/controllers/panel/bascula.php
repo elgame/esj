@@ -61,6 +61,8 @@ class bascula extends MY_Controller {
 
     'bascula/get_calidades/',
     'bascula/rdefull_xls/',
+
+    'bascula/rpt_auditorias_pdf/',
     );
 
   public function _remap($method){
@@ -122,6 +124,7 @@ class bascula extends MY_Controller {
       array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('general/util.js'),
+      array('panel/facturacion/gastos_productos.js'),
       array('panel/bascula/agregar.js'),
       array('panel/bascula/bonificacion.js'),
       array('panel/bascula/clasif.js'),
@@ -178,7 +181,7 @@ class bascula extends MY_Controller {
       }
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
       if( $res_mdl['error'] == false){
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
+        redirect(base_url('panel/bascula/agregar/?'.MyString::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
       }
     }
 
@@ -220,8 +223,9 @@ class bascula extends MY_Controller {
           $this->load->model('clientes_model');
           $cliente = $this->clientes_model->getClienteInfo($info['info'][0]->id_cliente, true);
 
-          $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
-          $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+          $_POST['pcliente']         = $cliente['info']->nombre_fiscal;
+          $_POST['pid_cliente']      = $info['info'][0]->id_cliente;
+          $_POST['dno_trazabilidad'] = $info['info'][0]->no_trazabilidad;
         }
 
         if ($info['info'][0]->id_productor != null)
@@ -251,6 +255,9 @@ class bascula extends MY_Controller {
         $params['param_folio'] = '?idb=' . $info['info'][0]->id_bascula; //$_GET['folio'];
         $params['idb']         = $info['info'][0]->id_bascula;
         $params['accion']      = $info['info'][0]->accion;
+
+        $_POST['pno_lote'] = $info['info'][0]->no_lote;
+        $_POST['pchofer_es_productor'] = $info['info'][0]->chofer_es_productor;
 
         if (isset($_GET['p']))
         {
@@ -335,6 +342,7 @@ class bascula extends MY_Controller {
         // Indicara si se necesita autorizacion para modificar.
         $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
         $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
+        $params['intangible'] = $info['info'][0]->intangible === 't' ? '1' : '0';
 
         $params['fotos'] = $info['bascula_fotos'];
       }
@@ -384,10 +392,10 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
       $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
       if($res_mdl)
-        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=8'));
+        redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -401,10 +409,10 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
       $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 't'));
       if($res_mdl)
-        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=9'));
+        redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   public function puede_modificar()
@@ -484,6 +492,7 @@ class bascula extends MY_Controller {
         array('libs/jquery.uniform.css', 'screen'),
       ));
       $this->carabiner->js(array(
+        array('general/msgbox.js'),
         array('libs/jquery.uniform.min.js'),
         array('libs/jquery.numeric.js'),
         array('general/supermodal.js'),
@@ -526,7 +535,7 @@ class bascula extends MY_Controller {
 
         $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
         if( ! $res_mdl['error'])
-          redirect(base_url('panel/bascula/bonificacion/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
+          redirect(base_url('panel/bascula/bonificacion/?'.MyString::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
       }
 
       // $params['accion'] = 'n'; // indica que es nueva entrada
@@ -643,7 +652,7 @@ class bascula extends MY_Controller {
       $this->load->view('panel/footer');
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -789,6 +798,60 @@ class bascula extends MY_Controller {
     $this->load->view('panel/bascula/reportes/rmc', $params);
   }
 
+  public function rptAuditoria()
+  {
+    // if (isset($_GET['fid_proveedor']))
+    //   if ($_GET['fid_proveedor'] == '')
+    //     redirect(base_url('panel/bascula/movimientos/?msg=13'));
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/bascula/movimientos_cuenta.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Movimientos de Cuenta'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+    $_GET['farea'] = empty($_GET['farea'])? $params['areas']['areas'][0]->id_area: $_GET['farea'];
+    // $params['movimientos'] = $this->bascula_model->getMovimientos();
+
+    // echo "<pre>";
+    //   var_dump($params['movimientos']);
+    // echo "</pre>";exit;
+
+    if (isset($_GET['p']) && isset($_GET['pe']))
+    {
+      $params['p'] = true;
+      $params['pe'] = $_GET['pe'];
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_auditorias', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rpt_auditorias_pdf()
+  {
+    $this->load->model('bascula2_model');
+
+    $params['data'] = $this->bascula2_model->getMovimientosAuditoria();
+    if($this->input->get('ftipop') == 'sa') {
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_sa_pdf', $params);
+    }else{
+      $this->load->view('panel/bascula/reportes/rpt_auditorias_pdf', $params);
+    }
+  }
+
   /**
    * Muestra la vista para realizar movimientos de cuenta.
    * @return void
@@ -874,9 +937,9 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
 
       $res_mdl = $this->bascula_model->cancelar_pago($_GET['id'], true);
-      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
+      redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
     }else
-      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
+      redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
   }
 
   public function pago_basculas()
@@ -888,7 +951,7 @@ class bascula extends MY_Controller {
     if ($res_mdl['passess'])
     {
       $pesadas = '&pe='.implode(',', $_POST['ppagos']);
-      redirect(base_url('panel/bascula/movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
+      redirect(base_url('panel/bascula/movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
     }
   }
 
@@ -1039,7 +1102,7 @@ class bascula extends MY_Controller {
       $respons = $this->empresas_model->addEmpresa();
 
       if($respons[0])
-        redirect(base_url('panel/empresas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$respons[2].'&close=1'));
+        redirect(base_url('panel/empresas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$respons[2].'&close=1'));
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
     }
@@ -1093,7 +1156,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->proveedores_model->addProveedor();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.String::getVarsLink(array('msg')).'&msg=4&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.MyString::getVarsLink(array('msg')).'&msg=4&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1136,7 +1199,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->clientes_model->addCliente();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_cliente/?'.String::getVarsLink(array('msg')).'&msg=11&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_cliente/?'.MyString::getVarsLink(array('msg')).'&msg=11&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1187,7 +1250,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->choferes_model->addChofer();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.String::getVarsLink(array('msg')).'&msg=5&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.MyString::getVarsLink(array('msg')).'&msg=5&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1232,7 +1295,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->camiones_model->addCamion();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.String::getVarsLink(array('msg')).'&msg=6&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.MyString::getVarsLink(array('msg')).'&msg=6&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1297,7 +1360,7 @@ class bascula extends MY_Controller {
       );
 
       if($res_mdl['passes'])
-        redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_lote/?'.MyString::getVarsLink(array('msg')).'&msg=15&close=1'));
     }
 
     $data = $this->bascula_model->getBasculaInfo($_GET['idb']);
@@ -1353,7 +1416,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->bascula_model->ligarOrdenes($_GET['idb'], $_POST);
 
       if($res_mdl)
-        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.String::getVarsLink(array('msg')).'&msg=30&close=1'));
+        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.MyString::getVarsLink(array('msg')).'&msg=30&close=1'));
     }
 
     if (isset($_GET['Buscar'])) {
@@ -1394,6 +1457,9 @@ class bascula extends MY_Controller {
       array('field' => 'certificado',
             'label' => 'Certificado',
             'rules' => ''),
+      array('field' => 'intangible',
+            'label' => 'intangible',
+            'rules' => ''),
       array('field' => 'ptipo',
             'label' => 'Tipo',
             'rules' => 'required'),
@@ -1425,6 +1491,9 @@ class bascula extends MY_Controller {
       array('field' => 'pcliente',
             'label' => '',
             'rules' => ''),
+      // array('field' => 'dno_trazabilidad',
+      //       'label' => '',
+      //       'rules' => 'max_length[15]|callback_check_trazabilidad'),
       array('field' => 'pid_chofer',
             'label' => 'Chofer',
             'rules' => ''),
@@ -1543,6 +1612,10 @@ class bascula extends MY_Controller {
                          'label' => 'Cliente',
                          'rules' => 'required');
 
+        $rules[] = array('field' => 'dno_trazabilidad',
+                         'label' => 'No Trazabilidad',
+                         'rules' => 'max_length[15]|callback_check_trazabilidad');
+
         $rules[] = array('field' => 'pid_chofer',
                          'label' => 'Chofer',
                          'rules' => 'required');
@@ -1570,6 +1643,30 @@ class bascula extends MY_Controller {
       }else
         return true;
     }
+  }
+
+  public function check_trazabilidad($value)
+  {
+    if (trim($value) != '') {
+      $sql = !empty($_POST['pidb'])? " AND b.id_bascula <> {$_POST['pidb']}": '';
+      $error = false;
+      $query = $this->db->query("SELECT b.id_bascula, b.no_trazabilidad
+                                   FROM bascula b
+                                   WHERE b.no_trazabilidad = '{$value}'
+                                    AND b.id_empresa = {$this->input->post('pid_empresa')}
+                                    AND b.status = 't'
+                                    {$sql}");
+
+      if ($query->num_rows() > 0)
+      {
+        $data = $query->row();
+
+        $this->form_validation->set_message('check_trazabilidad', "El numero de trazabilidad '{$data->no_trazabilidad}' ya esta registrado.");
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -2282,7 +2379,7 @@ class bascula extends MY_Controller {
     }
     else
     {
-      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: null));
 
       $params['frm_errors'] = $this->showMsgs(20);
     }
@@ -2299,7 +2396,7 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->bascula_model->cancelarFactura($_GET['id']);
 
-    redirect(base_url('panel/bascula/facturas/?' . String::getVarsLink(array('id')).'&msg=3'));
+    redirect(base_url('panel/bascula/facturas/?' . MyString::getVarsLink(array('id')).'&msg=3'));
   }
 
   public function get_boleta()
@@ -2314,9 +2411,9 @@ class bascula extends MY_Controller {
     $this->load->library('form_validation');
 
     $rules = array(
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
+      // array('field' => 'xml',
+      //       'label' => 'XML',
+      //       'rules' => 'callback_xml_check'),
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),

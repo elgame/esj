@@ -7,6 +7,7 @@ class nomina_trabajos extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_trabajos/ajax_save/',
+    'nomina_trabajos/nomina_fiscal_ticket/',
   );
 
   public function _remap($method)
@@ -91,7 +92,7 @@ class nomina_trabajos extends MY_Controller {
     // // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // // las fechas de los 7 dias siguientes.
     // $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
-    // $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    // $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
 
     // $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
 
@@ -120,6 +121,15 @@ class nomina_trabajos extends MY_Controller {
   {
     $this->load->model('nomina_trabajos_model');
     echo json_encode($this->nomina_trabajos_model->save($_POST));
+  }
+
+
+  public function nomina_fiscal_ticket()
+  {
+    if (isset($_GET['semana']) && isset($_GET['empresaId']) && isset($_GET['anio'])) {
+      $this->load->model('nomina_trabajos_model');
+      $this->nomina_trabajos_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    }
   }
 
 

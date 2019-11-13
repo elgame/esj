@@ -17,7 +17,7 @@
                           <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo $producto->data[1]; ?>">
                           <input type="hidden" class="esistema" name="esistema[]" value="<?php echo $producto->data[0]; ?>">
                         </td>
-                        <td><?php echo String::formatoNumero($producto->data[0], 2, '').' '.$producto->abreviatura; ?></td>
+                        <td><?php echo MyString::formatoNumero($producto->data[0], 2, '').' '.$producto->abreviatura; ?></td>
                         <td style="width: 133px;"><input type="text" class="prod-cantidad vpositive span6" value="0" placeholder="Cantidad" style="width: 133px;"></td>
                         <td><a class="btn" onclick="productos.check('<?php echo $producto->nombre_producto ?>', this); return false;" href="#" title="Traspasar"><i class="icon-angle-right"></i></a></td>
                     </tr>

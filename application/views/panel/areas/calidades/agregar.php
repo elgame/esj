@@ -17,7 +17,7 @@
         </ul>
       </div>
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -29,11 +29,11 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/areas/agregar_calidad/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/areas/agregar_calidad/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40" 
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40"
                   value="<?php echo set_value('fnombre'); ?>" required autofocus placeholder="Limon verde, limon industrial">
                 </div>
               </div>
@@ -41,7 +41,7 @@
               <div class="control-group">
                 <label class="control-label" for="fprecio_compra">Precio de compra </label>
                 <div class="controls">
-                  <input type="text" name="fprecio_compra" id="fprecio_compra" class="span6 vpositive" maxlength="11" 
+                  <input type="text" name="fprecio_compra" id="fprecio_compra" class="span6 vpositive" maxlength="11"
                   value="<?php echo set_value('fprecio_compra'); ?>" required placeholder="4.4, 33">
                 </div>
               </div>
@@ -49,7 +49,7 @@
               <div class="control-group">
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
-                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="12" 
+                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="12"
                   value="<?php echo set_value('fcuenta_cpi'); ?>" required placeholder="43000010">
                 </div>
               </div>

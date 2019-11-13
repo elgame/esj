@@ -31,6 +31,10 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa'); ?>">
 
+                <label for="fconcepto">Producto</label>
+                <input type="text" name="fconcepto" value="<?php echo set_value_get('fconcepto'); ?>" id="fconcepto" class="input-large search-query" placeholder="Producto / Descripción">
+                <input type="hidden" name="fconceptoId" id="fconceptoId" value="<?php echo set_value_get('fconceptoId'); ?>">
+
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01')); ?>" size="10">
@@ -84,20 +88,29 @@
                   </td>
                   <td class="center">
                     <?php
-                      echo $this->usuarios_model->getLinkPrivSm('productos_salidas/ver/', array(
-                        'params'   => 'id='.$salida->id_salida,
-                        'btn_type' => 'btn-success',
-                        'attrs' => array())
-                      );
+                      if ($salida->productos > 0) {
+                        echo $this->usuarios_model->getLinkPrivSm('productos_salidas/ver/', array(
+                          'params'   => 'id='.$salida->id_salida,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
+
+                        if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
+                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                                  <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                        }
+                      } else {
+                        echo $this->usuarios_model->getLinkPrivSm('productos_salidas/modificar/', array(
+                          'params'   => 'id='.$salida->id_salida,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array())
+                        );
+                      }
                       echo $this->usuarios_model->getLinkPrivSm('productos_salidas/imprimir/', array(
                         'params'   => 'id='.$salida->id_salida,
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => '_BLANK'))
                       );
-                      if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
-                        echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
-                                <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
-                      }
 
                       if ($salida->status !== 'ca')
                       {
@@ -117,7 +130,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $salidas['total_rows'],
                 'per_page'      => $salidas['items_per_page'],
                 'cur_page'      => $salidas['result_page']*$salidas['items_per_page'],

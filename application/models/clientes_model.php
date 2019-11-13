@@ -344,15 +344,22 @@ class clientes_model extends CI_Model {
   			LIMIT 20"
     );
 
+    $dir_empresa = $this->input->get('dir_emp')? $this->input->get('dir_emp'): 'r';
+
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
         $dato_ext = $itm->municipio==''? ($itm->estado==''? '': ' - '.$itm->estado): ' - '.$itm->municipio;
-        $dato_ext .= $this->input->get('empresa')=='si'? ' - '.substr($itm->empresa, 0, 5): '';
+
+        $dato_empresa['l'] = '';
+        $dato_empresa['r'] = '';
+        if ($this->input->get('empresa')=='si') {
+          $dato_empresa[$dir_empresa] = ($dir_empresa=='r'? ' - ': '').substr($itm->empresa, 0, 5).($dir_empresa=='l'? ' - ': '');
+        }
 				$response[] = array(
 						'id'    => $itm->id_cliente,
-						'label' => $itm->nombre_fiscal.$dato_ext,
-						'value' => $itm->nombre_fiscal.$dato_ext,
+						'label' => $dato_empresa['l'].$itm->nombre_fiscal.$dato_ext.$dato_empresa['r'],
+						'value' => $dato_empresa['l'].$itm->nombre_fiscal.$dato_ext.$dato_empresa['r'],
 						'item'  => $itm,
 				);
 			}

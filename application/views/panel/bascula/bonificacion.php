@@ -27,7 +27,7 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/bonificacion?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'b'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/bonificacion?'.MyString::getVarsLink(array('msg', 'fstatus', 'p', 'b'))); ?>" method="post" class="form-horizontal" id="form">
 
         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada
@@ -42,7 +42,7 @@
 
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
-        <input type="hidden" name="pidb" value="<?php echo $idb ?>">
+        <input type="hidden" name="pidb" value="<?php echo $idb ?>" id="pidb">
         <div class="row-fluid"><!--Datos Bascula-->
           <div class="box span12">
             <div class="box-header well" data-original-title>

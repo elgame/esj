@@ -100,7 +100,7 @@ class productos_regreso extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_regreso/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_orden'] ));
+        redirect(base_url('panel/productos_regreso/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_orden'] ));
       }
     }
 
@@ -161,7 +161,7 @@ class productos_regreso extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_regreso/ver/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/productos_regreso/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -183,7 +183,7 @@ class productos_regreso extends MY_Controller {
     $this->load->model('productos_regreso_model');
     $this->productos_regreso_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/productos_regreso/?' . String::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/productos_regreso/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
 
@@ -257,8 +257,8 @@ class productos_regreso extends MY_Controller {
         if ($_POST['tipoProducto'][$key] == 'p') {
           // id_almacen
           $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
-          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
           }
         }

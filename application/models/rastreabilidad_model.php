@@ -460,7 +460,7 @@ class rastreabilidad_model extends CI_Model {
       'id_area'     => $id_area,
     ));
 
-    $id = $this->db->insert_id();
+    $id = $this->db->insert_id('rastria_rendimiento_id_rendimiento_seq');
 
     return $id;
   }
@@ -732,7 +732,7 @@ class rastreabilidad_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
-      $pdf->titulo2 = "REPORTE RASTREABILIDAD DEL PRODUCTO <{$calidad_nombre}>";
+      $pdf->titulo2 = "# BIT-40 <{$calidad_nombre}>"; // "REPORTE RASTREABILIDAD DEL PRODUCTO <{$calidad_nombre}>";
       $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}\n";
       $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
       $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
@@ -777,8 +777,8 @@ class rastreabilidad_model extends CI_Model {
           $pdf->SetWidths($widths);
           $pdf->Row(array(
               '', '', '', '',
-              String::formatoNumero($cajas_lote, 2, ''),
-              String::formatoNumero($kilos_lote, 2, ''),
+              MyString::formatoNumero($cajas_lote, 2, ''),
+              MyString::formatoNumero($kilos_lote, 2, ''),
             ), true);
           $cajas_lote = 0;
           $kilos_lote = 0;
@@ -797,8 +797,8 @@ class rastreabilidad_model extends CI_Model {
               $boleta->folio,
               ($boleta->chofer_es_productor=='t'? $boleta->nombre: ''),
               $boleta->nombre_fiscal,
-              String::formatoNumero($boleta->cajas, 2, ''),
-              String::formatoNumero($boleta->kilos, 2, ''),
+              MyString::formatoNumero($boleta->cajas, 2, ''),
+              MyString::formatoNumero($boleta->kilos, 2, ''),
             ), false);
         $cajas_lote  += $boleta->cajas;
         $kilos_lote  += $boleta->kilos;
@@ -812,8 +812,8 @@ class rastreabilidad_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row(array(
           '', '', '', '',
-          String::formatoNumero($cajas_lote, 2, ''),
-          String::formatoNumero($kilos_lote, 2, ''),
+          MyString::formatoNumero($cajas_lote, 2, ''),
+          MyString::formatoNumero($kilos_lote, 2, ''),
         ), true);
 
       //total general
@@ -826,8 +826,8 @@ class rastreabilidad_model extends CI_Model {
       $pdf->SetWidths($widths);
         $pdf->Row(array(
             '', '', '', 'TOTAL',
-            String::formatoNumero($total_cajas, 2, ''),
-            String::formatoNumero($total_kilos, 2, ''),
+            MyString::formatoNumero($total_cajas, 2, ''),
+            MyString::formatoNumero($total_kilos, 2, ''),
           ), false, false);
 
 
@@ -952,8 +952,8 @@ class rastreabilidad_model extends CI_Model {
               $boleta->folio,
               $boleta->nombre_fiscal,
               $boleta->nombre,
-              String::formatoNumero($boleta->cajas, 2, ''),
-              String::formatoNumero($boleta->kilos, 2, ''),
+              MyString::formatoNumero($boleta->cajas, 2, ''),
+              MyString::formatoNumero($boleta->kilos, 2, ''),
             ), false);
 
         if($num_lote != $boleta->no_lote){
@@ -985,8 +985,8 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetX(6);
         $pdf->Row(array(
             $value['nombre'],
-            String::formatoNumero($value['cajas'], 2, ''),
-            String::formatoNumero($value['kilos'], 2, ''),
+            MyString::formatoNumero($value['cajas'], 2, ''),
+            MyString::formatoNumero($value['kilos'], 2, ''),
           ), false, false);
       }
 
@@ -998,7 +998,7 @@ class rastreabilidad_model extends CI_Model {
    * REPORTE DE RASTREABILIDAD DE PRODUCTOS
    * @return [type] [description]
    */
-  public function rrs_data()
+  public function rrs_data($completo=false)
   {
       $response = array('boletas' => array(), 'rendimientos' => array(), 'pallets' => array());
       $sql = '';
@@ -1030,9 +1030,12 @@ class rastreabilidad_model extends CI_Model {
           b.kilos_bruto,
           b.kilos_tara,
           b.kilos_neto,
-          p.nombre_fiscal
+          p.nombre_fiscal,
+          pr.nombre_fiscal AS productor,
+          b.importe, b.total_cajas
         FROM bascula AS b
           INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          INNER JOIN otros.productor AS pr ON pr.id_productor = b.id_productor
         WHERE b.status = true AND b.tipo = 'en' AND b.accion IN('sa', 'p', 'b')
           {$sql}
         ORDER BY b.folio ASC");
@@ -1091,10 +1094,10 @@ class rastreabilidad_model extends CI_Model {
     *
     * @return void
     */
-   public function rrs_pdf()
+   public function rrs_pdf($completo=false)
    {
       // Obtiene los datos del reporte.
-      $data = $this->rrs_data();
+      $data = $this->rrs_data($completo);
       // echo "<pre>";
       //   var_dump($data);
       // echo "</pre>";exit;
@@ -1104,7 +1107,10 @@ class rastreabilidad_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
-      $pdf->titulo2 = "REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO";
+      $pdf->titulo2 = "REPORTE VOLUMEN DE MASAS - # BIT-41";
+      if ($completo) {
+        $pdf->titulo2 = "REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO";
+      }
       if(isset($data['rendimientos'][0]))
         $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} | LOTE: {$data['rendimientos'][0]->lote_ext} | AREA: {$data['rendimientos'][0]->area}\n";
       // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
@@ -1151,9 +1157,9 @@ class rastreabilidad_model extends CI_Model {
         $pdf->Row(array(
             $boleta->folio,
             $boleta->nombre_fiscal,
-            String::formatoNumero($boleta->kilos_bruto, 2, '', false),
-            String::formatoNumero($boleta->kilos_tara, 2, '', false),
-            String::formatoNumero($boleta->kilos_neto, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_bruto, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_tara, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_neto, 2, '', false),
             ($boleta->certificado=='t'? 'Si': 'No'),
           ), false);
 
@@ -1172,10 +1178,10 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(106);
       $pdf->Row(array(
-              String::formatoNumero($total_kilos_bruto, 2, '', false),
-              String::formatoNumero($total_kilos_tara, 2, '', false),
-              String::formatoNumero($total_kilos_neto, 2, '', false),
-              String::formatoNumero($total_kilos_neto_cer, 2, '', false),
+              MyString::formatoNumero($total_kilos_bruto, 2, '', false),
+              MyString::formatoNumero($total_kilos_tara, 2, '', false),
+              MyString::formatoNumero($total_kilos_neto, 2, '', false),
+              MyString::formatoNumero($total_kilos_neto_cer, 2, '', false),
             ), false);
 
       // Listado de Rendimientos x lote
@@ -1216,9 +1222,9 @@ class rastreabilidad_model extends CI_Model {
         $pdf->Row(array(
             $boleta->clasificacion,
             $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
-            String::formatoNumero($boleta->rendimiento, 2, '', false),
-            String::formatoNumero($boleta->kilos, 2, '', false),
-            String::formatoNumero($boleta->kilos_total, 2, '', false),
+            MyString::formatoNumero($boleta->rendimiento, 2, '', false),
+            MyString::formatoNumero($boleta->kilos, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_total, 2, '', false),
             ($boleta->certificado=='t'? 'Si': 'No'),
           ), false);
 
@@ -1235,25 +1241,25 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(126);
       $pdf->Row(array(
-              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false), '',
+              MyString::formatoNumero($total_rendimiento, 2, '', false), MyString::formatoNumero($total_kilos_total, 2, '', false), '',
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
       $pdf->Row(array(
-              'Entro', String::formatoNumero($total_kilos_neto, 2, '', false),
+              'Entro', MyString::formatoNumero($total_kilos_neto, 2, '', false),
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
       $pdf->Row(array(
-              'Empacado', String::formatoNumero($total_kilos_total, 2, '', false),
+              'Empacado', MyString::formatoNumero($total_kilos_total, 2, '', false),
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
       $pdf->Row(array(
-              'Industrial', String::formatoNumero($total_kilos_neto-$total_kilos_total, 2, '', false),
+              'Industrial', MyString::formatoNumero($total_kilos_neto-$total_kilos_total, 2, '', false),
             ), false);
 
 
@@ -1293,9 +1299,9 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array(
-            String::fechaAT($boleta->fecha),
+            MyString::fechaAT($boleta->fecha),
             $boleta->folio,
-            String::fechaAT($boleta->fecha_venta),
+            MyString::fechaAT($boleta->fecha_venta),
             $boleta->serie.$boleta->foliov,
             $boleta->nombre_fiscal,
           ), false);
@@ -1468,11 +1474,11 @@ class rastreabilidad_model extends CI_Model {
         $pdf->Row(array(
             $lote->no_lote,
             $lote->btotal_cajas,
-            String::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds, 2, '', false),
-            String::formatoNumero($lote->bkilos_inds, 2, '', false),
-            String::formatoNumero($lote->rtotal_cajas, 2, '', false),
-            String::formatoNumero($lote->rtotal_kilos, 2, '', false),
-            String::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos, 2, '', false),
+            MyString::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds, 2, '', false),
+            MyString::formatoNumero($lote->bkilos_inds, 2, '', false),
+            MyString::formatoNumero($lote->rtotal_cajas, 2, '', false),
+            MyString::formatoNumero($lote->rtotal_kilos, 2, '', false),
+            MyString::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos, 2, '', false),
           ), false);
 
         $totales[0] += $lote->btotal_cajas;
@@ -1492,12 +1498,12 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(26);
       $pdf->Row(array(
-              String::formatoNumero($totales[0], 2, '', false),
-              String::formatoNumero($totales[1], 2, '', false),
-              String::formatoNumero($totales[2], 2, '', false),
-              String::formatoNumero($totales[3], 2, '', false),
-              String::formatoNumero($totales[4], 2, '', false),
-              String::formatoNumero($totales[5], 2, '', false),
+              MyString::formatoNumero($totales[0], 2, '', false),
+              MyString::formatoNumero($totales[1], 2, '', false),
+              MyString::formatoNumero($totales[2], 2, '', false),
+              MyString::formatoNumero($totales[3], 2, '', false),
+              MyString::formatoNumero($totales[4], 2, '', false),
+              MyString::formatoNumero($totales[5], 2, '', false),
             ), false);
 
       // Listado de Rendimientos
@@ -1539,8 +1545,8 @@ class rastreabilidad_model extends CI_Model {
             $boleta->clasificacion,
             // $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
             $boleta->size,
-            String::formatoNumero($boleta->rendimiento, 2, '', false),
-            String::formatoNumero($boleta->kilos_total, 2, '', false),
+            MyString::formatoNumero($boleta->rendimiento, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_total, 2, '', false),
           ), false);
 
         $total_rendimiento += $boleta->rendimiento;
@@ -1556,7 +1562,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(146);
       $pdf->Row(array(
-              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false)
+              MyString::formatoNumero($total_rendimiento, 2, '', false), MyString::formatoNumero($total_kilos_total, 2, '', false)
             ), false);
 
       if($pdf->GetY() >= $pdf->limiteY)
@@ -1565,19 +1571,19 @@ class rastreabilidad_model extends CI_Model {
       $pdf->SetWidths(array(30, 30));
       $pdf->SetX(6);
       $pdf->Row(array(
-              'B K NETOS', String::formatoNumero($totales[1], 2, '', false),
+              'B K NETOS', MyString::formatoNumero($totales[1], 2, '', false),
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
       $pdf->Row(array(
-              'REND K NETOS', String::formatoNumero($totales[4], 2, '', false),
+              'REND K NETOS', MyString::formatoNumero($totales[4], 2, '', false),
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
       $pdf->Row(array(
-              'K INDUSTRIAL', String::formatoNumero($totales[2]+$totales[5], 2, '', false),
+              'K INDUSTRIAL', MyString::formatoNumero($totales[2]+$totales[5], 2, '', false),
             ), false);
 
       $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
@@ -1792,7 +1798,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(107));
         $pdf->SetFillColor(200,200,200);
-        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '-' . $lote['info']->lote_ext), true);
+        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (MyString::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '-' . $lote['info']->lote_ext), true);
         $pdf->SetX($x);
         $pdf->SetAligns(array('L', 'C', 'C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 11, 12, 12, 12, 10));

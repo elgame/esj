@@ -91,6 +91,41 @@ var comPagos = (function($){
         }, 100);
         $("#btnRegComPago .loader").show();
       });
+
+      // Autocomplete
+      $("#addComplemento").autocomplete({
+        source: function(request, response) {
+          var params = {term : request.term};
+          if(parseInt($("#empresaId").val(), 10) > 0)
+            params.did_empresa = $("#empresaId").val();
+          if(parseInt($("#clienteId").val(), 10) > 0)
+            params.did_cliente = $("#clienteId").val();
+          $.ajax({
+              url: base_url + 'panel/cuentas_cobrar/ajax_get_com_pagos/',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                response(data);
+              }
+          });
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var hhtml = '<li>'+ui.item.value+
+                    '<input type="hidden" name="cfdiRel[uuids][]" value="'+ui.item.id+'">'+
+                    ' <button type="button" title="Quitar" class="removeComPago">X</button>'+
+                  '</li>';
+          $("#listaComPago").append(hhtml);
+          setTimeout(function () {
+            $('#addComplemento').val('');
+          }, 250);
+        }
+      });
+
+      $('#listaComPago').on('click', '.removeComPago', function(event) {
+        $(this).parent().remove();
+      });
     }
   }
 
@@ -111,9 +146,10 @@ var abonom = (function($){
     if ($("#btnGuardarAbono").length > 0)
     {
       $("#form").on('submit', function () {
-        setTimeout(function () {
-          $("#btnGuardarAbono").prop('disabled', true);
-        }, 100);
+        $("#btnGuardarAbono").prop('disabled', true);
+        // setTimeout(function () {
+        //   $("#btnGuardarAbono").prop('disabled', true);
+        // }, 100);
       });
     }
   }

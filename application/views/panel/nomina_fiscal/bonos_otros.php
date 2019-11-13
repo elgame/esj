@@ -45,7 +45,7 @@
       </ul>
       <div class="tab-content">
           <div class="tab-pane active" id="tab-bonos-otros">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/bonos_otros/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-bonos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/bonos_otros/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-bonos">
               <?php if (count($bonosOtros) > 0) { ?>
                 <input type="hidden" name="existentes" value="1" id="existentes">
               <?php } ?>
@@ -105,7 +105,7 @@
             </form><!--/form-horizontal -->
           </div>
           <div class="tab-pane" id="tab-prestamos">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_prestamos/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_prestamos/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
               <?php if (count($prestamos) > 0) { ?>
                 <input type="hidden" name="prestamos_existentes" value="1" id="prestamos-existentes">
               <?php } ?>
@@ -139,7 +139,13 @@
                       <tbody>
                         <?php foreach ($prestamos as $key => $prestamo) { ?>
                           <tr>
-                            <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $prestamo->fecha ?>" class="span12" readonly> </td>
+                            <td style="width: 200px;">
+                              <input type="text" name="fecha[]" value="<?php echo $prestamo->fecha ?>" class="span12" readonly>
+                              <input type="hidden" name="cuentaId[]" value="" class="cuentaId">
+                              <input type="hidden" name="contpaq[]" value="" class="contpaq">
+                              <input type="hidden" name="concepto[]" value="" class="concepto">
+                              <input type="hidden" name="metodoPago[]" value="" class="metodoPago">
+                            </td>
                             <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $prestamo->prestado ?>" class="span12 vpositive cantidad" required></td>
                             <td style="width: 100px;"><input type="text" name="pago_semana[]" value="<?php echo $prestamo->pago_semana ?>" class="span12 vpositive pago-semana" required></td>
                             <td style="width: 200px;"><input type="date" name="fecha_inicia_pagar[]" value="<?php echo $prestamo->inicio_pago ?>" class="span12 vpositive" required></td>
@@ -151,9 +157,10 @@
                               </select>
                             </td>
                             <td style="width: 50px;">
-                              <select name="tipo_efectico[]" required style="width: 50px;">
-                                <option value="fi" <?php echo set_select('tipo_efectico', 'fi', false, $prestamo->tipo); ?>>Fiscal</option>
+                              <select name="tipo_efectico[]" required style="width: 50px;" class="ptipo_efectico">
                                 <option value="ef" <?php echo set_select('tipo_efectico', 'ef', false, $prestamo->tipo); ?>>Efectivo</option>
+                                <option value="fi" <?php echo set_select('tipo_efectico', 'fi', false, $prestamo->tipo); ?>>Fiscal</option>
+                                <option value="mt" <?php echo set_select('tipo_efectico', 'mt', false, $prestamo->tipo); ?>>Materiales</option>
                               </select>
                             </td>
                             <td>
@@ -163,6 +170,52 @@
                         <?php } ?>
                       </tbody>
                     </table>
+                    <div id="pCuentasBanco" style="position: absolute;top: 105px;background-color: #fff;width: 100%;display: none">
+                      <div class="control-group">
+                        <label class="control-label" for="pCuenta">Cuenta</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <select id="pCuenta" class="span11">
+                            <?php foreach ($cuentas as $key => $value): ?>
+                              <option value="<?php echo $value->id_cuenta ?>"><?php echo $value->banco.' - '.$value->alias ?></option>
+                            <?php endforeach ?>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label" for="pContpaq">Contpaq</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="pContpaq" class="span11" id="pContpaq" value="" placeholder="">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label" for="pConcepto">Concepto</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="text" name="pConcepto" class="span11" id="pConcepto" value="" placeholder="">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label" for="pMetodoPago">Metodo de pago</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <select id="pMetodoPago">
+                              <?php  foreach ($metods_pago as $key => $value) {
+                              ?>
+                              <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
+                              <?php
+                              } ?>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" class="btn" title="Cancelar" id="pBtnCancelar" style="float: right;">Cancelar</button>
+                      <button type="button" class="btn btn-success" title="Guardar" id="pBtnAgregar" style="float: right;">Guardar</button>
+                    </div>
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -171,7 +224,7 @@
             </form><!--/form-horizontal -->
           </div><!--/tab-pane -->
           <div class="tab-pane" id="tab-vacaciones">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_vacaciones/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_vacaciones/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
                 <div class="row-fluid">
                   <div class="span12">
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-vacaciones">
@@ -203,7 +256,7 @@
             </form><!--/form-horizontal -->
           </div><!--/tab-pane -->
           <div class="tab-pane" id="tab-incapacidades">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
                 <div class="row-fluid">
                   <div class="span12">
                     <div style="display:none" id="sat_incapacidades"><?php echo json_encode($sat_incapacidades); ?></div>

@@ -87,7 +87,7 @@ class entrega_fruta extends MY_Controller {
 			$res_mdl = $this->entrega_fruta_model->addEntradas($_POST);
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/entrega_fruta/agregar/?'.String::getVarsLink(array('msg')).'&msg=3&hojas='.$res_mdl['hojas']));
+				redirect(base_url('panel/entrega_fruta/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3&hojas='.$res_mdl['hojas']));
 		}
 
 		$this->load->model('areas_model');
@@ -145,7 +145,7 @@ class entrega_fruta extends MY_Controller {
 				$res_mdl = $this->entrega_fruta_model->updateEntrada($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/entrega_fruta/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/entrega_fruta/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->entrega_fruta_model->getFormatoInfo();
@@ -161,7 +161,7 @@ class entrega_fruta extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/entrega_fruta/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/entrega_fruta/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

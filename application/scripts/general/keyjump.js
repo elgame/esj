@@ -28,7 +28,7 @@
                  })
                  .not('.nokey')
                  .toArray();
-
+    console.log('keyjump', fields);
     fields.forEach(function ($e, i) {
       $($e).on('keypress', function(event) {
 
@@ -66,7 +66,7 @@
         }
       });
     });
-
+    console.log(hiddens);
     hiddens.forEach(function ($h, i) {
       $h.on('keypress', function(event) {
         if (event.which == settings.next) {

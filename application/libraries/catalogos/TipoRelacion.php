@@ -12,9 +12,11 @@ class TipoRelacion {
     '02' => ['key' => '02', 'value' => 'Nota de débito de los documentos relacionados'],
     '03' => ['key' => '03', 'value' => 'Devolución de mercancía sobre facturas o traslados previos'],
     '04' => ['key' => '04', 'value' => 'Sustitución de los CFDI previos'],
-    '05' => ['key' => '05', 'value' => 'Traslados de mercancías facturados previamente'],
+    '05' => ['key' => '05', 'value' => 'Traslados de mercancias facturados previamente'],
     '06' => ['key' => '06', 'value' => 'Factura generada por los traslados previos'],
     '07' => ['key' => '07', 'value' => 'CFDI por aplicación de anticipo'],
+    '08' => ['key' => '08', 'value' => 'Factura generada por pagos en parcialidades'],
+    '09' => ['key' => '09', 'value' => 'Factura generada por pagos diferidos'],
   ];
 
   /**

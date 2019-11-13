@@ -183,6 +183,13 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="ftelefono">Teléfono </label>
+                      <div class="controls">
+                        <input type="text" name="ftelefono" id="ftelefono" class="span6" value="<?php echo set_value('ftelefono'); ?>" maxlength="20" placeholder="312321552">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
 										  <div class="controls">
@@ -244,6 +251,16 @@
 										</select>
 									  </div>
 									</div>
+
+                  <div class="control-group" id="cultivosGrup">
+                    <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña, Administrativos">
+                      </div>
+                      <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                    </div>
+                  </div>
 
 									<div class="control-group">
 									  <label class="control-label" for="fsalario_diario">Salario diario </label>
@@ -311,6 +328,13 @@
 											<input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo set_value('dno_trabajador'); ?>" maxlength="8" placeholder="# Trabajador">
 									  </div>
 									</div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dno_checador">No Checador </label>
+                    <div class="controls">
+                      <input type="text" name="dno_checador" id="dno_checador" class="span12" value="<?php echo set_value('dno_checador'); ?>" maxlength="8" placeholder="# Checador">
+                    </div>
+                  </div>
 
                   <div class="control-group">
                     <label class="control-label" for="tipo_contrato">Tipo Contrato </label>

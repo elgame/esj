@@ -28,7 +28,7 @@
                   <div class="control-group">
                     <label class="control-label" for="daguinaldo">Aguinaldo </label>
                     <div class="controls">
-                      <input type="text" name="daguinaldo" id="daguinaldo" class="vpos-int" 
+                      <input type="text" name="daguinaldo" id="daguinaldo" class="vpos-int"
                         value="<?php echo isset($data['conf']->aguinaldo)?$data['conf']->aguinaldo:''; ?>" placeholder="Aguinaldo" autofocus required>
                       <span class="help-inline">dias</span>
                     </div>
@@ -37,7 +37,7 @@
                   <div class="control-group">
                     <label class="control-label" for="dprima_vacacional">Prima Vacacional </label>
                     <div class="controls">
-                      <input type="text" name="dprima_vacacional" id="dprima_vacacional" class="vpositive" 
+                      <input type="text" name="dprima_vacacional" id="dprima_vacacional" class="vpositive"
                         value="<?php echo isset($data['conf']->prima_vacacional)?$data['conf']->prima_vacacional:''; ?>" placeholder="Prima Vacacional" required>
                       <span class="help-inline">%</span>
                     </div>
@@ -46,7 +46,7 @@
                   <div class="control-group">
                     <label class="control-label" for="dpuntualidad">Puntualidad </label>
                     <div class="controls">
-                      <input type="text" name="dpuntualidad" id="dpuntualidad" class="vpositive" 
+                      <input type="text" name="dpuntualidad" id="dpuntualidad" class="vpositive"
                         value="<?php echo isset($data['conf']->puntualidad)?$data['conf']->puntualidad:''; ?>" placeholder="Puntualidad" required>
                       <span class="help-inline">%</span>
                     </div>
@@ -55,7 +55,7 @@
                   <div class="control-group">
                     <label class="control-label" for="dasistencia">Asistencia </label>
                     <div class="controls">
-                      <input type="text" name="dasistencia" id="dasistencia" class="vpositive" 
+                      <input type="text" name="dasistencia" id="dasistencia" class="vpositive"
                         value="<?php echo isset($data['conf']->asistencia)?$data['conf']->asistencia:''; ?>" placeholder="Asistencia" required>
                       <span class="help-inline">%</span>
                     </div>
@@ -64,7 +64,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ddespensa">Despensa </label>
                     <div class="controls">
-                      <input type="text" name="ddespensa" id="ddespensa" class="vpositive" 
+                      <input type="text" name="ddespensa" id="ddespensa" class="vpositive"
                         value="<?php echo isset($data['conf']->despensa)?$data['conf']->despensa:''; ?>" placeholder="Despensa" required>
                       <span class="help-inline">%</span>
                     </div>
@@ -73,22 +73,30 @@
                 </div> <!--/span-->
 
                 <div class="span5">
-                  
+
                   <div class="control-group">
-                    <label class="control-label" for="dzona_a">Salari Zona A</label>
+                    <label class="control-label" for="dzona_a">UMA</label>
                     <div class="controls">
-                      <input type="text" name="dzona_a" id="dzona_a" class="vpositive" 
-                        value="<?php echo isset($data['salarios_minimos']->zona_a)?$data['salarios_minimos']->zona_a:''; ?>" placeholder="Salari Zona A" required>
+                      <input type="text" name="dzona_a" id="dzona_a" class="vpositive"
+                        value="<?php echo isset($data['salarios_minimos']->zona_a)?$data['salarios_minimos']->zona_a:''; ?>" placeholder="UMA" required>
                       <span class="help-inline">Pesos</span>
                     </div>
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="dzona_b">Salari Zona B </label>
+                    <label class="control-label" for="dzona_b">Salario mínimo </label>
                     <div class="controls">
-                      <input type="text" name="dzona_b" id="dzona_b" class="vpositive" 
-                        value="<?php echo isset($data['salarios_minimos']->zona_b)?$data['salarios_minimos']->zona_b:''; ?>" placeholder="Salari Zona B" required>
+                      <input type="text" name="dzona_b" id="dzona_b" class="vpositive"
+                        value="<?php echo isset($data['salarios_minimos']->zona_b)?$data['salarios_minimos']->zona_b:''; ?>" placeholder="Salario mínimo" required>
                       <span class="help-inline">Pesos</span>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dzona_anio">Año </label>
+                    <div class="controls">
+                      <input type="text" name="dzona_anio" id="dzona_anio" class="vpositive"
+                        value="<?php echo isset($data['salarios_minimos']->anio)? $data['salarios_minimos']->anio: ''; ?>" placeholder="Año salario" required>
                     </div>
                   </div>
 
@@ -97,13 +105,13 @@
                 <div class="clearfix"></div>
 
                 <div class="span12 nomarg">
-                  
+
                   <table class="table table-condensed table-bordered bootstrap-datatable">
                     <caption>Dias de Vacaciones por años trabajados</caption>
                     <tbody>
-                      <?php 
+                      <?php
                       $html_fields = $html_header = '';
-                      foreach($data['conf_vacaciones'] as $vaca){ 
+                      foreach($data['conf_vacaciones'] as $vaca){
                           $html_fields .= '<td style="width:40px;">
                             <input type="hidden" name="anio1[]" value="'.$vaca->anio1.'">
                             <input type="hidden" name="anio2[]" value="'.$vaca->anio2.'">
@@ -140,8 +148,8 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <?php 
-                            foreach($data['semanal_art113'] as $art){ 
+                            <?php
+                            foreach($data['semanal_art113'] as $art){
                             ?>
                             <tr>
                               <td style="width:40px;">
@@ -167,8 +175,8 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <?php 
-                            foreach($data['diaria_art113'] as $art){ 
+                            <?php
+                            foreach($data['diaria_art113'] as $art){
                             ?>
                             <tr>
                               <td style="width:40px;">
@@ -200,8 +208,8 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <?php 
-                            foreach($data['semanal_subsidios'] as $art){ 
+                            <?php
+                            foreach($data['semanal_subsidios'] as $art){
                             ?>
                             <tr>
                               <td style="width:40px;">
@@ -225,8 +233,8 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <?php 
-                            foreach($data['diaria_subsidios'] as $art){ 
+                            <?php
+                            foreach($data['diaria_subsidios'] as $art){
                             ?>
                             <tr>
                               <td style="width:40px;">

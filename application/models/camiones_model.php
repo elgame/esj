@@ -137,11 +137,13 @@ class camiones_model extends CI_Model {
 			$sql = " AND ( lower(placa) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
 								lower(modelo) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
 								lower(marca) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+    if ($this->input->get('alldata') !== false)
+      $sql .= " AND Coalesce(placa, '') <> '' AND Coalesce(modelo, '') <> '' AND Coalesce(marca, '') <> '' AND Coalesce(color, '') <> ''";
 
 		$res = $this->db->query("
 				SELECT id_camion, placa, modelo, marca, status
 				FROM camiones
-				WHERE status = 't' ".$sql."
+				WHERE status = 't' {$sql}
 				ORDER BY placa ASC
 				LIMIT 20");
 

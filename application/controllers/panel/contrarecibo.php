@@ -85,7 +85,7 @@ class contrarecibo extends MY_Controller {
 			$res_mdl = $this->contrarecibo_model->addContrarecibo();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/contrarecibo/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/contrarecibo/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$params['folio']         = $this->contrarecibo_model->getFolio();
@@ -135,7 +135,7 @@ class contrarecibo extends MY_Controller {
 				$res_mdl = $this->contrarecibo_model->updateContrarecibo($this->input->get('id'));
 
 				if(!$res_mdl['error'])
-					redirect(base_url('panel/contrarecibo/?'.String::getVarsLink(array('msg')).'&msg=4'));
+					redirect(base_url('panel/contrarecibo/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 			}
 
 			$params['data'] = $this->contrarecibo_model->getContrareciboInfo();
@@ -151,7 +151,7 @@ class contrarecibo extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/contrarecibo/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/contrarecibo/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -165,10 +165,10 @@ class contrarecibo extends MY_Controller {
 			$this->load->model('contrarecibo_model');
 			$res_mdl = $this->contrarecibo_model->updateContrarecibo( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/contrarecibo/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/contrarecibo/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/contrarecibo/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/contrarecibo/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -182,10 +182,10 @@ class contrarecibo extends MY_Controller {
 			$this->load->model('contrarecibo_model');
 			$res_mdl = $this->contrarecibo_model->updateProveedor( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	public function imprimir()

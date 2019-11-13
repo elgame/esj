@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver_nota_credito/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+        <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver_nota_credito/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
 
           <div class="row-fluid">
             <div class="span12">
@@ -50,11 +50,23 @@
                 </div>
                 <div class="span3">
                   <div class="control-group">
+                    <div class="controls span11">
+                      <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$nota_credito['info']->id_empresa.'&idp='.$nota_credito['info']->id_proveedor.'') ?>"
+                        rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                        <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                      <br><br>
+                      UUID: <input type="text" name="uuid" value="<?php echo $nota_credito['info']->uuid; ?>" id="buscarUuid" class="span12"><br>
+                      No Certificado: <input type="text" name="noCertificado" value="<?php echo $nota_credito['info']->no_certificado; ?>" id="buscarNoCertificado" class="span12">
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="span3">
+                  <div class="control-group">
                     <div class="controls span9">
                       XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>

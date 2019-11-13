@@ -31,6 +31,8 @@
     $htmlProdOk = '';
     $prodOk = false;
 
+    $readonlyCat = '';
+    $receta_readonly = '';
     if ($orden['info'][0]->status === 'p' AND $orden['info'][0]->autorizado === 'f' AND ! isset($_GET['mod']))
     {
       $badgeTitle = 'NO AUTORIZADO';
@@ -57,7 +59,8 @@
       {
         $badgeTitle = 'ACEPTADA';
         $badgeStyle = '-success';
-        $readonly = '';
+        $readonly = 'readonly';
+        $readonlyCat = 'readonly';
         $disabled = '';
         $showButton = true;
       }
@@ -83,6 +86,11 @@
         $badgeStyle = '-warning';
       }
     }
+
+    if ($orden['info'][0]->es_receta == 't') {
+      $receta_readonly = 'readonly';
+      $readonlyCat = 'disable';
+    }
   ?>
 
   <div class="row-fluid">
@@ -95,7 +103,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/modificar?'.String::getVarsLink(array('m', 'msg', 'print')).$method); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/modificar?'.MyString::getVarsLink(array('m', 'msg', 'print')).$method); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -124,7 +132,7 @@
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="">
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="" <?php echo $receta_readonly ?>>
                   </div>
                 </div>
               </div>
@@ -155,7 +163,8 @@
                 <label class="control-label" for="descripcion">Observaciones</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <textarea name="descripcion" class="span11" id="descripcion"><?php echo set_value('descripcion', $orden['info'][0]->descripcion) ?></textarea>
+                    <textarea name="descripcion" class="span11" id="descripcion"
+                      <?php echo $receta_readonly ?>><?php echo set_value('descripcion', $orden['info'][0]->descripcion) ?></textarea>
                   </div>
                 </div>
               </div>
@@ -173,7 +182,7 @@
                 <label class="control-label" for="autorizo">Autoriza</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>" placeholder="" required>
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>" placeholder="" required <?php echo $receta_readonly ?>>
                   </div>
                 </div>
                   <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId', $orden['info'][0]->id_autorizo) ?>" required>
@@ -194,9 +203,10 @@
                 <div class="controls">
                   <select name="tipoOrden" class="span9" id="tipoOrden" <?php echo $disabled ?>>
                     <option value="p" <?php echo set_select('tipoOrden', 'p', $orden['info'][0]->tipo_orden === 'p' ? true : false); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios</option>
-                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Orden de compra</option>
-                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?>>Fletes</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios (Gasto)</option>
+                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Gastos (Gasto)</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?>>Fletes (Gasto)</option>
+                    <option value="a" <?php echo set_select('tipoOrden', 'a', $orden['info'][0]->tipo_orden === 'a' ? true : false); ?>>Activo</option>
                   </select>
                 </div>
               </div>
@@ -285,6 +295,77 @@
             </div>
           </div>
 
+          <div class="row-fluid" id="groupInfoExt">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Información extra</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span12">
+                    <div class="control-group span6">
+                      <label class="control-label" for="infRecogerProv">Recoger con el proveedor </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="checkbox" data-uniform="false" name="infRecogerProv" id="infRecogerProv" value="si" <?php echo set_checkbox('infRecogerProv', 'si', isset($orden['info'][0]->otros_datos->infRecogerProv) ? true : false) ?>>
+                          <input type="text" name="infRecogerProvNom" class="span11" id="infRecogerProvNom" value="<?php echo set_value('infRecogerProvNom', isset($orden['info'][0]->otros_datos->infRecogerProvNom) ? $orden['info'][0]->otros_datos->infRecogerProvNom : '') ?>" placeholder="Nombre quien recoge">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group span6">
+                      <label class="control-label" for="infCotizacion">No cotización </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="infCotizacion" class="span11" id="infCotizacion" value="<?php echo set_value('infCotizacion', isset($orden['info'][0]->otros_datos->infCotizacion) ? $orden['info'][0]->otros_datos->infCotizacion : '') ?>">
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group span7">
+                      <label class="control-label" for="rancho">Requisitos para la entrega de mercancias </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <label id="infPasarBascula"><input type="checkbox" data-uniform="false" name="infPasarBascula" id="infPasarBascula" value="si" <?php echo set_checkbox('infPasarBascula', 'si', isset($orden['info'][0]->otros_datos->infPasarBascula) ? true : false) ?>>
+                          Pasar a Bascula a pesar la mercancía y entregar Boleta a almacén.</label>
+                          <label id="infEntOrdenCom"><input type="checkbox" data-uniform="false" name="infEntOrdenCom" id="infEntOrdenCom" value="si" <?php echo set_checkbox('infEntOrdenCom', 'si', isset($orden['info'][0]->otros_datos->infEntOrdenCom) ? true : false) ?>>
+                          Entregar la mercancía al almacenista, referenciando la presente Orden de Compra, así como anexarla a su Factura</label>
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group span4">
+                      <label class="control-label" for="infBoletasEntrada">Boletas entrada </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <button type="button" class="btn btn-info" id="show-boletasEntrada">Buscar</button>
+                          <span id="boletasEntrada" style="cursor:pointer;">
+                            <?php
+                            $boletasEntFolios = '';
+                            $boletasEntIds = '';
+                            foreach ($orden['info'][0]->boletas_lig as $key => $value)
+                            {
+                              $boletasEntFolios .= $value->folio.' | ';
+                              $boletasEntIds .= $value->id_bascula.'|';
+                            }
+                            echo $boletasEntFolios.' <input type="hidden" name="boletasEntradaId" value="'.$boletasEntIds.'"><input type="hidden" name="boletasEntradaFolio" value="'.$boletasEntFolios.'">';
+                            ?>
+                          </span>
+                        </div>
+                      </div>
+                    </div><!--/control-group -->
+
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
           <!-- Box Productos -->
           <div class="row-fluid" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : ($orden['info'][0]->id_vehiculo > 0 ? 'block' : 'none') ?>;">
             <div class="box span12">
@@ -341,6 +422,103 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
+          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'a' && $orden['info'][0]->tipo_orden !== 'a' ? 'block' : 'block') ?>;">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="" placeholder="Limon, Piña" <?php echo $receta_readonly ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsAreaIds">
+                      <?php if (isset($orden['info'][0]->area)) {
+                        foreach ($orden['info'][0]->area as $key => $area) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $area->nombre ?></span>
+                            <input type="hidden" name="areaId[]" class="areaId" value="<?php echo $area->id_area ?>">
+                            <input type="hidden" name="areaText[]" class="areaText" value="<?php echo $area->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="" placeholder="Milagro A, Linea 1" <?php echo $receta_readonly ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($orden['info'][0]->rancho)) {
+                        foreach ($orden['info'][0]->rancho as $key => $rancho) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $rancho->nombre ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $rancho->id_rancho ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $rancho->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="" placeholder="Mantenimiento, Gasto general" <?php echo $receta_readonly ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($orden['info'][0]->centroCosto)) {
+                        foreach ($orden['info'][0]->centroCosto as $key => $centroCosto) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $centroCosto->nombre ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCosto->id_centro_costo ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $centroCosto->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="" placeholder="Nissan FRX, Maquina limon" <?php echo $receta_readonly ?>>
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($orden['info'][0]->activo)) {
+                        foreach ($orden['info'][0]->activo as $key => $activo) { ?>
+                          <li class="<?php echo $readonlyCat==''? '': 'disable' ?>">
+                            <span class="tag <?php echo $readonlyCat ?>"><?php echo $activo->nombre ?></span>
+                            <input type="hidden" name="activoId[]" class="activoId" value="<?php echo $activo->id_producto ?>">
+                            <input type="hidden" name="activoText[]" class="activoText" value="<?php echo $activo->nombre ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
+
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
@@ -391,7 +569,7 @@
                       <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
                       <select class="span12" id="ftraslado">
                         <option value="0">0%</option>
-                        <option value="11">11%</option>
+                        <option value="8">8%</option>
                         <option value="16">16%</option>
                       </select>
                     </div><!--/span2 -->
@@ -484,7 +662,7 @@
                               <td style="width: 66px;">
                                   <select name="traslado[]" id="traslado" class="span12">
                                     <option value="0" <?php echo $_POST['traslado'][$key] === '0' ? 'selected' : '' ?>>0%</option>
-                                    <option value="11" <?php echo $_POST['traslado'][$key] === '11' ? 'selected' : ''?>>11%</option>
+                                    <option value="8" <?php echo $_POST['traslado'][$key] === '8' ? 'selected' : ''?>>11%</option>
                                     <option value="16" <?php echo $_POST['traslado'][$key] === '16' ? 'selected' : ''?>>16%</option>
                                   </select>
                                   <input type="hidden" name="trasladoTotal[]" value="<?php echo $_POST['trasladoTotal'][$key] ?>" id="trasladoTotal" class="span12">
@@ -508,7 +686,7 @@
                                   <input type="hidden" name="ret_isrTotal[]" value="<?php echo $_POST['ret_isrTotal'][$key] ?>" id="ret_isrTotal" class="span12">
                                </td>
                               <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
+                                  <span><?php echo MyString::formatoNumero($_POST['importe'][$key]) ?></span>
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
                               </td>
@@ -625,7 +803,7 @@
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                      <select name="traslado[]" id="traslado" class="span12" <?php echo $disabled.' '.$readonly ?>>
                                        <option value="0" <?php echo $prod->porcentaje_iva === '0' ? 'selected' : '' ?>>0%</option>
-                                       <option value="11" <?php echo $prod->porcentaje_iva === '11' ? 'selected' : ''?>>11%</option>
+                                       <option value="8" <?php echo $prod->porcentaje_iva === '8' ? 'selected' : ''?>>8%</option>
                                        <option value="16" <?php echo $prod->porcentaje_iva === '16' ? 'selected' : ''?>>16%</option>
                                      </select>
                                      <input type="hidden" name="trasladoTotal[]" value="<?php echo $prod->iva ?>" id="trasladoTotal" class="span12">
@@ -649,7 +827,7 @@
                                     <input type="hidden" name="ret_isrTotal[]" value="<?php echo $prod->retencion_isr ?>" id="ret_isrTotal" class="span12">
                                  </td>
                                  <td style="<?php echo $redBg ?>">
-                                     <span><?php echo String::formatoNumero($prod->importe) ?></span>
+                                     <span><?php echo MyString::formatoNumero($prod->importe) ?></span>
                                      <input type="hidden" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive">
                                      <input type="hidden" name="total[]" value="<?php echo $prod->total ?>" id="total" class="span12 vpositive">
                                  </td>
@@ -684,37 +862,37 @@
                 <tbody>
                   <tr>
                     <td rowspan="7">
-                        <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', String::num2letras($total));?></textarea>
+                        <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', MyString::num2letras($total));?></textarea>
                     </td>
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte', $subtotal))?></td>
+                    <td id="importe-format"><?php echo MyString::formatoNumero(set_value('totalImporte', $subtotal))?></td>
                     <input type="hidden" name="totalImporte" id="totalImporte" value="<?php echo set_value('totalImporte', $subtotal); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
+                    <td id="traslado-format"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
                     <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', $iva); ?>">
                   </tr>
                   <tr>
                     <td>IEPS</td>
-                    <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps', $ieps))?></td>
+                    <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('totalIeps', $ieps))?></td>
                     <input type="hidden" name="totalIeps" id="totalIeps" value="<?php echo set_value('totalIeps', $ieps); ?>">
                   </tr>
                   <tr>
                     <td>RET.</td>
-                    <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', $retencion))?></td>
+                    <td id="retencion-format"><?php echo MyString::formatoNumero(set_value('totalRetencion', $retencion))?></td>
                     <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', $retencion); ?>">
                   </tr>
                   <tr>
                     <td>RET ISR</td>
-                    <td id="retencionisr-format"><?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencionisr))?></td>
+                    <td id="retencionisr-format"><?php echo MyString::formatoNumero(set_value('totalRetencionIsr', $retencionisr))?></td>
                     <input type="hidden" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo set_value('totalRetencionIsr', $retencion); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden', $total))?></td>
+                    <td id="total-format"><?php echo MyString::formatoNumero(set_value('totalOrden', $total))?></td>
                     <input type="hidden" name="totalOrden" id="totalOrden" value="<?php echo set_value('totalOrden', $total); ?>">
                   </tr>
                 </tbody>
@@ -835,6 +1013,7 @@
               <th style="width:70px;">Fecha</th>
               <th># Folio</th>
               <th>Proveedor</th>
+              <th>Área</th>
             </tr>
           </thead>
           <tbody>

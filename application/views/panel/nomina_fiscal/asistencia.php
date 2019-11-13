@@ -58,13 +58,15 @@
             </form>
 
 
-            <form id="formAsistencia" action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
+            <form id="formAsistencia" action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" class="form">
 
               <div class="row-fluid">
                 <div class="span4">
                   <span class="label" style="background-color: green; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Asistencia</span>
                   <span class="label" style="background-color: red; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Falta</span>
                   <span class="label" style="background-color: yellow; color: black; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Incapacidad</span>
+
+                  <a href="<?php echo base_url('panel/nomina_fiscal/show_import_asistencias/?id='.(isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa).'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn" rel="superbox-50x450" title="Importar asistencias"><i class="icon-upload"></i></a>
                 </div>
                 <div class="span5">
                   <div style="font-size: 1.5em;"><?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?></div>
@@ -73,7 +75,7 @@
                   <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
                 </div>
                 <div class="span1">
-                  <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button>
+                  <!-- <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button> -->
                 </div>
               </div>
 
@@ -89,7 +91,7 @@
                         <tr>
                           <th>Nombre</th>
                           <?php foreach ($dias as $dia => $fecha) { ?>
-                          <th><?php echo String::dia($fecha, 'c'); ?></th>
+                          <th><?php echo MyString::dia($fecha, 'c'); ?></th>
                           <?php } ?>
                         </tr>
                       </thead>
@@ -125,7 +127,9 @@
                                     }
                                 ?>
 
-                                <select name="empleados[<?php echo $e->id ?>][<?php echo $fecha ?>]" class="span12 select-tipo" style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;" title="<?php echo $fecha ?>">
+                                <select name="empleados[<?php echo $e->id ?>][<?php echo $fecha ?>]" class="span12 select-tipo"
+                                  data-id="<?php echo $e->id ?>" data-fecha="<?php echo $fecha ?>"
+                                  style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;" title="<?php echo $fecha ?>">
                                   <option value="a" style="background-color: green;" <?php echo $selected_a ?>></option>
                                   <option value="f" style="background-color: red;" <?php echo $selected_f ?> <?php echo $dia === 2 ? '' : '' ?>></option>
 
@@ -161,6 +165,7 @@
       </div><!--/row-->
     </div><!--/#content.span10-->
 
+<div id="loaderAsistencia" style="position:fixed;top: 0px;left: 0px;width: 100%;height: 100%;background: #0000004d;text-align: center;font-size: 3em;color: #fff;padding-top: 16%; display: none;">Cargando...</div>
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){

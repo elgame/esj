@@ -51,14 +51,17 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       $sql .= " AND f.status = '".$status."'";
     }
 
+    if($this->input->get('ffolio') != '') {
+      $sql .= " AND f.folio = ".$this->input->get('ffolio');
+    }
 
     $query = BDUtil::pagination(
       "SELECT
         f.id, f.id_movimiento, f.fecha, f.serie, f.folio, f.uuid, f.cfdi_ext, f.sello, f.cadena_original,
         f.status, f.version, f.id_empresa, f.no_impresiones, bm.monto, c.nombre_fiscal, e.nombre_fiscal AS empresa
       FROM banco_movimientos_com_pagos AS f
-        INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
-        INNER JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+        LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
+        LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
       WHERE 1 = 1
       {$sql}
@@ -102,7 +105,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $factura;
   }
 
-  public function addComPago($id_movimiento, $id_cuenta_cliente)
+  public function addComPago($id_movimiento, $id_cuenta_cliente, $cfdiRel = null)
   {
     $query = $this->db->query(
           "SELECT *, (select Count(id_movimiento) from banco_movimientos_com_pagos where id_movimiento = {$id_movimiento}) AS num_row
@@ -115,8 +118,9 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       $queryMov = $this->db->query(
           "SELECT bm.id_movimiento, bm.fecha, bm.metodo_pago AS forma_pago, bm.concepto,
-            bm.monto AS pago, bb.rfc, bc.numero AS num_cuenta, caf.total AS pago_factura, v.version, v.serie, v.folio,
-            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa
+            bm.monto AS pago, bc.numero AS num_cuenta, (caf.total - Coalesce(fao.total, 0)) AS pago_factura, v.version, v.serie, v.folio,
+            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa, v.metodo_pago,
+            v.moneda, v.tipo_cambio, bb.rfc, bb.nombre AS banco
            FROM banco_movimientos bm
             INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
             INNER JOIN banco_bancos bb ON bb.id_banco = bm.id_banco
@@ -126,12 +130,15 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
             LEFT JOIN (
               SELECT id_factura, Count(*) AS parcialidades FROM facturacion_abonos GROUP BY id_factura
             ) par ON v.id_factura = par.id_factura
-           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2"
+            LEFT JOIN (
+              SELECT id_factura, id_abono, (CASE WHEN tipo = 's' THEN total ELSE -1*total END) AS total FROM facturacion_abonos_otros
+            ) fao ON v.id_factura = fao.id_factura AND caf.id_abono = fao.id_abono
+           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float >= 3.2 AND v.is_factura = 't'"
         );
 
       if ($id_cuenta_cliente > 0) {
         $queryCliente = $this->db->query(
-            "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc
+            "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc, bb.nombre AS banco
              FROM clientes_cuentas cc
               INNER JOIN banco_bancos bb ON bb.id_banco = cc.id_banco
              WHERE cc.id_cuenta = {$id_cuenta_cliente}"
@@ -146,42 +153,24 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           return array("passes" => false, "codigo" => "14");
         }
 
+        $queryMov[0]->num_cuenta = str_replace('-', '', $queryMov[0]->num_cuenta);
+
         // xml 3.3
-        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio);
+        // $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
+        $cfdiRel = $cfdiRel['tipo'] != ''? $cfdiRel: null;
+        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio, $cfdiRel);
         // echo "<pre>";
         //   var_dump($datosApi);
         // echo "</pre>";exit;
 
+        log_message('error', "ComPago");
+        log_message('error', json_encode($datosApi));
         // Timbrado de la factura.
         $result = $this->timbrar($datosApi, $id_movimiento);
+        log_message('error', json_encode($result));
 
         if ($result['passes'])
         {
-
-          // // $xmlName = explode('/', $archivos['pathXML']);
-
-          // // copy($archivos['pathXML'], $pathDocs.end($xmlName));
-
-          // //Si es otra moneda actualiza al tipo de cambio
-          // if($datosFactura['moneda'] !== 'MXN')
-          // {
-          //   $datosFactura1 = array();
-          //   $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //   $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
-
-          //   foreach ($productosFactura as $key => $value)
-          //   {
-          //     $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-          //     $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
-          //   }
-          // }
-
           $dataTimbrado = array(
             'id_movimiento'   => $id_movimiento,
             'id_empresa'      => $queryMov[0]->id_empresa,
@@ -196,7 +185,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
             'cfdi_ext'        => json_encode($datosApi),
           );
           $this->db->insert('banco_movimientos_com_pagos', $dataTimbrado);
-          $id_compago = $this->db->insert_id();
+          $id_compago = $this->db->insert_id('banco_movimientos_com_pagos_id_seq');
 
           foreach ($queryMov as $key => $pago) {
             $this->db->insert('facturacion_com_pagos', [
@@ -284,16 +273,19 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'   => $factura->cfdi_ext->emisor->rfc,
-        'uuids' => $factura->uuid,
-        'cer'   => $this->cfdi->obtenCer(),
-        'key'   => $this->cfdi->obtenKey(),
+        'rfc'    => $factura->cfdi_ext->emisor->rfc,
+        'rfcRec' => $factura->cfdi_ext->receptor->rfc,
+        'uuids'  => $factura->uuid,
+        'cer'    => $this->cfdi->obtenCer(),
+        'key'    => $this->cfdi->obtenKey(),
+        'total'  => $factura->cfdi_ext->total,
+        'sello'  => $factura->sello,
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.
       $result = $this->facturartebarato_api->cancelar($params);
 
-      if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+      if ($result->data->status_uuid == '201' || $result->data->status_uuid == '202')
       {
         $status_uuid = $result->data->status_uuid;
         $this->db->update('banco_movimientos_com_pagos',
@@ -314,6 +306,85 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
     return array('msg' => $status_uuid);
   }
+
+  public function getComPagosAjax(){
+    $sql = '';
+    if ($this->input->get('term') !== false) {
+      $sql = " AND f.folio::text LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+    }
+
+    if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
+      $sql .= " AND e.id_empresa = ".$this->input->get('did_empresa')."";
+    if ($this->input->get('did_cliente') !== false && $this->input->get('did_cliente') !== '')
+      $sql .= " AND c.id_cliente = ".$this->input->get('did_cliente')."";
+
+    $res = $this->db->query(
+        "SELECT
+          f.id, Date(f.fecha) AS fecha, f.serie, f.folio, f.uuid, f.id_empresa, bm.monto,
+          c.nombre_fiscal, e.nombre_fiscal AS empresa
+        FROM banco_movimientos_com_pagos AS f
+          LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
+          LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+          INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
+        WHERE 1 = 1
+         {$sql}
+        ORDER BY fecha DESC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->uuid,
+            'label' => $itm->serie.$itm->folio.' | '.$itm->nombre_fiscal.' | '.number_format($itm->monto, 2),
+            'value' => $itm->serie.$itm->folio.' | '.$itm->nombre_fiscal.' | '.number_format($itm->monto, 2),
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function descargarZipCP($idFactura)
+    {
+        $this->load->library('cfdi');
+
+        // Obtiene la info de la factura.
+        $factura = $this->getInfoComPago($idFactura);
+
+        $cliente = strtoupper($factura->cfdi_ext->receptor->nombreFiscal);
+        $fecha   = explode('-', $factura->fecha);
+        $ano     = $fecha[0];
+        $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
+        $serie   = $factura->serie !== '' ? $factura->serie.'-' : '';
+        $folio   = $factura->folio;
+
+        $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+        // Scanea el directorio para obtener los archivos.
+        $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+        $zip = new ZipArchive;
+        if ($zip->open(APPPATH.'media/documentos.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+        {
+          foreach ($archivos as $archivo)
+            $zip->addFile($pathDocs.$archivo, $archivo);
+
+          $zip->close();
+        }
+        else
+        {
+          exit('Error al intentar crear el ZIP.');
+        }
+
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=documentos.zip');
+        readfile(APPPATH.'media/documentos.zip');
+
+        unlink(APPPATH.'media/documentos.zip');
+    }
 
   public function getFolioSerie($serie, $empresa, $sqlX = null)
   {
@@ -402,7 +473,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(48, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'L', 0);
+    $pdf->Cell(48, 4, MyString::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'L', 0);
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(48, $pdf->GetY());
     $pdf->Cell(60, 4, $factura->cfdi_ext->noCertificado, 0, 0, 'R', 0);
@@ -419,7 +490,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $municipio   = strtoupper($factura->cfdi_ext->emisor->municipio);
     $estado = strtoupper($factura->cfdi_ext->emisor->estado);
     $fecha = explode('T', $factura->cfdi_ext->fecha);
-    $fecha = String::fechaATexto($fecha[0]);
+    $fecha = MyString::fechaATexto($fecha[0]);
 
     $pdf->Cell(108, 4, "{$municipio}, {$estado} ({$factura->cfdi_ext->emisor->cp}) | {$fecha}", 0, 0, 'R', 0);
 
@@ -586,12 +657,12 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       $pdf->SetWidths($widths);
 
       $pdf->Row(array(
-        String::formatoNumero($item->cantidad, 2, ''),
+        MyString::formatoNumero($item->cantidad, 2, ''),
         $item->unidad,
         $item->claveUnidad,
         $this->cfdi->replaceSpecialChars($item->claveProdServ.' - '.$item->concepto, true),
-        String::formatoNumero( $item->valorUnitario, 2, '$', false),
-        String::formatoNumero( $item->importe, 2, '$', false),
+        MyString::formatoNumero( $item->valorUnitario, 2, '$', false),
+        MyString::formatoNumero( $item->importe, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -615,7 +686,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->MultiCell(156, 6, String::num2letras($factura->cfdi_ext->total), 0, 'C', 0);
+    $pdf->MultiCell(156, 6, MyString::num2letras($factura->cfdi_ext->total), 0, 'C', 0);
 
     $pdf->Line(1, $pdf->GetY(), 200, $pdf->GetY());
 
@@ -636,7 +707,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(111, $pdf->GetY());
-    $pdf->Cell(39, 4, "Tipo de Cambio: ".String::formatoNumero($factura->cfdi_ext->tipoCambio, 4), 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "Tipo de Cambio: ".MyString::formatoNumero($factura->cfdi_ext->tipoCambio, 4), 0, 0, 'L', 1);
 
 
     $pdf->SetFont('helvetica','B', 10);
@@ -644,7 +715,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero($factura->cfdi_ext->totalImporte, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5, MyString::formatoNumero($factura->cfdi_ext->totalImporte, 2, '$', false), 1, 0, 'R', 1);
 
     // Pinta traslados, retenciones
 
@@ -652,13 +723,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->trasladosImporte->iva, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($factura->cfdi_ext->trasladosImporte->iva, 2, '$', false), 1, 0, 'R', 1);
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($factura->cfdi_ext->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Complemento de Pagos //

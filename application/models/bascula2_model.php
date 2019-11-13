@@ -291,11 +291,11 @@ class bascula2_model extends bascula_model {
                            $caja->fecha,
                            $caja->folio,
                            substr($caja->proveedor, 0, 28),
-                           String::formatoNumero($caja->promedio, 2, '', false),
+                           MyString::formatoNumero($caja->promedio, 2, '', false),
                            $caja->cajas,
                            $caja->kilos,
-                           String::formatoNumero($caja->precio, 2, '$', false),
-                           String::formatoNumero($caja->importe, 2, '$', false));
+                           MyString::formatoNumero($caja->precio, 2, '$', false),
+                           MyString::formatoNumero($caja->importe, 2, '$', false));
 
             $pdf->SetY($pdf->GetY()-2);
             $pdf->SetX(6);
@@ -310,11 +310,11 @@ class bascula2_model extends bascula_model {
           $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
           $pdf->Row(array(
             'TOTALES',
-            String::formatoNumero($kilos/$cajas, 2, '', false),
+            MyString::formatoNumero($kilos/$cajas, 2, '', false),
             $cajas,
             $kilos,
-            String::formatoNumero($importe/$kilos, 2, '$', false),
-            String::formatoNumero($importe, 2, '$', false)), false, false);
+            MyString::formatoNumero($importe/$kilos, 2, '$', false),
+            MyString::formatoNumero($importe, 2, '$', false)), false, false);
 
         }
 
@@ -343,10 +343,10 @@ class bascula2_model extends bascula_model {
         $pdf->SetAligns(array('C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 50, 50, 50));
         $pdf->Row(array(
-          String::formatoNumero($totalPagado, 2, '$', false),
-          String::formatoNumero($totalNoPagado, 2, '$', false),
-          String::formatoNumero($row['cancelados'], 2, '$', false),
-          String::formatoNumero($totalImporte, 2, '$', false)), false);
+          MyString::formatoNumero($totalPagado, 2, '$', false),
+          MyString::formatoNumero($totalNoPagado, 2, '$', false),
+          MyString::formatoNumero($row['cancelados'], 2, '$', false),
+          MyString::formatoNumero($totalImporte, 2, '$', false)), false);
 
         $gtotalPagado    += $totalPagado;
         $gtotalNoPagado  += $totalNoPagado;
@@ -380,10 +380,10 @@ class bascula2_model extends bascula_model {
         $pdf->SetAligns(array('C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 50, 50, 50));
         $pdf->Row(array(
-          String::formatoNumero($gtotalPagado, 2, '$', false),
-          String::formatoNumero($gtotalNoPagado, 2, '$', false),
-          String::formatoNumero($gtotalCancelado, 2, '$', false),
-          String::formatoNumero($gtotalImporte, 2, '$', false)), false);
+          MyString::formatoNumero($gtotalPagado, 2, '$', false),
+          MyString::formatoNumero($gtotalNoPagado, 2, '$', false),
+          MyString::formatoNumero($gtotalCancelado, 2, '$', false),
+          MyString::formatoNumero($gtotalImporte, 2, '$', false)), false);
       }
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$data[0]['area']['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
@@ -605,6 +605,273 @@ class bascula2_model extends bascula_model {
 
     $xls->workbook->send('reporte_diario_entradas.xls');
     $xls->workbook->close();
+  }
+
+
+  public function getDataMovimientosAuditoriaSa(&$data)
+  {
+    $sql = '';
+
+    $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-01');
+    $_GET['fechaend'] = $this->input->get('fechaend') != '' ? $_GET['fechaend'] : date('Y-m-d');
+    if ($this->input->get('fechaini') != '' && $this->input->get('fechaend') != '')
+    $sql .= " AND DATE(b.fecha_bruto) >= '".$this->input->get('fechaini')."' AND
+                  DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
+
+    $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+    if ($this->input->get('farea') != '')
+      $sql .= " AND b.id_area = " . $_GET['farea'];
+
+    if ($this->input->get('fid_proveedor') != ''){
+      if($this->input->get('ftipop') == 'sa'){
+        $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+      }else{
+        $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      }
+    }
+
+    if ($this->input->get('fid_empresa') != '') {
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    if ($this->input->get('prancho') != '') {
+      $sql .= " AND Upper(b.rancho) LIKE '".mb_strtoupper($_GET['prancho'], 'UTF-8')."'";
+    }
+
+    if ($this->input->get('fstatusp') != '')
+      if ($this->input->get('fstatusp') === '1')
+        $sql .= " AND b.accion IN ('p', 'b')";
+      else
+        $sql .= " AND b.accion IN ('en', 'sa')";
+
+    //Filtros del tipo de pesadas
+    if ($this->input->get('ftipop') != '')
+      $sql .= " AND b.tipo = '{$_GET['ftipop']}'";
+    $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+    $tipo_rpt = "Entrada";
+    if($this->input->get('ftipop') == 'sa') {
+      $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+      $tipo_rpt = "Salida";
+    }
+
+    // if ($this->input->get('ftipop') != '')
+    //   if ($this->input->get('ftipop') === '1')
+    //     $sql .= " AND b.tipo = 'en'";
+    //   else
+    //     $sql .= " AND b.tipo = 'sa'";
+
+    if (isset($_GET['pe']))
+      $sql = " AND b.id_bascula IN (".$_GET['pe'].")";
+
+    $query = $this->db->query(
+      "SELECT b.accion as status,
+         b.folio,
+         DATE(b.fecha_bruto) as fecha,
+         COALESCE(cl.nombre) as calidad,
+         COALESCE(fp.cantidad) AS cajas,
+         COALESCE(null, 0) AS promedio,
+         Coalesce(fp.kilos) AS kilos,
+         b.tipo,
+         b.rancho,
+         b.no_trazabilidad,
+         (f.serie || f.folio) AS factura,
+         (CASE WHEN f.is_factura = 't' THEN 'Factura' ELSE 'Remisión' END) AS tipo_doc
+      FROM bascula AS b
+        {$table_ms}
+        LEFT JOIN facturacion_otrosdatos AS fo ON fo.no_trazabilidad = b.no_trazabilidad
+        LEFT JOIN facturacion AS f ON f.id_factura = fo.id_factura
+        LEFT JOIN (
+          SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+        LEFT JOIN facturacion_productos AS fp ON f.id_factura = fp.id_factura
+        LEFT JOIN clasificaciones AS cl ON cl.id_clasificacion = fp.id_clasificacion
+      WHERE
+            b.status = true AND COALESCE(fh.id_remision, 0) = 0
+            {$sql}
+      ORDER BY b.folio ASC
+    ");
+
+    $movimientos = $query->result();
+
+    foreach ($movimientos as $key => $caja)
+    {
+      $data['totales']['kilos'] += floatval($caja->kilos);
+      $data['totales']['cajas'] += floatval($caja->cajas);
+
+      if ($caja->tipo == 'en')
+        $caja->tipo = 'E';
+      elseif ($caja->tipo == 'sa')
+        $caja->tipo = 'S';
+    }
+
+    $data['movimientos'] = $movimientos;
+  }
+
+  public function getDataMovimientosAuditoriaEn(&$data)
+  {
+    $sql = '';
+
+    $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-01');
+    $_GET['fechaend'] = $this->input->get('fechaend') != '' ? $_GET['fechaend'] : date('Y-m-d');
+    if ($this->input->get('fechaini') != '' && $this->input->get('fechaend') != '')
+    $sql .= " AND DATE(b.fecha_bruto) >= '".$this->input->get('fechaini')."' AND
+                  DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
+
+    $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+    if ($this->input->get('farea') != '')
+      $sql .= " AND b.id_area = " . $_GET['farea'];
+
+    if ($this->input->get('fid_proveedor') != ''){
+      if($this->input->get('ftipop') == 'sa'){
+        $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+      }else{
+        $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      }
+    }
+
+    if ($this->input->get('fid_empresa') != '') {
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    if ($this->input->get('prancho') != '') {
+      $sql .= " AND Upper(b.rancho) LIKE '".mb_strtoupper($_GET['prancho'], 'UTF-8')."'";
+    }
+
+    if ($this->input->get('fstatusp') != '')
+      if ($this->input->get('fstatusp') === '1')
+        $sql .= " AND b.accion IN ('p', 'b')";
+      else
+        $sql .= " AND b.accion IN ('en', 'sa')";
+
+    //Filtros del tipo de pesadas
+    if ($this->input->get('ftipop') != '')
+      $sql .= " AND b.tipo = '{$_GET['ftipop']}'";
+    $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+    $tipo_rpt = "Entrada";
+    if($this->input->get('ftipop') == 'sa') {
+      $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+      $tipo_rpt = "Salida";
+    }
+
+    // if ($this->input->get('ftipop') != '')
+    //   if ($this->input->get('ftipop') === '1')
+    //     $sql .= " AND b.tipo = 'en'";
+    //   else
+    //     $sql .= " AND b.tipo = 'sa'";
+
+    if (isset($_GET['pe']))
+      $sql = " AND b.id_bascula IN (".$_GET['pe'].")";
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula,
+             b.accion as status,
+             b.folio,
+             DATE(b.fecha_bruto) as fecha,
+             COALESCE(ca.nombre, bp.descripcion) as calidad,
+             COALESCE(bc.cajas, bp.cantidad) AS cajas,
+             COALESCE(bc.promedio, 0) AS promedio,
+             Coalesce(bc.kilos, b.kilos_neto) AS kilos,
+             -- COALESCE(bc.precio, bp.precio_unitario) AS precio,
+             -- COALESCE(bc.importe, bp.importe) AS importe,
+             -- b.importe as importe_todas,
+             b.tipo,
+             -- pagos.tipo_pago,
+             -- pagos.concepto,
+             b.id_bonificacion,
+             b.rancho,
+             COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago
+      FROM bascula AS b
+        LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
+        LEFT JOIN bascula_productos AS bp ON b.id_bascula = bp.id_bascula
+        {$table_ms}
+        LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
+        LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
+                  FROM bascula_pagos AS bp
+                  INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
+                  WHERE bp.status = 't') AS pagos
+                  ON pagos.id_bascula = b.id_bascula
+      WHERE
+            b.status = true
+            {$sql}
+      ORDER BY b.folio, bc.id_calidad ASC
+    ");
+
+    $movimientos = $query->result();
+
+    foreach ($movimientos as $key => $caja)
+    {
+      // $data['totales']['importe']     += floatval($caja->importe);
+      // $data['totales']['total']       += floatval($caja->importe);
+      if(!is_numeric($caja->id_bonificacion))
+      {
+        $data['totales']['kilos']       += floatval($caja->kilos);
+        $data['totales']['cajas']       += floatval($caja->cajas);
+      }else
+        $caja->calidad = 'BONIFICACION';
+      // $data['precio_prom'] += floatval($caja->promedio);
+
+      if ($caja->status === 'p' || $caja->status === 'b')
+      {
+        // $data['totales']['pagados'] += floatval($caja->importe);
+        if ($caja->status === 'p')
+          $caja->tipo_pago = 'EFECTIVO';
+      }else{
+        // $data['totales']['no_pagados'] += floatval($caja->importe);
+      }
+
+      if ($caja->tipo == 'en')
+        $caja->tipo = 'E';
+      elseif ($caja->tipo == 'sa')
+        $caja->tipo = 'S';
+    }
+
+    $data['movimientos'] = $movimientos;
+  }
+
+  public function getMovimientosAuditoria()
+  {
+    $data =  array(
+      'movimientos' => array(),
+      'area'        => array(),
+      'proveedor'   => array(),
+    );
+
+    $data['totales'] = array(
+        'importe'     => 0,
+        'pesada'      => 0,
+        'total'       => 0,
+        'pagados'     => 0,
+        'kilos'       => 0,
+        'cajas'       => 0,
+        'precio_prom' => 0, // importe / kilos
+        'no_pagados'  => 0,
+      );
+
+      if($this->input->get('ftipop') == 'sa') {
+        $this->getDataMovimientosAuditoriaSa($data);
+      }else{
+        $this->getDataMovimientosAuditoriaEn($data);
+      }
+
+
+      $this->load->model('areas_model');
+      $this->load->model('proveedores_model');
+      $this->load->model('clientes_model');
+
+      // Obtiene la informacion del Area filtrada.
+      $data['area'] = $this->areas_model->getAreaInfo($_GET['farea']);
+
+      // Obtiene la informacion del proveedor filtrado.
+      if ($this->input->get('fid_proveedor') > 0) {
+        if($this->input->get('ftipop') == 'sa') {
+          $data['proveedor'] = $this->clientes_model->getClienteInfo($_GET['fid_proveedor']);
+        }else
+          $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
+      }
+    // }
+
+    return $data;
   }
 
 }

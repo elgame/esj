@@ -302,8 +302,8 @@ class banco_model extends CI_Model {
         $aligns[5] = 'R';
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array($cuenta->alias, 'Saldo:', String::formatoNumero($cuenta->saldo_ini, 2, '$', false), '',
-                        'Saldo Final:', String::formatoNumero($cuenta->saldo, 2, '$', false)), true, true);
+        $pdf->Row(array($cuenta->alias, 'Saldo:', MyString::formatoNumero($cuenta->saldo_ini, 2, '$', false), '',
+                        'Saldo Final:', MyString::formatoNumero($cuenta->saldo, 2, '$', false)), true, true);
         $aligns[5] = 'L';
 
         if ($keyc == 0) {
@@ -338,8 +338,8 @@ class banco_model extends CI_Model {
           $pdf->Row(array(
               $mov->cli_pro,
               ucfirst(substr($mov->metodo_pago, 0, 5)),
-              $mov->tipo=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
-              $mov->tipo=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->tipo=='t'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->tipo=='f'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
               $mov->numero_ref,
               $mov->concepto,
             ), false, 'B');
@@ -364,8 +364,8 @@ class banco_model extends CI_Model {
       $pdf->SetAligns(array('L', 'R','R'));
       $pdf->SetWidths(array(18, 27, 27));
       $pdf->Row(array('Suma:',
-        String::formatoNumero($total_importes_ingre, 2, '$', false),
-        String::formatoNumero($total_importes_egre, 2, '$', false)
+        MyString::formatoNumero($total_importes_ingre, 2, '$', false),
+        MyString::formatoNumero($total_importes_egre, 2, '$', false)
       ), false);
     }
 
@@ -376,8 +376,8 @@ class banco_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R','R'));
     $pdf->SetWidths(array(18, 27, 27));
     $pdf->Row(array('Total:',
-      String::formatoNumero($total_importes_total_ingre, 2, '$', false),
-      String::formatoNumero($total_importes_total_egre, 2, '$', false)
+      MyString::formatoNumero($total_importes_total_ingre, 2, '$', false),
+      MyString::formatoNumero($total_importes_total_egre, 2, '$', false)
     ), false, 'B');
 
 
@@ -595,9 +595,9 @@ class banco_model extends CI_Model {
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array($nombree, $cuenta->alias, String::formatoNumero($cuenta->saldo_ini, 2, '$', false),
-                        String::formatoNumero($cuenta->transito, 2, '$', false),
-                        String::formatoNumero($cuenta->saldo, 2, '$', false)), false, false);
+        $pdf->Row(array($nombree, $cuenta->alias, MyString::formatoNumero($cuenta->saldo_ini, 2, '$', false),
+                        MyString::formatoNumero($cuenta->transito, 2, '$', false),
+                        MyString::formatoNumero($cuenta->saldo, 2, '$', false)), false, false);
       }
     }
 
@@ -686,6 +686,75 @@ class banco_model extends CI_Model {
       </tr>';
 
     echo $html;
+  }
+
+  public function getRptMovSinUuidPdf()
+  {
+    // Obtiene los datos del reporte.
+    $this->load->model('polizas_model');
+    $this->polizas_model->empresaId = $this->input->get('fid_empresa');
+    if($this->input->get('ftipo3') == 'el')  //Egreso de limon
+    {
+      $data = $this->polizas_model->polizaEgresoLimon();
+    }elseif($this->input->get('ftipo3') == 'ec') //Egreso de cheque
+    {
+      $data = $this->polizas_model->polizaEgreso();
+    }else //egreso de gasto
+    {
+      $data = $this->polizas_model->polizaEgreso('otros');
+    }
+
+    // echo "<pre>";
+    //   var_dump($data['abonos']);
+    // echo "</pre>";exit;
+
+    $tipos = [
+      'el' => 'Limon',
+      'ec' => 'Cheques',
+      'eg' => 'Gastos'
+    ];
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->titulo2 = "REPORTE DE MOVIMIENTOS UUID";
+    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+    $pdf->titulo3 .= $tipos[$_GET['ftipo3']];
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    // Listado de Rendimientos
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'C');
+    $widths = array(17, 25, 65, 60, 20, 18);
+    $header = array('FECHA', 'REF MOV', 'CONCEPTO', 'PROVEEDOR', 'MONTO', 'UUID');
+
+    // header
+    $pdf->SetFont('helvetica','B',8.5);
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($header, false, 'B');
+
+    foreach($data['abonos'] as $key => $mov)
+    {
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetX(6);
+      $pdf->Row([
+        $mov->fecha,
+        $mov->ref_movimiento,
+        $mov->concepto,
+        $mov->nombre_fiscal,
+        MyString::formatoNumero($mov->total_abono, 2, '$', false),
+        (trim($mov->uuid)!=''? 'Si': 'No')
+      ], false, true);
+    }
+
+    $pdf->Output('movimeintos_uuid.pdf', 'I');
   }
 
 }

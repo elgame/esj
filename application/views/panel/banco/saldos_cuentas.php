@@ -22,9 +22,9 @@
             </div>
           </div>
           <div class="box-content">
-            <a href="<?php echo base_url('panel/banco/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/banco/saldos_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> |
-            <a href="<?php echo base_url('panel/banco/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/banco/saldos_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a>
 
             <form action="<?php echo base_url('panel/banco/'); ?>" method="GET" class="form-search">
@@ -76,17 +76,17 @@
                 <tr>
                   <td><?php echo $cuenta->banco; ?></td>
                   <td><a href="<?php echo base_url('panel/banco/cuenta').'?id_cuenta='.$cuenta->id_cuenta.'&'.
-                    String::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->numero; ?></a>
+                    MyString::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->numero; ?></a>
                   </td>
                   <td><a href="<?php echo base_url('panel/banco/cuenta').'?id_cuenta='.$cuenta->id_cuenta.'&'.
-                    String::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->alias; ?></a>
+                    MyString::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->alias; ?></a>
                   </td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
                 </tr>
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
                   <td style="text-align: right" colspan="3">Total:</td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
                 </tr>
               </tbody>
             </table>

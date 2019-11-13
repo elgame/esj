@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/caja_chica/categorias_modificar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/caja_chica/categorias_modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">

@@ -1,0 +1,73 @@
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '01', 'R0601', 'ERA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '02', 'R0602', 'VIVERO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '03', 'R0603', 'CASA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0603-1', 'FAMILIAR', TRUE, 930);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0603-2', 'RANCHERO', TRUE, 930);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '04', 'R0604', 'BAÑO COMPLETO FIJOS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0604-1', 'MUJER', TRUE, 933);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0604-2', 'HOMBRE', TRUE, 933);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '05', 'R0605', '1/2 BAÑO FIJOS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0605-1', 'MUJER', TRUE, 936);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0605-2', 'HOMBRE', TRUE, 936);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '06', 'R0606', 'FOSA SEPTICA CERRADA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0606-1', 'No 1', TRUE, 939);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0606-2', 'No 2', TRUE, 939);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '07', 'R0607', 'FOSA SEPTICA ABIERTA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '08', 'R0608', 'COMEDOR DE EMPLEADOS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '09', 'R0609', 'BODEGA DE HERRAMIENTA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '10', 'R0610', 'BODEGITA DE EQUIPO DE PROTECCION', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '11', 'R0611', 'CASA SOMBRA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0611-1', 'MODULO No. 1', TRUE, 946);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0611-2', 'MODULO No. 2', TRUE, 946);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '12', 'R0612', 'HUMUS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '13', 'R0613', 'GALLINERO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '14', 'R0614', 'PORQUERIZAS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '15', 'R0615', 'ESTACIONAMIENTO TECHADO CERRADO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '16', 'R0616', 'ESTACIONAMIENTO TECHADO ABIERTO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '17', 'R0617', 'SUBESTACION ELECTRICA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0617-1', 'EQPO. Y TRANSFORMADOR DE - KVA (LA GPANA)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0617-2', 'EQPO. Y TRANSFORMADOR DE - KVA (SN JORGE)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-3', 'R0617-3', 'EQPO. Y TRANSFORMADOR DE - KVA (MIL SECC 1)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-4', 'R0617-4', 'EQPO. Y TRANSFORMADOR DE - KVA (MIL SECC. 2)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-5', 'R0617-5', 'EQPO. Y TRANSFORMADOR DE - KVA (MIL SECC. 3)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-6', 'R0617-6', 'EQPO. Y TRANSFORMADOR DE - KVA (LLANITO)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-7', 'R0617-7', 'EQPO. Y TRANSFORMADOR DE - KVA (HOMIGUERO)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-8', 'R0617-8', 'EQPO. Y TRANSFORMADOR DE - KVA (2 ROSITAS)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-9', 'R0617-9', 'EQPO. Y TRANSFORMADOR DE - KVA (7 LEGUAS)', TRUE, 954);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-10', 'R0617-10', 'EQPO. Y TRANSFORMADOR DE - KVA (PAPALOAPAN)', TRUE, 954);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '18', 'R0618', 'INSTALACION ELECTRICA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '19', 'R0619', 'INSTALACION HIDRAULICA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '20', 'R0620', 'POZITO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0620-1', 'BOMBA SUMERGIBLE DE 1.5 HP', TRUE, 967);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0620-2', 'BOMBA SUMERGIBLE DE 1.5 HP', TRUE, 967);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '21', 'R0621', 'POZO PROFUNDO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0621-1', 'EQPO Y BOMBA DE -- HP (LA GPANA)', TRUE, 970);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0621-2', 'EQPO Y BOMBA DE -- HP (EL LLANITO)', TRUE, 970);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '22', 'R0622', 'NORIA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '23', 'R0623', 'CARCAMO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-1', 'R0623-1', 'DE 60 HP (LA GPANA)', TRUE, 974);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-2', 'R0623-2', 'DE --  HP (SN JORGE)', TRUE, 974);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-3', 'R0623-3', 'DE 50 HP  SECC. 1', TRUE, 974);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-4', 'R0623-4', 'DE 50 HP  SECC. 2', TRUE, 974);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (4, '-5', 'R0623-5', 'DE 50 HP  SECC. 3', TRUE, 974);
+
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '24', 'R0624', 'CASETA DE FILTROS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '25', 'R0625', 'SISTEMA RIEGO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '26', 'R0626', 'CISTERNA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '27', 'R0627', 'CERCA PERIMETRAL', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '28', 'R0628', 'PUERTA DE INGRESO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '29', 'R0629', 'PATIOS DE MANIOBRAS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '30', 'R0630', 'AREAS VERDES', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '31', 'R0631', 'AREA DE DESCANSO', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '32', 'R0632', 'AREA LAVADO DE HERRAMIENTA', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '33', 'R0633', 'AREA LAVADO DE REMOLQUES', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '34', 'R0634', 'AREA DE PREPARACION DE MEZCLAS', TRUE, 669);
+INSERT INTO compras_areas(id_tipo, codigo, codigo_fin, nombre, status, id_padre) VALUES (3, '35', 'R0635', 'ZANJAS DE CEMENTO', TRUE, 669);

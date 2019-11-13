@@ -65,6 +65,7 @@ class productos_salidas extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -100,7 +101,7 @@ class productos_salidas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        redirect(base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
       }
     }
 
@@ -131,10 +132,94 @@ class productos_salidas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function modificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/productos_salidas/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
+    ));
+
+    $this->load->model('almacenes_model');
+    $this->load->model('productos_salidas_model');
+    $this->load->model('compras_areas_model');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar salida'
+    );
+
+    if (isset($_GET['id'])) {
+      $salida = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+      if (count($salida->productos) > 0) {
+        redirect(base_url('panel/productos_salidas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+      }
+    }
+
+    $this->configAddSalida();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->productos_salidas_model->agregar();
+      $this->productos_salidas_model->agregarProductos($res_mdl['id_salida']);
+
+      if ($res_mdl['passes'])
+      {
+        $salida = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+        if (count($salida->productos) > 0) {
+          redirect(base_url('panel/productos_salidas/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        } else
+          redirect(base_url('panel/productos_salidas/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+      }
+    }
+
+    $params['salida'] = $this->productos_salidas_model->info($_GET['id'], true)['info'][0];
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['fecha']      = str_replace(' ', 'T', substr($params['salida']->fecha, 0, 19));
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/productos_salidas/modificar', $params);
+    $this->load->view('panel/footer');
+  }
+
   public function ver()
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -161,16 +246,20 @@ class productos_salidas extends MY_Controller {
     }
     else
     {
+      $res_mdl = $this->productos_salidas_model->modificar($_GET['id']);
       $res_mdl = $this->productos_salidas_model->modificarProductos($_GET['id']);
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/ver/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/productos_salidas/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
     $params['salida'] = $this->productos_salidas_model->info($_GET['id'], true);
     $params['modificar'] = $this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/modificar/');
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -186,7 +275,7 @@ class productos_salidas extends MY_Controller {
     $this->load->model('productos_salidas_model');
     $this->productos_salidas_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/productos_salidas/?' . String::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/productos_salidas/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
   public function imprimir()
@@ -262,6 +351,12 @@ class productos_salidas extends MY_Controller {
   {
     $this->load->library('form_validation');
 
+    $req1 = $req2 = '';
+    if ($this->input->post('guardar') !== false) {
+      $req1 = 'required';
+      $req2 = 'required|';
+    }
+
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
@@ -273,7 +368,7 @@ class productos_salidas extends MY_Controller {
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => 'required'),
-      array('field' => 'id_almacen',
+      array('field' => 'tid_almacen',
             'label' => 'Transferir',
             'rules' => ''),
 
@@ -307,18 +402,18 @@ class productos_salidas extends MY_Controller {
       array('field' => 'etapa',
             'label' => 'Etapa',
             'rules' => 'max_length[30]'),
-      array('field' => 'rancho',
+      array('field' => 'ranchoC',
             'label' => 'Rancho',
-            'rules' => 'required'),
-      array('field' => 'rancho_id',
+            'rules' => $req1.''),
+      array('field' => 'ranchoC_id',
             'label' => 'Rancho',
-            'rules' => 'required|numeric'),
+            'rules' => $req2.'numeric'),
       array('field' => 'centro_costo',
             'label' => 'Centro de costo',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'centro_costo_id',
             'label' => 'Centro de costo',
-            'rules' => 'required|numeric'),
+            'rules' => $req2.'numeric'),
       array('field' => 'hectareas',
             'label' => 'Hectareas',
             'rules' => 'numeric'),
@@ -356,7 +451,7 @@ class productos_salidas extends MY_Controller {
       //       'rules' => 'required'),
       array('field' => 'tipoProducto[]',
             'label' => '',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'precioUnit[]',
             'label' => '',
             'rules' => ''),
@@ -365,14 +460,47 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'concepto[]',
             'label' => 'Productos',
-            'rules' => 'required'),
+            'rules' => $req1.''),
       array('field' => 'productoId[]',
             'label' => '',
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]')
+            'rules' => $req2.'|greater_than[0]')
     );
+
+    if ($this->input->post('tid_almacen') == '') {
+      $rules[] = array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => $req1.'');
+      $rules[] = array('field' => 'ranchoId[]',
+            'label' => 'Rancho',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'ranchoText[]',
+            'label' => 'Rancho',
+            'rules' => '');
+      $rules[] = array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => '');
+      $rules[] = array('field' => 'centroCostoId[]',
+            'label' => 'Centro de costo',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'centroCostoText[]',
+            'label' => 'Centro de costo',
+            'rules' => '');
+      $rules[] = array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => '');
+      $rules[] = array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => '');
+    }
 
     $this->form_validation->set_rules($rules);
   }
@@ -385,9 +513,9 @@ class productos_salidas extends MY_Controller {
       foreach ($_POST['productoId'] as $key => $value) {
         if ($_POST['tipoProducto'][$key] == 'p') {
           // id_almacen
-          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
-          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'), true);
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
           }
         }
@@ -440,6 +568,10 @@ class productos_salidas extends MY_Controller {
       case 5:
         $txt = 'La salida se modifico correctamente.';
         $icono = 'success';
+      break;
+      case 6:
+        $txt = 'La salida ya sta cerrada no la puedes modificar.';
+        $icono = 'error';
       break;
     }
 

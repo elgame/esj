@@ -60,10 +60,10 @@
                 <?php
                 if ($show_prestamos) {
                 ?>
-                <a href="<?php echo base_url('panel/nomina_ranchos/quitar_prestamos?').String::getVarsLink(); ?>" class="btn btn-info pull-right"
+                <a href="<?php echo base_url('panel/nomina_ranchos/quitar_prestamos?').MyString::getVarsLink(); ?>" class="btn btn-info pull-right"
                   onclick="msb.confirm('Estas seguro de quitar los prestamos para que se carguen de nuevo?', 'Nomina', this); return false;">Quitar prestamos</a>
                 <?php } ?>
-                <a href="<?php echo base_url('panel/nomina_ranchos/lista_asistencia?').String::getVarsLink(); ?>" class="btn btn-info pull-right" target="_blank">Imprimir Lista</a>
+                <a href="<?php echo base_url('panel/nomina_ranchos/lista_asistencia?').MyString::getVarsLink(); ?>" class="btn btn-info pull-right" target="_blank">Imprimir Lista</a>
               </div>
             </form>
 
@@ -158,19 +158,19 @@
                     } ?>
                     <tr>
                       <td style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
-                      <td id="total_cajas_cargadas" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_cajas_cargadas, 2, ''); ?></td>
-                      <td id="total_limon_am" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_limon_am, 2, ''); ?></td>
-                      <td id="total_sabado" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_sabado, 2, ''); ?></td>
-                      <td id="total_lunes" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_lunes, 2, ''); ?></td>
-                      <td id="total_martes" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_martes, 2, ''); ?></td>
-                      <td id="total_miercoles" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_miercoles, 2, ''); ?></td>
-                      <td id="total_jueves" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_jueves, 2, ''); ?></td>
-                      <td id="total_viernes" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_viernes, 2, ''); ?></td>
-                      <td id="total_domingo" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_domingo, 2, ''); ?></td>
-                      <td id="total_total_lam" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_total_lam, 2, ''); ?></td>
-                      <td id="total_total_lvrd" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_total_lvrd, 2, ''); ?></td>
-                      <td id="total_prestamos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_prestamos, 2, ''); ?></td>
-                      <td id="total_total_pagar" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_total_pagar, 2, '', false); ?></td>
+                      <td id="total_cajas_cargadas" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_cajas_cargadas, 2, ''); ?></td>
+                      <td id="total_limon_am" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_limon_am, 2, ''); ?></td>
+                      <td id="total_sabado" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_sabado, 2, ''); ?></td>
+                      <td id="total_lunes" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_lunes, 2, ''); ?></td>
+                      <td id="total_martes" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_martes, 2, ''); ?></td>
+                      <td id="total_miercoles" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_miercoles, 2, ''); ?></td>
+                      <td id="total_jueves" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_jueves, 2, ''); ?></td>
+                      <td id="total_viernes" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_viernes, 2, ''); ?></td>
+                      <td id="total_domingo" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_domingo, 2, ''); ?></td>
+                      <td id="total_total_lam" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_total_lam, 2, ''); ?></td>
+                      <td id="total_total_lvrd" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_total_lvrd, 2, ''); ?></td>
+                      <td id="total_prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_prestamos, 2, ''); ?></td>
+                      <td id="total_total_pagar" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($total_total_pagar, 2, '', false); ?></td>
                     </tr>
                   </tbody>
               </table>

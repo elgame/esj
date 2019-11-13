@@ -25,7 +25,7 @@ class vales_salida_model extends CI_Model {
 					);
 
 		$this->db->insert('otros.vales_salida', $data);
-    $id_vale = $this->db->insert_id();
+    $id_vale = $this->db->insert_id('otros.vales_salida_id_vale_salida_seq');
 
 		return $this->getValeInfo($id_vale);
 	}
@@ -161,7 +161,7 @@ class vales_salida_model extends CI_Model {
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
+    $pdf->Cell(108, 4, MyString::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetFillColor(242, 242, 242);
@@ -234,9 +234,7 @@ class vales_salida_model extends CI_Model {
         $pdf->SetWidths($widths);
 
         $printRow = true;
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+        if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
           if($vale->factura['info']->sin_costo_nover == 'f')
           {
             $printRow = false;
@@ -257,9 +255,7 @@ class vales_salida_model extends CI_Model {
             $traslado16 += $item->iva;
 
           $descripcion_ext = '';
-          if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-              $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-              $item->id_clasificacion == '53'){
+          if ( GastosProductos::searchGastosProductos($item->id_clasificacion) ){
             if($item->id_clasificacion == '49' && isset($vale->factura['seguro']))
               $descripcion_ext = " (No {$vale->factura['seguro']->pol_seg})";
             elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($vale->factura['certificado'.$item->id_clasificacion]))

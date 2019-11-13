@@ -29,8 +29,9 @@
 </script>
 </head>
 <body>
-
+  <div class="row-fluid">
   <?php echo $template ?>
+  </div>
 
   <?php if ($closeModal) { ?>
     <script>

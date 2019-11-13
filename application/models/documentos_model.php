@@ -129,7 +129,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         // Si ya existe los documentos en la carpeta de la factura entonces
         // los elimina.
@@ -226,7 +226,7 @@ class documentos_model extends CI_Model {
     );
 
     $this->db->insert('facturacion_doc_embarque', $data);
-    $idEmbarque = $this->db->insert_id();
+    $idEmbarque = $this->db->insert_id('facturacion_doc_embarque_id_embarque_seq');
 
     $pallets = array();
 
@@ -266,7 +266,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($data['id_factura']);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($data['id_factura'], $data['id_documento'], $path);
@@ -396,7 +396,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($idFactura, $idDocumento, $path);
@@ -439,7 +439,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($idFactura, $idDocumento, $path);
@@ -499,7 +499,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -557,7 +557,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -614,7 +614,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -669,8 +669,9 @@ class documentos_model extends CI_Model {
    * @param  string $folioFactura
    * @return string
    */
-  public function creaDirectorioDocsCliente($clienteNombre, $serieFactura, $folioFactura)
+  public function creaDirectorioDocsCliente($clienteNombre, $serieFactura, $folioFactura, $fecha=null)
   {
+    $fecha = explode('-', ($fecha? $fecha: date("Y-m-d")));
     $path = APPPATH.'documentos/CLIENTES/';
 
     if ( ! file_exists($path))
@@ -679,21 +680,21 @@ class documentos_model extends CI_Model {
       mkdir($path, 0777);
     }
 
-    $path .= strtoupper($clienteNombre).'/';
+    $path .= MyString::quitAcentos(strtoupper($clienteNombre)).'/';
     if ( ! file_exists($path))
     {
       // echo $path;
       mkdir($path, 0777);
     }
 
-    $path .= date('Y').'/';
+    $path .= $fecha[0].'/';
     if ( ! file_exists($path))
     {
       // echo $path;
       mkdir($path, 0777);
     }
 
-    $path .= $this->mesToString(date('m')).'/';
+    $path .= $this->mesToString($fecha[1]).'/';
     if ( ! file_exists($path))
     {
       // echo $path;
@@ -805,7 +806,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Llama el metodo que ejecuta la funcion dependiendo del documento que se
     // esta actualizando y los guarda en disco.
@@ -1144,7 +1145,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetXY(80, 247);
     $pdf->SetFont('Arial','',11);
-    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(String::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
+    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(MyString::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
 
     $chofer = strtoupper(str_replace(" ", "_", $data->chofer));
     $fecha = str_replace(" ", "_", $data->fecha);
@@ -1217,7 +1218,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(40, 6, $data['info'][0]->ctrl_embarque, 1, 0, 'C', 1);
 
     $pdf->SetXY(167, 22);
-    $pdf->Cell(40, 6, String::fechaAT($jsonData->fecha), 1, 0, 'C', 1);
+    $pdf->Cell(40, 6, MyString::fechaAT($jsonData->fecha), 1, 0, 'C', 1);
 
     $pdf->SetXY(7, 33);
     $pdf->SetFillColor(146,208,80);
@@ -1335,7 +1336,7 @@ class documentos_model extends CI_Model {
     $y = $pdf->GetY();
 
     $pdf->SetXY(50, $y + 2);
-    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . String::fechaAT($data['info'][0]->fecha_carga), 0, 0, 'L', 1);
+    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . MyString::fechaAT($data['info'][0]->fecha_carga), 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 7);
     $pdf->Cell(50, 6, 'INICIO: ' . $jsonData->inicio, 0, 0, 'L', 1);
@@ -1344,7 +1345,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(50, 6, 'TERMINO: ' . $jsonData->termino, 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 12);
-    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . String::fechaAT($data['info'][0]->fecha_embarque), 0, 0, 'L', 1);
+    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . MyString::fechaAT($data['info'][0]->fecha_embarque), 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 17);
     $pdf->Cell(105, 6, 'ELABORO: ' . strtoupper($jsonData->elaboro), 0, 0, 'L', 1);
@@ -1767,7 +1768,7 @@ class documentos_model extends CI_Model {
     $fecha = explode('-', $jsonData->fecha_embarque);
 
     $pdf->SetXY(10, $pdf->GetY());
-    $pdf->Cell(100, 4, "Fecha de Embarque: " . $fecha[2] .' DE ' . strtoupper(String::mes($fecha[1])) . ' DEL ' . $fecha[0], 0, 0, 'L');
+    $pdf->Cell(100, 4, "Fecha de Embarque: " . $fecha[2] .' DE ' . strtoupper(MyString::mes($fecha[1])) . ' DEL ' . $fecha[0], 0, 0, 'L');
 
     // -------------------------
 

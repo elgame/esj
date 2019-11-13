@@ -59,7 +59,7 @@ class unidades_model extends CI_Model {
       'codigo'   => $_POST['codigo'],
       'cantidad' => $_POST['cantidad'],
     ));
-    $idUnidad = $this->db->insert_id();
+    $idUnidad = $this->db->insert_id('unidades_id_unidad_seq');
 
     $productos = array();
     if (isset($_POST['productoId']))

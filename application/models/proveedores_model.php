@@ -146,6 +146,7 @@ class proveedores_model extends CI_Model {
                                           ':empresa'   => 'en '.$this->input->post('fempresa')));
 
 		$this->addCuentas($id_proveedor);
+    $this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
@@ -244,10 +245,31 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));
-		$this->addCuentas($id_proveedor);
+    $this->addCuentas($id_proveedor);
+		$this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
+
+  public function saveCentrosCostos($id_proveedor)
+  {
+    if (is_array($this->input->post('centros_costos')) && count($this->input->post('centros_costos')) > 0) {
+      $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor}");
+      $centros = [];
+      foreach ($this->input->post('centros_costos') as $key => $value) {
+        if ($this->input->post('centros_costos_del')[$key] === 'false') { // insert
+          $centros[] = ['id_proveedor' => $id_proveedor, 'id_centro_costo' => $value];
+        }
+        // else {
+        //   $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor} AND id_centro_costo = {$value}");
+        // }
+      }
+
+      if (count($centros) > 0) {
+        $this->db->insert_batch('otros.proveedores_centros_costo', $centros);
+      }
+    }
+  }
 
 	/**
 	 * Obtiene la informacion de un proveedor
@@ -274,6 +296,11 @@ class proveedores_model extends CI_Model {
 			if ($basic_info == False) {
 				$this->load->model('empresas_model');
 				$data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+
+        $data['info']->centros_costos = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
+          FROM otros.proveedores_centros_costo pc
+            INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = pc.id_centro_costo
+          WHERE pc.id_proveedor = {$id_proveedor}")->result();
 			}
 		}
 		$sql_res->free_result();
@@ -503,7 +530,7 @@ class proveedores_model extends CI_Model {
         $pdf->titulo2 = 'PROVEEDOR : ' . $proveedor['info']->nombre_fiscal;
       }
 
-      $pdf->titulo3 = 'PERIODO: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo3 = 'PERIODO: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
@@ -567,22 +594,22 @@ class proveedores_model extends CI_Model {
         if ($tipo === 'seguro')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->pol_seg,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
         elseif ($tipo === 'certificado')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->certificado,
             $data->bultos,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
 
@@ -597,7 +624,7 @@ class proveedores_model extends CI_Model {
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(175, 30));
 
-      $pdf->Row(array(' TOTAL:',  String::formatoNumero($total, 2, '', false)), false);
+      $pdf->Row(array(' TOTAL:',  MyString::formatoNumero($total, 2, '', false)), false);
 
       $pdf->Output('Reporte.pdf', 'I');
     }
@@ -776,6 +803,89 @@ class proveedores_model extends CI_Model {
 
     $html .= '
     </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function catalogo_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=proveedores.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $proveedores = $this->db->query("SELECT *
+        FROM proveedores p
+        WHERE status <> 'e'
+        ORDER BY p.nombre_fiscal ASC")->result();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Catalogo de proveedores";
+    $titulo3 = '';
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre Fiscal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calle</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No exterior</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">No interior</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Colonia</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Localidad</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Municipio</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pais</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CP</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Telefono</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Celular</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Email</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cta Contpaq</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CURP</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Dias de Credito</td>
+        </tr>';
+
+    foreach ($proveedores as $key => $proveedor)
+    {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->nombre_fiscal.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->calle.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->no_exterior.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->no_interior.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->colonia.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->localidad.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->municipio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->estado.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->pais.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->cp.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->telefono.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->celular.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->email.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->cuenta_cpi.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->rfc.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->curp.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->dias_credito.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
     </table>';
 
     echo $html;

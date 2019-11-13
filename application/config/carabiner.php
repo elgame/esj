@@ -161,7 +161,7 @@ $config['groups']['base_panel'] = array(
 
 	'js' => array(
 		array('bootstrap/modernizr-2.6.1-respond-1.1.0.min.js'),
-		array('bootstrap/jquery-1.8.2.min.js'),
+    array('bootstrap/jquery-1.8.2.min.js'),
 		// array('bootstrap/jquery-ui-1.8.21.custom.min.js'),
     array('bootstrap/jquery-ui-1.9.2.custom.min.js'),
     array('bootstrap/jquery-ui-i18n.js'),

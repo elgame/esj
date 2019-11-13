@@ -68,6 +68,12 @@ class compras_ordenes extends MY_Controller {
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
+    $this->load->model('almacenes_model');
+    $fstatus = $this->input->get('fstatus');
+    unset($_GET['fstatus']);
+    $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
+    $_GET['fstatus'] = $fstatus;
+
     $params['requisicion'] = false;
     $params['method']     = '';
     $params['titleBread'] = 'Ordenes de Compras';
@@ -129,6 +135,7 @@ class compras_ordenes extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -166,7 +173,7 @@ class compras_ordenes extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras_ordenes/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/compras_ordenes/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -220,6 +227,7 @@ class compras_ordenes extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -261,11 +269,11 @@ class compras_ordenes extends MY_Controller {
         {
           if (isset($_POST['autorizar']))
           {
-            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
+            redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
           }
           else
           {
-            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$response['msg']));
+            redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
           }
         }
       }
@@ -277,7 +285,7 @@ class compras_ordenes extends MY_Controller {
       {
         $this->compras_ordenes_model->autorizar($_GET['id']);
 
-        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg=4&print=true'));
+        redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m')).'&msg=4&print=true'));
       }
 
       // Si esta dando la entrada de una orden.
@@ -290,14 +298,17 @@ class compras_ordenes extends MY_Controller {
           $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
           $printFaltantes .= (is_array($response['entrada'])) ? '&entrada='.$response['entrada']['folio'] : '';
 
-          redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
+          redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
         }
-        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
+        redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
       }
     }
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
+    // echo "<pre>";
+    //   var_dump($params['orden']);
+    // echo "</pre>";exit;
 
     $params['impresoras'] = $this->compras_ordenes_model->impresoras();
 
@@ -318,17 +329,17 @@ class compras_ordenes extends MY_Controller {
 
   public function autorizar()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function entrada()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function ver()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function cancelar()
@@ -338,11 +349,11 @@ class compras_ordenes extends MY_Controller {
 
     if ($_GET['w'] === 'c')
     {
-      redirect(base_url('panel/compras_ordenes/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_ordenes/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
     else
     {
-      redirect(base_url('panel/compras_ordenes/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_ordenes/requisicion/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
   }
 
@@ -359,6 +370,7 @@ class compras_ordenes extends MY_Controller {
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
       array('general/util.js'),
       array('general/keyjump.js'),
       array('general/msgbox.js'),
@@ -377,7 +389,8 @@ class compras_ordenes extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'], $_GET['ids'], $_FILES['xml']);
+      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'],
+        $_GET['ids'], (isset($_FILES['xml'])? $_FILES['xml']: null));
 
       if ($res_mdl['passes'])
       {
@@ -391,7 +404,7 @@ class compras_ordenes extends MY_Controller {
       }
       // if ($res_mdl['passes'])
       // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
       // }
     }
 
@@ -599,7 +612,8 @@ class compras_ordenes extends MY_Controller {
     $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
 
     $id_almacen = isset($_GET['id_almacen']{0}) && $_GET['id_almacen'] > 0? $_GET['id_almacen']: 1;
-    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where, 'nombre', $id_almacen);
+    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'],
+      (isset($_GET['tipo'])? $_GET['tipo']: ''), $where, 'nombre', $id_almacen);
 
     echo json_encode($productos);
   }
@@ -646,6 +660,15 @@ class compras_ordenes extends MY_Controller {
   public function configAddOrden()
   {
     $this->load->library('form_validation');
+
+    $valGasto = $valFlete = false;
+    $tipoOrden = $this->input->post('tipoOrden');
+    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f' && $tipoOrden == 'a') {
+      $valGasto = true;
+
+      if ($tipoOrden == 'f')
+        $valFlete = true;
+    }
 
     $rules = array(
       array('field' => 'empresaId',
@@ -700,6 +723,31 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'tipoOrden',
             'label' => 'Tipo de Orden',
             'rules' => 'required'),
+
+      array('field' => 'areaId[]',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required|numeric': '')),
+      array('field' => 'areaText[]',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required': '')),
+      array('field' => 'ranchoId[]',
+            'label' => 'Rancho',
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
+      array('field' => 'ranchoText[]',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'centroCostoId[]',
+            'label' => 'Centro de costo',
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
+      array('field' => 'centroCostoText[]',
+            'label' => 'Centro de costo',
+            'rules' => ''),
+      array('field' => 'activoId[]',
+            'label' => 'Activo',
+            'rules' => ($valGasto && !$valFlete? 'numeric': '')),
+      array('field' => 'activoText[]',
+            'label' => 'Activo',
+            'rules' => ($valGasto && !$valFlete? '': '')),
 
       array('field' => 'totalLetra',
             'label' => '',
@@ -908,6 +956,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'xml',
             'label' => 'XML',
             'rules' => 'callback_xml_check'),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -932,10 +983,28 @@ class compras_ordenes extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($uuid)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'")->row();
+
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {

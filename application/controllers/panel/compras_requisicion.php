@@ -116,6 +116,7 @@ class compras_requisicion extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -146,7 +147,7 @@ class compras_requisicion extends MY_Controller {
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
-    $this->configAddOrden();
+    $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -157,7 +158,7 @@ class compras_requisicion extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras_requisicion/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/compras_requisicion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -213,6 +214,7 @@ class compras_requisicion extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -241,55 +243,27 @@ class compras_requisicion extends MY_Controller {
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
-    // if ( ! isset($_GET['m']))
-    // {
-      $this->configAddOrden();
-      if ($this->form_validation->run() == FALSE)
-      {
-        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-      }
-      else
-      {
-        $response = $this->compras_requisicion_model->actualizar($_GET['id']);
+    $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->compras_requisicion_model->actualizar($_GET['id']);
 
-        if ($response['passes'])
+      if ($response['passes'])
+      {
+        if ($response['autorizado'])
         {
-          if ($response['autorizado'])
-          {
-            redirect(base_url('panel/compras_ordenes/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
-          }
-          else
-          {
-            redirect(base_url('panel/compras_requisicion/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$response['msg']));
-          }
+          redirect(base_url('panel/compras_ordenes/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
+        }
+        else
+        {
+          redirect(base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
         }
       }
-    // }
-    // else
-    // {
-    //   // Si esta autorizando una orden de compra.
-    //   if ($_GET['m'] === 'a')
-    //   {
-    //     $this->compras_requisicion_model->autorizar($_GET['id']);
-
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg=4&print=true'));
-    //   }
-
-    //   // Si esta dando la entrada de una orden.
-    //   elseif ($_GET['m'] === 'e')
-    //   {
-    //     $response = $this->compras_requisicion_model->entrada($_GET['id']);
-
-    //     if ($response['msg'] === 5)
-    //     {
-    //       $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
-    //       $printFaltantes .= (is_array($response['entrada'])) ? '&entrada='.$response['entrada']['folio'] : '';
-
-    //       redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
-    //     }
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
-    //   }
-    // }
+    }
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
@@ -311,17 +285,17 @@ class compras_requisicion extends MY_Controller {
 
   public function autorizar()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function entrada()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function ver()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function cancelar()
@@ -331,11 +305,11 @@ class compras_requisicion extends MY_Controller {
 
     if ($_GET['w'] === 'c')
     {
-      redirect(base_url('panel/compras_requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
     else
     {
-      redirect(base_url('panel/compras_requisicion/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/requisicion/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
   }
 
@@ -376,7 +350,7 @@ class compras_requisicion extends MY_Controller {
       }
       // if ($res_mdl['passes'])
       // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
       // }
     }
 
@@ -424,7 +398,7 @@ class compras_requisicion extends MY_Controller {
 
     if (isset($_GET['p']))
     {
-      $this->compras_requisicion_model->print_orden_compra($_GET['id']);
+      $this->compras_requisicion_model->print_pre_orden_compra($_GET['id']);
     }
     else
     {
@@ -512,11 +486,24 @@ class compras_requisicion extends MY_Controller {
     echo json_encode($productos);
   }
 
-  public function ajax_get_tipo_cambio()
+  public function ajax_get_tipo_cambio($fecha=null)
   {
-    $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
-    preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
-    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
+    $fecha = MyString::suma_fechas(($fecha? $fecha: date("Y-m-d")), -1);
+    $isDia = MyString::dia($fecha, 'c');
+    if ($isDia == 'DO' || $isDia == 'SA') {
+      $fecha = date('Y-m-d', strtotime('previous friday', strtotime($fecha)));
+    }
+    $fecha = explode('-', $fecha);
+    $dia = $fecha[2];
+    $mes = $fecha[1];
+    $anio = $fecha[0];
+    $html_string = file_get_contents("https://dof.gob.mx/indicadores_detalle.php?cod_tipo_indicador=158&dfecha={$dia}%2F{$mes}%2F{$anio}&hfecha={$dia}%2F{$mes}%2F{$anio}");
+    preg_match('/\<td width="52%" align="center" class="txt"\>(\d+.?\d+)\<\/td\>/', $html_string, $coincidencias);
+    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[1]);
+
+    // $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
+    // preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
+    // echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
   }
 
   /*
@@ -525,9 +512,18 @@ class compras_requisicion extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddOrden()
+  public function configAddOrden($prereq = false)
   {
     $this->load->library('form_validation');
+
+    $valGasto = $valFlete = false;
+    $tipoOrden = $this->input->post('tipoOrden');
+    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f') {
+      $valGasto = true;
+
+      if ($tipoOrden == 'f')
+        $valFlete = true;
+    }
 
     $rules = array(
       array('field' => 'empresaId',
@@ -538,26 +534,29 @@ class compras_requisicion extends MY_Controller {
             'rules' => ''),
       array('field' => 'id_almacen',
             'label' => 'Almacen',
-            'rules' => 'required'),
+            'rules' => ($prereq? '': 'required')),
+      array('field' => 'es_receta',
+            'label' => 'Es receta',
+            'rules' => ''),
 
-      array('field' => 'proveedorId1',
-            'label' => 'Proveedor',
-            'rules' => 'callback_val_proveedor|callback_val_proveedor2'),
-      array('field' => 'proveedorId2',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedorId3',
-            'label' => 'Proveedor',
-            'rules' => ''),
-      array('field' => 'proveedor1',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor2',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'proveedor3',
-            'label' => '',
-            'rules' => ''),
+      // array('field' => 'proveedorId1',
+      //       'label' => 'Proveedor',
+      //       'rules' => ($prereq? '': 'callback_val_proveedor|callback_val_proveedor2')),
+      // array('field' => 'proveedorId2',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedorId3',
+      //       'label' => 'Proveedor',
+      //       'rules' => ''),
+      // array('field' => 'proveedor1',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor2',
+      //       'label' => '',
+      //       'rules' => ''),
+      // array('field' => 'proveedor3',
+      //       'label' => '',
+      //       'rules' => ''),
 
       array('field' => 'solicito',
             'label' => '',
@@ -572,7 +571,7 @@ class compras_requisicion extends MY_Controller {
 
       array('field' => 'departamento',
             'label' => 'Departamento',
-            'rules' => 'required'),
+            'rules' => ($prereq? '': 'required')),
 
       array('field' => 'descripcion',
             'label' => 'Observacion',
@@ -597,6 +596,55 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'tipoOrden',
             'label' => 'Tipo de Orden',
             'rules' => 'required'),
+
+      array('field' => 'infRecogerProv',
+            'label' => 'Recoger con el proveedor',
+            'rules' => ''),
+      array('field' => 'infRecogerProvNom',
+            'label' => 'Recoger con el proveedor',
+            'rules' => ''),
+      array('field' => 'infPasarBascula',
+            'label' => 'Pasar a Bascula',
+            'rules' => ''),
+      array('field' => 'infEntOrdenCom',
+            'label' => 'Entregar la mercancía',
+            'rules' => ''),
+
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required|numeric': '')),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required': '')),
+      array('field' => 'ranchoId[]',
+            'label' => 'Rancho',
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
+      array('field' => 'ranchoText[]',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'centroCostoId[]',
+            'label' => 'Centro de costo',
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
+      array('field' => 'centroCostoText[]',
+            'label' => 'Centro de costo',
+            'rules' => ''),
+      // array('field' => 'activoId',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? 'numeric': '')),
+      // array('field' => 'activos',
+      //       'label' => 'Activo',
+      //       'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'activosP[]',
+            'label' => 'Activo del producto',
+            'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'proveedorId[]',
+            'label' => 'Proveedor',
+            'rules' => 'numeric'),
+      array('field' => 'proveedor[]',
+            'label' => 'Proveedor',
+            'rules' => ''),
 
       array('field' => 'totalLetra1',
             'label' => '',

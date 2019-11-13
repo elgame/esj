@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -84,7 +84,7 @@
                 <label class="control-label" for="tid_almacen">Transferir a:</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <select name="tid_almacen" class="span11">
+                    <select name="tid_almacen" class="span11" id="tid_almacen">
                       <option value=""></option>
                     <?php foreach ($almacenes['almacenes'] as $key => $value) { ?>
                       <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('tid_almacen', $value->id_almacen, false, $this->input->post('tid_almacen')) ?>><?php echo $value->nombre ?></option>
@@ -122,12 +122,89 @@
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
-                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                      <button type="submit" name="guardar" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                      <button type="submit" name="preguardar" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar Pre-Salida</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($_POST['ranchoId'])) {
+                        foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($_POST['centroCostoId'])) {
+                        foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
 
           <div class="row-fluid tblproductos0" id="generalCodigo">  <!-- Box Otros datos -->
             <div class="box span12">
@@ -168,11 +245,11 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="rancho">Rancho</label>
+                    <label class="control-label" for="ranchoC">Rancho</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="text" name="rancho" class="span11 showCodigoAreaAuto notr" id="rancho" data-ini="371" value="<?php echo set_value('rancho') ?>" placeholder="" required>
-                        <input type="hidden" name="rancho_id" value="<?php echo set_value('rancho_id') ?>" class="span12 showCodigoAreaAutoId" required>
+                        <input type="text" name="ranchoC" class="span11 showCodigoAreaAuto notr" id="ranchoC" data-ini="371" value="<?php echo set_value('ranchoC') ?>" placeholder="">
+                        <input type="hidden" name="ranchoC_id" value="<?php echo set_value('ranchoC_id') ?>" class="span12 showCodigoAreaAutoId">
                         <i class="ico icon-list showCodigoArea notr" data-ini="371" style="cursor:pointer"></i>
                       </div>
                     </div>
@@ -182,8 +259,8 @@
                     <label class="control-label" for="centro_costo">Centro de costo</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="text" name="centro_costo" class="span11 showCodigoAreaAuto notr" id="centro_costo" value="<?php echo set_value('centro_costo') ?>" placeholder="" required>
-                        <input type="hidden" name="centro_costo_id" value="<?php echo set_value('centro_costo_id') ?>" class="span12 showCodigoAreaAutoId" required>
+                        <input type="text" name="centro_costo" class="span11 showCodigoAreaAuto notr" id="centro_costo" value="<?php echo set_value('centro_costo') ?>" placeholder="">
+                        <input type="hidden" name="centro_costo_id" value="<?php echo set_value('centro_costo_id') ?>" class="span12 showCodigoAreaAutoId">
                         <i class="ico icon-list showCodigoArea notr" style="cursor:pointer"></i>
                       </div>
                     </div>

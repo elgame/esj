@@ -24,21 +24,21 @@
             </div>
           </div>
           <div class="box-content">
-          	<a href="<?php echo base_url('panel/banco/?'.String::getVarsLink(array('msg', 'id_cuenta', 'fstatus'))); ?>" class="linksm">
+          	<a href="<?php echo base_url('panel/banco/?'.MyString::getVarsLink(array('msg', 'id_cuenta', 'fstatus'))); ?>" class="linksm">
               <i class="icon-chevron-left"></i> Atras</a> |
-            <a href="<?php echo base_url('panel/banco/cuenta_pdf/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/banco/cuenta_pdf/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> |
-            <a href="<?php echo base_url('panel/banco/cuenta_xls/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/banco/cuenta_xls/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a>
-            <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
+            <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
               <i class="icon-archive"></i> Conciliacion</a>
         <?php if($data['cuenta']['info']->banco == 'Banamex'){ ?>
                |
-            <a href="<?php echo base_url('panel/banco/cuenta_banamex/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/banco/cuenta_banamex/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-file-text"></i> Banamex</a>
         <?php } ?>
 
-            <a href="<?php echo base_url('panel/banco/mover_movimiento/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-info" id="cambia-fecha-movi"
+            <a href="<?php echo base_url('panel/banco/mover_movimiento/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-info" id="cambia-fecha-movi"
               onclick="msb.confirm('Estas seguro de mover los movimientos al siguiente mes?', 'Cuentas', this); return false;">Trasladar cuentas</a>
 
             <form action="<?php echo base_url('panel/banco/cuenta/'); ?>" method="GET" class="form-search">
@@ -135,10 +135,10 @@
                     if(count($status) > 0)
                     {
               				$opc_html .= '<li><input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
-              					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
+              					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.MyString::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
               					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Transito</li>';
                       $opc_html .= '<li><input type="checkbox" class="sbc_chekrs" id="sbc'.$movimiento->id_movimiento.'"
-                        value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
+                        value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.MyString::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
                         data-status="'.$movimiento->salvo_buen_cobro.'" '.($movimiento->salvo_buen_cobro=='t'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Salvo buen cobro</li>';
               		?>
                     <div class="btn-group">
@@ -148,6 +148,10 @@
                         <li><a href="#" role="button" class="modalimprimir"
                           data-idm="<?php echo $movimiento->id_movimiento ?>"
                           data-idc=""><i class="icon-print"></i> Sello digital</a></li>
+                        <?php if ($movimiento->metodo_pago == 'cheque' && $movimiento->tipo == 'f'): ?>
+                        <li><a href="<?php echo base_url("panel/banco/cheque?id={$movimiento->id_movimiento}") ?>" role="button" target="_blank">
+                          <i class="icon-print"></i> Imprimir cheque</a></li>
+                        <?php endif ?>
                       </ul>
                     </div>
                 <?php } ?>
@@ -157,9 +161,9 @@
               		<td><div style="width: 200px;"><?php echo $movimiento->cli_pro; ?></div></td>
               		<td><div style="width: 300px; word-wrap: break-word;"><?php echo $movimiento->concepto; ?></div></td>
               		<td><?php echo $movimiento->metodo_pago; ?></td>
-              		<td style="text-align: right;"><?php echo String::formatoNumero($movimiento->deposito, 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($movimiento->retiro, 2, '$', false); ?></td>
-              		<td style="text-align: right;"><?php echo String::formatoNumero($movimiento->saldo, 2, '$', false); ?></td>
+              		<td style="text-align: right;"><?php echo MyString::formatoNumero($movimiento->deposito, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($movimiento->retiro, 2, '$', false); ?></td>
+              		<td style="text-align: right;"><?php echo MyString::formatoNumero($movimiento->saldo, 2, '$', false); ?></td>
               		<td><?php
               			if(count($status)>0)
               				echo '<span class="label label-'.($status[0]=='Trans'? 'info' : 'success').'">'.$status[0].'</span>'
@@ -170,22 +174,22 @@
               			{
               				if($movimiento->status == 't')
   		            			echo $this->usuarios_model->getLinkPrivSm('banco/cancelar_movimiento/', array(
-      									'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+      									'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.MyString::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
       									'btn_type' => 'btn-danger',
       									'text_link'=> 'hidden',
       									'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
       								);
       							echo $this->usuarios_model->getLinkPrivSm('banco/eliminar_movimiento/', array(
-      								'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+      								'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.MyString::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
       								'btn_type' => 'btn-danger',
       								'text_link'=> 'hidden',
       								'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
       							);
                     echo $this->usuarios_model->getLinkPrivSm('banco/modificar_movimiento/', array(
-                      'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+                      'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.MyString::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
                       'btn_type' => 'btn-info',
                       'text_link'=> 'hidden',
-                      'attrs' => array('rel' => "superbox-50x500"))
+                      'attrs' => array('rel' => "superbox-70x500"))
                     );
       						}
               		?></td>
@@ -193,9 +197,9 @@
               <?php }?>
                   <tr style="background-color:#ccc;font-weight: bold;">
                     <td style="text-align: right" colspan="6">Total:</td>
-                    <td style="text-align: right"><?php echo String::formatoNumero($data['total_deposito'], 2, '$', false); ?></td>
-                    <td style="text-align: right"><?php echo String::formatoNumero($data['total_retiro'], 2, '$', false); ?></td>
-                    <td id="total_saldo" style="text-align: right"><?php echo String::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
+                    <td style="text-align: right"><?php echo MyString::formatoNumero($data['total_deposito'], 2, '$', false); ?></td>
+                    <td style="text-align: right"><?php echo MyString::formatoNumero($data['total_retiro'], 2, '$', false); ?></td>
+                    <td id="total_saldo" style="text-align: right"><?php echo MyString::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
                     <td></td>
                     <td></td>
                   </tr>
@@ -224,7 +228,7 @@
 				</tr>
 				<tr>
 					<td>Cheq no cob</td>
-					<td id="sb_cheque_ncob"><?php echo String::formatoNumero($data['cheques_no_cobrados']); ?></td>
+					<td id="sb_cheque_ncob"><?php echo MyString::formatoNumero($data['cheques_no_cobrados']); ?></td>
 				</tr>
 				<tr>
 					<td>Dif</td>

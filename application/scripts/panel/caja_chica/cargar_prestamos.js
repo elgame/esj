@@ -10,7 +10,7 @@
 
     btnAddFondoCaja();
     btnDelFondoCaja();
-    agregarFondoCaja();
+    // agregarFondoCaja();
 
     onChanceDenominacionNum();
     onChanceTotalDenominacion();

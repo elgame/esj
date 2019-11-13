@@ -67,6 +67,12 @@ class compras extends MY_Controller {
 
   public function ver()
   {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/compras_ordenes/ver.js'),
+    ));
+
     $this->load->model('proveedores_model');
     $this->load->model('compras_model');
     $this->load->model('compras_ordenes_model');
@@ -78,7 +84,7 @@ class compras extends MY_Controller {
     }
     else
     {
-      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: false));
 
       if (is_array($response)) {
         $params['frm_errors'] = $this->showMsgs(2, $response[0]);
@@ -144,7 +150,7 @@ class compras extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras/agregar_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/compras/agregar_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -166,7 +172,7 @@ class compras extends MY_Controller {
     $this->load->model('compras_model');
     $this->compras_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
+    redirect(base_url('panel/compras/?' . MyString::getVarsLink(array('id')).'&msg=3'));
   }
 
   public function ver_nota_credito()
@@ -202,11 +208,13 @@ class compras extends MY_Controller {
     }
     else
     {
+      $id_resp = $_GET['id'];
       $res_mdl = $this->compras_model->actualizarNotaCredito($_GET['id'], $_POST, $_FILES['xml']);
 
+      $_GET['id'] = $id_resp;
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras/ver_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/compras/ver_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -299,6 +307,9 @@ class compras extends MY_Controller {
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -306,10 +317,29 @@ class compras extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($uuid)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
+        (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
+
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {
@@ -390,9 +420,17 @@ class compras extends MY_Controller {
       array('field' => 'totalOrden',
             'label' => 'Total',
             'rules' => 'greater_than[-1]'),
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
+
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => '')  ,
+      array('field' => 'noCertificado',
+            'label' => 'Certificado',
+            'rules' => '')  ,
+
+      // array('field' => 'xml',
+      //       'label' => 'XML',
+      //       'rules' => 'callback_xml_check'),
     );
 
     $this->form_validation->set_rules($rules);

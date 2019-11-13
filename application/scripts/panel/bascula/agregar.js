@@ -44,7 +44,8 @@ $(function(){
           'area': $area.find('option:selected').val(),
         };
 
-    $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo') );
+    // var param_empresa = '&did_empresa=' + $('#pid_empresa').val();
+    // $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo')+param_empresa );
 
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
@@ -129,12 +130,18 @@ $(function(){
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
         option = $this.find('option:selected').val(),
-        priv_modif_kilosbt = $("#modif_kilosbt").val();
+        priv_modif_kilosbt = $("#modif_kilosbt").val(),
+        paccion = $('#paccion').val();
     if (option === 'en') {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
+      $('#groupTrazabilidad').css({'display': 'none'});
 
-      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+      // cargar kilos
+      if (paccion == 'n')
+        $("#pproductor").attr('data-next2', 'pkilos_brutos');
+      else
+        $("#pproductor").attr('data-next2', 'pkilos_tara');
 
       if (priv_modif_kilosbt == 'true') {
         $('#pkilos_brutos').prop("readonly", '');
@@ -146,8 +153,13 @@ $(function(){
     } else {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
+      $('#groupTrazabilidad').css({'display': 'block'});
 
-      $("#pproductor").attr('data-next2', 'pkilos_tara');
+      // cargar kilos
+      if (paccion == 'n')
+        $("#pproductor").attr('data-next2', 'pkilos_tara');
+      else
+        $("#pproductor").attr('data-next2', 'pkilos_brutos');
 
       if (priv_modif_kilosbt == 'true') {
         $('#pkilos_brutos').prop("readonly", '');
@@ -187,6 +199,13 @@ $(function(){
     select: function( event, ui ) {
       $("#pid_empresa").val(ui.item.id);
       $("#pempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      $("#pid_proveedor").val('').css({'background-color': '#FFF'});
+      $("#pproveedor").val('').css({'background-color': '#FFF'});
+      $("#pid_productor").val('').css({'background-color': '#FFF'});
+      $("#pproductor").val('').css({'background-color': '#FFF'});
+      $("#pid_cliente").val('').css({'background-color': '#FFF'});
+      $("#pcliente").val('').css({'background-color': '#FFF'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -201,6 +220,9 @@ $(function(){
       var params = {term : request.term};
       if(parseInt($("#pid_empresa").val()) > 0)
         params.did_empresa = $("#pid_empresa").val();
+
+      params.type = $("#parea option:selected").attr('data-tipo');
+
       $.ajax({
           url: base_url + 'panel/bascula/ajax_get_proveedores/',
           dataType: "json",
@@ -307,7 +329,23 @@ $(function(){
 
   // Autocomplete Chofer
   $("#pchofer").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_choferes/',
+    // source: base_url + 'panel/bascula/ajax_get_choferes/',
+    source: function(request, response) {
+      params = {term : request.term};
+
+      if ($('#ptipo').val() === 'sa') {
+        params['alldata'] = 'true';
+      }
+
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_choferes/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -323,7 +361,23 @@ $(function(){
 
   // Autocomplete Camiones
   $("#pcamion").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_camiones/',
+    // source: base_url + 'panel/bascula/ajax_get_camiones/',
+    source: function(request, response) {
+      params = {term : request.term};
+
+      if ($('#ptipo').val() === 'sa') {
+        params['alldata'] = 'true';
+      }
+
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_camiones/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -350,6 +404,17 @@ $(function(){
 
   // Evento keypress para el input del folio.
   $('#certificado').on('keypress', function(e) {
+    var $this = $(this);
+    if (e.charCode == '32') {
+      e.preventDefault();
+      if ($this.is(':checked'))
+        $this.removeAttr("checked");
+      else
+        $this.attr("checked", "checked");
+    }
+  });
+
+  $('#intangible').on('keypress', function(e) {
     var $this = $(this);
     if (e.charCode == '32') {
       e.preventDefault();
@@ -470,7 +535,7 @@ $(function(){
 
         location.href = base_url + 'panel/bascula/agregar?idb=' + data + editar + focus;
 
-        winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
+        // winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
         // winFotos.location.reload();
 
         } else {
@@ -670,21 +735,25 @@ $(function(){
 
       msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
       {
-        // $('#form').submit();
-        $.ajax({
-          url: base_url + 'panel/bascula/ajax_pagar_boleta/',
-          type: 'get',
-          dataType: 'json',
-          data: {idb: $('#pidb').val()},
-        })
-        .done(function() {
-          // location.reload();
-        });
+        console.log('test', parseInt($('#pidb').val()));
+        if ((parseInt($('#pidb').val())||0) > 0) {
+          // $('#form').submit();
+          $.ajax({
+            url: base_url + 'panel/bascula/ajax_pagar_boleta/',
+            type: 'get',
+            dataType: 'json',
+            data: {idb: $('#pidb').val()},
+          })
+          .done(function() {
+            // location.reload();
+          });
+        } else {
+          $('#pstatus').trigger('click');
+        }
 
       }, function () {
         $('#pstatus').trigger('click');
       });
-
     }
 
   });
@@ -809,26 +878,37 @@ var calculaKilosNeto = function () {
 
 var recargaTipo = function () {
   var option = $('#ptipo').find('option:selected').val(),
-  priv_modif_kilosbt = $("#modif_kilosbt").val();
+  priv_modif_kilosbt = $("#modif_kilosbt").val(),
+  paccion = $('#paccion').val();
   if (option === 'en') {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
+    $('#groupTrazabilidad').css({'display': 'none'});
 
-    $("#pproductor").attr('data-next2', 'pkilos_brutos');
+    // cargar kilos
+    if (paccion == 'n')
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+    else
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
 
-    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
+    if (paccion === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
-    } else if ($('#paccion').val() === 'sa') {
+    } else if (paccion === 'sa') {
       $("#pproductor").attr('data-next2', 'pkilos_tara');
     }
   } else {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
+    $('#groupTrazabilidad').css({'display': 'block'});
 
-    $("#pproductor").attr('data-next2', 'pkilos_tara');
+    // cargar kilos
+    if (paccion == 'n')
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
+    else
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
 
-    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
+    if (paccion === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", 'readonly');
       $('#pkilos_tara').prop("readonly", '');
     }
@@ -885,6 +965,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
+      $area         = $('#parea'),
 
       kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
       totalCajas = 0,
@@ -927,7 +1008,13 @@ var calculaTotales = function (trIndex, kilosNeto) {
     $tr.find('#ppromedio').val(promedio);
     // $tr.find('#tdpromedio').html(promedio)
 
-    importe = (kilos * precio).toFixed(2);
+    // Si el area es coco entonces calcula diferente el importe
+    if ($area.find('option:selected').attr('data-coco') === 't') {
+      importe = (cajas * precio).toFixed(2);
+    } else { // Calcula con los kilos
+      importe = (kilos * precio).toFixed(2);
+    }
+
     $tr.find('#pimporte').val(importe);
     $tr.find('#tdimporte').html(importe);
 

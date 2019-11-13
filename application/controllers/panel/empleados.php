@@ -91,7 +91,7 @@ class empleados extends MY_Controller {
 			$res_mdl = $this->usuarios_model->setRegistro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/empleados/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/empleados/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$this->load->model('usuarios_puestos_model');
@@ -152,7 +152,7 @@ class empleados extends MY_Controller {
 				$res_mdl = $this->usuarios_model->modificar_usuario($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$this->load->model('usuarios_puestos_model');
@@ -178,7 +178,7 @@ class empleados extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -191,10 +191,10 @@ class empleados extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->eliminar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -207,17 +207,20 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
-      {
-  			$this->load->model('usuarios_model');
-  			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
-  			if($res_mdl)
-  				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+      if ($this->validano_checador($user->no_checador) || $user->no_checador == '') {
+        if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
+        {
+    			$this->load->model('usuarios_model');
+    			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
+    			if($res_mdl)
+    				redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+        } else
+          redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
       } else
-        redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=8'));
+        redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=10'));
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=9'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
 	}
 
   public function historial()
@@ -252,14 +255,15 @@ class empleados extends MY_Controller {
       $this->load->model('nomina_fiscal_model');
       $data = $this->usuarios_model->getUsuariosAjax();
       $_GET['cid_empresa'] = $_GET['did_empresa'];
-      $configuraciones = $this->nomina_fiscal_model->configuraciones();
       $filtros = array(
         'semana'            => '',
         'anio'              => date("Y"),
         'empresaId'         => $_GET['did_empresa'],
         'puestoId'          => '',
         'dia_inicia_semana' => '4',
+        'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
       );
+      $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
       foreach ($data as $key => $value)
       {
         $data[$key]['nomina'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, $value['id']);
@@ -309,17 +313,18 @@ class empleados extends MY_Controller {
     {
       $this->load->model('usuarios_model');
       $this->usuarios_model->updateSueldos($_POST);
-      redirect(base_url('panel/empleados/sueldos/?'.String::getVarsLink(array('msg')).'&msg=7'));
+      redirect(base_url('panel/empleados/sueldos/?'.MyString::getVarsLink(array('msg')).'&msg=7'));
     }
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     // Se obtienen los trabajadores de la empresa
     $filtros = array(
-      'semana'            => '',
-      'anio'              => date("Y"),
-      'empresaId'         => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
-      'puestoId'          => '',
+      'semana'      => '',
+      'anio'        => date("Y"),
+      'empresaId'   => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
+      'puestoId'    => '',
+      'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
@@ -328,7 +333,7 @@ class empleados extends MY_Controller {
     $filtros['dia_inicia_semana'] = $dia;
 
     $_GET['cid_empresa'] = $filtros['empresaId'];
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
 
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
 
@@ -451,6 +456,9 @@ class empleados extends MY_Controller {
               array('field' => 'femail',
                     'label' => 'Email',
                     'rules' => 'max_length[70]'),
+              array('field' => 'ftelefono',
+                    'label' => 'Teléfono',
+                    'rules' => 'max_length[20]'),
               array('field' => 'fcuenta_cpi',
                     'label' => 'Cuenta contpaqi',
                     'rules' => 'max_length[12]'),
@@ -476,11 +484,21 @@ class empleados extends MY_Controller {
                     'label' => 'No Trabajador',
                     'rules' => 'required|max_length[8]|callback_validano_empleado'),
 
+              array('field' => 'dno_checador',
+                    'label' => 'No Checador',
+                    'rules' => 'max_length[8]|callback_validano_checador'),
+
               array('field' => 'fdepartamente',
                     'label' => 'Departamento',
                     'rules' => ''),
               array('field' => 'fpuesto',
                     'label' => 'Puesto',
+                    'rules' => ''),
+              array('field' => 'area',
+                    'label' => 'Cultivo',
+                    'rules' => ''),
+              array('field' => 'areaId',
+                    'label' => 'Cultivo',
                     'rules' => ''),
 		);
 
@@ -611,6 +629,29 @@ class empleados extends MY_Controller {
     return true;
   }
 
+  public function validano_checador($no_empleado)
+  {
+    if ($no_empleado != '')
+    {
+      $sql = isset($_GET['id'])? "id <> {$_GET['id']}": '';
+      $query = $this->db->query("SELECT * FROM usuarios
+                                 WHERE {$sql}
+                                  AND no_checador = '{$no_empleado}' AND status = 't'");
+
+      if ($query->num_rows() > 0)
+      {
+        $dt = $query->row();
+        $this->form_validation->set_message('validano_checador', 'Ya existe un empleado con el mismo No de Checador, '.$dt->nombre.' '.$dt->apellido_paterno);
+        return false;
+      }
+    }
+    // else {
+    //   $this->form_validation->set_message('validano_checador', 'Es requerido el No de Checador');
+    //   return false;
+    // }
+    return true;
+  }
+
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
@@ -667,6 +708,10 @@ class empleados extends MY_Controller {
         break;
       case 9:
         $txt = 'Es requerido el No de Trabajador.';
+        $icono = 'error';
+        break;
+      case 10:
+        $txt = 'Ya existe un empleado con el mismo No de checador.';
         $icono = 'error';
         break;
 

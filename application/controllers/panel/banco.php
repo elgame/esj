@@ -29,7 +29,10 @@ class banco extends MY_Controller {
     'banco/rpt_acumulado_empresa/',
     'banco/rpt_acumulado_empresa_pdf/',
     'banco/rpt_saldos_bancarios_pdf/',
-    'banco/rpt_saldos_bancarios_xls/'
+    'banco/rpt_saldos_bancarios_xls/',
+    'banco/ajax_get_cuentas/',
+
+    'banco/rptMovSinUuidPdf/',
 		);
 
 	public function _remap($method){
@@ -185,7 +188,7 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addDeposito();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/depositar/?'.String::getVarsLink(array('msg')).'&msg=7 '));
+				redirect(base_url('panel/banco/depositar/?'.MyString::getVarsLink(array('msg')).'&msg=7 '));
 		}
 
 		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
@@ -236,10 +239,10 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addRetiro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=8'.
+				redirect(base_url('panel/banco/retirar/?'.MyString::getVarsLink(array('msg')).'&msg=8'.
 						($res_mdl['ver_cheque'] ? "&id_movimiento={$res_mdl['id_movimiento']}" : '') ));
 			else
-				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+				redirect(base_url('panel/banco/retirar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
 		}
 
 		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
@@ -347,9 +350,10 @@ class banco extends MY_Controller {
 		{
 			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+      $msg = $response? '10': '12';
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg='.$msg));
 		}else
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	public function cancelar_movimiento(){
@@ -357,9 +361,9 @@ class banco extends MY_Controller {
 		{
 			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento'], true);
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=9'));
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=9'));
 		}else
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	public function cambia_entransito(){
@@ -368,9 +372,9 @@ class banco extends MY_Controller {
 			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'],
 				array('entransito' => ($this->input->get('mstatus')=='Trans'? 'f' : 't'), 'fecha_aplico' => ($this->input->get('mstatus')=='Trans'? $this->input->get('fecha_aplico_trans') : NULL) ));
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=11'));
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=11'));
 		}else
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=1'));
+			redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=1'));
 	}
 
   public function cambia_salvo_bc(){
@@ -379,9 +383,9 @@ class banco extends MY_Controller {
       $this->load->model('banco_cuentas_model');
       $response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'],
         array('salvo_buen_cobro' => ($this->input->get('sbcstatus')=='false'? 'f' : 't') ));
-      redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=11'));
+      redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=11'));
     }else
-      redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=1'));
+      redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=1'));
   }
 
 
@@ -451,7 +455,7 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addCuenta();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/cuentas_agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/banco/cuentas_agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
@@ -499,7 +503,7 @@ class banco extends MY_Controller {
 				$res_mdl = $this->banco_cuentas_model->updateCuenta($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->banco_cuentas_model->getCuentaInfo();
@@ -514,7 +518,7 @@ class banco extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -528,10 +532,10 @@ class banco extends MY_Controller {
 			$this->load->model('banco_cuentas_model');
 			$res_mdl = $this->banco_cuentas_model->updateCuenta( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -545,21 +549,21 @@ class banco extends MY_Controller {
 			$this->load->model('banco_cuentas_model');
 			$res_mdl = $this->banco_cuentas_model->updateCuenta( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/banco/cuentas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
-	// /**
-	//  * Obtiene lostado de camiones para el autocomplete, ajax
-	//  */
-	// public function ajax_get_lineas(){
-	// 	$this->load->model('banco_cuentas_model');
-	// 	$params = $this->banco_cuentas_model->getLineasAjax();
+	/**
+   * Obtiene lostado de productores para el autocomplete, ajax
+   */
+  public function ajax_get_cuentas(){
+    $this->load->model('banco_cuentas_model');
+    $params = $this->banco_cuentas_model->getCuentasAjax();
 
-	// 	echo json_encode($params);
-	// }
+    echo json_encode($params);
+  }
 
 
 
@@ -632,6 +636,34 @@ class banco extends MY_Controller {
 			array('field' => 'did_cliente',
 						'label' => 'Cliente',
 						'rules' => ''),
+
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => 'numeric'),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => ''),
+      array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => 'numeric'),
+      array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'centroCostoId',
+            'label' => 'Centro de costo',
+            'rules' => 'numeric'),
+      array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => ''),
+      array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric'),
+      array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => ''),
+      array('field' => 'intangible',
+            'label' => 'Gasto intangible',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
@@ -675,6 +707,36 @@ class banco extends MY_Controller {
       $rules[] = array('field'   => 'did_cuentacpi',
             'label'   => 'Cuenta contpaq',
             'rules'   => '');
+
+      if ($this->input->post('tipo_mov') == 'f') {
+        $rules[] = array('field' => 'areaId',
+              'label' => 'Cultivo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'area',
+              'label' => 'Cultivo',
+              'rules' => '');
+        $rules[] = array('field' => 'ranchoId',
+              'label' => 'Area',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'rancho',
+              'label' => 'Area',
+              'rules' => '');
+        $rules[] = array('field' => 'centroCostoId',
+              'label' => 'Centro de costo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'centroCosto',
+              'label' => 'Centro de costo',
+              'rules' => '');
+        $rules[] = array('field' => 'activoId',
+              'label' => 'Activo',
+              'rules' => 'numeric');
+        $rules[] = array('field' => 'activos',
+              'label' => 'Activo',
+              'rules' => '');
+        $rules[] = array('field' => 'intangible',
+              'label' => 'Gasto intangible',
+              'rules' => '');
+      }
     }
     $this->form_validation->set_rules($rules);
   }
@@ -684,7 +746,7 @@ class banco extends MY_Controller {
     $this->load->model('banco_cuentas_model');
     $msg = $this->banco_cuentas_model->moverMovimiento($_GET['ids']);
 
-    redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'ids')).'&msg='.$msg));
+    redirect(base_url('panel/banco/cuenta/?'.MyString::getVarsLink(array('msg', 'ids')).'&msg='.$msg));
   }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
@@ -735,6 +797,10 @@ class banco extends MY_Controller {
 				$txt = 'La operacion cambio de estado correctamente.';
 				$icono = 'success';
 				break;
+      case 12:
+        $txt = 'Hay complementos de pago ligados al movimiento, se tienen que cancelar.';
+        $icono = 'error';
+        break;
 			case 30:
 				$txt = 'La cuenta no tiene saldo suficiente.';
 				$icono = 'error';
@@ -892,6 +958,38 @@ class banco extends MY_Controller {
   public function rpt_saldos_bancarios_xls(){
     $this->load->model('banco_model');
     $this->banco_model->getRAcumuladoEmpresaXls();
+  }
+
+  public function rptMovSinUuid()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/polizas/genera.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de movimientos UUID'
+    );
+
+    $this->load->model('empresas_model');
+    $this->load->model('areas_model');
+    $this->load->model('polizas_model');
+
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/banco/rpt_mov_sin_uuid', $params);
+    $this->load->view('panel/footer');
+  }
+  public function rptMovSinUuidPdf(){
+    $this->load->model('banco_model');
+    $this->banco_model->getRptMovSinUuidPdf();
   }
 
 }

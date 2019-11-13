@@ -74,7 +74,7 @@ class clasificaciones_model extends CI_Model {
             'id_unidad'       => $this->input->post('dunidad'),
             // 'precio_venta' => $this->input->post('fprecio_venta'),
             'cuenta_cpi'      => $this->input->post('fcuenta_cpi'),
-            'cuenta_cpi2'     => $this->input->post('fcuenta_cpi2'),
+            'cuenta_cpi2'     => count($this->input->post('fcuentas'))>0? json_encode($this->input->post('fcuentas')): [],
             'codigo'          => $this->input->post('fcodigo'),
             'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
@@ -118,7 +118,7 @@ class clasificaciones_model extends CI_Model {
             'id_area'      => $this->input->post('farea'),
             'iva'          => $this->input->post('diva'),
             'id_unidad'    => $this->input->post('dunidad'),
-            'cuenta_cpi2'  => $this->input->post('fcuenta_cpi2'),
+            'cuenta_cpi2'  => count($this->input->post('fcuentas'))>0? json_encode($this->input->post('fcuentas')): [],
             'codigo'       => $this->input->post('fcodigo'),
             'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
@@ -205,7 +205,7 @@ class clasificaciones_model extends CI_Model {
 			$sql .= " AND id_area = {$this->input->get('type')}";
     if($this->input->get('inventario') !== false)
       $sql .= " AND inventario = 't'";
-		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad
+		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad, unidad_cantidad
 				FROM clasificaciones
 				WHERE status = true {$sql}
 				ORDER BY nombre ASC

@@ -42,7 +42,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/banco/modificar_movimiento?'.String::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/banco/modificar_movimiento?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
 
           <div class="row-fluid">
             <div class="span12">
@@ -74,7 +74,7 @@
                 <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
-                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('fcuenta', $value->id_cuenta, false, $mov->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('fcuenta', $value->id_cuenta, false, $mov->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                 <?php
                 }
                 ?>
@@ -129,6 +129,98 @@
               </div>
           <?php
           } ?>
+
+            <input type="hidden" name="tipo_mov" value="<?php echo $mov->tipo ?>">
+            <?php if ($mov->tipo == 'f'): ?>
+              <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+                <div class="box span12">
+                  <div class="box-header well" data-original-title>
+                    <h2><i class="icon-truck"></i> Poliza</h2>
+                    <div class="box-icon">
+                      <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                    </div>
+                  </div><!--/box-header -->
+                  <div class="box-content">
+                    <div class="row-fluid">
+                      <div class="control-group">
+                        <div class="controls span12">
+                          <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.$empresa['info']->id_empresa.'&idp='.(!empty($proveedor['info']->id_proveedor)? $proveedor['info']->id_proveedor: '').'&vmetodoPago=pue') ?>"
+                            data-href="<?php echo base_url('panel/gastos/verXml/') ?>"
+                            rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                            <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                          <span>
+                            UUID: <input type="text" name="uuid" value="<?php echo $mov->uuid ?>" id="buscarUuid"> |
+                            No Certificado: <input type="text" name="noCertificado" value="<?php echo $mov->no_certificado ?>" id="buscarNoCertificado">
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                   </div> <!-- /box-body -->
+                </div> <!-- /box -->
+              </div><!-- /row-fluid -->
+
+              <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+                <div class="box span12">
+                  <div class="box-header well" data-original-title>
+                    <h2><i class="icon-truck"></i> Catálogos</h2>
+                    <div class="box-icon">
+                      <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                    </div>
+                  </div><!--/box-header -->
+                  <div class="box-content">
+                    <div class="row-fluid">
+                      <div class="span6">
+                        <div class="control-group" id="cultivosGrup">
+                          <label class="control-label" for="area">Cultivo </label>
+                          <div class="controls">
+                            <div class="input-append span12">
+                              <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($mov->area->nombre) ? $mov->area->nombre : '') ?>" placeholder="Limon, Piña">
+                            </div>
+                            <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($mov->area->id_area) ? $mov->area->id_area : '') ?>">
+                          </div>
+                        </div><!--/control-group -->
+
+                        <div class="control-group" id="ranchosGrup">
+                          <label class="control-label" for="rancho">Rancho </label>
+                          <div class="controls">
+                            <div class="input-append span12">
+                              <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($mov->rancho->nombre) ? $mov->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1">
+                            </div>
+                            <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($mov->rancho->id_rancho) ? $mov->rancho->id_rancho : '') ?>">
+                          </div>
+                        </div><!--/control-group -->
+                      </div>
+
+                      <div class="span6">
+                        <div class="control-group" id="centrosCostosGrup">
+                          <label class="control-label" for="centroCosto">Centro de costo </label>
+                          <div class="controls">
+                            <div class="input-append span12">
+                              <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto', isset($mov->centroCosto->nombre) ? $mov->centroCosto->nombre : '') ?>" placeholder="Mantenimiento, Gasto general">
+                            </div>
+                            <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId', isset($mov->centroCosto->id_centro_costo) ? $mov->centroCosto->id_centro_costo : '') ?>">
+                          </div>
+                        </div><!--/control-group -->
+
+                        <div class="control-group" id="activosGrup">
+                          <label class="control-label" for="activos">Activos </label>
+                          <div class="controls">
+                            <div class="input-append span12">
+                              <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($mov->activo->nombre) ? $mov->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon">
+                            </div>
+                            <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($mov->activo->id_producto) ? $mov->activo->id_producto : '') ?>">
+                          </div>
+                        </div><!--/control-group -->
+                      </div>
+
+                    </div>
+
+                   </div> <!-- /box-body -->
+                </div> <!-- /box -->
+              </div><!-- /row-fluid -->
+            <?php endif ?>
+
             </div>
             <button type="submit" class="btn btn-success btn-large">Guardar</button>
           </div><!--/row-->

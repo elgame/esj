@@ -1,7 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class polizas_model extends CI_Model {
-  private $empresaId;
+  public $empresaId;
+  private $uuidsADD = '';
 
   function __construct()
   {
@@ -12,9 +13,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA TRASLADADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA TRASLADADO'"; //mamita
     else{
@@ -30,9 +31,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA X TRASLADAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA X TRASLADAR'"; //mamita
     else{
@@ -48,9 +49,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%RETENCION DE IVA%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //mamita
     else{
@@ -66,9 +67,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%RETENCION DE IVA X COBRAR%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //mamita
     else{
@@ -84,9 +85,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%REBAJAS Y BONIFICA%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //mamita
     else{
@@ -102,9 +103,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA ACREDITABLE POR DIFERIR%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE POR DIFERIR%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //mamita
     else{
@@ -120,9 +121,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA ACREDITABLE PAGADO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE PAGADO%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //mamita
     else{
@@ -138,9 +139,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '100% RETENCION IVA X PAGAR'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA X PAGAR'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //mamita
     else{
@@ -156,9 +157,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '100% RETENCION IVA PAGADO'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA PAGADO'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //mamita
     else{
@@ -174,9 +175,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '4% RETENCION IVA X PAGAR'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA X PAGAR'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //mamita
     else{
@@ -192,9 +193,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '4% RETENCION IVA PAGADO'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA PAGADO'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //mamita
     else{
@@ -210,9 +211,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO X PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE 'IVA HONORARIO X PAGAR'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //mamita
     else{
@@ -228,9 +229,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO PAGADO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA HONORARIO PAGADO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //mamita
     else{
@@ -246,9 +247,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE 'SOBRE HONORARIOS X PAGAR'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //mamita
     else{
@@ -264,9 +265,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%SOBRE HONORARIOS PAGADO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND 1 = 2"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND 1 = 2"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND 1 = 2"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //mamita
     else{
@@ -282,9 +283,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISR%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
     else{
@@ -300,9 +301,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%REBAJAS Y BONIFICA%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==4) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==5) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //mamita
     else{
@@ -332,14 +333,40 @@ class polizas_model extends CI_Model {
     }
     return $cuenta;
   }
+  public function getCuentaDiarioProductos($area = 2)
+  {
+    if ($area==2) $cuenta = '13000049'; //limon
+    elseif($area==7) $cuenta = '13000050'; //coco -
+    else{
+      $cuenta = '13000049';
+    }
+    if (!isset($cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'DiarioProductos'")->row();
+      $cuenta = (isset($data->cuenta)? $data->cuenta : '');
+    }
+    return $cuenta;
+  }
+  public function getCuentaDiarioProductosCosto($area = 2)
+  {
+    if ($area==2) $cuenta = '43000010'; //limon
+    elseif($area==7) $cuenta = '43000013'; //coco -
+    else{
+      $cuenta = '43000010';
+    }
+    if (!isset($cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'DiarioProductos'")->row();
+      $cuenta = (isset($data->cuenta)? $data->cuenta : '');
+    }
+    return $cuenta;
+  }
   public function getCuentaNSueldo($basic=true, $departamento=null){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%SUELDOS%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%SUELDOS%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%SUELDOS PRODUCCION2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%SUELDOS PRODUCCION2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%SUELDOS PRODUCCION2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
@@ -359,9 +386,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%VACACIONES%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%VACACIONES%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%VACACIONES VENTAS2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%VACACIONES VENTAS2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%VACACIONES VENTAS2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
@@ -381,9 +408,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%PRIMA VACACIONAL%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
@@ -403,9 +430,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%AGUINALDO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%AGUINALDOS%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%AGUINALDOS VENTAS2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%AGUINALDOS VENTAS2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%AGUINALDOS VENTAS2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
@@ -425,9 +452,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%COMPENSACION%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%HORAS EXTRAS%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%COMPENSACION VENTAS2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%COMPENSACION VENTAS2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%COMPENSACION VENTAS2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
@@ -448,9 +475,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1296'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%ASISTENCIA%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
@@ -472,9 +499,9 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%INDEMNIZACIONES%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
     elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
@@ -493,9 +520,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%NOMINAS POR PAGAR%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
     else{
@@ -511,9 +538,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%SUBSIDIO AL EMPLEO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //mamita
     else{
@@ -529,9 +556,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IMSS RETENIDO%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IMSS RETENIDO%'"; //mamita
     else{
@@ -547,9 +574,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%CENSATIA Y VEJEZ%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //mamita
     else{
@@ -565,9 +592,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%INFONAVIT%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //mamita
     else{
@@ -583,9 +610,9 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISPT ANTES DEL SUB%'"; //francis -
-    elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==4) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //mamita
     else{
@@ -619,7 +646,7 @@ class polizas_model extends CI_Model {
   }
   public function numero($numero)
   {
-    $numero = str_replace(',', '', String::formatoNumero($numero, 2, '') );
+    $numero = str_replace(',', '', MyString::formatoNumero($numero, 2, '') );
     $num = explode('.', $numero);
     if(!isset($num[1]))
       $numero .= '.0';
@@ -653,25 +680,25 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($tipo == '3') //Diarios
     {
-      $response['concepto'] = "Gastos del dia ".String::fechaATexto(date("Y-m-d"));
+      $response['concepto'] = "Gastos del dia ".MyString::fechaATexto(date("Y-m-d"));
       $rango_sel         = 'diario_gastos';
       if ($tipo2 == 'v')
       {
-        $response['concepto'] = "Ventas del dia ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Ventas del dia ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas';
       }elseif ($tipo2 == 'vnc')
       {
-        $response['concepto'] = "Notas de Credito del dia ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Notas de Credito del dia ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas_nc';
       }elseif ($tipo2 == 'no')
       {
-        $response['concepto'] = "Nomina ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Nomina ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'nomina';
       }elseif ($tipo2 == 'pr')
       {
         $result = $this->db->query("SELECT id_area, nombre
             FROM areas WHERE id_area = ".$tipo22)->row();
-        $response['concepto'] = "Compra de {$result->nombre} al ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Compra de {$result->nombre} al ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'diario_productos';
       }
       $sql = " AND tipo = {$tipo} AND tipo2 = '{$tipo2}'";
@@ -680,15 +707,15 @@ class polizas_model extends CI_Model {
       $rango_sel = 'ingresos';
       $sql       = " AND tipo = {$tipo}";
     }elseif($tipo == '2'){ //Egresos = 2
-      $response['concepto'] = "Egresos de limon, ".String::fechaATexto(date("Y-m-d"));
+      $response['concepto'] = "Egresos de limon, ".MyString::fechaATexto(date("Y-m-d"));
       $rango_sel            = 'egreso_limon';
       if ($tipo3 == 'ec')
       {
-        $response['concepto'] = "Egresos de cheques, ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Egresos de cheques, ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_cheque';
       }elseif ($tipo3 == 'eg')
       {
-        $response['concepto'] = "Egresos de gastos, ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Egresos de gastos, ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_gasto';
       }
       $sql       = " AND tipo = {$tipo} AND tipo2 = '{$tipo3}'";
@@ -708,6 +735,20 @@ class polizas_model extends CI_Model {
       $folio = '';
     $response['folio'] = $folio;
     return $response;
+  }
+
+  public function addLineUUID($uuid)
+  {
+    $txt = '';
+    if (!empty($uuid)) {
+      $txt = $this->setEspacios('AM',2).
+            $this->setEspacios($uuid, 36)."\r\n";
+
+      $this->uuidsADD .= $this->setEspacios('AD',2).
+                        $this->setEspacios($uuid, 36)."\r\n";
+    }
+
+    return $txt;
   }
 
   /**
@@ -734,7 +775,7 @@ class polizas_model extends CI_Model {
     if ($this->input->get('fid_empresa') != '')
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -759,13 +800,14 @@ class polizas_model extends CI_Model {
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
 
+        $this->uuidsADD = '';
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
                             $this->setEspacios(str_replace('-', '', $fecha),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Ventas del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Ventas del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -776,7 +818,22 @@ class polizas_model extends CI_Model {
 
           if($inf_factura['info']->status == 'ca')
           {
-            $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
+            if (count($inf_factura['productos'])>0) {
+              if (MyString::isJson($inf_factura['productos'][0]->cuenta_cpi2)) {
+                $cuentas = json_decode($inf_factura['productos'][0]->cuenta_cpi2);
+                if (is_array($cuentas)) {
+                  foreach ($cuentas as $kkcc => $cta) {
+                    $cuenta_cpi = $inf_factura['info']->id_empresa==$cta->id? $cta->cuenta: $value->cuenta_cpi;
+                  }
+                }
+              } else {
+                $cuenta_cpi = '41040000';
+              }
+            } else {
+              $cuenta_cpi = '41040000';
+            }
+            // $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
+
             $cuenta_cpi = $cuenta_cpi==''? '41040000': $cuenta_cpi;
             $cuenta_cpi = $inf_factura['info']->id_empresa==12? '41010000' : $cuenta_cpi;
             $response['data'] .= $this->setEspacios('M',2).
@@ -788,6 +845,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio.' CANCELADA',100).
                               $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
           }else
           {
             //Colocamos el Cargo al Cliente de la factura
@@ -800,17 +858,23 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
 
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
             //Colocamos los Ingresos de la factura (41040000)
             foreach ($inf_factura['productos'] as $key => $value)
             {
-              if ( ($inf_factura['info']->sin_costo == 't' && $value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-                  $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-                  $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
+              if ( ($inf_factura['info']->sin_costo == 't' && !GastosProductos::searchGastosProductos($value->id_clasificacion)) || $inf_factura['info']->sin_costo == 'f')
               {
-                $value->cuenta_cpi = $inf_factura['info']->id_empresa==3? $value->cuenta_cpi2: $value->cuenta_cpi;
+                if (MyString::isJson($value->cuenta_cpi2)) {
+                  $cuentas = json_decode($value->cuenta_cpi2);
+                  if (is_array($cuentas)) {
+                    foreach ($cuentas as $kkcc => $cta) {
+                      $value->cuenta_cpi = $inf_factura['info']->id_empresa==$cta->id? $cta->cuenta: $value->cuenta_cpi;
+                    }
+                  }
+                }
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -823,6 +887,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).
                                 $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
                                 $this->setEspacios('',4)."\r\n";
+                $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
               }
             }
             //Colocamos los impuestos de la factura
@@ -839,15 +904,22 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
                               $this->setEspacios('',4)."\r\n";
+                $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
               }
             }
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -880,7 +952,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -911,7 +983,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Notas de Credito del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -937,17 +1009,19 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
                             $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
           }
           //Colocamos el Abono al Cliente de la factura
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($inf_factura['info']->cliente->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).  //referencia movimiento
-                            $this->setEspacios('1',1).  //tipo movimiento, clientes es un Abono = 1
-                            $this->setEspacios( $this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un Abono = 1
+                            $this->setEspacios( '-'.$this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
           {
@@ -962,14 +1036,21 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_facturanc['info']->uuid);
             }
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1006,7 +1087,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1050,7 +1131,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Gastos del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Gastos del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1098,7 +1179,7 @@ class polizas_model extends CI_Model {
 
           foreach ($productos_grups as $key => $value)
           {
-            if($value->importe > 0)
+            if($value->importe > 0){
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($value->cuenta_cpi, 30).  //cuenta conpaq
                             $this->setEspacios('F/'.$inf_compra['info']->serie.$inf_compra['info']->folio,10).
@@ -1108,6 +1189,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
+            }
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
@@ -1123,6 +1206,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
             }
           }
 
@@ -1136,6 +1220,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_compra['info']->uuid);
 
           unset($inf_compra);
         }
@@ -1175,10 +1260,16 @@ class polizas_model extends CI_Model {
         //   }
         //   unset($inf_compra);
         // }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1211,7 +1302,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1243,7 +1334,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Notas de Credito del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1262,6 +1353,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
 
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
@@ -1281,6 +1373,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+            $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto)
@@ -1296,14 +1389,21 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
             }
           }
           unset($inf_factura);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1353,7 +1453,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
               f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
               f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
-              0 AS indemnizaciones, 'no' AS tipo
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid
           FROM nomina_fiscal AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1365,7 +1465,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
             f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
             f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
-            f.indemnizaciones, 'fi' AS tipo
+            f.indemnizaciones, 'fi' AS tipo, f.uuid
           FROM finiquito AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1380,7 +1480,7 @@ class polizas_model extends CI_Model {
     foreach ($query->result() as $key => $value)
     {
       if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
-        $semana = String::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
+        $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
         $value->anio = $semana['anio'];
         $value->semana = $semana['semana'];
         $value->fecha_inicio = $semana['fecha_inicio'];
@@ -1562,7 +1662,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios( $this->numero($value->{'indemnizaciones'.$iper}) , 20).  //importe movimiento - retencion
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                            $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios("INDEMNIZACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
 
@@ -1664,6 +1764,401 @@ class polizas_model extends CI_Model {
   }
 
   /**
+   * GENERA UNA POLIZA DE DIARIOS PARA LAS NOMINAS
+   * @return [type] [description]
+   */
+  public function polizaDiarioNominaDesglosado()
+  {
+    $response = array('data' => '', 'facturas' => array(), 'folio' => '');
+    $sql = $sql2 = '';
+
+    if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+      $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+      $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+    }
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+      $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      $sql .= " AND Date(f.fecha_inicio) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sql2 .= " AND Date(f.fecha_salida) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    }
+
+    $dias_desface = 4;
+    if ($this->input->get('fid_empresa') != '') {
+      $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $sql2 .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $dias_desface = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['fid_empresa'])->get()->row()->dia_inicia_semana;
+    }
+
+    $fecha = $_GET['ffecha1'];
+    if($_GET['ffecha1'] > $_GET['ffecha2'])
+      $fecha = $_GET['ffecha2'];
+
+    $folio = $this->input->get('ffolio');
+
+    $query = $this->db->query(
+      "SELECT id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, sueldo_semanal, vacaciones,
+            prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto, fondo_ahorro,
+            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo, uuid
+      FROM (
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
+              f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
+              f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid
+          FROM nomina_fiscal AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
+            f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            f.indemnizaciones, 'fi' AS tipo, f.uuid
+          FROM finiquito AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE u.esta_asegurado = 't'
+             {$sql2}
+        )
+      ) AS n
+      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
+      ");
+
+    $nominas = $query->result();
+    foreach ($nominas as $key => $value)
+    {
+      if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
+        $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
+        $value->anio = $semana['anio'];
+        $value->semana = $semana['semana'];
+        $value->fecha_inicio = $semana['fecha_inicio'];
+        $value->fecha_final = $semana['fecha_final'];
+      }
+
+      /*if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
+      {
+        if ($value->departamento == "ADMINISTRACION") {
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal1   += $value->sueldo_semanal;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones1       += $value->vacaciones;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones1  += $value->indemnizaciones;
+        } else {
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional2 += $value->prima_vacacional;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones2  += $value->indemnizaciones;
+        }
+
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->vejez           += $value->vejez;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
+      }else{
+        $value->fecha_inicio1    = $value->fecha_final;
+        $value->fecha_inicio     = str_replace('-', '/', $value->fecha_inicio);
+        $value->fecha_final      = str_replace('-', '/', $value->fecha_final);
+        if ($value->departamento == "ADMINISTRACION") {
+          $value->sueldo_semanal1   = $value->sueldo_semanal;
+          $value->vacaciones1       = $value->vacaciones;
+          $value->prima_vacacional1 = $value->prima_vacacional;
+          $value->aguinaldo1        = $value->aguinaldo;
+          $value->horas_extras1     = $value->horas_extras;
+          $value->pasistencia1      = $value->pasistencia;
+          $value->indemnizaciones1  = $value->indemnizaciones;
+
+          $value->sueldo_semanal2   = 0;
+          $value->vacaciones2       = 0;
+          $value->prima_vacacional2 = 0;
+          $value->aguinaldo2        = 0;
+          $value->horas_extras2     = 0;
+          $value->pasistencia2      = 0;
+          $value->indemnizaciones2  = 0;
+        } else {
+          $value->sueldo_semanal1   = 0;
+          $value->vacaciones1       = 0;
+          $value->prima_vacacional1 = 0;
+          $value->aguinaldo1        = 0;
+          $value->horas_extras1     = 0;
+          $value->pasistencia1      = 0;
+          $value->indemnizaciones1  = 0;
+
+          $value->sueldo_semanal2   = $value->sueldo_semanal;
+          $value->vacaciones2       = $value->vacaciones;
+          $value->prima_vacacional2 = $value->prima_vacacional;
+          $value->aguinaldo2        = $value->aguinaldo;
+          $value->horas_extras2     = $value->horas_extras;
+          $value->pasistencia2      = $value->pasistencia;
+          $value->indemnizaciones2  = $value->indemnizaciones;
+        }
+        $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
+      }*/
+    }
+
+    if(count($nominas) > 0)
+    {
+      $response['facturas'] = $nominas;
+
+      $this->load->model('facturacion_model');
+
+      $sql2 = $sql3 = '';
+      if ($this->input->get('fid_empresa') != '') {
+        $sql2 .= " AND u.id_empresa = '".$_GET['fid_empresa']."'";
+        $sql3 .= " AND nfp.id_empresa = '".$_GET['fid_empresa']."'";
+      }
+
+      $id_poliza = '';
+      //Contenido de la Poliza
+      foreach ($nominas as $key => $value)
+      {
+        if ($id_poliza != ($value->id_empresa.$value->anio.$value->semana)) {
+          //Se obtienen los prestamos
+          $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
+                                 FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+                                 WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+                                 GROUP BY u.id")->result();
+          $prestamos = new Collection($prestamos);
+
+          //Se obtienen los fondos_ahorro
+          $fondos_ahorro = $this->db->query("SELECT u.id, u.fondo_ahorro_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.fondo_ahorro), 0) AS fondo_ahorro
+                                 FROM nomina_fiscal AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+                                 WHERE nfp.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql3}
+                                 GROUP BY u.id HAVING COALESCE(Sum(nfp.fondo_ahorro), 0) > 0")->result();
+          $fondos_ahorro = new Collection($fondos_ahorro);
+
+          //Agregamos el header de la poliza
+          $response['data'] .= $this->setEspacios('P',2).
+                              $this->setEspacios(str_replace('/', '', $value->fecha_final),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                              $this->setEspacios($folio,9,'r').  //folio poliza
+                              $this->setEspacios('1',1). //clase
+                              $this->setEspacios('0',10). //iddiario
+                              $this->setEspacios("Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}",100). //concepto
+                              $this->setEspacios('11',2). //sistema de origen
+                              $this->setEspacios('0',1). //impresa
+                              $this->setEspacios('0',1)."\r\n"; //ajuste
+
+          if (!empty($this->uuidsADD)) {
+            $response['data'] .= $this->uuidsADD;
+            $this->uuidsADD = '';
+          }
+
+          $id_poliza = $value->id_empresa.$value->anio.$value->semana;
+          $folio++;
+        }
+
+        //Colocamos el Cargo de la nomina
+        $iper = ($value->departamento == "ADMINISTRACION")? 1: 2;
+        if($value->sueldo_semanal > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNSueldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->sueldo_semanal) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("SUELDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->vacaciones > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNVacaciones(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->vacaciones) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("VACACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->prima_vacacional > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->prima_vacacional) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("PRIMA VACACIONAL Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->aguinaldo > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNAguinaldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->aguinaldo) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("AGUINALDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->horas_extras > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNHorasHex(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->horas_extras) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("HRS EXTRAS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->pasistencia > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getPAsistenciaContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->pasistencia) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->indemnizaciones > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                          $this->setEspacios( $this->numero($value->indemnizaciones) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("INDEMNIZACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+
+        //Colocamos los abonos de la nomina
+        if($value->total_neto > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNominaPagar(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->total_neto) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("NOMINAS POR PAGAR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if(abs($value->subsidio) > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNSubsidio(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->subsidio*-1) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("SUBSIDIO AL EMPLEO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->imss > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNImss(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->imss) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("IMSS RETENIDO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->vejez > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNVejez(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->vejez) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("RETIRO CENSATIA Y VEJEZ Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->infonavit > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNInfonavit(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->infonavit) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("CREDITO INFONAVIT Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if($value->isr > 0){
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNIsr(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->isr) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("ISR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        foreach ($prestamos->where('id', '=', $value->id_empleado) as $keyp => $prestamo)
+        {
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($prestamo->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($prestamo->prestamo) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("PRESM {$prestamo->nombre} Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+
+        foreach ($fondos_ahorro->where('id', '=', $value->id_empleado) as $keyp => $fondo_ahorro)
+        {
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($fondo_ahorro->fondo_ahorro_cpi,30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($fondo_ahorro->fondo_ahorro) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("FA {$fondo_ahorro->nombre} Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+
+      }
+
+      if (!empty($this->uuidsADD)) {
+        $response['data'] .= $this->uuidsADD;
+        $this->uuidsADD = '';
+      }
+    }
+
+    $response['folio'] = $folio-1;
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
+    return $response;
+  }
+
+  /**
    * GENERA UNA POLIZA DE DIARIOS PARA LOS PRODUCTOS
    * @return [type] [description]
    */
@@ -1688,8 +2183,8 @@ class polizas_model extends CI_Model {
         $sql .= " AND b.id_area = " . $_GET['ftipo22'];
     }
 
-    $cuenta_cpi1 = '13000049';
-    $cuenta_cpi2 = '43000010';
+    $cuenta_cpi1 = $this->getCuentaDiarioProductos((!empty($_GET['ftipo22'])? $_GET['ftipo22']: 2)); //'13000049';
+    $cuenta_cpi2 = $this->getCuentaDiarioProductosCosto((!empty($_GET['ftipo22'])? $_GET['ftipo22']: 2)); //'43000010';
 
     if ($this->input->get('fid_empresa') != '')
       $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
@@ -1798,7 +2293,7 @@ class polizas_model extends CI_Model {
   public function polizaIngreso()
   {
     $response = array('data' => '', 'abonos' => array(), 'folio' => '');
-    $sql = $sql2 = '';
+    $sqlnc = $sql = $sql2 = '';
 
     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
       $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
@@ -1808,12 +2303,14 @@ class polizas_model extends CI_Model {
       $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
       $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
       $sql2 .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sqlnc .= " AND Date(fecha) <= '".$_GET['ffecha2']."' ";
     }
 
     if ($this->input->get('fid_empresa') != '')
     {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
       $sql2 .= " AND bc.id_empresa = '".$_GET['fid_empresa']."'";
+      $sqlnc .= " AND id_empresa = '{$_GET['fid_empresa']}'";
     }
     $cuenta_cuadre = '';
     $query = $this->db->query(
@@ -1822,21 +2319,30 @@ class polizas_model extends CI_Model {
         (
           SELECT
             bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/(f.total - nc.abononc))*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
-            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso
+            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
             INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+            LEFT JOIN (
+              SELECT
+                id_nc AS id_factura, Sum(total) AS abononc
+              FROM facturacion
+              WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+                {$sqlnc}
+              GROUP BY id_nc
+            ) nc ON nc.id_factura = f.id_factura
+            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bmf.id_movimiento
           WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
              {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
-             AND f.id_abono_factura IS NULL
+             AND f.id_abono_factura IS NULL AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
           GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), bmcp.uuid
           ORDER BY bmf.id_movimiento ASC
         )
         UNION
@@ -1848,15 +2354,17 @@ class polizas_model extends CI_Model {
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
             0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
             'banco'::character varying AS tipoo,
-            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso
+            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso, bmcp.uuid
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
             LEFT JOIN banco_movimientos_facturas AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
+            LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bm.id_movimiento
           WHERE bm.status = 't' AND bm.tipo = 't' AND bm.clasificacion <> 'elimon' {$sql2}
+            AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre, bmcp.uuid
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )
@@ -1890,7 +2398,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
                               $this->setEspacios('0',10). //iddiario
-                              $this->setEspacios($value->concepto, 100). //concepto  'Ingresos, '.String::fechaATexto($value->fecha)
+                              $this->setEspacios($value->concepto, 100). //concepto  'Ingresos, '.MyString::fechaATexto($value->fecha)
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1947,6 +2455,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
           //Colocamos el Abono al Cliente que realizo el pago
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
@@ -1957,8 +2466,9 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
           //Si hay abonos de mas se agregan a los mov
-          if (isset($query_mayor->cuenta_cpi) && ((floor($query_mayor->total * 100) / 100) > 0))
+          if (isset($query_mayor->cuenta_cpi) && ((floor($query_mayor->total * 100) / 100) > 0)) {
             $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($query_mayor->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
@@ -1968,8 +2478,10 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($query_mayor->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
+          }
           //Si hay abonos de mas se agregan a los mov
-          if (isset($query_saldar->cuenta_cpi) && ((floor($query_saldar->total * 100) / 100) > 0))
+          if (isset($query_saldar->cuenta_cpi) && ((floor($query_saldar->total * 100) / 100) > 0)) {
             $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($query_saldar->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
@@ -1979,6 +2491,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($query_saldar->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
+          }
 
 
           //Colocamos los impuestos de la factura
@@ -1995,6 +2509,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($value->concepto,100).
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           }
         }else //Son los depositos directos de banco
@@ -2020,6 +2535,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
           //Colocamos el Abono al Cliente que realizo el pago
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
@@ -2030,7 +2546,14 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
         }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
+
         $folio++;
       }
       $response['folio'] = $folio-1;
@@ -2192,7 +2715,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio
+            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2202,7 +2725,7 @@ class polizas_model extends CI_Model {
             LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = bmb.id_movimiento
           WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago = 'cheque'
              {$sql}
-          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref
+          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bm.uuid
           ORDER BY fa.id_pago ASC
         )
         UNION
@@ -2212,7 +2735,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, 0 AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio
+            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2222,7 +2745,7 @@ class polizas_model extends CI_Model {
             LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = bmb.id_movimiento
           WHERE fa.status = 'f' AND fa.poliza_egreso = 'f' AND fa.tipo_pago = 'cheque'
              {$sql}
-          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref
+          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref, bm.uuid
           ORDER BY fa.id_pago ASC
         )
         UNION
@@ -2233,16 +2756,16 @@ class polizas_model extends CI_Model {
             COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
           WHERE bm.status = 'f' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon'
             {$sql2} AND LOWER(bm.metodo_pago) = 'cheque'
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, bc.alias, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso
+            bm.monto, bc.alias, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, bm.uuid
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )";
@@ -2265,7 +2788,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -2275,7 +2798,7 @@ class polizas_model extends CI_Model {
           WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bm.uuid
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -2286,15 +2809,15 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+            LEFT JOIN cuentas_contpaq AS cc ON (cc.cuenta = bm.cuenta_cpi AND cc.id_empresa = bc.id_empresa)
           WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre, bm.uuid
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )
@@ -2426,6 +2949,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto  $value->concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2436,6 +2961,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
 
           //Colocamos los impuestos de la factura
           foreach ($impuestos as $key => $impuesto)
@@ -2451,6 +2977,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           }
         }else if($value->tipoo == 'banco'){ //Contenido de la Poliza de los movimientos directos de banco
@@ -2497,6 +3024,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
 
             if($value->banco_cuenta_contpaq != '') {
               //Colocamos el Cargo a la cuenta Compaq que realizo el pago
@@ -2509,6 +3037,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                                 $this->setEspacios($value->nombre_fiscal,100). //concepto
                                 $this->setEspacios('',4)."\r\n"; //segmento de negocio
+              $response['data'] .= $this->addLineUUID($value->uuid);
 
               //Colocamos el Abono al Proveedor que realizo el pago
               $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -2520,6 +3049,7 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                                 $this->setEspacios($value->nombre_fiscal,100). //concepto
                                 $this->setEspacios('',4)."\r\n"; //segmento de negocio
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           } elseif($value->cuenta_cpi_proveedor == $cuenta_cuadre && $value->banco_cuenta_contpaq != '' && $value->es_traspaso == 0) {
             // Pago de comisiones y Nomina, prestamos (cargo y abono)
@@ -2533,6 +3063,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
           } elseif($value->es_traspaso > 0) {
             // Traspaso de dinero
             //Colocamos el Cargo a la cuenta que se selecciono
@@ -2545,91 +3076,8 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
           }
-
-
-
-          // $es_proveedor = false;
-          // $lock1 = false;
-          // if($value->cuenta_cpi_proveedor != $value->banco_cuenta_contpaq)
-          // {
-          //   $es_proveedor = true;
-          //   $lock1 = true;
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-
-          //   // Si se seleccionan las 2 cuentas y no es de cuadre, asigna cuentas
-          //   if($value->cuenta_cpi_proveedor != $cuenta_cuadre && $value->banco_cuenta_contpaq != '')
-          //   {
-          //     //Colocamos el Cargo a la cuenta Compaq que realizo el pago
-          //     $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                       $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq
-          //                       $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                       $this->setEspacios('0',1).  //tipo movimiento, Cuenta del mov es un cargo
-          //                       $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)), 20).  //importe movimiento
-          //                       $this->setEspacios('0',10).  //iddiario poner 0
-          //                       $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                       $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                       $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //     //Colocamos el Abono al Proveedor que realizo el pago
-          //     $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-          //                       $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-          //                       $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                       $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
-          //                       $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)) , 20).  //importe movimiento
-          //                       $this->setEspacios('0',10).  //iddiario poner 0
-          //                       $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                       $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                       $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //   }
-          // }elseif ($value->banco_cuenta_contpaq != '' && $value->desglosar_iva == 't')
-          // {
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          //   $lock1 = false;
-          // }
-
-          // if ($value->banco_cuenta_contpaq != '' && $value->desglosar_iva == 't' && $es_proveedor)
-          // {
-          //   // // Cuadra el Iva si es un proveedor y seleccionaron la cuenta de conpaq directo
-          //   // $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //   //                   $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //   //                   $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //   //                   $this->setEspacios('1',1).  //tipo movimiento, Cuadra el IVa es un abono = 1
-          //   //                   $this->setEspacios( $this->numero($impuestos2['iva_activo']['importe']), 20).  //importe movimiento
-          //   //                   $this->setEspacios('0',10).  //iddiario poner 0
-          //   //                   $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //   //                   $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //   //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          // }elseif($value->banco_cuenta_contpaq != '' && $value->banco_cuenta_contpaq == $value->cuenta_cpi_proveedor && $lock1)
-          // {
-          //   //Colocamos el Cargo al Proveedor que realizo el pago
-          //   $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
-          //                     $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
-          //                     $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-          //                     $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-          //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-          //                     $this->setEspacios('0',10).  //iddiario poner 0
-          //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-          //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-          //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          // }
 
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -2641,6 +3089,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos los impuestos de la factura
           foreach ($impuestos2 as $key => $impuesto)
           {
@@ -2655,6 +3105,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
                             $this->setEspacios('',4)."\r\n";
+              $response['data'] .= $this->addLineUUID($value->uuid);
             }
           }
         }elseif($value->tipoo == 'banco-chc') {
@@ -2668,6 +3119,8 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2678,6 +3131,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
         }else  // Poliza de limon de cheques
         {
           //Agregamos el header de la poliza
@@ -2690,6 +3144,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
+          $response['data'] .= $this->addLineUUID($value->uuid);
 
           $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
 
@@ -2703,6 +3158,8 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2713,62 +3170,25 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          $response['data'] .= $this->addLineUUID($value->uuid);
         }
 
         if($aux_idmovimiento != $value->id_movimiento)
         {
+          if (!empty($this->uuidsADD)) {
+            $response['data'] .= $this->uuidsADD;
+            $this->uuidsADD = '';
+          }
+
           $aux_idmovimiento = $value->id_movimiento;
           $folio++;
         }
       }
 
-      // exit;
-
-      // //Contenido de la Poliza de los movimientos directos de banco
-      // foreach ($response['banco_mov'] as $key => $value)
-      // {
-      //   //Es traspaso entre cuentas bancarias, se cambian los numeros
-      //   if($value->es_traspaso > 0)
-      //   {
-      //     $info_mov                    = $this->banco_cuentas_model->getMovimientoInfo($value->es_traspaso, true)['info'];
-      //     $info_cuenta                 = $this->banco_cuentas_model->getCuentaInfo($info_mov->id_cuenta)['info'];
-      //     $value->cuenta_cpi_proveedor = $info_cuenta->cuenta_cpi;
-      //     $value->nombre_fiscal        = $info_cuenta->alias;
-      //   }
-
-      //   //Agregamos el header de la poliza
-      //   $response['data'] .= $this->setEspacios('P',2).
-      //                       $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('2',4,'r').  //tipo poliza = 2 poliza egreso
-      //                       $this->setEspacios($folio,9,'r').  //folio poliza
-      //                       $this->setEspacios('1',1). //clase
-      //                       $this->setEspacios('0',10). //iddiario
-      //                       $this->setEspacios('Egresos de gastos, '.String::fechaATexto($value->fecha),100). //concepto
-      //                       $this->setEspacios('11',2). //sistema de origen
-      //                       $this->setEspacios('0',1). //impresa
-      //                       $this->setEspacios('0',1)."\r\n"; //ajuste
-
-      //   //Colocamos el Cargo al Banco que se deposito el dinero
-      //   $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-      //                     $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
-      //                     $this->setEspacios($value->numero_ref,10).  //referencia movimiento
-      //                     $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
-      //                     $this->setEspacios( $this->numero($value->total) , 20).  //importe movimiento
-      //                     $this->setEspacios('0',10).  //iddiario poner 0
-      //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-      //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-      //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      //   //Colocamos el Abono al Proveedor que realizo el pago
-      //   $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-      //                     $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-      //                     $this->setEspacios($value->numero_ref,10).  //referencia movimiento
-      //                     $this->setEspacios('1',1).  //tipo movimiento, Proveedor es un abono = 1
-      //                     $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
-      //                     $this->setEspacios('0',10).  //iddiario poner 0
-      //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-      //                     $this->setEspacios($value->nombre_fiscal,100). //concepto
-      //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      //   $folio++;
-      // }
+      if (!empty($this->uuidsADD)) {
+        $response['data'] .= $this->uuidsADD;
+        $this->uuidsADD = '';
+      }
 
       $response['folio'] = $folio-1;
     }
@@ -2806,7 +3226,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiario '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiario '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2826,7 +3246,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2858,7 +3278,7 @@ class polizas_model extends CI_Model {
             }
 
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2878,14 +3298,14 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiarioncg '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarioncg '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
         }
       }elseif($this->input->get('ftipo2') == 'no') //nomina diario
       {
-        $response = $this->polizaDiarioNomina();
+        $response = $this->polizaDiarioNominaDesglosado();
 
         //actualizamos el estado de la factura y bascula y descarga el archivo
         if (isset($_POST['poliza']{0}))
@@ -2910,7 +3330,7 @@ class polizas_model extends CI_Model {
           //   }
 
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
@@ -2924,7 +3344,7 @@ class polizas_model extends CI_Model {
         //actualizamos el estado de la factura y bascula y descarga el archivo
         if (isset($_POST['poliza']{0}))
         {
-            $_GET['poliza_nombre'] = 'polizadiariopr '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiariopr '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
@@ -2946,7 +3366,7 @@ class polizas_model extends CI_Model {
           // $this->db->where_in('id_abono', $idsa);
           // $this->db->update('facturacion_abonos', array('poliza_ingreso' => 't'));
 
-          $_GET['poliza_nombre'] = 'polizaingreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+          $_GET['poliza_nombre'] = 'polizaingreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
           file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
           $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
         }
@@ -2968,7 +3388,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_pago', $idsa);
             // $this->db->update('bascula_pagos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data']); //se registra la poliza en la BD
           }
@@ -2987,7 +3407,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_abono', $idsa);
             // $this->db->update('compras_abonos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data']); //se registra la poliza en la BD
           }
@@ -3006,7 +3426,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_abono', $idsa);
             // $this->db->update('compras_abonos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }

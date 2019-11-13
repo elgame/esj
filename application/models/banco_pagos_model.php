@@ -33,7 +33,7 @@ class banco_pagos_model extends CI_Model {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.serie, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
                                   COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion, bpc.modificado_banco,
-                                  bpc.tcambio
+                                  bpc.tcambio, b.codigo_bajio, pc.alias, b.id_banco
                                FROM banco_pagos_compras AS bpc
                                  INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
                                  LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
@@ -136,6 +136,10 @@ class banco_pagos_model extends CI_Model {
       }
     }
 
+    $cuentaa = explode('-', $cuenta_retiro->cuenta);
+    if (count($cuentaa) == 3)
+      $cuenta_retiro->cuenta = $cuentaa[1];
+
     $data = array(
       //Reg de Control
       'id_cuenta'      => $cuenta_retiro->id_cuenta,
@@ -156,6 +160,19 @@ class banco_pagos_model extends CI_Model {
       );
 
     $this->banco_layout_model->get($data);
+  }
+
+  public function layoutBajio()
+  {
+    $this->load->model('banco_cuentas_model');
+    $this->load->model('banco_layout_bajio_model');
+    $tipo = $_GET['tipo'];
+    $pagos = $this->getPagos(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'con_cuenta' => 'true' ));
+    $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
+
+    $this->banco_layout_bajio_model->get($pagos, $cuenta_retiro);
   }
 
   public function aplicarPagos()
@@ -353,6 +370,10 @@ class banco_pagos_model extends CI_Model {
       }
     }
 
+    $cuentaa = explode('-', $cuenta_retiro->cuenta);
+    if (count($cuentaa) == 3)
+      $cuenta_retiro->cuenta = $cuentaa[1];
+
     $data = array(
       //Reg de Control
       'id_cuenta' => $cuenta_retiro->id_cuenta,
@@ -416,7 +437,7 @@ class banco_pagos_model extends CI_Model {
           'monto' => $value->monto,
           );
         $datos_factura['boletas'][] = $value->id_bascula;
-        $datos['descrip'] .= '|'.$value->folio.' => '.String::formatoNumero($value->monto, 2, '', false);
+        $datos['descrip'] .= '|'.$value->folio.' => '.MyString::formatoNumero($value->monto, 2, '', false);
         $this->db->update('banco_pagos_bascula', array('status' => 't'), array('id_bascula' => $value->id_bascula));
       }
       $_GET['did_empresa'] = $_GET['did_empresa'];

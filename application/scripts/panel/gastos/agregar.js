@@ -79,11 +79,34 @@
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
+
+          $('#proveedor').val('');
+          $('#proveedorId').val('');
+
+          $('#supermodalBtn').attr('href', $('#supermodalBtn').attr('data-href')+'?ide='+ui.item.id+'&idp='+$('#proveedorId').val());
+
+          $('#groupCatalogos').show();
+          $('#area').val('');
+          $('#areaId').val('');
+          $('#rancho').val('');
+          $('#ranchoId').val('');
+          $('#activos').val('');
+          $('#activoId').val('');
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
           $(this).css("background-color", "#FFD9B3");
           $("#empresaId").val("");
+          $('#proveedor').val('');
+          $('#proveedorId').val('');
+
+          $('#area').val('');
+          $('#areaId').val('');
+          $('#rancho').val('');
+          $('#ranchoId').val('');
+          $('#activos').val('');
+          $('#activoId').val('');
+          $('#groupCatalogos').hide();
         }
     });
 
@@ -121,6 +144,8 @@
 
           $('#fcuentas_proveedor').html(htmlOptions);
         }, 'json');
+
+        $('#supermodalBtn').attr('href', $('#supermodalBtn').attr('data-href')+'?ide='+$('#empresaId').val()+'&idp='+ui.item.id);
 
       }
     }).on("keydown", function(event) {
@@ -170,19 +195,19 @@
         $("#group_gasolina").hide();
     });
 
-    $('#condicionPago').on('change', function(event) {
-      var $this = $(this);
-      if ($this.val() == 'cr')
-      {
-        $("#grup_plazo_credito").show();
-        $("#group_pago_contado").hide();
-      }
-      else
-      {
-        $("#grup_plazo_credito").hide();
-        $("#group_pago_contado").show();
-      }
-    });
+    // $('#condicionPago').on('change', function(event) {
+    //   var $this = $(this);
+    //   if ($this.val() == 'cr')
+    //   {
+    //     $("#grup_plazo_credito").show();
+    //     $("#group_pago_contado").hide();
+    //   }
+    //   else
+    //   {
+    //     $("#grup_plazo_credito").hide();
+    //     $("#group_pago_contado").show();
+    //   }
+    // });
 
 
     /**
@@ -190,6 +215,11 @@
      */
     $("#btnCargarOrdenesGasto").on('click', cargarOrdenesGasto);
     $("#ordenesSeleccionadas").on('click', '.ordenremove', quitarOrdenGasto);
+
+    autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+    autocompleteActivos();
 
   });
 
@@ -205,6 +235,185 @@
                                parseFloat($ret_iva.val()||0) -
                                parseFloat($ret_isr.val()||0))
     );
+  };
+
+
+
+  var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        $area.val(ui.item.id);
+        $("#areaId").val(ui.item.id);
+        $area.css("background-color", "#A1F57A");
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#area").css("background-color", "#FFD071");
+        $("#areaId").val('');
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    });
+  };
+
+  var autocompleteRanchos = function () {
+    $("#rancho").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#areaId").val()) > 0)
+          params.area = $("#areaId").val();
+        $.ajax({
+            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $rancho =  $(this);
+
+        addRanchoTag(ui.item);
+        setTimeout(function () {
+          $rancho.val('');
+        }, 200);
+        // $rancho.val(ui.item.id);
+        // $("#ranchoId").val(ui.item.id);
+        // $rancho.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#rancho").css("background-color", "#FFD071");
+        // $("#ranchoId").val('');
+      }
+    });
+
+    function addRanchoTag(item) {
+      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
+
+  var autocompleteCentroCosto = function () {
+    $("#centroCosto").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+
+        params.tipo = ['gasto', 'gastofinanciero', 'servicio'];
+
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $centroCosto =  $(this);
+
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#centroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#centroCosto").css("background-color", "#FFD071");
+        // $("#centroCostoId").val('');
+      }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
+
+  var autocompleteActivos = function () {
+    $("#activos").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        // if(parseInt($("#empresaId").val()) > 0)
+        //   params.did_empresa = $("#empresaId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $activos =  $(this);
+
+        $activos.val(ui.item.id);
+        $("#activoId").val(ui.item.id);
+        $activos.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#activos").css("background-color", "#FFD071");
+        $("#activoId").val('');
+      }
+    });
   };
 
 

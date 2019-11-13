@@ -64,7 +64,7 @@ class bitacora_model extends bitacora_msg_model {
 			$datos['id_empresa'] = $params[':id_empresa'];
 
 		$this->db->insert('bitacora', $datos);
-		$id_bitacora = $this->db->insert_id();
+		$id_bitacora = $this->db->insert_id('bitacora_id_seq');
     return $id_bitacora;
 	}
 
@@ -119,8 +119,14 @@ class bitacora_model extends bitacora_msg_model {
 
     // Se actualiza la modificacion base con los nuevos cambios
     if (count($response) > 0) {
-    	$info = $this->db->query("SELECT json_cambios FROM bitacora WHERE id = {$id_bitacora}")->row();
-    	$info->json_cambios = json_decode($info->json_cambios);
+    	$info = $this->db->query("SELECT json_cambios FROM bitacora WHERE id = {$id_bitacora}");
+      if ($info) {
+        $info = $info->row();
+        $info->json_cambios = json_decode($info->json_cambios);
+      } else {
+        $info = new stdClass;
+        $info->json_cambios = [];
+      }
 
     	$info->json_cambios[] = array('titulo' => $params[':titulo'], 'cambios' => $response);
 

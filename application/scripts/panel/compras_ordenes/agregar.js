@@ -11,6 +11,10 @@
     // autocompleteCodigo();
     autocompleteConcepto();
     autocompleteClientes();
+    autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+    autocompleteActivos();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -29,6 +33,7 @@
 
     eventLigarFacturas();
     eventLigarBoletas();
+    eventLigarBoletasEntrada();
 
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
@@ -86,8 +91,9 @@
    */
 
    // Obtiene el siguiente folio segun el tipo de orden.
-  var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
   var eventOnChangeTipoOrden = function () {
+    var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
+
     $('#tipoOrden').on('change', function(event) {
       var $this      = $(this),
           $folio     = $('#folio'),
@@ -95,7 +101,7 @@
 
       if ($tableProd.find('tbody tr').length > 0) {
         noty({"text": 'Ya tiene productos para un tipo de orden, si desea cambiar de tipo de orden elimine los productos del listado', "layout":"topRight", "type": 'error'});
-
+        console.log('test', tipoOrderActual);
         $this.val(tipoOrderActual);
       } else {
         $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
@@ -133,11 +139,29 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+        $('#proveedor').val('');
+        $('#proveedorId').val('');
+        $('#groupCatalogos').show();
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+        $('#proveedor').val('');
+        $('#proveedorId').val('');
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
+        $('#groupCatalogos').show();
       }
     });
   };
@@ -213,6 +237,215 @@
       }
     });
   };
+
+  var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        // $area.val(ui.item.id);
+        // $("#areaId").val(ui.item.id);
+        // $area.css("background-color", "#A1F57A");
+        addAreaTag(ui.item);
+        setTimeout(function () {
+          $area.val('');
+        }, 200);
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        // $("#area").css("background-color", "#FFD071");
+        // $("#areaId").val('');
+        // $("#rancho").val('').css("background-color", "#FFD071");
+        // $('#tagsRanchoIds').html('');
+        // // $("#ranchoId").val('');
+      }
+    });
+
+    function addAreaTag(item) {
+      $('#tagsAreaIds').html('');
+      if ($('#tagsAreaIds .areaId[value="'+item.id+'"]').length === 0) {
+        $('#tagsAreaIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="areaId[]" class="areaId" value="'+item.id+'">'+
+          '<input type="hidden" name="areaText[]" class="areaText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsAreaIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+      $("#area").css("background-color", "#FFD071");
+      $("#areaId").val('');
+      $("#rancho").val('').css("background-color", "#FFD071");
+      $('#tagsRanchoIds').html('');
+    });
+  };
+
+  var autocompleteRanchos = function () {
+    $("#rancho").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+
+        if(parseInt($('#tagsAreaIds .areaId').first().val()) > 0)
+          params.area = $('#tagsAreaIds .areaId').first().val();
+        $.ajax({
+            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $rancho =  $(this);
+
+        addRanchoTag(ui.item);
+        setTimeout(function () {
+          $rancho.val('');
+        }, 200);
+        // $rancho.val(ui.item.id);
+        // $("#ranchoId").val(ui.item.id);
+        // $rancho.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#rancho").css("background-color", "#FFD071");
+        // $("#ranchoId").val('');
+      }
+    });
+
+    function addRanchoTag(item) {
+      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
+
+  var autocompleteCentroCosto = function () {
+    $("#centroCosto").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+
+        params.tipo = ['gasto'];
+        if ($('#tipoOrden').find('option:selected').val() == 'd') {
+          params.tipo = ['servicio'];
+        } else if ($('#tipoOrden').find('option:selected').val() == 'p') {
+          params.tipo = ['gasto', 'melga', 'tabla', 'seccion'];
+        }
+
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $centroCosto =  $(this);
+
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#centroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#centroCosto").css("background-color", "#FFD071");
+        // $("#centroCostoId").val('');
+      }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
+
+  var autocompleteActivos = function () {
+    $("#activos").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        // if(parseInt($("#empresaId").val()) > 0)
+        //   params.did_empresa = $("#empresaId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $activos =  $(this);
+
+        $activos.val(ui.item.id);
+        $("#activoId").val(ui.item.id);
+        $activos.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#activos").css("background-color", "#FFD071");
+        $("#activoId").val('');
+      }
+    });
+  };
+
+
   // Autocomplete para el codigo.
   var autocompleteCodigo = function () {
     $("#fcodigo").autocomplete({
@@ -331,10 +564,12 @@
         $fieps.val(ui.item.item.ieps);
 
         if (ui.item.item.inventario) {
-          var entradas = parseFloat(ui.item.item.inventario.entradas),
-          salidas = parseFloat(ui.item.item.inventario.salidas),
-          saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior);
-          $("#show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(saldo_anterior+entradas-salidas, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
+          // var entradas = parseFloat(ui.item.item.inventario.entradas),
+          // salidas = parseFloat(ui.item.item.inventario.salidas),
+          // saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior),
+          // existencias = saldo_anterior+entradas-salidas;
+          existencias = ui.item.item.inventario;
+          $("#show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(existencias, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
         }
 
         var presentaciones = ui.item.item.presentaciones,
@@ -503,6 +738,7 @@
 
       getBoletas();
       $("#modal-boletas").modal('show');
+      $("#modal-boletas #BtnAddBoleta").removeClass('entrada');
     });
 
     // $(".filTipoFacturas").on('change', function(event) {
@@ -511,26 +747,56 @@
     $("#filBoleta").on('change', function(event) {
       getBoletas();
     });
+    setBoletasSel();
+    $("#boletasLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var setBoletasSel = function () {
     $("#BtnAddBoleta").on('click', function(event) {
       var selected = $(".radioBoleta:checked"), facts = '', folios = '';
+
       selected.each(function(index, el) {
         var $this = $(this);
         facts += $this.val()+'|';
         folios += $this.attr("data-folio")+' | ';
       });
 
-      $("#boletasLigada").html(folios+' <input type="hidden" name="boletas" value="'+facts+'"><input type="hidden" name="boletas_folio" value="'+folios+'">');
+      if ($("#BtnAddBoleta").is('.entrada')) {
+        $("#boletasEntrada").html(folios+' <input type="hidden" name="boletasEntradaId" value="'+facts+'"><input type="hidden" name="boletasEntradaFolio" value="'+folios+'">');
+      } else {
+        $("#boletasLigada").html(folios+' <input type="hidden" name="boletas" value="'+facts+'"><input type="hidden" name="boletas_folio" value="'+folios+'">');
+      }
+
       $("#modal-boletas").modal('hide');
     });
-    $("#boletasLigada").on('click', function(event) {
+  };
+
+  // Datos extras
+  var eventLigarBoletasEntrada = function () {
+    $("#show-boletasEntrada").on('click', function(event) {
+      // $(".filTipoFacturas").removeAttr('checked');
+      // $(".filTipoFacturas:first").attr('checked', 'checked');
+      $("#filBoleta").val("");
+
+      getBoletas(['en', 'sa', 'p', 'b']);
+      $("#modal-boletas").modal('show');
+      $("#modal-boletas #BtnAddBoleta").addClass('entrada');
+    });
+
+    $("#filBoleta").on('change', function(event) {
+      getBoletas(['en', 'sa', 'p', 'b']);
+    });
+    $("#boletasEntrada").on('click', function(event) {
       $(this).html("");
     });
   };
 
-  var getBoletas = function(tipo){
+  var getBoletas = function(accion){
     var params = {
       // clienteId: $("#clienteId").val(),
-      // tipo: (tipo? tipo: 'f'),
+      accion: (accion? accion: ['en', 'p', 'b']),
       filtro: $("#filBoleta").val()
     };
     $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
@@ -541,6 +807,7 @@
         '  <td>'+json[i].fecha+'</td>'+
         '  <td>'+json[i].folio+'</td>'+
         '  <td>'+json[i].proveedor+'</td>'+
+        '  <td>'+json[i].area+'</td>'+
         '</tr>';
       }
       $("#table-boletas tbody").html(html);
@@ -857,7 +1124,7 @@
                   '<td style="width: 66px;">' +
                       '<select name="traslado[]" id="traslado" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                         '<option value="0" '+(producto.traslado === '0' ? "selected" : "")+'>0%</option>' +
-                        '<option value="11" '+(producto.traslado === '11' ? "selected" : "")+'>11%</option>' +
+                        '<option value="8" '+(producto.traslado === '8' ? "selected" : "")+'>8%</option>' +
                         '<option value="16" '+(producto.traslado === '16' ? "selected" : "")+'>16%</option>' +
                       '</select>' +
                       '<input type="hidden" name="trasladoTotal[]" value="" id="trasladoTotal" class="span12">' +

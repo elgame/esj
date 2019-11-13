@@ -28,13 +28,19 @@ class Usuario_historial_model extends CI_Model {
 
   public function buildEvent($evento)
   {
-    return array(
+    $datos = array(
       'id_usuario' => $this->usuarioId,
       'id_usuario_logueado' => $this->idUsuarioLogueado(),
       'evento' => $evento['evento'],
       'antes' => $evento['valor_anterior'],
       'despues' => $evento['valor_nuevo'],
     );
+
+    if (isset($evento['fecha'])) {
+      $datos['fecha'] = $evento['fecha'];
+    }
+
+    return $datos;
   }
 
   private function obtenerValoresDb($campos)
@@ -230,8 +236,8 @@ class Usuario_historial_model extends CI_Model {
         $log->fecha,
         $log->nombre,
         $log->cantidad,
-        String::formatoNumero($log->precio_unitario, 2, '', false),
-        String::formatoNumero($log->cantidad*$log->precio_unitario, 2, '', false),
+        MyString::formatoNumero($log->precio_unitario, 2, '', false),
+        MyString::formatoNumero($log->cantidad*$log->precio_unitario, 2, '', false),
       ), false, false);
     }
 

@@ -92,14 +92,14 @@
                   </div>
                 </div>
 
-                <div class="control-group" style="display: none;">
+                <div class="control-group" style="">
                   <label class="control-label" for="condicionPago">Condición de Pago</label>
                   <div class="controls">
-                    <input type="text" name="condicionPago" class="span9" id="condicionPago" value="<?php echo set_value('condicionPago', '0'); ?>">
-                    <!-- <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
+                    <!-- <input type="text" name="condicionPago" class="span9" id="condicionPago" value="<?php echo set_value('condicionPago', '0'); ?>"> -->
+                    <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
                       <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                       <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
-                    </select> -->
+                    </select>
                   </div>
                 </div>
 
@@ -111,11 +111,23 @@
                 </div>
 
                 <div class="control-group">
+                  <div class="controls span8">
+                    <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?ide='.set_value('empresaId', $empresa_default->id_empresa).'&idp='.set_value('proveedorId').'') ?>"
+                      data-href="<?php echo base_url('panel/gastos/verXml/') ?>"
+                      rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                      <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                    <span style="float: right;">
+                      UUID: <input type="text" name="uuid" value="" id="buscarUuid"><br>
+                      No Certificado: <input type="text" name="noCertificado" value="" id="buscarNoCertificado">
+                    </span>
+                  </div>
+                </div>
+                <!-- <div class="control-group">
                   <label class="control-label" for="xml">XML</label>
                   <div class="controls">
                     <input type="file" name="xml" class="span9" id="xml" data-uniform="false" accept="text/xml">
                   </div>
-                </div>
+                </div> -->
 
                 <div class="control-group">
                   <label class="control-label" for="concepto">Concepto</label>
@@ -168,7 +180,7 @@
                   <?php
                   foreach ($cuentas['cuentas'] as $key => $value) {
                   ?>
-                      <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                      <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                   <?php
                   }
                   ?>
@@ -212,6 +224,91 @@
               </div>
             </div>
           </div>
+
+          <div class="row-fluid" id="groupCatalogos">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsRanchoIds">
+                      <?php if (isset($_POST['ranchoId'])) {
+                        foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
+                            <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
+                            <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group">
+                      <label class="control-label" for="intangible">Gasto intangible</label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="checkbox" name="intangible" id="intangible" data-uniform="false" value="si" data-next="subtotal" <?php echo set_checkbox('intangible', 'si'); ?>></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+                        </div>
+                      </div>
+                      <ul class="tags" id="tagsCCIds">
+                      <?php if (isset($_POST['centroCostoId'])) {
+                        foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
+                          <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
+                            <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
+                            <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+                          </li>
+                       <?php }} ?>
+                      </ul>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
 
           <div class="row-fluid">
             <div class="span4">

@@ -289,17 +289,20 @@ class inventario extends MY_Controller {
   }
   public function ueps_pdf(){
     $this->load->model('inventario_model');
-    $this->inventario_model->getUEPSPdf();
+    $this->inventario_model->getEPCPdf();
+    // $this->inventario_model->getUEPSPdf();
   }
   public function ueps_xls(){
     $this->load->model('inventario_model');
-    $this->inventario_model->getUEPSXls();
+    $this->inventario_model->getEPCXls();
+    // $this->inventario_model->getUEPSXls();
   }
   public function pueps_pdf(){
     if (isset($_GET['id_producto']{0}))
     {
       $this->load->model('inventario_model');
-      $this->inventario_model->getPUEPSPdf();
+      $this->inventario_model->getPromediodf();
+      // $this->inventario_model->getPUEPSPdf();
     }
   }
 
@@ -403,7 +406,7 @@ class inventario extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 

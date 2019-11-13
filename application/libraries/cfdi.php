@@ -8,7 +8,7 @@ class cfdi{
 
 	public $version = '3.3';
 
-  private $rfc            = 'NEDR620710H76';
+  public $rfc            = 'NEDR620710H76';
   private $razon_social   = 'ROBERTO NEVAREZ DOMINGUEZ';
   private $regimen_fiscal = 'Actividad empresarial, régimen general de ley'; //'Actividad empresarial y profesional, Régimen de honorarios';
   private $calle          = 'Pista Aérea';
@@ -22,8 +22,8 @@ class cfdi{
   private $cp             = '60800';
 
   private $isNomina = false;
-  private $anio     = '2013'; // variable util para las nominas.
-  private $semana   = '1'; // variable util para las nominas.
+  public $anio     = '2013'; // variable util para las nominas.
+  public $semana   = '1'; // variable util para las nominas.
 
 	public $default_id_empresa = 3; //informacion fiscal guardada en la bd
 
@@ -48,8 +48,12 @@ class cfdi{
 	public function obtenNoCertificado($path_certificado_org = null)
   {
     $path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
-    $datos_cer            = file_get_contents($path_certificado_org);
-    $num_certificado      = substr($datos_cer, 15, 20);
+
+    $num_certificado = '';
+    if (file_exists($path_certificado_org)) {
+      $datos_cer            = file_get_contents($path_certificado_org);
+      $num_certificado      = substr($datos_cer, 15, 20);
+    }
 
 		return $num_certificado;
 	}
@@ -952,6 +956,17 @@ class cfdi{
       }
     }
 
+    if (isset($data['cfdiRelPrev']) && $data['cfdiRelPrev'] != '') {
+      $cfdiRel = array(
+        'tipoRelacion' => '04',
+        'cfdiRelacionado' => array(
+          array(
+            'uuid' => $data['cfdiRelPrev'],
+          )
+        )
+      );
+    }
+
     // $CI->load->model('catalogos33_model');
     // $this->regimen_fiscal = $CI->catalogos33_model->regimenFiscales($this->regimen_fiscal);
 
@@ -1054,7 +1069,7 @@ class cfdi{
     return $datosApi;
   }
 
-  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio)
+  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio, $cfdiRelacionados = null)
   {
     // echo "<pre>";
     //   var_dump($data, $cuentaCliente);
@@ -1083,10 +1098,26 @@ class cfdi{
     elseif ($data[0]->forma_pago == 'efectivo')
       $formaDePago = '01';
 
-    $cfdiRel = array(
-      'tipoRelacion' => '07',
-      'cfdiRelacionado' => array(),
-    );
+    $nombreBancoOrdExt = '';
+    if ($cuentaCliente->rfc === 'XEXX010101000') {
+      $cuentaCliente->rfc = '';
+      $nombreBancoOrdExt = $cuentaCliente->banco;
+    }
+
+    if ($cfdiRelacionados != null) {
+      $cfdiRel = array(
+        'tipoRelacion' => $cfdiRelacionados['tipo'],
+        'cfdiRelacionado' => array(),
+      );
+      if (isset($cfdiRelacionados['uuids'])) {
+        foreach ($cfdiRelacionados['uuids'] as $key => $uuid) {
+          $cfdiRel['cfdiRelacionado'][] = array(
+            'uuid' => $uuid,
+          );
+        }
+      }
+    }
+
     $comPago = [
       'cadenaPago'        => "",
       'certificadoPago'   => "",
@@ -1094,43 +1125,55 @@ class cfdi{
       'cuentaOrd'         => $cuentaCliente? $cuentaCliente->cuenta : '',
       'fechaPago'         => str_replace(' ', 'T', substr($data[0]->fecha, 0, 19)),
       'formaDePago'       => $formaDePago,
-      'moneda'            => $cfdi_ext->moneda,
+      'moneda'            => (isset($cfdi_ext->moneda)? $cfdi_ext->moneda: 'MXN'),
       'monto'             => $data[0]->pago,
-      'nombreBancoOrdExt' => "",
+      'nombreBancoOrdExt' => $nombreBancoOrdExt,
       'numOperacion'      => "1",
       'rfcEmisorCtaBen'   => $formaDePago != '01'? $data[0]->rfc: '',
       'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
       'selloPago'         => "",
       'tipoCadPago'       => "",
-      'tipoCambio'        => $cfdi_ext->tipoCambio,
+      'tipoCambio'        => (isset($cfdi_ext->tipoCambio)? $cfdi_ext->tipoCambio: 1),
       'doctoRelacionado'  => []
     ];
+    $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
+    $monto = 0;
     foreach ($data as $key => $pago) {
-      if (floatval($pago->version) > 3.2) {
-        $cfdiRel['cfdiRelacionado'][] = array(
-          'uuid' => $pago->uuid,
-        );
+      if (floatval($pago->version) >= 3.2) {
+        if ($firstCfdiRel) { // cuando es la primera ves
+          $cfdiRel['cfdiRelacionado'][] = array(
+            'uuid' => $pago->uuid,
+          );
+        }
 
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
+        $saldo_factura['saldo'] = $saldo_factura['saldo']<0? 0: $saldo_factura['saldo'];
         $saldoAnt = ($saldo_factura['saldo']+$pago->pago_factura);
-        $metodoDePago = 'PPD';
-        if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
-          $metodoDePago = 'PUE';
+        $metodoDePago = $pago->metodo_pago;
+        // if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
+        //   $metodoDePago = 'PUE';
+
+        $pago->tipo_cambio = floatval($pago->tipo_cambio);
+        $pago->tipo_cambio = $pago->tipo_cambio > 0? $pago->tipo_cambio: 1;
+        $pagado = number_format($pago->pago_factura/$pago->tipo_cambio, 2, '.', '');
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
           "folio"          => $pago->folio,
-          "moneda"         => $cfdi_ext->moneda,
-          "tipoCambio"     => $cfdi_ext->tipoCambio,
-          "metodoDePago"   => $metodoDePago,
+          "moneda"         => (floatval($pago->version) > 3.2? $pago->moneda: 'MXN'),
+          "tipoCambio"     => number_format($pago->tipo_cambio, 2, '.', ''),
+          "metodoDePago"   => (floatval($pago->version) > 3.2? $metodoDePago: 'PUE'),
           "numParcialidad" => $pago->parcialidades,
-          "saldoAnterior"  => $saldoAnt,
-          "importePagado"  => $pago->pago_factura,
-          "saldoInsoluto"  => $saldo_factura['saldo']
+          "saldoAnterior"  => number_format($saldoAnt/$pago->tipo_cambio, 2, '.', ''),
+          "importePagado"  => $pagado,
+          "saldoInsoluto"  => number_format($saldo_factura['saldo']/$pago->tipo_cambio, 2, '.', '')
         );
+        $monto += $pagado;
       }
     }
+
+    $comPago['monto'] = $monto;
 
     $noCertificado = $this->obtenNoCertificado();
 
@@ -1216,7 +1259,7 @@ class cfdi{
       ],
       'pagos' => [$comPago]
     );
-    if ($cfdiRel) {
+    if (isset($cfdiRel)) {
       $datosApi['cfdiRelacionados'] = $cfdiRel;
     }
 
@@ -1501,6 +1544,28 @@ class cfdi{
     return $path_guardar;
 	}
 
+  public function guardarXMLFactura($xml, $rfc, $serie, $folio, $fechaFactura)
+  {
+    $fecha    = $this->obtenFechaMes($fechaFactura);
+    $dir_anio = $fecha[0];
+    $dir_mes  = $this->mesToString($fecha[1]);
+
+    if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'))
+      $this->crearFolder(APPPATH.'media/cfdi/facturasXML/', $dir_anio.'/');
+
+    if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'))
+      $this->crearFolder(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/', $dir_mes.'/');
+
+    $path_guardar = APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'.
+      $rfc.'-'.$serie.'-'.$this->acomodarFolio($folio).'.xml';
+
+    $fp = fopen($path_guardar, 'w');
+    fwrite($fp, $xml);
+    fclose($fp);
+
+    return $path_guardar;
+  }
+
   /**
    * Guarda el XML en capertas especificas AÑO/MES.
    *
@@ -1510,8 +1575,7 @@ class cfdi{
    */
   public function guardarXMLNomina($xml, $nameAppend)
   {
-    // $vers = str_replace('.', '_', $this->version);
-    // $xml  = $this->{'generarXML'.$vers}($data, true);
+    $this->isNomina = true;
 
     $empresa = $this->validaDir('empresa', 'NominasXML/');
     $dir_anio = $this->validaDir('anio', 'NominasXML/'.$empresa.'/');
@@ -2681,7 +2745,7 @@ class cfdi{
 				$pdf->SetFont('Arial','',10);
 				$pdf->SetTextColor(0,0,0);
 
-				$datos = array($item['cantidad'], $item['descripcion'], String::formatoNumero($item['precio_unit']),String::formatoNumero($item['importe']));
+				$datos = array($item['cantidad'], $item['descripcion'], MyString::formatoNumero($item['precio_unit']),MyString::formatoNumero($item['importe']));
 
 				$pdf->SetX(8);
 				$pdf->SetAligns($aligns);
@@ -2715,20 +2779,20 @@ class cfdi{
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFillColor(255,255,255);
 			$pdf->SetXY(175, ($y+5));
-			$pdf->Cell(33, 6, String::formatoNumero($data['subtotal'],2) , 1, 0, 'C');
+			$pdf->Cell(33, 6, MyString::formatoNumero($data['subtotal'],2) , 1, 0, 'C');
 			$pdf->SetXY(175, ($y+11));
 
 			if (strtoupper($data['crfc']) != 'XAXX010101000') {
-				$pdf->Cell(33, 6, String::formatoNumero($data['importe_iva'],2) , 1, 0, 'C');
+				$pdf->Cell(33, 6, MyString::formatoNumero($data['importe_iva'],2) , 1, 0, 'C');
 				$pdf->SetXY(175, ($y+17));
 			}
 
 			if (isset($data['total_isr'])) {
-				$pdf->Cell(33, 6, (isset($data['total_isr'])) ? String::formatoNumero($data['total_isr'],2) : '$0.00' , 1, 0, 'C');
+				$pdf->Cell(33, 6, (isset($data['total_isr'])) ? MyString::formatoNumero($data['total_isr'],2) : '$0.00' , 1, 0, 'C');
 				$pdf->SetXY(175, ($y+23));
 			}
 
-			$pdf->Cell(33, 6, String::formatoNumero($data['total'],2) , 1, 0, 'C');
+			$pdf->Cell(33, 6, MyString::formatoNumero($data['total'],2) , 1, 0, 'C');
 
 			//------------ TOTAL CON LETRA--------------------
 

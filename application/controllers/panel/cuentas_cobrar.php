@@ -27,6 +27,10 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/com_pago/',
     'cuentas_cobrar/cancelar_com_pago/',
     'cuentas_cobrar/imprimir_com_pago/',
+    'cuentas_cobrar/xml_com_pago/',
+    'cuentas_cobrar/ajax_get_com_pagos/',
+
+    'cuentas_cobrar/reporte_pdf/',
   );
 
 
@@ -190,11 +194,15 @@ class cuentas_cobrar extends MY_Controller {
         else
           $respons = $this->cuentas_cobrar_model->addAbono();
 
-        if($this->input->post('imprimir') == 'si')
-          $params['print_recibo'] = $respons['id_movimiento'];
+        if (isset($respons[0]) && $respons[0] == false) {
+          $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+        } else {
+          if($this->input->post('imprimir') == 'si')
+            $params['print_recibo'] = $respons['id_movimiento'];
 
-        $params['closeModal'] = true;
-        $params['frm_errors'] = $this->showMsgs(4);
+          $params['closeModal'] = true;
+          $params['frm_errors'] = $this->showMsgs(4);
+        }
       }
 
       if(isset($_GET['total']{0})) //si es masivo
@@ -239,9 +247,9 @@ class cuentas_cobrar extends MY_Controller {
     {
       $this->load->model('cuentas_cobrar_model');
       $respons = $this->cuentas_cobrar_model->removeAbono();
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=5'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   public function imprimir_abono()
@@ -289,13 +297,13 @@ class cuentas_cobrar extends MY_Controller {
       $pago = $this->cuentas_cobrar_pago_model->getInfoComPago(false, $_GET['id_movimiento']);
 
       if (isset($pago->id))
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=101'));
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=101'));
       else {
         $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
       }
     }else
-      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
 
   public function factura_abono_parci()
@@ -305,12 +313,12 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->model('cuentas_cobrar_model');
       $respons = $this->cuentas_cobrar_model->creaFacturaAbono($_GET['ida']);
       if($respons['passes'])
-        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=11'));
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=11'));
       else
-        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg='.$respons['codigo']));
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg='.$respons['codigo']));
 
     }else
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   /**
@@ -340,7 +348,10 @@ class cuentas_cobrar extends MY_Controller {
       $params['template']   = '';
       $params['closeModal'] = false;
 
-      $movs = $this->db->query("SELECT id_cliente, metodo_pago FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
+      $movs = $this->db->query("SELECT bm.id_cliente, bm.metodo_pago, bc.id_empresa
+        FROM banco_movimientos bm
+          INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
+        WHERE bm.id_movimiento = {$_GET['idm']}")->row();
 
         // echo "<pre>";
         //   var_dump('dd', $_POST);
@@ -348,7 +359,7 @@ class cuentas_cobrar extends MY_Controller {
       if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');
-        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0));
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel']);
         if($respons['passes']) {
           $params['frm_errors'] = $this->showMsgs('8', $respons['msg']);
           $params['closeModal'] = true;
@@ -366,13 +377,24 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->model('clientes_model');
       $params['cuentas'] = $this->clientes_model->getCuentas($movs->id_cliente);
       $params['metodo_pago'] = $movs->metodo_pago;
+      $params['movs'] = $movs;
+
+      $tipoRelacionC = new TipoRelacion;
+      $params['tiposRelacion'] = $tipoRelacionC->get();
 
       $params['noHeader'] = false;
       $this->load->view('panel/header', $params);
       $this->load->view('panel/cuentas_cobrar/com_pagos', $params);
       $this->load->view('panel/footer', $params);
     }else
-      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'idm')).'&msg=1'));
+  }
+
+  public function ajax_get_com_pagos(){
+    $this->load->model('cuentas_cobrar_pago_model');
+    $params = $this->cuentas_cobrar_pago_model->getComPagosAjax();
+
+    echo json_encode($params);
   }
 
   public function cancelar_com_pago()
@@ -384,14 +406,14 @@ class cuentas_cobrar extends MY_Controller {
 
       $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
 
-      if (isset($pago->id))
-        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=101'));
-      else {
-        $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
-        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=10'));
-      }
+      // if (isset($pago->id))
+      //   redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=101'));
+      // else {
+      //   // $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
+        redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg='.$pago['msg']));
+      // }
     }else
-      redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=1'));
+      redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=1'));
   }
 
   public function imprimir_com_pago()
@@ -410,6 +432,25 @@ class cuentas_cobrar extends MY_Controller {
       redirect(base_url('panel/facturacion/?msg=1'));
   }
 
+  public function xml_com_pago()
+  {
+    if(isset($_GET['id']{0}))
+    {
+      $this->load->library('cfdi');
+      $this->load->model('cuentas_cobrar_pago_model');
+      $this->cuentas_cobrar_pago_model->descargarZipCP($_GET['id']);
+      // $factura = $this->cuentas_cobrar_pago_model->getInfoComPago($_GET['id']);
+
+      // $folio = $this->cfdi->acomodarFolio($factura->folio);
+      // $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;
+      // header('Content-type: text/xml');
+      // header('Content-Disposition: attachment; filename="'.$file.'.xml"');
+      // echo $factura->xml;
+    }
+    else
+      redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
 
   /**
    * RPTS
@@ -421,6 +462,33 @@ class cuentas_cobrar extends MY_Controller {
   public function rpt_ventas2_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->rptVentasClienteXls();
+  }
+
+  public function reporte()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Facturas Vencidas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/cuentas_cobrar/rpt_facturas_vencidas',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function reporte_pdf(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->rptFacturasVencidasPdf();
   }
 
   /**
@@ -503,13 +571,17 @@ class cuentas_cobrar extends MY_Controller {
         $txt = 'Los abonos no se pueden eliminar porque tiene un complemento de pago (se tiene que cancelar).';
         $icono = 'error';
         break;
+      case 102:
+        $txt = 'El comprobante de pago no se pudo subir.';
+        $icono = 'error';
+        break;
 
       case 12:
         $txt = 'Ya se registro el complemento de pago.';
         $icono = 'success';
         break;
       case 13:
-        $txt = 'Los CFDI no requieren complemento de pago.';
+        $txt = 'Los CFDI no requieren complemento de pago, o son remisiones los comprobantes.';
         $icono = 'success';
         break;
       case 14:

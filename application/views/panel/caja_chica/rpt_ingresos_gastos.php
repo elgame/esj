@@ -40,11 +40,9 @@
                   <div class="controls">
                     <select name="fno_caja" id="fno_caja">
                       <option value=""></option>
-                      <option value="1">Caja Limon</option>
-                      <option value="2">Caja Gastos</option>
-                      <option value="3">Caja Coco</option>
-                      <option value="4">Caja Venta de Contado</option>
-                      <option value="prest1">Caja prestamos</option>
+                      <?php foreach ($cajas as $key => $value): ?>
+                      <option value="<?php echo $value->no_caja ?>"><?php echo $value->nombre ?></option>
+                      <?php endforeach ?>
                     </select>
                   </div>
                 </div>
@@ -74,7 +72,7 @@
 
 <?php if (isset($p) && isset($pe)) { ?>
   <script>
-    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
     win.focus();
   </script>
 <?php } ?>

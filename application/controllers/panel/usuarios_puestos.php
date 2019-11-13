@@ -78,7 +78,7 @@ class usuarios_puestos extends MY_Controller {
 			$res_mdl = $this->usuarios_puestos_model->addPuesto();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/usuarios_puestos/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/usuarios_puestos/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
@@ -125,7 +125,7 @@ class usuarios_puestos extends MY_Controller {
 				$res_mdl = $this->usuarios_puestos_model->updatePuesto($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->usuarios_puestos_model->getPuestoInfo();
@@ -139,7 +139,7 @@ class usuarios_puestos extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -153,10 +153,10 @@ class usuarios_puestos extends MY_Controller {
 			$this->load->model('usuarios_puestos_model');
 			$res_mdl = $this->usuarios_puestos_model->updatePuesto( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -170,10 +170,10 @@ class usuarios_puestos extends MY_Controller {
 			$this->load->model('usuarios_puestos_model');
 			$res_mdl = $this->usuarios_puestos_model->updatePuesto( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_puestos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

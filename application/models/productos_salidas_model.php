@@ -13,7 +13,7 @@ class productos_salidas_model extends CI_Model {
    * @return
    */
   public function getSalidas($perpage = '40')
-    {
+  {
     $sql = '';
     //paginacion
     $params = array(
@@ -52,16 +52,26 @@ class productos_salidas_model extends CI_Model {
       $sql .= " AND cs.status in ('s', 'ca')";
     }
 
+    $sql_fil_prod = '';
+    if ($this->input->get('fconceptoId') > 0) {
+      // $sql_fil_prod = "INNER JOIN (
+      //     SELECT id_salida FROM compras_salidas_productos WHERE id_producto = {$this->input->get('fconceptoId')} GROUP BY id_salida
+      //   ) sp ON cs.id_salida = sp.id_salida";
+      $sql .= " AND sp.id_producto = {$this->input->get('fconceptoId')}";
+    }
+
     $query = BDUtil::pagination(
         "SELECT cs.id_salida,
                 cs.id_empresa, e.nombre_fiscal AS empresa,
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-                cs.status, cs.concepto
+                cs.status, cs.concepto, Count(sp.id_salida) AS productos
         FROM compras_salidas AS cs
-        INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
-        INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
+          INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          LEFT JOIN compras_salidas_productos sp ON cs.id_salida = sp.id_salida
         WHERE 1 = 1 {$sql}
+        GROUP BY cs.id_salida, e.id_empresa, u.id
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
         ", $params, true);
 
@@ -102,7 +112,7 @@ class productos_salidas_model extends CI_Model {
         // 'id_traspaso'    => intval($this->input->post('tid_almacen')),
         'no_receta'         => $this->input->post('no_receta')? $_POST['no_receta']: NULL,
         'etapa'             => $this->input->post('etapa')? $_POST['etapa']: NULL,
-        'rancho'            => $this->input->post('rancho_id')? $_POST['rancho_id']: NULL,
+        'rancho'            => $this->input->post('ranchoC_id')? $_POST['ranchoC_id']: NULL,
         'centro_costo'      => $this->input->post('centro_costo_id')? $_POST['centro_costo_id']: NULL,
         'hectareas'         => $this->input->post('hectareas')? $_POST['hectareas']: NULL,
         'grupo'             => $this->input->post('grupo')? $_POST['grupo']: NULL,
@@ -113,16 +123,107 @@ class productos_salidas_model extends CI_Model {
         'tipo_aplicacion'   => $this->input->post('tipo_aplicacion')? $_POST['tipo_aplicacion']: NULL,
         'observaciones'     => $this->input->post('observaciones')? $_POST['observaciones']: NULL,
         'fecha_aplicacion'  => $this->input->post('fecha_aplicacion')? $_POST['fecha_aplicacion']: NULL,
+
+        'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
+        // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
+        // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
+        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
       );
 
       if (isset($_POST['fid_trabajador']{0})) {
         $data['id_usuario'] = $_POST['fid_trabajador'];
       }
     }
+    if ($this->input->post('id_salida') > 0) {
+      $id_salida = $this->input->post('id_salida');
+      $this->db->update('compras_salidas', $data, "id_salida = {$id_salida}");
+    } else {
+      $this->db->insert('compras_salidas', $data);
+      $id_salida = $this->db->insert_id('compras_salidas_id_salida_seq');
+    }
 
-    $this->db->insert('compras_salidas', $data);
+    // Inserta los ranchos
+    $this->agregarRanchos($id_salida);
 
-    return array('passes' => true, 'msg' => 3, 'id_salida' => $this->db->insert_id());
+    // Inserta los centros de costo
+    $this->agregarCentrosCostos($id_salida);
+
+    return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
+  }
+
+  public function modificar($id_salida, $data = null)
+  {
+    if ( ! $data)
+    {
+      $data = array(
+        'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
+        // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
+        // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
+        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
+      );
+    }
+
+    $this->db->update('compras_salidas', $data, ['id_salida' => $id_salida]);
+
+    // Inserta los ranchos
+    $this->agregarRanchos($id_salida);
+
+    // Inserta los centros de costo
+    $this->agregarCentrosCostos($id_salida);
+
+    return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
+  }
+
+  public function agregarCentrosCostos($idSalida, $centrosCostos = null)
+  {
+    $this->db->delete('compras_salidas_centro_costo', "id_salida = {$idSalida}");
+    if (!$centrosCostos) {
+      if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+        foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+          $this->db->insert('compras_salidas_centro_costo', [
+            'id_centro_costo' => $id_centro_costo,
+            'id_salida'       => $idSalida,
+            'num'             => count($_POST['centroCostoId'])
+          ]);
+        }
+      }
+    } else {
+      if (count($centrosCostos) > 0) {
+        foreach ($centrosCostos as $keyr => $id_centro_costo) {
+          $this->db->insert('compras_salidas_centro_costo', [
+            'id_centro_costo' => $id_centro_costo,
+            'id_salida'       => $idSalida,
+            'num'             => count($centrosCostos)
+          ]);
+        }
+      }
+    }
+  }
+
+  public function agregarRanchos($idSalida, $ranchos = null)
+  {
+    $this->db->delete('compras_salidas_rancho', "id_salida = {$idSalida}");
+    if (!$ranchos) {
+      if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+        foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+          $this->db->insert('compras_salidas_rancho', [
+            'id_rancho' => $id_rancho,
+            'id_salida' => $idSalida,
+            'num'       => count($_POST['ranchoId'])
+          ]);
+        }
+      }
+    } else {
+      if (count($ranchos) > 0) {
+        foreach ($ranchos as $keyr => $id_rancho) {
+          $this->db->insert('compras_salidas_rancho', [
+            'id_rancho' => $id_rancho,
+            'id_salida' => $idSalida,
+            'num'       => count($ranchos)
+          ]);
+        }
+      }
+    }
   }
 
   /**
@@ -130,7 +231,7 @@ class productos_salidas_model extends CI_Model {
    *
    * @return array
    */
-  public function agregarProductos($idSalida, $productos = null)
+  public function agregarProductos($idSalida, $productos = null, $delProd = true)
   {
     if ( ! $productos)
     {
@@ -160,6 +261,9 @@ class productos_salidas_model extends CI_Model {
       }
     }
 
+    if ($delProd) {
+      $this->db->delete('compras_salidas_productos', "id_salida = {$idSalida}");
+    }
     $this->db->insert_batch('compras_salidas_productos', $productos);
 
     // si es transferencia de almacenes
@@ -221,7 +325,30 @@ class productos_salidas_model extends CI_Model {
       $this->db->insert('compras_transferencias', array('id_salida' => $idSalida, 'id_orden' => $id_orden));
     }
 
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
     return array('passes' => true, 'msg' => 3);
+  }
+
+  public function validaProductosExistencia($id_almacen, $productos)
+  {
+    $this->load->model('inventario_model');
+    $response = array();
+    if (count($productos)) {
+      foreach ($productos as $key => $producto) {
+        $item = $this->inventario_model->getEPUData($producto['id'], $id_almacen, true);
+        if (isset($item[0]->saldo_anterior)) {
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          if ( MyString::float($existencia-$producto['cantidad']) < 0) {
+            $response[] = $item[0]->nombre_producto.' ('.($existencia-$producto['cantidad']).')';
+          }
+        }
+      }
+    }
+    if (count($response)>0) {
+      return ['passes' => false, 'msg' => 'No hay existencia suficiente en: '.implode(', ', $response)];
+    }
+    return ['passes' => true, 'msg' => 'ok'];
   }
 
   /**
@@ -240,6 +367,8 @@ class productos_salidas_model extends CI_Model {
         array('id_salida' => $idSalida, 'id_producto' => $producto));
     }
 
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
     return array('passes' => true, 'msg' => 5);
   }
 
@@ -249,6 +378,10 @@ class productos_salidas_model extends CI_Model {
 
     $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
     $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
+
+    $this->db->delete('otros.recetas_salidas', "id_salida = {$idOrden}");
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     return array('passes' => true);
   }
@@ -262,18 +395,21 @@ class productos_salidas_model extends CI_Model {
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
               cs.status, cs.concepto, cs.solicito, cs.recibio,
               cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
-              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso,
+              cs.no_impresiones, cs.no_impresiones_tk,
+              ca.id_almacen, ca.nombre AS almacen, cs.id_traspaso,
               cs.no_receta, cs.etapa, cs.rancho, cs.centro_costo, cs.hectareas, cs.grupo,
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
-              ccr.nombre AS rancho_n, ccc.nombre AS centro_c
+              ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
+              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula
         FROM compras_salidas AS cs
-        INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
-        INNER JOIN usuarios AS u ON u.id = cs.id_empleado
-        INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
-        LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
-        LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
-        LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
+          INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
+          INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+          INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
+          LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
+          LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
+          LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
+          LEFT JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
         WHERE cs.id_salida = {$idSalida}");
 
     $data = array();
@@ -300,10 +436,48 @@ class productos_salidas_model extends CI_Model {
              LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = csp.id_cat_codigos
            WHERE csp.id_salida = {$data['info'][0]->id_salida}");
 
+        $data['info'][0]->bascula = null;
+        if ($data['info'][0]->id_bascula > 0)
+        {
+          $this->load->model('bascula_model');
+          $data['info'][0]->bascula = $this->bascula_model->getBasculaInfo(false, 0, true, [], $data['info'][0]->id_bascula)['info'][0];
+        }
+
         $data['info'][0]->productos = array();
         if ($query->num_rows() > 0)
         {
           $data['info'][0]->productos = $query->result();
+        }
+
+        $data['info'][0]->traspaso = null;
+        if ($data['info'][0]->id_traspaso > 0)
+        {
+          $this->load->model('compras_ordenes_model');
+          $data['info'][0]->traspaso = $this->compras_ordenes_model->info($data['info'][0]->id_traspaso)['info'][0];
+        }
+
+        $data['info'][0]->area = null;
+        if ($data['info'][0]->id_area)
+        {
+          $this->load->model('areas_model');
+          $data['info'][0]->area = $this->areas_model->getAreaInfo($data['info'][0]->id_area, true)['info'];
+        }
+
+        $data['info'][0]->rancho = $this->db->query("SELECT r.id_rancho, r.nombre
+                                   FROM compras_salidas_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_salida = {$data['info'][0]->id_salida}")->result();
+
+        $data['info'][0]->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
+                                   FROM compras_salidas_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_salida = {$data['info'][0]->id_salida}")->result();
+
+        $data['info'][0]->activo = null;
+        if ($data['info'][0]->id_activo)
+        {
+          $this->load->model('productos_model');
+          $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
         }
       }
 
@@ -338,6 +512,10 @@ class productos_salidas_model extends CI_Model {
 
     $orden = $this->info($salidaID, true);
 
+    if (isset($orden['info'][0]->productos) && count($orden['info'][0]->productos) === 0) {
+      $this->print_orden_pre_salida($orden, $path);
+    }
+
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -361,13 +539,13 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(150, 50));
     $pdf->Row(array(
       $tipo_orden,
-      'No '.String::formatoNumero($orden['info'][0]->folio, 2, ''),
+      'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
     ), false, false);
     // $pdf->SetFont('helvetica','', 8);
     // $pdf->SetX(6);
     // $pdf->Row(array(
     //   'PROVEEDOR: ' . $orden['info'][0]->empleado,
-    //   String::fechaATexto($orden['info'][0]->fecha, '/c'),
+    //   MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
     // ), false, false);
 
     $aligns = array('C', 'C', 'L', 'R', 'R');
@@ -403,8 +581,8 @@ class productos_salidas_model extends CI_Model {
         $prod->cantidad.' '.$prod->abreviatura,
         $prod->codigo.'/'.$prod->codigo_fin,
         $prod->producto,
-        String::formatoNumero($prod->precio_unitario, 2, '$', false),
-        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '$', false),
+        MyString::formatoNumero($prod->precio_unitario, 2, '$', false),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '$', false),
       );
 
       $pdf->SetX(6);
@@ -472,6 +650,11 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(100, 100));
     $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones),
                     'Almacen: '.$orden['info'][0]->almacen.($orden['info'][0]->id_traspaso>0? ' | Traspaso de almacen': '') ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetX(6);
+      $pdf->Row(array( 'TRASPASO: '.$orden['info'][0]->traspaso->almacen,
+                      'Fecha: '.$orden['info'][0]->traspaso->fecha.' | Orden: '.$orden['info'][0]->traspaso->folio ), false, false);
+    }
 
     //Totales
     $pdf->SetFont('Arial','',8);
@@ -479,7 +662,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(25, 25));
     $pdf->SetX(160);
-    $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
 
     $this->db->update('compras_salidas', ['no_impresiones' => $orden['info'][0]->no_impresiones+1], "id_salida = ".$orden['info'][0]->id_salida);
 
@@ -492,6 +675,191 @@ class productos_salidas_model extends CI_Model {
     else
     {
       $pdf->Output('SALIDA_PRODUCTO'.date('Y-m-d').'.pdf', 'I');
+    }
+  }
+
+  public function print_orden_pre_salida($orden, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $orden['info'][0]->empresa;
+    $tipo_orden = 'ORDEN DE SALIDA DE PRODUCTOS';
+    // if($orden['info'][0]->tipo_orden == 'd')
+    //   $tipo_orden = 'ORDEN DE SERVICIO';
+    // elseif($orden['info'][0]->tipo_orden == 'f')
+    //   $tipo_orden = 'ORDEN DE FLETE';
+
+    $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->SetXY(6, $pdf->GetY()-6);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(150, 50));
+    $pdf->Row(array(
+      $tipo_orden,
+      'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
+    ), false, false);
+    // $pdf->SetFont('helvetica','', 8);
+    // $pdf->SetX(6);
+    // $pdf->Row(array(
+    //   'PROVEEDOR: ' . $orden['info'][0]->empleado,
+    //   MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
+    // ), false, false);
+
+    $aligns = array('C', 'C', 'L', 'R', 'R');
+    $widths = array(35, 25, 94, 25, 25);
+    $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+
+    $subtotal = $iva = $total = $retencion = $ieps = 0;
+
+    $tipoCambio = 0;
+    $codigoAreas = array();
+
+    for ($i=0; $i < 15; $i++) {
+      $tipoCambio = 1;
+
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $i==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array(
+        '',
+        '',
+        '',
+        '',
+        '',
+      );
+
+      $pdf->SetX(6);
+      $pdf->Row($datos, false);
+    }
+
+    $yy = $pdf->GetY();
+
+    //Otros datos
+    // $pdf->SetXY(6, $yy);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(154));
+
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(104, 50));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(154));
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+4);
+    $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+    $yy2 = $pdf->GetY();
+    if(count($codigoAreas) > 0){
+      // $yy2 -= 9;
+      // $pdf->SetXY(160, $yy2);
+      // $pdf->Row(array('_______________________________'), false, false);
+      $yy2 = $pdf->GetY();
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetWidths(array(155));
+      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetWidths(array(155));
+      $pdf->Row(array('Se asigno a: ' . $orden['info'][0]->trabajador), false, false);
+    }
+
+    // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
+
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+    // if($orden['info'][0]->tipo_orden == 'f'){
+    //   $pdf->SetWidths(array(205));
+    //   $pdf->SetX(6);
+    //   $pdf->Row(array(substr($clientessss, 2)), false, false);
+    //   $pdf->SetXY(6, $pdf->GetY()-3);
+    //   $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
+    // }
+
+    $y_compras = $pdf->GetY();
+
+    $pdf->SetX(6);
+    $pdf->SetWidths(array(100, 100));
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones),
+                    'Almacen: '.$orden['info'][0]->almacen.($orden['info'][0]->id_traspaso>0? ' | Traspaso de almacen': '') ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetX(6);
+      $pdf->Row(array( 'TRASPASO: '.$orden['info'][0]->traspaso->almacen,
+                      'Fecha: '.$orden['info'][0]->traspaso->fecha.' | Orden: '.$orden['info'][0]->traspaso->folio ), false, false);
+    }
+    $auxy = $pdf->GetY();
+
+    //Totales
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(160, $yy);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(25, 25));
+    $pdf->SetX(160);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $auxy+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Cultivo / Actividad / Producto', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Areas / Ranchos / Lineas', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Centro de costo', ''), false, true);
+
+    $pdf->SetFont('Arial','',8);
+    $pdf->SetXY(5, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(40, 120));
+    $pdf->Row(array('Activo', ''), false, true);
+
+    if ($path)
+    {
+      $file = $path.'SALIDA_PRODUCTO'.date('Y-m-d').'.pdf';
+      $pdf->Output($file, 'F');
+      return $file;
+    }
+    else
+    {
+      $pdf->Output('SALIDA_PRODUCTO'.date('Y-m-d').'.pdf', 'I');
+      exit;
     }
   }
 
@@ -524,9 +892,9 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L','L', 'R', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', String::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
+    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
 
-    $semana = String::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
+    $semana = MyString::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
 
     $pdf->SetWidths(array(32, 32));
     $pdf->SetAligns(array('L', 'L'));
@@ -543,7 +911,11 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.String::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    if (isset($orden['info'][0]->traspaso)) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Traspaso: '.$orden['info'][0]->traspaso->almacen, 'Fecha: '.MyString::fechaAT($orden['info'][0]->traspaso->fecha) ), false, false);
+    }
     $pdf->SetWidths(array(65));
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
@@ -569,8 +941,8 @@ class productos_salidas_model extends CI_Model {
       $pdf->Row2(array(
         $prod->cantidad.' '.$prod->abreviatura,
         $prod->producto,
-        String::formatoNumero($prod->precio_unitario, 2, '', true),
-        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
 
       $total += floatval($prod->precio_unitario*$prod->cantidad);
 
@@ -583,10 +955,10 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(13, 20));
     // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(30);
-    $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+    $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '', true)), false, true, 5);
 
     if ($orden['info'][0]->concepto != '') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
@@ -621,7 +993,7 @@ class productos_salidas_model extends CI_Model {
     }
 
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.String::fechaAT(date("Y-m-d"))), false, false);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
 
     $pdf->SetX(0);
     $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
@@ -804,11 +1176,11 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -854,7 +1226,7 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->nombre,
-        String::formatoNumero($vehiculo->importe, 2, '', false),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->importe);
@@ -880,13 +1252,13 @@ class productos_salidas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            String::fechaAT($item->fecha_orden),
+            MyString::fechaAT($item->fecha_orden),
             $item->folio_orden,
-            String::fechaAT($item->fecha_compra),
+            MyString::fechaAT($item->fecha_compra),
             $item->folio_compra,
             $item->nombre,
             $item->producto,
-            String::formatoNumero($item->importe, 2, '', false),
+            MyString::formatoNumero($item->importe, 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -905,7 +1277,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_gasto_codigo.pdf', 'I');

@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/labores_codigo/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/labores_codigo/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -46,7 +46,7 @@
               </div><!--/control-group -->
 
               <div class="control-group">
-                <label class="control-label" for="costo">Costo x hr </label>
+                <label class="control-label" for="costo">Costo x unidad </label>
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="costo" class="span11" id="costo" value="<?php echo set_value('costo') ?>" maxlength="20" required>

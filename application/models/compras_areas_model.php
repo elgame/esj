@@ -119,7 +119,7 @@ class compras_areas_model extends CI_Model{
 		}
 
 		$this->db->insert('compras_areas', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('compras_areas_id_area_seq');
 
 		$data = array('nivel' => $this->getDescripCodigo($id_area, 'nivel'));
 		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");
@@ -215,6 +215,14 @@ class compras_areas_model extends CI_Model{
 			return $nombre;
 		}
 	}
+
+  public function getDescripCodigoSim($id_area)
+  {
+    $data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
+                               FROM compras_areas
+                               WHERE id_area = {$id_area}")->row();
+    return $data->nombre;
+  }
 
 	public function getHijos($id_area)
 	{

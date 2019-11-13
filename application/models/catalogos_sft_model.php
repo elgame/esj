@@ -101,7 +101,7 @@ class catalogos_sft_model extends CI_Model{
 		);
 
 		$this->db->insert('otros.cat_soft', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('otros.cat_soft_id_cat_soft_seq');
 
 		return array(true, '');
 	}
@@ -499,7 +499,7 @@ class catalogos_sft_model extends CI_Model{
 		);
 
 		$this->db->insert('otros.cat_codigos', $data);
-		$id_area = $this->db->insert_id();
+		$id_area = $this->db->insert_id('otros.cat_codigos_id_cat_codigos_seq');
 
 		return array(true, '');
 	}
@@ -559,6 +559,14 @@ class catalogos_sft_model extends CI_Model{
 			return $nombre;
 		}
 	}
+
+  public function getDescripCodigoSim($id_area)
+  {
+    $data = $this->db->query("SELECT id_cat_codigos AS id_area, codigo, nombre, descripcion, ubicacion, otro_dato, status, id_padre
+                               FROM otros.cat_codigos
+                               WHERE id_cat_codigos = {$id_area}")->row();
+    return $data->nombre;
+  }
 
 	/**
 	 * Obtiene el listado de clasificaciones para usar ajax
@@ -969,11 +977,11 @@ class catalogos_sft_model extends CI_Model{
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -1019,7 +1027,7 @@ class catalogos_sft_model extends CI_Model{
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->nombre,
-        String::formatoNumero($vehiculo->importe, 2, '', false),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->importe);
@@ -1045,13 +1053,13 @@ class catalogos_sft_model extends CI_Model{
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            String::fechaAT($item->fecha_orden),
+            MyString::fechaAT($item->fecha_orden),
             $item->folio_orden,
-            String::fechaAT($item->fecha_compra),
+            MyString::fechaAT($item->fecha_compra),
             $item->folio_compra,
             $item->nombre,
             $item->producto,
-            String::formatoNumero($item->importe, 2, '', false),
+            MyString::formatoNumero($item->importe, 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -1070,7 +1078,7 @@ class catalogos_sft_model extends CI_Model{
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_gasto_codigo.pdf', 'I');
@@ -1260,11 +1268,11 @@ class catalogos_sft_model extends CI_Model{
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -1310,7 +1318,7 @@ class catalogos_sft_model extends CI_Model{
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->nombre,
-        String::formatoNumero($vehiculo->importe, 2, '', false),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->importe);
@@ -1336,12 +1344,12 @@ class catalogos_sft_model extends CI_Model{
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            String::fechaAT($item->fecha_orden),
+            MyString::fechaAT($item->fecha_orden),
             $item->folio_orden,
             $item->solicito,
             $item->nombre,
             $item->producto,
-            String::formatoNumero($item->importe, 2, '', false),
+            MyString::formatoNumero($item->importe, 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -1360,7 +1368,7 @@ class catalogos_sft_model extends CI_Model{
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_gasto_salidas.pdf', 'I');

@@ -11,28 +11,36 @@ class gastos_model extends privilegios_model{
    * @param  array $data
    * @return array
    */
-  public function agregar($data, $xml)
+  public function agregar($data)
   {
     // datos del gasto.
     $datos = array(
-      'id_empresa'     => $data['empresaId'],
-      'id_proveedor'   => $data['proveedorId'],
-      'id_empleado'    => $this->session->userdata('id_usuario'),
-      'serie'          => $data['serie'],
-      'folio'          => $data['folio'],
-      'condicion_pago' => $data['condicionPago'],
-      'plazo_credito'  => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
-      'tipo_documento' => $data['tipo_documento'],
-      'fecha'          => str_replace('T', ' ', $data['fecha']),
-      'subtotal'       => $data['subtotal'],
-      'importe_iva'    => $data['iva'],
-      'total'          => $data['total'],
-      'concepto'       => $data['concepto'],
-      'isgasto'        => 't',
-      'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
-      'retencion_iva'  => $data['ret_iva'],
-      'retencion_isr'  => $data['ret_isr'],
+      'id_empresa'      => $data['empresaId'],
+      'id_proveedor'    => $data['proveedorId'],
+      'id_empleado'     => $this->session->userdata('id_usuario'),
+      'serie'           => $data['serie'],
+      'folio'           => $data['folio'],
+      'condicion_pago'  => $data['condicionPago'],
+      'plazo_credito'   => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
+      'tipo_documento'  => $data['tipo_documento'],
+      'fecha'           => str_replace('T', ' ', $data['fecha']),
+      'subtotal'        => $data['subtotal'],
+      'importe_iva'     => $data['iva'],
+      'total'           => $data['total'],
+      'concepto'        => $data['concepto'],
+      'isgasto'         => 't',
+      'status'          => $data['condicionPago'] ===  'co' ? 'p' : 'p',
+      'retencion_iva'   => $data['ret_iva'],
+      'retencion_isr'   => $data['ret_isr'],
+      'id_area'         => ($data['areaId']? $data['areaId']: NULL),
+      // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
+      // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
+      'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
+      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
+
     //Cuenta espesifica al gasto
     if(is_numeric($data['did_cuentacpi']))
         $datos['cuenta_cpi_gst'] = $data['did_cuentacpi'];
@@ -53,37 +61,37 @@ class gastos_model extends privilegios_model{
     //     return array('passes' => false, 'msg' => 30);
     // }
 
-    // Realiza el upload del XML.
-    if ($xml && $xml['tmp_name'] !== '')
-    {
-      $this->load->library("my_upload");
-      $this->load->model('proveedores_model');
+    // // Realiza el upload del XML.
+    // if ($xml && $xml['tmp_name'] !== '')
+    // {
+    //   $this->load->library("my_upload");
+    //   $this->load->model('proveedores_model');
 
-      $proveedor = $this->proveedores_model->getProveedorInfo($datos['id_proveedor']);
-      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+    //   $proveedor = $this->proveedores_model->getProveedorInfo($datos['id_proveedor']);
+    //   $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
 
-      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+    //   $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => $xmlName,
-      );
-      $this->my_upload->initialize($config_upload);
+    //   $config_upload = array(
+    //     'upload_path'     => $path,
+    //     'allowed_types'   => '*',
+    //     'max_size'        => '2048',
+    //     'encrypt_name'    => FALSE,
+    //     'file_name'       => $xmlName,
+    //   );
+    //   $this->my_upload->initialize($config_upload);
 
-      $xmlData = $this->my_upload->do_upload('xml');
+    //   $xmlData = $this->my_upload->do_upload('xml');
 
-      $xmlFile     = explode('application', $xmlData['full_path']);
-      $datos['xml'] = 'application'.$xmlFile[1];
-    }
+    //   $xmlFile     = explode('application', $xmlData['full_path']);
+    //   $datos['xml'] = 'application'.$xmlFile[1];
+    // }
 
     // inserta la compra
     $this->db->insert('compras', $datos);
 
     // obtiene el id de la compra insertada.
-    $compraId = $this->db->insert_id();
+    $compraId = $this->db->insert_id('compras_id_compra_seq');
 
     // Bitacora
     $this->bitacora_model->_insert('compras', $compraId,
@@ -91,6 +99,29 @@ class gastos_model extends privilegios_model{
                                           ':folio'      => $datos['serie'].$datos['folio'],
                                           ':id_empresa' => $datos['id_empresa'],
                                           ':empresa'    => 'en '.$this->input->post('empresa')));
+
+    // Si es un gasto son requeridos los campos de catálogos
+    // Inserta los ranchos
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $id_rancho) {
+        $this->db->insert('compras_rancho', [
+          'id_rancho' => $id_rancho,
+          'id_compra' => $compraId,
+          'num'       => count($_POST['ranchoId'])
+        ]);
+      }
+    }
+
+    // Inserta los centros de costo
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $id_centro_costo) {
+        $this->db->insert('compras_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_compra'       => $compraId,
+          'num'             => count($_POST['centroCostoId'])
+        ]);
+      }
+    }
 
     $respons = array();
     // //si es contado, se registra el abono y el retiro del banco
@@ -159,11 +190,11 @@ class gastos_model extends privilegios_model{
   public function updateXml($compraId, $proveedorId, $xml)
   {
     $compra = array(
-      'subtotal'      => String::float($this->input->post('subtotal')),
-      'importe_iva'   => String::float($this->input->post('iva')),
-      'retencion_iva' => String::float($this->input->post('ret_iva')),
-      'retencion_isr' => String::float($this->input->post('ret_isr')),
-      'total'         => String::float($this->input->post('total')),
+      'subtotal'      => MyString::float($this->input->post('subtotal')),
+      'importe_iva'   => MyString::float($this->input->post('iva')),
+      'retencion_iva' => MyString::float($this->input->post('ret_iva')),
+      'retencion_isr' => MyString::float($this->input->post('ret_isr')),
+      'total'         => MyString::float($this->input->post('total')),
       'fecha'         => $this->input->post('fecha'),
     );
 
@@ -204,6 +235,9 @@ class gastos_model extends privilegios_model{
                                     ':empresa'      => 'en '.$datoscompra['info']->empresa->nombre_fiscal,
                                     ':id'           => 'id_compra',
                                     ':titulo'       => 'Compra'));
+
+    $compra['uuid']           = $this->input->post('uuid');
+    $compra['no_certificado'] = $this->input->post('noCertificado');
 
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }

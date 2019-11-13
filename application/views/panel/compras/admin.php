@@ -54,6 +54,13 @@
                   <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTES</option>
                   <option value="pa" <?php echo set_select_get('fstatus', 'pa'); ?>>PAGADAS</option>
                   <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
+                </select><br>
+
+                <label for="fxml">XML?</label>
+                <select name="fxml" class="input-medium" id="fxml">
+                  <option value="">TODOS</option>
+                  <option value="si" <?php echo set_select_get('fxml', 'si'); ?>>SI</option>
+                  <option value="no" <?php echo set_select_get('fxml', 'no'); ?>>NO</option>
                 </select>
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
@@ -104,11 +111,11 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($compra->total, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->total, 2, '$', false); ?></td>
                   <td><?php
                           $texto = 'NO';
                           $label = 'warning';
-                        if ($compra->xml) {
+                        if ($compra->uuid != '') {
                           $texto = 'SI';
                           $label = 'success';
                         }
@@ -118,13 +125,13 @@
                   <td><?php echo $compra->observaciones; ?></td>
                   <td class="center">
                     <?php
-
                       if ($compra->status === 'p' || $compra->id_nc != '')
                       {
+                        $nota = ($compra->status === 'pa'? '<br><strong>Nota: La compra esta pagada, antes de cancelar comprueba que el saldo en cuentas por pagar sea '.MyString::formatoNumero($compra->total, 2, '$', false).'</strong>': '');
                         echo $this->usuarios_model->getLinkPrivSm('compras/cancelar/', array(
                           'params'   => 'id='.$compra->id_compra,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la compra?', 'Compras', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la compra?{$nota}', 'Compras', this); return false;"))
                         );
                       }
 
@@ -193,7 +200,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $compras['total_rows'],
                 'per_page'      => $compras['items_per_page'],
                 'cur_page'      => $compras['result_page']*$compras['items_per_page'],

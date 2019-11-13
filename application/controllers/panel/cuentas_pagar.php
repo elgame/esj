@@ -18,6 +18,8 @@ class cuentas_pagar extends MY_Controller {
     'cuentas_pagar/estado_cuenta_pdf/',
     'cuentas_pagar/estado_cuenta_xls/',
     'cuentas_pagar/rpt_compras_xls/',
+
+    'cuentas_pagar/reporte_pdf/',
   );
 
 
@@ -237,9 +239,9 @@ class cuentas_pagar extends MY_Controller {
     {
       $this->load->model('cuentas_pagar_model');
       $respons = $this->cuentas_pagar_model->removeAbono();
-      redirect(base_url('panel/cuentas_pagar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=5'));
+      redirect(base_url('panel/cuentas_pagar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_pagar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_pagar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   /**
@@ -280,9 +282,9 @@ class cuentas_pagar extends MY_Controller {
     {
       $this->load->model('banco_cuentas_model');
       $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=5'));
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
   public function imprimir_recibo()
   {
@@ -300,6 +302,34 @@ class cuentas_pagar extends MY_Controller {
   public function rpt_compras_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->rptComprasXls();
+  }
+
+
+  public function reporte()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Facturas Vencidas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/cuentas_pagar/rpt_facturas_vencidas',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function reporte_pdf(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->rptFacturasVencidasPdf();
   }
 
 

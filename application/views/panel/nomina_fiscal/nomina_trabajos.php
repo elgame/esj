@@ -39,7 +39,7 @@
             </form>
 
 
-            <form action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
+            <form action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" class="form">
               <input type="hidden" id="fdia_semana" value="<?php echo date('N'); ?>">
               <?php
                 foreach ($puestos['puestos'] as $puesto) {
@@ -55,7 +55,7 @@
                           <th style="width:10%;">Labor(s)</th>
                           <th style="width:9%;">Horas</th>
                           <th style="width:10%;">Hrs Extras</th>
-                          <th style="width:10%;">Asis</th>
+                          <!-- <th style="width:10%;">Asis</th> -->
                           <th style="width:10%;">Descripcion</th>
                           <th style="width:8%;">Costo</th>
                           <th style="width:5%;"></th>
@@ -179,7 +179,7 @@
                               </div>
                         <?php } ?>
                             </td>
-                            <td>
+                            <!-- <td>
                           <?php
                             $selected_a = '';
                             $selected_f = '';
@@ -206,7 +206,7 @@
                                 <?php } ?>
 
                               </select>
-                            </td>
+                            </td> -->
                             <td>
                               <input type="text" id="fdescripcion" value="<?php echo isset($info_e)? $info_e->descripcion: ''; ?>" class="span12">
                             </td>

@@ -119,6 +119,15 @@
                 </div>
               </div>
 
+              <div class="control-group" style="background-color: #fffed7">
+                <label class="control-label" for="dno_trazabilidad">No Trazabilidad</label>
+                <div class="controls">
+                  <input type="text" name="dno_trazabilidad" class="span9" id="dno_trazabilidad"
+                    value="<?php echo set_value('dno_trazabilidad', isset($factura) ? $factura['info']->no_trazabilidad : ''); ?>" placeholder="">
+                  <input type="hidden" name="id_paleta_salida" value="<?php echo (isset($factura) ? $factura['info']->id_paleta_salida : ''); ?>">
+                </div>
+              </div>
+
               <div class="control-group">
                 <label class="control-label" for="es_carta_porte">Carta Porte</label>
                 <div class="controls">
@@ -585,32 +594,32 @@
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', $factura['info']->subtotal))?></td>
+                    <td id="importe-format"><?php echo MyString::formatoNumero(set_value('total_importe', $factura['info']->subtotal))?></td>
                     <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', $factura['info']->subtotal); ?>">
                   </tr>
                   <tr>
                     <td>Descuento</td>
-                    <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0))?></td>
+                    <td id="descuento-format"><?php echo MyString::formatoNumero(set_value('total_descuento', 0))?></td>
                     <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
                   </tr>
                   <tr>
                     <td>SUBTOTAL</td>
-                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', $factura['info']->subtotal))?></td>
+                    <td id="subtotal-format"><?php echo MyString::formatoNumero(set_value('total_subtotal', $factura['info']->subtotal))?></td>
                     <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', $factura['info']->subtotal); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', $factura['info']->importe_iva))?></td>
+                    <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', $factura['info']->importe_iva))?></td>
                     <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', $factura['info']->importe_iva); ?>">
                   </tr>
                   <tr>
                     <td>Ret. IVA</td>
-                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', $factura['info']->retencion_iva))?></td>
+                    <td id="retiva-format"><?php echo MyString::formatoNumero(set_value('total_retiva', $factura['info']->retencion_iva))?></td>
                     <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', $factura['info']->retencion_iva); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', $factura['info']->total))?></td>
+                    <td id="totfac-format"><?php echo MyString::formatoNumero(set_value('total_totfac', $factura['info']->total))?></td>
                     <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', $factura['info']->total); ?>">
                   </tr>
                 </tbody>

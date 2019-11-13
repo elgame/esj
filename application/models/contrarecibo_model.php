@@ -258,7 +258,7 @@ class contrarecibo_model extends CI_Model {
     $pdf->SetWidths(array(31, 31));
     $pdf->SetAligns(array('L','R'));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: '.$data['info']->folio, String::fechaAT($data['info']->fecha)), false, false, 5);
+    $pdf->Row2(array('Folio: '.$data['info']->folio, MyString::fechaAT($data['info']->fecha)), false, false, 5);
 
     $pdf->SetWidths(array(62));
     $pdf->SetAligns(array('L'));
@@ -270,24 +270,24 @@ class contrarecibo_model extends CI_Model {
     $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
     $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size);
 
-    $pdf->SetWidths(array(13, 15, 15, 19));
+    $pdf->SetWidths(array(13, 17, 15, 18));
     $pdf->SetAligns(array('L','L','R','L'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-2));
     $pdf->SetX(0);
     $pdf->Row2(array('NUMERO', 'FECHA', 'IMPORTE', 'OBSERVACION'), false, true, 5);
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(.5,-1,-1,-2));
+                   array(0,0,0,-2));
     $subtotal = $iva = $total = $retencion = $ieps = 0;
     $tipoCambio = 0;
     $codigoAreas = array();
     $inc = 1;
     foreach ($facturas as $key => $prod) {
       $pdf->SetXY(0, $pdf->GetY()-$inc);
-      $pdf->Row(array(
+      $pdf->Row2(array(
         $prod->folio,
         $prod->fecha,
-        String::formatoNumero($prod->importe, 2, '', true),
+        MyString::formatoNumero($prod->importe, 2, '', true),
         $prod->observacion
       ), false, false);
       $inc = 2;
@@ -297,10 +297,10 @@ class contrarecibo_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(13, 20));
     // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
-    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,0));
     $pdf->SetX(30);
-    $pdf->Row2(array('TOTAL', String::formatoNumero($data['info']->total, 2, '', true)), false, true, 5);
+    $pdf->Row2(array('TOTAL', MyString::formatoNumero($data['info']->total, 2, '', true)), false, true, 5);
 
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetAligns(array('C'));

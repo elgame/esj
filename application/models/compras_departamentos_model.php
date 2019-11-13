@@ -55,7 +55,7 @@ class compras_departamentos_model extends CI_Model {
   public function agregar()
   {
     $this->db->insert('compras_departamentos', array('nombre' => $_POST['nombre']));
-    $departamentoId = $this->db->insert_id();
+    $departamentoId = $this->db->insert_id('compras_departamentos_id_departamento_seq');
 
     return array('passes' => true, 'msg' => 3, 'departamentoId' => $departamentoId);
   }

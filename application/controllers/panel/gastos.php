@@ -10,6 +10,7 @@ class gastos extends MY_Controller {
     'gastos/ajax_get_cuentas_proveedor/',
     'gastos/ligar/',
     'gastos/ajax_get_facturas/',
+    'gastos/verXml/'
   );
 
   public function _remap($method){
@@ -34,6 +35,9 @@ class gastos extends MY_Controller {
 
   public function agregar()
   {
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
@@ -62,7 +66,7 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->gastos_model->agregar($_POST, $_FILES['xml']);
+      $res_mdl = $this->gastos_model->agregar($_POST);
 
       if ($res_mdl['passes'])
       {
@@ -78,7 +82,7 @@ class gastos extends MY_Controller {
       }
       // if ($res_mdl['passes'])
       // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
       // }
     }
 
@@ -128,6 +132,16 @@ class gastos extends MY_Controller {
 
   public function ver()
   {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/compras_ordenes/ver.js'),
+    ));
+
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
     $this->load->model('gastos_model');
     $this->load->model('compras_model');
     $this->load->model('proveedores_model');
@@ -140,7 +154,7 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $this->gastos_model->updateXml($_GET['id'], $_GET['idp'], (isset($_FILES['xml'])? $_FILES['xml']: false));
 
       $params['frm_errors'] = $this->showMsgs(4);
     }
@@ -152,12 +166,51 @@ class gastos extends MY_Controller {
     $this->load->view('panel/gastos/ver', $params);
   }
 
+  public function verXml()
+  {
+    $this->carabiner->js(array(
+      array('general/util.js'),
+      array('panel/gastos/verXml.js')
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->model('gastos_model');
+    $this->load->model('compras_model');
+    $this->load->model('proveedores_model');
+    $this->load->model('empresas_model');
+
+    $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
+    if (!empty($_GET['id'])) {
+      $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], false);
+    }
+    $ide = !empty($_GET['ide'])? $_GET['ide']: $params['gasto']['info']->id_empresa;
+    $params['ide']     = $ide;
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($ide, true);
+
+    $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): (isset($params['proveedor']['info']->rfc)? $params['proveedor']['info']->rfc: '');
+    $params['rfc'] = $rfcProv;
+
+    $path = mb_convert_encoding("C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8"); // C:\DescargasXMLenlinea/
+    if (is_dir($path)) {
+      $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
+        $this->input->get('ffecha1'), $this->input->get('ffecha2'));
+      $params['files'] = $response;
+      // echo "<pre>";
+      //   var_dump($response);
+      // echo "</pre>";exit;
+    }
+
+    $this->load->view('panel/gastos/addXmls', $params);
+  }
+
   public function cancelar()
   {
     $this->load->model('compras_model');
     $this->compras_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
+    redirect(base_url('panel/compras/?' . MyString::getVarsLink(array('id')).'&msg=3'));
   }
 
 
@@ -255,11 +308,13 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_model->agregarNotaCredito($_GET['id'], $_POST, $_FILES['xml'], true);
+      $id_aux = $_GET['id'];
+      $res_mdl = $this->compras_model->agregarNotaCredito($_GET['id'], $_POST, (isset($_FILES['xml'])? $_FILES['xml']: null), true);
+      $_GET['id'] = $id_aux;
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/gastos/agregar_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/gastos/agregar_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -309,11 +364,13 @@ class gastos extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_model->actualizarNotaCredito($_GET['id'], $_POST, $_FILES['xml'], true);
+      $id_aux = $_GET['id'];
+      $res_mdl = $this->compras_model->actualizarNotaCredito($_GET['id'], $_POST, (isset($_FILES['xml'])? $_FILES['xml']: null), true);
+      $_GET['id'] = $id_aux;
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/gastos/ver_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/gastos/ver_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -375,9 +432,17 @@ class gastos extends MY_Controller {
       array('field' => 'totalOrden',
             'label' => 'Total',
             'rules' => 'greater_than[-1]'),
-      array('field' => 'xml',
-            'label' => 'XML',
-            'rules' => 'callback_xml_check'),
+
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => '')  ,
+      array('field' => 'noCertificado',
+            'label' => 'Certificado',
+            'rules' => ''),
+
+      // array('field' => 'xml',
+      //       'label' => 'XML',
+      //       'rules' => 'callback_xml_check'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -444,6 +509,34 @@ class gastos extends MY_Controller {
 
       array('field' => 'fcuentas_proveedor',
             'label' => 'Cuenta Proveedor',
+            'rules' => ''),
+
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => 'required|numeric'),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => 'required'),
+      array('field' => 'ranchoId[]',
+            'label' => 'Rancho',
+            'rules' => 'required|numeric'),
+      array('field' => 'ranchoText[]',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'centroCostoId[]',
+            'label' => 'Centro de costo',
+            'rules' => 'required|numeric'),
+      array('field' => 'centroCostoText[]',
+            'label' => 'Centro de costo',
+            'rules' => ''),
+      array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric'),
+      array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => ''),
+      array('field' => 'intangible',
+            'label' => 'Gasto intangible',
             'rules' => ''),
 
       array('field' => 'subtotal',
@@ -532,6 +625,9 @@ class gastos extends MY_Controller {
       array('field' => 'xml',
             'label' => 'XML',
             'rules' => 'callback_xml_check'),
+      array('field' => 'uuid',
+            'label' => 'UUID',
+            'rules' => 'callback_uuid_check'),
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
@@ -570,10 +666,29 @@ class gastos extends MY_Controller {
 
   public function xml_check($file)
   {
-    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    if (isset($_FILES['xml']) && $_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
     {
       $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
       return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
+  public function uuid_check($uuid)
+  {
+    if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
+    {
+      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
+        (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
+
+      if ($query->num > 0) {
+        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        return false;
+      }
+      return true;
     }
     else
     {

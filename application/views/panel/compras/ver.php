@@ -39,7 +39,7 @@
           <p>Usted está usando un navegador desactualizado. <a href="http://browsehappy.com/">Actualice su navegador</a> o <a href="http://www.google.com/chromeframe/?redirect=true">instale Google Chrome Frame</a> para experimentar mejor este sitio.</p>
         </div>
       <![endif]-->
-      <form class="form-horizontal" action="<?php echo base_url('panel/compras/ver/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-horizontal" action="<?php echo base_url('panel/compras/ver/?'.MyString::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
         <div id="content" class="span12">
           <div class="row-fluid">
             <div class="box span12">
@@ -96,7 +96,22 @@
                     </div>
 
                     <?php //if ( ! $compra['info']->xml){ ?>
-                      <div class="span4">
+                    <div class="span4">
+                      <div class="control-group">
+                        <div class="controls span9">
+                          <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$_GET['idp'].'') ?>"
+                            rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                            <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                          <br><br>
+                          UUID: <input type="text" name="uuid" value="<?php echo $compra['info']->uuid; ?>" id="buscarUuid"><br>
+                          No Certificado: <input type="text" name="noCertificado" value="<?php echo $compra['info']->no_certificado; ?>" id="buscarNoCertificado">
+
+                          <br><br><input type="hidden" name="aux" value="1">
+                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                        </div>
+                      </div>
+                    </div>
+                      <!-- <div class="span4">
                         <div class="control-group">
                           <div class="controls span9">
                             XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
@@ -104,7 +119,7 @@
                             <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                           </div>
                         </div>
-                      </div>
+                      </div> -->
                     <?php //} ?>
                   </div>
 
@@ -182,7 +197,7 @@
                                                <input type="text" name="ret_isrTotal[]" value="<?php echo isset($_POST['ret_isrTotal'][$key]) ? $_POST['ret_isrTotal'][$key]: $prod->retencion_isr ?>" id="ret_isrTotal" class="span12" readonly>
                                            </td>
                                            <td style="">
-                                               <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe, 2, '$', false) ?></span>
+                                               <span><?php echo MyString::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe, 2, '$', false) ?></span>
                                                <input type="hidden" name="importe[]" value="<?php echo set_value('importe[]', $prod->importe) ?>" id="importe" class="span12 vpositive">
                                                <input type="hidden" name="total[]" value="<?php echo set_value('total[]', $prod->total) ?>" id="total" class="span12 vpositive">
                                            </td>
@@ -210,49 +225,49 @@
                         <tbody>
                           <tr>
                             <td rowspan="7">
-                                <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', String::num2letras($total));?></textarea>
+                                <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', MyString::num2letras($total));?></textarea>
                             </td>
                           </tr>
                           <tr>
                             <td><em>Subtotal</em></td>
                             <td id="importe-format">
-                              <input type="text" name="totalImporte" id="totalImporte" value="<?php echo String::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
-                              <input type="hidden" name="htotalImporte" value="<?php echo $subtotal ?>">
+                              <input type="text" name="totalImporte" id="totalImporte" value="<?php echo MyString::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
+                              <input type="hidden" name="htotalImporte" id="htotalImporte" value="<?php echo $subtotal ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>IVA</td>
                             <td id="traslado-format">
-                              <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
-                              <input type="hidden" name="htotalImpuestosTrasladados" value="<?php echo $iva ?>">
+                              <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
+                              <input type="hidden" name="htotalImpuestosTrasladados" id="htotalImpuestosTrasladados" value="<?php echo $iva ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>IEPS</td>
                             <td id="ieps-format">
-                              <input type="text" name="totalIeps" id="totalIeps" value="<?php echo String::formatoNumero(set_value('totalIeps', $ieps), 2, '$', false); ?>">
-                              <input type="hidden" name="htotalIeps" value="<?php echo $ieps ?>">
+                              <input type="text" name="totalIeps" id="totalIeps" value="<?php echo MyString::formatoNumero(set_value('totalIeps', $ieps), 2, '$', false); ?>">
+                              <input type="hidden" name="htotalIeps" id="htotalIeps" value="<?php echo $ieps ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>RET.</td>
                             <td id="retencion-format">
-                              <input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo String::formatoNumero(set_value('totalRetencion', $retencion), 2, '$', false)?>">
-                              <input type="hidden" name="htotalRetencion" value="<?php echo $retencion ?>">
+                              <input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo MyString::formatoNumero(set_value('totalRetencion', $retencion), 2, '$', false)?>">
+                              <input type="hidden" name="htotalRetencion" id="htotalRetencion" value="<?php echo $retencion ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>RET ISR</td>
                             <td id="retencionisr-format">
-                              <input type="text" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencionisr), 2, '$', false)?>">
-                              <input type="hidden" name="htotalRetencionIsr" value="<?php echo $retencionisr ?>">
+                              <input type="text" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo MyString::formatoNumero(set_value('totalRetencionIsr', $retencionisr), 2, '$', false)?>">
+                              <input type="hidden" name="htotalRetencionIsr" id="htotalRetencionIsr" value="<?php echo $retencionisr ?>">
                             </td>
                           </tr>
                           <tr style="font-weight:bold;font-size:1.2em;">
                             <td>TOTAL</td>
                             <td id="total-format">
-                              <input type="text" name="totalOrden" id="totalOrden" value="<?php echo String::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
-                              <input type="hidden" name="htotalOrden" value="<?php echo $total ?>">
+                              <input type="text" name="totalOrden" id="totalOrden" value="<?php echo MyString::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
+                              <input type="hidden" name="htotalOrden" id="htotalOrden" value="<?php echo $total ?>">
                             </td>
                           </tr>
                         </tbody>

@@ -127,6 +127,7 @@ $(function(){
   autocompleteClasifi();
   autocompleteClasifiLive();
   autocompleteClaveUnidadLive();
+  autocompleteEmpresaRemisionesLive();
 
   if ($('#did_empresa').val() !== '') {
     loadSerieFolio($('#did_empresa').val());
@@ -417,7 +418,15 @@ $(function(){
   // Boton Ventas de Remision.
   $('#show-remisiones').on('click', function(event) {
     var $this = $(this); // boton
-    $('#modal-remisiones').modal('show');
+    var dataa = {'empresaId': $('#idempresarem').val()};
+
+    if ($('#idempresarem').val() == '') {
+      $('#empresarem').val($('#dempresa').val());
+      $('#idempresarem').val($('#did_empresa').val());
+      dataa.empresaId = $('#did_empresa').val();
+    }
+
+    getRemisionesEmpresa(dataa);
   });
 
   $('#BtnAddRemisiones').on('click', function(event) {
@@ -545,7 +554,96 @@ $(function(){
         calculaTotalProducto($(this));
     });
   }
+
+  modalCfdiRel();
 });
+
+var modalCfdiRel = function () {
+  $('#btnCfdiRelPrev').on('click', function(event) {
+    $('#modal-cfdiRelPrev').modal('show');
+
+    $('#BtnClearCfdiRel').hide();
+    if ($('#cfdiRelPrev').val() != '') {
+      $('#BtnClearCfdiRel').show();
+    }
+  });
+
+  $("#fileCfdiRelPrev").change(function(){
+    var file = document.getElementById("fileCfdiRelPrev").files[0]
+    var reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+
+    reader.onloadend = function(){
+      var uuid = reader.result.match(/UUID="([A-Z0-9\-]){35,38}"/g);
+      if (uuid && uuid.length > 0) {
+        var $uuid = uuid[0].replace(/(UUID=|")/g, '');
+        $('#cfdiRelPrev').val($uuid);
+        $('#cfdiRelPrevText').text($uuid);
+        $('#modal-cfdiRelPrev').modal('hide');
+      } else {
+        alert('No se encontró el UUID en el archivo XML.');
+      }
+    };
+
+    reader.onerror = function (error) {
+      alert('No se pudo cargar el archivo XML.')
+    };
+  });
+
+  $('#BtnClearCfdiRel').on('click', function(event) {
+    $('#cfdiRelPrev').val('');
+    $('#cfdiRelPrevText').text('');
+    $('#fileCfdiRelPrev').val('');
+    $('#modal-cfdiRelPrev').modal('hide');
+  });
+};
+
+var getRemisionesEmpresa = function (dataa) {
+  $.get(base_url + 'panel/facturacion/getRemisiones', dataa, function(remisiones) {
+      var html = '';
+
+      remisiones.forEach(function(el) {
+        var $rendimientos = [], selected = '';
+        el.pallets.forEach(function (pallet) {
+          $rendimientos = $rendimientos.concat(pallet.rendimientos);
+        });
+        $rendimientos = JSON.stringify($rendimientos);
+
+        selected = $('#remision'+el.id_factura).length>0? ' checked': '';
+
+        html += '<tr style="" id="chk-cli-remision-'+el.id_factura+'">'+
+                '<td><input type="checkbox" value="'+el.id_factura+'"'+selected+' class="chk-cli-remisiones"><input type="hidden" id="jsondata" value="'+$rendimientos+'"></td>'+
+                '<td>'+el.serie+el.folio+'</td>'+
+                '<td>'+el.nombre_fiscal+'</td>'+
+                '<td>'+el.fecha+'</td>'+
+              '</tr>';
+      });
+      $('#mdlRemisiones').html(html);
+      $('#modal-remisiones').modal('show');
+    }, 'json');
+};
+
+var autocompleteEmpresaRemisionesLive = function () {
+  $('#modal-remisiones').on('focus', 'input#empresarem:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#idempresarem").val(ui.item.id);
+        $("#empresarem").css("background-color", "#B0FFB0");
+
+        var dataa = {'empresaId': $('#idempresarem').val()};
+        getRemisionesEmpresa(dataa);
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#empresarem").css("background-color", "#FFD9B3");
+        $("#idempresarem").val("");
+      }
+    });
+  });
+};
 
 var EventOnChangeMoneda = function () {
   $('#moneda').on('change', function(event) {
@@ -689,7 +787,8 @@ function pasaGastosTabla () {
   // Pasa los gastos a la otra tabla
   $("#table_prod #prod_did_prod").each(function(index, el) {
     var $this = $(this), $tr = $this.parent().parent();
-    if ($this.val() == '49' || $this.val() == '50' || $this.val() == '51' || $this.val() == '52' || $this.val() == '53') {
+    // if ($this.val() == '49' || $this.val() == '50' || $this.val() == '51' || $this.val() == '52' || $this.val() == '53') {
+    if ( searchGastosProductos($this.val()) ) {
       $tr.appendTo('#table_prod2 thead');
     }
   });
@@ -907,7 +1006,7 @@ function addProducto(unidades, prod) {
                 '<td>' +
                     '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                       '<option value="0"'+(ivaSelected == '0' ? 'selected' : '')+'>0%</option>' +
-                      '<option value="11"'+(ivaSelected == '11' ? 'selected' : '')+'>11%</option>' +
+                      '<option value="8"'+(ivaSelected == '8' ? 'selected' : '')+'>8%</option>' +
                       '<option value="16"'+(ivaSelected == '16' ? 'selected' : '')+'>16%</option>' +
                     '</select>' +
                     // '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
@@ -953,7 +1052,8 @@ function recalculaCosto () {
   $('input#prod_did_prod').each(function(i, e) {
     var $this = $(this), $parent = $this.parent().parent(), idProd;
     idProd = $this.val();
-    if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+    // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+    if ( !searchGastosProductos(idProd) ) {
       num_cantidad += parseFloat($parent.find('#prod_dcantidad').val());
     } else {
       total_repartir += parseFloat($parent.find('#prod_importe').val()) +
@@ -967,7 +1067,8 @@ function recalculaCosto () {
     var $this = $(this), $parent = $this.parent().parent(), idProd;
     if (parseFloat($this.val()) > 0) {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         $this.val( (parseFloat($this.val()) + (parseFloat(repartir_costo)*(isCheckedSinCosto? 1: -1))).toFixed(4) );
         calculaTotalProducto($parent, false);
       }
@@ -995,7 +1096,8 @@ function calculaTotal ($calculaT) {
       total_importes += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_importes += parseFloat($(this).val());
       }
     }
@@ -1008,7 +1110,8 @@ function calculaTotal ($calculaT) {
       total_descuentos += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_descuentos += parseFloat($(this).val());
       }
     }
@@ -1023,7 +1126,8 @@ function calculaTotal ($calculaT) {
       total_ivas += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_ivas += parseFloat($(this).val());
       }
     }
@@ -1036,7 +1140,8 @@ function calculaTotal ($calculaT) {
       total_retenciones += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
         total_retenciones += parseFloat($(this).val());
       }
     }
@@ -1071,7 +1176,7 @@ function loadSerieFolio (ide, forceLoad) {
   loader.create();
     $.getJSON(base_url+'panel/facturacion/get_series/?tipof=f&ide='+ide,
       function(res){
-        if(res.msg === 'ok') {
+        if(res.data) {
           var html_option = '<option value="void"></option>',
               selected = '', serieSelected = 'void',
               loadDefault = false;
@@ -1104,7 +1209,7 @@ function loadSerieFolio (ide, forceLoad) {
             // }
           }
         } else {
-          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+          noty({"text":'No hay series', "layout":"topRight", "type": 'error'});
         }
         loader.close();
       });

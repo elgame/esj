@@ -291,9 +291,10 @@
         exist     = false,
         inveario  = 0;
     if ( ! exist) {
-      inveario  = (parseFloat(producto.selectedClasif.item.inventario.saldo_anterior)+
-                  parseFloat(producto.selectedClasif.item.inventario.entradas)-
-                  parseFloat(producto.selectedClasif.item.inventario.salidas));
+      // inveario  = (parseFloat(producto.selectedClasif.item.inventario.saldo_anterior)+
+      //             parseFloat(producto.selectedClasif.item.inventario.entradas)-
+      //             parseFloat(producto.selectedClasif.item.inventario.salidas));
+      inveario  = producto.selectedClasif.item.inventario;
       $trHtml = $('<tr>' +
                   '<td>'+
                     producto.selectedClasif.item.unidad+

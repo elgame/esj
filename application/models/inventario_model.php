@@ -87,7 +87,7 @@ class inventario_model extends privilegios_model{
 
 	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Proveedor';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -122,11 +122,11 @@ class inventario_model extends privilegios_model{
 			foreach ($item->productos as $key => $producto)
 			{
 				$datos = array($producto->nombre,
-					String::formatoNumero($producto->cantidad, 2, '', false),
+					MyString::formatoNumero($producto->cantidad, 2, '', false),
 					$producto->abreviatura,
-					String::formatoNumero($producto->importe, 2, '', false),
-					String::formatoNumero($producto->impuestos, 2, '', false),
-					String::formatoNumero(($producto->total), 2, '', false),
+					MyString::formatoNumero($producto->importe, 2, '', false),
+					MyString::formatoNumero($producto->impuestos, 2, '', false),
+					MyString::formatoNumero(($producto->total), 2, '', false),
 					);
 				$pdf->SetXY(6, $pdf->GetY()-2);
 				$pdf->SetAligns($aligns);
@@ -140,11 +140,11 @@ class inventario_model extends privilegios_model{
 			}
 
 			$datos = array('Total Proveedor',
-				String::formatoNumero($proveedor_cantidad, 2, '', false),
+				MyString::formatoNumero($proveedor_cantidad, 2, '', false),
 				'',
-				String::formatoNumero($proveedor_importe, 2, '', false),
-				String::formatoNumero($proveedor_impuestos, 2, '', false),
-				String::formatoNumero(($proveedor_total), 2, '', false),
+				MyString::formatoNumero($proveedor_importe, 2, '', false),
+				MyString::formatoNumero($proveedor_impuestos, 2, '', false),
+				MyString::formatoNumero(($proveedor_total), 2, '', false),
 				);
 			$pdf->SetXY(6, $pdf->GetY());
 			$pdf->SetAligns($aligns);
@@ -158,11 +158,11 @@ class inventario_model extends privilegios_model{
 		}
 
 		$datos = array('Total General',
-			String::formatoNumero($total_cantidad, 2, '', false),
+			MyString::formatoNumero($total_cantidad, 2, '', false),
 			'',
-			String::formatoNumero($total_importe, 2, '', false),
-			String::formatoNumero($total_impuestos, 2, '', false),
-			String::formatoNumero(($total_total), 2, '', false),
+			MyString::formatoNumero($total_importe, 2, '', false),
+			MyString::formatoNumero($total_impuestos, 2, '', false),
+			MyString::formatoNumero(($total_total), 2, '', false),
 			);
 		$pdf->SetXY(6, $pdf->GetY());
 		$pdf->SetAligns($aligns);
@@ -337,7 +337,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -364,16 +364,16 @@ class inventario_model extends privilegios_model{
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('Arial','',8);
 			$datos = array($producto->nombre,
-				String::formatoNumero($producto->cantidad, 2, '', false),
+				MyString::formatoNumero($producto->cantidad, 2, '', false),
 				$producto->abreviatura,
-				String::formatoNumero($producto->importe, 2, '', false),
-				String::formatoNumero($producto->impuestos, 2, '', false),
-				String::formatoNumero(($producto->total), 2, '', false),
+				MyString::formatoNumero($producto->importe, 2, '', false),
+				MyString::formatoNumero($producto->impuestos, 2, '', false),
+				MyString::formatoNumero(($producto->total), 2, '', false),
 				);
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
-			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.String::getVarsLink(array('fproductor', 'ids_productos'))) ));
+			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.MyString::getVarsLink(array('fproductor', 'ids_productos'))) ));
 			$pdf->Row($datos, false, false);
 
 			$proveedor_cantidad  += $producto->cantidad;
@@ -383,11 +383,11 @@ class inventario_model extends privilegios_model{
 
 		}
 		$datos = array('Total General',
-			String::formatoNumero($proveedor_cantidad, 2, '', false),
+			MyString::formatoNumero($proveedor_cantidad, 2, '', false),
 			'',
-			String::formatoNumero($proveedor_importe, 2, '', false),
-			String::formatoNumero($proveedor_impuestos, 2, '', false),
-			String::formatoNumero(($proveedor_total), 2, '', false),
+			MyString::formatoNumero($proveedor_importe, 2, '', false),
+			MyString::formatoNumero($proveedor_impuestos, 2, '', false),
+			MyString::formatoNumero(($proveedor_total), 2, '', false),
 			);
 		$pdf->SetXY(6, $pdf->GetY());
 		$pdf->SetAligns($aligns);
@@ -574,7 +574,7 @@ class inventario_model extends privilegios_model{
 
     $pdf->titulo2 = 'Reporte de seguimientos x Producto';
     // $pdf->titulo3 = (isset($res[0]->nombre)?'PRODUCTO: '.$res[0]->nombre:'')."\n";
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -621,13 +621,13 @@ class inventario_model extends privilegios_model{
 
           $pdf->SetTextColor(0,0,0);
           $pdf->SetFont('Arial','',8);
-          $datos = array(String::fechaAT($producto->fecha),
+          $datos = array(MyString::fechaAT($producto->fecha),
             $producto->serie.' '.$producto->folio,
             $producto->proveedor,
             $producto->cantidad.' '.$producto->abreviatura,
-            String::formatoNumero($producto->precio_unitario, 2, '', false),
-            String::formatoNumero($producto->impuestos, 2, '', false),
-            String::formatoNumero(($producto->total), 2, '', false),
+            MyString::formatoNumero($producto->precio_unitario, 2, '', false),
+            MyString::formatoNumero($producto->impuestos, 2, '', false),
+            MyString::formatoNumero(($producto->total), 2, '', false),
             );
           $pdf->SetXY(6, $pdf->GetY()-2);
           $pdf->SetAligns($aligns);
@@ -643,7 +643,7 @@ class inventario_model extends privilegios_model{
         }
         $pdf->SetFont('Arial','B',8);
         $datos = array('Total',
-          String::formatoNumero(($proveedor_total), 2, '', false),
+          MyString::formatoNumero(($proveedor_total), 2, '', false),
           );
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'R'));
@@ -653,7 +653,7 @@ class inventario_model extends privilegios_model{
     }
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($total_general), 2, '', false),
+      MyString::formatoNumero(($total_general), 2, '', false),
       );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R'));
@@ -819,7 +819,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -860,23 +860,23 @@ class inventario_model extends privilegios_model{
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->SetMyLinks(array());
-			$pdf->Row(array(String::fechaAT($producto->fechao),
+			$pdf->Row(array(MyString::fechaAT($producto->fechao),
 				'',
-				String::formatoNumero($producto->folioo, 0, '', false),
+				MyString::formatoNumero($producto->folioo, 0, '', false),
 				'Orden de Compra',
-				String::formatoNumero($producto->cantidad, 2, '', false),
-				String::formatoNumero(0, 2, '', false),
+				MyString::formatoNumero($producto->cantidad, 2, '', false),
+				MyString::formatoNumero(0, 2, '', false),
 				), false, false);
 
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_compra.
-							'&id_orden='.$producto->id_orden.'&'.String::getVarsLink(array('id_orden', 'id_compra'))) ));
-			$pdf->Row(array(String::fechaAT($producto->fecha),
+							'&id_orden='.$producto->id_orden.'&'.MyString::getVarsLink(array('id_orden', 'id_compra'))) ));
+			$pdf->Row(array(MyString::fechaAT($producto->fecha),
 				$producto->serie,
-				String::formatoNumero($producto->folio, 0, '', false),
+				MyString::formatoNumero($producto->folio, 0, '', false),
 				'Compra',
-				String::formatoNumero(0, 2, '', false),
-				String::formatoNumero($producto->cantidad, 2, '', false),
+				MyString::formatoNumero(0, 2, '', false),
+				MyString::formatoNumero($producto->cantidad, 2, '', false),
 				), false, false);
 
 			$proveedor_cantidad  += $producto->cantidad;
@@ -884,8 +884,8 @@ class inventario_model extends privilegios_model{
 		}
 		$datos = array('Total General',
 			'', '', '',
-			String::formatoNumero($proveedor_cantidad, 2, '', false),
-			String::formatoNumero(($proveedor_cantidad), 2, '', false),
+			MyString::formatoNumero($proveedor_cantidad, 2, '', false),
+			MyString::formatoNumero(($proveedor_cantidad), 2, '', false),
 			);
 		$pdf->SetXY(6, $pdf->GetY());
 		$pdf->SetAligns($aligns);
@@ -947,7 +947,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte Seguimiento de Operaciones de Compra';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 		$pdf->AddPage();
@@ -968,12 +968,12 @@ class inventario_model extends privilegios_model{
 		$pdf->SetAligns($aligns);
 		$pdf->SetWidths($widths);
 		$pdf->Row(array(
-			String::fechaATexto(substr($res['compra']->fecha, 0, 10), '/c'),
+			MyString::fechaATexto(substr($res['compra']->fecha, 0, 10), '/c'),
 			$res['compra']->serie,
 			$res['compra']->folio,
 			'Compra',
 			$res['orden']->proveedor,
-			String::fechaATexto(substr($res['orden']->fecha_aceptacion, 0, 10), '/c'),
+			MyString::fechaATexto(substr($res['orden']->fecha_aceptacion, 0, 10), '/c'),
 			), false, false);
 
 		$aligns = array('L', 'L', 'R', 'R', 'R');
@@ -997,9 +997,9 @@ class inventario_model extends privilegios_model{
 				$pdf->Row(array(
 					$value->codigo,
 					$value->producto,
-					String::formatoNumero($value->cantidad, 2, '', false),
-					String::formatoNumero($value->cantidad, 2, '', false),
-					String::formatoNumero($value->importe+$value->iva, 2, '', false),
+					MyString::formatoNumero($value->cantidad, 2, '', false),
+					MyString::formatoNumero($value->cantidad, 2, '', false),
+					MyString::formatoNumero($value->importe+$value->iva, 2, '', false),
 					), false, false);
 				$cantidad += $value->cantidad;
 				$surtido += $value->cantidad;
@@ -1014,9 +1014,9 @@ class inventario_model extends privilegios_model{
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetFont('Arial','',8);
 		$pdf->Row(array(
-					String::formatoNumero($cantidad, 2, '', false),
-					String::formatoNumero($cantidad, 2, '', false),
-					String::formatoNumero($total, 2, '', false),
+					MyString::formatoNumero($cantidad, 2, '', false),
+					MyString::formatoNumero($cantidad, 2, '', false),
+					MyString::formatoNumero($total, 2, '', false),
 					), false);
 		$pdf->Text($pdf->GetX(), $pdf->GetY(), "Orde de Compra {$res['orden']->folio}");
 
@@ -1033,9 +1033,9 @@ class inventario_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getEPUData($id_producto=null, $id_almacen=null)
+	public function getEPUData($id_producto=null, $id_almacen=null, $con_req=false, $extras = [])
   {
-		$sql_com = $sql_sal = $sql = '';
+		$sql_com = $sql_sal = $sql_req = $sql = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -1053,12 +1053,14 @@ class inventario_model extends privilegios_model{
       $_GET['did_empresa'] = $res_prod->id_empresa;
     }
 
-    $this->load->model('empresas_model');
-    $client_default = $this->empresas_model->getDefaultEmpresa();
-    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
-    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-    if($this->input->get('did_empresa') != ''){
-      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    if (!isset($extras['empresa'])) {
+      $this->load->model('empresas_model');
+      $client_default = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+      $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
     }
 
     if ($this->input->get('did_empresa') == 3) { // gomez gudiño
@@ -1070,12 +1072,30 @@ class inventario_model extends privilegios_model{
     if ($id_almacen > 0) {
       $sql_com .= " AND co.id_almacen = ".$id_almacen;
       $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
+      $sql_req .= " AND cr.id_almacen = ".$id_almacen;
+    }
+
+    $sql_con_req = '';
+    $sql_con_req_f = '';
+    if ($con_req) { // toma en cuenta la existencia de las requisición pendientes
+      $sql_con_req_f = ', con_req.cantidad AS con_req';
+      $sql_con_req = "LEFT JOIN
+      (
+        SELECT crq.id_producto, Sum(crq.cantidad) AS cantidad
+        FROM compras_requisicion cr
+          INNER JOIN compras_requisicion_productos crq ON cr.id_requisicion = crq.id_requisicion
+        WHERE cr.status = 'p' AND cr.tipo_orden = 'p' AND cr.autorizado = 'f' AND cr.id_autorizo IS NULL
+          AND cr.es_receta = 't' AND crq.importe > 0
+          {$sql_req}
+        GROUP BY crq.id_producto
+      ) AS con_req ON con_req.id_producto = p.id_producto";
     }
 
 		$res = $this->db->query(
 			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
         COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
 				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
+        {$sql_con_req_f}
 			FROM productos AS p
 			INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 			INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
@@ -1119,6 +1139,7 @@ class inventario_model extends privilegios_model{
           {$sql_sal}
 				GROUP BY sp.id_producto
 			) AS sal_sa ON sal_sa.id_producto = p.id_producto
+      {$sql_con_req}
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
 			ORDER BY nombre, nombre_producto ASC
 			");
@@ -1129,6 +1150,7 @@ class inventario_model extends privilegios_model{
 
 		return $response;
 	}
+
 	/**
 	 * Reporte existencias por unidad pdf
 	 */
@@ -1149,7 +1171,7 @@ class inventario_model extends privilegios_model{
 
 	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Existencia por unidades';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -1194,10 +1216,10 @@ class inventario_model extends privilegios_model{
 					$pdf->SetAligns($aligns);
 					$pdf->SetWidths($widths);
 					$pdf->Row(array('',
-						String::formatoNumero($totales['familia'][0], 2, '', false),
-						String::formatoNumero($totales['familia'][1], 2, '', false),
-						String::formatoNumero($totales['familia'][2], 2, '', false),
-						String::formatoNumero($totales['familia'][3], 2, '', false),
+						MyString::formatoNumero($totales['familia'][0], 2, '', false),
+						MyString::formatoNumero($totales['familia'][1], 2, '', false),
+						MyString::formatoNumero($totales['familia'][2], 2, '', false),
+						MyString::formatoNumero($totales['familia'][3], 2, '', false),
 						), true, false);
 				}
 				$totales['familia'] = array(0,0,0,0);
@@ -1236,10 +1258,10 @@ class inventario_model extends privilegios_model{
 				$totales['general'][3] += $existencia;
 
 				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
-					String::formatoNumero($item->saldo_anterior, 2, '', false),
-					String::formatoNumero($item->entradas, 2, '', false),
-					String::formatoNumero($item->salidas, 2, '', false),
-					String::formatoNumero($existencia, 2, '', false),
+					MyString::formatoNumero($item->saldo_anterior, 2, '', false),
+					MyString::formatoNumero($item->entradas, 2, '', false),
+					MyString::formatoNumero($item->salidas, 2, '', false),
+					MyString::formatoNumero($existencia, 2, '', false),
 					);
 
 				$pdf->SetX(6);
@@ -1254,18 +1276,18 @@ class inventario_model extends privilegios_model{
 		$pdf->SetAligns($aligns);
 		$pdf->SetWidths($widths);
 		$pdf->Row(array('',
-			String::formatoNumero($totales['familia'][0], 2, '', false),
-			String::formatoNumero($totales['familia'][1], 2, '', false),
-			String::formatoNumero($totales['familia'][2], 2, '', false),
-			String::formatoNumero($totales['familia'][3], 2, '', false),
+			MyString::formatoNumero($totales['familia'][0], 2, '', false),
+			MyString::formatoNumero($totales['familia'][1], 2, '', false),
+			MyString::formatoNumero($totales['familia'][2], 2, '', false),
+			MyString::formatoNumero($totales['familia'][3], 2, '', false),
 			), true, false);
 
 		$pdf->SetXY(6, $pdf->GetY()+5);
 		$pdf->Row(array('GENERAL',
-			String::formatoNumero($totales['general'][0], 2, '', false),
-			String::formatoNumero($totales['general'][1], 2, '', false),
-			String::formatoNumero($totales['general'][2], 2, '', false),
-			String::formatoNumero($totales['general'][3], 2, '', false),
+			MyString::formatoNumero($totales['general'][0], 2, '', false),
+			MyString::formatoNumero($totales['general'][1], 2, '', false),
+			MyString::formatoNumero($totales['general'][2], 2, '', false),
+			MyString::formatoNumero($totales['general'][3], 2, '', false),
 			), false, true);
 
 		$pdf->Output('epu.pdf', 'I');
@@ -1418,6 +1440,52 @@ class inventario_model extends privilegios_model{
     echo $html;
 	}
 
+  public function getCostoInventario($fecha)
+  {
+    $sql_com = $sql_sal = $sql = '';
+
+    //Filtros para buscar
+    if($this->input->get('did_empresa') != '') {
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('did_empresa') == 3) { // gomez gudiño
+      $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+      $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
+
+    $res = $this->db->query(
+      "SELECT Sum((COALESCE(co.cantidad, 0) - COALESCE(sa.cantidad, 0)) * p.precio_promedio) AS costo
+      FROM productos AS p
+      INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
+      LEFT JOIN
+      (
+        SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
+        FROM compras_ordenes AS co
+        INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) <= '{$fecha}'
+          {$sql_com}
+        GROUP BY cp.id_producto
+      ) AS co ON co.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) <= '{$fecha}'
+          {$sql_sal}
+        GROUP BY sp.id_producto
+      ) AS sa ON sa.id_producto = p.id_producto
+      WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
+      ");
+
+    $response = $res->row();
+
+    return $response;
+  }
+
 
   /**
    * Reporte costos ueps
@@ -1515,7 +1583,7 @@ class inventario_model extends privilegios_model{
 	          $row['saldo'][2] = $result[count($result)-1]['saldo'][2]-$row['salida'][2];
 
 	          $result[] = $row;
-	          if(floatval(String::formatoNumero($aux_cantidad, 2, '', true)) <= 0)
+	          if(floatval(MyString::formatoNumero($aux_cantidad, 2, '', true)) <= 0)
 	            break;
         	}
         }
@@ -1655,7 +1723,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Existencia por costos UEPS';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
@@ -1701,10 +1769,10 @@ class inventario_model extends privilegios_model{
           $pdf->SetWidths($widths);
           $pdf->SetMyLinks(array());
           $pdf->Row(array('TOTAL',
-            String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-            String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-            String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-            String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+            MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+            MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+            MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+            MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
             ), false, false);
         }
         $totaltes['familia'] = array(0,0,0,0);
@@ -1742,10 +1810,10 @@ class inventario_model extends privilegios_model{
         $totaltes['general'][3] += $item->data['saldo'][2];
 
         $datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
-          String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
-          String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
-          String::formatoNumero($item->data['salida'][2], 2, '$', false),
-          String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
+          MyString::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
+          MyString::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
+          MyString::formatoNumero($item->data['salida'][2], 2, '$', false),
+          MyString::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
           );
 
         $pdf->SetX(6);
@@ -1764,18 +1832,18 @@ class inventario_model extends privilegios_model{
     $pdf->SetWidths($widths);
     $pdf->SetMyLinks(array());
     $pdf->Row(array('TOTAL',
-      String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-      String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-      String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-      String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+      MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+      MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+      MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+      MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
       ), false, false);
 
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->Row(array('TOTAL GENERAL',
-      String::formatoNumero($totaltes['general'][0], 2, '$', false),
-      String::formatoNumero($totaltes['general'][1] , 2, '$', false),
-      String::formatoNumero($totaltes['general'][2], 2, '$', false),
-      String::formatoNumero($totaltes['general'][3], 2, '$', false),
+      MyString::formatoNumero($totaltes['general'][0], 2, '$', false),
+      MyString::formatoNumero($totaltes['general'][1] , 2, '$', false),
+      MyString::formatoNumero($totaltes['general'][2], 2, '$', false),
+      MyString::formatoNumero($totaltes['general'][3], 2, '$', false),
       ), false);
 
     $pdf->Output('epc.pdf', 'I');
@@ -1934,7 +2002,7 @@ class inventario_model extends privilegios_model{
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Reporte de inventario costo UEPS';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
@@ -1973,19 +2041,19 @@ class inventario_model extends privilegios_model{
         $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
       $datos = array(
-        String::fechaAT($item['fecha']),
+        MyString::fechaAT($item['fecha']),
 
-        $item['entrada'][0]!=''? String::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
-        $item['entrada'][1]!=''? String::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
-        $item['entrada'][2]!=''? String::formatoNumero($item['entrada'][2], 2, '$', false): $item['entrada'][2],
+        $item['entrada'][0]!=''? MyString::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
+        $item['entrada'][1]!=''? MyString::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
+        $item['entrada'][2]!=''? MyString::formatoNumero($item['entrada'][2], 2, '$', false): $item['entrada'][2],
 
-        $item['salida'][0]!=''? String::formatoNumero($item['salida'][0], 2, '', false): $item['salida'][0],
-        $item['salida'][1]!=''? String::formatoNumero($item['salida'][1], 2, '$', false): $item['salida'][1],
-        $item['salida'][2]!=''? String::formatoNumero($item['salida'][2], 2, '$', false): $item['salida'][2],
+        $item['salida'][0]!=''? MyString::formatoNumero($item['salida'][0], 2, '', false): $item['salida'][0],
+        $item['salida'][1]!=''? MyString::formatoNumero($item['salida'][1], 2, '$', false): $item['salida'][1],
+        $item['salida'][2]!=''? MyString::formatoNumero($item['salida'][2], 2, '$', false): $item['salida'][2],
 
-        $item['saldo'][0]!=''? String::formatoNumero($item['saldo'][0], 2, '', false): $item['saldo'][0],
-        $item['saldo'][1]!=''? String::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
-        $item['saldo'][2]!=''? String::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
+        $item['saldo'][0]!=''? MyString::formatoNumero($item['saldo'][0], 2, '', false): $item['saldo'][0],
+        $item['saldo'][1]!=''? MyString::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
+        $item['saldo'][2]!=''? MyString::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
         );
 
       $pdf->SetX(6);
@@ -2072,7 +2140,7 @@ class inventario_model extends privilegios_model{
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$pdf->titulo2 = 'Existencia por costos';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -2118,10 +2186,10 @@ class inventario_model extends privilegios_model{
 					$pdf->SetWidths($widths);
 					$pdf->SetMyLinks(array());
 					$pdf->Row(array('TOTAL',
-						String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-						String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-						String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-						String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+						MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+						MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+						MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+						MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
 						), false, false);
 				}
 				$totaltes['familia'] = array(0,0,0,0);
@@ -2159,10 +2227,10 @@ class inventario_model extends privilegios_model{
 				$totaltes['general'][3] += $item->data['saldo'][2];
 
 				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
-					String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
-					String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
-					String::formatoNumero($item->data['salida'][2], 2, '$', false),
-					String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
+					MyString::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
+					MyString::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
+					MyString::formatoNumero($item->data['salida'][2], 2, '$', false),
+					MyString::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
 					);
 
 				$pdf->SetX(6);
@@ -2181,18 +2249,18 @@ class inventario_model extends privilegios_model{
 		$pdf->SetWidths($widths);
 		$pdf->SetMyLinks(array());
 		$pdf->Row(array('TOTAL',
-			String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-			String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-			String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-			String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+			MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+			MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+			MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+			MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
 			), false, false);
 
 		$pdf->SetXY(6, $pdf->GetY()+5);
 		$pdf->Row(array('TOTAL GENERAL',
-			String::formatoNumero($totaltes['general'][0], 2, '$', false),
-			String::formatoNumero($totaltes['general'][1] , 2, '$', false),
-			String::formatoNumero($totaltes['general'][2], 2, '$', false),
-			String::formatoNumero($totaltes['general'][3], 2, '$', false),
+			MyString::formatoNumero($totaltes['general'][0], 2, '$', false),
+			MyString::formatoNumero($totaltes['general'][1] , 2, '$', false),
+			MyString::formatoNumero($totaltes['general'][2], 2, '$', false),
+			MyString::formatoNumero($totaltes['general'][3], 2, '$', false),
 			), false);
 
 		$pdf->Output('epc.pdf', 'I');
@@ -2459,7 +2527,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Historial de nivelaciones';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -2489,7 +2557,7 @@ class inventario_model extends privilegios_model{
       $pdf->SetX(6);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(30, 50));
-      $pdf->Row(array(String::fechaAT($item->fecha), $item->nombre), false, false);
+      $pdf->Row(array(MyString::fechaAT($item->fecha), $item->nombre), false, false);
 
       $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
@@ -2497,10 +2565,10 @@ class inventario_model extends privilegios_model{
       foreach ($item->datos as $key2 => $prod)
       {
         $datos = array($prod->nombre.' ('.$prod->abreviatura.')',
-          String::formatoNumero(($prod->inventario->data[0]+$prod->salida-$prod->entrada), 2, '', false),
-          String::formatoNumero($prod->entrada, 2, '', false),
-          String::formatoNumero($prod->salida, 2, '', false),
-          String::formatoNumero($prod->inventario->data[0], 2, '', false),
+          MyString::formatoNumero(($prod->inventario->data[0]+$prod->salida-$prod->entrada), 2, '', false),
+          MyString::formatoNumero($prod->entrada, 2, '', false),
+          MyString::formatoNumero($prod->salida, 2, '', false),
+          MyString::formatoNumero($prod->inventario->data[0], 2, '', false),
           );
 
         $pdf->SetX(6);
@@ -2515,18 +2583,18 @@ class inventario_model extends privilegios_model{
     // $pdf->SetWidths($widths);
     // $pdf->SetMyLinks(array());
     // $pdf->Row(array('TOTAL',
-    //   String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
     //   ), false, false);
 
     // $pdf->SetXY(6, $pdf->GetY()+5);
     // $pdf->Row(array('TOTAL GENERAL',
-    //   String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-    //   String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][0], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][2], 2, '$', false),
+    //   MyString::formatoNumero($totaltes['familia'][3], 2, '$', false),
     //   ), false);
 
     $pdf->Output('epc.pdf', 'I');
@@ -2554,12 +2622,12 @@ class inventario_model extends privilegios_model{
     }
 
 		$res = $this->db->query(
-		"SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, tipo
+		"SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, folio, tipo
 		FROM
 			(
 				(
 				SELECT cp.id_producto, cp.num_row, co.fecha_creacion AS fecha, cp.fecha_aceptacion AS fecha_reg,
-          cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+          cp.cantidad, cp.precio_unitario, cp.importe, co.folio, 'c' AS tipo
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
@@ -2569,7 +2637,7 @@ class inventario_model extends privilegios_model{
 				UNION ALL
 				(
 				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
-        sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+          sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, sa.folio, 's' AS tipo
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
 				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
@@ -2587,7 +2655,7 @@ class inventario_model extends privilegios_model{
 						'saldo' => array(0, 0, 0, 0), );
 		foreach ($res->result() as $key => $value)
 		{
-			$row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0));
+			$row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0), 'folio' => $value->folio);
 			if ($value->tipo == 'c')
 			{
 				$row['entrada'][0] = $value->cantidad;
@@ -2685,15 +2753,15 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de inventario costo promedio';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
-		$widths = array(20, 18, 18, 26, 18, 18, 26, 18, 18, 26);
-		$header = array('Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
+		$aligns = array('C', 'C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+		$widths = array(14, 18, 18, 18, 22, 18, 18, 22, 18, 18, 23);
+		$header = array('Folio', 'Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
 
 		$familia = '';
 		$keyconta = 0;
@@ -2705,9 +2773,9 @@ class inventario_model extends privilegios_model{
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
-				$pdf->SetX(26);
+				$pdf->SetX(38);
 				$pdf->SetAligns(array('C', 'C', 'C'));
-				$pdf->SetWidths(array(62, 62, 62));
+				$pdf->SetWidths(array(58, 58, 59));
 				$pdf->Row(array('Entradas', 'Salidas', 'Saldo'), true);
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
@@ -2724,19 +2792,20 @@ class inventario_model extends privilegios_model{
 				$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 			$datos = array(
-				String::fechaAT($item['fecha']),
+        (isset($item['folio'])? $item['folio']: ''),
+				MyString::fechaAT($item['fecha']),
 
-				$item['entrada'][0]!=''? String::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
-				$item['entrada'][1]!=''? String::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
-				$item['entrada'][2]!=''? String::formatoNumero($item['entrada'][2], 2, '$', false): $item['entrada'][2],
+				$item['entrada'][0]!=''? MyString::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
+				$item['entrada'][1]!=''? MyString::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
+				$item['entrada'][2]!=''? MyString::formatoNumero($item['entrada'][2], 2, '$', false): $item['entrada'][2],
 
-				$item['salida'][0]!=''? String::formatoNumero($item['salida'][0], 2, '', false): $item['salida'][0],
-				$item['salida'][1]!=''? String::formatoNumero($item['salida'][1], 2, '$', false): $item['salida'][1],
-				$item['salida'][2]!=''? String::formatoNumero($item['salida'][2], 2, '$', false): $item['salida'][2],
+				$item['salida'][0]!=''? MyString::formatoNumero($item['salida'][0], 2, '', false): $item['salida'][0],
+				$item['salida'][1]!=''? MyString::formatoNumero($item['salida'][1], 2, '$', false): $item['salida'][1],
+				$item['salida'][2]!=''? MyString::formatoNumero($item['salida'][2], 2, '$', false): $item['salida'][2],
 
-				$item['saldo'][0]!=''? String::formatoNumero($item['saldo'][0], 2, '', false): $item['saldo'][0],
-				$item['saldo'][1]!=''? String::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
-				$item['saldo'][2]!=''? String::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
+				$item['saldo'][0]!=''? MyString::formatoNumero($item['saldo'][0], 2, '', false): $item['saldo'][0],
+				$item['saldo'][1]!=''? MyString::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
+				$item['saldo'][2]!=''? MyString::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
 				);
 
 			$pdf->SetX(6);
@@ -2844,15 +2913,15 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('productos_salidas_model');
 
-			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida)
+			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) AS rows
           FROM compras_salidas AS cs
             LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
           WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
-			if (isset($res_salidas->count)) //ya existe una salida nivelacion en el dia
+			if (isset($res_salidas->rows) && $res_salidas->rows > 0) //ya existe una salida nivelacion en el dia
 			{
-				$rows_salidas = $res_salidas->count;
+				$rows_salidas = $res_salidas->rows;
 				$id_salida    = $res_salidas->id_salida;
 			}else
 			{
@@ -2874,7 +2943,7 @@ class inventario_model extends privilegios_model{
 				$salida[$key]['id_salida'] = $id_salida;
 				$salida[$key]['no_row']    = $rows_salidas;
 			}
-			$this->productos_salidas_model->agregarProductos($id_salida, $salida);
+			$this->productos_salidas_model->agregarProductos($id_salida, $salida, false);
 		}
 
 		if (count($compra) > 0) //se registra una orden de compra
@@ -2997,7 +3066,7 @@ class inventario_model extends privilegios_model{
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Existencia de Clasificaciones';
-		$pdf->titulo3 = " Al ".String::fechaAT($this->input->get('ffecha1'))."\n";
+		$pdf->titulo3 = " Al ".MyString::fechaAT($this->input->get('ffecha1'))."\n";
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
@@ -3025,12 +3094,12 @@ class inventario_model extends privilegios_model{
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 			$datos = array($item->nombre,
-				String::formatoNumero($item->entradas, 2, '', false),
-				String::formatoNumero($item->salidas, 2, '', false),
-				String::formatoNumero(($item->existencia), 2, '', false),
-				String::formatoNumero($item->entradas_kilos, 2, '', false),
-				String::formatoNumero($item->salidas_kilos, 2, '', false),
-				String::formatoNumero(($item->existencia_kilos), 2, '', false),
+				MyString::formatoNumero($item->entradas, 2, '', false),
+				MyString::formatoNumero($item->salidas, 2, '', false),
+				MyString::formatoNumero(($item->existencia), 2, '', false),
+				MyString::formatoNumero($item->entradas_kilos, 2, '', false),
+				MyString::formatoNumero($item->salidas_kilos, 2, '', false),
+				MyString::formatoNumero(($item->existencia_kilos), 2, '', false),
 				);
 
 			$pdf->SetX(6);

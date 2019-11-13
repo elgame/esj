@@ -56,6 +56,13 @@ class compras_model extends privilegios_model{
       $sql .= " AND co.isgasto = '".$this->input->get('ftipo')."'";
     }
 
+    if($this->input->get('fxml') == 'si')
+    {
+      $sql .= " AND Coalesce(co.uuid, '') <> ''";
+    } elseif ($this->input->get('fxml') == 'no') {
+      $sql .= " AND Coalesce(co.uuid, '') = ''";
+    }
+
     $query = BDUtil::pagination(
         "SELECT co.id_compra,
                 co.id_proveedor, p.nombre_fiscal AS proveedor,
@@ -63,7 +70,7 @@ class compras_model extends privilegios_model{
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
                 co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
-                co.tipo, co.id_nc, co.observaciones, co.total
+                co.tipo, co.id_nc, co.observaciones, co.total, co.uuid
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -148,6 +155,30 @@ class compras_model extends privilegios_model{
         $response['productos'][count($response['productos'])-1]->importe       = $response['info']->subtotal;
         $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
         $response['productos'][count($response['productos'])-1]->cuenta_cpi    = $response['info']->cuenta_cpi_gst;//Cuenta del gasto
+
+        $response['info']->area = null;
+        if ($response['info']->id_area)
+        {
+          $this->load->model('areas_model');
+          $response['info']->area = $this->areas_model->getAreaInfo($response['info']->id_area, true)['info'];
+        }
+
+        $response['info']->rancho = $this->db->query("SELECT r.id_rancho, r.nombre, csr.num
+                                   FROM compras_rancho csr
+                                    INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+                                   WHERE csr.id_compra = {$response['info']->id_compra}")->result();
+
+        $response['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num
+                                   FROM compras_centro_costo cscc
+                                    INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+                                   WHERE cscc.id_compra = {$response['info']->id_compra}")->result();
+
+        $response['info']->activo = null;
+        if ($response['info']->id_activo)
+        {
+          $this->load->model('productos_model');
+          $response['info']->activo = $this->productos_model->getProductosInfo($response['info']->id_activo, true)['info'];
+        }
       }
 
       //gasolina
@@ -210,20 +241,20 @@ class compras_model extends privilegios_model{
   public function updateXml($compraId, $proveedorId, $xml)
   {
     $comprah = array(
-      'subtotal'      => String::float($this->input->post('htotalImporte')),
-      'importe_iva'   => String::float($this->input->post('htotalImpuestosTrasladados')),
-      'importe_ieps'  => String::float($this->input->post('htotalIeps')),
-      'retencion_iva' => String::float($this->input->post('htotalRetencion')),
-      'retencion_isr' => String::float($this->input->post('htotalRetencionIsr')),
-      'total'         => String::float($this->input->post('htotalOrden')),
+      'subtotal'      => MyString::float($this->input->post('htotalImporte')),
+      'importe_iva'   => MyString::float($this->input->post('htotalImpuestosTrasladados')),
+      'importe_ieps'  => MyString::float($this->input->post('htotalIeps')),
+      'retencion_iva' => MyString::float($this->input->post('htotalRetencion')),
+      'retencion_isr' => MyString::float($this->input->post('htotalRetencionIsr')),
+      'total'         => MyString::float($this->input->post('htotalOrden')),
     );
     $compra = array(
-      'subtotal'      => String::float($this->input->post('totalImporte')),
-      'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
-      'importe_ieps'  => String::float($this->input->post('totalIeps')),
-      'retencion_iva' => String::float($this->input->post('totalRetencion')),
-      'retencion_isr' => String::float($this->input->post('totalRetencionIsr')),
-      'total'         => String::float($this->input->post('totalOrden')),
+      'subtotal'       => MyString::float($this->input->post('totalImporte')),
+      'importe_iva'    => MyString::float($this->input->post('totalImpuestosTrasladados')),
+      'importe_ieps'   => MyString::float($this->input->post('totalIeps')),
+      'retencion_iva'  => MyString::float($this->input->post('totalRetencion')),
+      'retencion_isr'  => MyString::float($this->input->post('totalRetencionIsr')),
+      'total'          => MyString::float($this->input->post('totalOrden')),
     );
 
     foreach ($compra as $key => $value) {
@@ -272,6 +303,9 @@ class compras_model extends privilegios_model{
                                     ':empresa'      => 'en '.$datoscompra['info']->empresa->nombre_fiscal,
                                     ':id'           => 'id_compra',
                                     ':titulo'       => 'Compra'));
+
+    $compra['uuid']           = $this->input->post('uuid');
+    $compra['no_certificado'] = $this->input->post('noCertificado');
 
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
@@ -452,6 +486,8 @@ class compras_model extends privilegios_model{
       'tipo' => 'nc',
       'id_nc' => $compraId,
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
 
     if ($deGasto)
     {
@@ -495,7 +531,7 @@ class compras_model extends privilegios_model{
     }
 
     $this->db->insert('compras', $datos);
-    $id = $this->db->insert_id();
+    $id = $this->db->insert_id('compras_id_compra_seq');
 
     $productos = array();
     foreach ($data['concepto'] as $key => $concepto)
@@ -557,6 +593,8 @@ class compras_model extends privilegios_model{
       // 'tipo' => 'nc',
       // 'id_nc' => $compraId,
     );
+    $datos['uuid']           = $this->input->post('uuid');
+    $datos['no_certificado'] = $this->input->post('noCertificado');
 
     if (isset($data['totalRetencionIsr']))
     {
@@ -669,7 +707,7 @@ class compras_model extends privilegios_model{
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
-              (SELECT precio_unitario FROM compras_productos WHERE id_producto = p.id_producto ORDER BY id_orden DESC LIMIT 1) AS precio_unitario
+              p.last_precio AS precio_unitario
         FROM productos AS p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
@@ -818,7 +856,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -838,7 +876,7 @@ class compras_model extends privilegios_model{
           if ($key > 0) {
             $datos = array('Total',
               '', '',
-              String::formatoNumero($proveedor_tipo, 2, '', false),
+              MyString::formatoNumero($proveedor_tipo, 2, '', false),
               '', '',
               );
             $pdf->SetXY(6, $pdf->GetY());
@@ -869,10 +907,10 @@ class compras_model extends privilegios_model{
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
 
-      $datos = array(String::fechaATexto($factura->fecha, '/c'),
+      $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
         $factura->serie.$factura->folio,
         $factura->nombre_fiscal,
-        String::formatoNumero($factura->total, 2, '', false),
+        MyString::formatoNumero($factura->total, 2, '', false),
         ($factura->status=='p'? 'Pendiente': 'Pagada'),
         $factura->folio_almacen,
         );
@@ -887,7 +925,7 @@ class compras_model extends privilegios_model{
     }
     $datos = array('Total',
       '', '',
-      String::formatoNumero($proveedor_tipo, 2, '', false),
+      MyString::formatoNumero($proveedor_tipo, 2, '', false),
       '', '',
       );
     $pdf->SetXY(6, $pdf->GetY());
@@ -897,7 +935,7 @@ class compras_model extends privilegios_model{
 
     $datos = array('Total General',
       '', '',
-      String::formatoNumero($proveedor_importe, 2, '', false),
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
       '', '',
       );
     $pdf->SetXY(6, $pdf->GetY());
@@ -955,7 +993,7 @@ class compras_model extends privilegios_model{
         if ($key > 0) {
           $datos = array('Total',
             '', '',
-            String::formatoNumero($proveedor_tipo, 2, '', false),
+            MyString::formatoNumero($proveedor_tipo, 2, '', false),
             '', '',
             );
           $html .= '
@@ -977,10 +1015,10 @@ class compras_model extends privilegios_model{
       }
 
       $html .= '<tr>
-            <td style="width:400px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+            <td style="width:400px;border:1px solid #000;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->serie.$factura->folio.'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->nombre_fiscal.'</td>
-            <td style="width:150px;border:1px solid #000;">'.String::formatoNumero($factura->total, 2, '', false).'</td>
+            <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($factura->total, 2, '', false).'</td>
             <td style="width:150px;border:1px solid #000;">'.($factura->status=='p'? 'Pendiente': 'Pagada').'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->folio_almacen.'</td>
           </tr>';
@@ -1065,7 +1103,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras y Productos';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -1091,14 +1129,14 @@ class compras_model extends privilegios_model{
 
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
-      $datos = array( ($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): ''),
+      $datos = array( ($compra_aux !== $factura->id_compra? MyString::fechaATexto($factura->fecha, '/c'): ''),
         ($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: ''),
         ($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: ''),
         $factura->nombre,
-        String::formatoNumero($factura->cantidad, 2, '', false),
+        MyString::formatoNumero($factura->cantidad, 2, '', false),
         $factura->unidad,
-        String::formatoNumero($factura->precio_unitario, 2, '', false),
-        String::formatoNumero($factura->importe, 2, '', false),
+        MyString::formatoNumero($factura->precio_unitario, 2, '', false),
+        MyString::formatoNumero($factura->importe, 2, '', false),
         ($compra_aux !== $factura->id_compra? ($factura->status=='p'? 'Pendiente': 'Pagada'): ''),
         $factura->folio_almacen,
         );
@@ -1113,7 +1151,7 @@ class compras_model extends privilegios_model{
 
     }
     $datos = array('Total General',
-      String::formatoNumero($proveedor_importe, 2, '', false),
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
       );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R'));
@@ -1170,7 +1208,7 @@ class compras_model extends privilegios_model{
     foreach($res as $key => $factura){
 
       $html .= '<tr>
-            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): '').'</td>
+            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? MyString::fechaATexto($factura->fecha, '/c'): '').'</td>
             <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: '').'</td>
             <td style="width:400px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: '').'</td>
             <td style="width:400px;border:1px solid #000;">'.$factura->nombre.'</td>

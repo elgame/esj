@@ -41,7 +41,7 @@ class cuentas_cobrar_model extends privilegios_model{
     $client_default = $this->empresas_model->getDefaultEmpresa();
     $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
     $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-    if($this->input->get('did_empresa') != ''){
+    if($this->input->get('did_empresa') != '' && $_GET['did_empresa'] != 'all'){
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
       $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
     }
@@ -188,10 +188,10 @@ class cuentas_cobrar_model extends privilegios_model{
       $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
       $datos = array($item->nombre,
-        String::formatoNumero($item->total, 2, '$', false),
-        String::formatoNumero($item->abonos, 2, '$', false),
-        String::formatoNumero($item->saldo, 2, '$', false),
-        String::formatoNumero($item->saldo_cambio, 2, '$', false),
+        MyString::formatoNumero($item->total, 2, '$', false),
+        MyString::formatoNumero($item->abonos, 2, '$', false),
+        MyString::formatoNumero($item->saldo, 2, '$', false),
+        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
         );
       $total_cargos += $item->total;
       $total_abonos += $item->abonos;
@@ -208,10 +208,10 @@ class cuentas_cobrar_model extends privilegios_model{
     $pdf->SetFont('Arial','B',8);
     $pdf->SetTextColor(255,255,255);
     $pdf->Row(array('Total:',
-      String::formatoNumero($total_cargos, 2, '$', false),
-      String::formatoNumero($total_abonos, 2, '$', false),
-      String::formatoNumero($total_saldo, 2, '$', false),
-      String::formatoNumero($total_saldo_cambio, 2, '$', false),
+      MyString::formatoNumero($total_cargos, 2, '$', false),
+      MyString::formatoNumero($total_abonos, 2, '$', false),
+      MyString::formatoNumero($total_saldo, 2, '$', false),
+      MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
 
     $pdf->Output('cuentas_x_cobrar.pdf', 'I');
@@ -354,17 +354,17 @@ class cuentas_cobrar_model extends privilegios_model{
             AND f.id_cliente = '{$_GET['id_cliente']}'
             AND Date(f.fecha) <= '{$fecha2}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
-            ) AS d
-GROUP BY d.id_cliente, d.id_factura
-) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-LEFT JOIN (SELECT id_remision, id_factura, status
-  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-  ) fh ON f.id_factura = fh.id_remision
-WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-AND f.id_abono_factura IS NULL AND id_nc IS NULL
-AND Date(f.fecha) < '{$fecha1}'
-AND COALESCE(fh.id_remision, 0) = 0 {$sql}
-GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
+          ) AS d
+          GROUP BY d.id_cliente, d.id_factura
+        ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+        WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
+        AND f.id_abono_factura IS NULL AND id_nc IS NULL
+        AND Date(f.fecha) < '{$fecha1}'
+        AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+        GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
 
           -- UNION ALL
 
@@ -396,7 +396,7 @@ GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
           --      AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
           -- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
 
-          ) AS sal
+        ) AS sal
 {$sql2}
 GROUP BY id_cliente, tipo
 ");
@@ -431,29 +431,29 @@ $res = $this->db->query(
         facturacion_abonos as fa
         WHERE Date(fecha) <= '{$fecha2}'
         GROUP BY id_factura
-        )
-UNION
-(
-  SELECT
-  id_nc AS id_factura,
-  Sum(total) AS abono
-  FROM
-  facturacion
-  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
-  AND id_cliente = {$_GET['id_cliente']}
-  AND Date(fecha) <= '{$fecha2}'
-  GROUP BY id_nc
-  )
-) AS ffs
-GROUP BY id_factura
-) AS ac ON f.id_factura = ac.id_factura {$sql}
-LEFT JOIN (SELECT id_remision, id_factura, status
-  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+      )
+      UNION
+      (
+        SELECT
+        id_nc AS id_factura,
+        Sum(total) AS abono
+        FROM
+        facturacion
+        WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+        AND id_cliente = {$_GET['id_cliente']}
+        AND Date(fecha) <= '{$fecha2}'
+        GROUP BY id_nc
+      )
+    ) AS ffs
+    GROUP BY id_factura
+  ) AS ac ON f.id_factura = ac.id_factura {$sql}
+  LEFT JOIN (SELECT id_remision, id_factura, status
+    FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
   ) fh ON f.id_factura = fh.id_remision
-WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
-AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
-AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+  WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
+  AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+  AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+  AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
       -- UNION ALL
 
@@ -506,8 +506,8 @@ if($res->num_rows() > 0){
 
       //verifica q no sea negativo o exponencial el saldo
   foreach ($response['cuentas'] as $key => $cuenta) {
-    $cuenta->saldo = floatval(String::float($cuenta->saldo));
-    $cuenta->saldo_cambio = floatval(String::float($cuenta->saldo_cambio));
+    $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
+    $cuenta->saldo_cambio = floatval(MyString::float($cuenta->saldo_cambio));
         // anticipos a fruta
     if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
       $cuenta->cargo = 0;
@@ -522,7 +522,7 @@ if($res->num_rows() > 0){
           }
         }
 
-        $cuenta->saldo = floatval(String::float($cuenta->saldo));
+        $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
         if($cuenta->saldo == 0){
           $cuenta->estado = 'Pagada';
           $cuenta->fecha_vencimiento = $cuenta->dias_transc = '';
@@ -616,10 +616,10 @@ if($res->num_rows() > 0){
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array('', '', '', $res['anterior']->concepto,
-          String::formatoNumero($res['anterior']->total, 2, '$', false),
-          String::formatoNumero($res['anterior']->abonos, 2, '$', false),
-          String::formatoNumero($res['anterior']->saldo, 2, '$', false),
-          String::formatoNumero($res['anterior']->saldo_cambio, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->total, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo_cambio, 2, '$', false),
           '', '', ''), false);
         $bad_saldo_ante = false;
       }
@@ -628,10 +628,10 @@ if($res->num_rows() > 0){
         $item->serie,
         $item->folio,
         $item->concepto,
-        String::formatoNumero($item->cargo, 2, '$', false),
-        String::formatoNumero($item->abono, 2, '$', false),
-        String::formatoNumero($item->saldo, 2, '$', false),
-        String::formatoNumero($item->saldo_cambio, 2, '$', false),
+        MyString::formatoNumero($item->cargo, 2, '$', false),
+        MyString::formatoNumero($item->abono, 2, '$', false),
+        MyString::formatoNumero($item->saldo, 2, '$', false),
+        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
         $item->estado, $item->fecha_vencimiento,
         $item->dias_transc > 0 ? $item->dias_transc : '0');
 
@@ -652,10 +652,10 @@ if($res->num_rows() > 0){
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(81, 23, 23, 20, 17));
     $pdf->Row(array('Totales:',
-      String::formatoNumero($total_cargo, 2, '$', false),
-      String::formatoNumero($total_abono, 2, '$', false),
-      String::formatoNumero($total_saldo, 2, '$', false),
-      String::formatoNumero($total_saldo_cambio, 2, '$', false) ), true);
+      MyString::formatoNumero($total_cargo, 2, '$', false),
+      MyString::formatoNumero($total_abono, 2, '$', false),
+      MyString::formatoNumero($total_saldo, 2, '$', false),
+      MyString::formatoNumero($total_saldo_cambio, 2, '$', false) ), true);
 
     $pdf->Output('cuentas_proveedor.pdf', 'I');
   }
@@ -770,11 +770,12 @@ if($close){
       'where_field' => 'id_factura');
     $sql_nc = "UNION
     SELECT
-    id_factura AS id_abono,
-    fecha,
-    total AS abono,
-    ('Nota de credito ' || serie || folio) AS concepto,
-    'nc' AS tipo, 1 AS facturado
+      id_factura AS id_abono,
+      fecha,
+      total AS abono,
+      ('Nota de credito ' || serie || folio) AS concepto,
+      'nc' AS tipo, 1 AS facturado,
+      '' AS url_comp_pago
     FROM facturacion
     WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
     AND id_nc = {$_GET['id']}
@@ -795,21 +796,22 @@ if($close){
 
       //Obtenemos los abonos de la factura o ticket
     $res = $this->db->query(
-      "SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo, facturado
+      "SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo, facturado, url_comp_pago
       FROM
       (
         SELECT
-        id_abono,
-        fecha,
-        total AS abono,
-        concepto,
-        'ab' AS tipo,
-        (SELECT Count(id_factura) FROM facturacion WHERE id_abono_factura = {$sql['tabla']}.id_abono) AS facturado
+          id_abono,
+          fecha,
+          total AS abono,
+          concepto,
+          'ab' AS tipo,
+          (SELECT Count(id_factura) FROM facturacion WHERE id_abono_factura = {$sql['tabla']}.id_abono) AS facturado,
+          url_comp_pago
         FROM {$sql['tabla']}
         WHERE {$sql['where_field']} = {$_GET['id']}
         AND Date(fecha) <= '{$fecha2}'
         {$sql_nc}
-        ) AS tt
+      ) AS tt
     ORDER BY fecha ASC
     ");
 
@@ -838,6 +840,7 @@ if($close){
       'fecha1'  => $fecha1
       );
     $abonos = 0;
+
     if($res->num_rows() > 0){
       $response['abonos'] = $res->result();
 
@@ -870,12 +873,43 @@ if($close){
    */
   public function getCuentaPagoAdicional()
   {
-    return '42200400';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'PagoAdicional'")->row();
+    return (isset($data->cuenta)? $data->cuenta : '42200400');
   }
 
   public function getCuentaPagoMenor()
   {
-    return '00800000';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'PagoMenor'")->row();
+    return (isset($data->cuenta)? $data->cuenta : '00800000');
+  }
+
+  public function uploadComPago()
+  {
+    if (isset($_FILES['comprobante']) && $_FILES['comprobante']['tmp_name'] !== '')
+    {
+      $path_comp = 'media/ventas/com_pagos';
+
+      $config_upload = array(
+        'upload_path'     => APPPATH.$path_comp,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE
+      );
+
+      $this->load->library('my_upload');
+      $this->my_upload->initialize($config_upload);
+      $this->my_upload->crearFolder(true);
+      $data_doc = $this->my_upload->do_upload('comprobante');
+
+      if (isset($data_doc[0]) && $data_doc[0] === false) {
+        return $data_doc;
+      } else {
+        $path = explode('application/', $data_doc['full_path']);
+        return APPPATH.$path[1];
+      }
+    }
+
+    return '';
   }
 
   public function addAbonoMasivo()
@@ -889,14 +923,22 @@ if($close){
     $this->load->model('banco_cuentas_model');
     $data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($this->input->post('dcuenta'));
     $data_cuenta  = $data_cuenta['info'];
+    $this->empresaId = $data_cuenta->id_empresa;
     $_GET['id']   = $ids[0];
     $_GET['tipo'] = $tipos[0];
     $inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo'], true);
+
+    // Carga comprobante de pago
+    $url_comp_pago = $this->uploadComPago();
+    if (is_array($url_comp_pago)) {
+      return $url_comp_pago;
+    }
+
     //Registra deposito
     foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
     {
       $total += $_POST['montofv'][$key];
-      $desc .= ' | '.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
+      $desc .= ' | '.$_POST['factura_desc'][$key].'=>'.MyString::formatoNumero($_POST['montofv'][$key], 2, '', false);
     }
     $desc = ' ('.substr($desc, 1).')';
     $resp = $this->banco_cuentas_model->addDeposito(array(
@@ -920,10 +962,12 @@ if($close){
       $_GET['tipo'] = $_POST['tipos'][$key];
       $data = array('fecha'        => $fecha_pago,
         'concepto'       => $this->input->post('dconcepto'),
-            'total'          => $_POST['montofv'][$key], //$total,
-            'id_cuenta'      => $this->input->post('dcuenta'),
-            'ref_movimiento' => $this->input->post('dreferencia'),
-            'saldar'         => $_POST['saldar'][$key] );
+        'total'          => $_POST['montofv'][$key], //$total,
+        'id_cuenta'      => $this->input->post('dcuenta'),
+        'ref_movimiento' => $this->input->post('dreferencia'),
+        'saldar'         => $_POST['saldar'][$key],
+        'url_comp_pago'  => $url_comp_pago
+      );
       $resa = $this->addAbono($data, null, true);
       $total -= $resa['total'];
 
@@ -958,12 +1002,21 @@ if($close){
     }
 
     if ($data == null) {
-      $data = array('fecha'        => $this->input->post('dfecha'),
+      // Carga comprobante de pago
+      $url_comp_pago = $this->uploadComPago();
+      if (is_array($url_comp_pago)) {
+        return $url_comp_pago;
+      }
+
+      $data = array(
+        'fecha'          => $this->input->post('dfecha'),
         'concepto'       => $this->input->post('dconcepto'),
         'total'          => $this->input->post('dmonto'),
         'id_cuenta'      => $this->input->post('dcuenta'),
         'ref_movimiento' => $this->input->post('dreferencia'),
-        'saldar' => 'no' );
+        'saldar'         => 'no',
+        'url_comp_pago'  => $url_comp_pago
+      );
     }
 
     $pagada = false;
@@ -985,8 +1038,9 @@ if($close){
       $this->load->model('banco_cuentas_model');
       $data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($data['id_cuenta']);
       $data_cuenta  = $data_cuenta['info'];
+      $this->empresaId = $data_cuenta->id_empresa;
 
-      $data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.String::formatoNumero($data['total'], 2, '', false).')';
+      $data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.MyString::formatoNumero($data['total'], 2, '', false).')';
       $resp = $this->banco_cuentas_model->addDeposito(array(
         'id_cuenta'   => $data['id_cuenta'],
         'id_banco'    => $data_cuenta->id_banco,
@@ -1008,7 +1062,9 @@ if($close){
       'concepto'       => $data['concepto'],
       'total'          => $data['total']+$pago_saldar,
       'id_cuenta'      => $data['id_cuenta'],
-      'ref_movimiento' => $data['ref_movimiento'], );
+      'ref_movimiento' => $data['ref_movimiento'],
+      'url_comp_pago'  => $data['url_comp_pago']
+    );
     //se inserta el abono
     $this->db->insert($camps[1], $data);
     $data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
@@ -1017,7 +1073,7 @@ if($close){
     $this->bitacora_model->_insert($camps[1], $data['id_abono'],
       array(':accion'    => 'un abono a la venta ',
         ':seccion' => 'cuentas por cobrar',
-        ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($data['total']),
+        ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.MyString::formatoNumero($data['total']),
         ':id_empresa' => $inf_factura['empresa']->id_empresa,
         ':empresa'   => 'de '.$inf_factura['cliente']->nombre_fiscal));
 
@@ -1097,7 +1153,7 @@ if($close){
       $inf_factura = $this->getDetalleVentaFacturaData($id);
       $this->bitacora_model->_cancel('facturacion_abonos', $ida,
         array(':accion'     => 'un abono de la venta ', ':seccion' => 'cuentas por cobrar',
-          ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($info_abano->total),
+          ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.MyString::formatoNumero($info_abano->total),
           ':id_empresa' => $inf_factura['empresa']->id_empresa,
           ':empresa'    => 'de '.$inf_factura['cliente']->nombre_fiscal));
     }
@@ -1142,8 +1198,8 @@ if($close){
     $query = BDUtil::pagination(
       "SELECT
       bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-      bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
-      Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+      bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/Coalesce(NULLIF(f.total, 0), 1))*f.importe_iva/100)) AS importe_iva,
+      Sum(((fa.total*100/Coalesce(NULLIF(f.total, 0), 1))*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
       c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
       FROM facturacion AS f
       INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
@@ -1305,7 +1361,7 @@ if($close){
     //   $_POST['prod_dreten_iva_porcent'][] = 0;
     //   $_POST['prod_importe'][]            = $subtotal;
     //   $_POST['isCert'][]                  = '0';
-    //   $_POST['dttotal_letra']             = strtoupper(String::num2letras($subtotal+$iva, $data_factura['info']->moneda));
+    //   $_POST['dttotal_letra']             = strtoupper(MyString::num2letras($subtotal+$iva, $data_factura['info']->moneda));
     //   $_POST['total_importe']             = $subtotal;
     //   $_POST['total_descuento']           = 0;
     //   $_POST['total_subtotal']            = $subtotal;
@@ -1403,18 +1459,18 @@ if($close){
     $pdf->MultiCell(60,4, 'RECIBO DE PAGO');
       // $pdf->SetY($pdf->GetY()+1);
       // $pdf->MultiCell(60,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
-      // $pdf->MultiCell(60,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
-      //      ' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+      // $pdf->MultiCell(60,4, 'La cantidad de '.MyString::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      //      ' ('.MyString::num2letras($orden['abonos'][0]->total_abono).')');
       // $pdf->MultiCell(60,4, 'A cuenta de: '.implode('-', $facturas_txt));
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(10, $pdf->GetY()+6);
-    $pdf->MultiCell(115,4, "FECHA: ".String::fechaATexto($orden['abonos'][0]->fecha));
+    $pdf->MultiCell(115,4, "FECHA: ".MyString::fechaATexto($orden['abonos'][0]->fecha));
     $pdf->SetXY(10, $pdf->GetY()+1);
     $pdf->MultiCell(115,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
     $pdf->SetX(10);
-    $pdf->MultiCell(115,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
-      ' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+    $pdf->MultiCell(115,4, 'La cantidad de '.MyString::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      ' ('.MyString::num2letras($orden['abonos'][0]->total_abono).')');
     $pdf->SetX(10);
     $pdf->MultiCell(115,4, 'A orden de: '.$orden['abonos'][0]->empresa);
     $pdf->SetX(10);
@@ -1444,7 +1500,7 @@ if($close){
       $pdf->SetTextColor(0,0,0);
       $datos = array(
         $prod->serie.$prod->folio,
-        String::formatoNumero($prod->total, 2, '$', false),
+        MyString::formatoNumero($prod->total, 2, '$', false),
         );
       $pdf->SetXY(140, $pdf->GetY()-2);
       $pdf->Row($datos, false, false);
@@ -1494,6 +1550,10 @@ if($close){
       $all_facturas = true;
       // if($this->input->get('fid_cliente') != '')
       //   $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
+    }
+
+    if($this->input->get('ftipodoc') != ''){
+      $sql_clientes .= " AND is_factura = '".($this->input->get('ftipodoc') === 'f' ? 't' : 'f')."'";
     }
 
     if($this->input->get('did_empresa') != ''){
@@ -1546,7 +1606,7 @@ if($close){
       }
 
       if ($aux_factura != $cliente1->id_factura) {
-        if(count($cliente->facturas) > 0 && $all_facturas == false && String::float($cliente->facturas[$aux_factura]->saldo) <= 0)
+        if(count($cliente->facturas) > 0 && $all_facturas == false && MyString::float($cliente->facturas[$aux_factura]->saldo) <= 0)
           unset($cliente->facturas[$aux_factura]);
 
         $cliente->facturas[$cliente1->id_factura]                    = new stdClass;
@@ -1606,405 +1666,6 @@ if($close){
       elseif($all_clientes && count($cliente->facturas) > 0)
         $response[] = $cliente;
     }
-
-
-
-    // if($this->input->get('ftipodoc') != ''){
-    //   $sql .= " AND f.is_factura = '".($this->input->get('ftipodoc') === 'f' ? 't' : 'f')."'";
-    // }
-
-    // $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito FROM clientes WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
-    // $response = array();
-    // foreach ($clientes->result() as $keyc => $cliente)
-    // {
-    //   $cliente->saldo = 0;
-    //   $cliente->saldo_cambio = 0;
-
-    //   /*** Saldo anterior ***/
-    //   $saldo_anterior = $this->db->query(
-    //     "SELECT
-    //       id_cliente,
-    //       Sum(total) AS total,
-    //       Sum(iva) AS iva,
-    //       Sum(abonos) AS abonos,
-    //       Sum(saldo)::numeric(12, 2) AS saldo,
-    //       SUM(saldo_cambio)::numeric(12, 2) AS saldo_cambio,
-    //       tipo
-    //     FROM
-    //     (
-    //       SELECT
-    //         c.id_cliente,
-    //         c.nombre_fiscal,
-    //         Sum(f.total) AS total,
-    //         Sum(f.importe_iva) AS iva,
-    //         COALESCE(Sum(faa.abonos),0) as abonos,
-    //         COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-    //         (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio,
-    //         'f' as tipo
-    //       FROM
-    //         clientes AS c
-    //         INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-    //         LEFT JOIN (
-    //           SELECT
-    //             d.id_cliente,
-    //             d.id_factura,
-    //             Sum(d.abonos) AS abonos
-    //           FROM
-    //           (
-    //             SELECT
-    //               f.id_cliente,
-    //               f.id_factura,
-    //               Sum(fa.total) AS abonos
-    //             FROM
-    //               facturacion AS f
-    //                 INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-    //             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
-    //               AND f.id_nc IS NULL
-    //               AND f.id_cliente = '{$cliente->id_cliente}'
-    //               AND Date(fa.fecha) < '{$fecha1}'{$sql}
-    //             GROUP BY f.id_cliente, f.id_factura
-
-    //             UNION
-
-    //             SELECT
-    //               f.id_cliente,
-    //               f.id_nc AS id_factura,
-    //               Sum(f.total) AS abonos
-    //             FROM
-    //               facturacion AS f
-    //             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-    //               AND f.id_abono_factura IS NULL
-    //               AND f.id_cliente = '{$cliente->id_cliente}'
-    //               AND Date(f.fecha) < '{$fecha1}'{$sql}
-    //             GROUP BY f.id_cliente, f.id_factura
-    //           ) AS d
-    //           GROUP BY d.id_cliente, d.id_factura
-    //         ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-    //         LEFT JOIN (
-    //           SELECT id_remision, id_factura, status
-    //           FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-    //         ) fh ON f.id_factura = fh.id_remision
-    //       WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-    //         AND COALESCE(fh.id_remision, 0) = 0 AND f.id_abono_factura IS NULL AND f.id_nc IS NULL
-    //         AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
-    //       GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
-
-    //         -- UNION ALL
-
-    //         -- SELECT
-    //         --   c.id_cliente,
-    //         --   c.nombre_fiscal,
-    //         --   Sum(f.total) AS total,
-    //         --   0 AS iva,
-    //         --   COALESCE(Sum(taa.abonos), 0) as abonos,
-    //         --   COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
-    //         --   'nv' as tipo
-    //         -- FROM
-    //         --   clientes AS c
-    //         --   INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-    //         --   LEFT JOIN (
-    //         --     SELECT
-    //         --       f.id_cliente,
-    //         --       f.id_venta,
-    //         --       Sum(fa.total) AS abonos
-    //         --     FROM
-    //         --       facturacion_ventas_remision AS f
-    //         --         INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-    //         --     WHERE f.id_cliente = '{$cliente->id_cliente}'
-    //         --       AND f.status <> 'ca'
-    //         --       AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
-    //         --     GROUP BY f.id_cliente, f.id_venta
-    //         --   ) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
-    //         -- WHERE c.id_cliente = '{$cliente->id_cliente}'
-    //         --       AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
-    //         -- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
-
-    //     ) AS sal
-    //   {$sql2}
-    //   GROUP BY id_cliente, tipo
-    //   ");
-
-    //   $saldo_anterior_vencido = $this->db->query(
-    //     "SELECT
-    //       id_cliente,
-    //       Sum(total) AS total,
-    //       Sum(iva) AS iva,
-    //       Sum(abonos) AS abonos,
-    //       Sum(saldo)::numeric(12, 2) AS saldo,
-    //       tipo
-    //     FROM
-    //     (
-    //       SELECT
-    //         c.id_cliente,
-    //         c.nombre_fiscal,
-    //         Sum(f.total) AS total,
-    //         Sum(f.importe_iva) AS iva,
-    //         COALESCE(Sum(faa.abonos),0) as abonos,
-    //         COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-    //         'f' as tipo
-    //       FROM
-    //         clientes AS c
-    //         INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-    //         LEFT JOIN (
-    //           SELECT
-    //             d.id_cliente,
-    //             d.id_factura,
-    //             Sum(d.abonos) AS abonos
-    //           FROM
-    //           (
-    //             SELECT
-    //               f.id_cliente,
-    //               f.id_factura,
-    //               Sum(fa.total) AS abonos
-    //             FROM
-    //               facturacion AS f
-    //               INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-    //             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
-    //               AND f.id_cliente = '{$cliente->id_cliente}'
-    //               AND Date(fa.fecha) <= '{$fecha2}'{$sql}
-    //             GROUP BY f.id_cliente, f.id_factura
-
-    //             UNION
-
-    //             SELECT
-    //               f.id_cliente,
-    //               f.id_nc AS id_factura,
-    //               Sum(f.total) AS abonos
-    //             FROM
-    //               facturacion AS f
-    //             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-    //               AND f.id_abono_factura IS NULL
-    //               AND f.id_cliente = '{$cliente->id_cliente}'
-    //               AND Date(f.fecha) <= '{$fecha2}'{$sql}
-    //             GROUP BY f.id_cliente, f.id_factura
-    //           ) AS d
-    //           GROUP BY d.id_cliente, d.id_factura
-    //         ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-    //         LEFT JOIN (
-    //           SELECT id_remision, id_factura, status
-    //           FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-    //         ) fh ON f.id_factura = fh.id_remision
-    //       WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-    //         AND f.id_abono_factura IS NULL AND COALESCE(fh.id_remision, 0) = 0
-    //         AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]} AND
-    //         Date(f.fecha + (f.plazo_credito || ' days')::interval) < '{$fecha2}'
-    //       GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
-    //     ) AS sal
-    //     {$sql2}
-    //     GROUP BY id_cliente, tipo
-    //     ");
-
-    //   // Asigna el saldo anterior vencido del cliente.
-    //   $cliente->saldo_anterior_vencido = $saldo_anterior_vencido->row();
-
-    //   $cliente->saldo_anterior = $saldo_anterior->row();
-    //   $saldo_anterior->free_result();
-    //   if( isset($cliente->saldo_anterior->saldo) ) {
-    //     $cliente->saldo = $cliente->saldo_anterior->saldo;
-    //     $cliente->saldo_cambio = $cliente->saldo_anterior->saldo_cambio;
-    //   }
-
-    //   /** Facturas ***/
-    //   $sql_field_cantidad = '';
-    //   if($all_clientes && $all_facturas)
-    //     $sql_field_cantidad = ", (SELECT Sum(cantidad) FROM facturacion_productos WHERE id_factura = f.id_factura) AS cantidad_productos";
-    //   // $facturas = $this->db->query("SELECT
-    //   //     f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
-    //   //     (CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
-    //   //     (f.total/f.tipo_cambio) AS total_cambio, f.tipo_cambio,
-    //   //     Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
-    //   //   FROM facturacion as f
-    //   //   LEFT JOIN (SELECT id_remision, id_factura, status
-    //   //     FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-    //   //   ) fh ON f.id_factura = fh.id_remision
-    //   //   WHERE f.id_cliente = {$cliente->id_cliente}
-    //   //     AND f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL
-    //   //     AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-    //   //     AND COALESCE(fh.id_remision, 0) = 0
-    //   //     {$sql} {$sqlext[1]}
-    //   //   ORDER BY fecha ASC, folio ASC");
-    //   $facturas = $this->db->query("SELECT
-    //       f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
-    //       (CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
-    //       (f.total/f.tipo_cambio) AS total_cambio, f.tipo_cambio,
-    //       Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-    //       ab.a_id_abono, ab.a_serie, ab.a_folio, ab.a_fecha, ab.a_concepto, ab.a_abono
-    //     FROM facturacion as f
-    //     LEFT JOIN (SELECT id_remision, id_factura, status
-    //       FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-    //     ) fh ON f.id_factura = fh.id_remision
-    //     LEFT JOIN (
-    //       SELECT id_factura, string_agg(COALESCE(id_abono, 0)::text, ',') AS a_id_abono, string_agg(COALESCE(serie, '-'), ',') AS a_serie,
-    //         string_agg(COALESCE(folio, 0)::text, ',') AS a_folio, string_agg(fecha::text, ',') AS a_fecha,
-    //         string_agg(COALESCE(concepto, '-'), ',') AS a_concepto, string_agg(COALESCE(abono, 0)::text, ',') AS a_abono
-    //       FROM (
-    //         SELECT *
-    //         FROM
-    //         (
-    //           (
-    //             SELECT
-    //               fa.id_factura,
-    //               fa.id_abono,
-    //               (CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
-    //               (CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
-    //               Date(fa.fecha) AS fecha,
-    //               (CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
-    //               fa.total AS abono
-    //             FROM
-    //               facturacion_abonos as fa
-    //               LEFT JOIN (
-    //                 SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
-    //                 FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
-    //                 WHERE Date(fa.fecha) <= '{$fecha2}'
-    //                 GROUP BY f.id_factura
-    //               ) abs ON abs.id_factura = fa.id_factura
-    //               LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
-    //             WHERE Date(fa.fecha) <= '{$fecha2}'
-    //           )
-    //           UNION
-    //           (
-    //             SELECT
-    //               id_nc AS id_factura,
-    //               id_factura AS id_abono,
-    //               serie,
-    //               folio,
-    //               Date(fecha) AS fecha,
-    //               'NOTA CREDITO DIGITAL'::text AS concepto,
-    //               total AS abono
-    //             FROM
-    //               facturacion
-    //             WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-    //               AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
-    //           )
-    //         ) AS ff
-    //         ORDER BY id_factura ASC, fecha ASC, id_abono ASC
-    //       ) AS ffs
-    //       GROUP BY id_factura
-    //       ORDER BY id_factura ASC
-    //     ) ab ON f.id_factura = ab.id_factura
-    //     WHERE f.id_cliente = {$cliente->id_cliente}
-    //       AND f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL
-    //       AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-    //       AND COALESCE(fh.id_remision, 0) = 0
-    //       {$sql} {$sqlext[1]}
-    //     ORDER BY fecha ASC, folio ASC
-    //   ");
-    //   $cliente->saldo_facturas = 0;
-    //   $cliente->facturas = $facturas->result();
-    //   $facturas->free_result();
-    //   $tiene_abonos = false;
-    //   foreach ($cliente->facturas as $key => $factura)
-    //   {
-    //     $cliente->saldo                        += $factura->total;
-    //     $cliente->saldo_cambio                 += $factura->total_cambio;
-    //     $cliente->facturas[$key]->saldo        = $factura->total;
-    //     $cliente->facturas[$key]->saldo_cambio = $factura->total_cambio;
-
-    //     // /** abonos **/
-    //     // $abonos = $this->db->query("SELECT id_abono, serie, folio, fecha, concepto, abono
-    //     //   FROM (
-    //     //   (
-    //     //     SELECT
-    //     //       fa.id_abono,
-    //     //       (CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
-    //     //       (CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
-    //     //       Date(fa.fecha) AS fecha,
-    //     //       (CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
-    //     //       fa.total AS abono
-    //     //     FROM
-    //     //     facturacion_abonos as fa
-    //     //     LEFT JOIN (
-    //     //       SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
-    //     //       FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
-    //     //       WHERE f.id_factura = {$factura->id_factura}
-    //     //         AND Date(fa.fecha) <= '{$fecha2}'
-    //     //       GROUP BY f.id_factura
-    //     //     ) abs ON abs.id_factura = fa.id_factura
-    //     //     LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
-    //     //     WHERE fa.id_factura = {$factura->id_factura} AND Date(fa.fecha) <= '{$fecha2}'
-    //     //   )
-    //     //   UNION
-    //     //   (
-    //     //     SELECT
-    //     //       id_factura AS id_abono,
-    //     //       serie,
-    //     //       folio,
-    //     //       Date(fecha) AS fecha,
-    //     //       'NOTA CREDITO DIGITAL'::text AS concepto,
-    //     //       total AS abono
-    //     //     FROM
-    //     //       facturacion
-    //     //     WHERE status <> 'ca' AND status <> 'b' AND id_nc = {$factura->id_factura}
-    //     //       AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
-    //     //   )
-    //     // ) AS ffs
-    //     // ORDER BY id_abono");
-    //     // $cliente->facturas[$key]->abonos = $abonos->result();
-    //     // $abonos->free_result();
-
-    //     $cliente->facturas[$key]->abonos = [];
-    //     if ($factura->a_id_abono != '') {
-    //       $aid_abonos = explode(',', $factura->a_id_abono);
-    //       $aseries    = explode(',', $factura->a_serie);
-    //       $afolios    = explode(',', $factura->a_folio);
-    //       $afechas    = explode(',', $factura->a_fecha);
-    //       $aconceptos = explode(',', $factura->a_concepto);
-    //       $aabonos    = explode(',', $factura->a_abono);
-    //       foreach ($aid_abonos as $aidk => $aid_abono) {
-    //         $aabono = new stdClass;
-    //         $aabono->id_abono = $aid_abonos[$aidk];
-    //         $aabono->serie    = $aseries[$aidk];
-    //         $aabono->folio    = $afolios[$aidk] === '0'? '': $afolios[$aidk];
-    //         $aabono->fecha    = $afechas[$aidk];
-    //         $aabono->concepto = $aconceptos[$aidk];
-    //         $aabono->abono    = $aabonos[$aidk];
-    //         $cliente->facturas[$key]->abonos[] = $aabono;
-    //       }
-    //     }
-
-    //     $cliente->facturas[$key]->abonos_total = 0;
-    //     foreach ($cliente->facturas[$key]->abonos as $keyab => $abono)
-    //     {
-    //       $cliente->facturas[$key]->abonos[$keyab]->concepto = str_replace('()', '', $abono->concepto);
-    //       $cliente->facturas[$key]->abonos_total += $abono->abono;
-    //     }
-    //     $cliente->saldo                        -= $cliente->facturas[$key]->abonos_total;
-    //     $cliente->saldo_cambio                 -= $cliente->facturas[$key]->abonos_total/$cliente->facturas[$key]->tipo_cambio;
-    //     $cliente->facturas[$key]->saldo        -= $cliente->facturas[$key]->abonos_total;
-    //     $cliente->facturas[$key]->saldo_cambio -= $cliente->facturas[$key]->abonos_total/$cliente->facturas[$key]->tipo_cambio;
-
-    //     // anticipos a fruta
-    //     if ((strtolower($cliente->facturas[$key]->serie) == 'an')) {
-    //       if ($cliente->facturas[$key]->saldo == 0)
-    //         $cliente->facturas[$key]->total = 0;
-    //       $tiene_abonos = true;
-    //       $cliente->facturas[$key]->concepto = 'ANTICIPO '.$cliente->facturas[$key]->concepto;
-    //     } elseif ( strtolower($cliente->facturas[$key]->serie) != 'an' && $tiene_abonos) { // $cliente->facturas[$key]->cargo == 0 &&
-    //       $resp = $this->db
-    //       ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')
-    //       ->from('facturacion_productos as fp')
-    //       ->where("fp.id_factura = ".$cliente->facturas[$key]->id_factura)
-    //       ->where("fp.descripcion = 'ANTICIPO A FRUTA'")->get()->row();
-    //       if (isset($resp->id_factura) && $resp->importe < 0) {
-    //         $cliente->facturas[$key]->total += abs($resp->importe);
-    //       }
-    //     }
-
-    //     if($cliente->facturas[$key]->saldo <= 0 && $all_facturas == false)
-    //       unset($cliente->facturas[$key]);
-    //   }
-
-    //   if( $cliente->saldo > 0 || $all_clientes)
-    //   {
-    //     if($all_clientes && $all_facturas)
-    //       $response[] = $cliente;
-    //     elseif($cliente->saldo > 0 && $all_clientes == false)
-    //       $response[] = $cliente;
-    //     elseif($all_clientes && count($cliente->facturas) > 0)
-    //       $response[] = $cliente;
-    //   }
-    // }
-    // $clientes->free_result();
 
     // echo "<pre>";
     //   var_dump($response);
@@ -2084,8 +1745,8 @@ if($close){
         if(isset($item->saldo_anterior->saldo) ){
           $datos = array('', '', '',
             'Saldo Inicial',
-            String::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
-            String::formatoNumero($item->saldo_anterior->saldo_cambio, 2, '', false),
+            MyString::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
+            MyString::formatoNumero($item->saldo_anterior->saldo_cambio, 2, '', false),
             '', '',
             );
           $pdf->SetXY(6, $pdf->GetY()-2);
@@ -2103,20 +1764,20 @@ if($close){
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
-          $datos = array(String::fechaATexto($factura->fecha, '/c'),
+          $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
             $factura->serie,
             $factura->folio,
             $factura->concepto,
-            String::formatoNumero($factura->total, 2, '', false),
+            MyString::formatoNumero($factura->total, 2, '', false),
             '',
-            String::formatoNumero( ($factura->saldo) , 2, '', false),
-            String::fechaATexto($factura->fecha_vencimiento, '/c'),
+            MyString::formatoNumero( ($factura->saldo) , 2, '', false),
+            MyString::fechaATexto($factura->fecha_vencimiento, '/c'),
             );
           //si esta vencido
           if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
           {
             $totalVencido += $factura->saldo;
-            if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+            if(MyString::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
               $pdf->SetFillColor(255,255,204);
             else
               $pdf->SetFillColor(255,255,255);
@@ -2134,12 +1795,12 @@ if($close){
               $pdf->AddPage();
 
             $total_abono += $abono->abono;
-            $datos = array('   '.String::fechaATexto($abono->fecha, '/c'),
+            $datos = array('   '.MyString::fechaATexto($abono->fecha, '/c'),
               $abono->serie,
               $abono->folio,
               $abono->concepto,
               '',
-              '('.String::formatoNumero($abono->abono, 2, '', false).')',
+              '('.MyString::formatoNumero($abono->abono, 2, '', false).')',
               '', '',
               );
 
@@ -2157,9 +1818,9 @@ if($close){
         $pdf->SetAligns(array('R', 'R', 'R', 'R'));
         $pdf->SetWidths(array(23, 23, 23));
         $pdf->Row(array(
-          String::formatoNumero($total_cargo, 2, '', false),
-          String::formatoNumero($total_abono, 2, '', false),
-          String::formatoNumero($total_saldo, 2, '', false)), false);
+          MyString::formatoNumero($total_cargo, 2, '', false),
+          MyString::formatoNumero($total_abono, 2, '', false),
+          MyString::formatoNumero($total_saldo, 2, '', false)), false);
 
         $saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
         $saldo_cliente_cambio = (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo_cambio: 0) + $total_saldo_cambio;
@@ -2167,21 +1828,21 @@ if($close){
         $pdf->SetAligns(array('R', 'R', 'R', 'R'));
         $pdf->SetWidths(array(50, 23, 23, 23));
         $pdf->SetX(65);
-        $pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', String::formatoNumero($totalVencido, 2, '', false)), false);
+        $pdf->Row(array('Saldo Inicial', MyString::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', MyString::formatoNumero($totalVencido, 2, '', false)), false);
 
         $pdf->SetX(65);
-        $pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false), 'Credito', $item->dias_credito.' Dias'), false);
+        $pdf->Row(array('(+) Cargos', MyString::formatoNumero($total_cargo, 2, '', false), 'Credito', $item->dias_credito.' Dias'), false);
         $pdf->SetX(65);
-        $pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
+        $pdf->Row(array('(-) Abonos', MyString::formatoNumero($total_abono, 2, '', false)), false);
         $pdf->SetX(65);
-        $pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false), String::formatoNumero( $saldo_cliente_cambio , 2, '', false)), false);
+        $pdf->Row(array('(=) Saldo Final', MyString::formatoNumero( $saldo_cliente , 2, '', false), MyString::formatoNumero( $saldo_cliente_cambio , 2, '', false)), false);
 
         $total_saldo_cliente += $saldo_cliente;
       }
     }
 
     $pdf->SetXY(65, $pdf->GetY()+4);
-    $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+    $pdf->Row(array('TOTAL SALDO DE CLIENTES', MyString::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
 
 
     $pdf->Output('estado_cuenta.pdf', 'I');
@@ -2249,7 +1910,7 @@ if($close){
         <tr>
         <td colspan="3"></td>
         <td>Saldo Inicial</td>
-        <td style="mso-number-format:\'0.00\';">'.String::float($value->saldo_anterior->saldo).'</td>
+        <td style="mso-number-format:\'0.00\';">'.MyString::float($value->saldo_anterior->saldo).'</td>
         <td colspan="3"></td>
         </tr>';
 
@@ -2263,20 +1924,20 @@ if($close){
           if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
           {
             $totalVencido += $factura->saldo;
-            if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+            if(MyString::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
               $color = '255,255,204';
           }
 
           $html .= '
           <tr>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');text-align:left;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');text-align:left;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->serie.'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->folio.'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->concepto.'</td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.String::float($factura->total).'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.MyString::float($factura->total).'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');"></td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.String::float($factura->saldo).'</td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');">'.String::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.MyString::float($factura->saldo).'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');">'.MyString::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
           </tr>';
 
           foreach ($factura->abonos as $keya => $abono)
@@ -2285,7 +1946,7 @@ if($close){
 
             $html .= '
             <tr>
-            <td>'.String::fechaATexto($abono->fecha, '/c').'</td>
+            <td>'.MyString::fechaATexto($abono->fecha, '/c').'</td>
             <td>'.$abono->serie.'</td>
             <td>'.$abono->folio.'</td>
             <td>'.$abono->concepto.'</td>
@@ -2301,23 +1962,23 @@ if($close){
         $total_saldo_cliente += $saldo_cliente;
         $html .= '<tr style="font-weight:bold">
         <td colspan="4"></td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_cargo).'</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_abono).'</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_saldo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_cargo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_abono).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_saldo).'</td>
         <td></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">Saldo Inicial</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0)).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0)).'</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">Vencido</td>
-        <td style="border:0px solid #000;background-color: rgb(255,255,204);mso-number-format:\'0.00\';">'.String::float($totalVencido).'</td>
+        <td style="border:0px solid #000;background-color: rgb(255,255,204);mso-number-format:\'0.00\';">'.MyString::float($totalVencido).'</td>
         <td></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(+) Cargos</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_cargo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_cargo).'</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">Credito</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">'.$value->dias_credito.'</td>
         <td></td>
@@ -2325,13 +1986,13 @@ if($close){
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(-) Abonos</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_abono).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_abono).'</td>
         <td colspan="3"></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(=) Saldo Final</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($saldo_cliente).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($saldo_cliente).'</td>
         <td colspan="3"></td>
         </tr>
         <tr>
@@ -2344,7 +2005,7 @@ if($close){
     <tr style="font-weight:bold">
     <td colspan="3"></td>
     <td style="border:0px solid #000;">TOTAL SALDO DE CLIENTES</td>
-    <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_saldo_cliente).'</td>
+    <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_saldo_cliente).'</td>
     <td colspan="3"></td>
     </tr>
     </tbody>
@@ -2544,6 +2205,172 @@ if($close){
     </table>';
 
     echo $html;
+  }
+
+
+  public function rptFacturasVencidasData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $sql .= " AND (Date(f.fecha) >= '{$_GET['ffecha1']}' AND Date(f.fecha) <= '{$_GET['ffecha2']}')";
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND f.id_empresa = {$_GET['did_empresa']}";
+    }
+
+    if ($this->input->get('tipo') != '') {
+      $sql .= " AND f.is_factura = '{$_GET['tipo']}'";
+    }
+
+    $response = array();
+    $facturas = $this->db->query("SELECT
+        f.id_factura,
+        f.serie,
+        f.folio,
+        Date(f.fecha) AS fecha,
+        c.nombre_fiscal AS cliente,
+        COALESCE(f.total, 0) AS cargo,
+        COALESCE(f.importe_iva, 0) AS iva,
+        COALESCE(ac.abono, 0) AS abono,
+        (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+        (CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
+        (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
+        Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+        (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
+        ( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
+        'f' as tipo
+      FROM facturacion AS f
+        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+          LEFT JOIN (
+            SELECT id_factura, Sum(abono) AS abono
+            FROM (
+              (
+          SELECT
+          id_factura,
+          Sum(total) AS abono
+          FROM
+          facturacion_abonos as fa
+          WHERE Date(fecha) <= '2019-09-10'
+          GROUP BY id_factura
+              )
+              UNION
+              (
+          SELECT
+          id_nc AS id_factura,
+          Sum(total) AS abono
+          FROM
+          facturacion
+          WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+          AND id_cliente = 960
+          AND Date(fecha) <= '2019-09-10'
+          GROUP BY id_nc
+              )
+            ) AS ffs
+            GROUP BY id_factura
+          ) AS ac ON f.id_factura = ac.id_factura  AND f.id_empresa = '2'
+          LEFT JOIN (SELECT id_remision, id_factura, status
+            FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+          ) fh ON f.id_factura = fh.id_remision
+      WHERE f.id_abono_factura IS NULL AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+        AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+        AND (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) > 0
+        AND Date(f.fecha + (f.plazo_credito || ' days')::interval) <= Date(Now())
+      ORDER BY cliente ASC, fecha ASC, serie ASC, folio ASC");
+    $response = $facturas->result();
+
+    return $response;
+  }
+  public function rptFacturasVencidasPdf(){
+    $res = $this->rptFacturasVencidasData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Facturas Vencidas';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= ($this->input->get('tipo')==''? 'Todas': ($this->input->get('tipo')=='t'? 'Facturas': 'Remisiones') );
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'R', 'R', 'R', 'L');
+    $widths = array(19, 25, 60, 25, 25, 25, 25);
+    $header = array('Fecha', 'Factura', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'F. Vencimiento');
+
+    $cliente_aux = '';
+    $show_headers = false;
+    foreach($res as $key => $factura){
+
+      if ($cliente_aux !== $factura->cliente) {
+        if ($pdf->GetY() >= $pdf->limiteY || $key==0) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([200]);
+        $pdf->Row([$factura->cliente], false, false);
+
+        $cliente_aux = $factura->cliente;
+        $show_headers = true;
+      }
+
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $show_headers){ //salta de pagina si exede el max
+        $show_headers = false;
+        if ($pdf->GetY() >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFillColor(200,200,200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = [
+        MyString::fechaATexto($factura->fecha, '/c'),
+        $factura->serie.$factura->folio,
+        $factura->concepto,
+        MyString::formatoNumero($factura->cargo, 2, '', false),
+        MyString::formatoNumero($factura->abono, 2, '', false),
+        MyString::formatoNumero($factura->saldo, 2, '', false),
+        MyString::fechaATexto($factura->fecha_vencimiento, '/c'),
+      ];
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+    }
+    // $datos = array('Total General',
+    //   MyString::formatoNumero($proveedor_importe, 2, '', false),
+    //   );
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->SetAligns(array('L', 'R'));
+    // $pdf->SetWidths(array(162, 20));
+    // $pdf->Row($datos, false);
+
+    $pdf->Output('compras_productos.pdf', 'I');
   }
 
 }

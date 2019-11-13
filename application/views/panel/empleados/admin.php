@@ -112,7 +112,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $usuarios['total_rows'],
 								'per_page'			=> $usuarios['items_per_page'],
 								'cur_page'			=> $usuarios['result_page']*$usuarios['items_per_page'],

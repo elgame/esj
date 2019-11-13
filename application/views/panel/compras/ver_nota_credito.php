@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras/ver_nota_credito/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras/ver_nota_credito/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
 
           <div class="row-fluid">
             <div class="span12">
@@ -50,11 +50,23 @@
                 </div>
                 <div class="span3">
                   <div class="control-group">
+                    <div class="controls span11">
+                      <a class="btn btn-success" href="<?php echo base_url('panel/gastos/verXml/?id='.$_GET['id'].'&idp='.$nota_credito['info']->id_proveedor.'') ?>"
+                        rel="superbox-80x550" title="Buscar" id="supermodalBtn">
+                        <i class="icon-eye-open icon-white"></i> <span class="hidden-tablet">Buscar XML</span></a>
+                      <br><br>
+                      UUID: <input type="text" name="uuid" value="<?php echo $nota_credito['info']->uuid; ?>" id="buscarUuid" class="span12"><br>
+                      No Certificado: <input type="text" name="noCertificado" value="<?php echo $nota_credito['info']->no_certificado; ?>" id="buscarNoCertificado" class="span12">
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="span3">
+                  <div class="control-group">
                     <div class="controls span9">
                       XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -183,7 +195,7 @@
                                   <input type="text" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
                               </td>
                               <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
+                                  <span><?php echo MyString::formatoNumero($_POST['importe'][$key]) ?></span>
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
                               </td>
@@ -231,7 +243,7 @@
                                 <input type="text" name="retTotal[]" value="<?php echo $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                               </td>
                               <td>
-                                <span><?php echo String::formatoNumero($prod->importe) ?></span>
+                                <span><?php echo MyString::formatoNumero($prod->importe) ?></span>
                                 <input type="hidden" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive">
                                 <input type="hidden" name="total[]" value="<?php echo $prod->total ?>" id="total" class="span12 vpositive">
                               </td>
@@ -268,22 +280,22 @@
                   <tr>
                     <td><em>Subtotal</em></td>
                     <td>
-                      <input type="text" name="totalImporte" id="totalImporte" value="<?php echo String::formatoNumero(set_value('totalImporte', 0), 2, '$', false)?>">
+                      <input type="text" name="totalImporte" id="totalImporte" value="<?php echo MyString::formatoNumero(set_value('totalImporte', 0), 2, '$', false)?>">
                     </td>
                   </tr>
                   <tr>
                     <td>IVA</td>
                     <td>
-                      <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', 0), 2, '$', false)?>">
+                      <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', 0), 2, '$', false)?>">
                     </td>
                   </tr>
                   <tr>
                     <td>RET.</td>
-                    <td><input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo String::formatoNumero(set_value('totalRetencion', 0), 2, '$', false)?>"></td>
+                    <td><input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo MyString::formatoNumero(set_value('totalRetencion', 0), 2, '$', false)?>"></td>
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td><input type="text" name="totalOrden" id="totalOrden" value="<?php echo String::formatoNumero(set_value('totalOrden', 0), 2, '$', false)?>"></td>
+                    <td><input type="text" name="totalOrden" id="totalOrden" value="<?php echo MyString::formatoNumero(set_value('totalOrden', 0), 2, '$', false)?>"></td>
                   </tr>
                 </tbody>
               </table>

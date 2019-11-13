@@ -35,6 +35,10 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
+    // $db2 = $this->load->database('firebird', TRUE);
+    // $data = $db2->query("SELECT * FROM DEPARTAMENTOS")->result();
+    // var_dump($data);
+
 		// $result = $this->db->query("SELECT *
 		//                            FROM proveedores
 		//                            WHERE id_empresa = 4");
@@ -250,6 +254,8 @@ class home extends MY_Controller {
 			'titulo' => 'Modificar usuario'
 		);
 
+    $_GET['anio'] = $this->input->get('anio')>0? $this->input->get('anio'): date('Y');
+
 		$this->config_configs('modificar');
 		if ($this->form_validation->run() == FALSE)
 		{
@@ -260,10 +266,10 @@ class home extends MY_Controller {
 			$res_mdl = $this->configuraciones_model->modificarConfiguracion();
 
 			if($res_mdl['error'] == FALSE)
-				redirect(base_url('panel/home/configuraciones/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+				redirect(base_url('panel/home/configuraciones/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4&anio='.$_GET['anio']));
 		}
 
-		$params['data'] = $this->configuraciones_model->getConfiguraciones();
+		$params['data'] = $this->configuraciones_model->getConfiguraciones($_GET['anio']);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -339,7 +345,7 @@ class home extends MY_Controller {
     // $is_xml = simplexml_load_string($decode);
 
     echo "<pre>";
-      var_dump(String::formatoNumero(5.10, 5, ''), (float)1.999999);
+      var_dump(MyString::formatoNumero(5.10, 5, ''), (float)1.999999);
     echo "</pre>";exit;
   }
 
@@ -348,7 +354,8 @@ class home extends MY_Controller {
 	 * cierra la sesion del usuario
 	 */
 	public function logout(){
-		$this->session->sess_destroy();
+    session_destroy();
+    $this->session->sess_destroy();
 		redirect(base_url('panel/home'));
 	}
 
@@ -385,11 +392,14 @@ class home extends MY_Controller {
 						'rules' => 'required|numeric'),
 
 			array('field' => 'dzona_a',
-						'label' => 'Despensa',
+						'label' => 'UMA',
 						'rules' => 'required|numeric'),
 			array('field' => 'dzona_b',
-						'label' => 'Despensa',
+						'label' => 'Salario min',
 						'rules' => 'required|numeric'),
+      array('field' => 'dzona_anio',
+            'label' => 'Año',
+            'rules' => 'required|numeric'),
 		);
 
 		$this->form_validation->set_rules($rules);

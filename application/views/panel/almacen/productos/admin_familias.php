@@ -13,7 +13,7 @@
                 <td><?php echo $familia->nombre; ?></td>
                 <td><span class="label label-info"><?php echo $familia->tipo_text; ?></span></td>
                 <td class="center">
-                    <?php 
+                    <?php
                     echo $this->usuarios_model->getLinkPrivSm('productos/modificar_familia/', array(
                         'params'   => 'id='.$familia->id_familia,
                         'btn_type' => 'btn-success', 'text_link' => 'hide',
@@ -32,9 +32,9 @@
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el area?', 'familias', this); return false;"))
                       );
                     }
-                    
+
                     ?>
-                    <a class="btn" href="#" onclick="familias.loadProd(<?php echo $familia->id_familia; ?>); return false;" title="Productos">
+                    <a class="btn" href="#" onclick="familias.loadProd(<?php echo $familia->id_familia; ?>, <?php echo $familia->id_empresa; ?>); return false;" title="Productos">
                       <i class="icon-angle-right"></i> <span class="hide">Productos</span></a>
                 </td>
               </tr>

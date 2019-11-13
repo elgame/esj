@@ -91,6 +91,7 @@
                       <option value="1">PAGADOS</option>
                       <option value="2">NO PAGADOS</option>
                     </select>
+                    <input type="checkbox" name="fefectivo" id="fefectivo" value="si"> <label for="fefectivo">Efectivo</label>
                   </div>
                 </div>
 

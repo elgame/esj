@@ -23,7 +23,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/cuentas_cpi/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
+            <form action="<?php echo base_url('panel/cuentas_cpi/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
               <fieldset>
                 <legend></legend>
 
@@ -93,6 +93,10 @@
                         <option value="NVejez" <?php echo set_select('dtipo_cuenta', 'NVejez', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Cesantia Y Vejez</option>
                         <option value="NInfonavit" <?php echo set_select('dtipo_cuenta', 'NInfonavit', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Infonavit</option>
                         <option value="NIsr" <?php echo set_select('dtipo_cuenta', 'NIsr', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Isr</option>
+                        <option value="PagoAdicional" <?php echo set_select('dtipo_cuenta', 'PagoAdicional', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Pago Adicional</option>
+                        <option value="PagoMenor" <?php echo set_select('dtipo_cuenta', 'PagoMenor', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Pago Menor</option>
+                        <option value="DiarioProductos" <?php echo set_select('dtipo_cuenta', 'DiarioProductos', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Diario Productos</option>
+                        <option value="DiarioProductosCosto" <?php echo set_select('dtipo_cuenta', 'DiarioProductosCosto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Diario Productos Costo</option>
                       </select>
                     </div>
                   </div>
