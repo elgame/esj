@@ -1,4 +1,8 @@
 
+ ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap
+     ALTER TABLE public.bascula_facturas ADD COLUMN id_pago bigint;
+     ALTER TABLE public.bascula_facturas ADD CONSTRAINT bascula_facturas_id_pago_fkey FOREIGN KEY (id_pago) REFERENCES public.bascula_pagos (id_pago) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+
  ✔ Continueacion de recetas, control de saldo @done (19-11-05 13:29) pct|pcc|lap|san
      ALTER TABLE otros.recetas_productos ADD COLUMN aplicacion_total_saldo double precision NOT NULL DEFAULT 0;
      ALTER TABLE otros.recetas ADD COLUMN paso character varying(3) NOT NULL DEFAULT 'p'::character varying;

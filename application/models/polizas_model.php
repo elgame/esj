@@ -2588,12 +2588,14 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT
         fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono,
-        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov
+        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov,
+        bf.uuid
       FROM bascula_pagos AS fa
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
         INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
         INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula
         INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
+        LEFT JOIN bascula_facturas AS bf ON fa.id_pago = bf.id_pago
       WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago <> 'cheque'
          {$sql}
       GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi
