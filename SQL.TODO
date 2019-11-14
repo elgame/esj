@@ -1,5 +1,5 @@
 
- ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap
+ ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap|san
      ALTER TABLE public.bascula_facturas ADD COLUMN id_pago bigint;
      ALTER TABLE public.bascula_facturas ADD CONSTRAINT bascula_facturas_id_pago_fkey FOREIGN KEY (id_pago) REFERENCES public.bascula_pagos (id_pago) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 

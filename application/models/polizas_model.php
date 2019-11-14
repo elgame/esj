@@ -2649,6 +2649,8 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
+
         //Colocamos el Abono al Banco que se deposito el dinero
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2659,6 +2661,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
         // //Colocamos el Abono al Proveedor que realizo el pago
         // foreach ($data_frutas as $key => $value_fruta)
         // {
@@ -2672,6 +2675,11 @@ class polizas_model extends CI_Model {
         //                   $this->setEspacios($value->concepto.' (Boleta:'.$value_fruta->folio.')',100). //concepto
         //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
         // }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
 
         $ffolio++;
       }
