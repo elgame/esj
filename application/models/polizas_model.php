@@ -2598,7 +2598,7 @@ class polizas_model extends CI_Model {
         LEFT JOIN bascula_facturas AS bf ON fa.id_pago = bf.id_pago
       WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago <> 'cheque'
          {$sql}
-      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi
+      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bf.uuid
       ORDER BY fa.id_pago ASC
       ");
 
