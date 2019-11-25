@@ -995,6 +995,7 @@ class bascula_model extends CI_Model {
     $data_cuenta  = $data_cuenta['info'];
     $_GET['id']   = $datos['boletas'][0]['id_bascula'];
     $inf_factura  = $this->getBasculaInfo($_GET['id'], 0, true);
+    $id_bascula_pagos = 0;
 
     $resp = $this->banco_cuentas_model->addRetiro(array(
           'id_cuenta'           => $datos['dcuenta'],
@@ -1046,7 +1047,7 @@ class bascula_model extends CI_Model {
     }
 
 
-    return array('passess' => true);
+    return array('passess' => true, 'id_bascula_pagos' => $id_bascula_pagos);
   }
 
   public function getPagos($paginados=true)

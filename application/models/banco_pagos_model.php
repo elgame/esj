@@ -444,7 +444,10 @@ class banco_pagos_model extends CI_Model {
       $datos['dmonto'] = $total_pagar;
       $datos_factura['dtotal'] = $datos_factura['dsubtotal'] = $total_pagar;
       if(count($pago->pagos) > 0){
-        $this->bascula_model->pago_basculas_banco($datos);
+        $res_pbascula = $this->bascula_model->pago_basculas_banco($datos);
+        if ($res_pbascula['id_bascula_pagos'] > 0) {
+          $datos_factura['id_pago'] = $res_pbascula['id_bascula_pagos'];
+        }
         $this->bascula_facturas_model->crearFactura($datos_factura);
       }
 

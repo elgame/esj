@@ -2588,15 +2588,17 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT
         fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono,
-        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov
+        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov,
+        bf.uuid
       FROM bascula_pagos AS fa
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
         INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
         INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula
         INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
+        LEFT JOIN bascula_facturas AS bf ON fa.id_pago = bf.id_pago
       WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago <> 'cheque'
          {$sql}
-      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi
+      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bf.uuid
       ORDER BY fa.id_pago ASC
       ");
 
@@ -2647,6 +2649,8 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
+
         //Colocamos el Abono al Banco que se deposito el dinero
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2657,6 +2661,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
         // //Colocamos el Abono al Proveedor que realizo el pago
         // foreach ($data_frutas as $key => $value_fruta)
         // {
@@ -2670,6 +2675,11 @@ class polizas_model extends CI_Model {
         //                   $this->setEspacios($value->concepto.' (Boleta:'.$value_fruta->folio.')',100). //concepto
         //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
         // }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
 
         $ffolio++;
       }
