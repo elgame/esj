@@ -63,7 +63,7 @@ class recetas extends MY_Controller {
 
     $params['recetas'] = $this->recetas_model->getRecetas();
 
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
 
     $params['requisicion'] = false;
     $params['method']     = '';
@@ -311,6 +311,46 @@ class recetas extends MY_Controller {
     $this->load->model('recetas_model');
 
     $this->recetas_model->print_salidaticket($_GET['id'], $_GET['id_receta']);
+  }
+
+
+
+  public function surtir()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/recetas/formulas.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Surtir Recetas'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('recetas_model');
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['recetas'] = $this->recetas_model->getSurtirRecetas();
+
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
+
+    $params['requisicion'] = false;
+    $params['method']     = '';
+    $params['titleBread'] = 'Surtir Recetas';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/admin_surtir', $params);
+    $this->load->view('panel/footer');
   }
 
 

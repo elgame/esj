@@ -5,6 +5,7 @@
   $(function(){
     autocompleteCultivo();
     autocompleteEmpresas();
+    autocompleteProveedor();
   });
 
   /*
@@ -64,5 +65,34 @@
       }
     });
   };
+
+  function autocompleteProveedor() {
+    $(".proveedor").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $(".proveedor").val(ui.item.id);
+        $("#dcliente").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+       $(this).css({'background-color': '#FFD9B3'});
+        $('#fid_cliente').val('');
+      }
+    });
+  }
 
 });

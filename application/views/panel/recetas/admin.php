@@ -39,6 +39,12 @@
                 </select>
 
                 <br>
+                <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
+                <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01')); ?>" size="10">
+                <label for="ffecha2">Al</label>
+                <input type="date" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
+
+                <br>
 
                 <label for="darea">Cultivo</label>
                 <input type="text" name="darea" class="input-large search-query" id="darea" value="<?php echo set_value_get('darea') ?>" size="73">
@@ -69,6 +75,7 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
+                  <th>F. Aplicación</th>
                   <th>Cultivo</th>
                   <th>Folio</th>
                   <th>Formula</th>
@@ -82,6 +89,7 @@
             <?php foreach($recetas['recetas'] as $receta) { ?>
                 <tr>
                   <td><?php echo $receta->fecha; ?></td>
+                  <td><?php echo $receta->fecha_aplicacion; ?></td>
                   <td><?php echo $receta->area; ?></td>
                   <td><?php echo $receta->folio; ?></td>
                   <td><?php echo $receta->nombre; ?></td>

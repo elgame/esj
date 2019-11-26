@@ -30,6 +30,13 @@
      ALTER TABLE compras_salidas ALTER COLUMN observaciones TYPE character varying(600);
      ALTER TABLE otros.recetas_salidas ADD COLUMN id_bascula bigint;
      ALTER TABLE otros.recetas_salidas ADD CONSTRAINT recetas_salidas_id_bascula_fkey FOREIGN KEY (id_bascula) REFERENCES public.bascula (id_bascula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+     -- pct
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Surtir Recetas',521,TRUE,'recetas/surtir/','qrcode',FALSE);
+     ALTER TABLE otros.recetas_productos ADD COLUMN id_requisicion bigint;
+     COMMENT ON COLUMN otros.recetas_productos.id_requisicion IS 'id de la orden de requisicion';
+     ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_requisicion_fkey FOREIGN KEY (id_requisicion) REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE otros.recetas_productos ADD COLUMN id_proveedor bigint;
+     ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_proveedor_fkey FOREIGN KEY (id_proveedor) REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
  ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc|pct|san
      CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones

@@ -17,6 +17,11 @@ class recetas_model extends CI_Model {
         'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
     );
 
+    $_GET['ffecha1'] = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m")."-01";
+    $_GET['ffecha2'] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(r.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+
     if($params['result_page'] % $params['result_items_per_page'] == 0)
       $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
@@ -49,7 +54,7 @@ class recetas_model extends CI_Model {
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
           f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
-          r.total_importe, r.paso
+          r.total_importe, r.paso, r.fecha_aplicacion
         FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
           INNER JOIN areas a ON a.id_area = r.id_area
         WHERE 1 = 1 {$sql}
@@ -482,6 +487,54 @@ class recetas_model extends CI_Model {
 
     return $salidas;
   }
+
+
+
+  public function getSurtirRecetas()
+  {
+    $sql = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m")."-01";
+    $_GET['ffecha2'] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(r.fecha_aplicacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+
+    if($this->input->get('ftipo') != '')
+    {
+      $sql .= " AND r.tipo = '".$this->input->get('ftipo')."'";
+    }
+
+    if($this->input->get('did_empresa') != '')
+    {
+      $sql .= "  AND r.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('did_area') != '')
+    {
+      $sql .= " AND r.id_area = '".$this->input->get('did_area')."'";
+    }
+
+    $res = $this->db->query(
+      "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
+        f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
+        rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total
+      FROM otros.recetas_productos rp
+        INNER JOIN productos pr ON pr.id_producto = rp.id_producto
+        INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
+        INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
+        INNER JOIN areas a ON a.id_area = r.id_area
+        LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
+      WHERE r.status = 't' AND rp.id_requisicion IS NULL {$sql}
+      ORDER BY r.folio DESC
+      ");
+
+    $response = $res->result();
+
+    return $response;
+  }
+
+
 
   /**
    * Obtiene el listado de facturas
