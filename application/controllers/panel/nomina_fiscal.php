@@ -319,6 +319,8 @@ class nomina_fiscal extends MY_Controller {
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 
+    // Ajuste de Ptu
+    // ===================
     $this->load->model('nomina_ajustes_model');
     $this->nomina_ajustes_model->confAjustePtu2019()->ajustePtu2019($params['empleados']);
     // echo "<pre>";

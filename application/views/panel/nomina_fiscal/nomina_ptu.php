@@ -246,6 +246,8 @@
 
                           // Si es nueva (no esta guardada) el ptu se divide
                           if ($e->nomina_guardada === 'f') {
+                            // Ajuste de Ptu
+                            // ===================
                             $e->ptu_empleado_dias = $e->ptu_empleado_dias;///2;
                             $e->ptu_empleado_percepciones = $e->ptu_empleado_percepciones;///2;
                             $ptuEmpleado = $ptuEmpleado;///2;

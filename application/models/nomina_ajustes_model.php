@@ -36,6 +36,17 @@ class nomina_ajustes_model extends CI_Model {
       $empleado->nomina->percepciones['ptu']['total']          = abs(number_format($empleado->nomina->percepciones['ptu']['total'] - $this->empleado[$empleado->id]->ptu, 2, '.', ''));
       $empleado->nomina->percepciones['ptu']['ImporteExcento'] = abs(number_format($empleado->nomina->percepciones['ptu']['ImporteExcento'] - $this->empleado[$empleado->id]->ptu_exento, 2, '.', ''));
       $empleado->nomina->percepciones['ptu']['ImporteGravado'] = abs(number_format($empleado->nomina->percepciones['ptu']['ImporteGravado'] - $this->empleado[$empleado->id]->ptu_grabable, 2, '.', ''));
+
+      $empleado->nomina->percepcionesTotales['TotalSueldos'] = abs(number_format($empleado->nomina->percepcionesTotales['TotalSueldos'] - $this->empleado[$empleado->id]->ptu, 2, '.', ''));
+      $empleado->nomina->percepcionesTotales['TotalExento'] = abs(number_format($empleado->nomina->percepcionesTotales['TotalExento'] - $this->empleado[$empleado->id]->ptu_exento, 2, '.', ''));
+      $empleado->nomina->percepcionesTotales['TotalGravado'] = abs(number_format($empleado->nomina->percepcionesTotales['TotalGravado'] - $this->empleado[$empleado->id]->ptu_grabable, 2, '.', ''));
+
+      $empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'] = abs(number_format($empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'] - $this->empleado[$empleado->id]->isr, 2, '.', ''));
+      $empleado->nomina->TotalPercepciones = abs(number_format($empleado->nomina->TotalPercepciones - $this->empleado[$empleado->id]->ptu, 2, '.', ''));
+      $empleado->nomina->TotalDeducciones = abs(number_format($empleado->nomina->TotalDeducciones - $this->empleado[$empleado->id]->isr, 2, '.', ''));
+      $empleado->nomina->subtotal = abs(number_format($empleado->nomina->subtotal - $this->empleado[$empleado->id]->ptu, 2, '.', ''));
+      $empleado->nomina->descuento = abs(number_format($empleado->nomina->descuento - $this->empleado[$empleado->id]->isr, 2, '.', ''));
+      $empleado->nomina->isr = abs(number_format($empleado->nomina->isr - $this->empleado[$empleado->id]->isr, 2, '.', ''));
       // $empleado->ptu_empleado_dias
       // $empleado->ptu_empleado_percepciones
     }
