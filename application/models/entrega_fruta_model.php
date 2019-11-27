@@ -77,7 +77,7 @@ class entrega_fruta_model extends CI_Model {
 			];
 
 			$this->db->insert('otros.entrega_fruta', $datos);
-			$response .= ','.$this->db->insert_id('otros.entrega_fruta', 'id_entrega_fruta');
+			$response .= ','.$this->db->insert_id('otros.entrega_fruta_id_entrega_fruta_seq');
 		}
 
 		return array('error' => FALSE, 'hojas' => $response);

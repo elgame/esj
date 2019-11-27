@@ -78,7 +78,7 @@ class contrarecibo_model extends CI_Model {
 		}
 
 		$this->db->insert('otros.contrarecibos', $data);
-		$id_contrarecibo = $this->db->insert_id('otros.contrarecibos', 'id_contrarecibo');
+		$id_contrarecibo = $this->db->insert_id('otros.contrarecibos_id_contrarecibo_seq');
 
 		// // Bitacora
   //   $this->bitacora_model->_insert('proveedores', $id_contrarecibo,

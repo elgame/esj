@@ -111,7 +111,7 @@ class productores_model extends CI_Model {
 		}
 		$this->db->insert('otros.productor', $data);
 
-		$id_productor = $this->db->insert_id('otros.productor', 'id_productor');
+		$id_productor = $this->db->insert_id('otros.productor_id_productor_seq');
 
 		// Bitacora
     $this->bitacora_model->_insert('otros.productor', $id_productor,

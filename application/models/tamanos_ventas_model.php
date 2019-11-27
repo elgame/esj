@@ -74,7 +74,7 @@ class tamanos_ventas_model extends CI_Model {
 		}
 
 		$this->db->insert('otros.areas_tamanios', $data);
-		$id_tamanio = $this->db->insert_id('otros.areas_tamanios', 'id_tamanio');
+		$id_tamanio = $this->db->insert_id('otros.areas_tamanios_id_tamanio_seq');
 
 		return array('error' => FALSE, $id_tamanio);
 	}

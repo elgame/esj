@@ -74,7 +74,7 @@ class calidades_ventas_model extends CI_Model {
 		}
 
 		$this->db->insert('otros.areas_calidades', $data);
-		$id_calidad = $this->db->insert_id('otros.areas_calidades', 'id_calidad');
+		$id_calidad = $this->db->insert_id('otros.areas_calidades_id_calidad_seq');
 
 		return array('error' => FALSE, $id_calidad);
 	}

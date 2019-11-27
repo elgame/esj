@@ -76,7 +76,7 @@ class calidades_model extends CI_Model {
 		}
 
 		$this->db->insert('calidades', $data);
-		$id_calidad = $this->db->insert_id('calidades', 'id_calidad');
+		$id_calidad = $this->db->insert_id('calidades_id_calidad_seq');
 
 		return array('error' => FALSE, $id_calidad);
 	}

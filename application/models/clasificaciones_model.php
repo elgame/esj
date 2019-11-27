@@ -84,7 +84,7 @@ class clasificaciones_model extends CI_Model {
 
 		$this->db->insert('clasificaciones', $data);
 
-		$id_clasificacion = $this->db->insert_id('clasificaciones', 'id_clasificacion');
+		$id_clasificacion = $this->db->insert_id('clasificaciones_id_clasificacion_seq');
 
     // if (isset($_POST['fcalibres']))
     // {
