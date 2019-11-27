@@ -532,7 +532,7 @@ class facturacion_model extends privilegios_model{
         'updated_at'                  => date("Y-m-d H:i:s")
         );
       $this->db->insert('facturacion_ce', $ce);
-      $idce = $this->db->insert_id('facturacion_ce', 'id');
+      $idce = $this->db->insert_id('facturacion_ce_id_seq');
 
       $ce = array(
         'comercio_exterior_id' => $idce,
@@ -709,7 +709,7 @@ class facturacion_model extends privilegios_model{
     if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
     {
       $this->db->insert('facturacion', $datosFactura);
-      $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+      $idFactura = $this->db->insert_id('facturacion_id_factura_seq');
 
       // Si tiene el # de trazabilidad
       if ($this->input->post('dno_trazabilidad') !== false) {

@@ -480,7 +480,7 @@ class ventas_dia_model extends privilegios_model{
     if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
     {
       $this->db->insert('facturacionv', $datosFactura);
-      $idFactura = $this->db->insert_id('facturacionv', 'id_factura');
+      $idFactura = $this->db->insert_id('facturacionv_id_factura_seq');
 
       $msg = '3';
       // // Bitacora

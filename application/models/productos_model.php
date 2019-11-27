@@ -91,7 +91,7 @@ class productos_model extends CI_Model {
 
 		$this->db->insert('productos_familias', $data);
 
-		$id_familia = $this->db->insert_id('productos_familias', 'id_familia');
+		$id_familia = $this->db->insert_id('productos_familias_id_familia_seq');
 
 		return array('error' => FALSE, $id_familia);
 	}
@@ -272,7 +272,7 @@ class productos_model extends CI_Model {
 		}
 
 		$this->db->insert('productos', $data);
-		$id_producto = $this->db->insert_id('productos', 'id_producto');
+		$id_producto = $this->db->insert_id('productos_id_producto_seq');
 
 		$this->addPresentacion($id_producto);
 

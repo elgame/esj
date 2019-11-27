@@ -84,7 +84,7 @@ class areas_model extends CI_Model {
 		}
 
 		$this->db->insert('areas', $data);
-		$id_area = $this->db->insert_id('areas', 'id_area');
+		$id_area = $this->db->insert_id('areas_id_area_seq');
 
 		//se agregan las calidades
 		if ($this->input->post('cal_nombre') !== false) {

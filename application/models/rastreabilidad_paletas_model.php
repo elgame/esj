@@ -213,7 +213,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     }
 
     $this->db->insert('otros.paletas_salidas', $data);
-    $id_paleta = $this->db->insert_id('otros.paletas_salidas', 'id_paleta_salida');
+    $id_paleta = $this->db->insert_id('otros.paletas_salidas_id_paleta_salida_seq');
 
     $this->saveClasificaciones($id_paleta);
 

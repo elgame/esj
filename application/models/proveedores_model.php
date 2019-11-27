@@ -136,7 +136,7 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->insert('proveedores', $data);
-		$id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
+		$id_proveedor = $this->db->insert_id('proveedores_id_proveedor_seq');
 
 		// Bitacora
     $this->bitacora_model->_insert('proveedores', $id_proveedor,

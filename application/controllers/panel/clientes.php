@@ -87,7 +87,7 @@ class clientes extends MY_Controller {
 							'is_factura'       => 'f',
 		        		);
 		        		$this->db->insert('facturacion', $data_factura);
-		        		$id_factura = $this->db->insert_id('facturacion', 'id_factura');
+		        		$id_factura = $this->db->insert_id('facturacion_id_factura_seq');
 		        	}
 		        }
 

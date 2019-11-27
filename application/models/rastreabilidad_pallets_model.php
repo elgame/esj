@@ -246,7 +246,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		//se valida que no este un pallet pendiente de la misma clasificacion
 		// if($this->checkPalletPendiente($data['id_clasificacion'])){
 			$this->db->insert('rastria_pallets', $data);
-			$id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
+			$id_pallet = $this->db->insert_id('rastria_pallets_id_pallet_seq');
 
       // Bitacora
       $this->bitacora_model->_insert('rastria_pallets', $id_pallet,

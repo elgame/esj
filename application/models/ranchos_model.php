@@ -81,7 +81,7 @@ class ranchos_model extends CI_Model {
 		}
 
 		$this->db->insert('otros.ranchos', $data);
-		$id_ranchos = $this->db->insert_id('otros.ranchos', 'id_rancho');
+		$id_ranchos = $this->db->insert_id('otros.ranchos_id_rancho_seq');
 
 		// Bitacora
     $this->bitacora_model->_insert('otros.ranchos', $id_ranchos,

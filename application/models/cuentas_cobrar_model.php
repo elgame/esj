@@ -995,9 +995,9 @@ if($close){
     $id = $id==null? $this->input->get('id') : $id; //id factura o nota de venta
 
     if ($this->input->get('tipo') == 'f') {
-      $camps = array('id_factura', 'facturacion_abonos', 'facturacion');
+      $camps = array('id_factura', 'facturacion_abonos', 'facturacion', 'facturacion_abonos_id_abono_seq');
     }else{
-      $camps = array('id_factura', 'facturacion_abonos', 'facturacion');
+      $camps = array('id_factura', 'facturacion_abonos', 'facturacion', 'facturacion_abonos_id_abono_seq');
       // $camps = array('id_venta', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision');
     }
 
@@ -1067,7 +1067,7 @@ if($close){
     );
     //se inserta el abono
     $this->db->insert($camps[1], $data);
-    $data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
+    $data['id_abono'] = $this->db->insert_id($camps[3]);
 
     // Bitacora
     $this->bitacora_model->_insert($camps[1], $data['id_abono'],

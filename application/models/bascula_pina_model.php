@@ -25,7 +25,7 @@ class bascula_pina_model extends CI_Model {
     } else {
       $data['id_usuario'] = $this->session->userdata('id_usuario');
       $this->db->insert('otros.bascula_salida_pina', $data);
-      $id = $this->db->insert_id('otros.bascula_salida_pina', 'id');
+      $id = $this->db->insert_id('otros.bascula_salida_pina_id_seq');
     }
 
     $this->addEstibas($id, $datos);

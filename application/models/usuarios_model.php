@@ -138,7 +138,7 @@ class Usuarios_model extends privilegios_model {
 		}
 
 		$this->db->insert('usuarios', $data);
-		$id_usuario = $this->db->insert_id('usuarios', 'id');
+		$id_usuario = $this->db->insert_id('usuarios_id_seq');
 
 		//privilegios
 		if (is_array( $data_privilegios )) {
