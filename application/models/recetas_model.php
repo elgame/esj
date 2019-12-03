@@ -526,12 +526,115 @@ class recetas_model extends CI_Model {
         INNER JOIN areas a ON a.id_area = r.id_area
         LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
       WHERE r.status = 't' AND rp.id_requisicion IS NULL {$sql}
-      ORDER BY r.folio DESC
+      ORDER BY r.folio DESC, p.id_proveedor ASC, pr.nombre ASC
       ");
 
     $response = $res->result();
 
     return $response;
+  }
+
+  public function guardarSurtirReceta()
+  {
+    if (isset($_POST['id_proveedor']) && count($_POST['id_proveedor']) > 0) {
+      foreach ($_POST['id_proveedor'] as $key => $id_proveedor) {
+        if ($id_proveedor > 0) {
+          $this->db->update('otros.recetas_productos', [
+            'id_proveedor' => $id_proveedor,
+          ], [
+            'id_receta'   => $_POST['id_receta'][$key],
+            'id_producto' => $_POST['id_producto'][$key],
+            'rows'        => $_POST['rows'][$key],
+          ]);
+        }
+      }
+    }
+  }
+
+  public function crearRequisiciones()
+  {
+    $this->guardarSurtirReceta();
+
+    $productos_recetas = $this->getSurtirRecetas();
+    $productos_recetasg = [];
+    $auxarea = '';
+    foreach ($productos_recetas as $key => $value) {
+      $productos_recetasg[$value->id_area][] = $value;
+    }
+
+// echo "<pre>";
+//   var_dump($productos_recetasg);
+// echo "</pre>";exit;
+
+    $requisiciones = [];
+    $requisiciones_productos = [];
+    $auxid = '';
+    foreach ($productos_recetasg as $key => $item) {
+      $requisiciones[$key] = [
+        'id_empresa'      => '',
+        'id_departamento' => 24,
+        'id_empleado'     => $this->session->userdata('id_usuario'),
+        'folio'           => '', //$_POST['folio'],
+        'fecha_creacion'  => date("Y-m-d"),
+        'tipo_pago'       => 'cr',
+        'tipo_orden'      => 'p',
+        'solicito'        => '',
+        'id_cliente'      => NULL,
+        'descripcion'     => '',
+        'id_almacen'      => '', //(is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+
+        'id_area'         => '',
+        'es_receta'       => true,
+      ];
+
+      // Si trae datos extras
+      $requisiciones[$key]['otros_datos']['noRecetas'] = [];
+      // $requisiciones[$key]['otros_datos'] = json_encode($data['otros_datos']);
+
+      foreach ($item as $key2 => $item2) {
+        $requisiciones[$key]['id_empresa'] = $item2->id_empresa;
+        $requisiciones[$key]['id_area']    = $item2->id_area;
+
+        $receta = $this->info($item2->id_recetas);
+        $requisiciones[$key]['solicito'] = $receta['info']->solicito;
+
+        if (!in_array($item2->folio, $requisiciones[$key]['otros_datos']['noRecetas'])) {
+          $requisiciones[$key]['otros_datos']['noRecetas'][] = $item2->folio;
+        }
+
+        $requisiciones_productos[$key][] = [
+          'id_requisicion'       => '',
+          'id_proveedor'         => $item2->id_proveedor,
+          'num_row'              => $key2,
+          'id_producto'          => $item2->id_producto,
+          'id_presentacion'      => null,
+          'descripcion'          => $item2->producto,
+          'cantidad'             => $cantidad,
+          'precio_unitario'      => $pu,
+          'importe'              => $_POST['importe'.$value][$key],
+          'iva'                  => $_POST['trasladoTotal'.$value][$key],
+          'retencion_iva'        => $_POST['retTotal'.$value][$key],
+          'total'                => $_POST['total'.$value][$key],
+          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+          'porcentaje_retencion' => $_POST['ret_iva'][$key],
+          // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
+          'observacion'          => $_POST['observacion'][$key],
+          'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
+          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+          'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+        ];
+      }
+    }
+    echo "<pre>";
+      var_dump($requisiciones);
+    echo "</pre>";exit;
+
+
   }
 
 

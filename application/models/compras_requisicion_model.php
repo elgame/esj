@@ -212,7 +212,7 @@ class compras_requisicion_model extends CI_Model {
           'kilometros' => $_POST['dkilometros'],
           'litros'     => $_POST['dlitros'],
           'precio'     => $_POST['dprecio'],
-          ));
+        ));
       }
     }
 
@@ -269,12 +269,23 @@ class compras_requisicion_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  // public function agregarData($data)
-  // {
-  //   $this->db->insert('compras_ordenes', $data);
+  public function agregarData($data)
+  {
+    $this->db->insert('compras_requisicion', $data);
+    $ordenId = $this->db->insert_id('compras_requisicion_id_requisicion_seq');
 
-  //   return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
-  // }
+    // Bitacora
+    $this->bitacora_model->_insert('compras_requisicion', $ordenId,
+                                    array(':accion'     => 'la orden de requisicion (del modulo de recetas)', ':seccion' => 'ordenes de compra',
+                                          ':folio'      => $data['folio'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'    => 'en '.$this->input->post('empresa')));
+
+
+    $this->db->insert_batch('compras_requisicion_productos', $productos);
+
+    return array('passes' => true, 'msg' => 3, 'id_requisicion' => $ordenId);
+  }
 
   // public function agregarProductosData($data)
   // {

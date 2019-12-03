@@ -193,7 +193,8 @@ class gastos extends MY_Controller {
     $params['rfc'] = $rfcProv;
 
     // $path = mb_convert_encoding("C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8");
-    $path = mb_convert_encoding("/media/winserver/corporativo/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8");
+    // $path = mb_convert_encoding("/media/winserver/corporativo/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8");
+    $path = "/media/winserver/corporativo/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos";
     if (is_dir($path)) {
       $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
         $this->input->get('ffecha1'), $this->input->get('ffecha2'));
