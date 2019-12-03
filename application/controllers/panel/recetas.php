@@ -321,7 +321,7 @@ class recetas extends MY_Controller {
       array('general/supermodal.js'),
       array('general/msgbox.js'),
       array('general/util.js'),
-      array('panel/recetas/formulas.js'),
+      array('panel/recetas/surtir_recetas.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -332,6 +332,12 @@ class recetas extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('recetas_model');
 
+    if (isset($_POST['guardar'])) {
+      $this->recetas_model->guardarSurtirReceta();
+    } elseif (isset($_POST['requisiciones'])) {
+      $this->recetas_model->crearRequisiciones();
+    }
+
     // Obtiene los datos de la empresa predeterminada.
     $this->load->model('empresas_model');
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
@@ -341,7 +347,7 @@ class recetas extends MY_Controller {
     $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
 
     $params['requisicion'] = false;
-    $params['method']     = '';
+    $params['method']     = 'surtir';
     $params['titleBread'] = 'Surtir Recetas';
 
     if (isset($_GET['msg']))

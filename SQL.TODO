@@ -1,5 +1,5 @@
 
- ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap|san
+ ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap|san|pcc
      ALTER TABLE public.bascula_facturas ADD COLUMN id_pago bigint;
      ALTER TABLE public.bascula_facturas ADD CONSTRAINT bascula_facturas_id_pago_fkey FOREIGN KEY (id_pago) REFERENCES public.bascula_pagos (id_pago) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -30,7 +30,7 @@
      ALTER TABLE compras_salidas ALTER COLUMN observaciones TYPE character varying(600);
      ALTER TABLE otros.recetas_salidas ADD COLUMN id_bascula bigint;
      ALTER TABLE otros.recetas_salidas ADD CONSTRAINT recetas_salidas_id_bascula_fkey FOREIGN KEY (id_bascula) REFERENCES public.bascula (id_bascula) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-     -- pct
+     -- pct|pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Surtir Recetas',521,TRUE,'recetas/surtir/','qrcode',FALSE);
      ALTER TABLE otros.recetas_productos ADD COLUMN id_requisicion bigint;
      COMMENT ON COLUMN otros.recetas_productos.id_requisicion IS 'id de la orden de requisicion';
