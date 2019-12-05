@@ -53,6 +53,13 @@
 
 
             <form action="<?php echo base_url('panel/recetas/'.$method.'?'.MyString::getVarsLink(array('msg'))); ?>" method="post">
+              Almacén: <select name="id_almacen" class="span3">
+                <?php $default = ($this->input->post('id_almacen')>0? $this->input->post('id_almacen'): '1');
+                foreach ($almacenes['almacenes'] as $key => $value) { ?>
+                  <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
+                <?php } ?>
+              </select>
+
               <button type="submit" name="requisiciones" class="btn btn-info pull-right">Crear requisiciones</button>
               <button type="submit" name="guardar" class="btn btn-success pull-right">Guardar</button>
 

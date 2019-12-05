@@ -374,26 +374,27 @@
     });
 
     total_factura = parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones));
+    console.log( total_factura );
 
-    $('#importe-format').html(util.darFormatoNum(total_importes));
-    $('#total_importe').val(total_importes);
+    $('#importe-format').html(util.darFormatoNum(total_importes.toFixed(2)));
+    $('#total_importe').val(total_importes.toFixed(2));
 
-    $('#descuento-format').html(util.darFormatoNum(total_descuentos));
-    $('#total_descuento').val(total_descuentos);
+    $('#descuento-format').html(util.darFormatoNum(total_descuentos.toFixed(3)));
+    $('#total_descuento').val(total_descuentos.toFixed(3));
 
-    $('#subtotal-format').html(util.darFormatoNum(total_subtotal));
-    $('#total_subtotal').val(total_subtotal);
+    $('#subtotal-format').html(util.darFormatoNum(total_subtotal.toFixed(2)));
+    $('#total_subtotal').val(total_subtotal.toFixed(2));
 
-    $('#iva-format').html(util.darFormatoNum(total_ivas));
-    $('#total_iva').val(total_ivas);
+    $('#iva-format').html(util.darFormatoNum(total_ivas.toFixed(2)));
+    $('#total_iva').val(total_ivas.toFixed(2));
 
-    $('#retiva-format').html(util.darFormatoNum(total_retenciones));
-    $('#total_retiva').val(total_retenciones);
+    $('#retiva-format').html(util.darFormatoNum(total_retenciones.toFixed(2)));
+    $('#total_retiva').val(total_retenciones.toFixed(2));
 
-    $('#totfac-format').html(util.darFormatoNum(total_factura));
-    $('#total_totfac').val(total_factura);
+    $('#totfac-format').html(util.darFormatoNum(total_factura.toFixed(2)));
+    $('#total_totfac').val(total_factura.toFixed(2));
 
-    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()))
+    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toFixed(2).toString(), $('#moneda').val()))
 
   }
 
