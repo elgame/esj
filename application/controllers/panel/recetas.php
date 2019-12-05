@@ -331,6 +331,7 @@ class recetas extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('recetas_model');
+    $this->load->model('almacenes_model');
 
     if (isset($_POST['guardar'])) {
       $this->recetas_model->guardarSurtirReceta();
@@ -343,6 +344,7 @@ class recetas extends MY_Controller {
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['recetas'] = $this->recetas_model->getSurtirRecetas();
+    $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
 
     $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
 

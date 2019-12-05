@@ -518,7 +518,7 @@ class recetas_model extends CI_Model {
       "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
         f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
-        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
@@ -553,6 +553,7 @@ class recetas_model extends CI_Model {
 
   public function crearRequisiciones()
   {
+    $this->load->model('compras_requisicion_model');
     $this->guardarSurtirReceta();
 
     $productos_recetas = $this->getSurtirRecetas();
@@ -574,7 +575,7 @@ class recetas_model extends CI_Model {
         'id_empresa'      => '',
         'id_departamento' => 24,
         'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => '', //$_POST['folio'],
+        'folio'           => $this->compras_requisicion_model->folio('p'), //$_POST['folio'],
         'fecha_creacion'  => date("Y-m-d"),
         'tipo_pago'       => 'cr',
         'tipo_orden'      => 'p',
@@ -589,7 +590,6 @@ class recetas_model extends CI_Model {
 
       // Si trae datos extras
       $requisiciones[$key]['otros_datos']['noRecetas'] = [];
-      // $requisiciones[$key]['otros_datos'] = json_encode($data['otros_datos']);
 
       foreach ($item as $key2 => $item2) {
         $requisiciones[$key]['id_empresa'] = $item2->id_empresa;
@@ -609,29 +609,28 @@ class recetas_model extends CI_Model {
           'id_producto'          => $item2->id_producto,
           'id_presentacion'      => null,
           'descripcion'          => $item2->producto,
-          'cantidad'             => $cantidad,
-          'precio_unitario'      => $pu,
-          'importe'              => $_POST['importe'.$value][$key],
-          'iva'                  => $_POST['trasladoTotal'.$value][$key],
-          'retencion_iva'        => $_POST['retTotal'.$value][$key],
-          'total'                => $_POST['total'.$value][$key],
-          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-          'porcentaje_retencion' => $_POST['ret_iva'][$key],
-          // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
-          'observacion'          => $_POST['observacion'][$key],
-          'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
-          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
-          'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
-          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+          'cantidad'             => $item2->aplicacion_total,
+          'precio_unitario'      => $item2->precio,
+          'importe'              => $item2->importe,
+          'iva'                  => 0,
+          'retencion_iva'        => 0,
+          'total'                => $item2->importe,
+          'porcentaje_iva'       => 0,
+          'porcentaje_retencion' => 0,
+          'observacion'          => '',
+          'ieps'                 => 0,
+          'porcentaje_ieps'      => 0,
+          'tipo_cambio'          => 0,
+          'id_cat_codigos'       => null,
+          'retencion_isr'        => 0,
+          'porcentaje_isr'       => 0,
+          'activos'              => NULL
         ];
       }
+      $requisiciones[$key]['otros_datos'] = json_encode($requisiciones[$key]['otros_datos']);
     }
     echo "<pre>";
-      var_dump($requisiciones);
+      var_dump($requisiciones, $requisiciones_productos);
     echo "</pre>";exit;
 
 
