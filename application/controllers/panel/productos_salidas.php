@@ -466,7 +466,7 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => $req2.'|greater_than[0]')
+            'rules' => $req1.'|greater_than[0]')
     );
 
     if ($this->input->post('tid_almacen') == '') {
