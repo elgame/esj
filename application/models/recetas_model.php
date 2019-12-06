@@ -518,7 +518,7 @@ class recetas_model extends CI_Model {
       "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
         f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
-        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
@@ -541,6 +541,7 @@ class recetas_model extends CI_Model {
         if ($id_proveedor > 0) {
           $this->db->update('otros.recetas_productos', [
             'id_proveedor' => $id_proveedor,
+            'surtir'       => $_POST['aplicar'][$key],
           ], [
             'id_receta'   => $_POST['id_receta'][$key],
             'id_producto' => $_POST['id_producto'][$key],
@@ -560,32 +561,33 @@ class recetas_model extends CI_Model {
     $productos_recetasg = [];
     $auxarea = '';
     foreach ($productos_recetas as $key => $value) {
-      $productos_recetasg[$value->id_area][] = $value;
+      if ($value->surtir == 't') {
+        $productos_recetasg[$value->id_area][] = $value;
+      }
     }
-
-// echo "<pre>";
-//   var_dump($productos_recetasg);
-// echo "</pre>";exit;
 
     $requisiciones = [];
     $requisiciones_productos = [];
+    $requisiciones_ranchos = [];
+    $requisiciones_centros = [];
     $auxid = '';
     foreach ($productos_recetasg as $key => $item) {
       $requisiciones[$key] = [
         'id_empresa'      => '',
         'id_departamento' => 24,
         'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => $this->compras_requisicion_model->folio('p'), //$_POST['folio'],
-        'fecha_creacion'  => date("Y-m-d"),
+        'folio'           => '',
+        'fecha_creacion'  => date("Y-m-d H:i:s"),
         'tipo_pago'       => 'cr',
         'tipo_orden'      => 'p',
         'solicito'        => '',
         'id_cliente'      => NULL,
         'descripcion'     => '',
-        'id_almacen'      => '', //(is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+        'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+        'descripcion'     => 'Requisición creada del modulo de recetas',
 
         'id_area'         => '',
-        'es_receta'       => true,
+        'es_receta'       => 't',
       ];
 
       // Si trae datos extras
@@ -595,7 +597,7 @@ class recetas_model extends CI_Model {
         $requisiciones[$key]['id_empresa'] = $item2->id_empresa;
         $requisiciones[$key]['id_area']    = $item2->id_area;
 
-        $receta = $this->info($item2->id_recetas);
+        $receta = $this->info($item2->id_recetas, true);
         $requisiciones[$key]['solicito'] = $receta['info']->solicito;
 
         if (!in_array($item2->folio, $requisiciones[$key]['otros_datos']['noRecetas'])) {
@@ -624,15 +626,56 @@ class recetas_model extends CI_Model {
           'id_cat_codigos'       => null,
           'retencion_isr'        => 0,
           'porcentaje_isr'       => 0,
-          'activos'              => NULL
+          'activos'              => NULL,
+
+          'prodSurtir' => [
+            'id_receta'   => $item2->id_recetas,
+            'id_producto' => $item2->id_producto,
+            'rows'        => $item2->rows
+          ]
         ];
+
+        if (isset($receta['info']->rancho) && count($receta['info']->rancho)> 0) {
+          foreach ($receta['info']->rancho as $keyR => $rancho) {
+            if (!isset($requisiciones_ranchos[$key])) {
+              $requisiciones_ranchos[$key] = [];
+            }
+
+            if (!in_array($rancho->id_rancho, $requisiciones_ranchos[$key])) {
+              $requisiciones_ranchos[$key][] = $rancho->id_rancho;
+            }
+          }
+        }
+
+        if (isset($receta['info']->centroCosto) && count($receta['info']->centroCosto) > 0) {
+          foreach ($receta['info']->centroCosto as $keyR => $centroCosto) {
+            if (!isset($requisiciones_centros[$key])) {
+              $requisiciones_centros[$key] = [];
+            }
+
+            if (!in_array($centroCosto->id_centro_costo, $requisiciones_centros[$key])) {
+              $requisiciones_centros[$key][] = $centroCosto->id_centro_costo;
+            }
+          }
+        }
+
       }
       $requisiciones[$key]['otros_datos'] = json_encode($requisiciones[$key]['otros_datos']);
     }
-    echo "<pre>";
-      var_dump($requisiciones, $requisiciones_productos);
-    echo "</pre>";exit;
 
+    // Agrega las ordenes de requisición
+    $response = $this->compras_requisicion_model->agregarData($requisiciones, $requisiciones_productos, $requisiciones_ranchos, $requisiciones_centros);
+
+    // Se actualizan los productos de las recetas con el id de la requisición
+    if ($response['passes']) {
+      foreach ($response['productosReq'] as $id_requisicion => $ordenes) {
+        foreach ($ordenes as $keyp => $product) {
+          $this->db->update('otros.recetas_productos', ['id_requisicion' => $id_requisicion], $product);
+        }
+      }
+    }
+
+    return $response;
 
   }
 

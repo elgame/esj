@@ -336,7 +336,8 @@ class recetas extends MY_Controller {
     if (isset($_POST['guardar'])) {
       $this->recetas_model->guardarSurtirReceta();
     } elseif (isset($_POST['requisiciones'])) {
-      $this->recetas_model->crearRequisiciones();
+      $respo = $this->recetas_model->crearRequisiciones();
+      $_GET['msg'] = $respo['msg'];
     }
 
     // Obtiene los datos de la empresa predeterminada.
