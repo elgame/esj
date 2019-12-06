@@ -98,8 +98,8 @@
                     </td>
                     <td>
                       <select name="aplicar[]">
-                        <option value="si" <?php echo ($receta->surtir == 't'? 'selected': '') ?>>Si</option>
-                        <option value="no" <?php echo ($receta->surtir == 'f'? 'selected': '') ?>>No</option>
+                        <option value="t" <?php echo ($receta->surtir == 't'? 'selected': '') ?>>Si</option>
+                        <option value="f" <?php echo ($receta->surtir == 'f'? 'selected': '') ?>>No</option>
                       </select>
                     </td>
                   </tr>
