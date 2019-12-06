@@ -75,6 +75,7 @@
                     <th>Importe</th>
                     <th>Producto</th>
                     <th>Proveedor</th>
+                    <th>Aplicar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -94,6 +95,12 @@
                       <input type="hidden" name="id_receta[]" class="id_receta" value="<?php echo $receta->id_recetas ?>">
                       <input type="hidden" name="id_producto[]" class="id_producto" value="<?php echo $receta->id_producto ?>">
                       <input type="hidden" name="rows[]" class="rows" value="<?php echo $receta->rows ?>">
+                    </td>
+                    <td>
+                      <select name="aplicar[]">
+                        <option value="si" <?php echo ($receta->surtir == 't'? 'selected': '') ?>>Si</option>
+                        <option value="no" <?php echo ($receta->surtir == 'f'? 'selected': '') ?>>No</option>
+                      </select>
                     </td>
                   </tr>
               <?php }?>

@@ -518,7 +518,7 @@ class recetas_model extends CI_Model {
       "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
         f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
-        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
@@ -575,14 +575,14 @@ class recetas_model extends CI_Model {
         'id_empresa'      => '',
         'id_departamento' => 24,
         'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => $this->compras_requisicion_model->folio('p'), //$_POST['folio'],
+        'folio'           => $this->compras_requisicion_model->folio('p'),
         'fecha_creacion'  => date("Y-m-d"),
         'tipo_pago'       => 'cr',
         'tipo_orden'      => 'p',
         'solicito'        => '',
         'id_cliente'      => NULL,
         'descripcion'     => '',
-        'id_almacen'      => '', //(is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+        'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
 
         'id_area'         => '',
         'es_receta'       => true,

@@ -37,6 +37,8 @@
      ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_requisicion_fkey FOREIGN KEY (id_requisicion) REFERENCES public.compras_requisicion (id_requisicion) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.recetas_productos ADD COLUMN id_proveedor bigint;
      ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_proveedor_fkey FOREIGN KEY (id_proveedor) REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     -- pct
+     ALTER TABLE otros.recetas_productos ADD COLUMN surtir boolean NOT NULL DEFAULT true;
 
  ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc|pct|san
      CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones
