@@ -141,7 +141,7 @@ class nomina_fiscal_model extends CI_Model {
                 (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
                 COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre AS nombre2,
                 u.banco,
-                COALESCE(nf.esta_asegurado, nptu.esta_asegurado) AS esta_asegurado,
+                COALESCE(nf.esta_asegurado, nptu.esta_asegurado, nagui.esta_asegurado) AS esta_asegurado,
                 't' AS nomina_guardada,
                 u.curp,
                 DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
