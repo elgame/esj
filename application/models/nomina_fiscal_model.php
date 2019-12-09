@@ -13820,7 +13820,7 @@ class nomina_fiscal_model extends CI_Model {
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
-    $empleados = $this->nomina($configuraciones, $filtros);
+    $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $nombre = "PAGO-AGUINALDO-{$semana['anio']}.txt";
 
     $content           = array();
