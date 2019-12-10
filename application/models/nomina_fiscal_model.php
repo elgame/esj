@@ -391,7 +391,7 @@ class nomina_fiscal_model extends CI_Model {
             0 as dias_vacaciones_fijo,
             null AS en_vacaciones,
 
-            'false' AS ptu_generado,
+            COALESCE(np.uuid, 'false') AS ptu_generado,
             0 AS nomina_fiscal_ptu,
             {$utilidadEmpresa} AS utilidad_empresa_ptu,
             0 as nomina_fiscal_ptu_isr,
@@ -417,6 +417,9 @@ class nomina_fiscal_model extends CI_Model {
             WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anioPtu}
             GROUP BY id_empleado
           ) acum_sem ON u.id = acum_sem.id_empleado
+          LEFT JOIN (
+            SELECT * FROM nomina_ptu WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empresa = {$filtros['empresaId']}
+          ) np ON np.id_empleado = u.id
             -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
             (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0
