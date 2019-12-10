@@ -49,14 +49,18 @@ class bascula_facturas_model extends CI_Model {
 
   public function crearFactura($datos)
   {
-    $this->db->insert('bascula_facturas', array(
-          'id_empresa'   => $datos['did_empresa'],
-          'id_proveedor' => $datos['did_proveedor'],
-          'serie'        => $datos['dserie'],
-          'folio'        => $datos['dfolio'],
-          'subtotal'     => $datos['dsubtotal'],
-          'total'        => $datos['dtotal'],
-          ));
+    $factura = array(
+      'id_empresa'   => $datos['did_empresa'],
+      'id_proveedor' => $datos['did_proveedor'],
+      'serie'        => $datos['dserie'],
+      'folio'        => $datos['dfolio'],
+      'subtotal'     => $datos['dsubtotal'],
+      'total'        => $datos['dtotal'],
+    );
+    if (isset($datos['id_pago'])) {
+      $factura['id_pago'] = $datos['id_pago'];
+    }
+    $this->db->insert('bascula_facturas', $factura);
     $id_factura = $this->db->insert_id('bascula_facturas_id_factura_seq');
     foreach ($datos['boletas'] as $key => $value)
     {
