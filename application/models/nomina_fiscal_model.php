@@ -135,6 +135,7 @@ class nomina_fiscal_model extends CI_Model {
         $sql_nm_guardadas = "nptu.anio = {$semana['anio']} AND nptu.semana = {$semana['semana']} {$sqlpt} {$ordenar}";
       }
 
+      $show_ag = ($nm_tipo=='ag'? 't': 'f');
       $query = $this->db->query(
         "SELECT u.id,
                 u.no_empleado,
@@ -216,7 +217,7 @@ class nomina_fiscal_model extends CI_Model {
          FROM usuarios u
          LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
          LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
-         LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
+         LEFT JOIN nomina_aguinaldo nagui ON (nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']} AND 't' = '{$show_ag}')
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
          LEFT JOIN (
           SELECT id_empleado, Sum(hrs) AS hrs
