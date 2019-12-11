@@ -142,7 +142,7 @@ class nomina_fiscal_model extends CI_Model {
                 (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
                 COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre AS nombre2,
                 u.banco,
-                COALESCE(nf.esta_asegurado, nptu.esta_asegurado) AS esta_asegurado,
+                COALESCE(nf.esta_asegurado, nptu.esta_asegurado, nagui.esta_asegurado) AS esta_asegurado,
                 't' AS nomina_guardada,
                 u.curp,
                 DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
@@ -392,7 +392,7 @@ class nomina_fiscal_model extends CI_Model {
             0 as dias_vacaciones_fijo,
             null AS en_vacaciones,
 
-            'false' AS ptu_generado,
+            COALESCE(np.uuid, 'false') AS ptu_generado,
             0 AS nomina_fiscal_ptu,
             {$utilidadEmpresa} AS utilidad_empresa_ptu,
             0 as nomina_fiscal_ptu_isr,
@@ -418,10 +418,13 @@ class nomina_fiscal_model extends CI_Model {
             WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anioPtu}
             GROUP BY id_empleado
           ) acum_sem ON u.id = acum_sem.id_empleado
+          LEFT JOIN (
+            SELECT * FROM nomina_ptu WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empresa = {$filtros['empresaId']}
+          ) np ON np.id_empleado = u.id
             -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
             (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0
-        GROUP BY u.id, up.nombre, nf.esta_asegurado, acum_sem.base_semana_ord_gravada
+        GROUP BY u.id, up.nombre, nf.esta_asegurado, acum_sem.base_semana_ord_gravada, np.uuid
         ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC";
         //{$sqle_id}
       }
@@ -13819,9 +13822,9 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
-      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
-    $empleados = $this->nomina($configuraciones, $filtros);
+    $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $nombre = "PAGO-AGUINALDO-{$semana['anio']}.txt";
 
     $content           = array();
