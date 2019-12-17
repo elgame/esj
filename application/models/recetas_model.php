@@ -100,7 +100,7 @@ class recetas_model extends CI_Model {
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
-        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion
+        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -191,15 +191,16 @@ class recetas_model extends CI_Model {
       'dosis_equipo'      => floatval($_POST['dosis_equipo']),
       'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'           => $_POST['a_etapa'],
-      'a_ciclo'           => $_POST['a_ciclo'],
-      'a_dds'             => $_POST['a_dds'],
-      'a_turno'           => $_POST['a_turno'],
-      'a_via'             => $_POST['a_via'],
-      'a_aplic'           => $_POST['a_aplic'],
-      'a_equipo'          => $_POST['a_equipo'],
-      'a_observaciones'   => $_POST['a_observaciones'],
-      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
+      'a_etapa'               => $_POST['a_etapa'],
+      'a_ciclo'               => $_POST['a_ciclo'],
+      'a_dds'                 => $_POST['a_dds'],
+      'a_turno'               => $_POST['a_turno'],
+      'a_via'                 => $_POST['a_via'],
+      'a_aplic'               => $_POST['a_aplic'],
+      'a_equipo'              => $_POST['a_equipo'],
+      'a_observaciones'       => $_POST['a_observaciones'],
+      'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
+      'id_recetas_calendario' => $_POST['calendario'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -272,15 +273,16 @@ class recetas_model extends CI_Model {
       'dosis_equipo'      => floatval($_POST['dosis_equipo']),
       'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'           => $_POST['a_etapa'],
-      'a_ciclo'           => $_POST['a_ciclo'],
-      'a_dds'             => $_POST['a_dds'],
-      'a_turno'           => $_POST['a_turno'],
-      'a_via'             => $_POST['a_via'],
-      'a_aplic'           => $_POST['a_aplic'],
-      'a_equipo'          => $_POST['a_equipo'],
-      'a_observaciones'   => $_POST['a_observaciones'],
-      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
+      'a_etapa'               => $_POST['a_etapa'],
+      'a_ciclo'               => $_POST['a_ciclo'],
+      'a_dds'                 => $_POST['a_dds'],
+      'a_turno'               => $_POST['a_turno'],
+      'a_via'                 => $_POST['a_via'],
+      'a_aplic'               => $_POST['a_aplic'],
+      'a_equipo'              => $_POST['a_equipo'],
+      'a_observaciones'       => $_POST['a_observaciones'],
+      'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
+      'id_recetas_calendario' => $_POST['calendario'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -1573,6 +1575,21 @@ class recetas_model extends CI_Model {
       $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
       $pdf->Output();
     }
+  }
+
+  public function getCalendariosAjax($id_area){
+    $res = $this->db->query(
+       "SELECT id, nombre
+        FROM otros.recetas_calendarios
+        WHERE status = 't' AND id_area = {$id_area}");
+
+    $response = array();
+    if($res->num_rows() > 0)
+    {
+      $response = $res->result();
+    }
+
+    return $response;
   }
 
 }

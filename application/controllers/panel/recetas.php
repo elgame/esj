@@ -11,19 +11,10 @@ class recetas extends MY_Controller {
 
     'recetas/ajax_get_folio/',
     'recetas/ajax_get_recetas/',
+    'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
 
-
-
-    'compras_requisicion/ajax_producto_by_codigo/',
-    'compras_requisicion/ajax_producto/',
-    'compras_requisicion/ajax_get_producto_all/',
-    'compras_requisicion/ajax_get_tipo_cambio/',
-
-    'compras_requisicion/ligar/',
-    'compras_requisicion/imprimir_recibo_faltantes/',
-    'compras_requisicion/ajaxGetFactRem/',
-    );
+  );
 
   public function _remap($method){
 
@@ -186,6 +177,7 @@ class recetas extends MY_Controller {
     }
 
     $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax($params['receta']['info']->id_area);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -429,6 +421,16 @@ class recetas extends MY_Controller {
     echo json_encode($formulas);
   }
 
+  public function ajax_get_calendarios()
+  {
+    $this->load->model('recetas_model');
+    $formulas = [];
+    if ($_GET['id_area'] > 0) {
+      $formulas = $this->recetas_model->getCalendariosAjax($_GET['id_area']);
+    }
+    echo json_encode($formulas);
+  }
+
 
 
   /*
@@ -490,6 +492,7 @@ class recetas extends MY_Controller {
       ['field' => 'a_equipo',               'label' => 'Equipo',               'rules' => ''],
       ['field' => 'a_observaciones',        'label' => 'Observaciones',        'rules' => ''],
       ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
+      ['field' => 'calendario',             'label' => 'Calendario',           'rules' => 'required'],
 
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
