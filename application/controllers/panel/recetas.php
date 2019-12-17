@@ -354,6 +354,53 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function calendario()
+  {
+    $this->carabiner->css(array(
+      array('libs/fullcalendar.css'),
+      array('libs/fullcalendar.print.css'),
+      array('panel/recetas_calendario.css', 'screen'),
+    ));
+    $this->carabiner->js(array(
+      array('libs/fullcalendar-moment.min.js'),
+      array('libs/fullcalendar.min.js'),
+      array('libs/fullcalendar-lang-all.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/recetas/calendarios.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Calendarios'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('recetas_model');
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['eventos'] = $this->recetas_model->getEventosCalendario($_GET);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax((isset($_GET['did_area'])? $_GET['did_area']: ''));
+
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
+
+    $params['requisicion'] = false;
+    $params['method']     = 'surtir';
+    $params['titleBread'] = 'Calendarios';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/calendarios', $params);
+    $this->load->view('panel/footer');
+  }
+
 
 
   public function faltantes_productos()

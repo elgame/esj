@@ -1577,16 +1577,44 @@ class recetas_model extends CI_Model {
     }
   }
 
-  public function getCalendariosAjax($id_area){
-    $res = $this->db->query(
-       "SELECT id, nombre
-        FROM otros.recetas_calendarios
-        WHERE status = 't' AND id_area = {$id_area}");
+
+  public function getEventosCalendario($datos)
+  {
+    $fecha = new DateTime($datos['ffecha1']);
+    $fecha->modify('first day of this month');
+    $fecha1 = $fecha->format('Y-m-d');
+    $fecha->modify('last day of this month');
+    $fecha2 = $fecha->format('Y-m-d');
 
     $response = array();
-    if($res->num_rows() > 0)
+    $result = $this->db->query("SELECT r.id_recetas,
+        ('Receta: ' || r.folio || ' | Fecha: ' || r.fecha || ' | Tipo: ' || r.tipo) AS title,
+        r.fecha_aplicacion AS start
+      FROM otros.recetas r
+      WHERE r.status = 't' AND r.id_area = {$datos['did_area']} AND r.id_recetas_calendario = {$datos['calendario']}
+        AND r.fecha_aplicacion BETWEEN '{$fecha1}' AND '{$fecha2}'");
+
+    if($result->num_rows() > 0)
     {
-      $response = $res->result();
+      $response = $result->result();
+    }
+
+    return $response;
+  }
+
+  public function getCalendariosAjax($id_area){
+    $response = array();
+
+    if ($id_area > 0) {
+      $res = $this->db->query(
+         "SELECT id, nombre
+          FROM otros.recetas_calendarios
+          WHERE status = 't' AND id_area = {$id_area}");
+
+      if($res->num_rows() > 0)
+      {
+        $response = $res->result();
+      }
     }
 
     return $response;
