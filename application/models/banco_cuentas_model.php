@@ -280,7 +280,7 @@ class banco_cuentas_model extends banco_model {
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
 			WHERE m.id_cuenta = {$this->input->get('id_cuenta')}
 				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}'
-				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
+				{$sql_todos} --AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
 				{$sqloperacion}
 			ORDER BY m.fecha ASC, m.id_movimiento ASC");
 
