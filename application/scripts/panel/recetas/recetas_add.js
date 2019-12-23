@@ -83,6 +83,24 @@
               }
             }
         });
+
+        // get calendarios
+        $.ajax({
+            url: base_url + 'panel/recetas/ajax_get_calendarios/',
+            dataType: "json",
+            data: {id_area: ui.item.item.id_area},
+            success: function(data) {
+              console.log('test', data);
+              if (data && data.length > 0) {
+                html = '';
+                $.each(data, function(index, val) {
+                   html += '<option value="'+val.id+'">'+val.nombre+'</option>';
+                });
+                $('#calendario').html(html);
+              }
+            }
+        });
+
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {

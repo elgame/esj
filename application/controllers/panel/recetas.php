@@ -11,19 +11,10 @@ class recetas extends MY_Controller {
 
     'recetas/ajax_get_folio/',
     'recetas/ajax_get_recetas/',
+    'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
 
-
-
-    'compras_requisicion/ajax_producto_by_codigo/',
-    'compras_requisicion/ajax_producto/',
-    'compras_requisicion/ajax_get_producto_all/',
-    'compras_requisicion/ajax_get_tipo_cambio/',
-
-    'compras_requisicion/ligar/',
-    'compras_requisicion/imprimir_recibo_faltantes/',
-    'compras_requisicion/ajaxGetFactRem/',
-    );
+  );
 
   public function _remap($method){
 
@@ -186,6 +177,7 @@ class recetas extends MY_Controller {
     }
 
     $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax($params['receta']['info']->id_area);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -362,6 +354,53 @@ class recetas extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function calendario()
+  {
+    $this->carabiner->css(array(
+      array('libs/fullcalendar.css'),
+      array('libs/fullcalendar.print.css'),
+      array('panel/recetas_calendario.css', 'screen'),
+    ));
+    $this->carabiner->js(array(
+      array('libs/fullcalendar-moment.min.js'),
+      array('libs/fullcalendar.min.js'),
+      array('libs/fullcalendar-lang-all.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/recetas/calendarios.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Calendarios'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('recetas_model');
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['eventos'] = $this->recetas_model->getEventosCalendario($_GET);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax((isset($_GET['did_area'])? $_GET['did_area']: ''));
+
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
+
+    $params['requisicion'] = false;
+    $params['method']     = 'surtir';
+    $params['titleBread'] = 'Calendarios';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/calendarios', $params);
+    $this->load->view('panel/footer');
+  }
+
 
 
   public function faltantes_productos()
@@ -429,6 +468,16 @@ class recetas extends MY_Controller {
     echo json_encode($formulas);
   }
 
+  public function ajax_get_calendarios()
+  {
+    $this->load->model('recetas_model');
+    $formulas = [];
+    if ($_GET['id_area'] > 0) {
+      $formulas = $this->recetas_model->getCalendariosAjax($_GET['id_area']);
+    }
+    echo json_encode($formulas);
+  }
+
 
 
   /*
@@ -490,6 +539,7 @@ class recetas extends MY_Controller {
       ['field' => 'a_equipo',               'label' => 'Equipo',               'rules' => ''],
       ['field' => 'a_observaciones',        'label' => 'Observaciones',        'rules' => ''],
       ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
+      ['field' => 'calendario',             'label' => 'Calendario',           'rules' => 'required'],
 
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],

@@ -173,6 +173,14 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="calendario">Calendario</label>
+                <div class="controls">
+                  <select name="calendario" class="span9" id="calendario" data-next="formula" required>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
