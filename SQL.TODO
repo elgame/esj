@@ -37,6 +37,19 @@
      ALTER TABLE otros.recetas_productos ADD COLUMN id_proveedor bigint;
      ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_proveedor_fkey FOREIGN KEY (id_proveedor) REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.recetas_productos ADD COLUMN surtir boolean NOT NULL DEFAULT true;
+     -- pcc
+     CREATE TABLE otros.recetas_calendarios
+        (
+            id bigint NOT NULL DEFAULT nextval('otros.recetas_calendarios_id_seq'::regclass),
+            id_area integer NOT NULL,
+            nombre character varying(50) COLLATE pg_catalog."default" NOT NULL,
+            status boolean NOT NULL DEFAULT true,
+            CONSTRAINT recetas_calendario_pkey PRIMARY KEY (id)
+        ) WITH ( OIDS = FALSE ) TABLESPACE pg_default;
+     ALTER TABLE otros.recetas_calendarios OWNER to programa;
+     ALTER TABLE otros.recetas ADD COLUMN id_recetas_calendario bigint;
+     ALTER TABLE otros.recetas ADD CONSTRAINT recetas_id_recetas_calendario_fkey FOREIGN KEY (id_recetas_calendario) REFERENCES otros.recetas_calendarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Calendario',521,TRUE,'recetas/calendario/','calendar',FALSE);
 
  ✔ Ligar ordenes de flete papeletas de salida @done (19-10-29 17:40) lap|pcc|pct|san
      CREATE OR REPLACE VIEW public.compras_ordenes_flete_remisiones
