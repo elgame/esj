@@ -37,10 +37,10 @@
      ALTER TABLE otros.recetas_productos ADD COLUMN id_proveedor bigint;
      ALTER TABLE otros.recetas_productos ADD CONSTRAINT recetas_productos_id_proveedor_fkey FOREIGN KEY (id_proveedor) REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE otros.recetas_productos ADD COLUMN surtir boolean NOT NULL DEFAULT true;
-     -- pcc
+     -- pcc|lap
      CREATE TABLE otros.recetas_calendarios
         (
-            id bigint NOT NULL DEFAULT nextval('otros.recetas_calendarios_id_seq'::regclass),
+            id bigserial NOT NULL,
             id_area integer NOT NULL,
             nombre character varying(50) COLLATE pg_catalog."default" NOT NULL,
             status boolean NOT NULL DEFAULT true,
