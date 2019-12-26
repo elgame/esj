@@ -1,28 +1,66 @@
 <?php
 
-$lang['required']			= "El campo %s es obligatorio.";
-$lang['isset']				= "El campo %s debe tener un valor.";
-$lang['valid_email']		= "El campo %s debe tener una dirección válida de correo electrónico.";
-$lang['valid_emails']		= "El campo %s debe contener todas las direcciones de correo electrónico válida.";
-$lang['valid_url']			= "El campo %s debe tener una URL válida.";
-$lang['valid_ip']			= "El campo %s debe tener una dirección IP válida.";
-$lang['min_length']			= "El campo %s debe tener al menos %s caracteres de longitud.";
-$lang['max_length']			= "El campo %s no puede ser superior a %s caracteres de longitud.";
-$lang['exact_length']		= "El campo %s debe tener exactamente %s caracteres de longitud.";
-$lang['alpha']				= "El campo %s sólo puede contener caracteres alfabéticos.";
-$lang['alpha_numeric']		= "El campo %s sólo puede contener caracteres alfanuméricos.";
-$lang['alpha_dash']			= "El campo %s sólo puede contener caracteres alfanuméricos, guiones bajos y guiones.";
-$lang['numeric']			= "El campo %s debe contener sólo números.";
-$lang['is_numeric']			= "El campo %s debe contener sólo caracteres numéricos.";
-$lang['integer']			= "El campo %s debe contener un número entero.";
-$lang['regex_match']		= "El campo %s no está en el formato correcto.";
-$lang['matches']			= "El campo %s no coincide con el campo %s.";
-$lang['is_unique'] 			= "El campo %s debe contener un valor unico.";
-$lang['is_natural']			= "El campo %s debe contener sólo números positivos.";
-$lang['is_natural_no_zero']	= "El campo %s debe contener un número mayor que cero.";
-$lang['decimal'] 			= "El campo %s debe ser un número decimal.";
-$lang['greater_than'] 	    = "El campo %s debe tener un valor mayor que %s.";
-$lang['less_than']  		= "El campo %s debe tener un valor menor que %s.";
+// factura_
+$lang['factura_copy']                      = "COPY";
+$lang['factura_folio_fiscal']              = "Fiscal Folio";
+$lang['factura_factura_contado']           = 'Cash bill';
+$lang['factura_factura_credito']           = 'Credit invoice';
+$lang['factura_nota_credito']              = 'Credit note';
+$lang['factura_abono_cliente']             = 'Customer subscription';
+$lang['factura_carta_porte']               = 'Porte Letter - Invoice';
+$lang['factura_fecha_hr_impresion']        = "Date and time of printing";
+$lang['factura_no_certificado_csd']        = "CSD Certificate Serial No.";
+$lang['factura_lugar_fecha_emision']       = "Place, date and time of issue";
+$lang['factura_emisor']                    = "Transmitter";
+$lang['factura_emisor_rfc']                = "RFC";
+$lang['factura_emisor_nombre']             = "NAME";
+$lang['factura_emisor_domicilio']          = "ADDRESS";
+$lang['factura_emisor_colonia']            = "SUBURB";
+$lang['factura_emisor_localidad']          = "LOCATION";
+$lang['factura_emisor_municipio']          = "MUNICIPALITY";
+$lang['factura_emisor_estado']             = "STATE";
+$lang['factura_emisor_pais']               = "COUNTRY";
+$lang['factura_emisor_cp']                 = "Postal Code";
+$lang['factura_emisor_regimen_fiscal']     = "Fiscal Regime";
+$lang['factura_emisor_tipo_compro']        = "TYPE OF VOUCHER";
+$lang['factura_emisor_uso']                = "USE";
+$lang['factura_receptor']                  = "Receiver";
+$lang['factura_remitente_operador']        = "OPERATOR";
+$lang['factura_remitente_marca']           = "BRAND";
+$lang['factura_remitente_modelo']          = "MODEL";
+$lang['factura_remitente_placas']          = "PLATES";
+$lang['factura_remitente_remitente']       = "Sender";
+$lang['factura_remitente_destinatario']    = "Addressee";
+
+$lang['factura_productos_cantidad']        = "Quantity";
+$lang['factura_productos_unidad_medida']   = "U Measurement";
+$lang['factura_productos_c_unidad']        = "C. Unity";
+$lang['factura_productos_c_prodserv']      = "C. ProdServ";
+$lang['factura_productos_descripcion']     = "Description";
+$lang['factura_productos_precio_unitario'] = "Unit price";
+$lang['factura_productos_importe']         = "Amount";
+
+$lang['factura_totales_total_letra']       = "Total with letter";
+$lang['factura_totales_moneda']            = "Currency";
+$lang['factura_totales_tipo_cambio']       = "Exchange rate";
+$lang['factura_totales_forma_pago']        = "Way to pay";
+$lang['factura_totales_condicion_pago']    = "Payment Condition";
+$lang['factura_totales_metodo_pago']       = "Payment method";
+$lang['factura_totales_subtotal']          = "Subtotal";
+$lang['factura_totales_iva']               = "IVA";
+$lang['factura_totales_iva_retenido']      = "IVA withheld";
+$lang['factura_totales_total']             = "TOTAL";
+
+$lang['factura_otros_observaciones']       = "Observations";
+$lang['factura_otros_cfdi_relacionados']   = "Related CFDI";
+$lang['factura_otros_tipo_relacion']       = "Type of Relationship";
+
+$lang['factura_otros_sello_digital_cfdi']       = "CFDI Digital Stamp";
+$lang['factura_otros_sello_digital_sat']        = "SAT Digital Stamp";
+$lang['factura_otros_rfc_prov_certif']          = "RFC Prov Certif";
+$lang['factura_otros_no_serie_cer_sat']         = "Serial Number of the SAT Certificate";
+$lang['factura_otros_fecha_hora_certificacion'] = "Date and time of certification";
+$lang['factura_otros_leyenda_cfdi']             = "THIS DOCUMENT IS A PRINTED REPRESENTATION OF A CFDI";
 
 
 /* End of file form_validation_lang.php */
