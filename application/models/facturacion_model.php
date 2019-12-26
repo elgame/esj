@@ -4342,6 +4342,8 @@ class facturacion_model extends privilegios_model{
     // echo "</pre>";exit;
 
     $this->load->library('mypdf');
+    $this->lang->load('factura', 'english');
+    $this->lang->line('language_key');
 
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
