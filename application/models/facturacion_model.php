@@ -4342,6 +4342,9 @@ class facturacion_model extends privilegios_model{
     // echo "</pre>";exit;
 
     $this->load->library('mypdf');
+    if (!empty($_GET['lang']) && $_GET['lang'] === 'en') {
+      $this->lang->load('factura', 'english');
+    }
 
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -4353,7 +4356,7 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetFont('Arial','B', 70);
     $pdf->SetTextColor(160,160,160);
-    $pdf->RotatedText(65, 130, ($factura['info']->no_impresiones==0? 'ORIGINAL': 'COPIA #'.$factura['info']->no_impresiones), 45);
+    $pdf->RotatedText(65, 130, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 45);
 
     $pdf->SetXY(0, 0);
     /////////////////////////////////////
@@ -4364,15 +4367,15 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 2);
-    $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_folio_fiscal', 'Folio Fiscal')}:", 0, 0, 'R', 1);
 
-    $titulo_comprobante = '                 '.($factura['info']->condicion_pago=='co'? 'Factura al contado': 'Factura a credito');
+    $titulo_comprobante = '                 '.($factura['info']->condicion_pago=='co'? $this->lang->line('factura_factura_contado', 'Factura al contado'): $this->lang->line('factura_factura_credito', 'Factura a crédito'));
     if($factura['info']->id_nc != '')
-      $titulo_comprobante = '                 Nota de Crédito';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_nota_credito', 'Nota de Crédito');
     elseif($factura['info']->id_abono_factura != '')
-      $titulo_comprobante = '                 Abono del Cliente';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_abono_cliente', 'Abono del Cliente');
     elseif (isset($factura['carta_porte']))
-      $titulo_comprobante = '                 Carta Porte - Factura';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_carta_porte', 'Carta Porte - Factura');
     $pdf->SetXY(0, $pdf->GetY());
     $pdf->Cell(50, 4, $titulo_comprobante.':  '.($factura['info']->serie.$factura['info']->folio) , 0, 0, 'L', 1);
 
@@ -4382,9 +4385,9 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(48, 4, "Fecha y hora de impresión:", 0, 0, 'L', 1);
+    $pdf->Cell(48, 4, "{$this->lang->line('factura_fecha_hr_impresion', 'Fecha y hora de impresión')}:", 0, 0, 'L', 1);
     $pdf->SetXY(48, $pdf->GetY());
-    $pdf->Cell(60, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+    $pdf->Cell(60, 4, "{$this->lang->line('factura_no_certificado_csd', 'No de Serie del Certificado del CSD')}:", 0, 0, 'R', 1);
 
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica','', 9);
@@ -4397,7 +4400,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_lugar_fecha_emision', 'Lugar. fecha y hora de emisión')}:", 0, 0, 'R', 1);
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
@@ -4427,7 +4430,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_emisor', 'Emisor')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -4436,19 +4439,23 @@ class facturacion_model extends privilegios_model{
     $pdf->SetX(0);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(19, 93));
-    $pdf->Row(array('RFC:', $factura['info']->cfdi_ext->emisor->rfc), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['info']->cfdi_ext->emisor->rfc), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 196));
     $pdf->SetX(0);
-    $pdf->Row(array('NOMBRE:', $factura['info']->cfdi_ext->emisor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['info']->cfdi_ext->emisor->nombreFiscal), false, false, null, 2, 1);
     $pdf->SetX(0);
-    $pdf->Row(array('DOMICILIO:', $factura['info']->cfdi_ext->emisor->calle.' No. '.$factura['info']->cfdi_ext->emisor->noExterior.
+    $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['info']->cfdi_ext->emisor->calle.' No. '.$factura['info']->cfdi_ext->emisor->noExterior.
           ((isset($factura['info']->cfdi_ext->emisor->noInterior)) ? ' Int. '.$factura['info']->cfdi_ext->emisor->noInterior : '') ), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 83, 19, 83));
     $pdf->SetX(0);
-    $pdf->Row(array('COLONIA:', $factura['info']->cfdi_ext->emisor->colonia, 'LOCALIDAD:', $factura['info']->cfdi_ext->emisor->localidad), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_colonia', 'COLONIA').':', $factura['info']->cfdi_ext->emisor->colonia,
+        $this->lang->line('factura_emisor_localidad', 'LOCALIDAD').':', $factura['info']->cfdi_ext->emisor->localidad), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 46, 19, 40, 11, 46, 11, 30));
     $pdf->SetX(0);
-    $pdf->Row(array('MUNICIPIO:', $factura['info']->cfdi_ext->emisor->municipio, 'ESTADO:', $factura['info']->cfdi_ext->emisor->estado, 'PAIS:', $factura['info']->cfdi_ext->emisor->pais, 'CP:', $factura['info']->cfdi_ext->emisor->cp), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_municipio', 'MUNICIPIO').':', $factura['info']->cfdi_ext->emisor->municipio,
+        $this->lang->line('factura_emisor_estado', 'ESTADO').':', $factura['info']->cfdi_ext->emisor->estado,
+        $this->lang->line('factura_emisor_pais', 'PAIS').':', $factura['info']->cfdi_ext->emisor->pais,
+        $this->lang->line('factura_emisor_cp', 'CP').':', $factura['info']->cfdi_ext->emisor->cp), false, false, null, 2, 1);
 
     $end_y = $pdf->GetY();
 
@@ -4464,7 +4471,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Régimen Fiscal: ", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_emisor_regimen_fiscal', 'Régimen Fiscal')}: ", 0, 0, 'R', 1);
 
     $regimen_fiscal = "{$regimenFiscal->c_RegimenFiscal} - {$regimenFiscal->nombre} ";
     $uso_cfdi = $usoCfdi->search($factura['info']->cfdi_ext->usoCfdi);
@@ -4475,9 +4482,9 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(109, $pdf->GetY() + 4);
     $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'R', 0);
     $pdf->SetXY(119, $pdf->GetY() + 1);
-    $pdf->MultiCell(98, 4, "TIPO DE COMPROBANTE : {$tipo_comprobante['key']} - {$tipo_comprobante['value']} ", 0, 'R', 0);
+    $pdf->MultiCell(98, 4, "{$this->lang->line('factura_emisor_tipo_compro', 'TIPO DE COMPROBANTE')} : {$tipo_comprobante['key']} - {$tipo_comprobante['value']} ", 0, 'R', 0);
     $pdf->SetXY(119, $pdf->GetY() + 1);
-    $pdf->MultiCell(98, 4, "USO: {$uso_cfdi['key']} - {$uso_cfdi['value']} ", 0, 'R', 0);
+    $pdf->MultiCell(98, 4, "{$this->lang->line('factura_emisor_uso', 'USO')}: {$uso_cfdi['key']} - {$uso_cfdi['value']} ", 0, 'R', 0);
 
     //////////////////
     // Datos Receptor //
@@ -4500,7 +4507,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(0, $pdf->GetY() + 1);
-    $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
+    $pdf->Cell(216, 4, "{$this->lang->line('factura_receptor', 'Receptor')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -4509,23 +4516,23 @@ class facturacion_model extends privilegios_model{
     $pdf->SetX(0);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(19, 93));
-    $pdf->Row(array('RFC:', $factura['info']->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['info']->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 196));
     $pdf->SetX(0);
-    $pdf->Row(array('NOMBRE:', $factura['info']->cfdi_ext->receptor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['info']->cfdi_ext->receptor->nombreFiscal), false, false, null, 2, 1);
     $pdf->SetX(0);
-    $pdf->Row(array('DOMICILIO:', (isset($factura['info']->cfdi_ext->receptor->calle) ? $factura['info']->cfdi_ext->receptor->calle : '').
+    $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', (isset($factura['info']->cfdi_ext->receptor->calle) ? $factura['info']->cfdi_ext->receptor->calle : '').
               ' No. '.(isset($factura['info']->cfdi_ext->receptor->noExterior) ? $factura['info']->cfdi_ext->receptor->noExterior : '').
               ((isset($factura['info']->cfdi_ext->receptor->noInterior)) ? ' Int. '.$factura['info']->cfdi_ext->receptor->noInterior : '') ), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 83, 19, 83));
     $pdf->SetX(0);
-    $pdf->Row(array('COLONIA:', (isset($factura['info']->cfdi_ext->receptor->colonia) ? $factura['info']->cfdi_ext->receptor->colonia : ''),
-              'LOCALIDAD:', (isset($factura['info']->cfdi_ext->receptor->localidad) ? $factura['info']->cfdi_ext->receptor->localidad : '')), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_colonia', 'COLONIA').':', (isset($factura['info']->cfdi_ext->receptor->colonia) ? $factura['info']->cfdi_ext->receptor->colonia : ''),
+              $this->lang->line('factura_emisor_localidad', 'LOCALIDAD').':', (isset($factura['info']->cfdi_ext->receptor->localidad) ? $factura['info']->cfdi_ext->receptor->localidad : '')), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
     $pdf->SetX(0);
-    $pdf->Row(array('ESTADO:', (isset($factura['info']->cfdi_ext->receptor->estado) ? $factura['info']->cfdi_ext->receptor->estado : ''),
-            'PAIS:', (isset($factura['info']->cfdi_ext->receptor->pais) ? $factura['info']->cfdi_ext->receptor->pais : ''),
-            'CP:', (isset($factura['info']->cfdi_ext->receptor->cp) ? $factura['info']->cfdi_ext->receptor->cp : '') ), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_estado', 'ESTADO').':', (isset($factura['info']->cfdi_ext->receptor->estado) ? $factura['info']->cfdi_ext->receptor->estado : ''),
+            $this->lang->line('factura_emisor_pais', 'PAIS').':', (isset($factura['info']->cfdi_ext->receptor->pais) ? $factura['info']->cfdi_ext->receptor->pais : ''),
+            $this->lang->line('factura_emisor_cp', 'CP').':', (isset($factura['info']->cfdi_ext->receptor->cp) ? $factura['info']->cfdi_ext->receptor->cp : '') ), false, false, null, 2, 1);
 
     if (isset($factura['carta_porte']))
     {
@@ -4534,7 +4541,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetTextColor(0, 171, 72);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $y_aux = $pdf->GetY();
-      $pdf->Cell(108, 4, "Remitente:", 0, 0, 'L', 1);
+      $pdf->Cell(108, 4, "{$this->lang->line('factura_remitente_remitente', 'Remitente')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetTextColor(0, 0, 0);
@@ -4543,21 +4550,21 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(19, 93));
-      $pdf->Row(array('RFC:', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
       $pdf->SetWidths(array(19, 196));
       $pdf->SetX(0);
-      $pdf->Row(array('NOMBRE:', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
       $pdf->SetX(0);
-      $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
 
       // $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(80, 50, 35, 45));
       $pdf->SetX(0);
       $pdf->Row(array(
-        'OPERADOR: ' . $factura['carta_porte']['remitente'][0]->chofer,
-        'MARCA: ' . $factura['carta_porte']['remitente'][0]->marca,
-        'MODELO:' . $factura['carta_porte']['remitente'][0]->modelo,
-        'PLACAS:' . $factura['carta_porte']['remitente'][0]->placas
+        $this->lang->line('factura_remitente_operador', 'OPERADOR').': ' . $factura['carta_porte']['remitente'][0]->chofer,
+        $this->lang->line('factura_remitente_marca', 'MARCA').': ' . $factura['carta_porte']['remitente'][0]->marca,
+        $this->lang->line('factura_remitente_modelo', 'MODELO').':' . $factura['carta_porte']['remitente'][0]->modelo,
+        $this->lang->line('factura_remitente_placas', 'PLACAS').':' . $factura['carta_porte']['remitente'][0]->placas
       ), false, false, null, 2, 1);
 
       $end_y = $pdf->GetY();
@@ -4567,7 +4574,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(110, $y_aux);
-      $pdf->Cell(216, 4, "Destinatario:", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_remitente_remitente', 'Destinatario')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetTextColor(0, 0, 0);
@@ -4576,12 +4583,12 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(110);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(19, 93));
-      $pdf->Row(array('RFC:', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
       $pdf->SetWidths(array(19, 196));
       $pdf->SetX(110);
-      $pdf->Row(array('NOMBRE:', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
       $pdf->SetX(110);
-      $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['destinatario'][0]->direccion ), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['carta_porte']['destinatario'][0]->direccion ), false, false, null, 2, 1);
     }
 
     ///////////////
@@ -4596,7 +4603,15 @@ class facturacion_model extends privilegios_model{
     $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C');
     $aligns2 = array('C', 'C', 'L', 'L', 'C', 'R', 'R');
     $widths = array(25, 35, 16, 19, 61, 30, 30);
-    $header = array('Cantidad', 'Unidad de Medida', 'C. Unidad', 'C. ProdServ', 'Descripcion', 'Precio Unitario', 'Importe');
+    $header = array(
+      $this->lang->line('factura_productos_cantidad', 'Cantidad'),
+      $this->lang->line('factura_productos_unidad_medida', 'Unidad de Medida'),
+      $this->lang->line('factura_productos_c_unidad', 'C. Unidad'),
+      $this->lang->line('factura_productos_c_prodserv', 'C. ProdServ'),
+      $this->lang->line('factura_productos_descripcion', 'Descripcion'),
+      $this->lang->line('factura_productos_precio_unitario', 'Precio Unitario'),
+      $this->lang->line('factura_productos_importe', 'Importe'),
+    );
 
     $pdf->limiteY = 250;
 
@@ -4669,13 +4684,13 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY() + 1);
-    $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
+    $pdf->Cell(154, 4, "{$this->lang->line('factura_totales_total_letra', 'Total con letra')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(90, $pdf->GetY());
-    $pdf->Cell(39, 4, "Moneda: ".$factura['info']->moneda, 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "{$this->lang->line('factura_totales_moneda', 'Moneda')}: ".$factura['info']->moneda, 0, 0, 'L', 1);
     $pdf->SetXY(115, $pdf->GetY());
-    $pdf->Cell(39, 4, "Tipo de Cambio: ".MyString::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "{$this->lang->line('factura_totales_tipo_cambio', 'Tipo de Cambio')}: ".MyString::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetXY(0, $pdf->GetY() + 4);
@@ -4686,11 +4701,11 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY()+1);
     $frmPago = $formaPago->search($factura['info']->cfdi_ext->formaDePago);
-    $pdf->Cell(91, 4, "Forma de Pago: {$frmPago['key']} - {$frmPago['value']}", 0, 0, 'L', 1);
+    $pdf->Cell(91, 4, "{$this->lang->line('factura_totales_forma_pago', 'Forma de Pago')}: {$frmPago['key']} - {$frmPago['value']}", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(91, $pdf->GetY());
-    $text_condicionpago = 'Condicion de Pago: '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito');
+    $text_condicionpago = $this->lang->line('factura_totales_condicion_pago', 'Condición de Pago').': '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito');
     if($factura['info']->id_abono_factura != '')
       $text_condicionpago = '';
     $pdf->Cell(65, 4, $text_condicionpago, 0, 0, 'L', 1);
@@ -4698,12 +4713,12 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY()+4.5);
     $metPago = $metodosPago->search($factura['info']->cfdi_ext->metodoDePago);
-    $pdf->Cell(148, 4, "Metodo de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
+    $pdf->Cell(148, 4, "{$this->lang->line('factura_totales_metodo_pago', 'Metodo de Pago')}: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
 
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(156, $pdf->GetY() - 16);
-    $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_subtotal', 'Subtotal')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5, MyString::formatoNumero(($factura['info']->subtotal/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
@@ -4711,7 +4726,7 @@ class facturacion_model extends privilegios_model{
     // Pinta traslados, retenciones
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva', 'IVA')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->importe_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
@@ -4719,14 +4734,14 @@ class facturacion_model extends privilegios_model{
     if ($factura['info']->retencion_iva > 0)
     {
       $pdf->SetXY(156, $pdf->GetY() + 5);
-      $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva_retenido', 'IVA Retenido')}", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
       $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->retencion_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_total', 'TOTAL')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->total/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
@@ -4748,7 +4763,7 @@ class facturacion_model extends privilegios_model{
         $pdf->SetFont('helvetica','B', 10);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
-        $pdf->Row(array('Observaciones'), true);
+        $pdf->Row(array($this->lang->line('factura_otros_observaciones', 'Observaciones')), true);
 
         $pdf->SetFont('helvetica','', 9);
         $pdf->SetXY(0, $pdf->GetY());
@@ -4783,7 +4798,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "CFDI Relacionados:", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_otros_cfdi_relacionados', 'CFDI Relacionados')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4791,7 +4806,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetWidths(array(216));
 
       $pdf->SetXY(0, $pdf->GetY()+4);
-      $pdf->Row(array("Tipo de Relacion: {$tipo_rel['key']} - {$tipo_rel['value']}" ), false, true, null, 2, 1);
+      $pdf->Row(array("{$this->lang->line('factura_otros_tipo_relacion', 'Tipo de Relación')}: {$tipo_rel['key']} - {$tipo_rel['value']}" ), false, true, null, 2, 1);
 
       foreach ($factura['info']->cfdi_ext->cfdiRelacionados->cfdiRelacionado as $key => $value) {
         $pdf->SetXY(0, $pdf->GetY());
@@ -4813,7 +4828,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "Comercio Exterior V{$ceExtras->version}", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce', 'Comercio Exterior')} V{$ceExtras->version}", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4821,56 +4836,56 @@ class facturacion_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(35, 73, 35, 73));
       $pdf->Row(array(
-            'Motivo traslado', $factura['ce']->motivo_traslado,
-            'Incoterm', $factura['ce']->incoterm
+            $this->lang->line('factura_ce_motivo_traslado', 'Motivo traslado'), $factura['ce']->motivo_traslado,
+            $this->lang->line('factura_ce_incoterm', 'Incoterm'), $factura['ce']->incoterm
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Tipo Operacion', $factura['ce']->tipo_operacion,
-            'Subdivision', $factura['ce']->subdivision
+            $this->lang->line('factura_ce_tipo_operacion', 'Tipo Operacion'), $factura['ce']->tipo_operacion,
+            $this->lang->line('factura_ce_subdivision', 'Subdivision'), $factura['ce']->subdivision
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Clave de pedimento', $factura['ce']->clave_pedimento,
-            'Observaciones', $factura['ce']->observaciones
+            $this->lang->line('factura_ce_clave_pedimento', 'Clave de pedimento'), $factura['ce']->clave_pedimento,
+            $this->lang->line('factura_ce_observaciones', 'Observaciones'), $factura['ce']->observaciones
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Cer de origen', $factura['ce']->certificado_origen,
-            'Tipo Cambio USD', $factura['ce']->tipocambio_USD
+            $this->lang->line('factura_ce_cer_origen', 'Cer de origen'), $factura['ce']->certificado_origen,
+            $this->lang->line('factura_ce_tipo_cambio_usd', 'Tipo Cambio USD'), $factura['ce']->tipocambio_USD
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# cer de origen', $factura['ce']->num_certificado_origen,
-            'Total USD', $factura['ce']->total_USD
+            $this->lang->line('factura_ce_cer_origen', '# cer de origen'), $factura['ce']->num_certificado_origen,
+            $this->lang->line('factura_ce_total_usd', 'Total USD'), $factura['ce']->total_USD
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# Expt confiable', $factura['ce']->numero_exportador_confiable,
+            $this->lang->line('factura_ce_expt_confiable', '# Expt confiable'), $factura['ce']->numero_exportador_confiable,
             '', ''
           ), false, true, null, 2, 1);
 
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Emisor ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": ''), 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": ''), 0, 0, 'L', 1);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $ceExtras->emisor->domicilio->calle,
-            'No. Exterior', $ceExtras->emisor->domicilio->numeroExterior,
-            'No. Interior', $ceExtras->emisor->domicilio->numeroInterior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->emisor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->emisor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->emisor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
 
       $this->load->model('clocalidad_model');
       $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
-            'Colonia', $ceExtras->emisor->domicilio->colonia,
-            'Localidad', ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
-            'Codigo Postal', $ceExtras->emisor->domicilio->codigoPostal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->emisor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->emisor->domicilio->codigoPostal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
@@ -4879,10 +4894,10 @@ class facturacion_model extends privilegios_model{
       $this->load->model('cmunicipio_model');
       $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
-            'Municipio', ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
-            'Estado', $ceExtras->emisor->domicilio->estado,
-            'Pais', $ceExtras->emisor->domicilio->pais,
-            'Referencia', '',
+            $this->lang->line('factura_ce_municipio', 'Municipio'), ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->emisor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->emisor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
           ), false, true, null, 2, 1);
 
       if ($ceExtras->propietario[0]->numRegIdTrib != '') {
@@ -4895,38 +4910,38 @@ class facturacion_model extends privilegios_model{
         $pdf->SetWidths(array(17, 64, 17, 118));
         $pdf->SetX(0);
         $pdf->Row(array(
-              'Num Id Trib', $ceExtras->propietario[0]->numRegIdTrib,
-              'Nombre', $ceExtras->propietario[0]->residenciaFiscal,
+              $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $ceExtras->propietario[0]->numRegIdTrib,
+              $this->lang->line('factura_ce_nombre', 'Nombre'), $ceExtras->propietario[0]->residenciaFiscal,
             ), false, true, null, 2, 1);
       }
 
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Receptor ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": ''), 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": ''), 0, 0, 'L', 1);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $ceExtras->receptor->domicilio->calle,
-            'No. Exterior', $ceExtras->receptor->domicilio->numeroExterior,
-            'No. Interior', $ceExtras->receptor->domicilio->numeroInterior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->receptor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->receptor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->receptor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Colonia', $ceExtras->receptor->domicilio->colonia,
-            'Localidad', $ceExtras->receptor->domicilio->localidad,
-            'Codigo Postal', $ceExtras->receptor->domicilio->codigoPostal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->receptor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $ceExtras->receptor->domicilio->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->receptor->domicilio->codigoPostal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Municipio', $ceExtras->receptor->domicilio->municipio,
-            'Estado', $ceExtras->receptor->domicilio->estado,
-            'Pais', $ceExtras->receptor->domicilio->pais,
-            'Referencia', '',
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $ceExtras->receptor->domicilio->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->receptor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->receptor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
           ), false, true, null, 2, 1);
 
       $pdf->SetXY(0, $pdf->GetY() + 1);
@@ -4938,31 +4953,31 @@ class facturacion_model extends privilegios_model{
       $pdf->SetWidths(array(17, 64, 17, 118));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Num Id Trib', $factura['ce']->destinatario->numregidtrib,
-            'Nombre', $factura['ce']->destinatario->nombre,
+            $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $factura['ce']->destinatario->numregidtrib,
+            $this->lang->line('factura_ce_nombre', 'Nombre'), $factura['ce']->destinatario->nombre,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $factura['ce']->destinatario->calle,
-            'No. Exterior', $factura['ce']->destinatario->numero_exterior,
-            'No. Interior', $factura['ce']->destinatario->numero_interior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $factura['ce']->destinatario->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $factura['ce']->destinatario->numero_exterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $factura['ce']->destinatario->numero_interior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Colonia', $factura['ce']->destinatario->colonia,
-            'Localidad', $factura['ce']->destinatario->localidad,
-            'Codigo Postal', $factura['ce']->destinatario->codigo_postal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $factura['ce']->destinatario->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $factura['ce']->destinatario->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $factura['ce']->destinatario->codigo_postal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Municipio', $factura['ce']->destinatario->municipio,
-            'Estado', $factura['ce']->destinatario->estado,
-            'Pais', $factura['ce']->destinatario->pais,
-            'Referencia', $factura['ce']->destinatario->referencia,
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $factura['ce']->destinatario->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $factura['ce']->destinatario->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $factura['ce']->destinatario->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), $factura['ce']->destinatario->referencia,
           ), false, true, null, 2, 1);
 
       $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
@@ -4970,7 +4985,12 @@ class facturacion_model extends privilegios_model{
       $aligns3 = array('L', 'L', 'L', 'L');
       $widths = array(36, 36, 36, 36, 36, 36);
       $widths3 = array(50, 50, 50, 50);
-      $header = array('No Ident', 'Frac Aran', 'Cantidad', 'Unidad', 'Valor Unitario', 'Valor Dolares');
+      $header = array('No Ident', 'Frac Aran',
+        $this->lang->line('factura_ce_cantidad', 'Cantidad'),
+        $this->lang->line('factura_ce_unidad', 'Unidad'),
+        $this->lang->line('factura_ce_valor_unitario', 'Valor Unitario'),
+        $this->lang->line('factura_ce_valor_dolares', 'Valor Dolares'),
+      );
       $pdf->setY($pdf->GetY() + 1);
       $hay_prod_certificados = false;
       foreach($factura['ce']->mercancias as $key => $item)
@@ -5020,10 +5040,10 @@ class facturacion_model extends privilegios_model{
             $pdf->SetAligns($aligns3);
             $pdf->SetWidths($widths3);
             $pdf->Row(array(
-              'Marca: '.$esp->marca,
-              'Modelo: '.$esp->modelo,
-              'Sub Modelo: '.$esp->submodelo,
-              'Numero Serie: '.$esp->numeroserie,
+              $this->lang->line('factura_ce_marca', 'Marca').': '.$esp->marca,
+              $this->lang->line('factura_ce_modelo', 'Modelo').': '.$esp->modelo,
+              $this->lang->line('factura_ce_sub_modelo', 'Sub Modelo').': '.$esp->submodelo,
+              $this->lang->line('factura_ce_numero_serie', 'Numero Serie').': '.$esp->numeroserie,
             ), false, true, null, 2, 1);
           }
         }
@@ -5042,7 +5062,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(3, $pdf->GetY());
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(196));
-    $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
+    $pdf->Row(array($this->lang->line('factura_otros_sello_digital_cfdi', 'Sello Digital del CFDI').':'), false, 0);
 
     $pdf->SetFont('helvetica', '', 8);
     $pdf->SetXY(3, $pdf->GetY() - 3);
@@ -5057,7 +5077,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(3, $pdf->GetY() - 2);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(196));
-    $pdf->Row(array('Sello Digital del SAT:'), false, 0);
+    $pdf->Row(array($this->lang->line('factura_otros_sello_digital_sat', 'Sello Digital del SAT').':'), false, 0);
 
     $pdf->SetFont('helvetica', '', 8);
     $pdf->SetXY(3, $pdf->GetY() - 3);
@@ -5101,7 +5121,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 1);
-    $pdf->Cell(80, 6, "RFC Prov Certif:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_rfc_prov_certif', 'RFC Prov Certif').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5111,7 +5131,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 10);
-    $pdf->Cell(80, 6, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_no_serie_cer_sat', 'No de Serie del Certificado del SAT').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5121,7 +5141,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 10);
-    $pdf->Cell(80, 6, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_fecha_hora_certificacion', 'Fecha y hora de certificación').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5130,7 +5150,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY()+13);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica', 'B', 8);
-    $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
+    $pdf->Cell(220, 6, $this->lang->line('factura_otros_leyenda_cfdi', 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI'), 0, 0, 'C', 0);
     $pdf->SetXY(10, $pdf->GetY()+3);
 
     //------------ IMAGEN CANDELADO --------------------

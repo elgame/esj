@@ -285,8 +285,8 @@
                                         <select name="dreten_iva" id="dreten_iva" class="span12 prod">
                                           <option value="0" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0 ? 'selected' : '' ?>>No retener</option>
                                           <option value="0.04" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.04 ? 'selected' : '' ?>>4%</option>
-                                          <option value="0.6666" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.6666 ? 'selected' : '' ?>>2 Terceras</option>
-                                          <option value="1" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 1 ? 'selected' : '' ?>>100 %</option>
+                                          <option value="0.10667" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.10667 ? 'selected' : '' ?>>2 Terceras</option>
+                                          <option value="0.16" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.16 ? 'selected' : '' ?>>100 %</option>
                                         </select>
 
                                         <input type="hidden" name="prod_dreten_iva_total[]" value="<?php echo $_POST['prod_dreten_iva_total'][$k] ?>" id="prod_dreten_iva_total" class="span12">
@@ -338,8 +338,8 @@
                                         <select name="dreten_iva" id="dreten_iva" class="span12 prod">
                                           <option value="0">No retener</option>
                                           <option value="0.04">4%</option>
-                                          <option value="0.6666">2 Terceras</option>
-                                          <option value="1">100 %</option>
+                                          <option value="0.10667">2 Terceras</option>
+                                          <option value="0.16">100 %</option>
                                         </select>
 
                                         <input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">

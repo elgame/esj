@@ -1188,7 +1188,7 @@ class facturacion extends MY_Controller {
       if($this->input->get('p') == 'true')
         $this->facturacion_model->generaFacturaPdf($_GET['id']);
       else {
-        $params['url'] = 'panel/facturacion/imprimir/?id='.$_GET['id'].'&p=true';
+        $params['url'] = 'panel/facturacion/imprimir/?id='.$_GET['id'].'&p=true&lang='.(!empty($_GET['lang'])? $_GET['lang']: null);
         $this->load->view('panel/facturacion/print_view', $params);
       }
     }
