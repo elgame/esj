@@ -1580,23 +1580,25 @@ class recetas_model extends CI_Model {
 
   public function getEventosCalendario($datos)
   {
-    $fecha = new DateTime($datos['ffecha1']);
+    $fecha = new DateTime( (isset($datos['ffecha1'])? $datos['ffecha1']: date("Y-m-d")) );
     $fecha->modify('first day of this month');
     $fecha1 = $fecha->format('Y-m-d');
     $fecha->modify('last day of this month');
     $fecha2 = $fecha->format('Y-m-d');
 
     $response = array();
-    $result = $this->db->query("SELECT r.id_recetas,
-        ('Receta: ' || r.folio || ' | Fecha: ' || r.fecha || ' | Tipo: ' || r.tipo) AS title,
-        r.fecha_aplicacion AS start
-      FROM otros.recetas r
-      WHERE r.status = 't' AND r.id_area = {$datos['did_area']} AND r.id_recetas_calendario = {$datos['calendario']}
-        AND r.fecha_aplicacion BETWEEN '{$fecha1}' AND '{$fecha2}'");
+    if (isset($datos['did_area'])) {
+      $result = $this->db->query("SELECT r.id_recetas,
+          ('Receta: ' || r.folio || ' | Fecha: ' || r.fecha || ' | Tipo: ' || r.tipo) AS title,
+          r.fecha_aplicacion AS start
+        FROM otros.recetas r
+        WHERE r.status = 't' AND r.id_area = {$datos['did_area']} AND r.id_recetas_calendario = {$datos['calendario']}
+          AND r.fecha_aplicacion BETWEEN '{$fecha1}' AND '{$fecha2}'");
 
-    if($result->num_rows() > 0)
-    {
-      $response = $result->result();
+      if($result->num_rows() > 0)
+      {
+        $response = $result->result();
+      }
     }
 
     return $response;
