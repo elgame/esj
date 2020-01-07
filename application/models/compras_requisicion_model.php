@@ -1558,6 +1558,10 @@ class compras_requisicion_model extends CI_Model {
         'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
       ), false, false);
 
+      $usoCFDI = 'G03 (Gastos en General)';
+      if ($orden['info'][0]->id_empresa == 20) { // agroinsumos
+        $usoCFDI = 'G01 (Adquisición de mercancias)';
+      }
       $yyy = $pdf->GetY();
       $pdf->SetFont('helvetica','B', 8);
       $pdf->SetAligns(array('L', 'L'));
@@ -1572,7 +1576,7 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY()-1.5);
       $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
       $pdf->SetXY(6, $pdf->GetY()-1.5);
-      $pdf->Row(array('Uso del CFDI:', "G03 (Gastos en General)"), false, false);
+      $pdf->Row(array('Uso del CFDI:', $usoCFDI), false, false);
       $pdf->SetXY(6, $pdf->GetY()-1.5);
       $pdf->Row(array('Almacén:', $orden['info'][0]->almacen), false, false);
       $yyy1 = $pdf->GetY();
