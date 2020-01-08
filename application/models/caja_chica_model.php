@@ -3387,6 +3387,11 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
+    $tituloo = 'GASTO POR COMPROBAR';
+    if ($gastos->tipo == 'g')
+      $tituloo = 'GASTOS GENERALES';
+    elseif ($gastos->tipo == 'rg')
+      $tituloo = 'REPOSICION DE GASTOS';
     $pdf->Row(array(($gastos->tipo=='g'? 'VALE DE GASTO EN CAJA': 'GASTO POR COMPROBAR')), false, false);
 
     $pdf->SetAligns(array('L'));
