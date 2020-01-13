@@ -17,6 +17,7 @@ class caja_chica_model extends CI_Model {
       'cheques_transito_total'   => 0,
       'saldo_clientes'           => array(),
       'denominaciones'           => array(),
+      'pregastos'                => array(),
       'gastos'                   => array(),
       'gastos_comprobar'         => array(),
       'reposicion_gastos'        => array(),

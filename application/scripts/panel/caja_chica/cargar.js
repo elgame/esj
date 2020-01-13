@@ -400,6 +400,7 @@
     });
 
     $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+    btnAddPreGastoComprobar();
     btnAddGastoComprobar();
     btnShowCompGasto();
 
@@ -539,6 +540,27 @@
       $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
       $('#modalCatalogos').modal('hide');
     }
+  };
+
+  var btnAddPreGastoComprobar = function () {
+    $('#btn-add-pregasto').on('click', function(event) {
+      $('#accion_catalogos').val('true');
+      $('#accion_catalogos_tipo').val('pre_gasto');
+      $('#modalCatalogos').modal('show');
+      $('#area').val('');
+      $('#areaId').val('');
+      $('#rancho').val('');
+      $('#ranchoId').val('');
+      $('#centroCosto').val('');
+      $('#centroCostoId').val('');
+      $('#activos').val('');
+      $('#activoId').val('');
+      $('#dempresa').val('');
+      $('#did_empresa').val('');
+      $('#did_categoria').val('');
+    });
+
+    // $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
   };
 
   var btnAddGastoComprobar = function () {
