@@ -25,6 +25,7 @@
     btnAddGasto();
     btnDelGasto();
     btnShowGastoCat();
+    btnShowChangePreGasto();
     btnAddTraspaso();
     btnDelTraspaso();
 
@@ -400,6 +401,7 @@
     });
 
     $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+    btnAddPreGastoComprobar();
     btnAddGastoComprobar();
     btnShowCompGasto();
 
@@ -411,8 +413,15 @@
   };
 
   var agregarGasto = function () {
-    var tabla_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? '#table-gastos-comprobar': '#table-gastos';
-    var prefix_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? 'comprobar_': '';
+    var tabla_gastos = '#table-gastos';
+    var prefix_gastos = '';
+    if ($('#accion_catalogos_tipo').val() == 'gasto_comp') {
+      tabla_gastos = '#table-gastos-comprobar';
+      prefix_gastos = 'comprobar_';
+    } else if ($('#accion_catalogos_tipo').val() == 'pre_gasto') {
+      tabla_gastos = '#table-pregastos';
+      prefix_gastos = 'pre_';
+    }
     var area = $('#area').val();
     var areaId = $('#areaId').val();
     var rancho = $('#rancho').val();
@@ -428,7 +437,7 @@
     if (areaId != '' && ranchoId != '' && centroCostoId != '' && empresaId != '') {
       var $table = $(tabla_gastos).find('tbody .row-total'),
           tr =  '<tr>' +
-                  (prefix_gastos!=''? '<td></td>': '')+
+                  (prefix_gastos!='' && prefix_gastos!='pre_'? '<td></td>': '')+
                   '<td style="">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'id_gasto[]" value="" id="gasto_id_gasto">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'del[]" value="" id="gasto_del">'+
@@ -482,7 +491,7 @@
   };
 
   var btnDelGasto = function () {
-    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos').on('click', '.btn-del-gasto', function(event) {
+    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos, #table-pregastos').on('click', '.btn-del-gasto', function(event) {
       var $tr = $(this).parents('tr'),
           id = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
@@ -541,6 +550,27 @@
     }
   };
 
+  var btnAddPreGastoComprobar = function () {
+    $('#btn-add-pregasto').on('click', function(event) {
+      $('#accion_catalogos').val('true');
+      $('#accion_catalogos_tipo').val('pre_gasto');
+      $('#modalCatalogos').modal('show');
+      $('#area').val('');
+      $('#areaId').val('');
+      $('#rancho').val('');
+      $('#ranchoId').val('');
+      $('#centroCosto').val('');
+      $('#centroCostoId').val('');
+      $('#activos').val('');
+      $('#activoId').val('');
+      $('#dempresa').val('');
+      $('#did_empresa').val('');
+      $('#did_categoria').val('');
+    });
+
+    // $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+  };
+
   var btnAddGastoComprobar = function () {
     $('#btn-add-gasto-comprobar').on('click', function(event) {
       $('#accion_catalogos').val('true');
@@ -582,8 +612,47 @@
     }
 
     $('#table-gastos').on('click', '.btn-show-cat', setDataGastos);
+    $('#table-pregastos').on('click', '.btn-show-cat', setDataGastos);
     $('#table-gastos-comprobar').on('click', '.btn-show-cat', setDataGastos);
     $('#table-reposicionGastos').on('click', '.btn-show-cat', setDataGastos);
+  };
+
+  var btnShowChangePreGasto = function () {
+    var $trGasto;
+
+    $('#table-pregastos').on('click', '.btn-change-pregasto', function(event) {
+      $trGasto = $(this).parents('tr');
+      $('#modal-pregastos').modal('show');
+      $('#pregastos_id_gasto').val($trGasto.find('#gasto_id_gasto').val());
+    });
+    // $('#modal-pregastos').on('shown', function () {
+    //   $('#compGastoMonto').focus();
+    // });
+
+    $('#cambiar-pregastos').on('click', function(event) {
+      if ($('#pregasto_new').val() != '' && $('#pregastos_id_gasto').val() != '') {
+
+        var params = {
+          'id_gasto'   : $('#pregastos_id_gasto').val(),
+          'tipo_gasto' : $('#pregasto_new').val(),
+          'fno_caja'   : $('#fno_caja').val(),
+          'fecha_caja' : $('#fecha_caja').val(),
+        };
+        // console.log('test', params);
+
+        $.post(base_url+'panel/caja_chica/ajax_cambiar_pregasto/', params, function(json, textStatus) {
+          $('#modal-pregastos').modal('hide');
+          $trGasto.remove();
+
+          setTimeout(function () {
+            var iframe = parent.document.getElementById('iframe-reporte');
+            iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
+          }, 300);
+        }, 'json');
+      } else {
+        noty({"text": 'El nuevo tipo de gasto es requerido.', "layout":"topRight", "type": 'error'});
+      }
+    });
   };
 
   var btnShowCompGasto = function () {

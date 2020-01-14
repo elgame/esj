@@ -17,6 +17,7 @@ class caja_chica_model extends CI_Model {
       'cheques_transito_total'   => 0,
       'saldo_clientes'           => array(),
       'denominaciones'           => array(),
+      'pregastos'                => array(),
       'gastos'                   => array(),
       'gastos_comprobar'         => array(),
       'reposicion_gastos'        => array(),
@@ -422,6 +423,9 @@ class caja_chica_model extends CI_Model {
       $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
     }
 
+    // Pregastos
+    $info['pregastos'] = $this->getCajaGastos(['pre', $fecha], $noCaja, $all);
+
     // gastos
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, $all);
 
@@ -526,6 +530,10 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cg.tipo = 'rg'";
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')
         AND (cg.fecha_compro_gasto IS NULL OR cg.fecha_compro_gasto >= '{$fecha[1]}')";
+      $fecha1 = $fecha[1];
+    } elseif (is_array($fecha) && $fecha[0] === 'pre') {
+      $sql .= " AND cg.tipo = 'pre'";
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
       $fecha1 = $fecha[1];
     } else {
       $sql .= " AND cg.tipo = 'g'";
@@ -1032,6 +1040,94 @@ class caja_chica_model extends CI_Model {
           $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
                         array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
                               ':folio'     => "Concepto: {$gasto} | Monto: {$data['gasto_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
+
+      if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+        $this->enviarEmail($gastos_ids);
+        // $this->db->insert_batch('cajachica_gastos', $gastos);
+      }
+    }
+
+    if (isset($data['gasto_pre_concepto']))
+    {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'pre'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['gasto_pre_concepto'] as $key => $gasto)
+      {
+        if (isset($data['gasto_pre_del'][$key]) && $data['gasto_pre_del'][$key] == 'true' &&
+          isset($data['gasto_pre_id_gasto'][$key]) && floatval($data['gasto_pre_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_pre_id_gasto'][$key]);
+
+          // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+        } elseif (isset($data['gasto_pre_id_gasto'][$key]) && floatval($data['gasto_pre_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            'id_categoria'    => $data['gasto_pre_empresa_id'][$key],
+            'id_nomenclatura' => $data['gasto_pre_nomenclatura'][$key],
+            // 'folio'           => $data['gasto_pre_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['gasto_pre_nombre'][$key],
+            'monto'           => $data['gasto_pre_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            $data['codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            'reposicion'      => ($data['gasto_pre_reposicion'][$key]=='t'? 't': 'f'),
+            'id_areac'        => (!empty($data['pre_areaId'][$key])? $data['pre_areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['pre_ranchoId'][$key])? $data['pre_ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['pre_centroCostoId'][$key])? $data['pre_centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['pre_activoId'][$key])? $data['pre_activoId'][$key]: NULL),
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_pre_id_gasto'][$key], $gastos_udt,
+                          array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_gasto',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'                => $data_folio->folio,
+            'id_categoria'             => $data['gasto_pre_empresa_id'][$key],
+            'id_nomenclatura'          => $data['gasto_pre_nomenclatura'][$key],
+            'folio'                    => '', //$data['gasto_pre_folio'][$key],
+            'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_pre_nombre'][$key],
+            'monto'                    => $data['gasto_pre_importe'][$key],
+            'fecha'                    => $data['fecha_caja_chica'],
+            'no_caja'                  => $data['fno_caja'],
+            // 'id_area'               => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            $data['pre_codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            'reposicion'               => ($data['gasto_pre_reposicion'][$key]=='t'? 't': 'f'),
+            'tipo'                     => 'pre',
+            'id_usuario'               => $this->session->userdata('id_usuario'),
+            'id_areac'                 => (!empty($data['pre_areaId'][$key])? $data['pre_areaId'][$key]: NULL),
+            'id_rancho'                => (!empty($data['pre_ranchoId'][$key])? $data['pre_ranchoId'][$key]: NULL),
+            'id_centro_costo'          => (!empty($data['pre_centroCostoId'][$key])? $data['pre_centroCostoId'][$key]: NULL),
+            'id_activo'                => (!empty($data['pre_activoId'][$key])? $data['pre_activoId'][$key]: NULL),
+          );
+          $this->db->insert('cajachica_gastos', $gastos);
+          $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
+          $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                        array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$gasto} | Monto: {$data['gasto_pre_importe'][$key]}",
                               // ':id_empresa' => $datosFactura['id_empresa'],
                               ':empresa'   => ''));
         }
@@ -1632,6 +1728,21 @@ class caja_chica_model extends CI_Model {
   public function elimimnarCategoria($categoriaId)
   {
     $this->db->update('cajachica_categorias', array('status' => 'f'), array('id_categoria' => $categoriaId));
+
+    return true;
+  }
+
+  public function ajaxCambiarPreGastos($data)
+  {
+    $anio = date('Y');
+
+    $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = '{$data['tipo_gasto']}'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+    $data_folio->folio += 1;
+
+    $this->db->update('cajachica_gastos', array('tipo' => $data['tipo_gasto'], 'folio' => $data_folio->folio, 'fecha' => $data['fecha_caja']), array('id_gasto' => $data['id_gasto']));
 
     return true;
   }
@@ -3387,6 +3498,11 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
+    $tituloo = 'GASTO POR COMPROBAR';
+    if ($gastos->tipo == 'g')
+      $tituloo = 'GASTOS GENERALES';
+    elseif ($gastos->tipo == 'rg')
+      $tituloo = 'REPOSICION DE GASTOS';
     $pdf->Row(array(($gastos->tipo=='g'? 'VALE DE GASTO EN CAJA': 'GASTO POR COMPROBAR')), false, false);
 
     $pdf->SetAligns(array('L'));

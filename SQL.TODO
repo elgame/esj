@@ -1,4 +1,21 @@
 
+ ✔ Cambiar en caja chica 5 los titulos en los recibos @done (20-01-13 10:40)
+ ☐ Cargar existencias de mamita y gomez a agroinsumos con costo
+ ✔ Acomodar ruta de empaque para los xml @done (20-01-14 13:08)
+ ☐ En ordenes de servicio poder ligar facturas de compras y mostrarlas en el pdf, tendria que seleccionar el proveedor para buscarlas y opcoin a cargar imagen, tambien que salgan esas ordenes de servicio en la caja de tryana
+ ✔ Agregar a la caja 2 opcion para capturar gastos @done (20-01-13 18:57) pcc
+     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos, pre: pregastos';
+ ✔ Pasar los productos de mamita y de gomez a agroinsumos @done (20-01-13 10:44)
+     SELECT DISTINCT ON(nombre) nombre, *
+      FROM (
+        SELECT * FROM public.productos
+        WHERE id_familia in(4, 35) and status = 'ac' and id_empresa = 3
+        UNION
+        SELECT * FROM public.productos
+        WHERE id_familia in(24, 34) and status = 'ac' and id_empresa = 14
+      ) f
+      ORDER BY nombre ASC
+
  ✔ Acomodo de aplicacion de escritorio para ligar el uuid @done (19-11-14 13:34) lap|san|pcc
      ALTER TABLE public.bascula_facturas ADD COLUMN id_pago bigint;
      ALTER TABLE public.bascula_facturas ADD CONSTRAINT bascula_facturas_id_pago_fkey FOREIGN KEY (id_pago) REFERENCES public.bascula_pagos (id_pago) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
