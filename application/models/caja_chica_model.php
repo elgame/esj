@@ -1742,7 +1742,7 @@ class caja_chica_model extends CI_Model {
         ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
     $data_folio->folio += 1;
 
-    $this->db->update('cajachica_gastos', array('tipo' => $data['tipo_gasto']), array('id_gasto' => $data['id_gasto']));
+    $this->db->update('cajachica_gastos', array('tipo' => $data['tipo_gasto'], 'folio' => $data_folio->folio, 'fecha' => $data['fecha_caja']), array('id_gasto' => $data['id_gasto']));
 
     return true;
   }

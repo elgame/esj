@@ -25,6 +25,7 @@
     btnAddGasto();
     btnDelGasto();
     btnShowGastoCat();
+    btnShowChangePreGasto();
     btnAddTraspaso();
     btnDelTraspaso();
 
@@ -635,6 +636,7 @@
           'id_gasto'   : $('#pregastos_id_gasto').val(),
           'tipo_gasto' : $('#pregasto_new').val(),
           'fno_caja'   : $('#fno_caja').val(),
+          'fecha_caja' : $('#fecha_caja').val(),
         };
         // console.log('test', params);
 

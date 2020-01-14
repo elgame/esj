@@ -712,7 +712,7 @@
                                       <?php if ($modificar_gasto): ?>
                                         <?php if (!$cajas_cerradas): ?>
                                           <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
-                                          <button type="button" class="btn btn-danger btn-change-pregasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                          <button type="button" class="btn btn-danger btn-change-pregasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
                                         <?php endif ?>
                                         <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
                                       <?php endif ?>

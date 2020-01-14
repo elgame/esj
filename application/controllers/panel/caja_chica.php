@@ -29,7 +29,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/agregar_abono_deudor/',
     'caja_chica/quitar_abono_deudor/',
     'caja_chica/ajax_registra_gasto_comp/',
-    'caja_chica/ajax_cambiar_pregasto',
+    'caja_chica/ajax_cambiar_pregasto/',
   );
 
   public function _remap($method)
