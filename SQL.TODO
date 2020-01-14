@@ -1,6 +1,7 @@
 
  ✔ Cambiar en caja chica 5 los titulos en los recibos @done (20-01-13 10:40)
- ☐ Agregar a la caja 2 opcion para capturar gastos
+ ✔ Agregar a la caja 2 opcion para capturar gastos @done (20-01-13 18:57) pcc
+     COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos, pre: pregastos';
  ✔ Pasar los productos de mamita y de gomez a agroinsumos @done (20-01-13 10:44)
      SELECT DISTINCT ON(nombre) nombre, *
       FROM (
