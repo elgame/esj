@@ -1,4 +1,6 @@
 
+ ☐ Poner opcion para desligar remisiones de facturas
+     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Cambiar en caja chica 5 los titulos en los recibos @done (20-01-13 10:40)
  ☐ Cargar existencias de mamita y gomez a agroinsumos con costo
  ✔ Acomodar ruta de empaque para los xml @done (20-01-14 13:08)
