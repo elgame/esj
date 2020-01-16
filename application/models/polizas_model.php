@@ -1824,7 +1824,7 @@ class polizas_model extends CI_Model {
              {$sql2}
         )
       ) AS n
-      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
+      ORDER BY semana ASC, id_empleado ASC, id_empresa ASC
       ");
 
     $nominas = $query->result();
