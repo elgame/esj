@@ -1834,75 +1834,9 @@ class polizas_model extends CI_Model {
         $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
         $value->anio = $semana['anio'];
         $value->semana = $semana['semana'];
-        $value->fecha_inicio = $semana['fecha_inicio'];
-        $value->fecha_final = $semana['fecha_final'];
+        // $value->fecha_inicio = $semana['fecha_inicio'];
+        // $value->fecha_final = $semana['fecha_final'];
       }
-
-      /*if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
-      {
-        if ($value->departamento == "ADMINISTRACION") {
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal1   += $value->sueldo_semanal;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones1       += $value->vacaciones;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones1  += $value->indemnizaciones;
-        } else {
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional2 += $value->prima_vacacional;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones2  += $value->indemnizaciones;
-        }
-
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->vejez           += $value->vejez;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
-      }else{
-        $value->fecha_inicio1    = $value->fecha_final;
-        $value->fecha_inicio     = str_replace('-', '/', $value->fecha_inicio);
-        $value->fecha_final      = str_replace('-', '/', $value->fecha_final);
-        if ($value->departamento == "ADMINISTRACION") {
-          $value->sueldo_semanal1   = $value->sueldo_semanal;
-          $value->vacaciones1       = $value->vacaciones;
-          $value->prima_vacacional1 = $value->prima_vacacional;
-          $value->aguinaldo1        = $value->aguinaldo;
-          $value->horas_extras1     = $value->horas_extras;
-          $value->pasistencia1      = $value->pasistencia;
-          $value->indemnizaciones1  = $value->indemnizaciones;
-
-          $value->sueldo_semanal2   = 0;
-          $value->vacaciones2       = 0;
-          $value->prima_vacacional2 = 0;
-          $value->aguinaldo2        = 0;
-          $value->horas_extras2     = 0;
-          $value->pasistencia2      = 0;
-          $value->indemnizaciones2  = 0;
-        } else {
-          $value->sueldo_semanal1   = 0;
-          $value->vacaciones1       = 0;
-          $value->prima_vacacional1 = 0;
-          $value->aguinaldo1        = 0;
-          $value->horas_extras1     = 0;
-          $value->pasistencia1      = 0;
-          $value->indemnizaciones1  = 0;
-
-          $value->sueldo_semanal2   = $value->sueldo_semanal;
-          $value->vacaciones2       = $value->vacaciones;
-          $value->prima_vacacional2 = $value->prima_vacacional;
-          $value->aguinaldo2        = $value->aguinaldo;
-          $value->horas_extras2     = $value->horas_extras;
-          $value->pasistencia2      = $value->pasistencia;
-          $value->indemnizaciones2  = $value->indemnizaciones;
-        }
-        $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
-      }*/
     }
 
     if(count($nominas) > 0)
@@ -1938,7 +1872,7 @@ class polizas_model extends CI_Model {
 
           //Agregamos el header de la poliza
           $response['data'] .= $this->setEspacios('P',2).
-                              $this->setEspacios(str_replace('/', '', $value->fecha_final),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                              $this->setEspacios(str_replace('-', '', $value->fecha_final),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
                               $this->setEspacios('0',10). //iddiario
