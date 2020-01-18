@@ -16,6 +16,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/ajaxGetBoletas/',
+    'compras_ordenes/ajaxGetCompras/',
     'compras_ordenes/imprimir_entrada/',
     'compras_ordenes/ticket/',
     'compras_ordenes/ajax_imprimir_recibo/',
@@ -639,6 +640,14 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $productos = $this->compras_ordenes_model->getFactRem($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetCompras()
+  {
+    $this->load->model('compras_ordenes_model');
+    $productos = $this->compras_ordenes_model->getCompras($_GET);
 
     echo json_encode($productos);
   }

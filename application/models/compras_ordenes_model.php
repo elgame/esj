@@ -771,6 +771,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_empleado, u.nombre AS empleado,
               co.id_autorizo, (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) AS autorizo,
               co.id_cliente, cl.nombre_fiscal AS cliente,
+              pr.id_proveedor, pr.nombre_fiscal AS proveedor,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
@@ -781,7 +782,7 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem,
+              co.ids_facrem, co.ids_compras, co.id_proveedor_compra,
               co.no_impresiones, co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
               co.id_almacen, ca.nombre AS almacen,
@@ -797,6 +798,7 @@ class compras_ordenes_model extends CI_Model {
          LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
          LEFT JOIN usuarios AS use ON use.id = co.id_registra
          LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
+         LEFT JOIN proveedores AS pr ON pr.id_proveedor = co.id_proveedor_compra
          LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
          LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
        WHERE co.id_orden = {$idOrden}");
@@ -879,6 +881,20 @@ class compras_ordenes_model extends CI_Model {
             foreach ($boletasss as $key => $value)
             {
               $data['info'][0]->boletasligadas[] = $this->bascula_model->getBasculaInfo($value, 0, false, [], $value)['info'][0];
+            }
+          }
+        }
+
+        $data['info'][0]->comprasligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_compras != '') { // compras
+          $this->load->model('compras_model');
+          $comprasss = explode('|', $data['info'][0]->ids_compras);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value)['info'];
             }
           }
         }
@@ -1566,6 +1582,22 @@ class compras_ordenes_model extends CI_Model {
     return $response;
   }
 
+  public function getCompras($datos)
+  {
+    $filtro = isset($datos['filtro']{0})? " AND f.folio = '{$datos['filtro']}'": '';
+    $query = $this->db->query("SELECT f.id_compra, Date(f.fecha) AS fecha, f.serie, f.folio, p.nombre_fiscal AS proveedor
+                               FROM compras AS f
+                                  INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
+                               WHERE p.id_proveedor = {$datos['proveedorId']} AND f.status <> 'ca' AND f.id_nc IS NULL
+                                {$filtro} AND f.fecha >= (now() - interval '115 months')
+                               ORDER BY f.fecha DESC, f.folio DESC");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
+  }
+
   public function getBoletas($datos)
   {
     $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
@@ -1988,7 +2020,7 @@ class compras_ordenes_model extends CI_Model {
         $this->load->model('documentos_model');
         // $facturasss = explode('|', $orden['info'][0]->ids_facrem);
         $info_bascula = false;
-        if (count($orden['info'][0]->facturasligadas) > 0 || count($orden['info'][0]->boletasligadas) > 0)
+        if (count($orden['info'][0]->facturasligadas) > 0 || count($orden['info'][0]->boletasligadas) > 0 || count($orden['info'][0]->comprasligadas) > 0)
         {
           $tituloclientt = $clientessss = $facturassss = $tituloclient = '';
           if ($orden['info'][0]->flete_de == 'v') {
@@ -2040,8 +2072,24 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('________________________________________________________________________________________________'), false, false);
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->Row(array('CHOFER: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
-      }else
-      {
+      } elseif ($orden['info'][0]->tipo_orden == 'd' && count($orden['info'][0]->comprasligadas) > 0) {
+        $facturassss = $clientessss = '';
+        foreach ($orden['info'][0]->comprasligadas as $key => $value)
+        {
+          $facturassss .= ' / '.$value->serie.$value->folio.' '.substr($value->fecha, 0, 10);
+          $clientessss .= ', '.$value->proveedor->nombre_fiscal;
+        }
+        $tituloclient = 'FOLIO: ';
+        $tituloclientt = 'Proveedor: ';
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array($tituloclient.substr($facturassss, 3) ), false, false);
+        $pdf->SetX(6);
+        $pdf->Row(array('PROVEEDOR: '.$orden['info'][0]->proveedor), false, false);
+        $pdf->SetXY(6, $pdf->GetY()+6);
+        $pdf->Row(array('________________________________________________________________________________________________'), false, false);
+        $pdf->SetXY(6, $pdf->GetY()-2);
+        $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+      } else {
         $pdf->SetAligns(array('L', 'R'));
         $pdf->SetWidths(array(104, 50));
         $pdf->SetXY(6, $pdf->GetY());

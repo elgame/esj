@@ -5,6 +5,10 @@
  ☐ Cargar existencias de mamita y gomez a agroinsumos con costo
  ✔ Acomodar ruta de empaque para los xml @done (20-01-14 13:08)
  ☐ En ordenes de servicio poder ligar facturas de compras y mostrarlas en el pdf, tendria que seleccionar el proveedor para buscarlas y opcoin a cargar imagen, tambien que salgan esas ordenes de servicio en la caja de tryana
+     ALTER TABLE public.compras_requisicion ADD COLUMN ids_compras character varying(100) COLLATE pg_catalog."default";
+     ALTER TABLE public.compras_ordenes ADD COLUMN ids_compras character varying(100) COLLATE pg_catalog."default";
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_proveedor_compra bigint;
+     ALTER TABLE public.compras_ordenes ADD COLUMN id_proveedor_compra bigint;
  ✔ Agregar a la caja 2 opcion para capturar gastos @done (20-01-13 18:57) pcc|san
      COMMENT ON COLUMN public.cajachica_gastos.tipo IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos, pre: pregastos';
  ✔ Pasar los productos de mamita y de gomez a agroinsumos @done (20-01-13 10:44)

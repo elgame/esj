@@ -90,6 +90,16 @@
                   <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId', isset($factura) ? $factura['info']->cliente->id_cliente : '') ?>">
               </div>
 
+              <div class="control-group hide" id="serComprasProvee">
+                <label class="control-label" for="serProveedor">Proveedor</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="serProveedor" class="span11" id="serProveedor" value="<?php echo set_value('serProveedor', isset($factura) ? $factura['info']->proveedor->nombre_fiscal : '') ?>" placeholder="">
+                  </div>
+                </div>
+                  <input type="hidden" name="serProveedorId" id="serProveedorId" value="<?php echo set_value('serProveedorId', isset($factura) ? $factura['info']->proveedor->id_proveedor : '') ?>">
+              </div>
+
               <div class="control-group">
                 <label class="control-label" for="descripcion">Observaciones</label>
                 <div class="controls">
@@ -191,6 +201,20 @@
                       echo $_POST['remfacs_folio'].' <input type="hidden" name="remfacs" value="'.$_POST['remfacs'].'"><input type="hidden" name="remfacs_folio" value="'.$_POST['remfacs_folio'].'">';
                     } else if (isset($ordenFlete) && $ordenFlete) {
                       echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="remfacs" value="t:'.$factura['info']->id_factura.'|"><input type="hidden" name="remfacs_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serCompras">
+                <label class="control-label" for="ligcompras">Ligar Compras</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-compras">Buscar</button>
+                  <span id="comprasLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['compras'])){
+                      echo $_POST['compras_folio'].' <input type="hidden" name="compras" value="'.$_POST['compras'].'"><input type="hidden" name="compras_folio" value="'.$_POST['compras_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="compras" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="compras_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
                     } ?>
                   </span>
                 </div>
@@ -858,6 +882,45 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal -->
+  <div id="modal-compras" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Compras</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" id="filFolioCompras" class="pull-left" placeholder="Folio"> <span class="pull-left"> | </span>
+        <!-- <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="f" checked>Facturas</label>
+        <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="r">Remision</label> -->
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-facturas">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Proveedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddCompra">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
 
