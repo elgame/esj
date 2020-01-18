@@ -1340,13 +1340,15 @@ class caja_chica_model extends CI_Model {
 
           $this->db->update('public.cajachica_traspasos', ['status' => 'f'], "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
         } elseif (isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
-          $gastos_udt = array(
-            'concepto' => $concepto,
-            'monto'    => $data['traspaso_importe'][$key],
-            // 'tipo'     => $data['traspaso_tipo'][$key],
-          );
+          if ($concepto != '-@-') {
+            $gastos_udt = array(
+              'concepto' => $concepto,
+              'monto'    => $data['traspaso_importe'][$key],
+              // 'tipo'     => $data['traspaso_tipo'][$key],
+            );
 
-          $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+            $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+          }
         } else {
           $data_folio->folio += 1;
           $traspaso = array(
