@@ -465,6 +465,7 @@
                                             <?php if ($traspaso->guardado == 't'): ?>
                                             <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
                                             <?php else: ?>
+                                              <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
                                               <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
                                             <?php endif ?>
                                           </td>
@@ -472,6 +473,7 @@
                                             <?php if ($traspaso->guardado == 't'): ?>
                                             <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
                                             <?php else: ?>
+                                              <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
                                               <?php echo $traspaso->monto ?>
                                             <?php endif ?>
                                           </td>
