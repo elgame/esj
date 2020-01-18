@@ -145,7 +145,7 @@ class compras_requisicion_model extends CI_Model {
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
     } elseif ($_POST['tipoOrden'] == 'd' && $_POST['compras'] != '') {
       $data['ids_compras'] = $_POST['compras'];
-      $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+      // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
     }
 
     // Si trae datos extras
@@ -458,7 +458,7 @@ class compras_requisicion_model extends CI_Model {
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       } elseif ($_POST['tipoOrden'] == 'd') {
         $data['ids_compras'] = $_POST['compras'];
-        $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+        // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
       }
 
       // Si trae datos extras
@@ -627,7 +627,7 @@ class compras_requisicion_model extends CI_Model {
           'tipo_orden'          => $data->tipo_orden,
           'solicito'            => $data->empleado_solicito,
           'id_cliente'          => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
-          'id_proveedor_compra' => (is_numeric($data->id_proveedor_compra)? $data->id_proveedor_compra: NULL),
+          // 'id_proveedor_compra' => (is_numeric($data->id_proveedor_compra)? $data->id_proveedor_compra: NULL),
           'descripcion'         => $data->descripcion,
           'id_autorizo'         => $data->id_autorizo,
           'id_almacen'          => $data->id_almacen,
@@ -958,7 +958,6 @@ class compras_requisicion_model extends CI_Model {
               co.id_empleado, u.nombre AS empleado,
               co.id_autorizo, (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) AS autorizo,
               co.id_cliente, cl.nombre_fiscal AS cliente,
-              pr.id_proveedor, pr.nombre_fiscal AS proveedor,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
@@ -970,7 +969,7 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem, co.ids_compras, co.id_proveedor_compra,
+              co.ids_facrem, co.ids_compras,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo,
               otros_datos
@@ -980,7 +979,6 @@ class compras_requisicion_model extends CI_Model {
        LEFT JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
-       LEFT JOIN proveedores AS pr ON pr.id_proveedor = co.id_proveedor_compra
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
        LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
       WHERE co.id_requisicion = {$idOrden}");

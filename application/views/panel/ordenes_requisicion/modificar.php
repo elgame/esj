@@ -82,16 +82,6 @@
                   <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId', $orden['info'][0]->id_cliente) ?>">
               </div>
 
-              <div class="control-group" id="serComprasProvee" <?php echo ($orden['info'][0]->tipo_orden=='d'? '': 'style="display:none;"'); ?>>
-                <label class="control-label" for="serProveedor">Proveedor</label>
-                <div class="controls">
-                  <div class="input-append span12">
-                    <input type="text" name="serProveedor" class="span11" id="serProveedor" value="<?php echo set_value('serProveedor', $orden['info'][0]->proveedor) ?>" placeholder="">
-                  </div>
-                </div>
-                  <input type="hidden" name="serProveedorId" id="serProveedorId" value="<?php echo set_value('serProveedorId', $orden['info'][0]->id_proveedor) ?>">
-              </div>
-
               <div class="control-group">
                 <label class="control-label" for="descripcion">Observaciones</label>
                 <div class="controls">
@@ -215,7 +205,7 @@
                 </div>
               </div>
 
-              <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'd' && $orden['info'][0]->ids_compras != ''? '': 'style="display:none;"'); ?> id="serCompras">
+              <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'd'? '': 'style="display:none;"'); ?> id="serCompras">
                 <label class="control-label" for="tipoPago">Ligar Compras</label>
                 <div class="controls">
                   <button type="button" class="btn btn-info" id="show-compras">Buscar</button>
@@ -932,9 +922,10 @@
     </div>
     <div class="modal-body">
       <div class="row-fluid">
-        <input type="text" id="filFolioCompras" class="pull-left" placeholder="Folio"> <span class="pull-left"> | </span>
-        <!-- <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="f" checked>Facturas</label>
-        <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="r">Remision</label> -->
+        <input type="text" name="serProveedor" class="pull-left" id="serProveedor" value="<?php echo set_value('serProveedor') ?>" placeholder="Proveedor">
+        <input type="hidden" name="serProveedorId" id="serProveedorId" value="<?php echo set_value('serProveedorId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="text" id="filFolioCompras" class="pull-left" placeholder="Folio">
       </div>
       <div class="row-fluid">
         <table class="table table-hover table-condensed" id="table-facturas">

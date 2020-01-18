@@ -593,7 +593,13 @@ class compras_ordenes_model extends CI_Model {
   public function agregarCompra($proveedorId, $empresaId, $ordenesIds, $xml = null)
   {
     // obtiene un array con los ids de las ordenes a ligar con la compra.
+    $ordenesIdssss = $ordenesIds;
     $ordenesIds = explode(',', $ordenesIds);
+
+    $ids_comprass = null;
+    if ($ordenesIdssss != '') {
+      $ids_comprass = $this->db->query("SELECT String_agg(ids_compras, '') AS ids_compras FROM compras_ordenes WHERE id_orden in({$ordenesIdssss})")->row();
+    }
 
     // datos de la compra.
     $data = array(
@@ -617,6 +623,7 @@ class compras_ordenes_model extends CI_Model {
       'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
       'uuid'           => $this->input->post('uuid'),
       'no_certificado' => $this->input->post('noCertificado'),
+      'ids_compras'    => (isset($ids_comprass->ids_compras)? $ids_comprass->ids_compras: NULL)
     );
 
     // //si es contado, se verifica que la cuenta tenga saldo
@@ -771,7 +778,6 @@ class compras_ordenes_model extends CI_Model {
               co.id_empleado, u.nombre AS empleado,
               co.id_autorizo, (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) AS autorizo,
               co.id_cliente, cl.nombre_fiscal AS cliente,
-              pr.id_proveedor, pr.nombre_fiscal AS proveedor,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
@@ -782,7 +788,7 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem, co.ids_compras, co.id_proveedor_compra,
+              co.ids_facrem, co.ids_compras,
               co.no_impresiones, co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
               co.id_almacen, ca.nombre AS almacen,
@@ -798,7 +804,6 @@ class compras_ordenes_model extends CI_Model {
          LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
          LEFT JOIN usuarios AS use ON use.id = co.id_registra
          LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
-         LEFT JOIN proveedores AS pr ON pr.id_proveedor = co.id_proveedor_compra
          LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
          LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
        WHERE co.id_orden = {$idOrden}");
@@ -1585,11 +1590,12 @@ class compras_ordenes_model extends CI_Model {
   public function getCompras($datos)
   {
     $filtro = isset($datos['filtro']{0})? " AND f.folio = '{$datos['filtro']}'": '';
+    $filtro .= isset($datos['proveedorId']{0})? " AND p.id_proveedor = {$datos['proveedorId']} ": '';
     $query = $this->db->query("SELECT f.id_compra, Date(f.fecha) AS fecha, f.serie, f.folio, p.nombre_fiscal AS proveedor
                                FROM compras AS f
                                   INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
-                               WHERE p.id_proveedor = {$datos['proveedorId']} AND f.status <> 'ca' AND f.id_nc IS NULL
-                                {$filtro} AND f.fecha >= (now() - interval '115 months')
+                               WHERE f.id_empresa = {$datos['empresaId']} AND f.status <> 'ca' AND f.id_nc IS NULL
+                                {$filtro} AND f.fecha >= (now() - interval '15 months')
                                ORDER BY f.fecha DESC, f.folio DESC");
     $response = array();
     if($query->num_rows() > 0)

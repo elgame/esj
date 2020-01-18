@@ -97,11 +97,14 @@ class inventario extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('empresas_model');
+    $this->load->model('productos_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Compras por Producto');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['familias'] = $this->productos_model->getFamiliasAjax(['id_empresa' => $params['empresa']->id_empresa]);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" method="GET" class="form-search" id="form" target="frame_reporte">
+            <form action="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" method="GET" class="form-search comprasxproductos" id="form" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -40,6 +40,19 @@
                     <div class="clearfix"></div>
                     <div style="height:130px;overflow-y: scroll;background-color:#eee;">
                       <ul id="lista_proveedores" style="list-style: none;margin-left: 4px;">
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="ffamilias">Familias</label>
+                  <div class="controls">
+                    <div style="height:130px;overflow-y: scroll;background-color:#eee;">
+                      <ul id="lista_familias" style="list-style: none;margin-left: 4px;">
+                        <?php foreach ($familias as $key => $value): ?>
+                          <li><label> <input type="checkbox" name="familias[]" value="<?php echo $value->id_familia ?>"> <?php echo $value->nombre ?></label></li>
+                        <?php endforeach ?>
                       </ul>
                     </div>
                   </div>

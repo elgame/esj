@@ -610,6 +610,25 @@ class productos_model extends CI_Model {
     return $response;
   }
 
+  public function getFamiliasAjax($params)
+  {
+    $sql = '';
+    if (isset($params['id_empresa'])) {
+      $sql = " AND id_empresa = {$params['id_empresa']}";
+    }
+
+    if (isset($params['tipo'])) {
+      $sql = " AND tipo = '{$params['tipo']}'";
+    }
+
+    $query = $this->db->query("SELECT id_familia, id_empresa, codigo, nombre, tipo
+        FROM productos_familias
+        WHERE status = 'ac' {$sql}
+        ORDER BY nombre ASC");
+
+    return $query->result();
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

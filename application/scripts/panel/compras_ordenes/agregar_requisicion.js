@@ -864,12 +864,13 @@
       $("#modal-compras").modal('show');
     });
 
-    $("#filFolioCompras").on('change', function(event) {
+    $("#filFolioCompras, #serProveedor").on('change', function(event) {
       getCompras();
     });
 
     $("#BtnAddCompra").on('click', function(event) {
-      var selected = $(".radioCompra:checked"), facts = '', folios = '';
+      var selected = $(".radioCompra:checked"), facts = ($('#comprasLigada input[name="compras"]').val()||''),
+        folios = ($('#comprasLigada input[name="compras_folio"]').val()||'');
       selected.each(function(index, el) {
         var $this = $(this);
         facts += $this.val()+'|';
@@ -885,9 +886,10 @@
   };
 
   var getCompras = function(tipo){
-    if($("#serProveedorId").val() !== '')
-    {
+    // if($("#serProveedorId").val() !== '')
+    // {
       var params = {
+        empresaId: $("#empresaId").val(),
         proveedorId: $("#serProveedorId").val(),
         filtro: $("#filFolioCompras").val()
       };
@@ -903,8 +905,8 @@
         }
         $("#table-facturas tbody").html(html);
       });
-    }else
-      noty({"text": 'Selecciona un proveedor', "layout":"topRight", "type": 'error'});
+    // }else
+    //   noty({"text": 'Selecciona un proveedor', "layout":"topRight", "type": 'error'});
   };
 
   var eventLigarBoletas = function () {
