@@ -304,7 +304,8 @@ class inventario_model extends privilegios_model{
 
 	    $response = array();
     	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
-    				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total
+    				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
+            pf.nombre AS familia
 				FROM
 					productos AS p LEFT JOIN (
 						SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe, (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
@@ -315,9 +316,10 @@ class inventario_model extends privilegios_model{
 							Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 						GROUP BY cp.id_producto
 					) AS cp ON p.id_producto = cp.id_producto
-    				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+    			INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+          INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
     			{$idsproveedores}
-				ORDER BY p.nombre ASC");
+				ORDER BY pf.nombre ASC, p.nombre ASC");
     	$response = $productos->result();
 
 		return $response;
@@ -352,8 +354,25 @@ class inventario_model extends privilegios_model{
 		$familia = '';
 		$proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
 		foreach($res as $key => $producto){
+      if ($familia != $producto->familia) {
+        if ($key==0 || $pdf->GetY() >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(200,200,200);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([205]);
+        $pdf->Row([$producto->familia], true);
+        $pdf->SetY($pdf->GetY()+2);
+        $familia = $producto->familia;
+      }
+
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-				$pdf->AddPage();
+        if ($key > 0)
+				  $pdf->AddPage();
 
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);

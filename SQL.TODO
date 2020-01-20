@@ -5,7 +5,7 @@
  ✔ Cambiar en caja chica 5 los titulos en los recibos @done (20-01-13 10:40)
  ☐ Cargar existencias de mamita y gomez a agroinsumos con costo
  ✔ Acomodar ruta de empaque para los xml @done (20-01-14 13:08)
- ✔ En ordenes de servicio poder ligar facturas de compras y mostrarlas en el pdf, tendria que @done (20-01-18 12:24) pct|pcc
+ ✔ En ordenes de servicio poder ligar facturas de compras y mostrarlas en el pdf, tendria que @done (20-01-18 12:24) pct|pcc|san
  seleccionar el proveedor para buscarlas y opcoin a cargar imagen, tambien que salgan esas ordenes de servicio en la caja de tryana
      ALTER TABLE public.compras_requisicion ADD COLUMN ids_compras character varying(100) COLLATE pg_catalog."default";
      ALTER TABLE public.compras_ordenes ADD COLUMN ids_compras character varying(100) COLLATE pg_catalog."default";
