@@ -37,6 +37,7 @@
 
     eventLigarFacturas();
     eventLigarBoletas();
+    eventLigarCompras();
 
     btnAutorizarClick();
 
@@ -158,10 +159,16 @@
           }
           $("#fleteDe").change();
 
-          if(tipoOrderActual == 'd')
+          if(tipoOrderActual == 'd'){
             $("#verVehiculoChk").show();
-          else
+            $("#serCompras").show();
+            $("#serComprasProvee").show();
+          }
+          else {
             $("#verVehiculoChk").hide();
+            $("#serCompras").hide();
+            $("#serComprasProvee").hide();
+          }
 
           if (tipoOrderActual == 'p') {
             $('.grpes_receta').show();
@@ -261,6 +268,36 @@
         var $proveedor =  $(this);
         $proveedor.css("background-color", "#FFD071");
         $("#fproveedorId").val('');
+      }
+    });
+
+    $("#serProveedor").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $proveedor =  $(this);
+
+        $("#serProveedorId").val(ui.item.id);
+        $proveedor.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        var $proveedor =  $(this);
+        $proveedor.css("background-color", "#FFD071");
+        $("#serProveedorId").val('');
       }
     });
   };
@@ -817,6 +854,59 @@
       });
     }else
       noty({"text": 'Selecciona un cliente', "layout":"topRight", "type": 'error'});
+  };
+
+  var eventLigarCompras = function () {
+    $("#show-compras").on('click', function(event) {
+      $("#filFolioCompras").val("");
+
+      getCompras();
+      $("#modal-compras").modal('show');
+    });
+
+    $("#filFolioCompras, #serProveedor").on('change', function(event) {
+      getCompras();
+    });
+
+    $("#BtnAddCompra").on('click', function(event) {
+      var selected = $(".radioCompra:checked"), facts = ($('#comprasLigada input[name="compras"]').val()||''),
+        folios = ($('#comprasLigada input[name="compras_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#comprasLigada").html(folios+' <input type="hidden" name="compras" value="'+facts+'"><input type="hidden" name="compras_folio" value="'+folios+'">');
+      $("#modal-compras").modal('hide');
+    });
+    $("#comprasLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var getCompras = function(tipo){
+    // if($("#serProveedorId").val() !== '')
+    // {
+      var params = {
+        empresaId: $("#empresaId").val(),
+        proveedorId: $("#serProveedorId").val(),
+        filtro: $("#filFolioCompras").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetCompras/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioCompra" value="'+json[i].id_compra+'" class="radioCompra" data-folio="'+json[i].serie+json[i].folio+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].serie+json[i].folio+'</td>'+
+          '  <td>'+json[i].proveedor+'</td>'+
+          '</tr>';
+        }
+        $("#table-facturas tbody").html(html);
+      });
+    // }else
+    //   noty({"text": 'Selecciona un proveedor', "layout":"topRight", "type": 'error'});
   };
 
   var eventLigarBoletas = function () {

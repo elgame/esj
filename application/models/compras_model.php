@@ -181,6 +181,20 @@ class compras_model extends privilegios_model{
         }
       }
 
+      $response['info']->comprasligadas = array();
+      if ($response['info']->ids_compras != '') { // compras
+        $this->load->model('compras_model');
+        $comprasss = explode('|', $response['info']->ids_compras);
+        if (count($comprasss) > 0)
+        {
+          array_pop($comprasss);
+          foreach ($comprasss as $key => $value)
+          {
+            $response['info']->comprasligadas[] = $this->compras_model->getInfoCompra($value)['info'];
+          }
+        }
+      }
+
       //gasolina
       // $res = $this->db->query(
       //     "SELECT id_compra, kilometros, litros, precio

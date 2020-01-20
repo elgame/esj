@@ -143,6 +143,9 @@ class compras_requisicion_model extends CI_Model {
     {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
+    } elseif ($_POST['tipoOrden'] == 'd' && $_POST['compras'] != '') {
+      $data['ids_compras'] = $_POST['compras'];
+      // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
     }
 
     // Si trae datos extras
@@ -453,6 +456,9 @@ class compras_requisicion_model extends CI_Model {
       {
         $data['flete_de'] = $_POST['fleteDe'];
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
+      } elseif ($_POST['tipoOrden'] == 'd') {
+        $data['ids_compras'] = $_POST['compras'];
+        // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
       }
 
       // Si trae datos extras
@@ -607,24 +613,25 @@ class compras_requisicion_model extends CI_Model {
       {
         $dataOrdenCats = null;
         $dataOrden = array(
-          'id_empresa'         => $data->id_empresa,
-          'id_proveedor'       => $value['id_proveedor'],
-          'id_departamento'    => $data->id_departamento,
-          'id_empleado'        => $data->id_empleado,
-          'folio'              => $this->compras_ordenes_model->folio($data->tipo_orden),
-          'status'             => 'p',
-          'autorizado'         => 't',
-          'fecha_autorizacion' => $data->fecha_autorizacion,
-          'fecha_aceptacion'   => substr($data->fecha_aceptacion, 0, 19),
-          'fecha_creacion'     => $data->fecha,
-          'tipo_pago'          => $data->tipo_pago,
-          'tipo_orden'         => $data->tipo_orden,
-          'solicito'           => $data->empleado_solicito,
-          'id_cliente'         => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
-          'descripcion'        => $data->descripcion,
-          'id_autorizo'        => $data->id_autorizo,
-          'id_almacen'         => $data->id_almacen,
-          'es_receta'          => $data->es_receta,
+          'id_empresa'          => $data->id_empresa,
+          'id_proveedor'        => $value['id_proveedor'],
+          'id_departamento'     => $data->id_departamento,
+          'id_empleado'         => $data->id_empleado,
+          'folio'               => $this->compras_ordenes_model->folio($data->tipo_orden),
+          'status'              => 'p',
+          'autorizado'          => 't',
+          'fecha_autorizacion'  => $data->fecha_autorizacion,
+          'fecha_aceptacion'    => substr($data->fecha_aceptacion, 0, 19),
+          'fecha_creacion'      => $data->fecha,
+          'tipo_pago'           => $data->tipo_pago,
+          'tipo_orden'          => $data->tipo_orden,
+          'solicito'            => $data->empleado_solicito,
+          'id_cliente'          => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
+          // 'id_proveedor_compra' => (is_numeric($data->id_proveedor_compra)? $data->id_proveedor_compra: NULL),
+          'descripcion'         => $data->descripcion,
+          'id_autorizo'         => $data->id_autorizo,
+          'id_almacen'          => $data->id_almacen,
+          'es_receta'           => $data->es_receta,
         );
 
         $dataOrdenCats['requisiciones'][] = [
@@ -703,6 +710,9 @@ class compras_requisicion_model extends CI_Model {
         {
           $dataOrden['ids_facrem'] = $data->ids_facrem;
           $dataOrden['flete_de']   = $data->flete_de;
+        } elseif ($data->tipo_orden == 'd')
+        {
+          $dataOrden['ids_compras'] = $data->ids_compras;
         }
 
         // si se registra a un vehiculo
@@ -959,7 +969,7 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem,
+              co.ids_facrem, co.ids_compras,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo,
               otros_datos
@@ -1095,6 +1105,20 @@ class compras_requisicion_model extends CI_Model {
             foreach ($boletasss as $key => $value)
             {
               $data['info'][0]->boletasligadas[] = $this->bascula_model->getBasculaInfo($value, 0, true)['info'][0];
+            }
+          }
+        }
+
+        $data['info'][0]->comprasligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_compras != '') { // compras
+          $this->load->model('compras_model');
+          $comprasss = explode('|', $data['info'][0]->ids_compras);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value, true)['info'];
             }
           }
         }

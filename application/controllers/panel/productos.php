@@ -10,7 +10,8 @@ class productos extends MY_Controller {
 			'productos/ajax_get_familias/',
       'productos/ajax_get_productos/',
 			'productos/ajax_aut_productos/',
-			'productos/acomoda_codigos/',
+      'productos/acomoda_codigos/',
+			'productos/ajax_get_familias2/',
 		);
 
 	public function _remap($method){
@@ -189,6 +190,13 @@ class productos extends MY_Controller {
 						'data' => $html
 				));
 	}
+
+  public function ajax_get_familias2(){
+    $this->load->model('productos_model');
+    $familias = $this->productos_model->getFamiliasAjax($_GET);
+
+    echo json_encode($familias);
+  }
 
 
 	public function acomoda_codigos()

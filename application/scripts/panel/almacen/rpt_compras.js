@@ -81,6 +81,10 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      if ($('.comprasxproductos').length > 0) {
+        getFamilias(ui.item.id);
+      }
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -246,4 +250,25 @@ function addProducto(event){
 
 function removeProducto(event){
   $(this).parent('li').remove();
+}
+
+
+function getFamilias(id_empresa, idset = 'lista_familias'){
+  $.ajax({
+    url: base_url + 'panel/productos/ajax_get_familias2/',
+    dataType: 'json',
+    data: {
+      id_empresa: id_empresa,
+    },
+    success: function (data) {
+      var html = '';
+      if (data.length > 0) {
+        for (var i = data.length - 1; i >= 0; i--) {
+          html += '<li><label> <input type="checkbox" name="familias[]" value="'+data[i].id_familia+'"> '+data[i].nombre+'</label></li>';
+        }
+      }
+
+      $('#'+idset).html(html);
+    }
+  });
 }

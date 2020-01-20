@@ -205,6 +205,23 @@
                 </div>
               </div>
 
+              <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'd'? '': 'style="display:none;"'); ?> id="serCompras">
+                <label class="control-label" for="tipoPago">Ligar Compras</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-compras">Buscar</button>
+                  <span id="comprasLigada" style="cursor:pointer;">
+                    <?php
+                    $folios = '';
+                    foreach ($orden['info'][0]->comprasligadas as $key => $value)
+                    {
+                      $folios .= $value->serie.$value->folio.' | ';
+                    }
+                      echo $folios.' <input type="hidden" name="compras" value="'.$orden['info'][0]->ids_compras.'"><input type="hidden" name="compras_folio" value="'.$folios.'">';
+                    ?>
+                  </span>
+                </div>
+              </div>
+
               <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'f' && $orden['info'][0]->flete_de === 'c'? '': 'style="display:none;"'); ?> id="fletesBoletas">
                 <label class="control-label" for="ligarBoleta">Ligar BOLETA</label>
                 <div class="controls">
@@ -893,6 +910,47 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+
+  <!-- Modal -->
+  <div id="modal-compras" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Compras</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serProveedor" class="pull-left" id="serProveedor" value="<?php echo set_value('serProveedor') ?>" placeholder="Proveedor">
+        <input type="hidden" name="serProveedorId" id="serProveedorId" value="<?php echo set_value('serProveedorId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="text" id="filFolioCompras" class="pull-left" placeholder="Folio">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-facturas">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Proveedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddCompra">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
 

@@ -295,6 +295,10 @@ class inventario_model extends privilegios_model{
 	    if(is_array($this->input->get('ids_productos')))
 	    	$idsproveedores .= " AND p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
 
+      if(is_array($this->input->get('familias'))){
+        $idsproveedores .= " AND p.id_familia IN(".implode(',', $this->input->get('familias')).")";
+      }
+
       if ($this->input->get('dcon_mov') == 'si')
         $idsproveedores .= " AND COALESCE(cp.total, 0) > 0";
 
@@ -373,7 +377,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
-			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.MyString::getVarsLink(array('fproductor', 'ids_productos'))) ));
+			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.MyString::getVarsLink(array('fproductor', 'ids_productos', 'familias'))) ));
 			$pdf->Row($datos, false, false);
 
 			$proveedor_cantidad  += $producto->cantidad;
