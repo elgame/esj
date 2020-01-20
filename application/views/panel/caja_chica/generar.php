@@ -682,8 +682,8 @@
                                       <input type="hidden" name="pre_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="pre_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="pre_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
-                                      <!-- <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
-                                        <i class="ico icon-print" style="cursor:pointer"></i></a> -->
+                                      <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
                                     <td style="">
                                       <input type="text" name="gasto_pre_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly.$mod_gas_readonly ?>>
