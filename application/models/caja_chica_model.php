@@ -554,7 +554,7 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
-          cg.nombre, cg.status, cg.folio_sig,
+          cg.nombre, cg.status, cg.folio_sig, cg.folio_ant,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
           {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
           (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha1}' < cg.fecha_cancelado) AS show_back_cortes
@@ -1824,6 +1824,7 @@ class caja_chica_model extends CI_Model {
           'id_rancho'       => $data_gasto->id_rancho,
           'id_centro_costo' => $data_gasto->id_centro_costo,
           'id_activo'       => $data_gasto->id_activo,
+          'folio_ant'       => $data_gasto->folio_sig,
         );
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
@@ -1877,6 +1878,7 @@ class caja_chica_model extends CI_Model {
           'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
           'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
           'tipo'            => 'rg',
+          'folio_ant'       => $data_gasto->folio_sig,
         );
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
@@ -2634,18 +2636,18 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(183, 22));
+      $pdf->SetWidths(array(185, 20));
       $pdf->Row(array('GASTOS POR COMPROBAR', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
+      $pdf->SetWidths(array(16, 13, 22, 23, 23, 9, 20, 33, 26, 20));
       $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
+      $pdf->SetWidths(array(16, 13, 22, 23, 23, 9, 20, 33, 26, 20));
 
       $codigoAreas = array();
       foreach ($caja['gastos_comprobar'] as $key => $gasto)
@@ -2676,6 +2678,7 @@ class caja_chica_model extends CI_Model {
           $colortxt = [[0, 0, 0]];
         }
 
+        $pdf->SetFont('Helvetica','', 6);
         $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
@@ -2719,18 +2722,18 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(183, 22));
+      $pdf->SetWidths(array(185, 20));
       $pdf->Row(array('GASTOS GENERALES', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
+      $pdf->SetWidths(array(16, 22, 24, 24, 11, 20, 35, 33, 20));
       $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
+      $pdf->SetWidths(array(16, 22, 24, 24, 11, 20, 35, 33, 20));
 
       $codigoAreas = array();
       foreach ($caja['gastos'] as $key => $gasto)
@@ -2761,7 +2764,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
-          $gasto->folio_sig,
+          (!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig,
           $gasto->empresa,
           $gasto->area,
           $gasto->rancho,
@@ -2843,7 +2846,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
-          $gasto->folio_sig,
+          (!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig,
           $gasto->fecha,
           $gasto->empresa,
           $gasto->area,

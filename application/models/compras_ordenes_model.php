@@ -403,7 +403,7 @@ class compras_ordenes_model extends CI_Model {
       }
 
       // Si trae datos extras
-      $data['otros_datos'] = json_decode($ordennn->otros_datos);
+      $data['otros_datos'] = isset($ordennn->otros_datos)? (array)json_decode($ordennn->otros_datos): [];
       if ($this->input->post('infRecogerProv') != false) {
         $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
         $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
@@ -1286,7 +1286,7 @@ class compras_ordenes_model extends CI_Model {
     }
 
     // Si trae datos extras
-    $data['otros_datos'] = json_decode($ordennn->otros_datos);
+    $data['otros_datos'] = isset($ordennn->otros_datos)? (array)json_decode($ordennn->otros_datos): [];
     if ($this->input->post('infRecogerProv') != false) {
       $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
       $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];

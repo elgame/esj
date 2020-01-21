@@ -1,6 +1,7 @@
 
  ☐ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden
- ☐ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar
+ ✔ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar @done (20-01-21 13:59) lap|san
+     ALTER TABLE public.cajachica_gastos ADD COLUMN folio_ant bigint;
  ☐ En las recetas que se puedan capturar sin formula y que se imprima otra copia como Administrador
  ☐ En caja en gastos x comprobar que no borre el gasto si lo comprueban el mismo dia
  ☐ Agregar todas las empresas a dulce
