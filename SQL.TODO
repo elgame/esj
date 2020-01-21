@@ -3,6 +3,7 @@
  ☐ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar
  ☐ En las recetas que se puedan capturar sin formula y que se imprima otra copia como Administrador
  ☐ En caja en gastos x comprobar que no borre el gasto si lo comprueban el mismo dia
+ ☐ Agregar todas las empresas a dulce
  ✔ Acomodar reporte de compras por productos @done (20-01-18 16:11)
  ☐ Poner opcion para desligar remisiones de facturas
      quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
