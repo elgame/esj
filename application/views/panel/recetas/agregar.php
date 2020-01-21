@@ -45,7 +45,7 @@
                 <label class="control-label" for="formula">Formula </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo set_value('formula') ?>" placeholder="Selecciona una formula" required>
+                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo set_value('formula') ?>" placeholder="Selecciona una formula">
                     <input type="hidden" name="formulaId" id="formulaId" value="<?php echo set_value('formulaId') ?>">
                   </div>
                 </div>
@@ -55,7 +55,7 @@
                 <label class="control-label" for="area">Cultivo</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña" readonly>
+                    <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña" required>
                   </div>
                   <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                 </div>
@@ -141,13 +141,14 @@
                     <option value="kg" <?php echo set_select('tipo', 'kg'); ?>>Kg</option>
                     <option value="lts" <?php echo set_select('tipo', 'lts'); ?>>Lts</option>
                   </select>
+                  <input type="hidden" id="tipooo" value="<?php echo (!empty($_POST['tipo'])? 'true': 'false') ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="folio_formula">Folio Formula</label>
                 <div class="controls">
-                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo set_value('folio_formula'); ?>" size="25" readonly required>
+                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo set_value('folio_formula'); ?>" size="25" readonly>
                 </div>
               </div>
 
@@ -177,6 +178,7 @@
                 <div class="controls">
                   <select name="calendario" class="span9" id="calendario" data-next="formula" required>
                   </select>
+                  <input type="hidden" id="calendariooo" value="<?php echo (empty($_POST['calendario'])? '': $_POST['calendario']) ?>">
                 </div>
               </div>
 

@@ -20,7 +20,7 @@
     eventBtnDelProducto();
     eventCantidadProd();
 
-    opcClear.datos = opcClear.formula = true;
+    opcClear.datos = opcClear.formula = ($('#tipooo').val()=='false'? true: false);
     $('#tipo').change();
     calculaTotal();
   });
@@ -84,22 +84,7 @@
             }
         });
 
-        // get calendarios
-        $.ajax({
-            url: base_url + 'panel/recetas/ajax_get_calendarios/',
-            dataType: "json",
-            data: {id_area: ui.item.item.id_area},
-            success: function(data) {
-              console.log('test', data);
-              if (data && data.length > 0) {
-                html = '';
-                $.each(data, function(index, val) {
-                   html += '<option value="'+val.id+'">'+val.nombre+'</option>';
-                });
-                $('#calendario').html(html);
-              }
-            }
-        });
+        getCalendarios(ui.item.item.id_area);
 
       }
     }).on("keydown", function(event) {
@@ -134,12 +119,34 @@
 
         $("#areaId").val(ui.item.id);
         $area.css("background-color", "#A1F57A");
+
+        getCalendarios($('#areaId').val());
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#area").css("background-color", "#FFD071");
         $("#areaId").val('');
       }
+    });
+  };
+
+  var getCalendarios = function (id_area, set_default = null) {
+    // get calendarios
+    $.ajax({
+        url: base_url + 'panel/recetas/ajax_get_calendarios/',
+        dataType: "json",
+        data: {id_area: id_area},
+        success: function(data) {
+          console.log('test', data);
+          if (data && data.length > 0) {
+            html = '';
+            $.each(data, function(index, val) {
+              selectedd = (set_default == val.id? ' selected': '');
+               html += '<option value="'+val.id+'" '+selectedd+'>'+val.nombre+'</option>';
+            });
+            $('#calendario').html(html);
+          }
+        }
     });
   };
 
@@ -380,6 +387,11 @@
           $('tbody.bodyproducs .rowprod').remove();
           calculaTotal();
         }
+
+        if ($('#tipooo').val() == 'true') {
+          getCalendarios($('#areaId').val(), $('#calendariooo').val());
+        }
+
       } else {
         $('#form').removeClass('modificar-receta');
       }

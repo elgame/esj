@@ -55,8 +55,9 @@ class recetas_model extends CI_Model {
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
           f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
           r.total_importe, r.paso, r.fecha_aplicacion
-        FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
+        FROM otros.recetas r
           INNER JOIN areas a ON a.id_area = r.id_area
+          LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
         WHERE 1 = 1 {$sql}
         ORDER BY r.folio DESC
         ", $params, true);
@@ -107,7 +108,7 @@ class recetas_model extends CI_Model {
         INNER JOIN usuarios aut ON aut.id = r.id_autorizo
         INNER JOIN usuarios rea ON rea.id = r.id_realizo
         INNER JOIN usuarios sol ON sol.id = r.id_solicito
-        INNER JOIN otros.formulas f ON f.id_formula = r.id_formula
+        LEFT JOIN otros.formulas f ON f.id_formula = r.id_formula
         LEFT JOIN (
           SELECT id_recetas, Sum(cargas) AS cargas FROM otros.recetas_salidas GROUP BY id_recetas
         ) rs ON r.id_recetas = rs.id_recetas
@@ -168,7 +169,7 @@ class recetas_model extends CI_Model {
 
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
-      'id_formula'        => $_POST['formulaId'],
+      'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       'id_realizo'        => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],
       'id_autorizo'       => $_POST['autorizoId'],
@@ -250,7 +251,7 @@ class recetas_model extends CI_Model {
 
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
-      'id_formula'        => $_POST['formulaId'],
+      'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       // 'id_realizo'     => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],
       'id_autorizo'       => $_POST['autorizoId'],
@@ -958,7 +959,7 @@ class recetas_model extends CI_Model {
     *
     * @return void
     */
-   public function print_receta($recetaId, $pdf = null)
+   public function print_receta($recetaId, $pdf = null, $rep = 0)
    {
       $receta = $this->info($recetaId, true);
       // echo "<pre>";
@@ -969,7 +970,11 @@ class recetas_model extends CI_Model {
       // Creación del objeto de la clase heredada
       if (is_null($pdf)) {
         $pdf = new MYpdf('L', 'mm', 'Letter');
+        $pdf->titulo2 = 'ADMINISTRADOR';
+        $rep++;
+      } elseif ($rep === 1) {
         $pdf->titulo2 = 'ALMACENISTA';
+        $rep++;
       } else {
         $pdf->titulo2 = 'APLICADOR';
       }
@@ -1062,7 +1067,7 @@ class recetas_model extends CI_Model {
       if ($receta['info']->tipo === 'kg') {
         $tpercent = $tcantidad = $ttaplicacion = $timporte = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R');
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $widths = array(14, 75, 22, 26, 22, 26);
           $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
@@ -1088,7 +1093,7 @@ class recetas_model extends CI_Model {
 
           $pdf->SetFont('Arial','',7);
           $pdf->SetTextColor(0,0,0);
-          if ($pdf->titulo2 === 'ALMACENISTA') {
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
@@ -1129,7 +1134,7 @@ class recetas_model extends CI_Model {
       } else { // lts
         $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $widths = array(14, 68, 16, 16, 16, 18, 16, 20);
           $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
@@ -1143,7 +1148,7 @@ class recetas_model extends CI_Model {
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->SetX(6);
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $datos = [
             '', '', 'Cargas',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
@@ -1182,7 +1187,7 @@ class recetas_model extends CI_Model {
 
           $pdf->SetFont('Arial','',7);
           $pdf->SetTextColor(0,0,0);
-          if ($pdf->titulo2 === 'ALMACENISTA') {
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
@@ -1219,7 +1224,7 @@ class recetas_model extends CI_Model {
         // Totales
         $pdf->SetFont('Arial','B',7);
         $pdf->SetX(6);
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $pdf->Row([
             "{$tpercent}%",
             '',
@@ -1245,9 +1250,9 @@ class recetas_model extends CI_Model {
       $page_aux2 = $pdf->page;
       $yaux_prod = $pdf->GetY();
 
-      $val_x = ($pdf->titulo2 !== 'ALMACENISTA')? 155: 192;
-      $val_widths1 = ($pdf->titulo2 !== 'ALMACENISTA')? array(117): array(80);
-      $val_widths2 = ($pdf->titulo2 !== 'ALMACENISTA')? array(20, 60): array(20, 60);
+      $val_x = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? 155: 192;
+      $val_widths1 = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? array(117): array(80);
+      $val_widths2 = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? array(20, 60): array(20, 60);
       $pdf->page = $page_aux;
       $pdf->SetXY($val_x, $yaux);
       $pdf->SetAligns(array('C', 'L'));
@@ -1279,7 +1284,7 @@ class recetas_model extends CI_Model {
       $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
       $pdf->Line(272, $yaux, 272, $pdf->GetY());
 
-      if ($pdf->titulo2 !== 'ALMACENISTA') {
+      if ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR') {
         $pdf->page = $page_aux;
         $pdf->SetXY(195, $yaux+8);
         $pdf->SetAligns(array('C', 'L'));
@@ -1346,8 +1351,8 @@ class recetas_model extends CI_Model {
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(''), false, false);
 
-      if ($pdf->titulo2 === 'ALMACENISTA') {
-        $this->print_receta($recetaId, $pdf);
+      if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+        $this->print_receta($recetaId, $pdf, $rep);
       }
       $pdf->Output('receta'.date('Y-m-d').'.pdf', 'I');
       exit;
