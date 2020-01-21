@@ -733,8 +733,7 @@ class compras_requisicion_model extends CI_Model {
 
         // Si trae datos extras
         $dataOrden['otros_datos'] = [];
-        if (isset($data->otros_datos->infRecogerProv) || isset($data->otros_datos->infPasarBascula) ||
-            isset($data->otros_datos->infEntOrdenCom)) {
+        if (!empty($data->otros_datos)) {
           $dataOrden['otros_datos'] = $data->otros_datos;
         }
         $dataOrden['otros_datos'] = json_encode($dataOrden['otros_datos']);

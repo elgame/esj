@@ -1051,6 +1051,7 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Pre gastos
     if (isset($data['gasto_pre_concepto']))
     {
       $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
@@ -1108,6 +1109,7 @@ class caja_chica_model extends CI_Model {
             'concepto'                 => $gasto,
             'nombre'                   => $data['gasto_pre_nombre'][$key],
             'monto'                    => $data['gasto_pre_importe'][$key],
+            'monto_ini'                => $data['gasto_pre_importe'][$key],
             'fecha'                    => $data['fecha_caja_chica'],
             'no_caja'                  => $data['fno_caja'],
             // 'id_area'               => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),

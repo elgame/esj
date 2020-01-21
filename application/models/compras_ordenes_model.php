@@ -293,10 +293,11 @@ class compras_ordenes_model extends CI_Model {
 
     else
     {
-      $status = $this->db->select("status")
+      $ordennn = $this->db->select("status, otros_datos")
         ->from("compras_ordenes")
         ->where("id_orden", $idOrden)
-        ->get()->row()->status;
+        ->get()->row();
+      $status = $ordennn->status;
 
       $data = array(
         'id_empresa'      => $_POST['empresaId'],
@@ -402,7 +403,7 @@ class compras_ordenes_model extends CI_Model {
       }
 
       // Si trae datos extras
-      $data['otros_datos'] = [];
+      $data['otros_datos'] = json_decode($ordennn->otros_datos);
       if ($this->input->post('infRecogerProv') != false) {
         $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
         $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
@@ -1081,6 +1082,11 @@ class compras_ordenes_model extends CI_Model {
 
   public function entrada($idOrden)
   {
+    $ordennn = $this->db->select("status, otros_datos")
+        ->from("compras_ordenes")
+        ->where("id_orden", $idOrden)
+        ->get()->row();
+
     $ordenRechazada = false;
     // Verifica si la orden se va rechazar
     foreach ($_POST['concepto'] as $key => $concepto)
@@ -1280,7 +1286,7 @@ class compras_ordenes_model extends CI_Model {
     }
 
     // Si trae datos extras
-    $data['otros_datos'] = [];
+    $data['otros_datos'] = json_decode($ordennn->otros_datos);
     if ($this->input->post('infRecogerProv') != false) {
       $data['otros_datos']['infRecogerProv'] = $_POST['infRecogerProv'];
       $data['otros_datos']['infRecogerProvNom'] = $_POST['infRecogerProvNom'];
@@ -2128,6 +2134,13 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array($tituloclientt.substr($clientessss, 2)), false, false);
         $pdf->SetXY(6, $pdf->GetY()-3);
         $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
+      }
+
+      if ($orden['info'][0]->es_receta == 't') {
+        $recetasss = isset($orden['info'][0]->otros_datos->noRecetas)? implode(', ', $orden['info'][0]->otros_datos->noRecetas): '';
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('RECETAS: '.$recetasss), false, false);
       }
 
       $pdf->SetWidths(array(205));
