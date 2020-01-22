@@ -33,6 +33,7 @@
 
     // Asigna la funcionalidad de ligar remisiones a facturas
     eventsRemisiones();
+    eventsRemoveRemision();
 
   });
 
@@ -175,6 +176,19 @@
       } else {
         noty({"text": 'Seleccione al menos una remisión para agregarla al listado.', "layout":"topRight", "type": 'error'});
       }
+    });
+  }
+
+  var eventsRemoveRemision = function () {
+    $('#remisiones-selected').on('click', '.remligadasFactura', function(event) {
+      msb.confirm('Estas seguro de Quitar la remision?', 'Facturacion', this, function (obj) {
+        $.getJSON(base_url + 'panel/facturacion/ajax_remove_remision_fact/',
+          {id_remision: $('input.remision-selected', obj).val(), id_factura: $('#facturaId').val() }, function(json, textStatus) {
+            /*optional stuff to do after success */
+        });
+        console.log('test', $('input.remision-selected', obj).val());
+        obj.remove();
+      });
     });
   }
 

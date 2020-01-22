@@ -2157,6 +2157,8 @@ class compras_ordenes_model extends CI_Model {
 
         $pdf->SetFont('Arial', 'B', 8);
 
+        $y_auxx = $pdf->GetY();
+
         $pdf->SetFont('Arial','',8);
         $pdf->SetXY(5, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L'));
@@ -2218,6 +2220,45 @@ class compras_ordenes_model extends CI_Model {
             $activos[] = $value->nombre;
           }
           $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
+        }
+
+
+        if (isset($orden['info'][0]->comprasligadas) && count($orden['info'][0]->comprasligadas) > 0) {
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetXY(85, $y_auxx);
+          $pdf->SetAligns(array('C'));
+          $pdf->SetWidths(array(125));
+          $pdf->Row(array('COMPRAS DEL SERVICIO'), false, true);
+
+          $pdf->SetFont('Arial','B',7);
+          $pdf->SetXY(85, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+          $pdf->SetWidths(array(18, 18, 67, 22));
+          $pdf->Row(array('FECHA', 'FOLIO', 'PROVEEDOR', 'MONTO'), false, true);
+
+          $pdf->SetFont('Arial','',7);
+          $total_serviciooo = $total;
+          foreach ($orden['info'][0]->comprasligadas as $key => $value) {
+            $total_serviciooo += $value->total;
+
+            $pdf->SetXY(85, $pdf->GetY());
+            $pdf->Row([
+              substr($value->fecha, 0, 10),
+              $value->serie.$value->folio,
+              $value->proveedor->nombre_fiscal,
+              MyString::formatoNumero($value->total, 2, '$', false),
+            ], false, true);
+          }
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetAligns(array('R', 'R'));
+          $pdf->SetWidths(array(103, 22));
+          $pdf->SetXY(85, $pdf->GetY());
+          $pdf->Row([
+            'COSTO TOTAL',
+            MyString::formatoNumero($total_serviciooo, 2, '$', false),
+          ], false, true);
+
         }
       }
 

@@ -24,7 +24,7 @@
           <?php
             if (isset($factura) && count($factura['remisiones']) > 0) {
               foreach ($factura['remisiones'] as $remision) { ?>
-                <label><?php echo $remision->serie.$remision->folio; ?> <input type="hidden" value="<?php echo $remision->id_venta ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remision->id_venta ?>"></label>
+                <label class="remligadasFactura"><i class="icon-remove"></i> <?php echo $remision->serie.$remision->folio; ?> <input type="hidden" value="<?php echo $remision->id_venta ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remision->id_venta ?>"></label>
           <?php }} ?>
         </div>
 

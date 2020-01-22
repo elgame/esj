@@ -33,6 +33,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_unidades/',
     'facturacion/ajax_get_pallets_cliente/',
     'facturacion/ajax_ligar_remisiones/',
+    'facturacion/ajax_remove_remision_fact/',
 
     'facturacion/xml/',
     'facturacion/nomina/',
@@ -2174,6 +2175,15 @@ class facturacion extends MY_Controller {
     * Liga las remisiones a una factura
     */
   public function ajax_ligar_remisiones()
+  {
+    $this->load->model('facturacion_model');
+
+    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true, true);
+
+    echo json_encode($response);
+  }
+
+  public function ajax_remove_remision_fact()
   {
     $this->load->model('facturacion_model');
 
