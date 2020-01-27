@@ -237,6 +237,26 @@
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
       }
     });
+
+    $("#empresaAp").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaAp =  $(this);
+
+        $empresaAp.val(ui.item.id);
+        $("#empresaApId").val(ui.item.id);
+        $empresaAp.css("background-color", "#A1F57A");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaAp").css("background-color", "#FFD071");
+        $("#empresaApId").val('');
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
   };
 
   // Autocomplete para los Proveedores.

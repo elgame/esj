@@ -516,13 +516,15 @@ class compras_requisicion extends MY_Controller {
   {
     $this->load->library('form_validation');
 
-    $valGasto = $valFlete = false;
+    $valEmpAp = $valGasto = $valFlete = false;
     $tipoOrden = $this->input->post('tipoOrden');
     if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f') {
-      $valGasto = true;
+      $valEmpAp = $valGasto = true;
 
       if ($tipoOrden == 'f')
         $valFlete = true;
+    } elseif ($this->input->post('empresaId') === 20) {
+      $valEmpAp = true;
     }
 
     $rules = array(
@@ -610,6 +612,12 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Entregar la mercancía',
             'rules' => ''),
 
+      array('field' => 'empresaApId',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required|numeric': '')),
+      array('field' => 'empresaAp',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required': '')),
       array('field' => 'areaId',
             'label' => 'Cultivo',
             'rules' => ($valGasto? 'required|numeric': '')),
