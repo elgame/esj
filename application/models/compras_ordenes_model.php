@@ -796,6 +796,7 @@ class compras_ordenes_model extends CI_Model {
               co.cont_x_dia,
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
               -- co.id_area, co.id_activo,
+              co.id_empresa_ap, co.id_orden_aplico,
               co.otros_datos, co.es_receta
        FROM compras_ordenes AS co
          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -929,6 +930,16 @@ class compras_ordenes_model extends CI_Model {
                                            FROM compras_ordenes_requisiciones cor
                                             INNER JOIN compras_requisicion cr ON cr.id_requisicion = cor.id_requisicion
                                            WHERE cor.id_orden = {$data['info'][0]->id_orden}")->result();
+
+        // Orden ligada de cuando se registra de agro insumos
+        $data['info'][0]->ordenPadre = $this->info($data['info'][0]->id_orden_aplico)['info'][0];
+
+        $data['info'][0]->empresaAp = null;
+        if ($data['info'][0]->id_empresa_ap)
+        {
+          $this->load->model('empresas_model');
+          $data['info'][0]->empresaAp = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa_ap, true)['info'];
+        }
 
         // Codigos nuevos
         $data['info'][0]->area = $this->db->query("SELECT a.id_area, a.nombre, csa.num

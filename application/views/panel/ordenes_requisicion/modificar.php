@@ -370,6 +370,16 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="empresaAp">Empresa aplicación </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="empresaAp" class="span11" id="empresaAp" value="<?php echo set_value('empresaAp', isset($orden['info'][0]->empresaAp->nombre_fiscal) ? $orden['info'][0]->empresaAp->nombre_fiscal : '') ?>" placeholder="Empaque, Mamita, etc">
+                        </div>
+                        <input type="hidden" name="empresaApId" id="empresaApId" value="<?php echo set_value('empresaApId', isset($orden['info'][0]->empresaAp->id_empresa) ? $orden['info'][0]->empresaAp->id_empresa : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -378,7 +388,9 @@
                         <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($orden['info'][0]->area->id_area) ? $orden['info'][0]->area->id_area : '') ?>">
                       </div>
                     </div><!--/control-group -->
+                  </div>
 
+                  <div class="span6">
                     <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
                       <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
@@ -396,9 +408,7 @@
                        <?php }} ?>
                       </ul>
                     </div><!--/control-group -->
-                  </div>
 
-                  <div class="span6">
                     <div class="control-group" id="centrosCostosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">

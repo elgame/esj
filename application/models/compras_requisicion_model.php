@@ -117,7 +117,8 @@ class compras_requisicion_model extends CI_Model {
     // Si es un gasto son requeridos los campos de catálogos
     if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
         || $_POST['tipoOrden'] == 'p') {
-      $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+      $data['id_empresa_ap'] = $this->input->post('empresaApId')? $this->input->post('empresaApId'): NULL;
+      $data['id_area']       = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
       // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
       // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
 
@@ -384,7 +385,8 @@ class compras_requisicion_model extends CI_Model {
       // Si es un gasto son requeridos los campos de catálogos
       if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
           || $_POST['tipoOrden'] == 'p') {
-        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+        $data['id_empresa_ap'] = $this->input->post('empresaApId')? $this->input->post('empresaApId'): NULL;
+        $data['id_area']       = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
         // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
         // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
 
@@ -643,7 +645,9 @@ class compras_requisicion_model extends CI_Model {
         // Si es un gasto son requeridos los campos de catálogos
         if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
             || $data->tipo_orden == 'p') {
-          // $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+
+          $dataOrden['id_empresa_ap'] = !empty($data->id_empresa_ap)? $data->id_empresa_ap: NULL;
+
           // Inserta las areas
           if (isset($data->id_area) && $data->id_area > 0) {
             $dataOrdenCats['area'][] = [
@@ -775,6 +779,20 @@ class compras_requisicion_model extends CI_Model {
 
         if(count($productos) > 0)
           $this->compras_ordenes_model->agregarProductosData($productos);
+
+        // Si se esta creando con la empresa de Agro insumos crea la otra orden
+        if ($dataOrden['id_empresa'] == 20 && $dataOrden['id_empresa_ap'] > 0) {
+          $dataOrden['id_empresa']      = $dataOrden['id_empresa_ap'];
+          $dataOrden['id_orden_aplico'] = $id_orden;
+          $res22 = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
+          $id_orden22 = $res['id_orden'];
+
+          foreach ($productos as $key => $value) {
+            $productos[$key]['id_orden'] = $id_orden22;
+          }
+
+          $this->compras_ordenes_model->agregarProductosData($productos);
+        }
 
       }
     }
@@ -970,7 +988,7 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.color, null) as color,
               co.ids_facrem, co.ids_compras,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
-              co.id_area, co.id_activo,
+              co.id_area, co.id_activo, co.id_empresa_ap,
               otros_datos
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -1120,6 +1138,13 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value, true)['info'];
             }
           }
+        }
+
+        $data['info'][0]->empresaAp = null;
+        if ($data['info'][0]->id_empresa_ap)
+        {
+          $this->load->model('empresas_model');
+          $data['info'][0]->empresaAp = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa_ap, true)['info'];
         }
 
         $data['info'][0]->area = null;

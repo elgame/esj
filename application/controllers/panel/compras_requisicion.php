@@ -523,7 +523,7 @@ class compras_requisicion extends MY_Controller {
 
       if ($tipoOrden == 'f')
         $valFlete = true;
-    } elseif ($this->input->post('empresaId') === 20) {
+    } elseif ($this->input->post('empresaId') === 20) { // id de agro insumos
       $valEmpAp = true;
     }
 

@@ -365,8 +365,8 @@
     $("#area").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         $.ajax({
             url: base_url + 'panel/areas/ajax_get_areas/',
             dataType: "json",
@@ -404,8 +404,8 @@
     $("#rancho").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         if(parseInt($("#areaId").val()) > 0)
           params.area = $("#areaId").val();
         $.ajax({
@@ -515,8 +515,8 @@
       $(this).autocomplete({
         source: function(request, response) {
           var params = {term : request.term};
-          // if(parseInt($("#empresaId").val()) > 0)
-          //   params.did_empresa = $("#empresaId").val();
+          // if(parseInt($("#empresaApId").val()) > 0)
+          //   params.did_empresa = $("#empresaApId").val();
           params.tipo = 'a'; // activos
           $.ajax({
               url: base_url + 'panel/productos/ajax_aut_productos/',
