@@ -932,7 +932,10 @@ class compras_ordenes_model extends CI_Model {
                                            WHERE cor.id_orden = {$data['info'][0]->id_orden}")->result();
 
         // Orden ligada de cuando se registra de agro insumos
-        $data['info'][0]->ordenPadre = $this->info($data['info'][0]->id_orden_aplico)['info'][0];
+        $data['info'][0]->ordenAplico = null;
+        if ($data['info'][0]->id_orden_aplico) {
+          $data['info'][0]->ordenAplico = $this->info($data['info'][0]->id_orden_aplico)['info'][0];
+        }
 
         $data['info'][0]->empresaAp = null;
         if ($data['info'][0]->id_empresa_ap)
@@ -2165,6 +2168,11 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+
+        if (!empty($orden['info'][0]->ordenAplico)) {
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->Row(array("ORDEN GENERADA AUTOMATICAMENTE DE LA EMPRESA {$orden['info'][0]->ordenAplico->empresa} CON FOLIO {$orden['info'][0]->ordenAplico->folio} EL DIA {$orden['info'][0]->ordenAplico->fecha}"), false, false);
+        }
 
         $pdf->SetFont('Arial', 'B', 8);
 

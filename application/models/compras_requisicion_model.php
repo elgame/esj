@@ -783,15 +783,30 @@ class compras_requisicion_model extends CI_Model {
         // Si se esta creando con la empresa de Agro insumos crea la otra orden
         if ($dataOrden['id_empresa'] == 20 && $dataOrden['id_empresa_ap'] > 0) {
           $dataOrden['id_empresa']      = $dataOrden['id_empresa_ap'];
+          $dataOrden['folio']           = $this->compras_ordenes_model->folio($data->tipo_orden);
           $dataOrden['id_orden_aplico'] = $id_orden;
-          $res22 = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
-          $id_orden22 = $res['id_orden'];
 
-          foreach ($productos as $key => $value) {
-            $productos[$key]['id_orden'] = $id_orden22;
+          $data_proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE id_empresa = {$dataOrden['id_empresa']} AND LOWER(nombre_fiscal) LIKE LOWER('AGRO INSUMOS SANJORGE SA DE CV')")->row();
+          if (!empty($data_proveedor)) {
+            $dataOrden['id_proveedor'] = $data_proveedor->id_proveedor;
           }
 
-          $this->compras_ordenes_model->agregarProductosData($productos);
+          $res22 = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
+          $id_orden22 = $res22['id_orden'];
+
+          $productos22 = [];
+          foreach ($productos as $keyon => $proon) {
+            $productos[$keyon]['id_orden'] = $id_orden22;
+            $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$dataOrden['id_empresa']} AND LOWER(nombre) LIKE LOWER('{$proon['descripcion']}')")->row();
+            if (!empty($data_prod)) {
+              $productos[$keyon]['id_producto'] = $data_prod->id_producto;
+              $productos22[] = $productos[$keyon];
+            }
+          }
+
+          if (count($productos22) > 0) {
+            $this->compras_ordenes_model->agregarProductosData($productos22);
+          }
         }
 
       }

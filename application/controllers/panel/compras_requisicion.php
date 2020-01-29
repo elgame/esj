@@ -523,7 +523,7 @@ class compras_requisicion extends MY_Controller {
 
       if ($tipoOrden == 'f')
         $valFlete = true;
-    } elseif ($this->input->post('empresaId') === 20) { // id de agro insumos
+    } elseif ($this->input->post('empresaId') == 20) { // id de agro insumos
       $valEmpAp = true;
     }
 
@@ -869,7 +869,59 @@ class compras_requisicion extends MY_Controller {
       }
     }
 
+    if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true' && $this->input->post('empresaId') == 20) {
+      $rules[] = array('field' => 'txtBtnAutorizar',
+                      'label' => 'Autorizo',
+                      'rules' => 'callback_val_productos_agro|callback_val_proveedor_agro');
+    }
+
     $this->form_validation->set_rules($rules);
+  }
+
+  public function val_productos_agro($auto)
+  {
+    if (is_array($this->input->post('productoId')) && count($this->input->post('productoId')) > 0)
+    {
+      $response = true;
+      $responseText = '';
+      foreach ($this->input->post('productoId') as $key => $item) {
+        $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaApId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+        if (empty($data_prod)) {
+          $response = false;
+          $responseText .= "{$_POST['concepto'][$key]}, ";
+        }
+      }
+      $this->form_validation->set_message('val_productos_agro', "El/Los productos {$responseText} no se encuentran en la empresa {$_POST['empresaAp']}, se tienen que llamar igual en ambas empresas.");
+      return $response;
+    }
+    else
+    {
+      $this->form_validation->set_message('val_productos_agro', 'Para autorizar una orden con empresa de aplicación se requiere que agregue productos.');
+      return false;
+    }
+  }
+
+  public function val_proveedor_agro($auto)
+  {
+    if (is_array($this->input->post('proveedorId')) && count($this->input->post('proveedorId')) > 0)
+    {
+      $response = true;
+      $responseText = '';
+      foreach ($this->input->post('proveedorId') as $key => $item) {
+        $data_proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE id_empresa = {$_POST['empresaApId']} AND LOWER(nombre_fiscal) LIKE LOWER('AGRO INSUMOS SANJORGE SA DE CV')")->row();
+        if (empty($data_proveedor)) {
+          $response = false;
+          $responseText = "AGRO INSUMOS SANJORGE SA DE CV";
+        }
+      }
+      $this->form_validation->set_message('val_proveedor_agro', "El/Los proveedores {$responseText} no se encuentran en la empresa {$_POST['empresaAp']}, se tienen que llamar igual en ambas empresas.");
+      return $response;
+    }
+    else
+    {
+      $this->form_validation->set_message('val_proveedor_agro', 'Para autorizar una orden con empresa de aplicación se requiere que agregue productos.');
+      return false;
+    }
   }
 
   public function val_proveedor($proveedor)

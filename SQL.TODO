@@ -9,8 +9,9 @@
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_empresa_ap_fkey FOREIGN KEY (id_empresa_ap) REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      COMMENT ON COLUMN public.compras_ordenes.id_empresa_ap IS 'id de la empresa en la que se aplicaran los productos';
      ALTER TABLE public.compras_ordenes ADD COLUMN id_orden_aplico integer;
-ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_orden_aplico_fkey FOREIGN KEY (id_orden_aplico) REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-COMMENT ON COLUMN public.compras_ordenes.id_orden_aplico IS 'id de la orden relacionadas cuando se crea una a través de Agro insumos (agro se registra la otra y en la otra la de agro)';
+     ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_orden_aplico_fkey FOREIGN KEY (id_orden_aplico) REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+     COMMENT ON COLUMN public.compras_ordenes.id_orden_aplico IS 'id de la orden relacionadas cuando se crea una a través de Agro insumos (agro se registra la otra y en la otra la de agro)';
+
  ✔ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar @done (20-01-21 13:59) lap|san
      ALTER TABLE public.cajachica_gastos ADD COLUMN folio_ant bigint;
  ✔ En las recetas que se puedan capturar sin formula y que se imprima otra copia como Administrador @done (20-01-21 15:55) lap|san
