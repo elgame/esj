@@ -222,6 +222,40 @@
                 </div>
               </div>
 
+              <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'd'? '': 'style="display:none;"'); ?> id="serSalidasAlmacen">
+                <label class="control-label" for="show-salidasAlmacen">Ligar Salidas Almacén</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-salidasAlmacen">Buscar</button>
+                  <span id="salidasAlmacenLigada" style="cursor:pointer;">
+                    <?php
+                    $folios = '';
+                    foreach ($orden['info'][0]->salidasalmacenligadas as $key => $value)
+                    {
+                      $folios .= $value->folio.' | ';
+                    }
+                      echo $folios.' <input type="hidden" name="salidasAlmacen" value="'.$orden['info'][0]->ids_salidas_almacen.'"><input type="hidden" name="salidasAlmacen_folio" value="'.$folios.'">';
+                    ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'd'? '': 'style="display:none;"'); ?> id="serGastosCaja">
+                <label class="control-label" for="show-gastosCaja">Ligar Gastos Caja 2</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-gastosCaja">Buscar</button>
+                  <span id="gastosCajaLigada" style="cursor:pointer;">
+                    <?php
+                    $folios = '';
+                    foreach ($orden['info'][0]->gastoscajaligadas as $key => $value)
+                    {
+                      $folios .= $value->folio_sig.' | ';
+                    }
+                      echo $folios.' <input type="hidden" name="gastosCaja" value="'.$orden['info'][0]->ids_gastos_caja.'"><input type="hidden" name="gastosCaja_folio" value="'.$folios.'">';
+                    ?>
+                  </span>
+                </div>
+              </div>
+
               <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'f' && $orden['info'][0]->flete_de === 'c'? '': 'style="display:none;"'); ?> id="fletesBoletas">
                 <label class="control-label" for="ligarBoleta">Ligar BOLETA</label>
                 <div class="controls">

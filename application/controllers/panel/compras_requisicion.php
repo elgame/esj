@@ -869,6 +869,30 @@ class compras_requisicion extends MY_Controller {
       }
     }
 
+    if($this->input->post('tipoOrden') == 'd')
+    {
+      $rules[] = array('field' => 'compras',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'compras_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+
+      $rules[] = array('field' => 'salidasAlmacen',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'salidasAlmacen_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+
+      $rules[] = array('field' => 'gastosCaja',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'gastosCaja_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+    }
+
     if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true' && $this->input->post('empresaId') == 20) {
       $rules[] = array('field' => 'txtBtnAutorizar',
                       'label' => 'Autorizo',

@@ -386,8 +386,17 @@ class productos_salidas_model extends CI_Model {
     return array('passes' => true);
   }
 
-  public function info($idSalida, $full = false)
+  public function info($idSalida, $full = false, $importe = false)
   {
+    $sql_field = $sql_join = '';
+    if ($importe) {
+      $sql_join = " LEFT JOIN (
+        SELECT id_salida, Sum((cantidad * precio_unitario))::Numeric(12, 3) AS importe
+        FROM compras_salidas_productos
+        GROUP BY id_salida
+      ) AS imp ON cs.id_salida = imp.id_salida";
+      $sql_field = ", imp.importe";
+    }
     $query = $this->db->query(
       "SELECT cs.id_salida,
               cs.id_empresa, e.nombre_fiscal AS empresa, e.logo, e.dia_inicia_semana,
@@ -402,6 +411,7 @@ class productos_salidas_model extends CI_Model {
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
               cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula
+              {$sql_field}
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
@@ -410,6 +420,7 @@ class productos_salidas_model extends CI_Model {
           LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
           LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
           LEFT JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
+          {$sql_join}
         WHERE cs.id_salida = {$idSalida}");
 
     $data = array();
@@ -497,6 +508,24 @@ class productos_salidas_model extends CI_Model {
     $folio = (isset($res->folio) ? $res->folio : 0) + 1;
 
     return $folio;
+  }
+
+  public function getSalidasAjax($datos)
+  {
+    $filtro = isset($datos['filtro']{0})? " AND cs.folio = {$datos['filtro']}": '';
+    // $filtro .= isset($datos['proveedorId']{0})? " AND p.id_proveedor = {$datos['proveedorId']} ": '';
+
+    $query = $this->db->query("SELECT cs.id_salida, Date(cs.fecha_creacion) AS fecha, cs.folio, e.nombre_fiscal AS empresa, cs.concepto
+                               FROM compras_salidas AS cs
+                                  INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
+                               WHERE e.id_empresa = {$datos['empresaId']} AND cs.status = 's'
+                                {$filtro} AND Date(cs.fecha_creacion) >= (now() - interval '8 months')
+                               ORDER BY cs.fecha_creacion DESC, cs.folio DESC");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
   }
 
 

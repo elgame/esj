@@ -599,32 +599,37 @@ class compras_ordenes_model extends CI_Model {
 
     $ids_comprass = null;
     if ($ordenesIdssss != '') {
-      $ids_comprass = $this->db->query("SELECT String_agg(ids_compras, '') AS ids_compras FROM compras_ordenes WHERE id_orden in({$ordenesIdssss})")->row();
+      $ids_comprass = $this->db->query("SELECT String_agg(ids_compras, '') AS ids_compras,
+          String_agg(ids_salidas_almacen, '') AS ids_salidas_almacen,
+          String_agg(ids_gastos_caja, '') AS ids_gastos_caja
+        FROM compras_ordenes WHERE id_orden in({$ordenesIdssss})")->row();
     }
 
     // datos de la compra.
     $data = array(
-      'id_proveedor'   => $proveedorId,
-      'id_empresa'     => $empresaId,
-      'id_empleado'    => $this->session->userdata('id_usuario'),
-      'serie'          => $_POST['serie'],
-      'folio'          => $_POST['folio'],
-      'condicion_pago' => $_POST['condicionPago'],
-      'plazo_credito'  => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
-      // 'tipo_documento' => $_POST['algo'],
-      'fecha'          => str_replace('T', ' ', $_POST['fecha']),
-      'subtotal'       => $_POST['totalImporte'],
-      'importe_iva'    => $_POST['totalImpuestosTrasladados'],
-      'importe_ieps'   => $_POST['totalIeps'],
-      'retencion_iva'  => $_POST['totalRetencion'],
-      'retencion_isr'  => $_POST['totalRetencionIsr'],
-      'total'          => $_POST['totalOrden'],
-      'concepto'       => 'Concepto',
-      'isgasto'        => 'f',
-      'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
-      'uuid'           => $this->input->post('uuid'),
-      'no_certificado' => $this->input->post('noCertificado'),
-      'ids_compras'    => (isset($ids_comprass->ids_compras)? $ids_comprass->ids_compras: NULL)
+      'id_proveedor'        => $proveedorId,
+      'id_empresa'          => $empresaId,
+      'id_empleado'         => $this->session->userdata('id_usuario'),
+      'serie'               => $_POST['serie'],
+      'folio'               => $_POST['folio'],
+      'condicion_pago'      => $_POST['condicionPago'],
+      'plazo_credito'       => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
+      // 'tipo_documento'   => $_POST['algo'],
+      'fecha'               => str_replace('T', ' ', $_POST['fecha']),
+      'subtotal'            => $_POST['totalImporte'],
+      'importe_iva'         => $_POST['totalImpuestosTrasladados'],
+      'importe_ieps'        => $_POST['totalIeps'],
+      'retencion_iva'       => $_POST['totalRetencion'],
+      'retencion_isr'       => $_POST['totalRetencionIsr'],
+      'total'               => $_POST['totalOrden'],
+      'concepto'            => 'Concepto',
+      'isgasto'             => 'f',
+      'status'              => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'uuid'                => $this->input->post('uuid'),
+      'no_certificado'      => $this->input->post('noCertificado'),
+      'ids_compras'         => (isset($ids_comprass->ids_compras)? $ids_comprass->ids_compras: NULL),
+      'ids_salidas_almacen' => (isset($ids_comprass->ids_salidas_almacen)? $ids_comprass->ids_salidas_almacen: NULL),
+      'ids_gastos_caja'     => (isset($ids_comprass->ids_gastos_caja)? $ids_comprass->ids_gastos_caja: NULL)
     );
 
     // //si es contado, se verifica que la cuenta tenga saldo
@@ -789,7 +794,7 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem, co.ids_compras,
+              co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.no_impresiones, co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
               co.id_almacen, ca.nombre AS almacen,
@@ -902,6 +907,34 @@ class compras_ordenes_model extends CI_Model {
             foreach ($comprasss as $key => $value)
             {
               $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value)['info'];
+            }
+          }
+        }
+
+        $data['info'][0]->salidasalmacenligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_salidas_almacen != '') { // salidas almacen
+          $this->load->model('productos_salidas_model');
+          $comprasss = explode('|', $data['info'][0]->ids_salidas_almacen);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->salidasalmacenligadas[] = $this->productos_salidas_model->info($value, false, true)['info'][0];
+            }
+          }
+        }
+
+        $data['info'][0]->gastoscajaligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_gastos_caja != '') { // gastos caja
+          $this->load->model('caja_chica_model');
+          $comprasss = explode('|', $data['info'][0]->ids_gastos_caja);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->gastoscajaligadas[] = $this->caja_chica_model->getDataGasto($value);
             }
           }
         }
@@ -2242,41 +2275,168 @@ class compras_ordenes_model extends CI_Model {
         }
 
 
-        if (isset($orden['info'][0]->comprasligadas) && count($orden['info'][0]->comprasligadas) > 0) {
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetXY(85, $y_auxx);
+        // Si tiene compras, salidas de almacen y/o gastos de caja
+        if ((isset($orden['info'][0]->comprasligadas) && count($orden['info'][0]->comprasligadas) > 0) ||
+            (isset($orden['info'][0]->salidasalmacenligadas) && count($orden['info'][0]->salidasalmacenligadas) > 0) ||
+            (isset($orden['info'][0]->gastoscajaligadas) && count($orden['info'][0]->gastoscajaligadas) > 0)) {
+          $pdf->AddPage('P');
+
+          $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+          if($pdf->logo != '')
+            $pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), 6, 5, 50);
+
+          $pdf->SetXY(150, $pdf->GetY());
+          $pdf->SetFillColor(200,200,200);
+          $pdf->SetFont('helvetica','B', 10);
           $pdf->SetAligns(array('C'));
-          $pdf->SetWidths(array(125));
-          $pdf->Row(array('COMPRAS DEL SERVICIO'), false, true);
+          $pdf->SetWidths(array(60));
+          $pdf->Row(array('ORDEN DE SERVICIO'), true, true);
+          $pdf->SetXY(150, $pdf->GetY());
+          $pdf->Row(array('No '.MyString::formatoNumero($orden['info'][0]->folio, 2, '')."\n \n "), false, true);
+          $pdf->SetFont('helvetica','B', 8.5);
+          $pdf->SetXY(150, $pdf->GetY()-8);
+          $pdf->Row(array(MyString::fechaATexto($orden['info'][0]->fecha, '/c', true)), false, false);
+          $pdf->SetFont('helvetica','B', 10);
+          $pdf->SetXY(150, $pdf->GetY());
 
-          $pdf->SetFont('Arial','B',7);
-          $pdf->SetXY(85, $pdf->GetY());
-          $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-          $pdf->SetWidths(array(18, 18, 67, 22));
-          $pdf->Row(array('FECHA', 'FOLIO', 'PROVEEDOR', 'MONTO'), false, true);
+          $pdf->SetFont('helvetica','', 9);
+          $pdf->SetXY(80, $pdf->GetY()-20);
+          $pdf->Row(array('Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': ($orden['info'][0]->no_impresiones==1? 'COPIA ARCHIVO': 'COPIA '.$orden['info'][0]->no_impresiones)).
+            "\n".MyString::fechaATexto(date("Y-m-d H:i:s"), '/c', true)), false, false);
 
-          $pdf->SetFont('Arial','',7);
+          $pdf->SetXY(6, $pdf->GetY()+35);
+
           $total_serviciooo = $total;
-          foreach ($orden['info'][0]->comprasligadas as $key => $value) {
-            $total_serviciooo += $value->total;
 
-            $pdf->SetXY(85, $pdf->GetY());
+          $pdf->SetFont('Arial','B',10);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('R'));
+          $pdf->SetWidths(array(204));
+          $pdf->Row(array('Importe Orden: '.MyString::formatoNumero($total_serviciooo, 2, '$', false)), false, false);
+
+          if ((isset($orden['info'][0]->comprasligadas) && count($orden['info'][0]->comprasligadas) > 0)) {
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('C'));
+            $pdf->SetWidths(array(204));
+            $pdf->Row(array('COMPRAS DEL SERVICIO'), true, true);
+
+            $pdf->SetFont('Arial','B',7);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+            $pdf->SetWidths(array(18, 22, 134, 30));
+            $pdf->Row(array('FECHA', 'FOLIO', 'PROVEEDOR', 'MONTO'), true, true);
+
+            $total_comprasss = 0;
+            $pdf->SetFont('Arial','',7);
+            foreach ($orden['info'][0]->comprasligadas as $key => $value) {
+              $total_serviciooo += $value->total;
+              $total_comprasss += $value->total;
+
+              $pdf->SetXY(6, $pdf->GetY());
+              $pdf->Row([
+                substr($value->fecha, 0, 10),
+                $value->serie.$value->folio,
+                $value->proveedor->nombre_fiscal,
+                MyString::formatoNumero($value->total, 2, '$', false),
+              ], false, true);
+            }
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetAligns(array('R', 'R'));
+            $pdf->SetWidths(array(174, 30));
+            $pdf->SetXY(6, $pdf->GetY());
             $pdf->Row([
-              substr($value->fecha, 0, 10),
-              $value->serie.$value->folio,
-              $value->proveedor->nombre_fiscal,
-              MyString::formatoNumero($value->total, 2, '$', false),
-            ], false, true);
+              'TOTAL COMPRAS',
+              MyString::formatoNumero($total_comprasss, 2, '$', false),
+            ], true, true);
+          }
+
+          if ((isset($orden['info'][0]->salidasalmacenligadas) && count($orden['info'][0]->salidasalmacenligadas) > 0)) {
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('C'));
+            $pdf->SetWidths(array(204));
+            $pdf->Row(array('SALIDAS DE ALMACEN'), true, true);
+
+            $pdf->SetFont('Arial','B',7);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R'));
+            $pdf->SetWidths(array(18, 22, 100, 34, 30));
+            $pdf->Row(array('FECHA', 'FOLIO', 'EMPRESA', 'ALMACEN', 'MONTO'), true, true);
+
+            $total_salidass = 0;
+            $pdf->SetFont('Arial','',7);
+            foreach ($orden['info'][0]->salidasalmacenligadas as $key => $value) {
+              $total_serviciooo += $value->importe;
+              $total_salidass += $value->importe;
+
+              $pdf->SetXY(6, $pdf->GetY());
+              $pdf->Row([
+                substr($value->fecha, 0, 10),
+                $value->folio,
+                $value->empresa,
+                $value->almacen,
+                MyString::formatoNumero($value->importe, 2, '$', false),
+              ], false, true);
+            }
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetAligns(array('R', 'R'));
+            $pdf->SetWidths(array(174, 30));
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->Row([
+              'TOTAL SALIDAS',
+              MyString::formatoNumero($total_salidass, 2, '$', false),
+            ], true, true);
+          }
+
+          if ((isset($orden['info'][0]->gastoscajaligadas) && count($orden['info'][0]->gastoscajaligadas) > 0)) {
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('C'));
+            $pdf->SetWidths(array(204));
+            $pdf->Row(array('GASTOS DE CAJA'), true, true);
+
+            $pdf->SetFont('Arial','B',7);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+            $pdf->SetWidths(array(18, 22, 134, 30));
+            $pdf->Row(array('FECHA', 'FOLIO', 'EMPRESA', 'MONTO'), true, true);
+
+            $total_gasto_cajasss = 0;
+            $pdf->SetFont('Arial','',7);
+            foreach ($orden['info'][0]->gastoscajaligadas as $key => $value) {
+              $total_serviciooo += $value->monto;
+              $total_gasto_cajasss += $value->monto;
+
+              $pdf->SetXY(6, $pdf->GetY());
+              $pdf->Row([
+                substr($value->fecha, 0, 10),
+                $value->folio_sig,
+                $value->empresal,
+                MyString::formatoNumero($value->monto, 2, '$', false),
+              ], false, true);
+            }
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetAligns(array('R', 'R'));
+            $pdf->SetWidths(array(174, 30));
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->Row([
+              'TOTAL GASTOS CAJA',
+              MyString::formatoNumero($total_gasto_cajasss, 2, '$', false),
+            ], true, true);
           }
 
           $pdf->SetFont('Arial','B',8);
           $pdf->SetAligns(array('R', 'R'));
-          $pdf->SetWidths(array(103, 22));
-          $pdf->SetXY(85, $pdf->GetY());
+          $pdf->SetWidths(array(174, 30));
+          $pdf->SetXY(6, $pdf->GetY());
           $pdf->Row([
             'COSTO TOTAL',
             MyString::formatoNumero($total_serviciooo, 2, '$', false),
-          ], false, true);
+          ], true, true);
 
         }
       }

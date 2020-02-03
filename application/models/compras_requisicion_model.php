@@ -144,9 +144,16 @@ class compras_requisicion_model extends CI_Model {
     {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
-    } elseif ($_POST['tipoOrden'] == 'd' && $_POST['compras'] != '') {
-      $data['ids_compras'] = $_POST['compras'];
-      // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+    } elseif ($_POST['tipoOrden'] == 'd') {
+      if ($_POST['compras'] != '') {
+        $data['ids_compras'] = $_POST['compras'];
+      }
+      if ($_POST['salidasAlmacen'] != '') {
+        $data['ids_salidas_almacen'] = $_POST['salidasAlmacen'];
+      }
+      if ($_POST['gastosCaja'] != '') {
+        $data['ids_gastos_caja'] = $_POST['gastosCaja'];
+      }
     }
 
     // Si trae datos extras
@@ -460,7 +467,8 @@ class compras_requisicion_model extends CI_Model {
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       } elseif ($_POST['tipoOrden'] == 'd') {
         $data['ids_compras'] = $_POST['compras'];
-        // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+        $data['ids_salidas_almacen'] = $_POST['salidasAlmacen'];
+        $data['ids_gastos_caja'] = $_POST['gastosCaja'];
       }
 
       // Si trae datos extras
@@ -717,6 +725,8 @@ class compras_requisicion_model extends CI_Model {
         } elseif ($data->tipo_orden == 'd')
         {
           $dataOrden['ids_compras'] = $data->ids_compras;
+          $dataOrden['ids_salidas_almacen'] = $data->ids_salidas_almacen;
+          $dataOrden['ids_gastos_caja'] = $data->ids_gastos_caja;
         }
 
         // si se registra a un vehiculo
@@ -1001,7 +1011,7 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem, co.ids_compras,
+              co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo, co.id_empresa_ap,
               otros_datos
@@ -1151,6 +1161,34 @@ class compras_requisicion_model extends CI_Model {
             foreach ($comprasss as $key => $value)
             {
               $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value, true)['info'];
+            }
+          }
+        }
+
+        $data['info'][0]->salidasalmacenligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_salidas_almacen != '') { // salidas almacen
+          $this->load->model('productos_salidas_model');
+          $comprasss = explode('|', $data['info'][0]->ids_salidas_almacen);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->salidasalmacenligadas[] = $this->productos_salidas_model->info($value, false)['info'][0];
+            }
+          }
+        }
+
+        $data['info'][0]->gastoscajaligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_gastos_caja != '') { // gastos caja
+          $this->load->model('caja_chica_model');
+          $comprasss = explode('|', $data['info'][0]->ids_gastos_caja);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->gastoscajaligadas[] = $this->caja_chica_model->getDataGasto($value);
             }
           }
         }
