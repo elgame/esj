@@ -113,6 +113,13 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="tipo">Tipo</label>
+                <div class="controls">
+                  <?php echo (isset($salida->tipo)? $salida->tipo: '') ?>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', (isset($salida->folio)? $salida->folio: '')); ?>" size="25" readonly>

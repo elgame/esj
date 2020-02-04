@@ -110,6 +110,7 @@ class productos_salidas_model extends CI_Model {
         'recibio'           => $_POST['recibio'],
         'id_almacen'        => $_POST['id_almacen'],
         // 'id_traspaso'    => intval($this->input->post('tid_almacen')),
+
         'no_receta'         => $this->input->post('no_receta')? $_POST['no_receta']: NULL,
         'etapa'             => $this->input->post('etapa')? $_POST['etapa']: NULL,
         'rancho'            => $this->input->post('ranchoC_id')? $_POST['ranchoC_id']: NULL,
@@ -124,10 +125,13 @@ class productos_salidas_model extends CI_Model {
         'observaciones'     => $this->input->post('observaciones')? $_POST['observaciones']: NULL,
         'fecha_aplicacion'  => $this->input->post('fecha_aplicacion')? $_POST['fecha_aplicacion']: NULL,
 
+        'tipo'              => $this->input->post('tipo')? $_POST['tipo']: 's',
+
         'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
         // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
         // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
-        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
+        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL),
+        'id_empresa_ap'     => ($this->input->post('empresaApId')? $_POST['empresaApId']: NULL)
       );
 
       if (isset($_POST['fid_trabajador']{0})) {
@@ -159,7 +163,8 @@ class productos_salidas_model extends CI_Model {
         'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
         // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
         // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
-        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL)
+        'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL),
+        'id_empresa_ap'     => ($this->input->post('empresaApId')? $_POST['empresaApId']: NULL)
       );
     }
 
@@ -410,7 +415,8 @@ class productos_salidas_model extends CI_Model {
               cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
-              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula
+              cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula,
+              cs.tipo, cs.id_empresa_ap, ea.nombre_fiscal AS empresa_ap
               {$sql_field}
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
@@ -420,6 +426,7 @@ class productos_salidas_model extends CI_Model {
           LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
           LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
           LEFT JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
+          LEFT JOIN empresas AS ea ON ea.id_empresa = cs.id_empresa_ap
           {$sql_join}
         WHERE cs.id_salida = {$idSalida}");
 

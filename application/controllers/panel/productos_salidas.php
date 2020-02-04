@@ -357,6 +357,11 @@ class productos_salidas extends MY_Controller {
       $req2 = 'required|';
     }
 
+    $valEmpAp = false;
+    if ($this->input->post('empresaId') == 20) { // id de agro insumos
+      $valEmpAp = true;
+    }
+
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
@@ -364,6 +369,10 @@ class productos_salidas extends MY_Controller {
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+
+      array('field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'required'),
 
       array('field' => 'id_almacen',
             'label' => 'Almacen',
@@ -396,52 +405,6 @@ class productos_salidas extends MY_Controller {
             'label' => 'Folio',
             'rules' => 'required'),
 
-      array('field' => 'no_receta',
-            'label' => 'No receta',
-            'rules' => 'max_length[20]'),
-      array('field' => 'etapa',
-            'label' => 'Etapa',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ranchoC',
-            'label' => 'Rancho',
-            'rules' => $req1.''),
-      array('field' => 'ranchoC_id',
-            'label' => 'Rancho',
-            'rules' => $req2.'numeric'),
-      array('field' => 'centro_costo',
-            'label' => 'Centro de costo',
-            'rules' => $req1.''),
-      array('field' => 'centro_costo_id',
-            'label' => 'Centro de costo',
-            'rules' => $req2.'numeric'),
-      array('field' => 'hectareas',
-            'label' => 'Hectareas',
-            'rules' => 'numeric'),
-      array('field' => 'grupo',
-            'label' => 'Grupo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'no_secciones',
-            'label' => 'No melgas/seccion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'dias_despues_de',
-            'label' => 'Dias despues de',
-            'rules' => 'numeric'),
-      array('field' => 'metodo_aplicacion',
-            'label' => 'Metodo de aplicacion',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ciclo',
-            'label' => 'Ciclo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'tipo_aplicacion',
-            'label' => 'Tipo de aplicacion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'observaciones',
-            'label' => 'Observaciones',
-            'rules' => 'max_length[220]'),
-      array('field' => 'fecha_aplicacion',
-            'label' => 'Fecha de aplicacion',
-            'rules' => ''),
-
 
       // array('field' => 'codigoArea[]',
       //       'label' => 'Codigo Area',
@@ -469,7 +432,62 @@ class productos_salidas extends MY_Controller {
             'rules' => $req1.'|greater_than[0]')
     );
 
+    if ($this->input->post('tipo') == 'r') { // recetas
+      $rules[] = array('field' => 'no_receta',
+            'label' => 'No receta',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'etapa',
+            'label' => 'Etapa',
+            'rules' => 'max_length[30]');
+      $rules[] = array('field' => 'ranchoC',
+            'label' => 'Rancho',
+            'rules' => $req1.'');
+      $rules[] = array('field' => 'ranchoC_id',
+            'label' => 'Rancho',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'centro_costo',
+            'label' => 'Centro de costo',
+            'rules' => $req1.'');
+      $rules[] = array('field' => 'centro_costo_id',
+            'label' => 'Centro de costo',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'hectareas',
+            'label' => 'Hectareas',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'grupo',
+            'label' => 'Grupo',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'no_secciones',
+            'label' => 'No melgas/seccion',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'dias_despues_de',
+            'label' => 'Dias despues de',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'metodo_aplicacion',
+            'label' => 'Metodo de aplicacion',
+            'rules' => 'max_length[30]');
+      $rules[] = array('field' => 'ciclo',
+            'label' => 'Ciclo',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'tipo_aplicacion',
+            'label' => 'Tipo de aplicacion',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'observaciones',
+            'label' => 'Observaciones',
+            'rules' => 'max_length[220]');
+      $rules[] = array('field' => 'fecha_aplicacion',
+            'label' => 'Fecha de aplicacion',
+            'rules' => '');
+    }
+
     if ($this->input->post('tid_almacen') == '') {
+      $rules[] = array('field' => 'empresaApId',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required|numeric': ''));
+      $rules[] = array('field' => 'empresaAp',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required': ''));
+
       $rules[] = array('field' => 'areaId',
             'label' => 'Cultivo',
             'rules' => $req2.'numeric');

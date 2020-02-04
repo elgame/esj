@@ -13,6 +13,7 @@
     autocompleteCentroCosto();
     autocompleteActivos();
 
+    eventOnChangeTipo();
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnDelProducto();
@@ -45,6 +46,26 @@
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+      }
+    });
+
+    $("#empresaAp").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaAp =  $(this);
+
+        $empresaAp.val(ui.item.id);
+        $("#empresaApId").val(ui.item.id);
+        $empresaAp.css("background-color", "#A1F57A");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaAp").css("background-color", "#FFD071");
+        $("#empresaApId").val('');
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
       }
     });
   };
@@ -300,6 +321,30 @@
    | Events
    |------------------------------------------------------------------------
    */
+  var tipoOrderActual = $('#tipo').find('option:selected').val();
+  var eventOnChangeTipo = function () {
+    $('#tipo').on('change', function(event) {
+      var $this      = $(this),
+          $folio     = $('#folio'),
+          $tableProd = $('#table-productos');
+
+      if ($tableProd.find('tbody tr').length > 0) {
+        noty({"text": 'Ya tiene productos para un tipo de salida, si desea cambiar de tipo elimine los productos del listado', "layout":"topRight", "type": 'error'});
+
+        $this.val(tipoOrderActual);
+      } else {
+        tipoOrderActual = $this.find('option:selected').val();
+        if(tipoOrderActual == 'r') {
+          $("#generalCodigo").show();
+        } else {
+          $("#generalCodigo").hide();
+        }
+      }
+    });
+
+    $('#tipo').change();
+  };
+
   var eventCodigoBarras = function () {
     $('#fcodigo').on('keypress', function(event) {
       var $codigo = $(this);
