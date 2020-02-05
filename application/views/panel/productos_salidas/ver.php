@@ -57,6 +57,28 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="tipo">Tipo</label>
+                <div class="controls">
+                  <?php
+                  if (isset($salida['info'][0]->tipo)) {
+                    switch ($salida['info'][0]->tipo) {
+                      case 'c':
+                        $tipooo = 'Combustible';
+                        break;
+                      case 'r':
+                        $tipooo = 'Recetas';
+                        break;
+                      default:
+                        $tipooo = 'Salida';
+                        break;
+                    }
+                    echo $tipooo;
+                  }
+                  ?>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $salida['info'][0]->folio); ?>" readonly>
@@ -92,6 +114,16 @@
               <div class="box-content">
                 <div class="row-fluid">
                   <div class="span6">
+                    <div class="control-group" id="empresaApGrup">
+                      <label class="control-label" for="empresaAp">Empresa aplicación </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="empresaAp" class="span11" id="empresaAp" value="<?php echo set_value('empresaAp', isset($salida['info'][0]->empresa_ap) ? $salida['info'][0]->empresa_ap : '') ?>" placeholder="Empaque, Mamita, etc">
+                        </div>
+                        <input type="hidden" name="empresaApId" id="empresaApId" value="<?php echo set_value('empresaApId', isset($salida['info'][0]->id_empresa_ap) ? $salida['info'][0]->id_empresa_ap : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
                     <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">

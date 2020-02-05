@@ -17,6 +17,8 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/ajaxGetBoletas/',
     'compras_ordenes/ajaxGetCompras/',
+    'compras_ordenes/ajaxGetSalidasAlmacen/',
+    'compras_ordenes/ajaxGetGastosCaja/',
     'compras_ordenes/imprimir_entrada/',
     'compras_ordenes/ticket/',
     'compras_ordenes/ajax_imprimir_recibo/',
@@ -648,6 +650,22 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $productos = $this->compras_ordenes_model->getCompras($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetSalidasAlmacen()
+  {
+    $this->load->model('productos_salidas_model');
+    $productos = $this->productos_salidas_model->getSalidasAjax($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetGastosCaja()
+  {
+    $this->load->model('caja_chica_model');
+    $productos = $this->caja_chica_model->getGastosAjax($_GET);
 
     echo json_encode($productos);
   }

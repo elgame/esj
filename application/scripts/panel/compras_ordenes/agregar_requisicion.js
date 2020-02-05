@@ -38,6 +38,8 @@
     eventLigarFacturas();
     eventLigarBoletas();
     eventLigarCompras();
+    eventLigarSalidasAlmacen();
+    eventLigarGastosCaja();
 
     btnAutorizarClick();
 
@@ -162,11 +164,15 @@
           if(tipoOrderActual == 'd'){
             $("#verVehiculoChk").show();
             $("#serCompras").show();
+            $("#serSalidasAlmacen").show();
+            $("#serGastosCaja").show();
             $("#serComprasProvee").show();
           }
           else {
             $("#verVehiculoChk").hide();
             $("#serCompras").hide();
+            $("#serSalidasAlmacen").hide();
+            $("#serGastosCaja").hide();
             $("#serComprasProvee").hide();
           }
 
@@ -235,6 +241,62 @@
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
+
+    $("#empresaAp").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaAp =  $(this);
+
+        $empresaAp.val(ui.item.id);
+        $("#empresaApId").val(ui.item.id);
+        $empresaAp.css("background-color", "#A1F57A");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaAp").css("background-color", "#FFD071");
+        $("#empresaApId").val('');
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
+
+    $("#serEmpresaSA").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#serEmpresaSAId").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#serEmpresaSA").css("background-color", "#FFD071");
+        $("#serEmpresaSAId").val('');
+      }
+    });
+
+    $("#serEmpresaGC").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#serEmpresaGCId").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#serEmpresaGC").css("background-color", "#FFD071");
+        $("#serEmpresaGCId").val('');
       }
     });
   };
@@ -345,8 +407,8 @@
     $("#area").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         $.ajax({
             url: base_url + 'panel/areas/ajax_get_areas/',
             dataType: "json",
@@ -384,8 +446,8 @@
     $("#rancho").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         if(parseInt($("#areaId").val()) > 0)
           params.area = $("#areaId").val();
         $.ajax({
@@ -495,8 +557,8 @@
       $(this).autocomplete({
         source: function(request, response) {
           var params = {term : request.term};
-          // if(parseInt($("#empresaId").val()) > 0)
-          //   params.did_empresa = $("#empresaId").val();
+          // if(parseInt($("#empresaApId").val()) > 0)
+          //   params.did_empresa = $("#empresaApId").val();
           params.tipo = 'a'; // activos
           $.ajax({
               url: base_url + 'panel/productos/ajax_aut_productos/',
@@ -885,6 +947,68 @@
     });
   };
 
+  var eventLigarSalidasAlmacen = function () {
+    $("#show-salidasAlmacen").on('click', function(event) {
+      $("#filFolioSalidasAlmacen").val("");
+
+      $('#serEmpresaSA').val($('#empresa').val());
+      $('#serEmpresaSAId').val($('#empresaId').val());
+      getSalidasAlmacen();
+      $("#modal-salidas-almacen").modal('show');
+    });
+
+    $("#filFolioSalidasAlmacen, #serEmpresaSA").on('change', function(event) {
+      getSalidasAlmacen();
+    });
+
+    $("#BtnAddSalidaAlmacen").on('click', function(event) {
+      var selected = $(".radioSalidaAlmacen:checked"), facts = ($('#salidasAlmacenLigada input[name="salidasAlmacen"]').val()||''),
+        folios = ($('#salidasAlmacenLigada input[name="salidasAlmacen_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#salidasAlmacenLigada").html(folios+' <input type="hidden" name="salidasAlmacen" value="'+facts+'"><input type="hidden" name="salidasAlmacen_folio" value="'+folios+'">');
+      $("#modal-salidas-almacen").modal('hide');
+    });
+    $("#salidasAlmacenLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var eventLigarGastosCaja = function () {
+    $("#show-gastosCaja").on('click', function(event) {
+      $("#filFolioGastosCaja, #filCajaGastosCaja").val("");
+
+      $('#serEmpresaGC').val($('#empresa').val());
+      $('#serEmpresaGCId').val($('#empresaId').val());
+      getGastosCaja();
+      $("#modal-gastos-caja").modal('show');
+    });
+
+    $("#filFolioGastosCaja, #serEmpresaGC, #filCajaGastosCaja").on('change', function(event) {
+      getGastosCaja();
+    });
+
+    $("#BtnAddGastosCaja").on('click', function(event) {
+      var selected = $(".radioGastosCaja:checked"), facts = ($('#gastosCajaLigada input[name="gastosCaja"]').val()||''),
+        folios = ($('#gastosCajaLigada input[name="gastosCaja_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#gastosCajaLigada").html(folios+' <input type="hidden" name="gastosCaja" value="'+facts+'"><input type="hidden" name="gastosCaja_folio" value="'+folios+'">');
+      $("#modal-gastos-caja").modal('hide');
+    });
+    $("#gastosCajaLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
   var getCompras = function(tipo){
     // if($("#serProveedorId").val() !== '')
     // {
@@ -907,6 +1031,56 @@
       });
     // }else
     //   noty({"text": 'Selecciona un proveedor', "layout":"topRight", "type": 'error'});
+  };
+
+  var getSalidasAlmacen = function(tipo){
+    if($("#serEmpresaSAId").val() !== '')
+    {
+      var params = {
+        empresaId: $("#serEmpresaSAId").val(),
+        filtro: $("#filFolioSalidasAlmacen").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetSalidasAlmacen/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioSalidaAlmacen" value="'+json[i].id_salida+'" class="radioSalidaAlmacen" data-folio="'+json[i].folio+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].folio+'</td>'+
+          '  <td>'+json[i].empresa+'</td>'+
+          '  <td>'+json[i].concepto+'</td>'+
+          '</tr>';
+        }
+        $("#table-salidas-almacen tbody").html(html);
+      });
+    }else
+      noty({"text": 'Selecciona una empresa', "layout":"topRight", "type": 'error'});
+  };
+
+  var getGastosCaja = function(tipo){
+    if($("#serEmpresaGCId").val() !== '')
+    {
+      var params = {
+        empresaId: $("#serEmpresaGCId").val(),
+        caja: $('#filCajaGastosCaja').val(),
+        filtro: $("#filFolioGastosCaja").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetGastosCaja/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioGastosCaja" value="'+json[i].id_gasto+'" class="radioGastosCaja" data-folio="'+json[i].folio_sig+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].folio_sig+'</td>'+
+          '  <td>'+json[i].empresa+'</td>'+
+          '  <td>'+json[i].no_caja+'</td>'+
+          '  <td>'+json[i].monto+'</td>'+
+          '</tr>';
+        }
+        $("#table-gastos-caja tbody").html(html);
+      });
+    }else
+      noty({"text": 'Selecciona una empresa', "layout":"topRight", "type": 'error'});
   };
 
   var eventLigarBoletas = function () {

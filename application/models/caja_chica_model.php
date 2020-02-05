@@ -1928,6 +1928,26 @@ class caja_chica_model extends CI_Model {
     return (isset($cuenta->id_cuenta)? $cuenta->id_cuenta: 16);
   }
 
+  public function getGastosAjax($datos)
+  {
+    $filtro = isset($datos['filtro']{0})? " AND cg.folio_sig = {$datos['filtro']}": '';
+    $filtro .= isset($datos['caja']{0})? " AND cg.no_caja = {$datos['caja']} ": '';
+
+    $query = $this->db->query("SELECT cg.id_gasto, Date(cg.fecha) AS fecha, cg.folio, e.nombre_fiscal AS empresa,
+        cg.concepto, cg.monto, cg.no_caja, cg.folio_sig
+     FROM cajachica_gastos AS cg
+        INNER JOIN cajachica_categorias AS cc ON cc.id_categoria = cg.id_categoria
+        INNER JOIN empresas AS e ON e.id_empresa = cc.id_empresa
+     WHERE cg.tipo in('g', 'rg') AND cc.status = 't' AND e.id_empresa = {$datos['empresaId']} AND cg.status = 't'
+      {$filtro} AND Date(cg.fecha) >= (now() - interval '8 months')
+     ORDER BY cg.fecha DESC, cg.folio_sig DESC");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
+  }
+
   public function ajaxCategorias()
   {
     $sql = '';

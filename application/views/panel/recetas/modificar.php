@@ -281,12 +281,12 @@
 
                 <div class="span3">
                   No plantas
-                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly data-next="carga1" style="display: none;">
+                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" data-next="carga1" style="display: none;"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
+                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -306,7 +306,7 @@
 
                 <div class="span3 datos-lts">
                   Lts de Cargas Extras
-                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>" readonly>
+                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -395,13 +395,13 @@
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
                               <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive" min="0">

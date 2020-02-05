@@ -1126,10 +1126,10 @@ class inventario_model extends privilegios_model{
 			(
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
-				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+				  INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
           AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql_com}
+          {$sql_com} AND co.id_orden_aplico IS NULL
 				GROUP BY cp.id_producto
 			) AS co ON co.id_producto = p.id_producto
 			LEFT JOIN
@@ -1146,10 +1146,10 @@ class inventario_model extends privilegios_model{
 			(
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
-				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+				  INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
           AND Date(cp.fecha_aceptacion) < '{$fecha}'
-          {$sql_com}
+          {$sql_com} AND co.id_orden_aplico IS NULL
 				GROUP BY cp.id_producto
 			) AS sal_co ON sal_co.id_producto = p.id_producto
 			LEFT JOIN
@@ -2655,7 +2655,7 @@ class inventario_model extends privilegios_model{
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
 					AND co.tipo_orden in('p', 't') AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
-          {$sql_com}
+          {$sql_com} AND co.id_orden_aplico IS NULL
 				)
 				UNION ALL
 				(

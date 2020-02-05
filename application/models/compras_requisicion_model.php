@@ -117,7 +117,8 @@ class compras_requisicion_model extends CI_Model {
     // Si es un gasto son requeridos los campos de catálogos
     if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
         || $_POST['tipoOrden'] == 'p') {
-      $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+      $data['id_empresa_ap'] = $this->input->post('empresaApId')? $this->input->post('empresaApId'): NULL;
+      $data['id_area']       = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
       // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
       // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
 
@@ -143,9 +144,16 @@ class compras_requisicion_model extends CI_Model {
     {
       $data['flete_de'] = $_POST['fleteDe'];
       $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
-    } elseif ($_POST['tipoOrden'] == 'd' && $_POST['compras'] != '') {
-      $data['ids_compras'] = $_POST['compras'];
-      // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+    } elseif ($_POST['tipoOrden'] == 'd') {
+      if ($_POST['compras'] != '') {
+        $data['ids_compras'] = $_POST['compras'];
+      }
+      if ($_POST['salidasAlmacen'] != '') {
+        $data['ids_salidas_almacen'] = $_POST['salidasAlmacen'];
+      }
+      if ($_POST['gastosCaja'] != '') {
+        $data['ids_gastos_caja'] = $_POST['gastosCaja'];
+      }
     }
 
     // Si trae datos extras
@@ -384,7 +392,8 @@ class compras_requisicion_model extends CI_Model {
       // Si es un gasto son requeridos los campos de catálogos
       if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
           || $_POST['tipoOrden'] == 'p') {
-        $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
+        $data['id_empresa_ap'] = $this->input->post('empresaApId')? $this->input->post('empresaApId'): NULL;
+        $data['id_area']       = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
         // $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
         // $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
 
@@ -458,7 +467,8 @@ class compras_requisicion_model extends CI_Model {
         $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       } elseif ($_POST['tipoOrden'] == 'd') {
         $data['ids_compras'] = $_POST['compras'];
-        // $data['id_proveedor_compra'] = (!empty($_POST['serProveedorId'])? $_POST['serProveedorId']: NULL);
+        $data['ids_salidas_almacen'] = $_POST['salidasAlmacen'];
+        $data['ids_gastos_caja'] = $_POST['gastosCaja'];
       }
 
       // Si trae datos extras
@@ -643,7 +653,9 @@ class compras_requisicion_model extends CI_Model {
         // Si es un gasto son requeridos los campos de catálogos
         if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a'
             || $data->tipo_orden == 'p') {
-          // $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+
+          $dataOrden['id_empresa_ap'] = !empty($data->id_empresa_ap)? $data->id_empresa_ap: NULL;
+
           // Inserta las areas
           if (isset($data->id_area) && $data->id_area > 0) {
             $dataOrdenCats['area'][] = [
@@ -713,6 +725,8 @@ class compras_requisicion_model extends CI_Model {
         } elseif ($data->tipo_orden == 'd')
         {
           $dataOrden['ids_compras'] = $data->ids_compras;
+          $dataOrden['ids_salidas_almacen'] = $data->ids_salidas_almacen;
+          $dataOrden['ids_gastos_caja'] = $data->ids_gastos_caja;
         }
 
         // si se registra a un vehiculo
@@ -775,6 +789,38 @@ class compras_requisicion_model extends CI_Model {
 
         if(count($productos) > 0)
           $this->compras_ordenes_model->agregarProductosData($productos);
+
+
+        // ============================================
+        // Si se esta creando con la empresa de Agro insumos crea la otra orden
+        if ($dataOrden['id_empresa'] == 20 && $dataOrden['id_empresa_ap'] > 0 &&
+            ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc')) {
+          $dataOrden['id_empresa']      = $dataOrden['id_empresa_ap'];
+          $dataOrden['folio']           = $this->compras_ordenes_model->folio($data->tipo_orden);
+          $dataOrden['id_orden_aplico'] = $id_orden;
+
+          $data_proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE id_empresa = {$dataOrden['id_empresa']} AND LOWER(nombre_fiscal) LIKE LOWER('AGRO INSUMOS SANJORGE SA DE CV')")->row();
+          if (!empty($data_proveedor)) {
+            $dataOrden['id_proveedor'] = $data_proveedor->id_proveedor;
+          }
+
+          $res22 = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData, $dataOrdenCats);
+          $id_orden22 = $res22['id_orden'];
+
+          $productos22 = [];
+          foreach ($productos as $keyon => $proon) {
+            $productos[$keyon]['id_orden'] = $id_orden22;
+            $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$dataOrden['id_empresa']} AND LOWER(nombre) LIKE LOWER('{$proon['descripcion']}')")->row();
+            if (!empty($data_prod)) {
+              $productos[$keyon]['id_producto'] = $data_prod->id_producto;
+              $productos22[] = $productos[$keyon];
+            }
+          }
+
+          if (count($productos22) > 0) {
+            $this->compras_ordenes_model->agregarProductosData($productos22);
+          }
+        }
 
       }
     }
@@ -968,9 +1014,9 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem, co.ids_compras,
+              co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
-              co.id_area, co.id_activo,
+              co.id_area, co.id_activo, co.id_empresa_ap,
               otros_datos
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -1120,6 +1166,41 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->comprasligadas[] = $this->compras_model->getInfoCompra($value, true)['info'];
             }
           }
+        }
+
+        $data['info'][0]->salidasalmacenligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_salidas_almacen != '') { // salidas almacen
+          $this->load->model('productos_salidas_model');
+          $comprasss = explode('|', $data['info'][0]->ids_salidas_almacen);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->salidasalmacenligadas[] = $this->productos_salidas_model->info($value, false)['info'][0];
+            }
+          }
+        }
+
+        $data['info'][0]->gastoscajaligadas = array();
+        if ($data['info'][0]->tipo_orden === 'd' && $data['info'][0]->ids_gastos_caja != '') { // gastos caja
+          $this->load->model('caja_chica_model');
+          $comprasss = explode('|', $data['info'][0]->ids_gastos_caja);
+          if (count($comprasss) > 0)
+          {
+            array_pop($comprasss);
+            foreach ($comprasss as $key => $value)
+            {
+              $data['info'][0]->gastoscajaligadas[] = $this->caja_chica_model->getDataGasto($value);
+            }
+          }
+        }
+
+        $data['info'][0]->empresaAp = null;
+        if ($data['info'][0]->id_empresa_ap)
+        {
+          $this->load->model('empresas_model');
+          $data['info'][0]->empresaAp = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa_ap, true)['info'];
         }
 
         $data['info'][0]->area = null;

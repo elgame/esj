@@ -210,6 +210,34 @@
                 </div>
               </div>
 
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serSalidasAlmacen">
+                <label class="control-label" for="show-salidasAlmacen">Ligar Salidas Almacén</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-salidasAlmacen">Buscar</button>
+                  <span id="salidasAlmacenLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['salidasAlmacen'])){
+                      echo $_POST['salidasAlmacen_folio'].' <input type="hidden" name="salidasAlmacen" value="'.$_POST['salidasAlmacen'].'"><input type="hidden" name="salidasAlmacen_folio" value="'.$_POST['salidasAlmacen_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="salidasAlmacen" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="salidasAlmacen_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serGastosCaja">
+                <label class="control-label" for="show-gastosCaja">Ligar Gastos Caja 2</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-gastosCaja">Buscar</button>
+                  <span id="gastosCajaLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['gastosCaja'])){
+                      echo $_POST['gastosCaja_folio'].' <input type="hidden" name="gastosCaja" value="'.$_POST['gastosCaja'].'"><input type="hidden" name="gastosCaja_folio" value="'.$_POST['gastosCaja_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="gastosCaja" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="gastosCaja_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
               <div class="control-group" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="fletesBoletas">
                 <label class="control-label" for="ligarBoleta">Ligar BOLETA</label>
                 <div class="controls">
@@ -351,6 +379,16 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="empresaAp">Empresa aplicación </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="empresaAp" class="span11" id="empresaAp" value="<?php echo set_value('empresaAp') ?>" placeholder="Empaque, Mamita, etc">
+                        </div>
+                        <input type="hidden" name="empresaApId" id="empresaApId" value="<?php echo set_value('empresaApId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -359,7 +397,9 @@
                         <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                       </div>
                     </div><!--/control-group -->
+                  </div>
 
+                  <div class="span6">
                     <div class="control-group" id="ranchosGrup">
                       <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
@@ -377,9 +417,7 @@
                        <?php }} ?>
                       </ul>
                     </div><!--/control-group -->
-                  </div>
 
-                  <div class="span6">
                     <div class="control-group" id="centrosCostosGrup">
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">
@@ -875,7 +913,7 @@
     </div>
   </div><!--/modal pallets -->
 
-  <!-- Modal -->
+  <!-- Modal Ligar Compras -->
   <div id="modal-compras" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -912,6 +950,91 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddCompra">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal Ligar Salidas Almacen -->
+  <div id="modal-salidas-almacen" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Salidas de Almacén</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serEmpresaSA" class="pull-left" id="serEmpresaSA" value="<?php echo set_value('serEmpresaSA') ?>" placeholder="Empresa">
+        <input type="hidden" name="serEmpresaSAId" id="serEmpresaSAId" value="<?php echo set_value('serEmpresaSAId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="number" id="filFolioSalidasAlmacen" class="pull-left" placeholder="Folio">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-salidas-almacen">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Empresa</th>
+              <th>Concepto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddSalidaAlmacen">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal Ligar Gastos caja -->
+  <div id="modal-gastos-caja" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Gastos de Caja</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serEmpresaGC" class="pull-left" id="serEmpresaGC" value="<?php echo set_value('serEmpresaGC') ?>" placeholder="Empresa">
+        <input type="hidden" name="serEmpresaGCId" id="serEmpresaGCId" value="<?php echo set_value('serEmpresaGCId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="number" id="filFolioGastosCaja" class="pull-left" placeholder="Folio">
+        <span class="pull-left"> | </span>
+        <input type="number" id="filCajaGastosCaja" class="pull-left" placeholder="Caja">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-gastos-caja">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Empresa</th>
+              <th>No Caja</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddGastosCaja">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
 
