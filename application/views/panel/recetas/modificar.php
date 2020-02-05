@@ -395,13 +395,13 @@
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
                               <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive" min="0">

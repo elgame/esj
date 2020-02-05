@@ -401,13 +401,13 @@
       $(".datos-lts, .datos-kg").hide();
       $(".datos-"+tipo).show();
       if (tipo === 'kg') {
-        $('#ha_neta').removeAttr('readonly');
-        $('#no_plantas').attr('readonly', 'readonly');
+        // $('#ha_neta').removeAttr('readonly');
+        // $('#no_plantas').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Kg');
         $('.tipostyle').hide();
       } else {
-        $('#no_plantas').removeAttr('readonly');
-        $('#ha_neta, #carga1, #carga2').attr('readonly', 'readonly');
+        // $('#no_plantas').removeAttr('readonly');
+        // $('#ha_neta, #carga1, #carga2').attr('readonly', 'readonly');
         $('.titulo-box-kglts').text('Datos Lts');
         $('.tipostyle').show();
       }
@@ -557,13 +557,13 @@
               '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
           '</td>'+
           '<td style="width: 80px;'+tipostyle+'">'+
-              '<input type="number" step="any" name="pcarga1[]" value="'+($tipo.val() === 'lts'? producto.cantidad: '')+'" id="pcarga1" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
+              '<input type="number" step="any" name="pcarga1[]" value="'+($tipo.val() === 'lts'? producto.cantidad: '')+'" id="pcarga1" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+ // readonly
           '</td>'+
           '<td style="width: 80px;'+tipostyle+'">'+
-              '<input type="number" step="any" name="pcarga2[]" value="'+(producto['carga2']? producto.carga2: '')+'" id="pcarga2" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
+              '<input type="number" step="any" name="pcarga2[]" value="'+(producto['carga2']? producto.carga2: '')+'" id="pcarga2" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+ // readonly
           '</td>'+
           '<td style="width: 130px;">'+
-              '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0" readonly>'+
+              '<input type="number" step="any" name="aplicacion_total[]" value="'+(producto['aplicacion_total']? producto.aplicacion_total: '')+'" id="aplicacion_total" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+ // readonly
           '</td>'+
           '<td style="width: 130px;">'+
               '<input type="number" step="any" name="precio[]" value="'+(producto['precio']? producto.precio: '')+'" id="precio" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'" min="0">'+
@@ -592,17 +592,17 @@
   }
 
   var eventCantidadProd = function () {
-    $('#productos #table-productos').on('keyup', '#cantidad, #precio', function(e) {
+    $('#productos #table-productos').on('keyup', '#cantidad, #precio, #aplicacion_total', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parents("tr.rowprod");
 
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
-        calculaTotal();
+        calculaTotal($this.attr('id'));
       }
-    }).on('change', '#cantidad, #precio', function(event) {
+    }).on('change', '#cantidad, #precio, #aplicacion_total', function(event) {
       var $tr = $(this).parents("tr.rowprod");
-      calculaTotal();
+      calculaTotal($(this).attr('id'));
     });
   };
 
@@ -618,7 +618,7 @@
     });
   };
 
-  function calculaTotal () {
+  function calculaTotal (id) {
     var $tipo = $('#tipo'),
     total_percent = 0,
     total_cantidad = 0,
@@ -640,8 +640,12 @@
 
       // Calculos de acuerdo al tipo de receta
       if ($tipo.val() === 'kg') {
-        aplicacion_total = percent*(parseFloat($('#kg_totales').val())||0)/100;
-        $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
+        if (id === 'aplicacion_total') {
+          aplicacion_total = parseFloat($tr.find('#aplicacion_total').val())||0;
+        } else {
+          aplicacion_total = percent*(parseFloat($('#kg_totales').val())||0)/100;
+          $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
+        }
 
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
         $tr.find('#importe').val(importe.toFixed(2));
@@ -651,8 +655,12 @@
         carga2 = (parseFloat($('#carga2').val())||0)*(parseFloat($tr.find('#cantidad').val())||0);
         $tr.find('#pcarga2').val(carga2.toFixed(2));
 
-        aplicacion_total = ( (parseFloat($tr.find('#pcarga1').val())||0) * (parseFloat($('#carga1').val())||0) ) + (parseFloat($tr.find('#pcarga2').val())||0);
-        $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
+        if (id === 'aplicacion_total') {
+          aplicacion_total = parseFloat($tr.find('#aplicacion_total').val())||0;
+        } else {
+          aplicacion_total = ( (parseFloat($tr.find('#pcarga1').val())||0) * (parseFloat($('#carga1').val())||0) ) + (parseFloat($tr.find('#pcarga2').val())||0);
+          $tr.find('#aplicacion_total').val(aplicacion_total.toFixed(2));
+        }
 
         importe = aplicacion_total*(parseFloat($tr.find('#precio').val())||0);
         $tr.find('#importe').val(importe.toFixed(2));
