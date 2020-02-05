@@ -8,10 +8,9 @@
  ☐ Poner fecha de contrato en los trabajadores para que notifique
  ✔ En ordenes de servicio poner para que puedan ligar tanto compras, salidas de almacen y gastos de caja @done (20-02-03 17:13)
  ✔ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de
-   agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc
+   agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|ch
      ALTER TABLE public.compras_requisicion ADD COLUMN id_empresa_ap integer;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_empresa_ap_fkey FOREIGN KEY (id_empresa_ap) REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-     -- pct|pcc|lap
      COMMENT ON COLUMN public.compras_requisicion.id_empresa_ap IS 'id de la empresa en la que se aplicaran los productos';
      ALTER TABLE public.compras_ordenes ADD COLUMN id_empresa_ap integer;
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_empresa_ap_fkey FOREIGN KEY (id_empresa_ap) REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
@@ -19,7 +18,7 @@
      ALTER TABLE public.compras_ordenes ADD COLUMN id_orden_aplico integer;
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_orden_aplico_fkey FOREIGN KEY (id_orden_aplico) REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      COMMENT ON COLUMN public.compras_ordenes.id_orden_aplico IS 'id de la orden relacionadas cuando se crea una a través de Agro insumos (agro se registra la otra y en la otra la de agro)';
-     -- pcc|lap
+     -- pcc|lap|ch
      ALTER TABLE public.compras_requisicion ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
      ALTER TABLE public.compras_ordenes ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
      ALTER TABLE public.compras ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
