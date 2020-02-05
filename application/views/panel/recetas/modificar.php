@@ -281,12 +281,12 @@
 
                 <div class="span3">
                   No plantas
-                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly data-next="carga1" style="display: none;">
+                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" data-next="carga1" style="display: none;"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
+                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -306,7 +306,7 @@
 
                 <div class="span3 datos-lts">
                   Lts de Cargas Extras
-                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>" readonly>
+                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">

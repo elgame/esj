@@ -22,8 +22,10 @@
 
     opcClear.datos = opcClear.formula = ($('#tipooo').val()=='false'? true: false);
     $('#tipo').change();
-    calculaTotal();
+    calculaTotal('aplicacion_total');
   });
+
+  var notCalcDatos = false;
 
   /*
    |------------------------------------------------------------------------
@@ -483,7 +485,8 @@
 
   var eventCalcuDatos = function () {
     $('#dosis_planta, #ha_bruta, #planta_ha, #ha_neta, #no_plantas, #carga1, #carga2, #dosis_equipo').on('keyup', function(event) {
-      var $tipo          = $('#tipo'),
+      var $this          = $(this),
+      $tipo              = $('#tipo'),
       $dosis_planta      = $('#dosis_planta'),
       $planta_ha         = $('#planta_ha'),
       $ha_neta           = $('#ha_neta'),
@@ -506,9 +509,13 @@
 
         // Separa decimales para las cargas
         let cargas = ha_neta.toFixed(2).split('.');
-        $carga1.val(cargas[0]);
+        if ($this.attr('id') !== 'carga1' && $this.attr('id') !== 'carga2' && notCalcDatos) {
+          $carga1.val(cargas[0]);
+        }
         if (cargas.length > 1) {
-          $carga2.val("0."+cargas[1]);
+          if ($this.attr('id') !== 'carga1' && $this.attr('id') !== 'carga2' && notCalcDatos) {
+            $carga2.val("0."+cargas[1]);
+          }
         }
 
         lts_cargas2 = (parseFloat($dosis_equipo.val())||0)*(parseFloat($carga2.val())||0);

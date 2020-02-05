@@ -790,8 +790,11 @@ class compras_requisicion_model extends CI_Model {
         if(count($productos) > 0)
           $this->compras_ordenes_model->agregarProductosData($productos);
 
+
+        // ============================================
         // Si se esta creando con la empresa de Agro insumos crea la otra orden
-        if ($dataOrden['id_empresa'] == 20 && $dataOrden['id_empresa_ap'] > 0) {
+        if ($dataOrden['id_empresa'] == 20 && $dataOrden['id_empresa_ap'] > 0 &&
+            ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc')) {
           $dataOrden['id_empresa']      = $dataOrden['id_empresa_ap'];
           $dataOrden['folio']           = $this->compras_ordenes_model->folio($data->tipo_orden);
           $dataOrden['id_orden_aplico'] = $id_orden;
