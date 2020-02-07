@@ -188,7 +188,7 @@ class nomina
     $this->subsidioCausado = $subsidioCausado;
 
     if ($subsidio == 0.01 && $subsidioCausado == 0) {
-      $this->subsidio = 0;
+      $this->subsidioCausado = 0.01;
     }
 
     return $this;
