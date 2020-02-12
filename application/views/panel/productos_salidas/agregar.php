@@ -116,9 +116,9 @@
                 <label class="control-label" for="tipo">Tipo</label>
                 <div class="controls">
                   <select name="tipo" id="tipo" class="span9">
-                    <option value="s" <?php echo set_select('tipo', 's') ?>>Salida</option>
-                    <option value="r" <?php echo set_select('tipo', 'r') ?>>Receta</option>
-                    <option value="c" <?php echo set_select('tipo', 'c') ?>>Combustible</option>
+                    <option value="s" <?php echo set_select('tipo', 's', false) ?>>Salida</option>
+                    <option value="r" <?php echo set_select('tipo', 'r', false) ?>>Receta</option>
+                    <option value="c" <?php echo set_select('tipo', 'c', false) ?>>Combustible</option>
                   </select>
                 </div>
               </div>
@@ -227,7 +227,7 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
-          <div class="row-fluid tblproductos0" id="generalCodigo">  <!-- Box Otros datos -->
+          <div class="row-fluid tblproductos0 <?php echo ((isset($_POST['tipo']) && $_POST['tipo'] == 'r')? '': 'hide') ?>" id="generalCodigo">  <!-- Box Otros datos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
                 <h2><i class="icon-barcode"></i> Otros datos de la salida</h2>
@@ -377,6 +377,81 @@
                     <label class="control-label" for="fecha_aplicacion">Fecha de aplicacion</label>
                     <div class="controls">
                       <input type="datetime-local" name="fecha_aplicacion" class="span9" id="fecha_aplicacion" value="<?php echo set_value('fecha_aplicacion', $fecha); ?>">
+                    </div>
+                  </div>
+
+                </div>
+              </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
+          <div class="row-fluid tblproductos0 <?php echo ((isset($_POST['tipo']) && $_POST['tipo'] == 'c')? '': 'hide') ?>" id="datosCombustible">  <!-- Box Combustible -->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-barcode"></i> Combustible</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content" style="display: block;">
+                <div class="span6">
+
+                  <div class="control-group">
+                    <label class="control-label" for="clabor">Labor</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="clabor" class="span11" id="clabor" value="<?php echo set_value('clabor') ?>" placeholder="">
+                        <input type="hidden" name="clabor_id" class="span11" id="clabor_id" value="<?php echo set_value('clabor_id') ?>">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="cimplemento">Implemento</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="cimplemento" class="span11" id="cimplemento" value="<?php echo set_value('cimplemento') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="chora_carga">Hora de carga</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="time" name="chora_carga" class="span11" id="chora_carga" value="<?php echo set_value('chora_carga') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="span6">
+
+                  <div class="control-group">
+                    <label class="control-label" for="codometro">Odómetro</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="number" step="any" name="codometro" min="0" class="span11" id="codometro" value="<?php echo set_value('codometro') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="clitros">Litros</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="number" step="any" name="clitros" min="0" class="span11" id="clitros" value="<?php echo set_value('clitros') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="cprecio">Precio</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="number" step="any" name="cprecio" min="0" class="span11" id="cprecio" value="<?php echo set_value('cprecio') ?>" placeholder="">
+                      </div>
                     </div>
                   </div>
 

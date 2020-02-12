@@ -1,11 +1,38 @@
 
- ☐ Reportes de las hojas de la señora de salidas de almacen
  ☐ En cuentas por cobrar y pagar poner otra columna de lo que se vence
  ☐ Control de proyectos
  ☐ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos
  ☐ Generar remisiones al agregar las salidas de almacen cuando sea de agro insumo
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
  ☐ Poner fecha de contrato en los trabajadores para que notifique
+ ☐ Reportes de las hojas de la señora de salidas de almacen, control de combustible
+     DROP TABLE public.compras_salidas_combustible;
+     CREATE TABLE public.compras_salidas_combustible
+          (
+              id_combustible bigserial NOT NULL,
+            id_salida bigint NOT NULL,
+            id_labor integer NOT NULL,
+              fecha date NOT NULL DEFAULT now(),
+              implemento character varying(80),
+              hora_carga time with time zone,
+            odometro double precision NOT NULL DEFAULT 0,
+              lts_combustible double precision NOT NULL DEFAULT 0,
+            precio double precision NOT NULL DEFAULT 0,
+              CONSTRAINT compras_salidas_combustible_pkey PRIMARY KEY (id_combustible),
+              CONSTRAINT compras_salidas_combustible_id_salida_fkey FOREIGN KEY (id_salida)
+                  REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+                  ON UPDATE CASCADE
+                  ON DELETE CASCADE,
+              CONSTRAINT compras_salidas_combustible_id_labor_fkey FOREIGN KEY (id_labor)
+                  REFERENCES public.compras_salidas_labores (id_labor) MATCH SIMPLE
+                  ON UPDATE CASCADE
+                  ON DELETE CASCADE
+          )
+          WITH (
+              OIDS = FALSE
+          )
+          TABLESPACE pg_default;
+          ALTER TABLE public.compras_salidas_combustible OWNER to programa;
  ✔ En ordenes de servicio poner para que puedan ligar tanto compras, salidas de almacen y gastos de caja @done (20-02-03 17:13)
  ✔ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de
    agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|ch
@@ -18,7 +45,6 @@
      ALTER TABLE public.compras_ordenes ADD COLUMN id_orden_aplico integer;
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_orden_aplico_fkey FOREIGN KEY (id_orden_aplico) REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      COMMENT ON COLUMN public.compras_ordenes.id_orden_aplico IS 'id de la orden relacionadas cuando se crea una a través de Agro insumos (agro se registra la otra y en la otra la de agro)';
-     -- pcc|lap|ch
      ALTER TABLE public.compras_requisicion ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
      ALTER TABLE public.compras_ordenes ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
      ALTER TABLE public.compras ADD COLUMN ids_salidas_almacen character varying(100) COLLATE pg_catalog."default";
@@ -31,9 +57,9 @@
      ALTER TABLE public.compras_salidas ADD COLUMN tipo character varying(10) COLLATE pg_catalog."default" DEFAULT 's'::character varying;
      COMMENT ON COLUMN public.compras_salidas.tipo IS 's: salida, r: receta, c: combustible';
 
- ✔ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar @done (20-01-21 13:59) lap|san
+ ✔ checar en caja 2 lo de pre gastos, y agregar folio del gasto x comprobar @done (20-01-21 13:59) lap|san|pct
      ALTER TABLE public.cajachica_gastos ADD COLUMN folio_ant bigint;
- ✔ En las recetas que se puedan capturar sin formula y que se imprima otra copia como Administrador @done (20-01-21 15:55) lap|san
+ ✔ En las recetas que se puedan capturar sin formula y que se imprima otra copia como Administrador @done (20-01-21 15:55) lap|san|pct
    ALTER TABLE otros.recetas ALTER COLUMN id_formula DROP NOT NULL;
  ☐ En caja en gastos x comprobar que no borre el gasto si lo comprueban el mismo dia
  ✔ Agregar todas las empresas a dulce @done (20-01-21 17:39)

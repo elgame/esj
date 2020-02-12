@@ -520,6 +520,30 @@ class productos_salidas extends MY_Controller {
             'rules' => '');
     }
 
+    if ($this->input->post('tipo') == 'c') { // combustible
+      $rules[] = array('field' => 'clabor',
+            'label' => 'Labor',
+            'rules' => 'required');
+      $rules[] = array('field' => 'clabor_id',
+            'label' => 'Labor',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'cimplemento',
+            'label' => 'Implemento',
+            'rules' => 'max_length[80]');
+      $rules[] = array('field' => 'chora_carga',
+            'label' => 'Hora de carga',
+            'rules' => '');
+      $rules[] = array('field' => 'clitros',
+            'label' => 'Litros',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'codometro',
+            'label' => 'Odometro',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'cprecio',
+            'label' => 'Precio',
+            'rules' => 'required|numeric');
+    }
+
     $this->form_validation->set_rules($rules);
   }
 

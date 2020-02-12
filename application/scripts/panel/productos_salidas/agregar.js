@@ -12,6 +12,7 @@
     autocompleteRanchos();
     autocompleteCentroCosto();
     autocompleteActivos();
+    autocompleteLabores();
 
     eventOnChangeTipo();
     eventCodigoBarras();
@@ -316,6 +317,47 @@
     });
   };
 
+  var autocompleteLabores = function () {
+    $('#cimplemento').autocomplete({
+      source: base_url+'panel/control_maquinaria/ajax_get_implemento/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this);
+
+        $this.css("background-color", "#B0FFB0");
+      }
+    }).keydown(function(event){
+      if(event.which == 8 || event == 46) {
+        var $this = $(this);
+
+        $this.css("background-color", "#FFD9B3");
+      }
+    });
+
+    $('#datosCombustible').on('focus', 'input#clabor:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/labores_codigo/ajax_get_labores/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+          $('#clabor_id').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $this = $(this), $tr = $this.parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $('#clabor_id').val('');
+        }
+      });
+    });
+  };
+
   /*
    |------------------------------------------------------------------------
    | Events
@@ -336,13 +378,17 @@
         tipoOrderActual = $this.find('option:selected').val();
         if(tipoOrderActual == 'r') {
           $("#generalCodigo").show();
+          $("#datosCombustible").hide();
+        } else if(tipoOrderActual == 'c') {
+          $("#datosCombustible").show();
+          $("#generalCodigo").hide();
         } else {
           $("#generalCodigo").hide();
         }
       }
     });
 
-    $('#tipo').change();
+    // $('#tipo').change();
   };
 
   var eventCodigoBarras = function () {
