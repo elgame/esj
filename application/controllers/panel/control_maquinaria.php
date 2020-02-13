@@ -12,6 +12,7 @@ class control_maquinaria extends MY_Controller {
 
     'control_maquinaria/rptcombustible_pdf/',
     'control_maquinaria/rptcombustible_xls/',
+    'control_maquinaria/ajax_get_implemento/',
   );
 
   public function _remap($method){
@@ -118,6 +119,12 @@ class control_maquinaria extends MY_Controller {
   {
     $this->load->model('control_maquinaria_model');
     echo json_encode($this->control_maquinaria_model->delete($_POST));
+  }
+
+  public function ajax_get_implemento()
+  {
+    $this->load->model('control_maquinaria_model');
+    echo json_encode($this->control_maquinaria_model->ajaxImplementos());
   }
 
 

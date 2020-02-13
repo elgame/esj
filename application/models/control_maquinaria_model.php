@@ -67,6 +67,31 @@ class control_maquinaria_model extends CI_Model {
     return $data;
   }
 
+  public function ajaxImplementos()
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT DISTINCT ON (upper(implemento)) implemento
+        FROM compras_salidas_combustible
+        WHERE upper(implemento) LIKE '%".mb_strtoupper($_GET['term'], 'UTF-8')."%'
+        ORDER BY upper(implemento) ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+          'id' => $itm->implemento,
+          'label' => $itm->implemento,
+          'value' => $itm->implemento,
+          'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
 
   /**
    * Reportes
