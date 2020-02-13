@@ -252,13 +252,14 @@ class productos_salidas_model extends CI_Model {
       ], ['id_combustible' => $id_combustible]);
     } else {
       $this->db->insert('compras_salidas_combustible', [
+        'id_salida'       => $idSalida,
         'id_labor'        => $_POST['clabor_id'],
         'fecha'           => substr($_POST['fecha'], 0, 10),
         'implemento'      => $_POST['cimplemento'],
-        'hora_carga'      => $_POST['chora_carga'],
-        'odometro'        => $_POST['codometro'],
-        'lts_combustible' => $_POST['clitros'],
-        'precio'          => $_POST['cprecio']
+        'hora_carga'      => (isset($_POST['chora_carga'])? $_POST['chora_carga'].':00' : date("H:i:s")),
+        'odometro'        => floatval($_POST['codometro']),
+        'lts_combustible' => floatval($_POST['clitros']),
+        'precio'          => floatval($_POST['cprecio'])
       ]);
     }
   }
@@ -528,6 +529,14 @@ class productos_salidas_model extends CI_Model {
         {
           $this->load->model('productos_model');
           $data['info'][0]->activo = $this->productos_model->getProductosInfo($data['info'][0]->id_activo, true)['info'];
+        }
+
+        if ($data['info'][0]->tipo == 'c') {
+          $data['info'][0]->combustible = $this->db->query("SELECT sc.id_combustible, sc.id_salida, sc.id_labor, sc.fecha,
+              sc.implemento, sc.hora_carga, sc.odometro, sc.lts_combustible, sc.precio, sl.nombre AS labor
+           FROM compras_salidas_combustible sc
+            INNER JOIN compras_salidas_labores sl ON sl.id_labor = sc.id_labor
+           WHERE sc.id_salida = {$data['info'][0]->id_salida}")->row();
         }
       }
 
@@ -948,10 +957,16 @@ class productos_salidas_model extends CI_Model {
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
 
+    $tituloo = 'SALIDA DE PRODUCTOS';
+    if ($orden['info'][0]->tipo == 'r')
+      $tituloo = 'SALIDA DE RECETA';
+    elseif ($orden['info'][0]->tipo == 'r')
+      $tituloo = 'SALIDA DE COMBUSTIBLE';
+
     // Título
     $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
     $pdf->SetXY(0, 3);
-    $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS'.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
+    $pdf->MultiCell($pdf->pag_size[0], 4, $tituloo.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 8);
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
@@ -1013,6 +1028,16 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array($orden['info'][0]->activo->nombre), false, false);
+    }
+
+    if ($orden['info'][0]->tipo == 'c' && isset($orden['info'][0]->combustible)) {
+      $pdf->SetWidths(array(32, 32));
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Odometro: '.MyString::formatoNumero($orden['info'][0]->combustible->odometro, 2, ''),
+                      'Hr Carga: '.substr($orden['info'][0]->combustible->hora_carga, 0, 8) ), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Labor: '.$orden['info'][0]->combustible->labor, 'Implemento: '.$orden['info'][0]->combustible->implemento ), false, false);
     }
 
     if ($orden['info'][0]->tipo == 'r') {

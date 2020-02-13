@@ -6,6 +6,7 @@
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
  ☐ Poner fecha de contrato en los trabajadores para que notifique
  ☐ Reportes de las hojas de la señora de salidas de almacen, control de combustible
+     -- pct
      DROP TABLE public.compras_salidas_combustible;
      CREATE TABLE public.compras_salidas_combustible
           (
