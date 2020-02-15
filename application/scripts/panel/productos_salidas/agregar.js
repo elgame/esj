@@ -481,6 +481,12 @@
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
         $fcodigo.val('');
+
+        // Si es combustible asigna el precio
+        if ($('#tipo').val() === 'c') {
+          $('#clitros').val(producto.cantidad);
+          $('#cprecio').val(producto.precio_unitario);
+        }
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
