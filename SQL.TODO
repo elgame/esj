@@ -6,7 +6,7 @@
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
  ☐ Poner fecha de contrato en los trabajadores para que notifique
  ☐ Reportes de las hojas de la señora de salidas de almacen, control de combustible
-     -- pct
+     -- pct|san
      DROP TABLE public.compras_salidas_combustible;
      CREATE TABLE public.compras_salidas_combustible
           (
@@ -36,7 +36,7 @@
           ALTER TABLE public.compras_salidas_combustible OWNER to programa;
  ✔ En ordenes de servicio poner para que puedan ligar tanto compras, salidas de almacen y gastos de caja @done (20-02-03 17:13)
  ✔ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de
-   agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|ch
+   agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|san
      ALTER TABLE public.compras_requisicion ADD COLUMN id_empresa_ap integer;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_empresa_ap_fkey FOREIGN KEY (id_empresa_ap) REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
      COMMENT ON COLUMN public.compras_requisicion.id_empresa_ap IS 'id de la empresa en la que se aplicaran los productos';

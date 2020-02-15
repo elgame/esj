@@ -1004,6 +1004,10 @@ class finiquito
       $isr = 0;
     }
 
+    if ($subsidio == 0) {
+      $subsidio = 0.01;
+    }
+
     $this->empleado->nomina->subsidio = $subsidio;
     $this->empleado->nomina->otrosPagos['subsidio'] = array(
       'TipoOtroPago'     => '002',
