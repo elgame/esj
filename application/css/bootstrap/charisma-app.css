@@ -523,3 +523,11 @@ min-height:297px;
 table.table.table-condensed.table-addproducf tr td{
 	min-height: 39px;
 }
+
+
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}

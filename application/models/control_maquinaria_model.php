@@ -49,16 +49,23 @@ class control_maquinaria_model extends CI_Model {
       "combustible" => array(),
     );
 
+    //cs.id_empresa_ap = {$empresaId}
     $sql = $this->db->query(
-      "SELECT csc.id_combustible, csc.fecha, csc.hora_inicial, csc.hora_final, csc.horas_totales, csc.lts_combustible,
-        l.id_labor, l.nombre AS labor, l.codigo, csc.id_centro_costo, cc.nombre AS centro_costo, cc.codigo_fin AS codigo_centro_costo,
-        csc.id_implemento, i.nombre AS implemento, i.codigo_fin AS codigo_implemento
-      FROM compras_salidas_combustible AS csc
-        INNER JOIN compras_areas AS cc ON cc.id_area = csc.id_centro_costo
-        INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-        INNER JOIN compras_salidas_labores AS l ON l.id_labor = csc.id_labor
+      "SELECT csc.id_combustible, cs.id_activo, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
+        csc.odometro, csc.lts_combustible, csc.precio, csc.implemento, csl.id_labor, csl.nombre AS labor, cs.observaciones,
+        ran.rancho, csc.odometro_fin, (Coalesce(csc.odometro_fin, 0) - Coalesce(csc.odometro)) AS horas_totales
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
+        INNER JOIN productos p On p.id_producto = cs.id_activo
+        INNER JOIN compras_salidas_labores csl ON csl.id_labor = csc.id_labor
+        LEFT JOIN (
+          SELECT csr.id_salida, string_agg(r.nombre, ', ') AS rancho
+          FROM compras_salidas_rancho csr
+            INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+          GROUP BY csr.id_salida
+        ) ran ON ran.id_salida = cs.id_salida
       WHERE csc.fecha = '{$fecha}'
-      ORDER BY csc.id_combustible ASC
+      ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC
       ");
 
     if ($sql->num_rows() > 0)
@@ -126,7 +133,7 @@ class control_maquinaria_model extends CI_Model {
     $response = $this->db->query(
       "SELECT cs.id_activo, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
         csc.odometro, csc.lts_combustible, csc.precio, csc.implemento, csl.nombre AS labor, cs.observaciones,
-        ran.rancho
+        ran.rancho, csc.odometro_fin
       FROM compras_salidas cs
         INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
         INNER JOIN productos p On p.id_producto = cs.id_activo

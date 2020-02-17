@@ -47,12 +47,13 @@
                 <caption></caption>
                 <thead>
                   <tr>
-                    <th>Centro Costo</th>
+                    <th>Activo</th>
                     <th>Labor</th>
                     <th>Implemento</th>
                     <th>Lts Combustible</th>
-                    <th>Hr Inicio</th>
-                    <th>Hr Final</th>
+                    <th>Precio</th>
+                    <th>Hor Inicio</th>
+                    <th>Hor Final</th>
                     <th style="width:55px;">Total Hrs</th>
                     <th style="width:55px;">Lts/Hrs</th>
                     <th></th>
@@ -63,9 +64,8 @@
                   <?php foreach ($combustible['combustible'] as $key => $c) { ?>
                     <tr>
                       <td>
-                        <input type="text" id="fcentro_costo" value="<?php echo $c->centro_costo ?>" class="span11 pull-left showCodigoAreaAuto">
-                        <input type="hidden" id="fcentro_costo_id" value="<?php echo $c->id_centro_costo ?>" class="span12">
-                        <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                        <input type="text" name="factivos" class="span11 factivos" value="<?php echo $c->activo ?>" placeholder="Nissan FRX, Maquina limon">
+                        <input type="hidden" name="factivoId" class="factivoId" value="<?php echo $c->id_activo ?>">
 
                         <input type="hidden" id="fid_combustible" value="<?php echo $c->id_combustible ?>" class="span12">
                       </td>
@@ -74,18 +74,19 @@
                         <input type="hidden" id="flabor_id" value="<?php echo $c->id_labor ?>" class="span12">
                       </td>
                       <td>
-                        <input type="text" id="fimplemento" value="<?php echo $c->implemento ?>" class="span11 pull-left showCodigoAreaAuto">
-                        <input type="hidden" id="fimplemento_id" value="<?php echo $c->id_implemento ?>" class="span12">
-                        <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                        <input type="text" id="fimplemento" value="<?php echo $c->implemento ?>" class="span11 pull-left fimplemento">
                       </td>
                       <td>
                         <input type="number" id="flts_combustible" value="<?php echo $c->lts_combustible ?>" class="span12 vpositive">
                       </td>
                       <td>
-                        <input type="time" name="fhr_ini" id="fhr_ini" value="<?php echo substr($c->hora_inicial, 0, 5); ?>" class="span12">
+                        <input type="number" id="fprecio" value="<?php echo $c->precio ?>" class="span12 vpositive">
                       </td>
                       <td>
-                        <input type="time" name="fhr_fin" id="fhr_fin" value="<?php echo substr($c->hora_final, 0, 5); ?>" class="span12">
+                        <input type="number" name="fodometro" id="fodometro" value="<?php echo $c->odometro; ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="number" name="fodometro_fin" id="fodometro_fin" value="<?php echo $c->odometro_fin; ?>" class="span12">
                       </td>
                       <td>
                         <input type="text" id="ftotal_hrs" value="<?php echo $c->horas_totales ?>" class="span12" readonly>
@@ -102,9 +103,8 @@
 
                   <tr>
                     <td>
-                      <input type="text" id="fcentro_costo" value="" class="span11 pull-left showCodigoAreaAuto">
-                      <input type="hidden" id="fcentro_costo_id" value="" class="span12">
-                      <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                      <input type="text" name="factivos" class="span11 factivos" value="" placeholder="Nissan FRX, Maquina limon">
+                      <input type="hidden" name="factivoId" class="factivoId" value="">
 
                       <input type="hidden" id="fid_combustible" value="" class="span12">
                     </td>
@@ -113,18 +113,19 @@
                       <input type="hidden" id="flabor_id" value="" class="span12">
                     </td>
                     <td>
-                      <input type="text" id="fimplemento" value="" class="span11 pull-left showCodigoAreaAuto">
-                      <input type="hidden" id="fimplemento_id" value="" class="span12">
-                      <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                      <input type="text" id="fimplemento" value="" class="span11 pull-left fimplemento">
                     </td>
                     <td>
                       <input type="number" id="flts_combustible" value="" class="span12 vpositive">
                     </td>
                     <td>
-                      <input type="time" name="fhr_ini" id="fhr_ini" value="" class="span12">
+                      <input type="number" id="fprecio" value="" class="span12 vpositive">
                     </td>
                     <td>
-                      <input type="time" name="fhr_fin" id="fhr_fin" value="" class="span12">
+                      <input type="number" name="fodometro" id="fodometro" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="number" name="fodometro_fin" id="fodometro_fin" value="" class="span12">
                     </td>
                     <td>
                       <input type="text" id="ftotal_hrs" value="" class="span12" readonly>

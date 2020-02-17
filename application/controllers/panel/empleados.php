@@ -444,6 +444,11 @@ class empleados extends MY_Controller {
               array('field' => 'ffecha_salida',
                     'label' => 'Fecha de salida',
                     'rules' => 'max_length[25]'),
+
+              array('field' => 'ffecha_contrato',
+                    'label' => 'Fecha vencimiento contrato',
+                    'rules' => 'max_length[25]'),
+
               array('field' => 'fnacionalidad',
                     'label' => 'Nacionalidad',
                     'rules' => 'max_length[20]'),

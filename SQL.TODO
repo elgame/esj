@@ -4,19 +4,20 @@
  ☐ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos
  ☐ Generar remisiones al agregar las salidas de almacen cuando sea de agro insumo
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
- ☐ Poner fecha de contrato en los trabajadores para que notifique
+ ✔ Poner fecha de contrato en los trabajadores para que notifique @done (20-02-14 20:36) pcc
+     ALTER TABLE public.usuarios ADD COLUMN fecha_contrato date;
  ☐ Reportes de las hojas de la señora de salidas de almacen, control de combustible
-     -- pct|san
+     -- pct|san|pcc
      DROP TABLE public.compras_salidas_combustible;
      CREATE TABLE public.compras_salidas_combustible
           (
               id_combustible bigserial NOT NULL,
-            id_salida bigint NOT NULL,
-            id_labor integer NOT NULL,
+              id_salida bigint NOT NULL,
+              id_labor integer NOT NULL,
               fecha date NOT NULL DEFAULT now(),
               implemento character varying(80),
               hora_carga time with time zone,
-            odometro double precision NOT NULL DEFAULT 0,
+              odometro double precision NOT NULL DEFAULT 0,
               lts_combustible double precision NOT NULL DEFAULT 0,
             precio double precision NOT NULL DEFAULT 0,
               CONSTRAINT compras_salidas_combustible_pkey PRIMARY KEY (id_combustible),
@@ -34,6 +35,7 @@
           )
           TABLESPACE pg_default;
           ALTER TABLE public.compras_salidas_combustible OWNER to programa;
+     ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro_fin double precision;
  ✔ En ordenes de servicio poner para que puedan ligar tanto compras, salidas de almacen y gastos de caja @done (20-02-03 17:13)
  ✔ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de
    agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|san
