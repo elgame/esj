@@ -429,7 +429,7 @@
                 <div class="span6">
 
                   <div class="control-group">
-                    <label class="control-label" for="codometro">Odómetro</label>
+                    <label class="control-label" for="codometro">Horómetro</label>
                     <div class="controls">
                       <div class="input-append span12">
                         <input type="number" step="any" name="codometro" min="0" class="span11" id="codometro" value="<?php echo set_value('codometro') ?>" placeholder="">

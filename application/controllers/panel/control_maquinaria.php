@@ -83,6 +83,8 @@ class control_maquinaria extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Combutible');
 
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
     // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
     $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
     $params['vehiculos'] = $this->compras_areas_model->getFrmAreas(620);

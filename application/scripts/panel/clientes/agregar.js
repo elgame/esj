@@ -17,6 +17,11 @@ $(function(){
 
   autocompleteCatalogos();
 
+  $('#contratosa').click(function () {
+    $('#contrato').val('true');
+    $('#userfilter').click();
+  });
+
   cuentas.init();
 });
 

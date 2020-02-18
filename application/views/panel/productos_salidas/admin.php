@@ -67,6 +67,7 @@
                   <th>Folio</th>
                   <th>Empresa</th>
                   <th>Estado</th>
+                  <th>Tipo</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -82,6 +83,19 @@
                         if ($salida->status === 's') {
                           $texto = 'NO CANCELADA';
                           $label = 'success';
+                        }
+                      ?>
+                      <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
+                  </td>
+                  <td><?php
+                          $texto = 'Salida';
+                          $label = '';
+                        if ($salida->tipo === 'r') {
+                          $texto = 'Receta';
+                          $label = 'primary';
+                        } elseif ($salida->tipo == 'c') {
+                          $texto = 'Combustible';
+                          $label = 'info';
                         }
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>

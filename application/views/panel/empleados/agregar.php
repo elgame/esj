@@ -146,6 +146,13 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="ffecha_contrato">Fecha vencimiento contrato </label>
+                      <div class="controls">
+                        <input type="date" name="ffecha_contrato" id="ffecha_contrato" class="span6" value="<?php echo set_value('ffecha_contrato'); ?>" maxlength="25" placeholder="Fecha vencimiento de contrato">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="fnacionalidad">Nacionalidad </label>
 										  <div class="controls">

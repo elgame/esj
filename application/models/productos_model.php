@@ -274,7 +274,11 @@ class productos_model extends CI_Model {
 		$this->db->insert('productos', $data);
 		$id_producto = $this->db->insert_id('productos_id_producto_seq');
 
-		$this->addPresentacion($id_producto);
+    $this->addPresentacion($id_producto);
+
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
+      $this->addColores($id_producto);
+    }
 
 		return array('error' => FALSE, $id_producto);
 	}
@@ -323,6 +327,10 @@ class productos_model extends CI_Model {
 		$this->db->update('productos', $data, "id_producto = {$id_producto}");
 
 		$this->addPresentacion($id_producto);
+
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
+      $this->addColores($id_producto);
+    }
 
 		return array('error' => FALSE, $id_producto);
 	}
@@ -377,6 +385,24 @@ class productos_model extends CI_Model {
 		return true;
 	}
 
+  public function addColores($id_producto, $data=NULL)
+  {
+    if ($data == NULL) {
+      $this->db->delete('productos_color_agro', "id_producto = {$id_producto}");
+
+      if ($this->input->post('colorEmpresaId')) {
+        foreach ($this->input->post('colorEmpresaId') as $key => $idEmpresa) {
+          $this->db->insert('productos_color_agro', [
+            'id_producto' => $id_producto,
+            'id_empresa'  => $_POST['colorEmpresaId'][$key],
+            'color'       => $_POST['colorColor'][$key],
+            'tipo_apli'   => $_POST['colorTipoApli'][$key],
+          ]);
+        }
+      }
+    }
+  }
+
 	/**
 	 * Obtiene la informacion de un producto
 	 * @param  boolean $id_producto [description]
@@ -407,6 +433,7 @@ class productos_model extends CI_Model {
       $data['presentaciones'] = $this->getPresentaciones($id_producto);
   		$data['piezas'] = $this->getPiezas($id_producto);
       $data['familia'] = $this->getFamiliaInfo($data['info']->id_familia, true)['info'];
+      $data['colores'] = $this->getColores($id_producto);
   	}
 
 		return $data;
@@ -508,6 +535,26 @@ class productos_model extends CI_Model {
 
 		return $response;
 	}
+
+  public function getColores($id_producto)
+  {
+    $str_query = "
+        SELECT pca.id_producto, pca.id_empresa, pca.color, pca.tipo_apli,
+          e.nombre_fiscal AS empresa
+        FROM productos_color_agro pca
+          INNER JOIN empresas e ON e.id_empresa = pca.id_empresa
+        WHERE pca.id_producto = {$id_producto}
+        ORDER BY empresa ASC
+        ";
+    $res = $this->db->query($str_query);
+
+    $response = array();
+    if($res->num_rows() > 0){
+      $response = $res->result();
+    }
+
+    return $response;
+  }
 
   public function getPiezas($id_producto)
   {

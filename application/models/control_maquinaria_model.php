@@ -10,14 +10,14 @@ class control_maquinaria_model extends CI_Model {
   public function save($datos)
   {
     $data = array(
-      'fecha'           => $datos['fecha'],
-      'id_centro_costo' => $datos['id_centro_costo'],
       'id_labor'        => $datos['id_labor'],
-      'id_implemento'   => $datos['id_implemento'],
+      'fecha'           => $datos['fecha'],
+      'implemento'      => $datos['implemento'],
+      'hora_carga'      => $datos['hora_carga'],
+      'odometro'        => $datos['odometro'],
       'lts_combustible' => $datos['lts_combustible'],
-      'hora_inicial'    => $datos['hora_inicial'],
-      'hora_final'      => $datos['hora_final'],
-      'horas_totales'   => $datos['horas_totales'],
+      'precio'          => $datos['precio'],
+      'odometro_fin'    => $datos['odometro_fin']
     );
 
     if (isset($datos['id_combustible']{0}))
@@ -27,8 +27,7 @@ class control_maquinaria_model extends CI_Model {
       $datos['id_combustible'] = $this->db->insert_id('compras_salidas_combustible_id_combustible_seq');
     }
 
-    return array('passess' => true,
-            'id_combustible' => $datos['id_combustible'] );
+    return array('passess' => true, 'id_combustible' => $datos['id_combustible'] );
   }
 
   /**
@@ -49,16 +48,23 @@ class control_maquinaria_model extends CI_Model {
       "combustible" => array(),
     );
 
+    //cs.id_empresa_ap = {$empresaId}
     $sql = $this->db->query(
-      "SELECT csc.id_combustible, csc.fecha, csc.hora_inicial, csc.hora_final, csc.horas_totales, csc.lts_combustible,
-        l.id_labor, l.nombre AS labor, l.codigo, csc.id_centro_costo, cc.nombre AS centro_costo, cc.codigo_fin AS codigo_centro_costo,
-        csc.id_implemento, i.nombre AS implemento, i.codigo_fin AS codigo_implemento
-      FROM compras_salidas_combustible AS csc
-        INNER JOIN compras_areas AS cc ON cc.id_area = csc.id_centro_costo
-        INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-        INNER JOIN compras_salidas_labores AS l ON l.id_labor = csc.id_labor
+      "SELECT csc.id_combustible, cs.id_activo, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
+        csc.odometro, csc.lts_combustible, csc.precio, csc.implemento, csl.id_labor, csl.nombre AS labor, cs.observaciones,
+        ran.rancho, csc.odometro_fin, (Coalesce(csc.odometro_fin, 0) - Coalesce(csc.odometro)) AS horas_totales
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
+        INNER JOIN productos p On p.id_producto = cs.id_activo
+        INNER JOIN compras_salidas_labores csl ON csl.id_labor = csc.id_labor
+        LEFT JOIN (
+          SELECT csr.id_salida, string_agg(r.nombre, ', ') AS rancho
+          FROM compras_salidas_rancho csr
+            INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+          GROUP BY csr.id_salida
+        ) ran ON ran.id_salida = cs.id_salida
       WHERE csc.fecha = '{$fecha}'
-      ORDER BY csc.id_combustible ASC
+      ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC
       ");
 
     if ($sql->num_rows() > 0)
@@ -112,39 +118,33 @@ class control_maquinaria_model extends CI_Model {
 
     $sql2 = $sql;
 
+    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
+
     // vehiculos
-    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
+    if (isset($_GET['activoId']) && intval($_GET['activoId']) > 0)
     {
-      $sql .= " AND i.id_area In(".implode(',', $_GET['dareas']).")";
+      $sql .= " AND cs.id_activo = {$_GET['activoId']}";
     }
 
     $response = array();
 
     // Totales de vehiculos
     $response = $this->db->query(
-        "SELECT Sum(csc.horas_totales) AS horas_totales, Sum(csc.lts_combustible) AS lts_combustible,
-          i.nombre AS implemento, i.codigo_fin AS codigo_implemento, i.id_area
-        FROM compras_salidas_combustible AS csc
-          INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-        WHERE 1 = 1 {$sql}
-        GROUP BY i.id_area
-        ORDER BY implemento ASC")->result();
-
-    // Si es desglosado carga independientes
-    if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
-      foreach ($response as $key => $value) {
-        $value->detalle = $this->db->query(
-            "SELECT csc.id_combustible, csc.fecha, csc.hora_inicial, csc.hora_final, csc.horas_totales, csc.lts_combustible,
-              l.id_labor, l.nombre AS labor, l.codigo, csc.id_centro_costo, cc.nombre AS centro_costo, cc.codigo_fin AS codigo_centro_costo,
-              csc.id_implemento, i.nombre AS implemento, i.codigo_fin AS codigo_implemento
-            FROM compras_salidas_combustible AS csc
-              INNER JOIN compras_areas AS cc ON cc.id_area = csc.id_centro_costo
-              INNER JOIN compras_areas AS i ON i.id_area = csc.id_implemento
-              INNER JOIN compras_salidas_labores AS l ON l.id_labor = csc.id_labor
-            WHERE i.id_area = {$value->id_area} {$sql2}
-            ORDER BY (csc.fecha, csc.id_combustible) ASC")->result();
-      }
-    }
+      "SELECT cs.id_activo, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
+        csc.odometro, csc.lts_combustible, csc.precio, csc.implemento, csl.nombre AS labor, cs.observaciones,
+        ran.rancho, csc.odometro_fin
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
+        INNER JOIN productos p On p.id_producto = cs.id_activo
+        INNER JOIN compras_salidas_labores csl ON csl.id_labor = csc.id_labor
+        LEFT JOIN (
+          SELECT csr.id_salida, string_agg(r.nombre, ', ') AS rancho
+          FROM compras_salidas_rancho csr
+            INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+          GROUP BY csr.id_salida
+        ) ran ON ran.id_salida = cs.id_salida
+      WHERE cs.id_empresa_ap = {$empresaId} {$sql}
+      ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC")->result();
 
     return $response;
   }
@@ -152,12 +152,17 @@ class control_maquinaria_model extends CI_Model {
   {
     $combustible = $this->getDataCombutible();
 
+    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
+
+    // echo "<pre>";
+    //   var_dump($combustible);
+    // echo "</pre>";exit;
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
     $pdf->show_head = true;
 
     if ($empresa['info']->logo !== '')
@@ -178,14 +183,15 @@ class control_maquinaria_model extends CI_Model {
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(115, 30, 30, 30);
-    $header = array('Vehiculo', 'Lts Combustible', 'Total Hrs', 'Lts/Hrs');
-    $aligns2 = array('L', 'L', 'L', 'R', 'R', 'R');
-    $widths2 = array(19, 48, 48, 30, 30, 30);
-    $header2 = array('Fecha', 'Centro Costo', 'Labor', 'Lts Combustible', 'Total Hrs', 'Lts/Hrs');
+    $widths = array(153, 40);
+    $header = array('Vehiculo');
+    $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
+    $widths2 = array(15, 12, 15, 35, 35, 10, 10, 11, 10, 10, 15, 15, 18, 20, 35);
+    $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
+        'Litros', 'Precio', 'Total', 'Rendim lt/Hr', 'Acumulado', 'Implemento', 'Observaciones');
 
-    $lts_combustible = 0;
-    $horas_totales = 0;
+    $costoacumulado = 0;
+    $auxvehi = '';
 
     $entro = false;
     foreach($combustible as $key => $vehiculo)
@@ -194,80 +200,68 @@ class control_maquinaria_model extends CI_Model {
       $importe = 0;
       if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
       {
-        $pdf->AddPage();
-
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
-        $pdf->SetFillColor(160,160,160);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
-      }
-      $pdf->SetFont('Arial','B',8);
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetX(6);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-      $pdf->Row(array(
-        $vehiculo->implemento,
-        MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
-        MyString::formatoNumero($vehiculo->horas_totales, 2, '', false),
-        MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
-      ), false, false);
-
-      $lts_combustible += floatval($vehiculo->lts_combustible);
-      $horas_totales   += floatval($vehiculo->horas_totales);
-
-      if (isset($vehiculo->detalle)) {
-        foreach ($vehiculo->detalle as $key2 => $item)
-        {
-          $band_head = false;
-          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-          {
-            $pdf->AddPage();
-
-            $pdf->SetFont('Arial','B',8);
-            $pdf->SetTextColor(255,255,255);
-            $pdf->SetFillColor(160,160,160);
-            $pdf->SetX(6);
-            $pdf->SetAligns($aligns2);
-            $pdf->SetWidths($widths2);
-            $pdf->Row($header2, true);
-          }
-
-          $pdf->SetFont('Arial','',8);
-          $pdf->SetTextColor(0,0,0);
-
-          $datos = array(
-            $item->fecha,
-            $item->centro_costo,
-            $item->labor,
-            MyString::formatoNumero($item->lts_combustible, 2, '', false),
-            MyString::formatoNumero($item->horas_totales, 2, '', false),
-            MyString::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
-          );
-
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns2);
-          $pdf->SetWidths($widths2);
-          $pdf->Row($datos, false, false);
+        if ($pdf->GetY() >= $pdf->limiteY || $key==0) {
+          $pdf->AddPage();
         }
       }
 
+      if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row([$vehiculo->activo, $vehiculo->labor], false);
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(180,180,180);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row($header2, true);
+
+        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
+        $costoacumulado = 0;
+      }
+
+      $hrs = ($vehiculo->odometro_fin - $vehiculo->odometro);
+      $costoacumulado += $vehiculo->precio*$vehiculo->lts_combustible;
+
+      $pdf->SetFont('Arial','',7);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns2);
+      $pdf->SetWidths($widths2);
+      $pdf->Row(array(
+        $vehiculo->fecha,
+        substr($vehiculo->hora_carga, 0, 8),
+        $vehiculo->folio,
+        $vehiculo->rancho,
+        $vehiculo->operador,
+        $vehiculo->odometro,
+        $vehiculo->odometro_fin,
+        $hrs,
+        MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
+        MyString::formatoNumero($vehiculo->precio, 2, '', false),
+        MyString::formatoNumero($vehiculo->precio*$vehiculo->lts_combustible, 2, '', false),
+        MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
+        MyString::formatoNumero($costoacumulado, 2, '', false),
+        $vehiculo->implemento,
+        $vehiculo->observaciones,
+      ), false, false);
+
     }
 
-    $pdf->SetX(6);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
+    // $pdf->SetX(6);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
 
-    $pdf->SetFont('Arial','B',9);
-    $pdf->SetTextColor(0,0,0);
-    $pdf->Row(array('TOTALES',
-        MyString::formatoNumero($lts_combustible, 2, '', false),
-        MyString::formatoNumero($horas_totales, 2, '', false),
-        MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
-    true, false);
+    // $pdf->SetFont('Arial','B',9);
+    // $pdf->SetTextColor(0,0,0);
+    // $pdf->Row(array('TOTALES',
+    //     MyString::formatoNumero($lts_combustible, 2, '', false),
+    //     MyString::formatoNumero($horas_totales, 2, '', false),
+    //     MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
+    // true, false);
 
     $pdf->Output('reporte_combustible.pdf', 'I');
   }

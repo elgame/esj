@@ -39,20 +39,30 @@ class Usuarios_model extends privilegios_model {
     if($this->input->get('did_empresa') != '')
       $sql .= ' AND u.id_empresa = ' . $this->input->get('did_empresa');
 
+    if ($this->input->get('contrato') == 'true') {
+      $sql .= " AND u.fecha_contrato IS NOT NULL AND (u.fecha_contrato - Date(now())) <= 15";
+    }
+
 		$query = BDUtil::pagination("
 				SELECT u.id AS id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.usuario, u.email, u.tipo,
-					u.status, u.rfc, u.cuenta_banco, u.no_seguro
+					u.status, u.rfc, u.cuenta_banco, u.no_seguro, (fecha_contrato - Date(now())) AS dias_faltantes
 				FROM usuarios u
 				".$sql."
 				ORDER BY (u.nombre || u.apellido_paterno || u.apellido_materno) ASC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
+    $rescontrato = $this->db->query("
+      SELECT Count(id) AS nums
+      FROM usuarios
+      WHERE fecha_contrato IS NOT NULL AND (fecha_contrato - Date(now())) <= 15")->row();
+
 		$response = array(
 				'usuarios'      => array(),
 				'total_rows'     => $query['total_rows'],
 				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
+				'result_page'    => $params['result_page'],
+        'contrato'       => $rescontrato->nums
 		);
 		if($res->num_rows() > 0)
 			$response['usuarios'] = $res->result();
@@ -127,6 +137,8 @@ class Usuarios_model extends privilegios_model {
             // 'tipo_regimen'  => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
             'tipo_jornada'  => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
             'riesgo_puesto' => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+
+            'fecha_contrato' => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -210,6 +222,8 @@ class Usuarios_model extends privilegios_model {
             // 'tipo_regimen'    => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
             'tipo_jornada'    => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
             'riesgo_puesto'   => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+
+            'fecha_contrato' => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');
@@ -268,7 +282,7 @@ class Usuarios_model extends privilegios_model {
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
-            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono" )
+            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")

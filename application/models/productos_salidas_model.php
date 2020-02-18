@@ -65,7 +65,8 @@ class productos_salidas_model extends CI_Model {
                 cs.id_empresa, e.nombre_fiscal AS empresa,
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-                cs.status, cs.concepto, Count(sp.id_salida) AS productos
+                cs.status, cs.concepto, Count(sp.id_salida) AS productos,
+                cs.tipo
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado

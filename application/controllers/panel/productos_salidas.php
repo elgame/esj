@@ -515,9 +515,13 @@ class productos_salidas extends MY_Controller {
       $rules[] = array('field' => 'activoId',
             'label' => 'Activo',
             'rules' => 'numeric');
+
+      $drequired = '';
+      if ($this->input->post('tipo') == 'c')
+        $drequired = 'required';
       $rules[] = array('field' => 'activos',
             'label' => 'Activo',
-            'rules' => '');
+            'rules' => $drequired);
     }
 
     if ($this->input->post('tipo') == 'c') { // combustible

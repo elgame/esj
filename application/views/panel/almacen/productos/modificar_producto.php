@@ -84,7 +84,7 @@
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
 
-                    <input type="hidden" id="did_empresa" value="<?php echo $data['familia']->id_empresa ?>">
+                    <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo $data['familia']->id_empresa ?>">
                   </div>
                 </div>
 
@@ -134,6 +134,10 @@
                   </div>
                 </div>
 
+              </div>
+
+              <div class="span6">
+              <?php if ($data['familia']->id_empresa != 20): ?> <!-- Empresa Agro 20 -->
                 <div class="control-group">
                   <label class="control-label" for="ftipo">Tipo lista</label>
                   <div class="controls">
@@ -145,9 +149,7 @@
                     </select>
                   </div>
                 </div>
-              </div>
 
-              <div class="span6">
                 <div class="control-group">
                   <label class="control-label" for="ftipo_apli">Tipo</label>
                   <div class="controls">
@@ -158,6 +160,7 @@
                     </select>
                   </div>
                 </div>
+              <?php endif ?>
 
                 <?php if ($data['familia']->tipo == 'a'): ?>
                 <div class="control-group">
@@ -194,6 +197,90 @@
               </div>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $data['familia']->tipo ?>">
+
+
+              <?php if ($data['familia']->id_empresa == 20 && $data['familia']->tipo == 'p'): ?> <!-- Empresa Agro 20 -->
+              <div class="row-fluid">
+                <h4 style="background-color: #ccc;">Colores de productos</h4>
+                <div class="row-fluid">
+                  <div style="width: 49%; float: left;"> Empresa
+                    <input type="text" id="pcolorsEmpresa" value="" placeholder="Empresa" class="span12">
+                    <input type="hidden" id="pcolorsEmpresaId" value="">
+                  </div>
+
+                  <div style="width: 49%; float: right;"> Color
+                    <select id="pcolorColor" class="span12">
+                      <option value="">Selecciona Color</option>
+                      <option value="v">Verde (Orgánico)</option>
+                      <option value="a">Amarillo (Orgánico Opc)</option>
+                      <option value="r">Rojo (No Orgánico)</option>
+                    </select>
+                  </div>
+
+                  <div style="width: 55%; float: left;">Tipo aplicacion
+                    <select name="pcolorTipoApl" id="pcolorTipoApl" class="span12">
+                      <option value="">Selecciona Aplicación</option>
+                      <option value="n">Nutrición</option>
+                      <option value="fs">Fito sanidad</option>
+                    </select>
+                  </div>
+
+                  <div style="width: 35%; float: right;">
+                    <button type="button" class="btn" onclick="colores.add();" style="margin-top: 15px;">Agregar Color</button>
+                  </div>
+                </div>
+
+                <table class="table table-condensed">
+                  <thead>
+                    <tr>
+                      <th>Empresa</th>
+                      <th>Color</th>
+                      <th>Tipo</th>
+                      <th>Opc</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblColorRow">
+                    <?php
+                    if (is_array($data['colores']))
+                    {
+                      $varColores = [
+                        'v' => 'Verde (Orgánico)',
+                        'a' => 'Amarillo (Orgánico Opc)',
+                        'r' => 'Rojo (No Orgánico)',
+                      ];
+                      $varTipoApli = [
+                        'n' => 'Nutrición',
+                        'fs' => 'Fito sanidad',
+                      ];
+
+                      foreach ($data['colores'] as $key => $value)
+                      {
+                    ?>
+                    <tr class="rowColor">
+                      <td>
+                        <input type="text" name="colorEmpresa[]" value="<?php echo $value->empresa ?>" class="span12 colorEmpresa" readonly>
+                        <input type="hidden" name="colorEmpresaId[]" value="<?php echo $value->id_empresa ?>" class="colorEmpresaId">
+                      </td>
+                      <td style="width: 100px;"> <?php echo $varColores[$value->color] ?>
+                        <input type="text" name="colorColor[]" value="<?php echo $value->color ?>" class="span12 colorColor" readonly>
+                      </td>
+                      <td style="width: 100px;"> <?php echo $varTipoApli[$value->tipo_apli] ?>
+                        <input type="text" name="colorTipoApli[]" value="<?php echo $value->tipo_apli ?>" class="span12 colorTipoApli" readonly>
+                      </td>
+                      <td style="width: 50px;">
+                        <a class="btn btn-danger" href="#" onclick="colores.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a>
+                      </td>
+                    </tr>
+                    <?php
+                      }
+                    } ?>
+                  </tbody>
+                </table>
+              </div>
+              <?php endif ?>
+
+              <hr>
 
               <?php if ($data['familia']->tipo != 'a'): ?>
               <div class="row-fluid">

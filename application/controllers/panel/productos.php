@@ -472,6 +472,21 @@ class productos extends MY_Controller {
 			            'rules' => 'numeric|callback_val_familia');
 		}
 
+    if (isset($_POST['did_empresa']) && $_POST['did_empresa'] == '20' && $_POST['tipo_familia'] == 'p') { // Empresa Agro 20
+      $rules[] = array('field' => 'colorEmpresa[]',
+                  'label' => 'Color Empresa',
+                  'rules' => 'required');
+      $rules[] = array('field' => 'colorEmpresaId[]',
+                  'label' => 'Color Empresa',
+                  'rules' => 'required|numeric');
+      $rules[] = array('field' => 'colorColor[]',
+                  'label' => 'Color',
+                  'rules' => 'required');
+      $rules[] = array('field' => 'colorTipoApli[]',
+                  'label' => 'Tipo aplicación',
+                  'rules' => 'required');
+    }
+
 		$this->form_validation->set_rules($rules);
 	}
 
