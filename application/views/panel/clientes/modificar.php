@@ -112,6 +112,14 @@
                     <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa['info']->id_empresa); ?>" id="did_empresa">
                     </div>
                   </div>
+
+                  <div class="control-group <?php echo ($empresa['info']->id_empresa == 20? '': 'hide') ?>" id="groupFempresa_ap">
+                    <label class="control-label" for="fempresa_ap">Empresa Aplicación </label>
+                    <div class="controls">
+                    <input type="text" name="fempresa_ap" id="fempresa_ap" class="span10" value="<?php echo (isset($data->empresa_ap->nombre_fiscal)? $data->empresa_ap->nombre_fiscal: '') ?>" placeholder="Nombre">
+                    <input type="hidden" name="did_empresa_ap" value="<?php echo (isset($data->empresa_ap->id_empresa)? $data->empresa_ap->id_empresa: '') ?>" id="did_empresa_ap">
+                    </div>
+                  </div>
                 </div> <!--/span-->
 
                 <div class="span5">
