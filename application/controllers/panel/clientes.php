@@ -415,6 +415,13 @@ class clientes extends MY_Controller {
       array('field' => 'did_empresa',
             'label' => 'Empresa',
             'rules' => ''),
+
+      array('field' => 'fempresa_ap',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'did_empresa_ap',
+            'label' => 'Empresa',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
