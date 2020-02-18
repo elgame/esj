@@ -137,7 +137,7 @@
               </div>
 
               <div class="span6">
-              <?php if ($data['familia']->id_empresa != 2): ?> <!-- Empresa Agro 20 -->
+              <?php if ($data['familia']->id_empresa != 20): ?> <!-- Empresa Agro 20 -->
                 <div class="control-group">
                   <label class="control-label" for="ftipo">Tipo lista</label>
                   <div class="controls">
@@ -199,7 +199,7 @@
               <input type="hidden" name="tipo_familia" value="<?php echo $data['familia']->tipo ?>">
 
 
-              <?php if ($data['familia']->id_empresa == 2 && $data['familia']->tipo == 'p'): ?> <!-- Empresa Agro 20 -->
+              <?php if ($data['familia']->id_empresa == 20 && $data['familia']->tipo == 'p'): ?> <!-- Empresa Agro 20 -->
               <div class="row-fluid">
                 <h4 style="background-color: #ccc;">Colores de productos</h4>
                 <div class="row-fluid">

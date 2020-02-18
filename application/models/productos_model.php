@@ -276,7 +276,7 @@ class productos_model extends CI_Model {
 
     $this->addPresentacion($id_producto);
 
-    if ($data['id_empresa'] == '2') { // Empresa Agro 20
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
       $this->addColores($id_producto);
     }
 
@@ -328,7 +328,7 @@ class productos_model extends CI_Model {
 
 		$this->addPresentacion($id_producto);
 
-    if ($data['id_empresa'] == '2') { // Empresa Agro 20
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
       $this->addColores($id_producto);
     }
 
