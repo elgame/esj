@@ -35,9 +35,19 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" data-next="tipo" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" data-next="empresa_ap" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
                   <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
+                </div>
+              </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="empresa_ap">Empresa Aplicación </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="empresa_ap" class="span11" id="empresa_ap" value="<?php echo set_value('empresa_ap') ?>" data-next="tipo">
+                  </div>
+                  <input type="hidden" name="empresaId_ap" id="empresaId_ap" value="<?php echo set_value('empresaId_ap') ?>">
                 </div>
               </div><!--/control-group -->
 

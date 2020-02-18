@@ -278,6 +278,24 @@
         $("#empresaId").val('');
       }
     });
+
+    $("#empresa_ap").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#empresaId_ap").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresa_ap").css("background-color", "#FFD071");
+        $("#empresaId_ap").val('');
+      }
+    });
   };
 
   var autocompleteConcepto = function () {
