@@ -107,7 +107,8 @@ class clientes_model extends CI_Model {
             'ultimos_digitos' => $this->input->post('fdigitos'),
             'id_empresa'      => $this->input->post('did_empresa'),
             'show_saldo'      => $this->input->post('show_saldo')==='true'? 't': 'f',
-						);
+            'id_empresa_ap'   => ($this->input->post('did_empresa_ap')? $this->input->post('did_empresa_ap'): NULL),
+					);
 		}
 
 		$this->db->insert('clientes', $data);
@@ -158,7 +159,8 @@ class clientes_model extends CI_Model {
             'ultimos_digitos' => $this->input->post('fdigitos'),
             'id_empresa'      => $this->input->post('did_empresa'),
             'show_saldo'      => $this->input->post('show_saldo')==='true'? 't': 'f',
-						);
+            'id_empresa_ap'   => ($this->input->post('did_empresa_ap')? $this->input->post('did_empresa_ap'): NULL),
+					);
 			// Bitacora
 	    $id_bitacora = $this->bitacora_model->_update('clientes', $id_cliente, $data,
 	                              array(':accion'       => 'el cliente', ':seccion' => 'clientes',
@@ -290,7 +292,7 @@ class clientes_model extends CI_Model {
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
 														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito, pais,
-                            metodo_pago, ultimos_digitos, id_empresa, show_saldo" )
+                            metodo_pago, ultimos_digitos, id_empresa, show_saldo, id_empresa_ap" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();
@@ -313,6 +315,11 @@ class clientes_model extends CI_Model {
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa);
       $data['info']->empresa = $empresa['info'];
+
+      if ($data['info']->id_empresa_ap > 0) {
+        $empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa_ap);
+        $data['info']->empresa_ap = $empresa['info'];
+      }
 		}
 
 		return $data;
