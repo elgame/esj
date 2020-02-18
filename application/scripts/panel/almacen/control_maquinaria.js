@@ -198,12 +198,13 @@
     postData.fecha           = $('#gfecha').val();
     postData.id_combustible  = $tr.find('#fid_combustible').val();
     postData.id_labor        = $tr.find('#flabor_id').val();
-    postData.id_implemento   = $tr.find('#fimplemento').val();
+    postData.implemento      = $tr.find('#fimplemento').val();
     postData.lts_combustible = $tr.find('#flts_combustible').val();
     postData.precio          = $tr.find('#fprecio').val();
-    postData.odometro        = $tr.find('#fhr_ini').val()+':00';
-    postData.odometro_fin    = $tr.find('#fhr_fin').val()+':00';
+    postData.odometro        = $tr.find('#fodometro').val();
+    postData.odometro_fin    = $tr.find('#fodometro_fin').val();
     postData.horas_totales   = $tr.find('#ftotal_hrs').val();
+    postData.hora_carga      = $tr.find('#fhora_carga').val();
 
     if ( validExisCombustible(postData, $tr) ) {
       $.post(base_url + 'panel/control_maquinaria/ajax_save/', postData, function(data) {
@@ -217,7 +218,7 @@
           $tr.remove();
         }
 
-        addNewTr();
+        // addNewTr();
       }, "json");
     } else {
       $tr.find('#fcentro_costo').focus();
@@ -278,8 +279,11 @@
 
     trHtml =
       '<tr>' +
+        '<td>'+
+          '<input type="time" id="fhora_carga" value="" class="span11 pull-left fhora_carga jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
         '<td>' +
-          '<input type="text" name="factivos" class="span11 factivos jump'+(++jumpIndex)+'" value="" placeholder="Nissan FRX, Maquina limon" data-next="jump'+(++jumpIndex)+'">' +
+          '<input type="text" name="factivos" class="span11 factivos jump'+jumpIndex+'" value="" placeholder="Nissan FRX, Maquina limon" data-next="jump'+(++jumpIndex)+'">' +
           '<input type="hidden" name="factivoId" class="factivoId" value="">' +
           '<input type="hidden" id="fid_combustible" value="" class="span12">' +
         '</td>' +

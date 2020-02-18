@@ -47,6 +47,7 @@
                 <caption></caption>
                 <thead>
                   <tr>
+                    <th>Hr Carga</th>
                     <th>Activo</th>
                     <th>Labor</th>
                     <th>Implemento</th>
@@ -63,6 +64,9 @@
 
                   <?php foreach ($combustible['combustible'] as $key => $c) { ?>
                     <tr>
+                      <td>
+                        <input type="time" id="fhora_carga" value="<?php echo substr($c->hora_carga, 0, 8) ?>" class="span11 pull-left fhora_carga">
+                      </td>
                       <td>
                         <input type="text" name="factivos" class="span11 factivos" value="<?php echo $c->activo ?>" placeholder="Nissan FRX, Maquina limon">
                         <input type="hidden" name="factivoId" class="factivoId" value="<?php echo $c->id_activo ?>">
@@ -92,7 +96,7 @@
                         <input type="text" id="ftotal_hrs" value="<?php echo $c->horas_totales ?>" class="span12" readonly>
                       </td>
                       <td>
-                        <input type="text" id="flitro_hr" value="<?php echo ($c->lts_combustible/($c->horas_totales>0?$c->horas_totales:1)) ?>" class="span12" readonly>
+                        <input type="text" id="flitro_hr" value="<?php echo round($c->lts_combustible/($c->horas_totales>0?$c->horas_totales:1), 2) ?>" class="span12" readonly>
                       </td>
                       <td>
                         <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
@@ -101,7 +105,10 @@
                     </tr>
                   <?php } ?>
 
-                  <tr>
+                  <!-- <tr>
+                    <td>
+                      <input type="time" id="fhora_carga" value="" class="span11 pull-left fhora_carga">
+                    </td>
                     <td>
                       <input type="text" name="factivos" class="span11 factivos" value="" placeholder="Nissan FRX, Maquina limon">
                       <input type="hidden" name="factivoId" class="factivoId" value="">
@@ -115,16 +122,16 @@
                     <td>
                       <input type="text" id="fimplemento" value="" class="span11 pull-left fimplemento">
                     </td>
-                    <td>
+                    <td style="width: 100px;">
                       <input type="number" id="flts_combustible" value="" class="span12 vpositive">
                     </td>
-                    <td>
+                    <td style="width: 100px;">
                       <input type="number" id="fprecio" value="" class="span12 vpositive">
                     </td>
-                    <td>
+                    <td style="width: 100px;">
                       <input type="number" name="fodometro" id="fodometro" value="" class="span12">
                     </td>
-                    <td>
+                    <td style="width: 100px;">
                       <input type="number" name="fodometro_fin" id="fodometro_fin" value="" class="span12">
                     </td>
                     <td>
@@ -133,11 +140,11 @@
                     <td>
                       <input type="text" id="flitro_hr" value="" class="span12" readonly>
                     </td>
-                    <td>
+                    <td style="width: 60px;">
                       <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
                       <button type="button" class="btn btn-danger btn-small" id="btnDelClasif">Eliminar</button>
                     </td>
-                  </tr>
+                  </tr> -->
                 </tbody>
               </table>
 

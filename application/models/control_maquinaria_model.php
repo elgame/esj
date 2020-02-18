@@ -10,14 +10,14 @@ class control_maquinaria_model extends CI_Model {
   public function save($datos)
   {
     $data = array(
-      'fecha'           => $datos['fecha'],
-      'id_centro_costo' => $datos['id_centro_costo'],
       'id_labor'        => $datos['id_labor'],
-      'id_implemento'   => $datos['id_implemento'],
+      'fecha'           => $datos['fecha'],
+      'implemento'      => $datos['implemento'],
+      'hora_carga'      => $datos['hora_carga'],
+      'odometro'        => $datos['odometro'],
       'lts_combustible' => $datos['lts_combustible'],
-      'hora_inicial'    => $datos['hora_inicial'],
-      'hora_final'      => $datos['hora_final'],
-      'horas_totales'   => $datos['horas_totales'],
+      'precio'          => $datos['precio'],
+      'odometro_fin'    => $datos['odometro_fin']
     );
 
     if (isset($datos['id_combustible']{0}))
@@ -27,8 +27,7 @@ class control_maquinaria_model extends CI_Model {
       $datos['id_combustible'] = $this->db->insert_id('compras_salidas_combustible_id_combustible_seq');
     }
 
-    return array('passess' => true,
-            'id_combustible' => $datos['id_combustible'] );
+    return array('passess' => true, 'id_combustible' => $datos['id_combustible'] );
   }
 
   /**
@@ -184,14 +183,14 @@ class control_maquinaria_model extends CI_Model {
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(151, 40);
+    $widths = array(153, 40);
     $header = array('Vehiculo');
-    $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
-    $widths2 = array(14, 11, 14, 25, 25, 10, 10, 10, 9, 10, 13, 15, 25);
-    $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'O Ini', 'O Fin', 'O Total',
-        'Litros', 'Precio', 'Total', 'Implemento', 'Observaciones');
+    $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
+    $widths2 = array(15, 12, 15, 35, 35, 10, 10, 11, 10, 10, 15, 15, 18, 20, 35);
+    $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
+        'Litros', 'Precio', 'Total', 'Rendim lt/Hr', 'Acumulado', 'Implemento', 'Observaciones');
 
-    $odometro = 0;
+    $costoacumulado = 0;
     $auxvehi = '';
 
     $entro = false;
@@ -207,24 +206,27 @@ class control_maquinaria_model extends CI_Model {
       }
 
       if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
-        $pdf->SetFont('Arial','B',6);
+        $pdf->SetFont('Arial','B',7);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row([$vehiculo->activo, $vehiculo->labor], false);
 
-        $pdf->SetTextColor(255,255,255);
-        $pdf->SetFillColor(160,160,160);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(180,180,180);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns2);
         $pdf->SetWidths($widths2);
         $pdf->Row($header2, true);
 
         $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
-        $odometro = 0;
+        $costoacumulado = 0;
       }
 
-      $pdf->SetFont('Arial','',6);
+      $hrs = ($vehiculo->odometro_fin - $vehiculo->odometro);
+      $costoacumulado += $vehiculo->precio*$vehiculo->lts_combustible;
+
+      $pdf->SetFont('Arial','',7);
       $pdf->SetTextColor(0,0,0);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns2);
@@ -235,19 +237,17 @@ class control_maquinaria_model extends CI_Model {
         $vehiculo->folio,
         $vehiculo->rancho,
         $vehiculo->operador,
-        $odometro,
         $vehiculo->odometro,
-        ($vehiculo->odometro - $odometro),
+        $vehiculo->odometro_fin,
+        $hrs,
         MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
         MyString::formatoNumero($vehiculo->precio, 2, '', false),
         MyString::formatoNumero($vehiculo->precio*$vehiculo->lts_combustible, 2, '', false),
+        MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
+        MyString::formatoNumero($costoacumulado, 2, '', false),
         $vehiculo->implemento,
         $vehiculo->observaciones,
       ), false, false);
-
-      $odometro = $vehiculo->odometro;
-
-      // $lts_combustible += floatval($vehiculo->lts_combustible);
 
     }
 

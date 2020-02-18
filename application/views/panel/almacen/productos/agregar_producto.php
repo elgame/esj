@@ -72,7 +72,7 @@
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre'); ?>" required placeholder="Nombre del producto" autofocus>
 
-                    <input type="hidden" id="did_empresa" value="<?php echo $familia['info']->id_empresa ?>">
+                    <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo $familia['info']->id_empresa ?>">
                   </div>
                 </div>
 
@@ -123,6 +123,7 @@
                 </div>
               </div>
 
+              <?php if ($familia['info']->id_empresa != 2): ?> <!-- Empresa Agro 20 -->
               <div class="control-group">
                 <label class="control-label" for="ftipo">Tipo lista</label>
                 <div class="controls">
@@ -145,6 +146,7 @@
                   </select>
                 </div>
               </div>
+              <?php endif ?>
 
               <?php if ($familia['info']->tipo == 'a'): ?>
               <div class="control-group">
@@ -180,6 +182,99 @@
               <?php endif ?>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $familia['info']->tipo ?>">
+
+
+              <?php if ($familia['info']->id_empresa == 2 && $familia['info']->tipo == 'p'): ?> <!-- Empresa Agro 20 -->
+              <div class="row-fluid">
+                <h4 style="background-color: #ccc;">Colores de productos</h4>
+                <div class="row-fluid">
+                  <div style="width: 49%; float: left;"> Empresa
+                    <input type="text" id="pcolorsEmpresa" value="" placeholder="Empresa" class="span12">
+                    <input type="hidden" id="pcolorsEmpresaId" value="">
+                  </div>
+
+                  <div style="width: 49%; float: right;"> Color
+                    <select id="pcolorColor" class="span12">
+                      <option value="">Selecciona Color</option>
+                      <option value="v">Verde (Orgánico)</option>
+                      <option value="a">Amarillo (Orgánico Opc)</option>
+                      <option value="r">Rojo (No Orgánico)</option>
+                    </select>
+                  </div>
+
+                  <div style="width: 55%; float: left;">Tipo aplicacion
+                    <select name="pcolorTipoApl" id="pcolorTipoApl" class="span12">
+                      <option value="">Selecciona Aplicación</option>
+                      <option value="n">Nutrición</option>
+                      <option value="fs">Fito sanidad</option>
+                    </select>
+                  </div>
+
+                  <div style="width: 35%; float: right;">
+                    <button type="button" class="btn" onclick="colores.add();" style="margin-top: 15px;">Agregar Color</button>
+                  </div>
+                </div>
+
+                <table class="table table-condensed">
+                  <thead>
+                    <tr>
+                      <th>Empresa</th>
+                      <th>Color</th>
+                      <th>Tipo</th>
+                      <th>Opc</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblColorRow">
+                    <?php
+                    if (is_array($this->input->post('colorEmpresaId')))
+                    {
+                      foreach ($this->input->post('colorEmpresaId') as $key => $value)
+                      {
+                        if ($value != '')
+                        {
+                    ?>
+                    <tr class="rowColor">
+                      <td>
+                        <input type="text" name="colorEmpresa[]" value="<?php echo $this->input->post('colorEmpresa')[$key] ?>" class="span12 colorEmpresa" readonly>
+                        <input type="hidden" name="colorEmpresaId[]" value="<?php echo $value ?>" class="colorEmpresaId">
+                      </td>
+                      <td style="width: 100px;">
+                        <input type="text" name="colorColor[]" value="<?php echo $this->input->post('colorColor')[$key] ?>" class="span12 colorColor" readonly>
+                      </td>
+                      <td style="width: 100px;">
+                        <input type="text" name="colorTipoApli[]" value="<?php echo $this->input->post('colorTipoApli')[$key] ?>" class="span12 colorTipoApli" readonly>
+                      </td>
+                      <td style="width: 50px;">
+                        <a class="btn btn-danger" href="#" onclick="colores.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a>
+                      </td>
+                    </tr>
+                    <?php
+                        }
+                      }
+                    } ?>
+                    <!-- <tr class="rowColor">
+                      <td>
+                        <input type="text" name="colorEmpresa[]" value="" class="span12 colorEmpresa" readonly>
+                        <input type="hidden" name="colorEmpresaId[]" value="" class="colorEmpresaId">
+                      </td>
+                      <td style="width: 100px;">
+                        <input type="text" name="colorColor[]" value="" class="span12 colorColor" readonly>
+                      </td>
+                      <td style="width: 100px;">
+                        <input type="text" name="colorTipoApli[]" value="" class="span12 colorTipoApli" readonly>
+                      </td>
+                      <td style="width: 50px;">
+                        <a class="btn btn-danger" href="#" onclick="colores.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a>
+                      </td>
+                    </tr> -->
+                  </tbody>
+                </table>
+              </div>
+              <?php endif ?>
+
+              <hr>
 
               <?php if ($familia['info']->tipo != 'a'): ?>
               <div class="row-fluid">
@@ -223,6 +318,7 @@
                 </table>
               </div>
               <?php endif ?>
+
 
               <?php if ($familia['info']->tipo == 'a'): ?>
               <div class="row-fluid">

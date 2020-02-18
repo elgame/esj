@@ -1,12 +1,33 @@
 
  ☐ En cuentas por cobrar y pagar poner otra columna de lo que se vence
  ☐ Control de proyectos
- ☐ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos
+ ✔ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos @done (20-02-17 22:06)
+     -- pcc
+     CREATE TABLE public.productos_color_agro
+        (
+            id_producto bigint NOT NULL,
+            id_empresa integer NOT NULL,
+            color character varying(5) COLLATE pg_catalog."default" NOT NULL,
+            tipo_apli character varying(5) COLLATE pg_catalog."default" NOT NULL,
+            CONSTRAINT productos_color_agro_pkey PRIMARY KEY (id_producto, id_empresa),
+            CONSTRAINT productos_color_agro_id_empresa_fkey FOREIGN KEY (id_empresa)
+                REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            CONSTRAINT productos_color_agro_id_producto_fkey FOREIGN KEY (id_producto)
+                REFERENCES public.productos (id_producto) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        )
+        WITH ( OIDS = FALSE ) TABLESPACE pg_default;
+        ALTER TABLE public.productos_color_agro OWNER to programa;
+        COMMENT ON COLUMN public.productos_color_agro.color IS 'v: verde (organico), a: amarillo (organico opc), r: rojo (no organico)';
+        COMMENT ON COLUMN public.productos_color_agro.tipo_apli IS 'n: nutricion, fs: fitosanidad';
  ☐ Generar remisiones al agregar las salidas de almacen cuando sea de agro insumo
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
  ✔ Poner fecha de contrato en los trabajadores para que notifique @done (20-02-14 20:36) pcc
      ALTER TABLE public.usuarios ADD COLUMN fecha_contrato date;
- ☐ Reportes de las hojas de la señora de salidas de almacen, control de combustible
+ ✔ Reportes de las hojas de la señora de salidas de almacen, control de combustible @done (20-02-17 19:23)
      -- pct|san|pcc
      DROP TABLE public.compras_salidas_combustible;
      CREATE TABLE public.compras_salidas_combustible
@@ -36,6 +57,10 @@
           TABLESPACE pg_default;
           ALTER TABLE public.compras_salidas_combustible OWNER to programa;
      ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro_fin double precision;
+     -- pcc
+     ALTER TABLE compras_salidas_combustible ALTER COLUMN id_salida DROP NOT NULL;
+     -- ALTER TABLE public.compras_salidas_combustible ADD COLUMN id_activo bigint;
+
  ✔ En ordenes de servicio poner para que puedan ligar tanto compras, salidas de almacen y gastos de caja @done (20-02-03 17:13)
  ✔ En las ordenes de compra y requicicion poner la empresa en la que se ara la orden solo de la empresa agroinsumo y que genere la orden de
    agro y la orden igualita en la otra empresa seleccionada, que salga impresa en la orden @done (20-01-27 10:29) lap|pct|pcc|san

@@ -21,6 +21,7 @@ $(function(){
 
   familias.init();
   productos.init();
+  colores.init();
 });
 
 
@@ -247,6 +248,123 @@ var productos = (function($){
   objr.add = add;
   objr.quitar = quitar;
   objr.remove = remove;
+
+  return objr;
+})(jQuery);
+
+
+var colores = (function($){
+  var objr = {};
+  var varColores = {
+    'v': 'Verde (Orgánico)',
+    'a': 'Amarillo (Orgánico Opc)',
+    'r': 'Rojo (No Orgánico)',
+  };
+  var varTipoApli = {
+    'n': 'Nutrición',
+    'fs': 'Fito sanidad',
+  };
+
+  function init(){
+    $("#pcolorsEmpresa, #pcolorColor, #pcolorTipoApl").on('keypress', setEventRow);
+
+    autEmpresa();
+  }
+
+  function autEmpresa() {
+    $("#pcolorsEmpresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#pcolorsEmpresaId").val(ui.item.id);
+        $("#pcolorsEmpresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        $('#pcolorsEmpresaId').val('');
+      }
+    });
+  }
+
+  function add () { // pr: presentacion, pz: piezas partes
+    var color = {
+      'colorEmpresa'   : $('#pcolorsEmpresa').val(),
+      'colorEmpresaId' : $('#pcolorsEmpresaId').val(),
+      'colorColor'     : $('#pcolorColor').val(),
+      'colorTipoApli'  : $('#pcolorTipoApl').val(),
+    };
+    if (validateAdd(color)) {
+      var html =
+      '<tr class="rowColor">'+
+        '<td>'+
+          '<input type="text" name="colorEmpresa[]" value="'+color.colorEmpresa+'" class="span12 colorEmpresa" readonly>'+
+          '<input type="hidden" name="colorEmpresaId[]" value="'+color.colorEmpresaId+'" class="colorEmpresaId">'+
+        '</td>'+
+        '<td style="width: 100px;">'+ varColores[color.colorColor]+
+          '<input type="hidden" name="colorColor[]" value="'+color.colorColor+'" class="span12 colorColor" readonly>'+
+        '</td>'+
+        '<td style="width: 100px;">'+ varTipoApli[color.colorTipoApli]+
+          '<input type="hidden" name="colorTipoApli[]" value="'+color.colorTipoApli+'" class="span12 colorTipoApli" readonly>'+
+        '</td>'+
+        '<td style="width: 50px;">'+
+          '<a class="btn btn-danger" href="#" onclick="colores.quitar(this); return false;" title="Quitar">'+
+          '<i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a>'+
+        '</td>'+
+      '</tr>';
+
+      $('#tblColorRow').append(html);
+
+      $('#pcolorsEmpresa').val('');
+      $('#pcolorsEmpresaId').val('');
+      $('#pcolorColor').val('');
+      $('#pcolorTipoApl').val('');
+    }
+
+    $("#pcolorsEmpresa").focus();
+
+    return false;
+  }
+
+  function validateAdd(color) {
+    var pass = true, msg = '';
+    $('#tblColorRow .rowColor').each(function(index, el) {
+      if ($(this).find('.colorEmpresaId').val() == color.colorEmpresaId) {
+        pass = false;
+        noty({"text": "La empresa "+color.colorEmpresa+" ya esta agregada a la lista.", "layout":"topRight", "type":'warning'});
+      }
+    });
+
+    if (color.colorEmpresaId == '') {
+      pass = false;
+      noty({"text": "Es requerida la empresa.", "layout":"topRight", "type":'warning'});
+    } else if (color.colorColor == '') {
+      pass = false;
+      noty({"text": "Es requerido el color.", "layout":"topRight", "type":'warning'});
+    } else if (color.colorTipoApli == '') {
+      pass = false;
+      noty({"text": "Es requerido el tipo de aplicación.", "layout":"topRight", "type":'warning'});
+    }
+
+    return pass;
+  }
+
+  function quitar(obj){
+    var $tr = $(obj).parent().parent("tr.rowColor");
+    $tr.remove();
+    return false;
+  }
+
+  function setEventRow(event) {
+    if (event.which === 13) {
+      event.preventDefault();
+    }
+  }
+
+  objr.init = init;
+  objr.add = add;
+  objr.quitar = quitar;
 
   return objr;
 })(jQuery);
