@@ -101,13 +101,15 @@ class recetas_model extends CI_Model {
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
-        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario
+        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario,
+        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
         INNER JOIN usuarios aut ON aut.id = r.id_autorizo
         INNER JOIN usuarios rea ON rea.id = r.id_realizo
         INNER JOIN usuarios sol ON sol.id = r.id_solicito
+        LEFT JOIN empresas eap ON eap.id_empresa = r.id_empresa_ap
         LEFT JOIN otros.formulas f ON f.id_formula = r.id_formula
         LEFT JOIN (
           SELECT id_recetas, Sum(cargas) AS cargas FROM otros.recetas_salidas GROUP BY id_recetas
@@ -169,6 +171,7 @@ class recetas_model extends CI_Model {
 
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
+      'id_empresa_ap'     => (!empty($_POST['empresaId_ap'])? $_POST['empresaId_ap']: NULL),
       'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       'id_realizo'        => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],
@@ -251,6 +254,7 @@ class recetas_model extends CI_Model {
 
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
+      'id_empresa_ap'     => (!empty($_POST['empresaId_ap'])? $_POST['empresaId_ap']: NULL),
       'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       // 'id_realizo'     => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],

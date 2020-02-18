@@ -508,6 +508,8 @@ class recetas extends MY_Controller {
     $rules = array(
       ['field' => 'empresa',                'label' => 'Empresa',              'rules' => 'required'],
       ['field' => 'empresaId',              'label' => 'Empresa',              'rules' => 'required|numeric'],
+      ['field' => 'empresa_ap',             'label' => 'Empresa Aplicación',   'rules' => ''],
+      ['field' => 'empresaId_ap',           'label' => 'Empresa Aplicación',   'rules' => 'numeric'],
       ['field' => 'formula',                'label' => 'Formula',              'rules' => ''],
       ['field' => 'formulaId',              'label' => 'Formula',              'rules' => 'numeric'],
       ['field' => 'area',                   'label' => 'Cultivo',              'rules' => 'required'],

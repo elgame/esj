@@ -42,6 +42,16 @@
               </div><!--/control-group -->
 
               <div class="control-group">
+                <label class="control-label" for="empresa_ap">Empresa Aplicación </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="empresa_ap" class="span11" id="empresa_ap" value="<?php echo $receta['info']->empresa_ap ?>" data-next="tipo">
+                  </div>
+                  <input type="hidden" name="empresaId_ap" id="empresaId_ap" value="<?php echo $receta['info']->id_empresa_ap ?>">
+                </div>
+              </div><!--/control-group -->
+
+              <div class="control-group">
                 <label class="control-label" for="formula">Formula </label>
                 <div class="controls">
                   <div class="input-append span12">
