@@ -992,12 +992,14 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array($orden['info'][0]->empresa_ap), false, false);
 
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Cultivo / Actividad / Producto: '), false, false);
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array($orden['info'][0]->area->nombre), false, false);
+    if (isset($orden['info'][0]->area->nombre)) {
+      $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Cultivo / Actividad / Producto: '), false, false);
+      $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array($orden['info'][0]->area->nombre), false, false);
+    }
 
     $txtranchos = [];
     if (count($orden['info'][0]->rancho) > 0) {
