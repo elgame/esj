@@ -1,7 +1,7 @@
 
  ☐ En cuentas por cobrar y pagar poner otra columna de lo que se vence
  ☐ Recetas
-     -- lap|san
+     -- lap|san|pcc
      ALTER TABLE otros.recetas ADD COLUMN id_empresa_ap integer;
     COMMENT ON COLUMN otros.recetas.id_empresa_ap IS 'empresa de aplicacion';
  ☐ Control de proyectos
@@ -28,7 +28,7 @@
         COMMENT ON COLUMN public.productos_color_agro.color IS 'v: verde (organico), a: amarillo (organico opc), r: rojo (no organico)';
         COMMENT ON COLUMN public.productos_color_agro.tipo_apli IS 'n: nutricion, fs: fitosanidad';
  ☐ Generar remisiones al agregar las salidas de almacen cuando sea de agro insumo
-     -- lap
+     -- lap|pcc|san
      ALTER TABLE public.clientes ADD COLUMN id_empresa_ap integer;
  ☐ Crear nuevo modulo de facturacion para agro insumo que enliste las remisiones para que seleccione a que facturar
  ✔ Poner fecha de contrato en los trabajadores para que notifique @done (20-02-14 20:36) pcc|lap|san
