@@ -126,7 +126,7 @@
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->tipo : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->folio : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->fecha : ''; ?></td>
-							<td><?php echo substr($caja->calidad, 0, 9); ?></td>
+							<td><?php echo $isXml? $caja->calidad: substr($caja->calidad, 0, 9); ?></td>
 							<td class="txt_right"><?php echo $caja->cajas; ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->promedio, 2, '', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->kilos, 2, ''); ?></td>

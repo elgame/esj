@@ -794,8 +794,20 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
 
+    $params['isXml'] = (isset($_GET['tipoo']) && $_GET['tipoo'] == 'xls');
     $params['data'] = $this->bascula_model->getMovimientos();
-    $this->load->view('panel/bascula/reportes/rmc', $params);
+
+    if ($params['isXml']) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=reporte_movimientos.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      echo $this->load->view('panel/bascula/reportes/rmc', $params, true);
+      exit;
+    } else {
+      $this->load->view('panel/bascula/reportes/rmc', $params);
+    }
   }
 
   public function rptAuditoria()
