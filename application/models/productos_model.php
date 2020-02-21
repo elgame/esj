@@ -448,20 +448,21 @@ class productos_model extends CI_Model {
 	public function getFolioNext($id_familia)
 	{
 		$codigo = 1;
-		$res = $this->db->query("SELECT Coalesce(t.codigo[2], t.codigo[1]) AS codigo, t.rfc,
+		$res = $this->db->query("SELECT Coalesce(t.codigo[2], t.codigo[1]) AS codigo,
+        substring(t.cod from '([0-9]+)') AS cod, t.rfc,
         t.codigo[3] AS codigo_fecha, t.tipo
       FROM (
-        SELECT string_to_array(p.codigo, '-') AS codigo, substring(e.rfc, 1, 3) AS rfc,
+        SELECT string_to_array(p.codigo, '-') AS codigo, p.codigo AS cod, substring(e.rfc, 1, 3) AS rfc,
           pf.tipo
         FROM empresas e
           LEFT JOIN productos_familias pf ON e.id_empresa = pf.id_empresa
           LEFT JOIN productos p ON pf.id_familia = p.id_familia
         WHERE pf.id_familia = {$id_familia}
       ) t
-      ORDER BY Coalesce(t.codigo[2], t.codigo[1])::integer DESC")->row();
+      ORDER BY substring(t.cod from '([0-9]+)')::integer DESC")->row();
 
 		if(isset($res->codigo)){
-      $codigo = intval($res->codigo) + 1;
+      $codigo = intval($res->cod) + 1;
     }
 
     // Si es activo
