@@ -9,7 +9,9 @@
  ☐ Recetas
      -- lap|san|pcc|pct
      ALTER TABLE otros.recetas ADD COLUMN id_empresa_ap integer;
-    COMMENT ON COLUMN otros.recetas.id_empresa_ap IS 'empresa de aplicacion';
+      COMMENT ON COLUMN otros.recetas.id_empresa_ap IS 'empresa de aplicacion';
+     -- pcc
+     ALTER TABLE otros.centro_costo ADD COLUMN codigo character varying COLLATE pg_catalog."default";
  ☐ Control de proyectos
  ✔ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos @done (20-02-17 22:06)
      -- pcc|lap|san|pct

@@ -39,7 +39,7 @@ class centros_costos_model extends CI_Model {
 
     $query['query'] =
           "SELECT cc.id_centro_costo, cc.nombre, cc.status, cc.tipo,
-            a.id_area, a.nombre AS area
+            a.id_area, a.nombre AS area, cc.codigo
           FROM otros.centro_costo cc
             LEFT JOIN public.areas a ON a.id_area = cc.id_area
           {$sql}
@@ -80,6 +80,7 @@ class centros_costos_model extends CI_Model {
         'anios_credito' => floatval($this->input->post('anios_credito')),
         'id_cuenta'     => NULL,
         'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
+        'codigo'        => $this->input->post('codigo'),
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -112,6 +113,7 @@ class centros_costos_model extends CI_Model {
         'anios_credito' => floatval($this->input->post('anios_credito')),
         'id_cuenta'     => NULL,
         'cuenta_cpi'    => $this->input->post('cuenta_cpi'),
+        'codigo'        => $this->input->post('codigo'),
       );
 
       if ($data['tipo'] === 'banco' && $this->input->post('id_cuenta') !== false) {
@@ -136,7 +138,7 @@ class centros_costos_model extends CI_Model {
     $id_centro_costo = $id_centro_costo? $id_centro_costo: (isset($_GET['id'])? $_GET['id']: 0);
 
     $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas, anios_credito,
-                                  id_cuenta, cuenta_cpi" )
+                                  id_cuenta, cuenta_cpi, codigo" )
                         ->from("otros.centro_costo")
                         ->where("id_centro_costo", $id_centro_costo)
                         ->get();
@@ -174,7 +176,9 @@ class centros_costos_model extends CI_Model {
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
     if ($this->input->get('term') !== false)
-      $sql .= " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+      $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                lower(cc.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+              )";
     if ($this->input->get('tipo') !== false) {
       if (is_array($this->input->get('tipo'))) {
         $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
@@ -190,7 +194,7 @@ class centros_costos_model extends CI_Model {
 
     $res = $this->db->query(
         "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
-          cc.hectareas, cc.no_plantas
+          cc.hectareas, cc.no_plantas, cc.codigo
         FROM otros.centro_costo cc
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'
@@ -204,8 +208,8 @@ class centros_costos_model extends CI_Model {
       foreach($res->result() as $itm){
         $response[] = array(
             'id'    => $itm->id_centro_costo,
-            'label' => $itm->nombre,
-            'value' => $itm->nombre,
+            'label' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
+            'value' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
             'item'  => $itm,
         );
       }
