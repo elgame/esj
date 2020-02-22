@@ -893,7 +893,8 @@ class compras_requisicion extends MY_Controller {
                     'rules' => '');
     }
 
-    if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true' && $this->input->post('empresaId') == 20) {
+    if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true' && $this->input->post('empresaId') == 20
+      $this->input->post('empresaApId') != 20) {
       $rules[] = array('field' => 'txtBtnAutorizar',
                       'label' => 'Autorizo',
                       'rules' => 'callback_val_productos_agro|callback_val_proveedor_agro');
