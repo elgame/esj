@@ -1034,7 +1034,21 @@ function addProducto(unidades, prod) {
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
                 '<td><input type="checkbox" class="is-cert-check" ' + (prod_certificado ? 'checked' : '')  + ' ><input type="hidden" name="isCert[]" value="' + (prod_certificado ? '1' : '0') + '" class="certificado"></td>' +
-                '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
+                '<td>' +
+                  '<div class="btn-group">' +
+                    '<button type="button" class="btn impuestosEx">' +
+                      '<span class="caret"></span>' +
+                    '</button>' +
+                    '<ul class="dropdown-menu impuestosEx">' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">' +
+                        '<input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">' +
+                      '</li>' +
+                    '</ul>' +
+                  '</div>' +
+                  '<button type="button" class="btn btn-danger" id="delProd">' +
+                  '<i class="icon-remove"></i></button>' +
+                '</td>' +
               '</tr>';
 
     $(trHtml).appendTo($tabla.find('tbody'));
