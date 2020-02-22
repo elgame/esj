@@ -10,6 +10,17 @@ $(function(){
     }
   });
 
+  $('#table_prod, #table_prod2').on('click', '.btn.impuestosEx', function(){
+    var $group = $(this).parents(".btn-group"),
+      $ul = $group.find('.dropdown-menu.impuestosEx');
+    if ($ul.css('display') == 'none') {
+      $ul.show();
+      $group.find('#dieps').focus();
+    } else {
+      $ul.hide();
+    }
+  });
+
   $("#table_prod tbody tr .btn-group .btn.ventasmore").click();
   $("#table_prod tbody tr:last-child .btn-group .btn.ventasmore").click();
 

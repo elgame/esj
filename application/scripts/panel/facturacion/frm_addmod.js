@@ -269,17 +269,17 @@ $(function(){
     }
   });
 
-  $('#table_prod').on('keyup', '#prod_dcantidad, #prod_dpreciou', function(e) {
+  $('#table_prod').on('keyup', '#prod_dcantidad, #prod_dpreciou, #dieps', function(e) {
     var key = e.which,
         $this = $(this),
-        $tr = $this.parent().parent();
+        $tr = $this.parents('tr');
 
     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaTotalProducto($tr);
     }
-  }).on('change', '#prod_dcantidad, #prod_dpreciou', function(e) {
+  }).on('change', '#prod_dcantidad, #prod_dpreciou, #dieps', function(e) {
     var $this = $(this),
-        $tr = $this.parent().parent();
+        $tr = $this.parents('tr');
 
     calculaTotalProducto($tr);
   });
@@ -761,18 +761,23 @@ function calculaTotalProducto ($tr, $calculaT) {
   var $cantidad   = $tr.find('#prod_dcantidad'),
       $precio_uni = $tr.find('#prod_dpreciou'),
       $iva        = $tr.find('#diva'),
+      $ieps       = $tr.find('#dieps'),
       $retencion  = $tr.find('#dreten_iva'),
       $importe    = $tr.find('#prod_importe'),
 
       $totalIva       = $tr.find('#prod_diva_total'),
       $totalRetencion = $tr.find('#prod_dreten_iva_total'),
+      $totalIeps      = $tr.find('#dieps_total'),
 
       totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0)) * parseFloat($precio_uni.val() || 0)),
       totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
+      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val())),
+      totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100)
+      ;
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
 
   $totalIva.val(totalIva);
+  $totalIeps.val(totalIeps);
   $totalRetencion.val(totalRetencion);
   $importe.val(totalImporte);
 
@@ -1082,13 +1087,12 @@ function calculaTotal ($calculaT) {
   var total_importes    = 0,
       total_descuentos  = 0,
       total_ivas        = 0,
+      total_ieps        = 0,
       total_retenciones = 0,
       total_factura     = 0;
 
   var $sinCosto = $('#dsincosto'),
       isCheckedSinCosto = $sinCosto.is(':checked');
-
-    console.log("dadasd");
 
   $('input#prod_importe').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1134,6 +1138,20 @@ function calculaTotal ($calculaT) {
   });
   total_ivas = trunc2Dec(total_ivas);
 
+  $('input#dieps_total').each(function(i, e) {
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_ieps += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
+        total_ieps += parseFloat($(this).val());
+      }
+    }
+  });
+  total_ieps = trunc2Dec((total_ieps||0));
+
   $('input#prod_dreten_iva_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
     if ( ! isCheckedSinCosto) {
@@ -1148,7 +1166,7 @@ function calculaTotal ($calculaT) {
   });
   total_retenciones = trunc2Dec(total_retenciones);
 
-  total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
+  total_factura = trunc2Dec(parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_retenciones));
 
   $('#importe-format').html(util.darFormatoNum(total_importes));
   $('#total_importe').val(total_importes);
@@ -1161,6 +1179,9 @@ function calculaTotal ($calculaT) {
 
   $('#iva-format').html(util.darFormatoNum(total_ivas));
   $('#total_iva').val(total_ivas);
+
+  $('#ieps-format').html(util.darFormatoNum(total_ieps));
+  $('#total_ieps').val(total_ieps);
 
   $('#retiva-format').html(util.darFormatoNum(total_retenciones));
   $('#total_retiva').val(total_retenciones);

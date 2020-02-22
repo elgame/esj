@@ -668,6 +668,7 @@ class facturacion_model extends privilegios_model{
       'status'              => $borrador ? 'b' : 'p',
       // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'retencion_iva'       => $this->input->post('total_retiva'),
+      'ieps'                => floatval($this->input->post('total_ieps')),
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
       'cfdi_ext'            => json_encode($cfdi_ext),
