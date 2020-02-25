@@ -1,12 +1,12 @@
 
  ☐ En cuentas por cobrar y pagar poner otra columna de lo que se vence
- ☐ Agregar ieps en nomina y remisiones
+ ✔ Agregar ieps en factura y remisiones @done (20-02-24 20:52)
    -- pct|pcc
    ALTER TABLE public.facturacion ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
    -- pcc
    ALTER TABLE public.facturacion_productos ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_ieps double precision NOT NULL DEFAULT 0;
- ☐ Recetas
+ ✔ Recetas @done (20-02-24 21:46)
      -- lap|san|pcc|pct
      ALTER TABLE otros.recetas ADD COLUMN id_empresa_ap integer;
       COMMENT ON COLUMN otros.recetas.id_empresa_ap IS 'empresa de aplicacion';

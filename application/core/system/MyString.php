@@ -481,7 +481,7 @@ class MyString {
    * Devuelve la cadena de texto asociada a la fecha ingresada
    *
    * @param   string fecha (cadena con formato XXXX-XX-XX)
-   * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'in')
+   * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'cm', 'in')
    * @return  string  fecha_en_formato_texto
    */
   public static function fechaATexto($fecha, $formato = 'c', $conHr = false) {
@@ -500,6 +500,8 @@ class MyString {
 
       if($formato == '/c')
         return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1] . $hr;
+      elseif($formato == 'cm')
+        return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. substr($partes[1], -2, 2) . $hr;
       elseif($formato == 'in')
         return $partes[3] .'/'. $partes[2] .'/'. $partes[1] . $hr;
       else{
