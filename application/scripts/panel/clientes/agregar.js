@@ -11,10 +11,11 @@ $(function(){
       // Empresa Agro 20
       if (ui.item.id == 20) {
         $('#groupFempresa_ap').show();
-        $('#fempresa_ap').removeAttr('required');
+        $('#fempresa_ap').prop('required', true).val('');
+        $('#did_empresa_ap').val('');
       } else {
         $('#groupFempresa_ap').hide();
-        $('#fempresa_ap').prop('required', true).val('');
+        $('#fempresa_ap').removeAttr('required').val('');
         $('#did_empresa_ap').val('');
       }
     }
