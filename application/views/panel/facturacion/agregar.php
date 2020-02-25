@@ -398,6 +398,8 @@
                                 $_POST['prod_dcajas'][$key]             = $p->cajas;
                                 $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
                                 $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+                                $_POST['dieps_total'][$key]             = $p->ieps;
+                                $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
 
                                 $_POST['prod_dclase'][$key]             = $p->clase;
                                 $_POST['prod_dpeso'][$key]              = $p->peso;
@@ -509,6 +511,17 @@
                                       <input type="hidden" name="isCert[]" value="<?php echo $_POST['isCert'][$k] ?>" class="certificado">
                                     </td>
                                     <td>
+                                      <div class="btn-group">
+                                        <button type="button" class="btn impuestosEx">
+                                          <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu impuestosEx">
+                                          <li class="clearfix">
+                                            <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                            <input type="hidden" name="dieps_total[]" value="<?php echo $_POST['dieps_total'][$k] ?>" id="dieps_total" class="span12">
+                                          </li>
+                                        </ul>
+                                      </div>
                                       <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                     </td>
                                   </tr>
@@ -603,7 +616,20 @@
                                 <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
                               </td>
                               <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
-                              <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                              <td>
+                                <div class="btn-group">
+                                  <button type="button" class="btn impuestosEx">
+                                    <span class="caret"></span>
+                                  </button>
+                                  <ul class="dropdown-menu impuestosEx">
+                                    <li class="clearfix">
+                                      <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                      <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
+                                    </li>
+                                  </ul>
+                                </div>
+                                <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                              </td>
                             </tr>
                     </tbody>
                   </table>
@@ -646,7 +672,7 @@
                     </thead>
                     <tbody>
                       <tr>
-                        <td rowspan="7">
+                        <td rowspan="8">
                             <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra', isset($borrador) ? $borrador['info']->total_letra : '');?></textarea>
                         </td>
                       </tr>
@@ -669,6 +695,11 @@
                         <td>IVA</td>
                         <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
                         <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
+                      </tr>
+                      <tr>
+                        <td>IEPS</td>
+                        <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
+                        <input type="hidden" name="total_ieps" id="total_ieps" value="<?php echo set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
                       </tr>
                       <tr>
                         <td>Ret. IVA</td>
