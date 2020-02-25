@@ -103,16 +103,16 @@
                   <div class="control-group">
                     <label class="control-label" for="fempresa">Empresa </label>
                     <div class="controls">
-                    <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
-                    <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">
+                      <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
+                      <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">
                     </div>
                   </div>
 
                   <div class="control-group hide" id="groupFempresa_ap">
                     <label class="control-label" for="fempresa_ap">Empresa Aplicación </label>
                     <div class="controls">
-                    <input type="text" name="fempresa_ap" id="fempresa_ap" class="span10" value="" placeholder="Nombre">
-                    <input type="hidden" name="did_empresa_ap" value="" id="did_empresa_ap">
+                      <input type="text" name="fempresa_ap" id="fempresa_ap" class="span10" value="" placeholder="Nombre">
+                      <input type="hidden" name="did_empresa_ap" value="" id="did_empresa_ap">
                     </div>
                   </div>
 								</div> <!--/span-->

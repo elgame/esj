@@ -3,7 +3,7 @@
  ✔ Agregar ieps en factura y remisiones @done (20-02-24 20:52)
    -- pct|pcc|san
    ALTER TABLE public.facturacion ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
-   -- pcc|san
+   -- pct|pcc|san
    ALTER TABLE public.facturacion_productos ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_ieps double precision NOT NULL DEFAULT 0;
  ✔ Recetas @done (20-02-24 21:46)
