@@ -250,6 +250,9 @@ class centro_costo extends MY_Controller {
       array('field' => 'no_plantas',
             'label' => 'No de plantas',
             'rules' => ($val? 'required|numeric': '')),
+      array('field' => 'codigo',
+            'label' => 'Código',
+            'rules' => ($val? 'required': '')),
 
       array('field' => 'anios_credito',
             'label' => 'Años del crédito',

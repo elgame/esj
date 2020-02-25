@@ -131,7 +131,7 @@ class facturacion_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
-                cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext", false)
+                cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext, fp.ieps, fp.porcentaje_ieps", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', "u.nombre = fp.unidad and u.status = 't'", 'left')
@@ -668,6 +668,7 @@ class facturacion_model extends privilegios_model{
       'status'              => $borrador ? 'b' : 'p',
       // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'retencion_iva'       => $this->input->post('total_retiva'),
+      'ieps'                => floatval($this->input->post('total_ieps')),
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
       'cfdi_ext'            => json_encode($cfdi_ext),
@@ -835,6 +836,8 @@ class facturacion_model extends privilegios_model{
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
           'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ieps'                  => $_POST['dieps_total'][$key],
+          'porcentaje_ieps'       => $_POST['dieps'][$key],
           'ids_pallets'           => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'ids_remisiones'        => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
           'kilos'                 => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
@@ -881,8 +884,8 @@ class facturacion_model extends privilegios_model{
             'retencionIvcPorcent'     => '0',
             'trasladoCedular'         => '0',
             'trasladoCedularPorcent'  => '0',
-            'trasladoIeps'            => '0',
-            'trasladoIepsPorcent'     => '0',
+            'trasladoIeps'            => floatval($_POST['dieps_total'][$key]),
+            'trasladoIepsPorcent'     => floatval($_POST['dieps'][$key]),
             'trasladoIsh'             => '0',
             'trasladoIshPorcent'      => '0',
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
@@ -1040,6 +1043,9 @@ class facturacion_model extends privilegios_model{
 
     // xml 3.3
     $datosApi = $this->cfdi->obtenDatosCfdi33($_POST, $productosApi, $cid_nc);
+    // echo "<pre>";
+    //   var_dump($datosApi);
+    // echo "</pre>";exit;
 
     // Obtiene los datos para la cadena original
     // $datosCadOrig = $this->datosCadenaOriginal();
@@ -1712,6 +1718,7 @@ class facturacion_model extends privilegios_model{
         'observaciones'       => $this->input->post('dobservaciones'),
         'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
         'retencion_iva'       => $this->input->post('total_retiva'),
+        'ieps'                => floatval($this->input->post('total_ieps')),
         'cfdi_ext'            => json_encode($cfdi_ext),
       );
 
@@ -1771,6 +1778,8 @@ class facturacion_model extends privilegios_model{
             'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
             'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
             'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+            'ieps'              => $_POST['dieps_total'][$key],
+            'porcentaje_ieps'   => $_POST['dieps'][$key],
             'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
             'ids_remisiones'    => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
             'kilos'             => $_POST['prod_dkilos'][$key],

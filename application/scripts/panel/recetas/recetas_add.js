@@ -103,8 +103,8 @@
     $("#area").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaId_ap").val()) > 0)
+          params.did_empresa = $("#empresaId_ap").val();
         $.ajax({
             url: base_url + 'panel/areas/ajax_get_areas/',
             dataType: "json",
@@ -156,8 +156,8 @@
     $("#rancho").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaId_ap").val()) > 0)
+          params.did_empresa = $("#empresaId_ap").val();
         if(parseInt($("#areaId").val()) > 0)
           params.area = $("#areaId").val();
         $.ajax({

@@ -1027,7 +1027,8 @@ class cfdi{
       'descuento'         => '0',
       'total'             => $data['total_totfac'],
       'trasladosImporte'  => array(
-        'iva' => $data['total_iva']
+        'iva'  => $data['total_iva'],
+        'ieps' => floatval($data['total_ieps'])
       ),
       'retencionesImporte'  => array(
         'iva' => $data['total_retiva']
