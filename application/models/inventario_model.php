@@ -1084,6 +1084,8 @@ class inventario_model extends privilegios_model{
       if($this->input->get('did_empresa') != ''){
         $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
       }
+    } elseif (isset($extras['empresa'])) {
+      $sql .= " AND p.id_empresa = '{$extras['empresa']}'";
     }
 
     if ($this->input->get('did_empresa') == 3) { // gomez gudiño
@@ -1101,7 +1103,7 @@ class inventario_model extends privilegios_model{
     $sql_con_req = '';
     $sql_con_req_f = '';
     if ($con_req) { // toma en cuenta la existencia de las requisición pendientes
-      $sql_con_req_f = ', con_req.cantidad AS con_req';
+      $sql_con_req_f = ', COALESCE(con_req.cantidad, 0) AS con_req';
       $sql_con_req = "LEFT JOIN
       (
         SELECT crq.id_producto, Sum(crq.cantidad) AS cantidad

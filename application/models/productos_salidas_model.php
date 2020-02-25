@@ -369,13 +369,13 @@ class productos_salidas_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  public function validaProductosExistencia($id_almacen, $productos)
+  public function validaProductosExistencia($id_almacen, $productos, $extras = [])
   {
     $this->load->model('inventario_model');
     $response = array();
     if (count($productos)) {
       foreach ($productos as $key => $producto) {
-        $item = $this->inventario_model->getEPUData($producto['id'], $id_almacen, true);
+        $item = $this->inventario_model->getEPUData($producto['id'], $id_almacen, true, $extras);
         if (isset($item[0]->saldo_anterior)) {
           $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
           if ( MyString::float($existencia-$producto['cantidad']) < 0) {
@@ -970,7 +970,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->MultiCell($pdf->pag_size[0], 4, $tituloo.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 8);
     $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->MultiCell($pdf->pag_size[0], 4, $orden['info'][0]->empresa, 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');

@@ -51,7 +51,7 @@ class MY_Controller extends CI_Controller {
 													'tipo'       => '');
 
 			$user_data  = array('id_usuario'=> $this->session->userdata('id_usuario'),
-													'username'  => $this->session->userdata('username'),
+													'username'  => $this->session->userdata('usuario'),
 													'email'     => $this->session->userdata('email'),
 													'remember'	=> TRUE,
 													'acceso'    => $this->session->userdata('acceso'),

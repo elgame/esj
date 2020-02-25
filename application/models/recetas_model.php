@@ -144,7 +144,7 @@ class recetas_model extends CI_Model {
                                     INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
                                   WHERE csr.id_receta = {$data['info']->id_recetas}")->result();
 
-        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num,
+        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cc.codigo, cscc.num,
                                     cc.hectareas, cc.no_plantas
                                   FROM otros.recetas_centro_costo cscc
                                     INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
@@ -387,7 +387,7 @@ class recetas_model extends CI_Model {
         'cantidad' => $_POST['cantidad'][$key],
       ];
     }
-    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos);
+    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos, ['empresa' => $_POST['empresaId']] );
     if (!$res['passes']) {
       return $res;
     }
@@ -396,7 +396,7 @@ class recetas_model extends CI_Model {
     $fecha      = date("Y-m-d");
     $next_folio = $this->productos_salidas_model->folio();
     $res = $this->productos_salidas_model->agregar(array(
-        'id_empresa'        => $_POST['empresaId'],
+        'id_empresa'        => $receta['info']->id_empresa,
         'id_almacen'        => $id_almacen,
         'id_empleado'       => $this->session->userdata('id_usuario'),
         'folio'             => $next_folio,
@@ -409,6 +409,9 @@ class recetas_model extends CI_Model {
         'recibio'           => $receta['info']->autorizo,
         'no_receta'         => $receta['info']->folio,
         'id_area'           => $receta['info']->id_area,
+        'id_empresa_ap'     => $receta['info']->id_empresa_ap,
+
+        'tipo'              => 'r',
 
         'etapa'             => $receta['info']->a_etapa,
         'ciclo'             => $receta['info']->a_ciclo,
@@ -1389,10 +1392,10 @@ class recetas_model extends CI_Model {
     // Título
     $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
     $pdf->SetXY(0, 3);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->MultiCell($pdf->pag_size[0], 4, $receta['info']->empresa, 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 7);
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+    // $pdf->SetX(0);
+    // $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
 
     $pdf->SetFont($pdf->fount_txt, 'B', 7);
     $pdf->SetX(0);
@@ -1406,12 +1409,12 @@ class recetas_model extends CI_Model {
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
     $pdf->Row2(array('Receta: '.$receta['info']->folio,
-        'Fecha S.: '.MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) ) ), false, false, 5);
+        'Fecha S.: '.MyString::fechaATexto( substr($orden['info'][0]->fecha, 0, 10), 'cm') ), false, false, 5);
 
     $pdf->SetWidths(array(32, 32));
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array('Fecha R.: '.$receta['info']->fecha, 'Semana: '.$receta['info']->semana ), false, false, 5);
+    $pdf->Row2(array('Fecha R.: '.MyString::fechaATexto($receta['info']->fecha, 'cm'), 'Semana: '.$receta['info']->semana ), false, false, 5);
 
     if ($receta['info']->tipo == 'lts') {
       $pdf->SetXY(0, $pdf->GetY()-1);
@@ -1427,6 +1430,8 @@ class recetas_model extends CI_Model {
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
 
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Empresa: '.$receta['info']->empresa_ap ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $ranchos = [];
     foreach ($receta['info']->rancho as $keyr => $item) {
@@ -1448,7 +1453,7 @@ class recetas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $centrosc = [];
     foreach ($receta['info']->centroCosto as $keyr => $item) {
-      $centrosc[] = $item->nombre;
+      $centrosc[] = $item->codigo;
     }
     $pdf->Row2(array('Centros de costo: '.implode(', ', $centrosc) ), false, false);
 
@@ -1535,9 +1540,9 @@ class recetas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(66, 0));
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->Row2(array('ELABORO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->Row2(array('SOLICITO: '.strtoupper($orden['info'][0]->solicito)), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('AUTORIZO: '.strtoupper($orden['info'][0]->recibio)), false, false);
 
@@ -1548,16 +1553,18 @@ class recetas_model extends CI_Model {
     $pdf->Row2(array('PLACAS: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion_placas : '') )), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('CAMION: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion : '') )), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('RECIBIO: '), false, false);
 
     $pdf->SetWidths(array(63, 0));
     $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array('____________________________'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-3);
+    $pdf->Row2(array('____________________________________'), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Firma de Recibido'), false, false);
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.MyString::fechaATexto(date("Y-m-d H:i:s"), 'in', true)), false, false);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaATexto(date("Y-m-d H:i:s"), 'in', true)." Por: {$this->session->userdata('usuario')}"), false, false);
 
     // if ($orden['info'][0]->trabajador != '') {
     //   $pdf->SetXY(0, $pdf->GetY()-2);
