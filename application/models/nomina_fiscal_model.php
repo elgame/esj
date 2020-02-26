@@ -1212,7 +1212,10 @@ class nomina_fiscal_model extends CI_Model {
         // Timbrado de la factura.
         log_message('error', "nomina");
         log_message('error', json_encode($datosApi));
-        $result = $this->timbrar($datosApi);
+        echo "<pre>";
+          var_dump(json_encode($datosApi));
+        echo "</pre>";exit;
+        // $result = $this->timbrar($datosApi);
         // $result = $this->timbrar($archivo['pathXML']);
         // echo "<pre>";
         //   var_dump($result, $empleadoNomina);
@@ -1776,6 +1779,9 @@ class nomina_fiscal_model extends CI_Model {
           $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
           $datosApi['data'][0]["{$value['ApiKey']}excento"]  = $value['ImporteExcento'];
           $datosApi['data'][0]["{$value['ApiKey']}gravado"]  = $value['ImporteGravado'];
+        }
+        if ($value['ApiKey'] === 'pe_sueldo_7d_') {
+          $datosApi['data'][0]["pe_sueldo_gravado"] -= $value['ImporteGravado'];
         }
         if ($value['ApiKey'] === 'pe_indemnizacion_') {
           $datosApi['data'][0]["{$value['ApiKey']}numAñosServicio"]     = (int)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['NumAñosServicio'];
