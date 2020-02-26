@@ -191,6 +191,16 @@ class nomina
       $this->subsidioCausado = 0.01;
     }
 
+    if ($this->empleado->nomina_guardada == 't') {
+      $this->subsidio        = $this->empleado->nomina_fiscal_subsidio;
+      $this->isr             = $this->empleado->nomina_fiscal_isr;
+      $this->subsidioCausado = $this->empleado->nomina_fiscal_subsidio_causado;
+
+      if ($this->subsidio == 0.01 && $this->subsidioCausado == 0) {
+        $this->subsidioCausado = 0.01;
+      }
+    }
+
     return $this;
   }
 
