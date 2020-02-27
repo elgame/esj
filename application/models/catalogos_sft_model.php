@@ -1229,7 +1229,7 @@ class catalogos_sft_model extends CI_Model{
               FROM (
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
-                  p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe
+                  p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe, cp.cantidad, cp.precio_unitario
                 FROM compras_salidas co
                   INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
@@ -1280,9 +1280,9 @@ class catalogos_sft_model extends CI_Model{
     $aligns = array('L', 'R');
     $widths = array(170, 35);
     $header = array('Nombre', 'Importe');
-    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R');
-    $widths2 = array(18, 18, 36, 60, 45, 29);
-    $header2 = array('Fecha S', 'Folio S', 'Solicito', 'C Costo', 'Producto', 'Importe');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
+    $widths2 = array(18, 17, 31, 50, 40, 10, 11, 29);
+    $header2 = array('Fecha S', 'Folio S', 'Solicito', 'C Costo', 'Producto', 'Cantidad', 'Costo', 'Importe');
 
     $lts_combustible = 0;
     $horas_totales = 0;
@@ -1349,6 +1349,8 @@ class catalogos_sft_model extends CI_Model{
             $item->solicito,
             $item->nombre,
             $item->producto,
+            MyString::formatoNumero($item->cantidad, 2, '', false),
+            MyString::formatoNumero($item->precio_unitario, 2, '', false),
             MyString::formatoNumero($item->importe, 2, '', false),
           );
 
@@ -1422,6 +1424,8 @@ class catalogos_sft_model extends CI_Model{
         <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Solicito</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Costo</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
       </tr>';
     }
@@ -1444,6 +1448,8 @@ class catalogos_sft_model extends CI_Model{
               <td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$item->solicito.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->cantidad.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->precio_unitario.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
             </tr>';
         }
