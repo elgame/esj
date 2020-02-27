@@ -264,50 +264,53 @@ class nomina
     // Totales Percepciones
     $totalSueldosClaves = array('022', '023', '025', '039', '044');
     $totalSeparacionIndemnizacionClaves = array('022', '023', '025');
+    $excluirPercepciones = ['septimo_dia']; // Percepciones q ya están incluidas en otra
     foreach ($this->empleado->nomina->percepciones as $keyp => $percep) {
-      $this->empleado->nomina->subtotal          += $percep['total'];
-      $this->empleado->nomina->TotalPercepciones += $percep['total'];
-      $this->empleado->nomina->percepcionesTotales['TotalGravado'] += $percep['ImporteGravado'];
-      $this->empleado->nomina->percepcionesTotales['TotalExento'] += $percep['ImporteExcento'];
+      if (!in_array($keyp, $excluirPercepciones)) {
+        $this->empleado->nomina->subtotal          += $percep['total'];
+        $this->empleado->nomina->TotalPercepciones += $percep['total'];
+        $this->empleado->nomina->percepcionesTotales['TotalGravado'] += $percep['ImporteGravado'];
+        $this->empleado->nomina->percepcionesTotales['TotalExento'] += $percep['ImporteExcento'];
 
-      if (!in_array($percep['TipoPercepcion'], $totalSueldosClaves)) {
-        if (!isset($this->empleado->nomina->percepcionesTotales['TotalSueldos']))
-          $this->empleado->nomina->percepcionesTotales['TotalSueldos'] = 0;
-        $this->empleado->nomina->percepcionesTotales['TotalSueldos'] += $percep['total'];
-      }
+        if (!in_array($percep['TipoPercepcion'], $totalSueldosClaves)) {
+          if (!isset($this->empleado->nomina->percepcionesTotales['TotalSueldos']))
+            $this->empleado->nomina->percepcionesTotales['TotalSueldos'] = 0;
+          $this->empleado->nomina->percepcionesTotales['TotalSueldos'] += $percep['total'];
+        }
 
-      if (in_array($percep['TipoPercepcion'], $totalSeparacionIndemnizacionClaves)) {
-        if (($percep['ImporteGravado']+$percep['ImporteExcento']) > 0) {
-          if (!isset($this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion']))
-            $this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion'] = 0;
-          $this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion'] += $percep['total'];
+        if (in_array($percep['TipoPercepcion'], $totalSeparacionIndemnizacionClaves)) {
+          if (($percep['ImporteGravado']+$percep['ImporteExcento']) > 0) {
+            if (!isset($this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion']))
+              $this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion'] = 0;
+            $this->empleado->nomina->percepcionesTotales['TotalSeparacionIndemnizacion'] += $percep['total'];
 
-          $finte = $this->aniosTrabajadosEmpleado(true);
-          $anios_antiguedad = $finte->y+($finte->m>5? 1: 0);
-          $this->empleado->nomina->percepcionesSeparacionIndemnizacion = array(
-            'TotalPagado'         => 0,
-            'NumAñosServicio'     => $anios_antiguedad,
-            'UltimoSueldoMensOrd' => floatval($this->empleado->salario_diario*30),
-            'IngresoAcumulable'   => 0,
-            'IngresoNoAcumulable' => 0,
-          );
+            $finte = $this->aniosTrabajadosEmpleado(true);
+            $anios_antiguedad = $finte->y+($finte->m>5? 1: 0);
+            $this->empleado->nomina->percepcionesSeparacionIndemnizacion = array(
+              'TotalPagado'         => 0,
+              'NumAñosServicio'     => $anios_antiguedad,
+              'UltimoSueldoMensOrd' => floatval($this->empleado->salario_diario*30),
+              'IngresoAcumulable'   => 0,
+              'IngresoNoAcumulable' => 0,
+            );
 
-          if ($percep['TipoPercepcion'] == '022') { // Prima por antigüedad
-            $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
-          } elseif ($percep['TipoPercepcion'] == '023') { // Pagos por separación
-            $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
-          } else { // Indemnizaciones
-            $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
+            if ($percep['TipoPercepcion'] == '022') { // Prima por antigüedad
+              $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
+            } elseif ($percep['TipoPercepcion'] == '023') { // Pagos por separación
+              $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
+            } else { // Indemnizaciones
+              $this->empleado->nomina->percepcionesSeparacionIndemnizacion['TotalPagado'] += $percep['total'];
+            }
           }
         }
-      }
 
-      if ($percep['TipoPercepcion'] == '019' && ($percep['total']) > 0) { // hrs extras
-        $this->empleado->nomina->percepciones[$keyp]['HorasExtra'] = array(
-          array(
-            'Dias' => '1', 'TipoHoras' => '03', 'HorasExtra' => ceil(($percep['total'])/($this->empleado->salario_diario>0? $this->empleado->salario_diario: 1)),
-            'ImportePagado' => $percep['ImporteGravado']+$percep['ImporteExcento']),
-          );
+        if ($percep['TipoPercepcion'] == '019' && ($percep['total']) > 0) { // hrs extras
+          $this->empleado->nomina->percepciones[$keyp]['HorasExtra'] = array(
+            array(
+              'Dias' => '1', 'TipoHoras' => '03', 'HorasExtra' => ceil(($percep['total'])/($this->empleado->salario_diario>0? $this->empleado->salario_diario: 1)),
+              'ImportePagado' => $percep['ImporteGravado']+$percep['ImporteExcento']),
+            );
+        }
       }
     }
     if (count($this->empleado->nomina->percepcionesSeparacionIndemnizacion) > 0) {
