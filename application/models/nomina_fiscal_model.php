@@ -151,6 +151,8 @@ class nomina_fiscal_model extends CI_Model {
                 COALESCE(nf.salario_real, u.salario_diario_real) AS salario_diario_real,
                 nf.infonavit,
                 nf.fondo_ahorro,
+                nf.imss,
+                nf.vejez,
                 u.regimen_contratacion,
                 'COL' AS estado,
                 u.tipo_contrato,
@@ -1212,6 +1214,9 @@ class nomina_fiscal_model extends CI_Model {
         // Timbrado de la factura.
         log_message('error', "nomina");
         log_message('error', json_encode($datosApi));
+        // echo "<pre>";
+        //   var_dump(json_encode($datosApi));
+        // echo "</pre>";exit;
         $result = $this->timbrar($datosApi);
         // $result = $this->timbrar($archivo['pathXML']);
         // echo "<pre>";
@@ -1704,12 +1709,16 @@ class nomina_fiscal_model extends CI_Model {
 
     $noCertificado = $this->cfdi->obtenNoCertificado();
     $diasPago = ceil($nomina[0]->dias_trabajados);
+
+    $excludePercep = [];
     $tipoCan = 'se';
     if ($tipo === 'aguinaldo') {
       $diasPago = $nomina[0]->nomina->NumDiasPagados;
       $tipoCan = 'ag';
+      $excludePercep = ['pe_sueldo_7d_'];
     } elseif ($tipo === 'ptu') {
       $tipoCan = 'pt';
+      $excludePercep = ['pe_sueldo_7d_'];
     }
 
     // Array con los datos necesarios para generar la cadena original.
@@ -1767,21 +1776,26 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     foreach ($nomina[0]->nomina->percepciones as $key => $value) {
-      if (floatval($value['ImporteGravado']+$value['ImporteExcento']) > 0) {
-        if (isset($datosApi['data'][0]["{$value['ApiKey']}clave"])) {
-          $datosApi['data'][0]["{$value['ApiKey']}excento"]  += $value['ImporteExcento'];
-          $datosApi['data'][0]["{$value['ApiKey']}gravado"]  += $value['ImporteGravado'];
-        } else {
-          $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
-          $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
-          $datosApi['data'][0]["{$value['ApiKey']}excento"]  = $value['ImporteExcento'];
-          $datosApi['data'][0]["{$value['ApiKey']}gravado"]  = $value['ImporteGravado'];
-        }
-        if ($value['ApiKey'] === 'pe_indemnizacion_') {
-          $datosApi['data'][0]["{$value['ApiKey']}numAñosServicio"]     = (int)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['NumAñosServicio'];
-          $datosApi['data'][0]["{$value['ApiKey']}ultimoSueldoMensOrd"] = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['UltimoSueldoMensOrd'];
-          $datosApi['data'][0]["{$value['ApiKey']}ingresoAcumulable"]   = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['IngresoAcumulable'];
-          $datosApi['data'][0]["{$value['ApiKey']}ingresoNoAcumulable"] = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['IngresoNoAcumulable'];
+      if (!in_array($value['ApiKey'], $excludePercep)) {
+        if (floatval($value['ImporteGravado']+$value['ImporteExcento']) > 0) {
+          if (isset($datosApi['data'][0]["{$value['ApiKey']}clave"])) {
+            $datosApi['data'][0]["{$value['ApiKey']}excento"]  += $value['ImporteExcento'];
+            $datosApi['data'][0]["{$value['ApiKey']}gravado"]  += $value['ImporteGravado'];
+          } else {
+            $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
+            $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
+            $datosApi['data'][0]["{$value['ApiKey']}excento"]  = $value['ImporteExcento'];
+            $datosApi['data'][0]["{$value['ApiKey']}gravado"]  = $value['ImporteGravado'];
+          }
+          if ($value['ApiKey'] === 'pe_sueldo_7d_') {
+            $datosApi['data'][0]["pe_sueldo_gravado"] -= $value['ImporteGravado'];
+          }
+          if ($value['ApiKey'] === 'pe_indemnizacion_') {
+            $datosApi['data'][0]["{$value['ApiKey']}numAñosServicio"]     = (int)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['NumAñosServicio'];
+            $datosApi['data'][0]["{$value['ApiKey']}ultimoSueldoMensOrd"] = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['UltimoSueldoMensOrd'];
+            $datosApi['data'][0]["{$value['ApiKey']}ingresoAcumulable"]   = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['IngresoAcumulable'];
+            $datosApi['data'][0]["{$value['ApiKey']}ingresoNoAcumulable"] = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['IngresoNoAcumulable'];
+          }
         }
       }
     }
@@ -7216,6 +7230,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['sueldo'] += $percepciones['sueldo']['total'];
         $total_gral['sueldo'] += $percepciones['sueldo']['total'];
+        $empleado->nomina_fiscal_total_percepciones += $percepciones['sueldo']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -7369,17 +7384,20 @@ class nomina_fiscal_model extends CI_Model {
           }
         }
 
-        $pdf->SetXY(108, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'R'));
-        $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
-        $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
-        $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
-        if($pdf->GetY() >= $pdf->limiteY)
+        if (($empleado->imss+$empleado->vejez) > 0)
         {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
+          $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
             $pdf->AddPage();
             $y = $pdf->GetY();
           }
+        }
 
         if ($empleado->nomina_fiscal_prestamos > 0)
         {
@@ -7769,7 +7787,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(35, 35, 25, 35, 70));
-      $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $empleado->dias_trabajados * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
+      $dias_reales = $empleado->dias_trabajados == 7? 6: intval($empleado->dias_trabajados);
+      $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $dias_reales * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -7779,14 +7798,29 @@ class nomina_fiscal_model extends CI_Model {
       $percepciones = $empleado->nomina->percepciones;
 
       // Sueldo
+      $septimo_dia_gravado = (isset($percepciones['septimo_dia']['ImporteGravado'])? $percepciones['septimo_dia']['ImporteGravado']: 0);
+      $septimo_dia_exento = (isset($percepciones['septimo_dia']['ImporteExcento'])? $percepciones['septimo_dia']['ImporteExcento']: 0);
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array("001", 'Sueldo Gravado', MyString::formatoNumero($percepciones['sueldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array("001", 'Sueldo Gravado', MyString::formatoNumero($percepciones['sueldo']['ImporteGravado']-$septimo_dia_gravado, 2, '$', false)), false, 0, null, 1, 1);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array("001", 'Sueldo Exento', MyString::formatoNumero($percepciones['sueldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array("001", 'Sueldo Exento', MyString::formatoNumero($percepciones['sueldo']['ImporteExcento']-$septimo_dia_exento, 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['sueldo'] += $percepciones['sueldo']['total'];
       $total_gral['sueldo'] += $percepciones['sueldo']['total'];
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $y2 = $pdf->GetY();
+      }
+
+      // Sueldo Séptimo día
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25));
+      $pdf->Row(array("001", '7 Dia Sueldo Gravado', MyString::formatoNumero($septimo_dia_gravado, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array("001", '7 Dia Sueldo Exento', MyString::formatoNumero($septimo_dia_exento, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();

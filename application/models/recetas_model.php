@@ -997,10 +997,10 @@ class recetas_model extends CI_Model {
 
       $pdf->SetXY(6, $pdf->GetY());
       $yaux = $pdf->GetY();
-      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetFont('helvetica','B', 6.5);
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(22, 90));
-      $pdf->Row(array('EMPRESA', $receta['info']->empresa), false, 'B');
+      $pdf->SetWidths(array(17, 95));
+      $pdf->Row(array('EMPRESA', $receta['info']->empresa_ap), false, 'B');
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('CULTIVO', $receta['info']->area), false, 'B');
       $pdf->SetXY(6, $pdf->GetY());
@@ -1025,7 +1025,7 @@ class recetas_model extends CI_Model {
       if ($receta['info']->tipo === 'kg') {
         // $yaux = $pdf->GetY();
         $pdf->SetXY(120, $yaux);
-        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetFont('helvetica','B', 6.5);
         $pdf->SetAligns(array('C', 'C'));
         $pdf->SetWidths(array(35, 35));
         $pdf->Row(array('Dosis Planta', 'Planta x Ha'), false, false);
@@ -1039,7 +1039,7 @@ class recetas_model extends CI_Model {
         $pdf->Row(array('Kg Total', $receta['info']->kg_totales), false, true);
       } else { // lts
         $pdf->SetXY(120, $yaux);
-        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetFont('helvetica','B', 6.5);
         $pdf->SetAligns(array('C', 'C'));
         $pdf->SetWidths(array(35, 35));
         $pdf->Row(array('Ha Bruta', 'Planta x Ha'), false, false);
@@ -1056,10 +1056,10 @@ class recetas_model extends CI_Model {
       $yaux_datos = $pdf->GetY();
 
       $pdf->SetXY(192, $yaux);
-      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFont('helvetica','B', 6);
       $pdf->SetAligns(array('R', 'L'));
       $pdf->SetWidths(array(25, 55));
-      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(2,3), array('B', 'B'));
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(-1, 0), array('B', 'B'));
       $pdf->Row2(array('RECETA:', $receta['info']->folio), false, 'B', null, [[0,0,0], [236,0,0]]);
       $pdf->SetTextColor(0,0,0);
       $pdf->SetXY(192, $pdf->GetY());
@@ -1082,7 +1082,7 @@ class recetas_model extends CI_Model {
           $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL');
         }
 
-        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+5);
+        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+3);
         $yaux = $pdf->GetY();
         $page_aux = $pdf->page;
         foreach ($receta['info']->productos as $key => $prod)
@@ -1090,7 +1090,7 @@ class recetas_model extends CI_Model {
           if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
             if($pdf->GetY()+5 >= $pdf->limiteY)
               $pdf->AddPage();
-            $pdf->SetFont('Arial','B',7);
+            $pdf->SetFont('Arial','B', 6);
 
             $pdf->SetX(6);
             $pdf->SetAligns($aligns);
@@ -1098,7 +1098,7 @@ class recetas_model extends CI_Model {
             $pdf->Row($header, true);
           }
 
-          $pdf->SetFont('Arial','',7);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetTextColor(0,0,0);
           if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
@@ -1130,7 +1130,7 @@ class recetas_model extends CI_Model {
         }
 
         // Totales
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetX(6);
         $pdf->Row([
           "{$tpercent}%",
@@ -1151,7 +1151,7 @@ class recetas_model extends CI_Model {
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+2);
 
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->SetX(6);
@@ -1179,7 +1179,7 @@ class recetas_model extends CI_Model {
           if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
             if($pdf->GetY()+5 >= $pdf->limiteY)
               $pdf->AddPage();
-            $pdf->SetFont('Arial','B',7);
+            $pdf->SetFont('Arial','B', 6);
 
             if ($key === 0) {
               $header[3] = MyString::formatoNumero($receta['info']->dosis_equipo, 2, '', false);
@@ -1192,7 +1192,7 @@ class recetas_model extends CI_Model {
             $pdf->Row($header, true);
           }
 
-          $pdf->SetFont('Arial','',7);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetTextColor(0,0,0);
           if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
@@ -1229,7 +1229,7 @@ class recetas_model extends CI_Model {
         }
 
         // Totales
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetX(6);
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $pdf->Row([

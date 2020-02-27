@@ -292,9 +292,9 @@ class facturartebarato_api {
         } else {
           $incidencias =  array(
             'status'  => false,
-            'codigo'  => $codigo,
-            'mensaje' => $this->resultAPI->data->msg,
-            'data'    => $this->resultAPI->data
+            'codigo'  => '???',
+            'mensaje' => (isset($this->resultAPI->data)? $this->resultAPI->data->msg: ''),
+            'data'    => (isset($this->resultAPI->data)? $this->resultAPI->data: '')
           );
         }
       }
