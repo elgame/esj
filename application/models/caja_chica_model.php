@@ -2401,6 +2401,15 @@ class caja_chica_model extends CI_Model {
       }
       $ttotalIngresos += $totalIngresos;
     }
+    if ($totalIngresos > 0) {
+      $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array('TOTAL: ', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, true);
+    }
 
 
     // ingresos Remisiones
@@ -2451,15 +2460,24 @@ class caja_chica_model extends CI_Model {
       $pdf->SetTextColor(0, 0, 0);
       $ttotalIngresos += $totalRemisiones;
     }
+    if ($totalRemisiones > 0) {
+      $pdf->SetTextColor(0, 0, 0);
 
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array('TOTAL: ', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, true);
+    }
     if (($totalRemisiones + $totalIngresos) > 0) {
       $pdf->SetTextColor(0, 0, 0);
 
       $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetWidths(array(180, 25));
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(6);
-      $pdf->Row(array('', 'ACUMULADO: '.MyString::formatoNumero($ttotalIngresos, 2, '$', false), 'TOTAL: '.MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, true);
+      $pdf->Row(array('ACUMULADO: ', MyString::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
+      // $pdf->Row(array('', 'ACUMULADO: '.MyString::formatoNumero($ttotalIngresos, 2, '$', false), 'TOTAL: '.MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, true);
     }
 
 
