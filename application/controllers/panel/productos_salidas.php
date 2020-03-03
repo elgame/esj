@@ -13,6 +13,8 @@ class productos_salidas extends MY_Controller {
 
     'productos_salidas/rpt_salidas_prod_cod_pdf/',
     'productos_salidas/rpt_salidas_prod_cod_xls/',
+    'productos_salidas/rpt_salidas_productos_pdf/',
+    'productos_salidas/rpt_salidas_productos_xls/'
   );
 
   public function _remap($method){
@@ -357,7 +359,7 @@ class productos_salidas extends MY_Controller {
     $this->load->model('almacenes_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Reporte Salidas por Producto');
+    $params['seo']        = array('titulo' => 'Reporte Salidas por Codigo');
 
     $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['data'] = $this->productos_model->getFamilias(false, 'p');
@@ -378,6 +380,44 @@ class productos_salidas extends MY_Controller {
   public function rpt_salidas_prod_cod_xls(){
     $this->load->model('productos_salidas_model');
     $this->productos_salidas_model->getProductosSalidasCodXls();
+  }
+
+  public function rpt_salidas_productos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Salidas por Producto');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/salidas/rpt_salidas_productos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_salidas_productos_pdf(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasPdf();
+  }
+  public function rpt_salidas_productos_xls(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasXls();
   }
 
 

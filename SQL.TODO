@@ -3,7 +3,9 @@
     -- lap
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cuentas por Pagar 2', 128, true,  'cuentas_pagar/cuenta2/',  'money', false);
  ✔ Reporte de codigos nuevos en salidas de almacen @done (20-03-02 13:45) pcc|lap|san
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Producto',  366, true,  'productos_salidas/rpt_salidas_codigo/', 'print', true);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Producto',  366, true,  'productos_salidas/rpt_salidas_productos/', 'print', true);
+    -- lap|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Codigo',  366, true,  'productos_salidas/rpt_salidas_codigo/', 'print', true);
  ☐ Reporte de Cédula a Detalle de Proveedores que no salgan los pagados
  ✔ Agregar ieps en factura y remisiones @done (20-02-24 20:52)
    -- pct|pcc|san|lap
