@@ -1015,7 +1015,7 @@ class recetas_model extends CI_Model {
       $centros_costo = [];
       if (count($receta['info']->centroCosto) > 0) {
         foreach ($receta['info']->centroCosto as $key => $value) {
-          $centros_costo[] = $value->nombre;
+          $centros_costo[] = $value->codigo;
         }
       }
       $pdf->Row(array('C COSTO', implode(', ', $centros_costo)), false, 'B');

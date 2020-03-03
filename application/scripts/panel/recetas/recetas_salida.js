@@ -286,7 +286,8 @@
     var params = {
       tipoo: 'sa',
       accion: (accion? accion: ['en', 'p', 'b']),
-      filtro: $("#filBoleta").val()
+      filtro: $("#filBoleta").val(),
+      area: 6 // 6 = insumos
     };
     $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
       var html = '';

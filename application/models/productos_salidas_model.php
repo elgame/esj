@@ -1530,7 +1530,7 @@ class productos_salidas_model extends CI_Model {
    *
    * @return
    */
-  public function getProductosSalidasCodData()
+  public function getProductosSalidasCodData($tipo = 'salida')
   {
     $sql = '';
 
@@ -1576,27 +1576,50 @@ class productos_salidas_model extends CI_Model {
       $sql .= " AND cscc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
     }
 
-    $res = $this->db->query(
-      "SELECT *
-      FROM (
-        SELECT
-          co.id_salida, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
-          p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe, cp.cantidad,
-          cp.precio_unitario, pu.nombre AS unidad, String_agg(cc.nombre, ',') AS centro_costo,
-          String_agg(r.nombre, ',') AS ranchos
-        FROM compras_salidas co
-          INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
-          INNER JOIN productos p ON p.id_producto = cp.id_producto
-          INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
-          LEFT JOIN compras_salidas_rancho csr ON csr.id_salida = co.id_salida
-          LEFT JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
-          LEFT JOIN compras_salidas_centro_costo cscc ON cscc.id_salida = co.id_salida
-          LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
-        WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
-        GROUP BY co.id_salida, p.nombre, cp.cantidad, cp.precio_unitario, pu.nombre
-      ) t
-      ORDER BY fecha_orden ASC
-      ");
+    if ($tipo === 'salida') {
+      $res = $this->db->query(
+        "SELECT *
+        FROM (
+          SELECT
+            co.id_salida, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
+            p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe, cp.cantidad,
+            cp.precio_unitario, pu.nombre AS unidad, String_agg(cc.codigo, ',') AS centro_costo,
+            String_agg(r.nombre, ',') AS ranchos
+          FROM compras_salidas co
+            INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
+            INNER JOIN productos p ON p.id_producto = cp.id_producto
+            INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+            LEFT JOIN compras_salidas_rancho csr ON csr.id_salida = co.id_salida
+            LEFT JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+            LEFT JOIN compras_salidas_centro_costo cscc ON cscc.id_salida = co.id_salida
+            LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+          WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
+          GROUP BY co.id_salida, p.nombre, cp.cantidad, cp.precio_unitario, pu.nombre
+        ) t
+        ORDER BY fecha_orden ASC
+        ");
+    } elseif ($tipo === 'producto') {
+      $res = $this->db->query(
+        "SELECT *
+        FROM (
+          SELECT
+            p.id_producto, p.nombre producto, Sum(cp.cantidad*cp.precio_unitario) importe, Sum(cp.cantidad) AS cantidad,
+            (Sum(cp.cantidad*cp.precio_unitario) / Coalesce(NULLIF(Sum(cp.cantidad), 0), 1))::Numeric(10, 2) AS precio_unitario,
+            pu.nombre AS unidad
+          FROM compras_salidas co
+            INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
+            INNER JOIN productos p ON p.id_producto = cp.id_producto
+            INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+            LEFT JOIN compras_salidas_rancho csr ON csr.id_salida = co.id_salida
+            LEFT JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+            LEFT JOIN compras_salidas_centro_costo cscc ON cscc.id_salida = co.id_salida
+            LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+          WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
+          GROUP BY p.id_producto, p.nombre, pu.nombre
+        ) t
+        ORDER BY producto ASC
+        ");
+    }
 
     $response = array();
     if($res->num_rows() > 0)
@@ -1606,10 +1629,10 @@ class productos_salidas_model extends CI_Model {
   }
 
   /**
-   * Reporte existencias por unidad pdf
+   * Reporte salidas de productos
    */
-  public function getProductosSalidasCodPdf(){
-    $res = $this->getProductosSalidasCodData();
+  public function getProductosSalidasPdf(){
+    $res = $this->getProductosSalidasCodData('producto');
 
     $this->load->model('empresas_model');
     $this->load->model('almacenes_model');
@@ -1634,11 +1657,157 @@ class productos_salidas_model extends CI_Model {
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
+    $aligns = array('L', 'L', 'R', 'R', 'R');
+    $widths = array(110, 30, 30, 30, 30);
+    $header = array('Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
+
+    $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->producto,
+        $item->unidad,
+        MyString::formatoNumero($item->cantidad, 2, '', false),
+        MyString::formatoNumero($item->precio_unitario, 2, '', false),
+        MyString::formatoNumero($item->importe, 2, '', false),
+      );
+      $total_importe += $item->importe;
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R']);
+    $pdf->SetWidths([200, 30]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
+
+    $pdf->Output('salidas_productos.pdf', 'I');
+  }
+
+  public function getProductosSalidasXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=salidas_productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getProductosSalidasCodData('producto');
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Salidas por Producto';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Costo</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+
+    $total_importe = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td style="width:30px;border:1px solid #000;"></td>
+          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->unidad.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->cantidad.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->precio_unitario.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+        </tr>';
+      $total_importe += $item->importe;
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="5"></td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  /**
+   * Reporte salidas de productos x codigo
+   */
+  public function getProductosSalidasCodPdf(){
+    $res = $this->getProductosSalidasCodData('salida');
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Salidas por Codigo';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
     $aligns = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
     $widths = array(18, 18, 45, 55, 55, 18, 20, 20, 20);
     $header = array('Fecha', 'Folio', 'Solicito', 'C Costo', 'Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
 
-    $total_cargos = $total_abonos = $total_saldo = 0;
+    $total_importe = 0;
     foreach($res as $key => $item){
       $band_head = false;
       if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
@@ -1667,6 +1836,7 @@ class productos_salidas_model extends CI_Model {
         MyString::formatoNumero($item->precio_unitario, 2, '', false),
         MyString::formatoNumero($item->importe, 2, '', false),
       );
+      $total_importe += $item->importe;
 
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
@@ -1674,52 +1844,51 @@ class productos_salidas_model extends CI_Model {
       $pdf->Row($datos, false);
     }
 
-    // $pdf->SetFont('Arial','B',8);
-    // $pdf->SetXY(6, $pdf->GetY()+5);
-    // $pdf->Row(array('GENERAL',
-    //   MyString::formatoNumero($totales['general'][0], 2, '', false),
-    //   MyString::formatoNumero($totales['general'][1], 2, '', false),
-    //   MyString::formatoNumero($totales['general'][2], 2, '', false),
-    //   MyString::formatoNumero($totales['general'][3], 2, '', false),
-    //   ), false, true);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(['R', 'R']);
+    $pdf->SetWidths([249, 20]);
+    $pdf->Row(array('TOTAL',
+      MyString::formatoNumero($total_importe, 2, '', false),
+      ), false, true);
 
-    $pdf->Output('salidas_productos.pdf', 'I');
+    $pdf->Output('salidas_productos_cod.pdf', 'I');
   }
 
   public function getProductosSalidasCodXls(){
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=salidas_productos.xls");
+    header("Content-Disposition: attachment; filename=salidas_productos_cod.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $res = $this->getProductosSalidasCodData();
+    $res = $this->getProductosSalidasCodData('salida');
 
     $this->load->model('empresas_model');
     $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
     $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = 'Reporte Salidas por Producto';
-    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
-    $pdf->titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
-    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
-    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
-    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Salidas por Codigo';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
 
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="10" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="10" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="10" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="10"></td>
         </tr>
         <tr style="font-weight:bold">
           <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
@@ -1734,7 +1903,7 @@ class productos_salidas_model extends CI_Model {
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
 
-    $total_cargos = $total_abonos = $total_saldo = 0;
+    $total_importe = 0;
     foreach($res as $key => $item){
       $html .= '<tr>
           <td style="width:30px;border:1px solid #000;"></td>
@@ -1748,17 +1917,14 @@ class productos_salidas_model extends CI_Model {
           <td style="width:200px;border:1px solid #000;">'.$item->precio_unitario.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
         </tr>';
+      $total_importe += $item->importe;
     }
 
-    // $html .= '
-    //         <tr style="font-weight:bold">
-    //           <td></td>
-    //           <td style="border:1px solid #000;">GENERAL</td>
-    //           <td style="border:1px solid #000;">'.$totales['general'][0].'</td>
-    //           <td style="border:1px solid #000;">'.$totales['general'][1].'</td>
-    //           <td style="border:1px solid #000;">'.$totales['general'][2].'</td>
-    //           <td style="border:1px solid #000;">'.$totales['general'][3].'</td>
-    //         </tr>';
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="9"></td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
 
     $html .= '</tbody>
     </table>';
