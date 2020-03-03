@@ -115,6 +115,32 @@ class cuentas_pagar extends MY_Controller {
     $this->cuentas_pagar_model->cuentaProveedorExcel();
   }
 
+  public function cuenta2()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/almacen/cuentas_pagar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_pagar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por pagar');
+
+    $params['data'] = $this->cuentas_pagar_model->getCuentaProveedorData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_pagar/cuentaProveedor',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
 
   public function detalle()
   {
