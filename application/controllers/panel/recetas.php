@@ -89,6 +89,7 @@ class recetas extends MY_Controller {
       array('general/util.js'),
       array('general/keyjump.js'),
       array('panel/recetas/recetas_add.js'),
+      array('panel/recetas/rango_centros_costo.js'),
     ));
 
     $this->load->model('recetas_model');

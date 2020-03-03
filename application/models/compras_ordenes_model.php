@@ -1662,6 +1662,7 @@ class compras_ordenes_model extends CI_Model {
     $tipo = isset($datos['tipoo']{0})? $datos['tipoo']: 'en';
     $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
     $accion = isset($datos['accion'][0])? "'".implode("','", $datos['accion'])."'": "'en', 'p', 'b'";
+    $area = isset($datos['area']{0})? " AND a.id_area = '{$datos['area']}'": '';
 
     $campos = "p.nombre_fiscal AS proveedor,";
     $tablas = "INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor";
@@ -1689,6 +1690,7 @@ class compras_ordenes_model extends CI_Model {
           LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
           LEFT JOIN camiones AS ca ON ca.id_camion = b.id_camion
         WHERE b.tipo = '{$tipo}' AND b.accion in({$accion}) {$filtro}
+          {$area}
         ORDER BY b.folio DESC
         LIMIT 100");
     $response = array();
