@@ -255,7 +255,7 @@ class cuentas_pagar_model extends privilegios_model{
 	 */
 	public function getCuentaProveedorData()
 	{
-		$sql = '';
+		$sqlp1 = $sqlp2 = $sqlp3 = $sql = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -277,10 +277,16 @@ class cuentas_pagar_model extends privilegios_model{
 			$sql2 = 'WHERE saldo > 0';
 		}
 
-	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	    }
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('id_proveedor') != ''){
+      $sqlp1 = " AND f.id_proveedor = '".$this->input->get('id_proveedor')."'";
+      $sqlp2 = " AND c.id_proveedor = '".$this->input->get('id_proveedor')."'";
+      $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
+    }
 
 		/*** Saldo anterior ***/
 		$saldo_anterior = $this->db->query(
@@ -319,7 +325,7 @@ class cuentas_pagar_model extends privilegios_model{
                   compras AS f
                     INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
                 WHERE f.status <> 'ca' AND f.status <> 'b'
-                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  {$sqlp1}
                   AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_proveedor, f.id_compra
 
@@ -332,13 +338,13 @@ class cuentas_pagar_model extends privilegios_model{
                 FROM
                   compras AS f
                 WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  {$sqlp1}
                   AND Date(f.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_proveedor, f.id_compra
               ) AS d
               GROUP BY d.id_proveedor, d.id_compra
             ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
-          WHERE c.id_proveedor = '{$_GET['id_proveedor']}' AND f.status <> 'ca' AND f.status <> 'b'
+          WHERE f.status <> 'ca' AND f.status <> 'b' {$sqlp2}
              AND id_nc IS NULL
              AND Date(f.fecha) < '{$fecha1}'
              {$sql}
@@ -387,15 +393,15 @@ class cuentas_pagar_model extends privilegios_model{
 							FROM
 								compras
 							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-								AND id_proveedor = {$_GET['id_proveedor']}
+								{$sqlp3}
 								AND Date(fecha) <= '{$fecha2}'
 							GROUP BY id_nc
 						)
 					) AS ffs
 					GROUP BY id_compra
 				) AS ac ON f.id_compra = ac.id_compra {$sql}
-			WHERE f.id_proveedor = {$_GET['id_proveedor']}
-				AND f.status <> 'ca' AND f.id_nc IS NULL
+			WHERE f.status <> 'ca' AND f.id_nc IS NULL
+        {$sqlp1}
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
 
@@ -404,13 +410,17 @@ class cuentas_pagar_model extends privilegios_model{
 
 
 		//obtenemos la info del proveedor
-		$this->load->model('proveedores_model');
-		$prov = $this->proveedores_model->getProveedorInfo($_GET['id_proveedor'], true);
+    $prov = null;
+		if (!empty($_GET['id_proveedor'])) {
+      $this->load->model('proveedores_model');
+      $prov = $this->proveedores_model->getProveedorInfo($_GET['id_proveedor'], true);
+      $prov = $prov['info'];
+    }
 
 		$response = array(
 			'cuentas'   => array(),
 			'anterior'  => array(),
-			'proveedor' => $prov['info'],
+			'proveedor' => $prov,
 			'fecha1'    => $fecha1
 		);
 		if($res->num_rows() > 0){
