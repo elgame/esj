@@ -384,6 +384,7 @@
           $("#generalCodigo").hide();
         } else {
           $("#generalCodigo").hide();
+          $("#datosCombustible").hide();
         }
       }
     });

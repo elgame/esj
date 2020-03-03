@@ -1,11 +1,13 @@
 
- ☐ En cuentas por cobrar y pagar poner otra columna de lo que se vence
- ☐ Reporte de codigos nuevos en salidas de almacen
+ ☐ En cuentas por cobrar y pagar poner hacer lo de maria jose otra columna de lo que se vence
+    -- lap
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cuentas por Pagar 2', 128, true,  'cuentas_pagar/cuenta2/',  'money', false);
+ ✔ Reporte de codigos nuevos en salidas de almacen @done (20-03-02 13:45) pcc|lap|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Producto',  366, true,  'productos_salidas/rpt_salidas_codigo/', 'print', true);
  ☐ Reporte de Cédula a Detalle de Proveedores que no salgan los pagados
  ✔ Agregar ieps en factura y remisiones @done (20-02-24 20:52)
-   -- pct|pcc|san
+   -- pct|pcc|san|lap
    ALTER TABLE public.facturacion ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
-   -- pct|pcc|san
    ALTER TABLE public.facturacion_productos ADD COLUMN ieps double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_ieps double precision NOT NULL DEFAULT 0;
  ✔ Recetas @done (20-02-24 21:46)

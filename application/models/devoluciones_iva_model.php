@@ -45,9 +45,9 @@ class devoluciones_iva_model extends privilegios_model{
       string_agg(DISTINCT bm.metodo_pago, ', ') AS metodo_pago, string_agg(DISTINCT ca.concepto, ', ') AS concepto
     FROM compras c
       INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
-      LEFT JOIN compras_abonos ca ON c.id_compra = ca.id_compra
-      LEFT JOIN banco_movimientos_compras bmc ON bmc.id_compra_abono = ca.id_abono
-      LEFT JOIN banco_movimientos bm ON bm.id_movimiento = bmc.id_movimiento
+      INNER JOIN compras_abonos ca ON c.id_compra = ca.id_compra
+      INNER JOIN banco_movimientos_compras bmc ON bmc.id_compra_abono = ca.id_abono
+      INNER JOIN banco_movimientos bm ON bm.id_movimiento = bmc.id_movimiento
     WHERE c.status <> 'ca' AND c.importe_iva > 0
       {$sql}
     GROUP BY c.id_compra, p.id_proveedor
