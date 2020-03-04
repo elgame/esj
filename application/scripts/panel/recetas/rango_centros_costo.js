@@ -11,9 +11,11 @@
     $('#btnRangoCentrosCosto').on('click', function(event) {
       if (validaFormatoRango()) {
         $.ajax({
-          url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+          url: base_url + 'panel/centro_costo/ajax_get_centros_costos/',
           dataType: "json",
-          data: params,
+          data: {
+            centrosCosto: $('#rangoCentrosCosto').val()
+          },
           success: function(data) {
             console.log('respuesta', data);
           }
