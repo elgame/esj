@@ -464,11 +464,11 @@
   aria-hidden="true" style="width: 40%;left: 45%;top: 40%;height: 300px;">
   <div class="modal-body" style="max-height: 1500px;">
     <label class="control-label" for="rangoCentrosCosto">Rango de Centros de Costo por Código</label>
-    <input type="text" name="rangoCentrosCosto" id="rangoCentrosCosto" value="" placeholder="M1-M10, T1-T15">
+    <input type="text" name="rangoCentrosCosto" id="rangoCentrosCosto" value="" placeholder="1-4,5,7-9,8">
   </div>
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-    <button class="btn btn-primary">Agregar</button>
+    <button class="btn btn-primary" id="btnRangoCentrosCosto">Agregar</button>
   </div>
 </div>
 
