@@ -17,7 +17,11 @@
             centrosCosto: $('#rangoCentrosCosto').val()
           },
           success: function(data) {
-            console.log('respuesta', data);
+            if (data.length > 0) {
+              for (itm in data) {
+                addCCTag(data[itm]);
+              }
+            }
           }
         });
       } else {
@@ -52,7 +56,7 @@
   var validaFormatoRango = function () {
     var patter = /^([A-Z,a-z]*[0-9]+){1,}((-([A-Z,a-z]*[0-9]+){1,})|(,([A-Z,a-z]*[0-9]+){1,})?){1,}$/g;
     var result = patter.test($('#rangoCentrosCosto').val());
-    console.log('test', result);
+
     return result;
   };
 

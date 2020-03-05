@@ -234,33 +234,28 @@ class centros_costos_model extends CI_Model {
         $subcodigos = range($codini, $codfin);
         foreach ($subcodigos as $key2 => $cod2) {
           $cod2 = trim($cod2);
-          $cc[] = $subfijos.$cod2;
+          $cc[] = "'{$subfijos}{$cod2}'";
         }
       } else {
-        $cc[] = $cod;
+        $cc[] = "'{$cod}'";
       }
     }
 
-    echo "<pre>";
-      var_dump($cc);
-    echo "</pre>";exit;
+    $cc = implode(',', $cc);
+    $sql .= " AND (lower(cc.codigo) IN({$cc}))";
 
-    if ($this->input->get('term') !== false)
-      $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                lower(cc.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-              )";
-    if ($this->input->get('tipo') !== false) {
-      if (is_array($this->input->get('tipo'))) {
-        $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
-      } else
-        $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
-    }
+    // if ($this->input->get('tipo') !== false) {
+    //   if (is_array($this->input->get('tipo'))) {
+    //     $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
+    //   } else
+    //     $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
+    // }
 
-    if ($this->input->get('id_area') !== false)
-      $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+    // if ($this->input->get('id_area') !== false)
+    //   $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
 
-    if (!is_null($sqlX))
-      $sql .= $sqlX;
+    // if (!is_null($sqlX))
+    //   $sql .= $sqlX;
 
     $res = $this->db->query(
         "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
@@ -269,8 +264,7 @@ class centros_costos_model extends CI_Model {
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'
           {$sql}
-        ORDER BY cc.nombre ASC
-        LIMIT 20"
+        ORDER BY cc.nombre ASC"
     );
 
     $response = array();
