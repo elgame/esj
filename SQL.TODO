@@ -1,4 +1,8 @@
 
+
+ ✔ Recetas folio hojas @done (20-03-07 15:49)
+    -- pcc
+    ALTER TABLE otros.recetas ADD COLUMN folio_hoja character varying(15) COLLATE pg_catalog."default";
  ☐ En cuentas por cobrar y pagar poner hacer lo de maria jose otra columna de lo que se vence
     -- lap|pct|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cuentas por Pagar 2', 128, true,  'cuentas_pagar/cuenta2/',  'money', false);

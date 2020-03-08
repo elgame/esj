@@ -64,10 +64,10 @@ class MYpdf extends FPDF {
     /**
      * Carta Vertical
      */
-    public function headerLetterP(){
+    public function headerLetterP($y = [6, 5, 8]){
       // Título
       $this->SetFont('Arial','B',14);
-      $this->SetXY(46, 6);
+      $this->SetXY(46, $y[0]);
       $this->MultiCell(141, 6, $this->titulo1, 0, 'C', false);
 
       $this->SetFont('Arial','B',11);
@@ -81,10 +81,10 @@ class MYpdf extends FPDF {
       }
 
       $this->SetFont('Arial','I',8);
-      $this->SetXY(211, 5);
+      $this->SetXY(211, $y[1]);
       if($this->noShowPages)
        $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
-      $this->SetXY(194, 8);
+      $this->SetXY(194, $y[2]);
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 

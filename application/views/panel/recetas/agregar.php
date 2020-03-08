@@ -171,6 +171,13 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="folio_hoja">Folio Receta Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folio_hoja" class="span9" id="folio_hoja" value="<?php echo set_value('folio_hoja'); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="fecha">Fecha</label>
                 <div class="controls">
                   <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', date("Y-m-d")); ?>" size="25" readonly>

@@ -527,6 +527,7 @@ class recetas extends MY_Controller {
       ['field' => 'tipo',                   'label' => 'Tipo',                 'rules' => 'required'],
       ['field' => 'folio_formula',          'label' => 'Folio formula',        'rules' => 'numeric'],
       ['field' => 'folio',                  'label' => 'Folio',                'rules' => 'required|numeric'],
+      ['field' => 'folio_hoja',             'label' => 'Folio Hoja',           'rules' => 'max_length[15]'],
       ['field' => 'fecha',                  'label' => 'Fecha',                'rules' => 'required'],
       ['field' => 'solicito',               'label' => 'solicito',             'rules' => 'required'],
       ['field' => 'solicitoId',             'label' => 'solicitoId',           'rules' => 'required|numeric'],
