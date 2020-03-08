@@ -130,6 +130,12 @@ class cuentas_pagar extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Cuentas por pagar');
 
+    if($this->input->get('did_empresa') == false){
+      $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $params['empresa']->id_empresa;
+      $_GET['dempresa'] = $params['empresa']->nombre_fiscal;
+    }
+
     $params['data'] = $this->cuentas_pagar_model->getCuentaProveedorData();
 
     if(isset($_GET['msg']{0}))
@@ -137,7 +143,7 @@ class cuentas_pagar extends MY_Controller {
 
     $this->load->view('panel/header',$params);
     $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/cuentas_pagar/cuentaProveedor',$params);
+    $this->load->view('panel/cuentas_pagar/cuentaProveedor2',$params);
     $this->load->view('panel/footer',$params);
   }
 
