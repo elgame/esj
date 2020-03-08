@@ -1,7 +1,7 @@
 
 
  ✔ Recetas folio hojas @done (20-03-07 15:49)
-    -- pcc
+    -- pcc|san
     ALTER TABLE otros.recetas ADD COLUMN folio_hoja character varying(15) COLLATE pg_catalog."default";
  ☐ En cuentas por cobrar y pagar poner hacer lo de maria jose otra columna de lo que se vence
     -- lap|pct|pcc
