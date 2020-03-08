@@ -75,7 +75,8 @@
 							  <tr>
 							  	<th>Nombre</th>
 								  <th>Tipo</th>
-									<th>Área</th>
+                  <th>Área</th>
+									<th>Código</th>
                   <th>Estatus</th>
 								  <th>Opciones</th>
 							  </tr>
@@ -85,7 +86,8 @@
 							<tr>
 								<td><?php echo $centro_costo->nombre; ?></td>
 								<td><?php echo $centro_costo->tipo; ?></td>
-								<td><?php echo $centro_costo->area; ?></td>
+                <td><?php echo $centro_costo->area; ?></td>
+								<td><?php echo $centro_costo->codigo; ?></td>
 								<td>
 									<?php
 										if($centro_costo->status == 't'){

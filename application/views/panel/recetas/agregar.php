@@ -171,6 +171,13 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="folio_hoja">Folio Receta Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folio_hoja" class="span9" id="folio_hoja" value="<?php echo set_value('folio_hoja'); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="fecha">Fecha</label>
                 <div class="controls">
                   <input type="date" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', date("Y-m-d")); ?>" size="25" readonly>
@@ -464,11 +471,11 @@
   aria-hidden="true" style="width: 40%;left: 45%;top: 40%;height: 300px;">
   <div class="modal-body" style="max-height: 1500px;">
     <label class="control-label" for="rangoCentrosCosto">Rango de Centros de Costo por Código</label>
-    <input type="text" name="rangoCentrosCosto" id="rangoCentrosCosto" value="" placeholder="M1-M10, T1-T15">
+    <input type="text" name="rangoCentrosCosto" id="rangoCentrosCosto" value="" placeholder="1-4,5,7-9,8">
   </div>
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-    <button class="btn btn-primary">Agregar</button>
+    <button class="btn btn-primary" id="btnRangoCentrosCosto">Agregar</button>
   </div>
 </div>
 
