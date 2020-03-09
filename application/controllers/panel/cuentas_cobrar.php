@@ -359,7 +359,7 @@ class cuentas_cobrar extends MY_Controller {
       if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');
-        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel']);
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel'], $_POST);
         if($respons['passes']) {
           $params['frm_errors'] = $this->showMsgs('8', $respons['msg']);
           $params['closeModal'] = true;
