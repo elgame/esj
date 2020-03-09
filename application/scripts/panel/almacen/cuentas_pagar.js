@@ -16,7 +16,7 @@ $(function(){
   });
 
   // Autocomplete proveedores
-  $("#dcliente").autocomplete({
+  $("#dproveedor").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
       if(parseInt($("#did_empresa").val()) > 0)
@@ -33,13 +33,15 @@ $(function(){
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
-      $("#fid_cliente").val(ui.item.id);
-      $("#dcliente").val(ui.item.label).css({'background-color': '#99FF99'});
+      $("#fid_proveedor").val(ui.item.id);
+      $("#id_proveedor").val(ui.item.id);
+      $("#dproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
      $(this).css({'background-color': '#FFD9B3'});
-      $('#fid_cliente').val('');
+      $('#fid_proveedor').val('');
+      $('#id_proveedor').val('');
     }
   });
 
@@ -130,20 +132,30 @@ var abonom = (function($){
 
     if($this.attr('data-status') == 'p')
     {
-      if($this.is(':checked')){
-        $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
-          monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val() },
-          function(data, textStatus, xhr) {
-            // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
-      }else{
-        $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
-          monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val() },
-          function(data, textStatus, xhr) {
-            // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      var params = {
+        id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
+        monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val()
+      };
+
+      if ((parseInt(params.id_proveedor)||0) > 0) {
+        if($this.is(':checked')){
+          $.post(base_url + 'panel/banco_pagos/set_compra/', params,
+            function(data, textStatus, xhr) {
+              // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+          }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+        }else{
+          $.post(base_url + 'panel/banco_pagos/set_compra/', params,
+            function(data, textStatus, xhr) {
+              // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+          }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+        }
+      } else {
+        noty({"text": 'Se tiene que seleccionar un proveedor para marcar las compras.', "layout":"topRight", "type": 'error'});
+        if($this.is(':checked')) {
+          $this.prop('checked', false);
+        } else {
+          $this.prop('checked', true);
+        }
       }
     }else
     {

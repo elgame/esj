@@ -48,7 +48,9 @@ class MYexcel {
 			foreach($campos['conte'] as $kcamp => $camp){
 				if($camp['sum'] != -1){
 					$item->{$camp['name']} = MyString::float($item->{$camp['name']});
-					$campos['conte'][$kcamp]['sum'] += $item->{$camp['name']};
+          if (!isset($item->command_sum) || $item->command_sum) {
+					 $campos['conte'][$kcamp]['sum'] += $item->{$camp['name']};
+          }
 				}else{
 					$item->{$camp['name']} = utf8_decode($item->{$camp['name']});
 				}
