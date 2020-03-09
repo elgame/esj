@@ -126,6 +126,14 @@ var comPagos = (function($){
       $('#listaComPago').on('click', '.removeComPago', function(event) {
         $(this).parent().remove();
       });
+
+      $('#moneda').on('change', function(event) {
+        if ($(this).val() == 'MXN') {
+          $('#tipoCambio').val('').hide();
+        } else {
+          $('#tipoCambio').val('').show();
+        }
+      });
     }
   }
 
