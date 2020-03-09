@@ -1028,7 +1028,7 @@ class cfdi{
       'total'             => $data['total_totfac'],
       'trasladosImporte'  => array(
         'iva'  => $data['total_iva'],
-        'ieps' => floatval($data['total_ieps'])
+        'ieps' => floatval((isset($data['total_ieps'])? $data['total_ieps']: 0))
       ),
       'retencionesImporte'  => array(
         'iva' => $data['total_retiva']
@@ -1070,7 +1070,7 @@ class cfdi{
     return $datosApi;
   }
 
-  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio, $cfdiRelacionados = null)
+  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio, $cfdiRelacionados = null, $posts = [])
   {
     // echo "<pre>";
     //   var_dump($data, $cuentaCliente);
@@ -1119,6 +1119,19 @@ class cfdi{
       }
     }
 
+    $override_monto = true;
+    $pago_moneda      = (isset($cfdi_ext->moneda)? $cfdi_ext->moneda: 'MXN');
+    $pago_tipo_cambio = (isset($cfdi_ext->tipoCambio)? $cfdi_ext->tipoCambio: 1);
+    $pago_monto       = $data[0]->pago;
+    if (!empty($posts['moneda'])) {
+      $pago_moneda = $posts['moneda'];
+      $pago_tipo_cambio = (!empty($posts['tipoCambio']) && $posts['tipoCambio']>0? $posts['tipoCambio']: $pago_tipo_cambio);
+
+      if ($pago_moneda == 'USD') {
+        $override_monto = false;
+        $pago_monto = number_format($data[0]->pago/$pago_tipo_cambio, 2, '.', '');
+      }
+    }
     $comPago = [
       'cadenaPago'        => "",
       'certificadoPago'   => "",
@@ -1126,15 +1139,15 @@ class cfdi{
       'cuentaOrd'         => $cuentaCliente? $cuentaCliente->cuenta : '',
       'fechaPago'         => str_replace(' ', 'T', substr($data[0]->fecha, 0, 19)),
       'formaDePago'       => $formaDePago,
-      'moneda'            => (isset($cfdi_ext->moneda)? $cfdi_ext->moneda: 'MXN'),
-      'monto'             => $data[0]->pago,
+      'moneda'            => $pago_moneda,
+      'monto'             => $pago_monto,
       'nombreBancoOrdExt' => $nombreBancoOrdExt,
       'numOperacion'      => "1",
       'rfcEmisorCtaBen'   => $formaDePago != '01'? $data[0]->rfc: '',
       'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
       'selloPago'         => "",
       'tipoCadPago'       => "",
-      'tipoCambio'        => (isset($cfdi_ext->tipoCambio)? $cfdi_ext->tipoCambio: 1),
+      'tipoCambio'        => $pago_tipo_cambio,
       'doctoRelacionado'  => []
     ];
     $firstCfdiRel = (isset($cfdiRel['cfdiRelacionado']) && count($cfdiRel['cfdiRelacionado']) == 0);
@@ -1174,7 +1187,9 @@ class cfdi{
       }
     }
 
-    $comPago['monto'] = $monto;
+    if ($override_monto) {
+      $comPago['monto'] = $monto;
+    }
 
     $noCertificado = $this->obtenNoCertificado();
 

@@ -21,6 +21,18 @@
                   <strong><?php echo $metodo_pago ?></strong>
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="moneda">Moneda</label>
+                <div class="controls">
+                  <select name="moneda" class="span8 pull-left" id="moneda">
+                    <option value="MXN" selected="selected">Peso mexicano (MXN)</option>
+                    <option value="USD">Dólar estadounidense (USD)</option>
+                  </select>
+                  <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="" style="display: none;" placeholder="Tipo de Cambio">
+                </div>
+              </div>
+
             <?php if ($metodo_pago != 'efectivo') { ?>
               <div class="control-group">
                 <label class="control-label" for="dcuenta">Cuenta Bancaria Cliente</label>
