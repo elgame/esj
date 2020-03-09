@@ -24,9 +24,9 @@
           <div class="box-content">
             <a href="<?php echo base_url('panel/cuentas_pagar/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm">
               <i class="icon-chevron-left"></i> Atras</a> |
-            <a href="<?php echo base_url('panel/cuentas_pagar/cuenta_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/cuentas_pagar/cuenta2_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> |
-            <a href="<?php echo base_url('panel/cuentas_pagar/cuenta_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/cuentas_pagar/cuenta2_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a>
 
             <form action="<?php echo base_url('panel/cuentas_pagar/cuenta2'); ?>" method="GET" class="form-search">
@@ -47,15 +47,23 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
 
-                <label for="dcliente">Proveedor</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
+                <label for="dproveedor">Proveedor</label>
+                <input type="text" name="dproveedor" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
+                <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>"> |
 
                 <input type="hidden" name="id_proveedor" id="id_proveedor" value="<?php echo set_value_get('id_proveedor'); ?>">
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
+
+            <div class="span6 hide" id="hide_agregar_abono">
+              <?php echo $this->usuarios_model->getLinkPrivSm('cuentas_pagar/agregar_abono/', array(
+                'params'   => "",
+                'btn_type' => 'btn-success pull-right btn_abonos_masivo',
+                'attrs' => array('style' => 'margin-top: 30px; display:none;', 'rel' => 'superbox-50x500') )
+              ); ?>
+            </div>
 
             <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 100px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:14px;font-weight:bold;"></div>
 
@@ -68,6 +76,7 @@
                   <th>Serie</th>
                   <th>Folio</th>
                   <th>Concepto</th>
+                  <th>Proveedor</th>
                   <th>Cargo</th>
                   <th>Abono</th>
                   <th>Saldo <input type="checkbox" id="select-all-abonom" title="Seleccionar/Deseleccionar"></th>
@@ -83,6 +92,7 @@
                   <td></td>
                   <td></td>
                   <td>Saldo anterior a <?php echo $data['fecha1']; ?></td>
+                  <td></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero(
                       (isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0), 2, '$', false ); ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero(
@@ -129,6 +139,7 @@
                     <a href="<?php echo base_url('panel/cuentas_pagar/detalle/').'?id='.$cuenta->id_compra.'&tipo='.$cuenta->tipo.
                           '&'.MyString::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
                   </td>
+                  <td><?php echo $cuenta->proveedor ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->cargo, 2, "$", false); ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->abono, 2, "$", false); ?></td>
                   <td class="sel_abonom" data-id="<?php echo $cuenta->id_compra; ?>" data-tipo="<?php echo $cuenta->tipo ?>" style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->saldo, 2, "$", false); ?></td>
@@ -139,7 +150,7 @@
             <?php }
             } ?>
                 <tr style="background-color:#ccc;font-weight: bold;">
-                  <td colspan="4" class="a-r">Totales:</td>
+                  <td colspan="6" class="a-r">Totales:</td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($total_cargo, 2, "$", false); ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($total_abono, 2, "$", false); ?></td>
                   <td style="text-align: right;"><?php echo MyString::formatoNumero($total_saldo, 2, "$", false); ?></td>

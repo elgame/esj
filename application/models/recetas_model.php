@@ -992,7 +992,7 @@ class recetas_model extends CI_Model {
 
       $pdf->logo = $receta['info']->empresaData->logo!=''? (file_exists($receta['info']->empresaData->logo)? $receta['info']->empresaData->logo: '') : '';
 
-      if (is_null($pdf->GetY()) || $pdf->GetY()+24 >= ($pdf->limiteY/2)) {
+      if (is_null($pdf->GetY()) || $pdf->GetY()+12 >= ($pdf->limiteY/2)) {
         $pdf->AliasNbPages();
         $pdf->AddPage();
         $pdf->SetXY(6, $pdf->GetY()-8);
@@ -1164,14 +1164,14 @@ class recetas_model extends CI_Model {
         $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
-          $widths = array(14, 68, 16, 16, 16, 18, 16, 20);
+          $widths = array(10, 50, 14, 14, 14, 17, 15, 18);
           $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
-          $widths = array(14, 68, 16, 16, 16, 18);
+          $widths = array(10, 50, 14, 14, 14, 17);
           $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
         }
 
-        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+2);
+        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
 
         $pdf->SetFont('Arial','B', 6);
         $pdf->SetAligns($aligns);

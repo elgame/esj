@@ -11,6 +11,8 @@ class cuentas_pagar extends MY_Controller {
 
     'cuentas_pagar/cuenta_pdf/',
     'cuentas_pagar/cuenta_xls/',
+    'cuentas_pagar/cuenta2_pdf/',
+    'cuentas_pagar/cuenta2_xls/',
 
     'cuentas_pagar/saldos_pdf/',
     'cuentas_pagar/saldos_xls/',
@@ -117,6 +119,9 @@ class cuentas_pagar extends MY_Controller {
 
   public function cuenta2()
   {
+    $this->carabiner->css(array(
+      array('panel/cuentas_pagar_cobrar.css'),
+    ));
     $this->carabiner->js(array(
       array('general/msgbox.js'),
       array('general/supermodal.js'),
@@ -145,6 +150,14 @@ class cuentas_pagar extends MY_Controller {
     $this->load->view('panel/general/menu',$params);
     $this->load->view('panel/cuentas_pagar/cuentaProveedor2',$params);
     $this->load->view('panel/footer',$params);
+  }
+  public function cuenta2_pdf(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuenta2ProveedorPdf();
+  }
+  public function cuenta2_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuenta2ProveedorExcel();
   }
 
 

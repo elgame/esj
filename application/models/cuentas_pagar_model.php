@@ -370,7 +370,8 @@ class cuentas_pagar_model extends privilegios_model{
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
-        COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
+        COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago,
+        p.nombre_fiscal AS proveedor
 			FROM
 				compras AS f
 				LEFT JOIN (
@@ -400,6 +401,7 @@ class cuentas_pagar_model extends privilegios_model{
 					) AS ffs
 					GROUP BY id_compra
 				) AS ac ON f.id_compra = ac.id_compra {$sql}
+        LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
 			WHERE f.status <> 'ca' AND f.id_nc IS NULL
         {$sqlp1}
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
@@ -876,6 +878,200 @@ class cuentas_pagar_model extends privilegios_model{
 			$xls->workbook->close();
 		}
 	}
+
+
+  public function cuenta2ProveedorPdf(){
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    $res = $this->getCuentaProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
+    $pdf->titulo2 = isset($res['proveedor']->nombre_fiscal)? 'Cuenta de '.$res['proveedor']->nombre_fiscal: '';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+
+    // $response = $this->cuentaProveedorCurpPdf($pdf, $res);
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
+
+
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('C', 'C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+    $widths = array(17, 11, 20, 40, 50, 28, 28, 28, 16, 17, 15);
+    $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D. Trans.');
+
+    $total_cargo = 0;
+    $total_abono = 0;
+    $total_saldo = 0;
+    $totales_x_tipo = array('nacional' => 0, 'internacional' => 0);
+
+    $bad_saldo_ante = true;
+    if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
+      // $total_cargo += $res['anterior']->total;
+      // $total_abono += $res['anterior']->abonos;
+      // $total_saldo += $res['anterior']->saldo;
+    }else{
+      $res['anterior'] = new stdClass();
+      $res['anterior']->total = 0;
+      $res['anterior']->abonos = 0;
+      $res['anterior']->saldo = 0;
+    }
+    $res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
+    $comprasids = array();
+    foreach($res['cuentas'] as $key => $item){
+      $comprasids[] = $item->id_compra;
+      $band_head = false;
+      if($pdf->GetY()+5 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        if ($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      if($bad_saldo_ante){
+        $pdf->SetFont('Arial','',7);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array('', '', '', $res['anterior']->concepto, '',
+          MyString::formatoNumero($res['anterior']->total, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
+          '', '', ''), false);
+        $bad_saldo_ante = false;
+      }
+
+      $pdf->SetFont('Arial','',8);
+
+      if (preg_match('/internacional/', $item->concepto2)) {
+        $totales_x_tipo['internacional'] += $item->cargo;
+      } else {
+        $totales_x_tipo['nacional'] += $item->cargo;
+      }
+
+      $datos = array($item->fecha,
+                  $item->serie,
+                  $item->folio,
+                  $item->concepto,
+                  $item->proveedor,
+                  MyString::formatoNumero($item->cargo, 2, '$', false),
+                  MyString::formatoNumero($item->abono, 2, '$', false),
+                  MyString::formatoNumero($item->saldo, 2, '$', false),
+                  $item->estado, $item->fecha_vencimiento,
+                  $item->dias_transc);
+
+      $total_cargo += $item->cargo;
+      $total_abono += $item->abono;
+      $total_saldo += $item->saldo;
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(255,255,255);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(138, 28, 28, 28));
+    $pdf->Row(array('Totales:',
+        MyString::formatoNumero($total_cargo, 2, '$', false),
+        MyString::formatoNumero($total_abono, 2, '$', false),
+        MyString::formatoNumero($total_saldo, 2, '$', false)), true);
+
+
+    $pdf->Output('cuentas_proveedor.pdf', 'I');
+  }
+  public function cuenta2ProveedorExcel(&$xls=null, $close=true){
+    $res = $this->getCuentaProveedorData();
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
+    $this->load->library('myexcel');
+    if($xls == null)
+      $xls = new myexcel();
+
+    $worksheet =& $xls->workbook->addWorksheet();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $xls->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $xls->titulo2 = (isset($res['proveedor']->nombre_fiscal)? 'Cuenta de '.$res['proveedor']->nombre_fiscal: '');
+    $xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
+
+    if(is_array($res['anterior'])){
+      $res['anterior'] = new stdClass();
+      $res['anterior']->cargo = 0;
+      $res['anterior']->abono = 0;
+      $res['anterior']->saldo = 0;
+    }else{
+      $res['anterior']->cargo = $res['anterior']->total;
+      $res['anterior']->abono = $res['anterior']->abonos;
+    }
+    $res['anterior']->fecha = $res['anterior']->serie = $res['anterior']->folio = '';
+    $res['anterior']->concepto = $res['anterior']->estado = $res['anterior']->fecha_vencimiento = '';
+    $res['anterior']->proveedor = '';
+    $res['anterior']->dias_transc = '';
+    $res['anterior']->command_sum = false;
+
+    array_unshift($res['cuentas'], $res['anterior']);
+
+    $data_fac = $res['cuentas'];
+
+    $row=0;
+    //Header
+    $xls->excelHead($worksheet, $row, 8, array(
+        array($xls->titulo2, 'format_title2'),
+        array($xls->titulo3, 'format_title3'),
+        array($xls->titulo4, 'format_title3')
+    ));
+
+    $row +=3;
+    $xls->excelContent($worksheet, $row, $data_fac, array(
+        'head' => array('Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
+        'conte' => array(
+            array('name' => 'fecha', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'serie', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'folio', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'concepto', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'proveedor', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'cargo', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'abono', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'estado', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'fecha_vencimiento', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'dias_transc', 'format' => 'format4', 'sum' => -1))
+    ));
+
+    if($close){
+      $xls->workbook->send('cuentaProveedor.xls');
+      $xls->workbook->close();
+    }
+  }
 
 
 
