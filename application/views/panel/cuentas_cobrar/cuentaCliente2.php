@@ -24,9 +24,9 @@
           <div class="box-content">
           	<a href="<?php echo base_url('panel/cuentas_cobrar/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm">
 							<i class="icon-chevron-left"></i> Atras</a> |
-						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta2_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
 							<i class="icon-print"></i> Imprimir</a> |
-						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta2_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
 							<i class="icon-table"></i> Excel</a>
 
             <form action="<?php echo base_url('panel/cuentas_cobrar/cuenta2'); ?>" method="GET" class="form-search">
