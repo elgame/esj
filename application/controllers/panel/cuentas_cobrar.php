@@ -11,6 +11,8 @@ class cuentas_cobrar extends MY_Controller {
 
     'cuentas_cobrar/cuenta_pdf/',
     'cuentas_cobrar/cuenta_xls/',
+    'cuentas_cobrar/cuenta2_pdf/',
+    'cuentas_cobrar/cuenta2_xls/',
 
     'cuentas_cobrar/saldos_pdf/',
     'cuentas_cobrar/saldos_xls/',
@@ -122,6 +124,49 @@ class cuentas_cobrar extends MY_Controller {
     $this->cuentas_cobrar_model->cuentaClientePdf();
   }
   public function cuenta_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentaClienteExcel();
+  }
+
+  public function cuenta2()
+  {
+    $this->carabiner->css(array(
+      array('panel/cuentas_pagar_cobrar.css'),
+    ));
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_cobrar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por cobrar');
+
+    if($this->input->get('did_empresa') == false){
+      $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $params['empresa']->id_empresa;
+      $_GET['dempresa'] = $params['empresa']->nombre_fiscal;
+    }
+
+    $params['data'] = $this->cuentas_cobrar_model->getCuentaClienteData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_cobrar/cuentaCliente2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cuenta2_pdf(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentaClientePdf();
+  }
+  public function cuenta2_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->cuentaClienteExcel();
   }

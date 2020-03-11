@@ -269,7 +269,7 @@ class cuentas_cobrar_model extends privilegios_model{
    */
   public function getCuentaClienteData()
   {
-    $sql = '';
+    $sqlp1 = $sqlp2 = $sqlp3 = $sql = '';
 
     //Filtros para buscar
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -293,6 +293,12 @@ class cuentas_cobrar_model extends privilegios_model{
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
       $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('id_cliente') != ''){
+      $sqlp1 = " AND f.id_cliente = '".$this->input->get('id_cliente')."'";
+      $sqlp2 = " AND c.id_cliente = '".$this->input->get('id_cliente')."'";
+      $sqlp3 = " AND id_cliente = '".$this->input->get('id_cliente')."'";
     }
 
     if($this->input->get('ftipodoc') != ''){
@@ -338,7 +344,7 @@ class cuentas_cobrar_model extends privilegios_model{
             facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
-            AND f.id_cliente = '{$_GET['id_cliente']}'
+            {$sqlp1}
             AND Date(fa.fecha) <= '{$fecha2}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
 
@@ -351,7 +357,7 @@ class cuentas_cobrar_model extends privilegios_model{
             FROM
             facturacion AS f
             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
-            AND f.id_cliente = '{$_GET['id_cliente']}'
+            {$sqlp1}
             AND Date(f.fecha) <= '{$fecha2}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
           ) AS d
@@ -360,157 +366,101 @@ class cuentas_cobrar_model extends privilegios_model{
         LEFT JOIN (SELECT id_remision, id_factura, status
           FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
         ) fh ON f.id_factura = fh.id_remision
-        WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
+        WHERE f.status <> 'ca' AND f.status <> 'b'
+        {$sqlp2}
         AND f.id_abono_factura IS NULL AND id_nc IS NULL
         AND Date(f.fecha) < '{$fecha1}'
         AND COALESCE(fh.id_remision, 0) = 0 {$sql}
         GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
-
-          -- UNION ALL
-
-          -- SELECT
-          --  c.id_cliente,
-          --  c.nombre_fiscal,
-          --  Sum(f.total) AS total,
-          --  0 AS iva,
-          --  COALESCE(Sum(taa.abonos), 0) as abonos,
-          --  COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
-          --  'nv' as tipo
-          -- FROM
-          --  clientes AS c
-          --  INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-          --  LEFT JOIN (
-          --    SELECT
-          --      f.id_cliente,
-          --      f.id_venta,
-          --      Sum(fa.total) AS abonos
-          --    FROM
-          --      facturacion_ventas_remision AS f
-          --        INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-          --    WHERE f.id_cliente = '{$_GET['id_cliente']}'
-          --      AND f.status <> 'ca'
-          --      AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
-          --    GROUP BY f.id_cliente, f.id_venta
-          --  ) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
-          -- WHERE c.id_cliente = '{$_GET['id_cliente']}'
-          --      AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
-          -- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
-
         ) AS sal
-{$sql2}
-GROUP BY id_cliente, tipo
-");
+    {$sql2}
+    GROUP BY id_cliente, tipo
+    ");
 
-/*** Facturas y ventas en el rango de fechas ***/
-$res = $this->db->query(
-  "SELECT
-  f.id_factura,
-  f.serie,
-  f.folio,
-  Date(f.fecha) AS fecha,
-  COALESCE(f.total, 0) AS cargo,
-  COALESCE(f.importe_iva, 0) AS iva,
-  COALESCE(ac.abono, 0) AS abono,
-  (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
-  (CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
-  (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-  Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-  (Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
-  ( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
-  'f' as tipo
-  FROM
-  facturacion AS f
-  LEFT JOIN (
-    SELECT id_factura, Sum(abono) AS abono
-    FROM (
-      (
-        SELECT
-        id_factura,
-        Sum(total) AS abono
-        FROM
-        facturacion_abonos as fa
-        WHERE Date(fecha) <= '{$fecha2}'
+    /*** Facturas y ventas en el rango de fechas ***/
+    $res = $this->db->query(
+      "SELECT
+      f.id_factura,
+      f.serie,
+      f.folio,
+      Date(f.fecha) AS fecha,
+      COALESCE(f.total, 0) AS cargo,
+      COALESCE(f.importe_iva, 0) AS iva,
+      COALESCE(ac.abono, 0) AS abono,
+      (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+      (CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
+      (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
+      Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+      (Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
+      ( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
+      'f' as tipo, c.nombre_fiscal AS cliente
+      FROM
+      facturacion AS f
+      LEFT JOIN (
+        SELECT id_factura, Sum(abono) AS abono
+        FROM (
+          (
+            SELECT
+            id_factura,
+            Sum(total) AS abono
+            FROM
+            facturacion_abonos as fa
+            WHERE Date(fecha) <= '{$fecha2}'
+            GROUP BY id_factura
+          )
+          UNION
+          (
+            SELECT
+            id_nc AS id_factura,
+            Sum(total) AS abono
+            FROM
+            facturacion
+            WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+            {$sqlp3}
+            AND Date(fecha) <= '{$fecha2}'
+            GROUP BY id_nc
+          )
+        ) AS ffs
         GROUP BY id_factura
-      )
-      UNION
-      (
-        SELECT
-        id_nc AS id_factura,
-        Sum(total) AS abono
-        FROM
-        facturacion
-        WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
-        AND id_cliente = {$_GET['id_cliente']}
-        AND Date(fecha) <= '{$fecha2}'
-        GROUP BY id_nc
-      )
-    ) AS ffs
-    GROUP BY id_factura
-  ) AS ac ON f.id_factura = ac.id_factura {$sql}
-  LEFT JOIN (SELECT id_remision, id_factura, status
-    FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-  ) fh ON f.id_factura = fh.id_remision
-  WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
-  AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
-  AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-  AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+      ) AS ac ON f.id_factura = ac.id_factura {$sql}
+      LEFT JOIN (SELECT id_remision, id_factura, status
+        FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+      ) fh ON f.id_factura = fh.id_remision
+      LEFT JOIN clientes c ON c.id_cliente = f.id_cliente
+    WHERE f.id_abono_factura IS NULL
+      {$sqlp1}
+      AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+      AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+      AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
-      -- UNION ALL
-
-      -- (SELECT
-      --  f.id_venta as id_factura,
-      --  '' as serie,
-      --  f.folio,
-      --  Date(f.fecha) AS fecha,
-      --  COALESCE(f.total, 0) AS cargo,
-      --  0 AS iva,
-      --  COALESCE(ac.abono, 0) AS abono,
-      --  (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) AS saldo,
-      --  (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-      --  Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-      --  (Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
-      --  ('Notas de venta ' || f.folio) AS concepto,
-      --  'v' as tipo
-      -- FROM
-      --  facturacion_ventas_remision AS f
-      --  LEFT JOIN (
-      --    SELECT
-      --      id_venta,
-      --      Sum(total) AS abono
-      --    FROM
-      --      facturacion_ventas_remision_abonos
-      --    WHERE Date(fecha) <= '{$fecha2}'
-      --    GROUP BY id_venta
-      --  ) AS ac ON f.id_venta = ac.id_venta {$sqlt}
-      -- WHERE f.id_cliente = {$_GET['id_cliente']}
-      --  AND f.status <> 'ca'
-      --  AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'){$sqlt}
-      --  )
-
-ORDER BY fecha ASC, serie ASC, folio ASC
-");
+      ORDER BY fecha ASC, serie ASC, folio ASC
+    ");
 
 
     //obtenemos la info del cliente
-$this->load->model('clientes_model');
-$prov = $this->clientes_model->getClienteInfo($_GET['id_cliente'], true);
+    $prov = null;
+    if (!empty($_GET['id_cliente'])) {
+      $this->load->model('clientes_model');
+      $prov = $this->clientes_model->getClienteInfo($_GET['id_cliente'], true);
+      $prov = $prov['info'];
+    }
 
-$response = array(
-  'cuentas'       => array(),
-  'anterior'      => array(),
-  'cliente'     => $prov['info'],
-  'fecha1'      => $fecha1
-  );
-if($res->num_rows() > 0){
-  $response['cuentas'] = $res->result();
+    $response = array(
+      'cuentas'  => array(),
+      'anterior' => array(),
+      'cliente'  => $prov,
+      'fecha1'   => $fecha1
+      );
+    if($res->num_rows() > 0){
+      $response['cuentas'] = $res->result();
 
       //verifica q no sea negativo o exponencial el saldo
-  foreach ($response['cuentas'] as $key => $cuenta) {
-    $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
-    $cuenta->saldo_cambio = floatval(MyString::float($cuenta->saldo_cambio));
-        // anticipos a fruta
-    if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
-      $cuenta->cargo = 0;
+    foreach ($response['cuentas'] as $key => $cuenta) {
+      $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
+      $cuenta->saldo_cambio = floatval(MyString::float($cuenta->saldo_cambio));
+          // anticipos a fruta
+      if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
+        $cuenta->cargo = 0;
         } elseif ( strtolower($cuenta->serie) != 'an') { // $cuenta->cargo == 0 &&
           $resp = $this->db
           ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')

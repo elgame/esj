@@ -35,11 +35,13 @@ $(function(){
     select: function( event, ui ) {
       $("#fid_cliente").val(ui.item.id);
       $("#dcliente").val(ui.item.label).css({'background-color': '#99FF99'});
+      $("#id_cliente").val(ui.item.id);
     }
   }).keydown(function(e){
     if (e.which === 8) {
      $(this).css({'background-color': '#FFD9B3'});
       $('#fid_cliente').val('');
+      $("#id_cliente").val('');
     }
   });
 
