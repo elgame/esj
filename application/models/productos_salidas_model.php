@@ -1582,17 +1582,26 @@ class productos_salidas_model extends CI_Model {
         FROM (
           SELECT
             co.id_salida, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
-            p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe, cp.cantidad,
-            cp.precio_unitario, pu.nombre AS unidad, String_agg(cc.codigo, ',') AS centro_costo,
-            String_agg(r.nombre, ',') AS ranchos
+            p.nombre producto, co.solicito, Sum(cp.cantidad*cp.precio_unitario) importe, cp.cantidad,
+            (Sum(cp.cantidad*cp.precio_unitario) / Coalesce(NULLIF(Sum(cp.cantidad), 0), 1))::Numeric(10, 2) AS precio_unitario,
+            pu.nombre AS unidad, String_agg(DISTINCT cscc.centro_costo, ',') AS centro_costo,
+            String_agg(DISTINCT csr.ranchos, ',') AS ranchos
           FROM compras_salidas co
             INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
             INNER JOIN productos p ON p.id_producto = cp.id_producto
             INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
-            LEFT JOIN compras_salidas_rancho csr ON csr.id_salida = co.id_salida
-            LEFT JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
-            LEFT JOIN compras_salidas_centro_costo cscc ON cscc.id_salida = co.id_salida
-            LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+            LEFT JOIN (
+              SELECT csr.id_salida, String_agg(DISTINCT r.nombre, ',') AS ranchos
+              FROM compras_salidas_rancho csr
+                INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+              GROUP BY csr.id_salida
+            ) csr ON csr.id_salida = co.id_salida
+            LEFT JOIN (
+              SELECT cscc.id_salida, String_agg(DISTINCT cc.codigo, ',') AS centro_costo
+              FROM compras_salidas_centro_costo cscc
+                LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+              GROUP BY cscc.id_salida
+            ) cscc ON cscc.id_salida = co.id_salida
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
           GROUP BY co.id_salida, p.nombre, cp.cantidad, cp.precio_unitario, pu.nombre
         ) t
@@ -1610,10 +1619,18 @@ class productos_salidas_model extends CI_Model {
             INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
             INNER JOIN productos p ON p.id_producto = cp.id_producto
             INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
-            LEFT JOIN compras_salidas_rancho csr ON csr.id_salida = co.id_salida
-            LEFT JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
-            LEFT JOIN compras_salidas_centro_costo cscc ON cscc.id_salida = co.id_salida
-            LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+            LEFT JOIN (
+              SELECT csr.id_salida, String_agg(DISTINCT r.nombre, ',') AS ranchos
+              FROM compras_salidas_rancho csr
+                INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+              GROUP BY csr.id_salida
+            ) csr ON csr.id_salida = co.id_salida
+            LEFT JOIN (
+              SELECT cscc.id_salida, String_agg(DISTINCT cc.codigo, ',') AS centro_costo
+              FROM compras_salidas_centro_costo cscc
+                LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+              GROUP BY cscc.id_salida
+            ) cscc ON cscc.id_salida = co.id_salida
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
           GROUP BY p.id_producto, p.nombre, pu.nombre
         ) t
