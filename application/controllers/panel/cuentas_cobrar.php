@@ -164,7 +164,7 @@ class cuentas_cobrar extends MY_Controller {
   }
   public function cuenta2_pdf(){
     $this->load->model('cuentas_cobrar_model');
-    $this->cuentas_cobrar_model->cuentaClientePdf();
+    $this->cuentas_cobrar_model->cuenta2ClientePdf();
   }
   public function cuenta2_xls(){
     $this->load->model('cuentas_cobrar_model');

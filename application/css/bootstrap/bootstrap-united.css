@@ -138,7 +138,8 @@ body {
   font-size: 13px;
   line-height: 18px;
   color: #333333;
-  background-color: #ffffff;
+  background-color: #f3f3f3;
+  /*background-color: #ffffff;*/
 }
 a {
   color: #25861E;
