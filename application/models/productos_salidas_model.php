@@ -1532,7 +1532,7 @@ class productos_salidas_model extends CI_Model {
    */
   public function getProductosSalidasCodData($tipo = 'salida')
   {
-    $sql = '';
+    $sqlr = $sqlc = $sql = '';
 
     //Filtros para buscar
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -1569,11 +1569,11 @@ class productos_salidas_model extends CI_Model {
     }
 
     if(is_array($this->input->get('ranchoId'))){
-      $sql .= " AND csr.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+      $sqlr .= " AND csr.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
     }
 
     if(is_array($this->input->get('centroCostoId'))){
-      $sql .= " AND cscc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
+      $sqlc .= " AND cscc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
     }
 
     if ($tipo === 'salida') {
@@ -1594,12 +1594,14 @@ class productos_salidas_model extends CI_Model {
               SELECT csr.id_salida, String_agg(DISTINCT r.nombre, ',') AS ranchos
               FROM compras_salidas_rancho csr
                 INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+              WHERE 1 = 1 {$sqlr}
               GROUP BY csr.id_salida
             ) csr ON csr.id_salida = co.id_salida
             LEFT JOIN (
               SELECT cscc.id_salida, String_agg(DISTINCT cc.codigo, ',') AS centro_costo
               FROM compras_salidas_centro_costo cscc
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+              WHERE 1 = 1 {$sqlc}
               GROUP BY cscc.id_salida
             ) cscc ON cscc.id_salida = co.id_salida
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
