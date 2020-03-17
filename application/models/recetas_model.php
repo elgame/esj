@@ -534,8 +534,8 @@ class recetas_model extends CI_Model {
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
-        INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
         INNER JOIN areas a ON a.id_area = r.id_area
+        LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
         LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
       WHERE r.status = 't' AND rp.id_requisicion IS NULL {$sql}
       ORDER BY r.folio DESC, p.id_proveedor ASC, pr.nombre ASC
