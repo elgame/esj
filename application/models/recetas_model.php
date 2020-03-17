@@ -530,12 +530,13 @@ class recetas_model extends CI_Model {
       "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
         f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
-        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir,
+        r.id_empresa_ap
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
-        INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
         INNER JOIN areas a ON a.id_area = r.id_area
+        LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
         LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
       WHERE r.status = 't' AND rp.id_requisicion IS NULL {$sql}
       ORDER BY r.folio DESC, p.id_proveedor ASC, pr.nombre ASC
@@ -600,14 +601,16 @@ class recetas_model extends CI_Model {
 
         'id_area'         => '',
         'es_receta'       => 't',
+        'id_empresa_ap'   => ''
       ];
 
       // Si trae datos extras
       $requisiciones[$key]['otros_datos']['noRecetas'] = [];
 
       foreach ($item as $key2 => $item2) {
-        $requisiciones[$key]['id_empresa'] = $item2->id_empresa;
-        $requisiciones[$key]['id_area']    = $item2->id_area;
+        $requisiciones[$key]['id_empresa']    = $item2->id_empresa;
+        $requisiciones[$key]['id_area']       = $item2->id_area;
+        $requisiciones[$key]['id_empresa_ap'] = (isset($item2->id_empresa_ap)? $item2->id_empresa_ap: NULL);
 
         $receta = $this->info($item2->id_recetas, true);
         $requisiciones[$key]['solicito'] = $receta['info']->solicito;
