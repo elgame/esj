@@ -1,4 +1,39 @@
 
+ ☐ Generar archivo de Banorte nomina
+ ☐ Modulo de proyectos, seleccionar en ordenes de gastos y servicios, gastos directos y en salidas de almacen, que tenga presupuesto e imprima un reporte de lo gastado
+     -- lap
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Proyectos',0,TRUE,'proyectos/','magnet',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',540,TRUE,'proyectos/agregar/','plus',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',540,FALSE,'proyectos/modificar/','edit',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',540,FALSE,'proyectos/eliminar/','remove',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',540,FALSE,'proyectos/activar/','ok',FALSE);
+     CREATE TABLE otros.proyectos
+        (
+            id_proyecto bigserial NOT NULL,
+            nombre character varying(90) COLLATE pg_catalog."default" NOT NULL,
+            presupuesto double precision NOT NULL DEFAULT 0,
+            status boolean NOT NULL DEFAULT true,
+            id_empresa integer NOT NULL,
+            CONSTRAINT proyectos_pkey PRIMARY KEY (id_proyecto),
+            CONSTRAINT proyectos_id_empresa_fkey FOREIGN KEY (id_empresa)
+                REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        ) WITH (OIDS = FALSE)
+        TABLESPACE pg_default;
+        ALTER TABLE otros.proyectos OWNER to programa;
+
+ ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san
+     CREATE OR REPLACE VIEW public.unidades_unq
+         AS
+         SELECT DISTINCT ON (unidades.nombre) unidades.nombre,
+            unidades.id_unidad,
+            unidades.codigo,
+            unidades.cantidad,
+            unidades.tipo
+           FROM unidades
+          ORDER BY unidades.nombre;
+          ALTER TABLE public.unidades_unq OWNER TO programa;
 
  ✔ Recetas folio hojas @done (20-03-07 15:49)
     -- pcc|san|pct|lap
