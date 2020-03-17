@@ -1,5 +1,6 @@
 
  ☐ Generar archivo de Banorte nomina
+ ☐ Apartado de produccion en almacen que descuente productos e incremente el producido
  ☐ Modulo de proyectos, seleccionar en ordenes de gastos y servicios, gastos directos y en salidas de almacen, que tenga presupuesto e imprima un reporte de lo gastado
      -- lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Proyectos',0,TRUE,'proyectos/','magnet',FALSE);
