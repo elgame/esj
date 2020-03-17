@@ -56,7 +56,9 @@
 
                 <label for="dproveedor">Proveedor</label>
                 <input type="text" name="dproveedor" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
-                <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>"> |
+                <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>">
+                <input type="hidden" name="id_proveedor" id="id_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>">
+                 |
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>

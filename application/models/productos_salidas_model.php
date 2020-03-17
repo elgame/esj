@@ -155,7 +155,7 @@ class productos_salidas_model extends CI_Model {
 
     // Si es tipo combustible
     if ($this->input->post('tipo') === 'c') {
-      $this->agregarCombustible($id_salida);
+      $this->agregarCombustible($id_salida, $data);
     }
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
@@ -262,6 +262,26 @@ class productos_salidas_model extends CI_Model {
         'lts_combustible' => floatval($_POST['clitros']),
         'precio'          => floatval($_POST['cprecio'])
       ]);
+      $id_combustible = $this->db->insert_id('compras_salidas_combustible_id_combustible_seq');
+    }
+
+    if (isset($data['id_activo'])) {
+      $this->updateHorometroFin($idSalida, $data['id_activo'], floatval($_POST['codometro']));
+    }
+  }
+
+  public function updateHorometroFin($idSalida, $idActivo, $horometro)
+  {
+    $combust = $this->db->query("SELECT
+        cs.id_salida, csc.id_combustible, csc.odometro, csc.odometro_fin
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
+      WHERE cs.tipo = 'c' AND cs.status = 's' AND cs.id_activo = {$idActivo}
+        AND cs.id_salida < {$idSalida}
+      ORDER BY cs.id_salida DESC
+      LIMIT 1")->row();
+    if (isset($combust->id_combustible)) {
+      $this->db->update('compras_salidas_combustible', ['odometro_fin' => $horometro], "id_combustible = {$combust->id_combustible}");
     }
   }
 

@@ -31,9 +31,9 @@ class cuentas_pagar_model extends privilegios_model{
 		$sql = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
 		$sqlt = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
 
-		if($this->input->get('fid_cliente') != ''){
-			$sql .= " AND f.id_proveedor = '".$this->input->get('fid_cliente')."'";
-			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_cliente')."'";
+		if($this->input->get('fid_proveedor') != ''){
+			$sql .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
+			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
 		}
 
 		$this->load->model('empresas_model');
