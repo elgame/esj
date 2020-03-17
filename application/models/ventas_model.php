@@ -127,7 +127,7 @@ class Ventas_model extends privilegios_model{
                 fp.ieps, fp.porcentaje_ieps')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
+        ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
         ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
         ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
         ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
