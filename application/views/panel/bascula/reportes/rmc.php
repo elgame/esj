@@ -88,7 +88,7 @@
 
 	$pdf = new mypdf_ticket();
 	?>
-	<h2><?php echo $pdf->titulo1; ?></h2>
+	<h2><?php echo (isset($empresa)? $empresa->nombre_fiscal: $pdf->titulo1); ?></h2>
 	<h3><?php echo $titulo2; ?></h3>
 	<h4><?php echo $titulo3; ?></h4>
 	<table class="tblinfo">
