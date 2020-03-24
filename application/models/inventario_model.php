@@ -2462,12 +2462,12 @@ class inventario_model extends privilegios_model{
     // }
 
     $res = $this->db->query(
-      "SELECT DISTINCT(fecha), u.nombre
+      "SELECT DISTINCT(fecha), u.nombre, t.descripcion
       FROM (
-        SELECT Date(fecha_creacion) AS fecha, id_empleado FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+        SELECT Date(fecha_creacion) AS fecha, id_empleado, concepto AS descripcion FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
         UNION
-        SELECT Date(fecha_aceptacion) AS fecha, id_empleado FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+        SELECT Date(fecha_aceptacion) AS fecha, id_empleado, descripcion FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
       ) t
       INNER JOIN usuarios u ON u.id = t.id_empleado
@@ -2580,9 +2580,9 @@ class inventario_model extends privilegios_model{
 
       $pdf->SetFont('Arial', 'B', 11);
       $pdf->SetX(6);
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(30, 50));
-      $pdf->Row(array(MyString::fechaAT($item->fecha), $item->nombre), false, false);
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->SetWidths(array(30, 50, 120));
+      $pdf->Row(array(MyString::fechaAT($item->fecha), $item->nombre, $item->descripcion), false, false);
 
       $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);

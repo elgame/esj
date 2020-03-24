@@ -271,11 +271,17 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+
+        $('#table-productos tbody tr').remove();
+        $('#formula').val('');
+        $('#formulaId').val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+
+
       }
     });
 
@@ -286,17 +292,24 @@
       select: function( event, ui ) {
         var $empresa =  $(this);
 
-        $empresa.val(ui.item.id);
-        $("#empresaId_ap").val(ui.item.id);
-        $empresa.css("background-color", "#A1F57A");
+        limpiaEmpresa();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa_ap").css("background-color", "#FFD071");
         $("#empresaId_ap").val('');
+
+        limpiaEmpresa();
       }
     });
   };
+
+  function limpiaEmpresa() {
+    $('#table-productos tbody tr').remove();
+    $('#formula').val('');
+    $('#formulaId').val('');
+    calculaTotal();
+  }
 
   var autocompleteConcepto = function () {
     $("#productos #fconcepto").autocomplete({

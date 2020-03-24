@@ -1,8 +1,36 @@
 
  ☐ Generar archivo de Banorte nomina
- ☐ Apartado de produccion en almacen que descuente productos e incremente el producido
+ ☐ Poner opcion para desligar remisiones de facturas
+    quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
+ ✔ Reporte de movimientos de bascula que salga el titulo de la empresa seleccionada @done (20-03-23 18:43)
+ ✔ Apartado de producción en almacen que descuente productos e incremente el producido @done (20-03-23 18:43)
+     -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Producción de productos',128,TRUE,'produccion_almacen/','briefcase',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',541,TRUE,'produccion_almacen/agregar/','plus',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',541,FALSE,'produccion_almacen/cancelar/','ban-circle',FALSE);
+     CREATE TABLE public.compras_salidas_produccion
+        (
+            id_salida bigint NOT NULL,
+            id_orden bigint NOT NULL,
+            folio bigint NOT NULL,
+            no_impresiones_tk integer NOT NULL DEFAULT 0,
+            CONSTRAINT compras_salidas_produccion_pkey PRIMARY KEY (id_salida, id_orden),
+            CONSTRAINT compras_salidas_produccion_id_orden_fkey FOREIGN KEY (id_orden)
+                REFERENCES public.compras_ordenes (id_orden) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            CONSTRAINT compras_salidas_produccion_id_salida_fkey FOREIGN KEY (id_salida)
+                REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        )
+        WITH ( OIDS = FALSE )
+        TABLESPACE pg_default;
+        ALTER TABLE public.compras_salidas_produccion OWNER to programa;
+        COMMENT ON TABLE public.compras_salidas_produccion IS 'Produccion de productos, indica que salida y orden de compra (nivelación)';
+
  ☐ Modulo de proyectos, seleccionar en ordenes de gastos y servicios, gastos directos y en salidas de almacen, que tenga presupuesto e imprima un reporte de lo gastado
-     -- lap
+     -- lap|pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Proyectos',0,TRUE,'proyectos/','magnet',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',540,TRUE,'proyectos/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',540,FALSE,'proyectos/modificar/','edit',FALSE);
@@ -57,7 +85,7 @@
      ALTER TABLE otros.recetas ADD COLUMN id_empresa_ap integer;
       COMMENT ON COLUMN otros.recetas.id_empresa_ap IS 'empresa de aplicacion';
      ALTER TABLE otros.centro_costo ADD COLUMN codigo character varying COLLATE pg_catalog."default";
- ☐ Control de proyectos
+ ✔ Control de proyectos @done (20-03-23 14:01)
  ✔ Poner en productos de agro insumo que puedan indicar x empresa el color de los productos @done (20-02-17 22:06)
      -- pcc|lap|san|pct
      CREATE TABLE public.productos_color_agro
@@ -149,8 +177,6 @@
  ☐ En caja en gastos x comprobar que no borre el gasto si lo comprueban el mismo dia
  ✔ Agregar todas las empresas a dulce @done (20-01-21 17:39)
  ✔ Acomodar reporte de compras por productos @done (20-01-18 16:11)
- ☐ Poner opcion para desligar remisiones de facturas
-     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Cambiar en caja chica 5 los titulos en los recibos @done (20-01-13 10:40)
  ☐ Cargar existencias de mamita y gomez a agroinsumos con costo
  ✔ Acomodar ruta de empaque para los xml @done (20-01-14 13:08)
