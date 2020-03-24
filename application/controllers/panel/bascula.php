@@ -793,9 +793,12 @@ class bascula extends MY_Controller {
   public function rmc_pdf()
   {
     $this->load->model('bascula_model');
+    $this->load->model('empresas_model');
 
     $params['isXml'] = (isset($_GET['tipoo']) && $_GET['tipoo'] == 'xls');
     $params['data'] = $this->bascula_model->getMovimientos();
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['fid_empresa'], true);
+    $params['empresa'] = isset($params['empresa']['info'])? $params['empresa']['info']: null;
 
     if ($params['isXml']) {
       header('Content-type: application/vnd.ms-excel; charset=utf-8');
