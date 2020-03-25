@@ -140,43 +140,33 @@ class proyectos_model extends CI_Model {
    * @param term. termino escrito en la caja de texto, busca en el nombre
    * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
    */
-  public function getCentrosCostosAjax($sqlX = null){
+  public function getProyectosAjax($sqlX = null){
     $sql = '';
-    if ($this->input->get('term') !== false)
-      $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                lower(cc.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-              )";
-    if ($this->input->get('tipo') !== false) {
-      if (is_array($this->input->get('tipo'))) {
-        $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
-      } else
-        $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
-    }
+    //Filtros para buscar
+    if($this->input->get('fnombre') != '')
+      $sql = "WHERE ( lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
-    if ($this->input->get('id_area') !== false)
-      $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+    $sql .= ($sql==''? 'WHERE': ' AND')." p.status = 't'";
 
-    if (!is_null($sqlX))
-      $sql .= $sqlX;
+    if($this->input->get('did_empresa') != '')
+      $sql .= ($sql==''? 'WHERE': ' AND').' e.id_empresa = ' . $this->input->get('did_empresa');
 
-    $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
-          cc.hectareas, cc.no_plantas, cc.codigo
-        FROM otros.centro_costo cc
-          LEFT JOIN public.areas a ON a.id_area = cc.id_area
-        WHERE cc.status = 't'
+    $query['query'] =
+          "SELECT p.id_proyecto, p.nombre, p.presupuesto, p.status,
+            e.id_empresa, e.nombre_fiscal
+          FROM otros.proyectos p
+            INNER JOIN empresas e ON e.id_empresa = p.id_empresa
           {$sql}
-        ORDER BY cc.nombre ASC
-        LIMIT 20"
-    );
+          ORDER BY nombre ASC";
+    $res = $this->db->query($query['query']);
 
     $response = array();
     if($res->num_rows() > 0){
       foreach($res->result() as $itm){
         $response[] = array(
-            'id'    => $itm->id_centro_costo,
-            'label' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
-            'value' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
+            'id'    => $itm->id_proyecto,
+            'label' => $itm->nombre,
+            'value' => $itm->nombre,
             'item'  => $itm,
         );
       }

@@ -36,7 +36,9 @@ class gastos_model extends privilegios_model{
       // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
       // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
       'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
-      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
+      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f'),
+
+      'id_proyecto'     => (!empty($data['proyecto'])? $data['proyecto']: NULL),
     );
     $datos['uuid']           = $this->input->post('uuid');
     $datos['no_certificado'] = $this->input->post('noCertificado');

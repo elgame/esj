@@ -81,6 +81,17 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
+                  <div class="controls">
+                    <select name="proyecto" id="proyecto" class="span8" style="float: left;">
+                      <!-- <?php foreach ($proyectos as $key => $value): ?>
+                        <option value="<?php echo $value->id_proyecto; ?>" <?php echo set_select('proyecto', $value->id_proyecto); ?>><?php echo $value->nombre; ?></option>
+                      <?php endforeach ?> -->
+                    </select>
+                  </div>
+                </div>
+
               </div><!--/span6 -->
 
               <div class="span6">

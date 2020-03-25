@@ -126,6 +126,15 @@
                 </div>
               </div>
 
+              <?php if (isset($salida->proyecto)): ?>
+              <div class="control-group">
+                <label class="control-label" for="proyecto">Proyecto</label>
+                <div class="controls">
+                  <?php echo $salida->proyecto['info']->nombre ?>
+                </div>
+              </div>
+              <?php endif ?>
+
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">

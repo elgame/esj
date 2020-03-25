@@ -16,6 +16,10 @@
     autocompleteCentroCosto();
     autocompleteActivos();
 
+    if ($('.editando').length == 0) {
+      getProyectos();
+    }
+
     eventOtros();
 
     eventCodigoBarras();
@@ -176,6 +180,13 @@
             $("#serComprasProvee").hide();
           }
 
+          if(tipoOrderActual == 'oc' || tipoOrderActual == 'd') {
+            $('.classProyecto').show();
+          } else {
+            $('.classProyecto').hide();
+          }
+
+
           if (tipoOrderActual == 'p') {
             $('.grpes_receta').show();
           } else {
@@ -235,12 +246,14 @@
         $("#proveedor1, #proveedor2, #proveedor3").val("");
         $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+        getProyectos();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+        getProyectos();
       }
     });
 
@@ -1759,6 +1772,30 @@
   // Regresa true si esta seleccionada una empresa si no false.
   var isEmpresaSelected = function () {
     return $('#empresaId').val() !== '';
+  };
+
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
   };
 
 });

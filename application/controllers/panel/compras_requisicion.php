@@ -268,6 +268,10 @@ class compras_requisicion extends MY_Controller {
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
 
+    $_GET['did_empresa'] = $params['orden']['info'][0]->id_empresa;
+    $this->load->model('proyectos_model');
+    $params['proyectos'] = $this->proyectos_model->getProyectosAjax();
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -539,6 +543,10 @@ class compras_requisicion extends MY_Controller {
             'rules' => ($prereq? '': 'required')),
       array('field' => 'es_receta',
             'label' => 'Es receta',
+            'rules' => ''),
+
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
             'rules' => ''),
 
       // array('field' => 'proveedorId1',

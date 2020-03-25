@@ -129,6 +129,9 @@ class productos_salidas_model extends CI_Model {
         'tipo'              => $this->input->post('tipo')? $_POST['tipo']: 's',
 
         'id_area'           => ($this->input->post('areaId')? $_POST['areaId']: NULL),
+
+        'id_proyecto'       => (!empty($this->input->post('proyecto'))? $_POST['proyecto']: NULL),
+
         // 'id_rancho'         => ($this->input->post('ranchoId')? $_POST['ranchoId']: NULL),
         // 'id_centro_costo'   => ($this->input->post('centroCostoId')? $_POST['centroCostoId']: NULL),
         'id_activo'         => ($this->input->post('activoId')? $_POST['activoId']: NULL),
@@ -470,7 +473,7 @@ class productos_salidas_model extends CI_Model {
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
               cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula,
-              cs.tipo, cs.id_empresa_ap, ea.nombre_fiscal AS empresa_ap
+              cs.tipo, cs.id_empresa_ap, ea.nombre_fiscal AS empresa_ap, cs.id_proyecto
               {$sql_field}
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
@@ -526,6 +529,11 @@ class productos_salidas_model extends CI_Model {
         {
           $this->load->model('compras_ordenes_model');
           $data['info'][0]->traspaso = $this->compras_ordenes_model->info($data['info'][0]->id_traspaso)['info'][0];
+        }
+
+        if ($data['info'][0]->id_proyecto > 0) {
+          $this->load->model('proyectos_model');
+          $data['info'][0]->proyecto = $this->proyectos_model->getProyectoInfo($data['info'][0]->id_proyecto, true);
         }
 
         $data['info'][0]->area = null;
@@ -973,7 +981,7 @@ class productos_salidas_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf = new MYpdf('P', 'mm', array(63, 180));
     $pdf->show_head = false;
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
@@ -1006,6 +1014,13 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
     $pdf->SetWidths(array(64));
     $pdf->SetAligns(array('L', 'L'));
+
+    if (isset($orden['info'][0]->proyecto)) {
+      $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array('Proyecto: '. $orden['info'][0]->proyecto['info']->nombre), false, false);
+    }
+
     $pdf->SetXY(0, $pdf->GetY()-1);
     $pdf->Row2(array('Empresa aplicación: '), false, false);
     $pdf->SetFounts(array($pdf->fount_txt), [], ['']);

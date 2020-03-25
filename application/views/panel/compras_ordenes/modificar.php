@@ -238,6 +238,15 @@
                 </div>
               </div>
 
+              <?php if (isset($orden['info'][0]->proyecto['info'])): ?>
+              <div class="control-group">
+                <label class="control-label" for="tipoPago">Proyecto asignado</label>
+                <div class="controls">
+                  <?php echo $orden['info'][0]->proyecto['info']->nombre ?>
+                </div>
+              </div>
+              <?php endif ?>
+
               <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'f' && $orden['info'][0]->flete_de === 'v'? '': 'style="display:none;"'); ?> id="fletesFactura">
                 <label class="control-label" for="tipoPago">Ligar Factura/Remision</label>
                 <div class="controls">

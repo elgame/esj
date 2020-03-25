@@ -51,6 +51,15 @@
         ) WITH (OIDS = FALSE)
         TABLESPACE pg_default;
         ALTER TABLE otros.proyectos OWNER to programa;
+     -- pcc
+     ALTER TABLE public.compras ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras ADD CONSTRAINT compras_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_ordenes ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_salidas ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
  ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san
      CREATE OR REPLACE VIEW public.unidades_unq
