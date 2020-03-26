@@ -135,48 +135,68 @@ class proyectos_model extends CI_Model {
     return $data;
   }
 
+  public function getProyectoPresupuesto($id_proyecto)
+  {
+    $response = [];
+    $response['salidas'] = $this->db->query("SELECT cs.id_salida, cs.folio, Date(cs.fecha_creacion) AS fecha,
+        (cs.concepto || ' ' || cs.observaciones) AS concepto,
+        Sum(csp.cantidad*csp.precio_unitario) AS costo
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
+      WHERE cs.status <> 'ca' AND cs.id_proyecto = {$id_proyecto}
+      GROUP BY cs.id_salida
+      ORDER BY fecha ASC")->result();
+
+    $response['compras'] = $this->db->query("SELECT id_compra, serie, folio, Date(fecha) AS fecha,
+        (concepto || ' ' || observaciones) AS concepto, subtotal AS costo
+      FROM compras
+      WHERE isgasto = 't' AND status <> 'ca' AND id_proyecto = {$id_proyecto}
+      ORDER BY fecha ASC")->result();
+
+    $response['ordenes'] = $this->db->query("SELECT cs.id_orden, cs.folio, Date(cs.fecha_creacion) AS fecha,
+        (cs.descripcion) AS concepto,
+        Sum(csp.importe) AS costo
+      FROM compras_ordenes cs
+        INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
+      WHERE cs.status in('a','f','n') AND cs.id_proyecto = {$id_proyecto}
+      GROUP BY cs.id_orden
+      ORDER BY fecha ASC")->result();
+
+    return $response;
+  }
+
   /**
    * Obtiene el listado de proveedores para usar ajax
    * @param term. termino escrito en la caja de texto, busca en el nombre
    * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
    */
-  public function getCentrosCostosAjax($sqlX = null){
+  public function getProyectosAjax($sqlX = null){
     $sql = '';
-    if ($this->input->get('term') !== false)
-      $sql .= " AND (lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                lower(cc.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-              )";
-    if ($this->input->get('tipo') !== false) {
-      if (is_array($this->input->get('tipo'))) {
-        $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
-      } else
-        $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
-    }
+    //Filtros para buscar
+    if($this->input->get('fnombre') != '')
+      $sql = "WHERE ( lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
-    if ($this->input->get('id_area') !== false)
-      $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
+    $sql .= ($sql==''? 'WHERE': ' AND')." p.status = 't'";
 
-    if (!is_null($sqlX))
-      $sql .= $sqlX;
+    if($this->input->get('did_empresa') != '')
+      $sql .= ($sql==''? 'WHERE': ' AND').' e.id_empresa = ' . $this->input->get('did_empresa');
 
-    $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
-          cc.hectareas, cc.no_plantas, cc.codigo
-        FROM otros.centro_costo cc
-          LEFT JOIN public.areas a ON a.id_area = cc.id_area
-        WHERE cc.status = 't'
+    $query['query'] =
+          "SELECT p.id_proyecto, p.nombre, p.presupuesto, p.status,
+            e.id_empresa, e.nombre_fiscal
+          FROM otros.proyectos p
+            INNER JOIN empresas e ON e.id_empresa = p.id_empresa
           {$sql}
-        ORDER BY cc.nombre ASC
-        LIMIT 20"
-    );
+          ORDER BY nombre ASC";
+    $res = $this->db->query($query['query']);
 
     $response = array();
     if($res->num_rows() > 0){
       foreach($res->result() as $itm){
         $response[] = array(
-            'id'    => $itm->id_centro_costo,
-            'label' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
-            'value' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
+            'id'    => $itm->id_proyecto,
+            'label' => $itm->nombre,
+            'value' => $itm->nombre,
             'item'  => $itm,
         );
       }
@@ -185,148 +205,179 @@ class proyectos_model extends CI_Model {
     return $response;
   }
 
-  public function getCentrosCostosPagesAjax($centros){
-    $sql = '';
-
-    $cc = [];
-    $codigos = explode(',', $centros);
-    foreach ($codigos as $key => $cod) {
-      $cod = mb_strtolower(trim($cod), 'UTF-8');
-      if (strpos($cod, '-') !== false) {
-        $subcodigos = explode('-', $cod);
-        preg_match('/[a-z]+/', $subcodigos[0], $subfijos);
-        $subfijos = count($subfijos)>0? $subfijos[0]: ''; // m, t, c
-        $codini = preg_replace('/[^0-9]/', '', $subcodigos[0]);
-        $codfin = preg_replace('/[^0-9]/', '', $subcodigos[1]);
-        $subcodigos = range($codini, $codfin);
-        foreach ($subcodigos as $key2 => $cod2) {
-          $cod2 = trim($cod2);
-          $cc[] = "'{$subfijos}{$cod2}'";
-        }
-      } else {
-        $cc[] = "'{$cod}'";
-      }
-    }
-
-    $cc = implode(',', $cc);
-    $sql .= " AND (lower(cc.codigo) IN({$cc}))";
-
-    // if ($this->input->get('tipo') !== false) {
-    //   if (is_array($this->input->get('tipo'))) {
-    //     $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
-    //   } else
-    //     $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
-    // }
-
-    // if ($this->input->get('id_area') !== false)
-    //   $sql .= " AND cc.id_area = {$this->input->get('id_area')}";
-
-    // if (!is_null($sqlX))
-    //   $sql .= $sqlX;
-
-    $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, cc.cuenta_cpi, a.id_area, a.nombre AS area,
-          cc.hectareas, cc.no_plantas, cc.codigo
-        FROM otros.centro_costo cc
-          LEFT JOIN public.areas a ON a.id_area = cc.id_area
-        WHERE cc.status = 't'
-          {$sql}
-        ORDER BY cc.nombre ASC"
-    );
-
-    $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
-        $response[] = array(
-            'id'    => $itm->id_centro_costo,
-            'label' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
-            'value' => $itm->nombre.($itm->codigo!=''? " ({$itm->codigo})": ''),
-            'item'  => $itm,
-        );
-      }
-    }
-
-    return $response;
-  }
-
-  public function catalogo_xls()
+  public function print($idProyecto)
   {
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=productores.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    $orden = $this->getProyectoInfo($idProyecto);
+    $presupuesto = $this->getProyectoPresupuesto($idProyecto);
+    // echo "<pre>";
+    //   var_dump($orden, $presupuesto);
+    // echo "</pre>";exit;
 
-    // $this->load->model('areas_model');
-    // $area = $this->areas_model->getAreaInfo($id_area, true);
-    $producotres = $this->getProductores(false);
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    // $pdf->show_head = true;
+    $pdf->titulo1 = $orden['info']->empresa->nombre_fiscal;
+    $pdf->titulo2 = mb_strtoupper($orden['info']->nombre);
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $pdf->logo = $orden['info']->empresa->logo!=''? (file_exists($orden['info']->empresa->logo)? $orden['info']->empresa->logo: '') : '';
 
-    $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = "Catalogo de productores";
-    $titulo3 = '';
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
 
-    $html = '<table>
-      <tbody>
-        <tr>
-          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
-        </tr>
-        <tr>
-          <td colspan="3"></td>
-        </tr>
-        <tr style="font-weight:bold">
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre Fiscal</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calle</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No exterior</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">No interior</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Colonia</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Localidad</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Municipio</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pais</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CP</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Telefono</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Celular</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Email</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Parcela</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Ejido parcela</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Tipo</td>
-        </tr>';
+    $pdf->SetXY(6, $pdf->GetY()-8);
 
-    foreach ($producotres['productores'] as $key => $clasif)
+    $salidas = $compras = $ordenes = 0;
+
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("SALIDAS DE ALMACEN"), false, false);
+
+    $aligns = array('C', 'C', 'L', 'R');
+    $widths = array(20, 30, 120, 35);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+
+    foreach ($presupuesto['salidas'] as $key => $prod)
     {
-      $html .= '<tr>
-          <td style="width:400px;border:1px solid #000;">'.utf8_decode($clasif->nombre_fiscal).'</td>
-          <td style="width:400px;border:1px solid #000;">'.utf8_decode($clasif->calle).'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->no_exterior.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->no_interior.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->colonia.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->localidad.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->municipio.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->estado.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->pais.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->cp.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->telefono.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->celular.'</td>
-          <td style="width:400px;border:1px solid #000;">'.$clasif->email.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->parcela.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$clasif->ejido_parcela.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$clasif->tipo.'</td>
-        </tr>';
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = array(
+        $prod->fecha,
+        $prod->folio,
+        $prod->concepto,
+        MyString::formatoNumero($prod->costo, 2, '$', false),
+      );
+
+      $pdf->SetX(6);
+      $pdf->Row($datos, false);
+
+      $salidas += floatval($prod->costo);
     }
 
-    $html .= '
-      </tbody>
-    </table>';
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->Row(['','','', MyString::formatoNumero($salidas, 2, '$', false)], true);
 
-    echo $html;
+    $pdf->SetY($pdf->GetY()+2);
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("GASTOS DIRECTOS (COMPRAS)"), false, false);
+
+    $aligns = array('C', 'C', 'L', 'R');
+    $widths = array(20, 30, 120, 35);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+
+    foreach ($presupuesto['compras'] as $key => $prod)
+    {
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = array(
+        $prod->fecha,
+        $prod->serie.$prod->folio,
+        $prod->concepto,
+        MyString::formatoNumero($prod->costo, 2, '$', false),
+      );
+
+      $pdf->SetX(6);
+      $pdf->Row($datos, false);
+
+      $compras += floatval($prod->costo);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->Row(['','','', MyString::formatoNumero($compras, 2, '$', false)], true);
+
+    $pdf->SetY($pdf->GetY()+2);
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("ORDENES DE COMPRAS (COMPRAS)"), false, false);
+
+    $aligns = array('C', 'C', 'L', 'R');
+    $widths = array(20, 30, 120, 35);
+    $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
+
+    foreach ($presupuesto['ordenes'] as $key => $prod)
+    {
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+        if($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = array(
+        $prod->fecha,
+        $prod->folio,
+        $prod->concepto,
+        MyString::formatoNumero($prod->costo, 2, '$', false),
+      );
+
+      $pdf->SetX(6);
+      $pdf->Row($datos, false);
+
+      $ordenes += floatval($prod->costo);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->Row(['','','', MyString::formatoNumero($ordenes, 2, '$', false)], true);
+
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->SetFont('helvetica','B', 11);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("PRESUPUESTO: ".MyString::formatoNumero($orden['info']->presupuesto, 2, '$', false) ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->SetFont('helvetica','B', 11);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("GASTOS: ".MyString::formatoNumero($salidas+$compras+$ordenes, 2, '$', false) ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->SetFont('helvetica','B', 11);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("RESTO: ".MyString::formatoNumero(($orden['info']->presupuesto-($salidas+$compras+$ordenes)), 2, '$', false) ), false, false);
+
+
+    $pdf->Output('PROYECTO'.date('Y-m-d').'.pdf', 'I');
+
   }
 
 }

@@ -462,6 +462,10 @@ class productos_salidas extends MY_Controller {
             'label' => 'Transferir',
             'rules' => ''),
 
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
+            'rules' => ''),
+
       array('field' => 'solicito',
             'label' => 'Solicito',
             'rules' => 'required|max_length[130]'),

@@ -483,6 +483,10 @@ class gastos extends MY_Controller {
             'label' => '',
             'rules' => ''),
 
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
+            'rules' => ''),
+
       array('field' => 'tipo_documento',
             'label' => 'Tipo de Documento',
             'rules' => 'required'),

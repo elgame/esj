@@ -131,6 +131,17 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
+                <div class="controls">
+                  <select name="proyecto" id="proyecto" class="span9" style="float: left;">
+                    <!-- <?php foreach ($proyectos as $key => $value): ?>
+                      <option value="<?php echo $value->id_proyecto; ?>" <?php echo set_select('proyecto', $value->id_proyecto); ?>><?php echo $value->nombre; ?></option>
+                    <?php endforeach ?> -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" name="guardar" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>

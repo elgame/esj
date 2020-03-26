@@ -441,8 +441,8 @@
                   '<td style="">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'id_gasto[]" value="" id="gasto_id_gasto">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'del[]" value="" id="gasto_del">'+
-                    '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
-                    '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                    '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto">'+
+                    '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
                     '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                     '<input type="hidden" name="'+prefix_gastos+'area[]" value="'+ area +'" class="area span12">'+

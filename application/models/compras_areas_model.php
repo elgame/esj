@@ -183,37 +183,41 @@ class compras_areas_model extends CI_Model{
 
 	public function getDescripCodigo($id_area, $tipo='nombre', $nivel=0)
 	{
-		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
-		                           FROM compras_areas
-		                           WHERE id_area = {$id_area}")->row();
-		if($tipo === 'nombre')
-		{
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).'/'.$data->nombre;
-			else
-				$nombre = $data->nombre;
-			return $nombre;
-		}elseif($tipo === 'id') {
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).','.$data->id_area;
-			else
-				$nombre = $data->id_area;
-			return $nombre;
-		}elseif($tipo === 'nivel') {
-			if($data->id_padre != '') {
-				$nivel++;
-				$nivel = $this->getDescripCodigo($data->id_padre, $tipo, $nivel);
-			} else
-				$nivel++;
-			return $nivel;
-		}else
-		{
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).$data->codigo;
-			else
-				$nombre = $data->codigo;
-			return $nombre;
-		}
+    if ($id_area > 0) {
+  		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
+                                 FROM compras_areas
+                                 WHERE id_area = {$id_area}")->row();
+      if($tipo === 'nombre')
+      {
+        if($data->id_padre != '')
+          $nombre = $this->getDescripCodigo($data->id_padre, $tipo).'/'.$data->nombre;
+        else
+          $nombre = $data->nombre;
+        return $nombre;
+      }elseif($tipo === 'id') {
+        if($data->id_padre != '')
+          $nombre = $this->getDescripCodigo($data->id_padre, $tipo).','.$data->id_area;
+        else
+          $nombre = $data->id_area;
+        return $nombre;
+      }elseif($tipo === 'nivel') {
+        if($data->id_padre != '') {
+          $nivel++;
+          $nivel = $this->getDescripCodigo($data->id_padre, $tipo, $nivel);
+        } else
+          $nivel++;
+        return $nivel;
+      }else
+      {
+        if($data->id_padre != '')
+          $nombre = $this->getDescripCodigo($data->id_padre, $tipo).$data->codigo;
+        else
+          $nombre = $data->codigo;
+        return $nombre;
+      }
+    }
+
+    return '';
 	}
 
   public function getDescripCodigoSim($id_area)

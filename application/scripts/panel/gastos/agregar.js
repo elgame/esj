@@ -3,6 +3,9 @@
 })(function ($, window) {
 
   $(function () {
+    getProyectos();
+
+
     //Autocomplete cuentas contpaq
     $("#dcuenta_cpi").autocomplete({
         source: function(request, response) {
@@ -92,6 +95,8 @@
           $('#ranchoId').val('');
           $('#activos').val('');
           $('#activoId').val('');
+
+          getProyectos();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -107,6 +112,8 @@
           $('#activos').val('');
           $('#activoId').val('');
           $('#groupCatalogos').hide();
+
+          getProyectos();
         }
     });
 
@@ -237,6 +244,30 @@
     );
   };
 
+
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
+  };
 
 
   var autocompleteCultivo = function () {

@@ -4,7 +4,7 @@
     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Reporte de movimientos de bascula que salga el titulo de la empresa seleccionada @done (20-03-23 18:43)
  ✔ Apartado de producción en almacen que descuente productos e incremente el producido @done (20-03-23 18:43)
-     -- pcc
+     -- pcc|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Producción de productos',128,TRUE,'produccion_almacen/','briefcase',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',541,TRUE,'produccion_almacen/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',541,FALSE,'produccion_almacen/cancelar/','ban-circle',FALSE);
@@ -51,6 +51,16 @@
         ) WITH (OIDS = FALSE)
         TABLESPACE pg_default;
         ALTER TABLE otros.proyectos OWNER to programa;
+     -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',540,FALSE,'proyectos/imprimir/','file',FALSE);
+     ALTER TABLE public.compras ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras ADD CONSTRAINT compras_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_ordenes ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_salidas ADD COLUMN id_proyecto bigint;
+     ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
  ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san
      CREATE OR REPLACE VIEW public.unidades_unq

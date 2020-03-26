@@ -109,6 +109,15 @@
                     </div>
                   </div>
 
+                  <?php if (isset($gasto['info']->proyecto)): ?>
+                  <div class="control-group">
+                    <label class="control-label" for="folio">Proyecto</label>
+                    <div class="controls">
+                      <?php echo $gasto['info']->proyecto['info']->nombre ?>
+                    </div>
+                  </div>
+                  <?php endif ?>
+
                 </div><!--/span6 -->
 
                 <div class="span6">
