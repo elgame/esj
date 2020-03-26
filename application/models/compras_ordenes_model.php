@@ -802,7 +802,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
               -- co.id_area, co.id_activo,
               co.id_empresa_ap, co.id_orden_aplico,
-              co.otros_datos, co.es_receta
+              co.otros_datos, co.es_receta, co.id_proyecto
        FROM compras_ordenes AS co
          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -867,6 +867,11 @@ class compras_ordenes_model extends CI_Model {
           {
             $data['info'][0]->gasolina = $query->result();
           }
+        }
+
+        if ($data['info'][0]->id_proyecto > 0) {
+          $this->load->model('proyectos_model');
+          $data['info'][0]->proyecto = $this->proyectos_model->getProyectoInfo($data['info'][0]->id_proyecto, true);
         }
 
         // facturas ligadas
@@ -2165,6 +2170,11 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
       }
 
+      if (isset($orden['info'][0]->proyecto['info'])) {
+        $pdf->SetXY(6, $pdf->GetY()-1);
+        $pdf->Row(array('PROYECTO: ' . $orden['info'][0]->proyecto['info']->nombre), false, false);
+      }
+
       $pdf->SetXY(6, $pdf->GetY()+6);
       $pdf->Row(array('________________________________________________________________________________________________'), false, false);
       $pdf->SetXY(6, $pdf->GetY()-2);
@@ -2521,7 +2531,7 @@ class compras_ordenes_model extends CI_Model {
 
     $orden = $this->info($ordenId, true);
 
-    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf = new MYpdf('P', 'mm', array(63, 150));
     $pdf->limiteY = 50;
     $pdf->SetMargins(0, 0, 0);
     $pdf->SetAutoPageBreak(false);
@@ -2734,9 +2744,14 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
     }
 
-    $pdf->SetAligns(array('C'));
+    $pdf->SetAligns(array('L'));
     $pdf->SetXY(0, $pdf->GetY()-1);
     $pdf->Row(array('ALMACEN ' . $orden['info'][0]->almacen), false, false);
+
+    if (isset($orden['info'][0]->proyecto['info'])) {
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row(array('PROYECTO: ' . $orden['info'][0]->proyecto['info']->nombre), false, false);
+    }
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetWidths(array(30, 33));

@@ -22,6 +22,8 @@
     eventChangeTraspaso();
 
     copyCodigoAll();
+
+    getProyectos();
   });
 
   /*
@@ -42,11 +44,13 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+        getProyectos();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+        getProyectos();
       }
     });
 
@@ -628,6 +632,30 @@
   // Regresa true si esta seleccionada una empresa si no false.
   var isEmpresaSelected = function () {
     return $('#empresaId').val() !== '';
+  };
+
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
   };
 
 });

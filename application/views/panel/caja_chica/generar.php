@@ -617,8 +617,8 @@
                                           <td style="">
                                             <input type="hidden" name="gasto_pre_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_pre_del[]" value="" id="gasto_del">
-                                            <input type="text" name="pre_codigoArea[]" value="<?php echo $_POST['pre_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $_POST['pre_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="pre_codigoArea[]" value="<?php echo $_POST['pre_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $_POST['pre_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="pre_codigoCampo[]" value="<?php echo $_POST['pre_codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="pre_area[]" value="<?php echo $_POST['pre_area'][$key] ?>" class="area span12">
@@ -669,8 +669,8 @@
                                     <td style="">
                                       <input type="hidden" name="gasto_pre_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_pre_del[]" value="" id="gasto_del">
-                                      <input type="text" name="pre_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="pre_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="pre_codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="pre_area[]" value="<?php echo $gasto->area ?>" class="area span12">
@@ -787,8 +787,8 @@
                                           <td style="">
                                             <input type="hidden" name="gasto_comprobar_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
-                                            <input type="text" name="comprobar_codigoArea[]" value="<?php echo $_POST['comprobar_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $_POST['comprobar_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="comprobar_codigoArea[]" value="<?php echo $_POST['comprobar_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $_POST['comprobar_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $_POST['comprobar_codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="comprobar_area[]" value="<?php echo $_POST['comprobar_area'][$key] ?>" class="area span12">
@@ -844,8 +844,8 @@
                                     <td style="">
                                       <input type="hidden" name="gasto_comprobar_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
-                                      <input type="text" name="comprobar_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
-                                      <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="comprobar_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                      <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="comprobar_area[]" value="<?php echo $gasto->area ?>" class="area span12">
@@ -959,8 +959,8 @@
                                           <td style="">
                                             <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
-                                            <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="area[]" value="<?php echo $_POST['area'][$key] ?>" class="area span12">
@@ -1011,8 +1011,8 @@
                                     <td style="">
                                       <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
-                                      <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="area[]" value="<?php echo $gasto->area ?>" class="area span12">
@@ -1125,8 +1125,8 @@
                                           <td style="">
                                             <input type="hidden" name="reposicionGasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="reposicionGasto_del[]" value="" id="gasto_del">
-                                            <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="reposicionGasto_codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="reposicionGasto_area[]" value="<?php echo $_POST['area'][$key] ?>" class="area span12">
@@ -1181,8 +1181,8 @@
                                     <td style="">
                                       <input type="hidden" name="reposicionGasto_id_gasto[]" value="<?php echo $reposiciong->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="reposicionGasto_del[]" value="" id="gasto_del">
-                                      <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $reposiciong->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $reposiciong->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $reposiciong->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $reposiciong->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="reposicionGasto_codigoCampo[]" value="<?php echo $reposiciong->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="reposicionGasto_area[]" value="<?php echo $reposiciong->area ?>" class="area span12">

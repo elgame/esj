@@ -1277,20 +1277,6 @@ class nomina
   {
     // Dias de vacaciones son cero por si no tiene almenos 1 año de antigüedad.
     $diasVacaciones = $this->diasVacacionesCorresponden($this->empleado->anios_trabajados);
-    // // Si tiene 1 año o mas.
-    // if (intval($this->empleado->anios_trabajados) > 0)
-    // {
-    //   // Recorre las configuraciones para obtener los dias de vacaciones a dar
-    //   // segun los años trabajados.
-    //   foreach ($this->vacacionesConfig as $anio)
-    //   {
-    //     if (intval($this->empleado->anios_trabajados) >= intval($anio->anio1) && intval($this->empleado->anios_trabajados) <= intval($anio->anio2))
-    //     {
-    //       $diasVacaciones = intval($anio->dias);
-    //       break;
-    //     }
-    //   }
-    // }
 
     $diasVacaciones = round(($this->diasAnioVacaciones() / 365) * $diasVacaciones, 4);
 

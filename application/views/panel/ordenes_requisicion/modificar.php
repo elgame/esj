@@ -35,7 +35,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal editando" action="<?php echo base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -135,6 +135,18 @@
                     value="<?php echo (isset($orden['info'][0]->otros_datos->noRecetas)? implode(',', $orden['info'][0]->otros_datos->noRecetas) : '') ?>" id="no_recetas"
                     class="span11" placeholder="No de recetas (si es mas de una separar con ,)" <?php echo $receta_activa? '': 'readonly'; ?>>
                   </div>
+                </div>
+              </div>
+
+              <div class="control-group classProyecto" <?php echo ((isset($orden['info'][0]->tipo_orden) && ($orden['info'][0]->tipo_orden == 'd' || $orden['info'][0]->tipo_orden == 'oc'))? '': 'style="display:none;"'); ?>>
+                <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
+                <div class="controls">
+                  <select name="proyecto" id="proyecto" class="span9" style="float: left;">
+                      <option value=""></option>
+                    <?php foreach ($proyectos as $key => $value): ?>
+                      <option value="<?php echo $value['id']; ?>" <?php echo set_select('proyecto', $value['id'], (isset($orden['info'][0]->proyecto['info']) && $value['id']==$orden['info'][0]->proyecto['info']->id_proyecto) ); ?>><?php echo $value['value']; ?></option>
+                    <?php endforeach ?>
+                  </select>
                 </div>
               </div>
 

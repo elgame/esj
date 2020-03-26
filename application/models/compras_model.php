@@ -181,6 +181,11 @@ class compras_model extends privilegios_model{
         }
       }
 
+      if ($response['info']->id_proyecto > 0) {
+        $this->load->model('proyectos_model');
+        $response['info']->proyecto = $this->proyectos_model->getProyectoInfo($response['info']->id_proyecto, true);
+      }
+
       $response['info']->comprasligadas = array();
       if ($response['info']->ids_compras != '') { // compras
         $this->load->model('compras_model');

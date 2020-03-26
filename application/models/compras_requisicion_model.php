@@ -112,6 +112,8 @@ class compras_requisicion_model extends CI_Model {
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       'descripcion'     => $_POST['descripcion'],
       'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+
+      'id_proyecto'     => (!empty($this->input->post('proyecto'))? $_POST['proyecto']: NULL),
     );
 
     // Si es un gasto son requeridos los campos de catálogos
@@ -387,6 +389,8 @@ class compras_requisicion_model extends CI_Model {
         'descripcion'     => $_POST['descripcion'],
         'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
         'id_almacen'      => $_POST['id_almacen'],
+
+        'id_proyecto'     => (!empty($this->input->post('proyecto'))? $_POST['proyecto']: NULL),
       );
 
       // Si es un gasto son requeridos los campos de catálogos
@@ -642,6 +646,8 @@ class compras_requisicion_model extends CI_Model {
           'id_autorizo'         => $data->id_autorizo,
           'id_almacen'          => $data->id_almacen,
           'es_receta'           => $data->es_receta,
+
+          'id_proyecto'         => (!empty($data->id_proyecto)? $data->id_proyecto: NULL),
         );
 
         $dataOrdenCats['requisiciones'][] = [
@@ -1017,7 +1023,7 @@ class compras_requisicion_model extends CI_Model {
               co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo, co.id_empresa_ap,
-              otros_datos
+              otros_datos, co.id_proyecto
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
@@ -1124,6 +1130,11 @@ class compras_requisicion_model extends CI_Model {
           {
             $data['info'][0]->gasolina = $query->result();
           }
+        }
+
+        if ($data['info'][0]->id_proyecto > 0) {
+          $this->load->model('proyectos_model');
+          $data['info'][0]->proyecto = $this->proyectos_model->getProyectoInfo($data['info'][0]->id_proyecto, true);
         }
 
         // facturas ligadas
