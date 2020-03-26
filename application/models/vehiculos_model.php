@@ -240,37 +240,41 @@ class vehiculos_model extends CI_Model {
 
       //Disel
       $res = $this->db->query(
-        "(
-          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
-          FROM compras_ordenes AS c
-            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
-            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
-          ORDER BY c.fecha_creacion ASC
-          LIMIT 1
-        )
-        UNION
-        (
-          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
-          FROM compras_ordenes AS c
-            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
-            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
-          ORDER BY c.fecha_creacion DESC
-          LIMIT 1
-        )
-        UNION
-        (
-          SELECT cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
-            0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
-          FROM compras_ordenes AS c
-            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
-            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
-          GROUP BY cv.id_vehiculo
-        )
+        "SELECT *
+        FROM (
+          (
+            SELECT 1 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+            FROM compras_ordenes AS c
+              INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+              INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+            WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+            ORDER BY c.fecha_creacion ASC
+            LIMIT 1
+          )
+          UNION
+          (
+            SELECT 2 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+            FROM compras_ordenes AS c
+              INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+              INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+            WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+            ORDER BY c.fecha_creacion DESC
+            LIMIT 1
+          )
+          UNION
+          (
+            SELECT 3 AS orden, cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
+              0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
+            FROM compras_ordenes AS c
+              INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+              INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+            WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+            GROUP BY cv.id_vehiculo
+          )
+        ) f
+        ORDER BY orden ASC
         ")->result();
       if (count($res) == 3) {
         $res[2]->nombre     = $res[0]->nombre;

@@ -1603,7 +1603,7 @@ class caja_chica_model extends CI_Model {
           ORDER BY r.id_rancho ASC
         ) ra ON ra.id_compra = c.id_compra
         LEFT JOIN productos ac ON ac.id_producto = c.id_activo
-      WHERE (c.isgasto = 't' OR c.ids_compras IS NOT NULL) {$sql} AND c.status = 'p' AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
+      WHERE c.status = 'p' {$sql} AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
       GROUP BY c.id_compra, p.id_proveedor, cc.abreviatura, cc.id_categoria, a.id_area, ac.id_producto
       ORDER BY (c.fecha, c.serie, c.folio) DESC"
     );
