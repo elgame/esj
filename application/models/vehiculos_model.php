@@ -244,7 +244,7 @@ class vehiculos_model extends CI_Model {
         FROM (
           (
             SELECT 1 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -255,7 +255,7 @@ class vehiculos_model extends CI_Model {
           UNION
           (
             SELECT 2 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -266,7 +266,7 @@ class vehiculos_model extends CI_Model {
           UNION
           (
             SELECT 3 AS orden, cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
-              0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
+              0 AS total, 0 AS id_empresa, 0 AS folio, 'Diesel' AS tipo
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
