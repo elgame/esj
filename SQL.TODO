@@ -36,7 +36,6 @@
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',540,FALSE,'proyectos/modificar/','edit',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',540,FALSE,'proyectos/eliminar/','remove',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',540,FALSE,'proyectos/activar/','ok',FALSE);
-     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',540,FALSE,'proyectos/imprimir/','file',FALSE);
      CREATE TABLE otros.proyectos
         (
             id_proyecto bigserial NOT NULL,
@@ -53,6 +52,7 @@
         TABLESPACE pg_default;
         ALTER TABLE otros.proyectos OWNER to programa;
      -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',540,FALSE,'proyectos/imprimir/','file',FALSE);
      ALTER TABLE public.compras ADD COLUMN id_proyecto bigint;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_requisicion ADD COLUMN id_proyecto bigint;
