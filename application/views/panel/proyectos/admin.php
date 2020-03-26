@@ -83,11 +83,19 @@
 								</td>
 								<td class="center">
 										<?php
-										echo $this->usuarios_model->getLinkPrivSm('proyectos/modificar/', array(
-												'params'   => 'id='.$proyecto->id_proyecto,
-												'btn_type' => 'btn-success')
-										);
+                    echo $this->usuarios_model->getLinkPrivSm('proyectos/imprimir/', array(
+                        'params'   => 'id='.$proyecto->id_proyecto,
+                        'btn_type' => 'btn-info',
+                        'attrs'    => ['target' => '_blank']
+                      )
+                    );
+
 										if ($proyecto->status == 't') {
+                      echo $this->usuarios_model->getLinkPrivSm('proyectos/modificar/', array(
+                          'params'   => 'id='.$proyecto->id_proyecto,
+                          'btn_type' => 'btn-success')
+                      );
+
 											echo $this->usuarios_model->getLinkPrivSm('proyectos/eliminar/', array(
 														'params'   => 'id='.$proyecto->id_proyecto,
 														'btn_type' => 'btn-danger',

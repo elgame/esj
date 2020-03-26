@@ -208,24 +208,14 @@ class proyectos extends MY_Controller {
     echo json_encode($params);
   }
 
-  /**
-   * obtiene los centros espesificados en el string
-   */
-  public function ajax_get_centros_costos(){
-    $params = [];
-
-    if ($this->input->get('centrosCosto')) {
-      $this->load->model('proyectos_model');
-      $params = $this->proyectos_model->getCentrosCostosPagesAjax($this->input->get('centrosCosto'));
-    }
-
-    echo json_encode($params);
-  }
-
-  public function catalogo_xls()
+  public function imprimir()
   {
     $this->load->model('proyectos_model');
-    $this->proyectos_model->catalogo_xls();
+
+    if (isset($_GET['id']))
+    {
+      $this->proyectos_model->print($_GET['id']);
+    }
   }
 
 
