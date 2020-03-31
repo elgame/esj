@@ -335,6 +335,7 @@
                     <select name="fbanco" id="fbanco">
                       <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>BBVA Bancomer</option>
                       <option value="santr" <?php echo set_select('fbanco', 'santr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Santander</option>
+                      <option value="banor" <?php echo set_select('fbanco', 'banor', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Santander</option>
                       <option value="efectivo" <?php echo set_select('fbanco', 'efectivo', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Efectivo</option>
                     </select>
                     </div>
