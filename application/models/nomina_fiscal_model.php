@@ -3094,9 +3094,12 @@ class nomina_fiscal_model extends CI_Model {
 
     $content           = array();
     $contentSantr      = array();
+    $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
+    $contadorBanorte   = 1;
     $cuentaSantr       = '92001449876'; // Cuenta cargo santander
+    $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte
     $total_nominaSantr = 0;
 
     //header santader
@@ -3124,6 +3127,20 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D') .
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
+        } elseif($empleado->banco == 'banor') {
+          $contentBanorte[] = '02' .
+                      "'142335" . // $empleado->no_proveedor_banorte
+                      $this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
+                      $this->formatoBanco('', '', 13, 'D'). $this->addTab() .
+                      $this->formatoBanco('', '', 14, 'I'). $this->addTab() .
+                      $this->formatoBanco('', '', 10, 'I'). $this->addTab() .
+                      $this->formatoBanco('x', '', 1, 'I'). $this->addTab() .
+                      $this->formatoBanco('0', '', 1, 'D');
+          $contadorBanorte++;
         }
       }
     }
@@ -3154,6 +3171,20 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D') .
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
+        } elseif($empleado->banco == 'banor') {
+          $contentBanorte[] = '02' .
+                      "'142335" . // $empleado->no_proveedor_banorte
+                      $this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
+                      $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
+                      $this->formatoBanco('', '', 13, 'D'). $this->addTab() .
+                      $this->formatoBanco('', '', 14, 'I'). $this->addTab() .
+                      $this->formatoBanco('', '', 10, 'I'). $this->addTab() .
+                      $this->formatoBanco('x', '', 1, 'I'). $this->addTab() .
+                      $this->formatoBanco('0', '', 1, 'D');
+          $contadorBanorte++;
         }
       }
     }
@@ -3165,6 +3196,7 @@ class nomina_fiscal_model extends CI_Model {
     $contentSantr[] = '';
     $content        = implode("\r\n", $content);
     $contentSantr   = implode("\r\n", $contentSantr);
+    $contentBanorte = implode("\r\n", $contentBanorte);
 
     // $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
     // fwrite($fp,$content);
@@ -3175,6 +3207,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $zip->addFromString('SANTANDER.txt', $contentSantr);
       $zip->addFromString('BBVA Bancomer.txt', $content);
+      $zip->addFromString('BANORTE.txt', $contentBanorte);
 
       $zip->close();
     }
@@ -3239,6 +3272,10 @@ class nomina_fiscal_model extends CI_Model {
       //   var_dump($valor, $relleno, $cantidad, $lado, $decimal, $longitudValor);
       // echo "</pre>";exit;
     }
+  }
+  public function addTab()
+  {
+    return "\t";
   }
 
   /*
