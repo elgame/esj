@@ -1,13 +1,14 @@
 
+ ☐ En la caja chica en el apartado de comprobar gasto, que muestre todas las ordenes de compra y poner una opcion para indicar que esa orden se registre en gastos generales en lugar de comprobar
  ☐ Generar archivo de Banorte nomina
  ☐ Poner opcion para desligar remisiones de facturas
     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Reporte de movimientos de bascula que salga el titulo de la empresa seleccionada @done (20-03-23 18:43)
  ✔ Apartado de producción en almacen que descuente productos e incremente el producido @done (20-03-23 18:43)
-     -- pcc|san
+     -- pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Producción de productos',128,TRUE,'produccion_almacen/','briefcase',FALSE);
-     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',541,TRUE,'produccion_almacen/agregar/','plus',FALSE);
-     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',541,FALSE,'produccion_almacen/cancelar/','ban-circle',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',546,TRUE,'produccion_almacen/agregar/','plus',FALSE);
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',546,FALSE,'produccion_almacen/cancelar/','ban-circle',FALSE);
      CREATE TABLE public.compras_salidas_produccion
         (
             id_salida bigint NOT NULL,
@@ -51,7 +52,7 @@
         ) WITH (OIDS = FALSE)
         TABLESPACE pg_default;
         ALTER TABLE otros.proyectos OWNER to programa;
-     -- pcc|san
+     -- pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',540,FALSE,'proyectos/imprimir/','file',FALSE);
      ALTER TABLE public.compras ADD COLUMN id_proyecto bigint;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;

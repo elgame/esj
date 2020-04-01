@@ -238,38 +238,43 @@ class proyectos_model extends CI_Model {
     $widths = array(20, 30, 120, 35);
     $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
 
-    foreach ($presupuesto['salidas'] as $key => $prod)
-    {
-      $band_head = false;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-        if($pdf->GetY()+5 >= $pdf->limiteY)
-          $pdf->AddPage();
+    if (count($presupuesto['salidas']) > 0) {
+      foreach ($presupuesto['salidas'] as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
 
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetFillColor(160,160,160);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $datos = array(
+          $prod->fecha,
+          $prod->folio,
+          $prod->concepto,
+          MyString::formatoNumero($prod->costo, 2, '$', false),
+        );
+
         $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($datos, false);
+
+        $salidas += floatval($prod->costo);
       }
-
-      $pdf->SetFont('Arial','',8);
-      $datos = array(
-        $prod->fecha,
-        $prod->folio,
-        $prod->concepto,
-        MyString::formatoNumero($prod->costo, 2, '$', false),
-      );
-
-      $pdf->SetX(6);
-      $pdf->Row($datos, false);
-
-      $salidas += floatval($prod->costo);
     }
 
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
-    $pdf->Row(['','','', MyString::formatoNumero($salidas, 2, '$', false)], true);
+    $pdf->Row(['', '', '', MyString::formatoNumero($salidas, 2, '$', false)], true);
 
     $pdf->SetY($pdf->GetY()+2);
     $pdf->SetFont('helvetica', 'B', 9);
@@ -281,35 +286,40 @@ class proyectos_model extends CI_Model {
     $widths = array(20, 30, 120, 35);
     $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
 
-    foreach ($presupuesto['compras'] as $key => $prod)
-    {
-      $band_head = false;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-        if($pdf->GetY()+5 >= $pdf->limiteY)
-          $pdf->AddPage();
+    if (count($presupuesto['compras']) > 0) {
+      foreach ($presupuesto['compras'] as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
 
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetFillColor(160,160,160);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $datos = array(
+          $prod->fecha,
+          $prod->serie.$prod->folio,
+          $prod->concepto,
+          MyString::formatoNumero($prod->costo, 2, '$', false),
+        );
+
         $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($datos, false);
+
+        $compras += floatval($prod->costo);
       }
-
-      $pdf->SetFont('Arial','',8);
-      $datos = array(
-        $prod->fecha,
-        $prod->serie.$prod->folio,
-        $prod->concepto,
-        MyString::formatoNumero($prod->costo, 2, '$', false),
-      );
-
-      $pdf->SetX(6);
-      $pdf->Row($datos, false);
-
-      $compras += floatval($prod->costo);
     }
 
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
     $pdf->Row(['','','', MyString::formatoNumero($compras, 2, '$', false)], true);
@@ -324,35 +334,40 @@ class proyectos_model extends CI_Model {
     $widths = array(20, 30, 120, 35);
     $header = array('FECHA', 'FOLIO', 'CONCEPTO', 'COSTO');
 
-    foreach ($presupuesto['ordenes'] as $key => $prod)
-    {
-      $band_head = false;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-        if($pdf->GetY()+5 >= $pdf->limiteY)
-          $pdf->AddPage();
+    if (count($presupuesto['ordenes']) > 0) {
+      foreach ($presupuesto['ordenes'] as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
 
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetFillColor(160,160,160);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $datos = array(
+          $prod->fecha,
+          $prod->folio,
+          $prod->concepto,
+          MyString::formatoNumero($prod->costo, 2, '$', false),
+        );
+
         $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($datos, false);
+
+        $ordenes += floatval($prod->costo);
       }
-
-      $pdf->SetFont('Arial','',8);
-      $datos = array(
-        $prod->fecha,
-        $prod->folio,
-        $prod->concepto,
-        MyString::formatoNumero($prod->costo, 2, '$', false),
-      );
-
-      $pdf->SetX(6);
-      $pdf->Row($datos, false);
-
-      $ordenes += floatval($prod->costo);
     }
 
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
     $pdf->Row(['','','', MyString::formatoNumero($ordenes, 2, '$', false)], true);
