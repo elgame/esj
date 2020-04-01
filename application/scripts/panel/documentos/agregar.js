@@ -183,8 +183,9 @@
     $('#remisiones-selected').on('click', '.remligadasFactura', function(event) {
       msb.confirm('Estas seguro de Quitar la remision?', 'Facturacion', this, function (obj) {
         $.getJSON(base_url + 'panel/facturacion/ajax_remove_remision_fact/',
-          {id_remision: $('input.remision-selected', obj).val(), id_factura: $('#facturaId').val() }, function(json, textStatus) {
-            /*optional stuff to do after success */
+          {id_remision: $('input.remision-selected', obj).val(), id_factura: $('#facturaId').val() },
+          function(data, textStatus) {
+            noty({"text": data.msg, "layout":"topRight", "type": 'success'});
         });
         console.log('test', $('input.remision-selected', obj).val());
         obj.remove();

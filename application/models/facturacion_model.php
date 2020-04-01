@@ -481,6 +481,14 @@ class facturacion_model extends privilegios_model{
       return array('passes' => true, 'msg' => 'Se ligaron las remisiones correctamente');
     }
 
+    public function removePallestRemisiones($id_remision, $id_factura)
+    {
+      $this->db->delete('facturacion_ventas_remision_pivot', ['id_factura' => $id_factura, 'id_venta' => $id_remision]);
+      $this->db->delete('facturacion_remision_hist', ['id_factura' => $id_factura, 'id_remision' => $id_remision]);
+
+      return array('passes' => true, 'msg' => 'Se quito la remisión correctamente');
+    }
+
     public function addComercioExterior($idFactura, $borrador)
     {
       if ((isset($_GET['idb']) && ! $borrador) || $borrador)

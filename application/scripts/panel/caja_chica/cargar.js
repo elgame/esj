@@ -680,6 +680,7 @@
           $tr = $(this).parent().parent();
           $json = JSON.parse(decodeURIComponent($(this).val()));
           $json.total = $tr.find('.compGastoGMonto').val();
+          $json.sin_factura = $tr.find('.compGastoGSinFactura').is(':checked')? true: false;
           gastos.push( $json );
         });
 
@@ -1469,6 +1470,7 @@
             centros_costos_id: $this.attr('data-centros_costos_id'),
             ranchos: $this.attr('data-ranchos'),
             ranchos_id: $this.attr('data-ranchos_id'),
+            sin_factura: false,
           };
 
           html +=
@@ -1483,6 +1485,9 @@
             '</td>'+
             '<td>'+
               '<input type="number" class="compGastoGMonto" value="'+datos.total+'">'+
+            '</td>'+
+            '<td>'+
+              '<input type="checkbox" class="compGastoGSinFactura" value="true">'+
             '</td>'+
             '<td><button type="button" class="btn compGastoGFrmRemRem"><i class="icon-remove"></i></button></td>'+
           '</tr>';
