@@ -2040,6 +2040,7 @@
                 <th>Proveedor</th>
                 <th>Folio</th>
                 <th>Monto</th>
+                <th>Sin factura</th>
                 <th style="width: 70px;"></th>
               </tr>
             </thead>
