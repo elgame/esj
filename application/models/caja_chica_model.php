@@ -1753,6 +1753,9 @@ class caja_chica_model extends CI_Model {
 
   public function ajaxRegGastosComprobar($data)
   {
+    // echo "<pre>";
+    // var_dump($data);
+    // echo "</pre>";exit;
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
@@ -1798,16 +1801,16 @@ class caja_chica_model extends CI_Model {
     // }
 
     // Agrega las remisiones (gastos del dia)
+    $data_folio_rem = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'g'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
     if (isset($data['remisiones']) && count($data['remisiones']) > 0) {
-      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
-          WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-            AND tipo = 'g'
-          ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
       foreach ($data['remisiones'] as $key => $remm) {
-        $data_folio->folio += 1;
+        $data_folio_rem->folio += 1;
         $gastos = array(
-          'folio_sig'       => $data_folio->folio,
+          'folio_sig'       => $data_folio_rem->folio,
           'id_categoria'    => $data['id_empresa'],
           'id_nomenclatura' => $data_gasto->id_nomenclatura,
           'folio'           => $remm['folio'],
@@ -1858,28 +1861,53 @@ class caja_chica_model extends CI_Model {
         $centros_costos = (!empty($gastoo['centros_costos_id'])? explode('|', $gastoo['centros_costos_id']): [NULL]);
         $ranchos = (!empty($gastoo['ranchos_id'])? explode('|', $gastoo['ranchos_id']): [NULL]);
 
-        $data_folio->folio += 1;
-        $gastos = array(
-          'folio_sig'       => $data_folio->folio,
-          'id_categoria'    => $gastoo['idempresa'],
-          'id_nomenclatura' => $data_gasto->id_nomenclatura,
-          'folio'           => $gastoo['folio'],
-          'concepto'        => $gastoo['proveedor'],
-          'nombre'          => $data_gasto->nombre,
-          'monto'           => $gastoo['total'],
-          'fecha'           => $data['fecha_caja'],
-          'no_caja'         => $data['fno_caja'],
-          'id_cat_codigos'  => $data_gasto->id_cat_codigos,
-          'reposicion'      => $data_gasto->reposicion,
-          'id_usuario'      => $this->session->userdata('id_usuario'),
-          'id_compra'       => $gastoo['id'],
-          'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
-          'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
-          'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
-          'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
-          'tipo'            => 'rg',
-          'folio_ant'       => $data_gasto->folio_sig,
-        );
+        if ($gastoo['sin_factura'] == 'true') {
+          $data_folio_rem->folio += 1;
+          $gastos = array(
+            'folio_sig'       => $data_folio_rem->folio,
+            'id_categoria'    => $gastoo['idempresa'],
+            'id_nomenclatura' => $data_gasto->id_nomenclatura,
+            'folio'           => $gastoo['folio'],
+            'concepto'        => $gastoo['proveedor'],
+            'nombre'          => $data_gasto->nombre,
+            'monto'           => $gastoo['total'],
+            'fecha'           => $data['fecha_caja'],
+            'no_caja'         => $data['fno_caja'],
+            'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+            'reposicion'      => $data_gasto->reposicion,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_compra'       => $gastoo['id'],
+            'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
+            'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
+            'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
+            'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
+            'folio_ant'       => $data_gasto->folio_sig,
+          );
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'       => $data_folio->folio,
+            'id_categoria'    => $gastoo['idempresa'],
+            'id_nomenclatura' => $data_gasto->id_nomenclatura,
+            'folio'           => $gastoo['folio'],
+            'concepto'        => $gastoo['proveedor'],
+            'nombre'          => $data_gasto->nombre,
+            'monto'           => $gastoo['total'],
+            'fecha'           => $data['fecha_caja'],
+            'no_caja'         => $data['fno_caja'],
+            'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+            'reposicion'      => $data_gasto->reposicion,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_compra'       => $gastoo['id'],
+            'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
+            'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
+            'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
+            'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
+            'tipo'            => 'rg',
+            'folio_ant'       => $data_gasto->folio_sig,
+          );
+        }
+
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
 
