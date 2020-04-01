@@ -2196,7 +2196,7 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
 
-    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true, true);
+    $response = $this->facturacion_model->removePallestRemisiones($_GET['id_remision'], $_GET['id_factura']);
 
     echo json_encode($response);
   }
