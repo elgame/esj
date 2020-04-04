@@ -1128,9 +1128,9 @@ class cfdi{
       $pago_tipo_cambio = (!empty($posts['tipoCambio']) && $posts['tipoCambio']>0? $posts['tipoCambio']: $pago_tipo_cambio);
 
       if ($pago_moneda == 'USD') {
-        // if ($posts['tipoCambio']>0) {
-        //   $override_monto = false;
-        // }
+        if ($posts['tipoCambio']>0) {
+          $override_monto = false;
+        }
 
         $pago_monto = number_format($data[0]->pago/$pago_tipo_cambio, 2, '.', '');
       }
