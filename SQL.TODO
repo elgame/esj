@@ -1,7 +1,7 @@
 
  ✔ En la caja chica en el apartado de comprobar gasto, que muestre todas las ordenes de compra y poner una opcion para indicar que esa orden se registre en gastos generales en lugar de comprobar @done (20-04-01 16:08)
  ☐ Generar archivo de Banorte nomina
- ☐ Poner opcion para desligar remisiones de facturas
+ ✔ Poner opcion para desligar remisiones de facturas @done (20-04-04 11:07)
     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Reporte de movimientos de bascula que salga el titulo de la empresa seleccionada @done (20-03-23 18:43)
  ✔ Apartado de producción en almacen que descuente productos e incremente el producido @done (20-03-23 18:43)
