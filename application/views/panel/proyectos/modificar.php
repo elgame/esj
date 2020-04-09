@@ -57,6 +57,22 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="fecha_inicio">Fecha de inicio </label>
+                    <div class="controls">
+                      <input type="date" name="fecha_inicio" id="fecha_inicio" class="span10"
+                        value="<?php echo isset($data->fecha_inicio)? $data->fecha_inicio:''; ?>">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fecha_terminacion">Fecha de terminación </label>
+                    <div class="controls">
+                      <input type="date" name="fecha_terminacion" id="fecha_terminacion" class="span10"
+                        value="<?php echo isset($data->fecha_terminacion)? $data->fecha_terminacion:''; ?>">
+                    </div>
+                  </div>
+
                 </div> <!--/span-->
 
                 <div class="clearfix"></div>

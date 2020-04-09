@@ -59,6 +59,8 @@
 							  	<th>Nombre</th>
 								  <th>Empresa</th>
                   <th>Presupuesto</th>
+                  <th>Fecha Ini</th>
+                  <th>Fecha Fin</th>
                   <th>Estatus</th>
 								  <th>Opciones</th>
 							  </tr>
@@ -67,8 +69,10 @@
 						<?php foreach($proyectos['proyectos'] as $proyecto){ ?>
 							<tr>
 								<td><?php echo $proyecto->nombre; ?></td>
-								<td><?php echo $proyecto->nombre_fiscal; ?></td>
+                <td><?php echo $proyecto->nombre_fiscal; ?></td>
                 <td><?php echo number_format($proyecto->presupuesto, 2); ?></td>
+                <td><?php echo $proyecto->fecha_inicio; ?></td>
+								<td><?php echo $proyecto->fecha_terminacion; ?></td>
 								<td>
 									<?php
 										if($proyecto->status == 't'){

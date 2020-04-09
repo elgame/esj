@@ -197,6 +197,12 @@
                           'btn_type' => 'btn-success',
                           'attrs' => array('target' => '_BLANK'))
                         );
+
+                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar_ext/', array(
+                          'params'   => 'id='.$orden->id_orden,
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('rel' => 'superbox-80x550'))
+                        );
                       }
 
                       if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca' && $orden->prod_sincompras == 0)
