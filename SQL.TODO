@@ -1,4 +1,14 @@
 
+ ✔ Cambios en ordenes de compra y requisición, proyectos @done (20-04-08 19:29)
+   -- pcc
+   ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja bigint;
+   ALTER TABLE public.compras_requisicion ADD COLUMN uso_cfdi character varying(50) COLLATE pg_catalog."default";
+   ALTER TABLE public.compras_ordenes ADD COLUMN folio_hoja bigint;
+   ALTER TABLE public.compras_ordenes ADD COLUMN uso_cfdi character varying(50) COLLATE pg_catalog."default";
+   ALTER TABLE otros.proyectos ADD COLUMN fecha_inicio date;
+   ALTER TABLE otros.proyectos ADD COLUMN fecha_terminacion date;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Ext',136,FALSE,'compras_ordenes/modificar_ext/','edit',FALSE);
+
  ✔ En la caja chica en el apartado de comprobar gasto, que muestre todas las ordenes de compra y poner una opcion para indicar que esa orden se registre en gastos generales en lugar de comprobar @done (20-04-01 16:08)
  ☐ Generar archivo de Banorte nomina
  ✔ Poner opcion para desligar remisiones de facturas @done (20-04-04 11:07)

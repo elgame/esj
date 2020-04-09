@@ -240,6 +240,16 @@ class proyectos extends MY_Controller {
       array('field' => 'did_empresa',
             'label' => 'Empresa',
             'rules' => 'required|numeric'),
+
+      array('field' => 'fecha_inicio',
+            'label' => 'Fecha de inicio',
+            'rules' => ''),
+      array('field' => 'fecha_terminacion',
+            'label' => 'Fecha de terminación',
+            'rules' => ''),
+
+
+
     );
 
     $this->form_validation->set_rules($rules);

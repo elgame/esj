@@ -313,6 +313,9 @@ class compras_ordenes_model extends CI_Model {
         'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
         'descripcion'     => $_POST['descripcion'],
         'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
+
+        'folio_hoja'      => (!empty($this->input->post('folioHoja'))? $_POST['folioHoja']: NULL),
+        'uso_cfdi'        => (!empty($this->input->post('duso_cfdi'))? $_POST['duso_cfdi']: 'G03'),
       );
 
       // Si es un gasto son requeridos los campos de catálogos
@@ -526,6 +529,47 @@ class compras_ordenes_model extends CI_Model {
       if(isset($data['autorizado']))
         if($data['autorizado'] == 't')
           $this->sendEmail($idOrden, $_POST['proveedorId']);
+    }
+
+    return array('passes' => true, 'msg' => 7);
+  }
+
+  public function actualizarExt($idOrden, $datos)
+  {
+    $ordennn = $this->db->select("status, otros_datos")
+      ->from("compras_ordenes")
+      ->where("id_orden", $idOrden)
+      ->get()->row();
+    $status = $ordennn->status;
+
+    $data = array();
+
+    //si se registra a un vehiculo
+    if (isset($_POST['es_vehiculo']))
+    {
+      $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
+      $data['id_vehiculo'] = $_POST['vehiculoId'];
+    }
+    else
+    {
+      $data['tipo_vehiculo'] = 'ot';
+      $data['id_vehiculo'] = null;
+    }
+
+    if (count($data) > 0) {
+      // Bitacora
+      $id_bitacora = $this->bitacora_model->_update('compras_ordenes', $idOrden, $data,
+                                array(':accion'       => 'modifico la orden de compra', ':seccion' => 'ordenes de compra',
+                                      ':folio'        => $this->input->post('folio'),
+                                      ':id_empresa'   => $this->input->post('empresaId'),
+                                      ':empresa'      => 'en '.$this->input->post('empresa'),
+                                      ':id'           => 'id_orden',
+                                      ':titulo'       => 'Orden de compra'));
+
+      $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
+
+      // Actualiza los datos del vehiculo
+      $this->actualizaVehiculo($idOrden);
     }
 
     return array('passes' => true, 'msg' => 7);
@@ -802,7 +846,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
               -- co.id_area, co.id_activo,
               co.id_empresa_ap, co.id_orden_aplico,
-              co.otros_datos, co.es_receta, co.id_proyecto
+              co.otros_datos, co.es_receta, co.id_proyecto, co.folio_hoja, co.uso_cfdi
        FROM compras_ordenes AS co
          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -871,7 +915,13 @@ class compras_ordenes_model extends CI_Model {
 
         if ($data['info'][0]->id_proyecto > 0) {
           $this->load->model('proyectos_model');
-          $data['info'][0]->proyecto = $this->proyectos_model->getProyectoInfo($data['info'][0]->id_proyecto, true);
+          $data['info'][0]->proyecto = $this->proyectos_model->getProyectoInfo($data['info'][0]->id_proyecto, true, true);
+        }
+
+        $data['info'][0]->uso_cfdi_all = null;
+        if ($data['info'][0]->uso_cfdi != '') {
+          $usoCFDI = new UsoCfdi;
+          $data['info'][0]->uso_cfdi_all = $usoCFDI->search($data['info'][0]->uso_cfdi);
         }
 
         // facturas ligadas
@@ -1797,9 +1847,10 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
       $usoCFDI = 'G03 (Gastos en General)';
-      if ($orden['info'][0]->id_empresa == 20) { // agroinsumos
-        $usoCFDI = 'G01 (Adquisición de mercancias)';
+      if ($orden['info'][0]->uso_cfdi_all) { // agroinsumos
+        $usoCFDI = "{$orden['info'][0]->uso_cfdi_all['key']} ({$orden['info'][0]->uso_cfdi_all['value']})";
       }
+
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Uso del CFDI:', $usoCFDI), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
@@ -1941,7 +1992,7 @@ class compras_ordenes_model extends CI_Model {
 
       $aligns = array('C', 'L', 'C', 'R', 'R', 'C', 'C');
       $ultima_compra = false;
-      if ($orden['info'][0]->no_impresiones > 0) {
+      if ($orden['info'][0]->no_impresiones > -1) {
         $widths = array(93, 18, 25, 25, 25, 25, 25);
         $header = array('DESCRIPCION', 'CANT.', 'PRECIO', 'IMPORTE');
 
@@ -2170,11 +2221,6 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
       }
 
-      if (isset($orden['info'][0]->proyecto['info'])) {
-        $pdf->SetXY(6, $pdf->GetY()-1);
-        $pdf->Row(array('PROYECTO: ' . $orden['info'][0]->proyecto['info']->nombre), false, false);
-      }
-
       $pdf->SetXY(6, $pdf->GetY()+6);
       $pdf->Row(array('________________________________________________________________________________________________'), false, false);
       $pdf->SetXY(6, $pdf->GetY()-2);
@@ -2213,7 +2259,7 @@ class compras_ordenes_model extends CI_Model {
 
       $y_compras = $pdf->GetY();
 
-      if ($orden['info'][0]->no_impresiones > 0) {
+      if ($orden['info'][0]->no_impresiones > -1) {
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
@@ -2226,6 +2272,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial', 'B', 8);
 
         $y_auxx = $pdf->GetY();
+        $pag_auxx = $pdf->page;
 
         $pdf->SetFont('Arial','',8);
         $pdf->SetXY(5, $pdf->GetY());
@@ -2288,6 +2335,23 @@ class compras_ordenes_model extends CI_Model {
             $activos[] = $value->nombre;
           }
           $pdf->Row(array('Activo', implode(' | ', $activos)), false, true);
+        }
+
+        $pdf->page = $pag_auxx;
+        $pdf->SetY($y_auxx);
+
+        if (isset($orden['info'][0]->proyecto['info'])) {
+          $pdf->SetWidths(array(120));
+          $pdf->SetXY(90, $pdf->GetY()-1);
+          $pdf->Row(array("PROYECTO {$orden['info'][0]->proyecto['info']->id_proyecto}: ".
+              "{$orden['info'][0]->proyecto['info']->nombre} / P:".intval($orden['info'][0]->proyecto['info']->presupuesto)." / A:".intval($orden['info'][0]->proyecto['info']->aplicado)
+            ), false, true);
+        }
+
+        if (!empty($orden['info'][0]->folio_hoja)) {
+          $pdf->SetWidths(array(120));
+          $pdf->SetXY(90, $pdf->GetY());
+          $pdf->Row(array("Folio Orden: {$orden['info'][0]->folio_hoja}"), false, true);
         }
 
 
@@ -2814,7 +2878,7 @@ class compras_ordenes_model extends CI_Model {
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
         WHERE cp.id_producto = {$id_producto} {$sql}
-        ORDER BY Date(co.fecha_aceptacion) DESC
+        ORDER BY co.fecha_aceptacion DESC
         LIMIT 1")->row();
     }
     return $query;

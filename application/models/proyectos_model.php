@@ -36,7 +36,7 @@ class proyectos_model extends CI_Model {
 
     $query['query'] =
           "SELECT p.id_proyecto, p.nombre, p.presupuesto, p.status,
-            e.id_empresa, e.nombre_fiscal
+            e.id_empresa, e.nombre_fiscal, p.fecha_inicio, p.fecha_terminacion
           FROM otros.proyectos p
             INNER JOIN empresas e ON e.id_empresa = p.id_empresa
           {$sql}
@@ -68,9 +68,11 @@ class proyectos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'id_empresa'  => $this->input->post('did_empresa'),
-        'nombre'      => $this->input->post('nombre'),
-        'presupuesto' => $this->input->post('presupuesto'),
+        'id_empresa'        => $this->input->post('did_empresa'),
+        'nombre'            => $this->input->post('nombre'),
+        'presupuesto'       => $this->input->post('presupuesto'),
+        'fecha_inicio'      => ($this->input->post('fecha_inicio')!=false? $_POST['fecha_inicio']: NULL),
+        'fecha_terminacion' => ($this->input->post('fecha_terminacion')!=false? $_POST['fecha_terminacion']: NULL),
       );
     }
 
@@ -90,9 +92,11 @@ class proyectos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'id_empresa'  => $this->input->post('did_empresa'),
-        'nombre'      => $this->input->post('nombre'),
-        'presupuesto' => $this->input->post('presupuesto'),
+        'id_empresa'        => $this->input->post('did_empresa'),
+        'nombre'            => $this->input->post('nombre'),
+        'presupuesto'       => $this->input->post('presupuesto'),
+        'fecha_inicio'      => ($this->input->post('fecha_inicio')!=false? $_POST['fecha_inicio']: NULL),
+        'fecha_terminacion' => ($this->input->post('fecha_terminacion')!=false? $_POST['fecha_terminacion']: NULL),
       );
     }
 
@@ -108,11 +112,11 @@ class proyectos_model extends CI_Model {
    * @param  boolean $basic_info [description]
    * @return [type]              [description]
    */
-  public function getProyectoInfo($id_proyecto=FALSE, $basic_info=FALSE)
+  public function getProyectoInfo($id_proyecto=FALSE, $basic_info=FALSE, $with_apl = false)
   {
     $id_proyecto = $id_proyecto? $id_proyecto: (isset($_GET['id'])? $_GET['id']: 0);
 
-    $sql_res = $this->db->select("id_proyecto, id_empresa, nombre, presupuesto, status" )
+    $sql_res = $this->db->select("id_proyecto, id_empresa, nombre, presupuesto, status, fecha_inicio, fecha_terminacion" )
                         ->from("otros.proyectos")
                         ->where("id_proyecto", $id_proyecto)
                         ->get();
@@ -121,6 +125,10 @@ class proyectos_model extends CI_Model {
     if ($sql_res->num_rows() > 0)
       $data['info'] = $sql_res->row();
     $sql_res->free_result();
+
+    if ($basic_info == False || $with_apl) {
+      $data['info']->aplicado = $this->getProyectoAplicado($id_proyecto);
+    }
 
     if ($basic_info == False) {
 
@@ -165,6 +173,32 @@ class proyectos_model extends CI_Model {
     return $response;
   }
 
+  public function getProyectoAplicado($id_proyecto)
+  {
+    $response = 0;
+    $data = $this->getProyectoPresupuesto($id_proyecto);
+
+    if (count($data['salidas']) > 0) {
+      foreach ($data['salidas'] as $key => $value) {
+        $response += $value->costo;
+      }
+    }
+
+    if (count($data['compras']) > 0) {
+      foreach ($data['compras'] as $key => $value) {
+        $response += $value->costo;
+      }
+    }
+
+    if (count($data['ordenes']) > 0) {
+      foreach ($data['ordenes'] as $key => $value) {
+        $response += $value->costo;
+      }
+    }
+
+    return $response;
+  }
+
   /**
    * Obtiene el listado de proveedores para usar ajax
    * @param term. termino escrito en la caja de texto, busca en el nombre
@@ -183,7 +217,7 @@ class proyectos_model extends CI_Model {
 
     $query['query'] =
           "SELECT p.id_proyecto, p.nombre, p.presupuesto, p.status,
-            e.id_empresa, e.nombre_fiscal
+            e.id_empresa, e.nombre_fiscal, p.fecha_inicio, p.fecha_terminacion
           FROM otros.proyectos p
             INNER JOIN empresas e ON e.id_empresa = p.id_empresa
           {$sql}
@@ -225,7 +259,15 @@ class proyectos_model extends CI_Model {
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
-    $pdf->SetXY(6, $pdf->GetY()-8);
+    $pdf->SetXY(90, $pdf->GetY()-8);
+
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(60, 60));
+    $pdf->Row(array(
+      "Fecha de Inicio: ". MyString::fechaATexto($orden['info']->fecha_inicio, '/c'),
+      "Fecha de terminación: ". MyString::fechaATexto($orden['info']->fecha_terminacion, '/c')
+    ), false, false);
 
     $salidas = $compras = $ordenes = 0;
 

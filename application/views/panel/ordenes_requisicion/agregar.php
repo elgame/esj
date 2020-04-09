@@ -184,6 +184,24 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="folioHoja">Folio Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folioHoja" class="span9" id="folioHoja" value="<?php echo set_value('folioHoja'); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="duso_cfdi">Uso de CFDI</label>
+                <div class="controls">
+                  <select name="duso_cfdi" class="span9" id="duso_cfdi">
+                    <?php foreach ($usoCfdi as $key => $usoCfdi) { ?>
+                      <option value="<?php echo $usoCfdi['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfdi['key'], false, 'G03'); ?>><?php echo $usoCfdi['key'].' - '.$usoCfdi['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="tipoPago">Tipo de Pago</label>
                 <div class="controls">
                   <select name="tipoPago" class="span9" id="tipoPago">
