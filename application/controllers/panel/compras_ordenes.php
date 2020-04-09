@@ -253,9 +253,12 @@ class compras_ordenes extends MY_Controller {
       'titulo' => (isset($_GET['w'])? ($_GET['w']=='c'? 'Orden de compra': 'Orden de requisición'): 'Orden de compra')
     );
 
+    $usoCfdi = new UsoCfdi();
+
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_ordenes_model->departamentos();
     $params['unidades']      = $this->compras_ordenes_model->unidades();
+    $params['usoCfdi']       = $usoCfdi->get()->all();
 
     if ( ! isset($_GET['m']))
     {
@@ -328,6 +331,73 @@ class compras_ordenes extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/compras_ordenes/modificar', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function modificar_ext()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      // array('general/buttons.toggle.js'),
+      array('general/keyjump.js'),
+      array('panel/compras_ordenes/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
+    ));
+
+    $this->load->model('compras_ordenes_model');
+    $this->load->model('compras_areas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Orden de compra'
+    );
+
+
+    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $this->configAddOrdenExt();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->compras_ordenes_model->actualizarExt($_GET['id'], $_POST);
+
+      if ($response['passes'])
+      {
+        if (isset($_POST['autorizar']))
+        {
+          redirect(base_url('panel/compras_ordenes/modificar_ext/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&reload=true'));
+        }
+        else
+        {
+          redirect(base_url('panel/compras_ordenes/modificar_ext/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
+        }
+      }
+    }
+
+    $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
+    // echo "<pre>";
+    //   var_dump($params['orden']);
+    // echo "</pre>";exit;
+
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['reload']))
+      $params['reload'] = true;
+
+    $this->load->view('panel/compras_ordenes/modificar_ext', $params);
   }
 
   public function autorizar()
@@ -987,6 +1057,46 @@ class compras_ordenes extends MY_Controller {
             'label' => 'UUID',
             'rules' => 'callback_uuid_check'),
     );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function configAddOrdenExt()
+  {
+    $this->load->library('form_validation');
+
+    $rules = [];
+
+    $rules[] = array('field' => 'es_vehiculo',
+                    'label' => 'Vehiculo',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculo',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculoId',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+
+    if ($this->input->post('es_vehiculo') == 'si')
+    {
+      $rules[count($rules)-1]['rules'] = 'required|numeric';
+
+      $rules[] = array('field' => 'tipo_vehiculo',
+                      'label' => 'Tipo vehiculo',
+                      'rules' => '');
+      if ($this->input->post('tipo_vehiculo') == 'g')
+      {
+        $rules[] = array('field' => 'dkilometros',
+                        'label' => 'Kilometros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dlitros',
+                        'label' => 'Litros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dprecio',
+                        'label' => 'Precio',
+                        'rules' => 'required|numeric');
+      }
+    }
 
     $this->form_validation->set_rules($rules);
   }
