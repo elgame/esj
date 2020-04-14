@@ -2661,11 +2661,11 @@ class inventario_model extends privilegios_model{
 				)
 				UNION ALL
 				(
-				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
+        SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
           sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, sa.folio, 's' AS tipo
-				FROM compras_salidas AS sa
-				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
           AND Date(sa.fecha_registro) <= '{$fecha2}'
           {$sql_sal}
 				)

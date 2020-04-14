@@ -253,7 +253,7 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Saldo de un cliente seleccionado
 	 * @return [type] [description]
 	 */
-	public function getCuentaProveedorData()
+	public function getCuentaProveedorData($otros = null)
 	{
 		$sqlp1 = $sqlp2 = $sqlp3 = $sql = '';
 
@@ -286,6 +286,13 @@ class cuentas_pagar_model extends privilegios_model{
       $sqlp1 = " AND f.id_proveedor = '".$this->input->get('id_proveedor')."'";
       $sqlp2 = " AND c.id_proveedor = '".$this->input->get('id_proveedor')."'";
       $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
+    }
+
+    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = '';
+    if (isset($otros['only_select'])) { // solo los seleccionados para pago masivo
+      $sql_only_sel_table = " INNER JOIN banco_pagos_compras bpc ON f.id_compra = bpc.id_compra";
+      $sql_only_sel_where = " AND bpc.status = 'f'";
+      $sql_only_sel_order = 'proveedor ASC,';
     }
 
 		/*** Saldo anterior ***/
@@ -374,6 +381,7 @@ class cuentas_pagar_model extends privilegios_model{
         p.nombre_fiscal AS proveedor
 			FROM
 				compras AS f
+        {$sql_only_sel_table}
 				LEFT JOIN (
 					SELECT id_compra, Sum(abono) AS abono
 					FROM (
@@ -406,8 +414,9 @@ class cuentas_pagar_model extends privilegios_model{
         {$sqlp1}
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
+        {$sql_only_sel_where}
 
-			ORDER BY fecha ASC, serie ASC, folio ASC
+			ORDER BY {$sql_only_sel_order} fecha ASC, serie ASC, folio ASC
 			");
 
 
@@ -724,9 +733,9 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$bad_saldo_ante = true;
 		if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
-			$total_cargo += $res['anterior']->total;
-			$total_abono += $res['anterior']->abonos;
-			$total_saldo += $res['anterior']->saldo;
+			// $total_cargo += $res['anterior']->total;
+			// $total_abono += $res['anterior']->abonos;
+			// $total_saldo += $res['anterior']->saldo;
 		}else{
 			$res['anterior'] = new stdClass();
 			$res['anterior']->total = 0;
@@ -885,7 +894,7 @@ class cuentas_pagar_model extends privilegios_model{
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('L', 'mm', 'Letter');
 
-    $res = $this->getCuentaProveedorData();
+    $res = $this->getCuentaProveedorData(['only_select' => true]);
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -916,6 +925,8 @@ class cuentas_pagar_model extends privilegios_model{
     $total_cargo = 0;
     $total_abono = 0;
     $total_saldo = 0;
+    $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+    $aux_prov = '';
     $totales_x_tipo = array('nacional' => 0, 'internacional' => 0);
 
     $bad_saldo_ante = true;
@@ -980,6 +991,10 @@ class cuentas_pagar_model extends privilegios_model{
                   $item->estado, $item->fecha_vencimiento,
                   $item->dias_transc);
 
+      $total_cargo_p += $item->cargo;
+      $total_abono_p += $item->abono;
+      $total_saldo_p += $item->saldo;
+
       $total_cargo += $item->cargo;
       $total_abono += $item->abono;
       $total_saldo += $item->saldo;
@@ -988,11 +1003,33 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
       $pdf->Row($datos, false);
+
+
+      if (!isset($res['cuentas'][$key+1]) || $aux_prov != $res['cuentas'][$key+1]->proveedor) {
+        $pdf->SetX(6);
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(220,220,220);
+        $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(138, 28, 28, 28));
+        $pdf->Row(array('Totales:',
+            MyString::formatoNumero($total_cargo_p, 2, '$', false),
+            MyString::formatoNumero($total_abono_p, 2, '$', false),
+            MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+
+        $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+        $pdf->SetY($pdf->GetY()+3);
+        if (isset($res['cuentas'][$key+1])) {
+          $aux_prov = $res['cuentas'][$key+1]->proveedor;
+        }
+      }
+
     }
 
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
     $pdf->SetTextColor(255,255,255);
+    $pdf->SetFillColor(160,160,160);
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(138, 28, 28, 28));
     $pdf->Row(array('Totales:',
@@ -1004,7 +1041,7 @@ class cuentas_pagar_model extends privilegios_model{
     $pdf->Output('cuentas_proveedor.pdf', 'I');
   }
   public function cuenta2ProveedorExcel(&$xls=null, $close=true){
-    $res = $this->getCuentaProveedorData();
+    $res = $this->getCuentaProveedorData(['only_select' => true]);
 
     if (count($res['anterior']) > 0)
       $res['anterior'] = $res['anterior'][0];

@@ -26,6 +26,7 @@ $(function(){
 
   autocompleteCalidadLive();
   autocompleteTamanioLive();
+  autocompleteTamanioProdLive();
   closeGroupMoreOut();
   extrasProductosEspeciales();
 
@@ -107,8 +108,31 @@ function autocompleteTamanioLive () {
       }
     });
   });
+}
 
+function autocompleteTamanioProdLive () {
+  $('#table_prod').on('focus', 'input#prod_dtamanio_prod:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/rastreabilidad/ajax_get_calibres/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this),
+            $tr = $this.parent().parent();
 
+        $this.css("background-color", "#B0FFB0");
+
+        $tr.find('#prod_did_tamanio_prod').val(ui.item.id);
+      }
+    }).keydown(function(event){
+      if(event.which == 8 || event == 46) {
+        var $tr = $(this).parent().parent();
+
+        $(this).css("background-color", "#FFD9B3");
+        $tr.find('#prod_did_tamanio_prod').val('');
+      }
+    });
+  });
 }
 
 /****** Supervisor, certificados, etc  ********/

@@ -802,6 +802,9 @@ class facturacion extends MY_Controller {
       $rules[] = array('field'   => 'prod_did_tamanio[]',
                       'label'   => 'Tamaño',
                       'rules'   => 'required');
+      $rules[] = array('field'   => 'prod_did_tamanio_prod[]',
+                      'label'   => 'TamañoProd',
+                      'rules'   => 'required');
     }
 
     if (isset($_POST['palletsIds']) && isset($_POST['timbrar']))
