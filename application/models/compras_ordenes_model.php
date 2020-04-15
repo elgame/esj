@@ -846,7 +846,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada,
               -- co.id_area, co.id_activo,
               co.id_empresa_ap, co.id_orden_aplico,
-              co.otros_datos, co.es_receta, co.id_proyecto, co.folio_hoja, co.uso_cfdi
+              co.otros_datos, co.es_receta, co.id_proyecto, co.folio_hoja, co.uso_cfdi, co.forma_pago
        FROM compras_ordenes AS co
          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -923,6 +923,10 @@ class compras_ordenes_model extends CI_Model {
           $usoCFDI = new UsoCfdi;
           $data['info'][0]->uso_cfdi_all = $usoCFDI->search($data['info'][0]->uso_cfdi);
         }
+
+        $data['info'][0]->forma_pago = empty($data['info'][0]->forma_pago)? '99': $data['info'][0]->forma_pago;
+        $formPago = new FormaPago;
+        $data['info'][0]->forma_pago_all = $formPago->search($data['info'][0]->forma_pago);
 
         // facturas ligadas
         $data['info'][0]->facturasligadas = array();
@@ -1843,7 +1847,11 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Condiciones:', ($proveedor['info']->condicion_pago=='co'? 'Contado': "Crédito {$proveedor['info']->dias_credito} DIAS")), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
-      $pdf->Row(array('Forma de Pago:', "99 (Por Definir)"), false, false);
+      $formaPago = "99 (Por Definir)";
+      if ($orden['info'][0]->forma_pago_all) { // agroinsumos
+        $formaPago = "{$orden['info'][0]->forma_pago_all['key']} ({$orden['info'][0]->forma_pago_all['value']})";
+      }
+      $pdf->Row(array('Forma de Pago:', $formaPago), false, false);
       $pdf->SetXY(95, $pdf->GetY()-1.5);
       $pdf->Row(array('Método de Pago:', "PPD (Pago Parcialidades/Diferido)"), false, false);
       $usoCFDI = 'G03 (Gastos en General)';
