@@ -7,10 +7,13 @@
 
  ✔ Cuentas por pagar 2 que imprima solo las facturas marcadas @done (20-04-14 17:12)
  ☐ Reporte de existencias de limón
-    -- lap|pcc (ya tiene el codigo en remisiones y facturacion)
+    -- lap|pcc (falta acomodar la imprecion del reporte)
     ALTER TABLE public.facturacion_productos ADD COLUMN id_calibres integer;
     COMMENT ON COLUMN public.facturacion_productos.id_calibres IS 'Unidad usada en producción';
     ALTER TABLE public.facturacion_productos ADD CONSTRAINT facturacion_productos_id_calibres_fkey FOREIGN KEY (id_calibres) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    -- pcc
+    ALTER TABLE public.calibres ADD COLUMN status boolean NOT NULL DEFAULT true;
+    -- En la tabla otros.existencias_limon_existencia y otros.existencias_limon_produccion trucar los registros y cambiar id_clasificacion x id_calibre y Pk/Fk.
 
  ✔ Cambios en ordenes de compra y requisición, proyectos @done (20-04-08 19:29)
    -- pcc|san|lap
