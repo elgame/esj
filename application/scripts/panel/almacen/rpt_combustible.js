@@ -8,10 +8,14 @@
     $('#form').on('submit', function(event) {
       var linkDownXls = $("#linkDownXls"),
         url = {
-          ffecha1: $("#ffecha1").val(),
-          ffecha2: $("#ffecha2").val(),
-          ddesglosado: $("#ddesglosado:checked").val(),
-          dareas: [],
+          ffecha1     : $("#ffecha1").val(),
+          ffecha2     : $("#ffecha2").val(),
+          dempresa    : $("#dempresa").val(),
+          did_empresa : $("#did_empresa").val(),
+          activos     : $("#activos").val(),
+          activoId    : $("#activoId").val(),
+          ddesglosado : $("#ddesglosado:checked").val(),
+          dareas      : [],
         };
 
       $(".treeviewcustom input[type=checkbox]:checked").each(function(index, el) {
