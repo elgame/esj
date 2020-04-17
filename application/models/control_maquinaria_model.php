@@ -186,7 +186,7 @@ class control_maquinaria_model extends CI_Model {
     $widths = array(153, 40);
     $header = array('Vehiculo');
     $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
-    $widths2 = array(15, 9, 15, 35, 35, 14, 14, 19, 10, 10, 15, 15, 18, 22, 20);
+    $widths2 = array(15, 9, 15, 35, 35, 14, 14, 17, 12, 10, 15, 15, 18, 22, 20);
     $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
         'Litros', 'Precio', 'Total', 'Rendim lt/Hr', 'Acumulado', 'Implemento', 'Observaciones');
 
@@ -211,7 +211,7 @@ class control_maquinaria_model extends CI_Model {
         if ($key != 0) {
           $pdf->SetX(6);
           $pdf->SetAligns(['R', 'R', 'R', 'R']);
-          $pdf->SetWidths([135, 11, 10, 25]);
+          $pdf->SetWidths([137, 17, 12, 25]);
 
           $pdf->SetFont('Arial', 'B', 7);
           $pdf->SetTextColor(0, 0, 0);
@@ -279,7 +279,7 @@ class control_maquinaria_model extends CI_Model {
 
     $pdf->SetX(6);
     $pdf->SetAligns(['R', 'R', 'R', 'R']);
-    $pdf->SetWidths([135, 11, 10, 25]);
+    $pdf->SetWidths([137, 17, 12, 25]);
 
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
