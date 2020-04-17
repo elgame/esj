@@ -337,46 +337,87 @@ class control_maquinaria_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total Hrs</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lts/Hrs</td>
         </tr>';
-    $lts_combustible = $horas_totales = 0;
+
+    $costoacumulado = 0;
+    $auxvehi = '';
+    $total_hrs = $total_litros = $total_importe = 0;
+    $ttotal_hrs = $ttotal_litros = $ttotal_importe = 0;
+
+    $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
+        'Litros', 'Precio', 'Total', 'Rendim lt/Hr', 'Acumulado', 'Implemento', 'Observaciones');
+
     foreach ($combustible as $key => $vehiculo)
     {
-      $lts_combustible += floatval($vehiculo->lts_combustible);
-      $horas_totales   += floatval($vehiculo->horas_totales);
-
-      $html .= '<tr style="font-weight:bold">
-          <td style="width:500px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->implemento.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->lts_combustible.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->horas_totales.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
-        </tr>';
-      if (isset($vehiculo->detalle)) {
-        foreach ($vehiculo->detalle as $key2 => $item)
-        {
-          $html .= '<tr>
-              <td colspan="3" style="width:500px;border:1px solid #000;">
-                <table>
-                  <tr>
-                    <td style="width:80px;border:1px solid #000;">'.$item->fecha.'</td>
-                    <td style="width:210px;border:1px solid #000;">'.$item->centro_costo.'</td>
-                    <td style="width:210px;border:1px solid #000;">'.$item->labor.'</td>
-                  </tr>
-                </table>
-              </td>
-              <td style="width:150px;border:1px solid #000;">'.$item->lts_combustible.'</td>
-              <td style="width:150px;border:1px solid #000;">'.$item->horas_totales.'</td>
-              <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
-            </tr>';
+      if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
+        if ($key != 0) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="7" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_hrs, 2, '', false).'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_litros, 2, '', false).'</td>
+            <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
+            <td colspan="4" style=""></td>
+          </tr>';
         }
+        $total_hrs = $total_litros = $total_importe = 0;
+
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="8" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->activo.'</td>
+            <td colspan="7" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->labor.'</td>
+          </tr>';
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(180,180,180);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row($header2, true);
+
+        $html .= '<tr style="font-weight:bold">';
+        foreach ($header2 as $keyhh => $head) {
+          $html .= '<td style="border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
+        }
+        $html .= '</tr>';
+
+        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
+        $costoacumulado = 0;
       }
 
+      $hrs = ($vehiculo->odometro_fin - $vehiculo->odometro);
+      $costoacumulado += $vehiculo->precio*$vehiculo->lts_combustible;
+      $total_hrs      += $hrs;
+      $total_litros   += $vehiculo->lts_combustible;
+      $total_importe  += ($vehiculo->precio*$vehiculo->lts_combustible);
+
+      $ttotal_hrs      += $hrs;
+      $ttotal_litros   += $vehiculo->lts_combustible;
+      $ttotal_importe  += ($vehiculo->precio*$vehiculo->lts_combustible);
+
+      $html .= '<tr style="">
+          <td style="width:150px;border:1px solid #000;">'.$vehiculo->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.substr($vehiculo->hora_carga, 0, 5).'</td>
+          <td style="width:150px;border:1px solid #000;">'.$vehiculo->folio.'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->rancho.'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->operador.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->odometro, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->odometro_fin, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($hrs, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->precio, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->precio*$vehiculo->lts_combustible, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($costoacumulado, 2, '', false).'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->implemento.'</td>
+          <td style="width:250px;border:1px solid #000;">'.$vehiculo->observaciones.'</td>
+        </tr>';
     }
 
     $html .= '
         <tr style="font-weight:bold">
-          <td>TOTALES</td>
-          <td style="border:1px solid #000;">'.$lts_combustible.'</td>
-          <td style="border:1px solid #000;">'.$horas_totales.'</td>
-          <td style="border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+          <td colspan="7" style="border:1px solid #000;background-color: #cccccc;">TOTALES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_hrs, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_litros, 2, '', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_importe, 2, '', false).'</td>
+          <td colspan="4" style=""></td>
         </tr>
       </tbody>
     </table>';
