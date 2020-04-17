@@ -297,10 +297,10 @@ class control_maquinaria_model extends CI_Model {
 
   public function rptcombustible_xls()
   {
-    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    // header("Content-Disposition: attachment; filename=reporte_combustible.xls");
-    // header("Pragma: no-cache");
-    // header("Expires: 0");
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_combustible.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
     $combustible = $this->getDataCombutible();
 
@@ -330,12 +330,6 @@ class control_maquinaria_model extends CI_Model {
         </tr>
         <tr>
           <td colspan="6"></td>
-        </tr>
-        <tr style="font-weight:bold">
-          <td style="width:500px;border:1px solid #000;background-color: #cccccc;">Vehiculo</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lts Combustible</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total Hrs</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lts/Hrs</td>
         </tr>';
 
     $costoacumulado = 0;
