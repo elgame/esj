@@ -143,7 +143,7 @@ class control_maquinaria_model extends CI_Model {
             INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
           GROUP BY csr.id_salida
         ) ran ON ran.id_salida = cs.id_salida
-      WHERE cs.id_empresa_ap = {$empresaId} {$sql}
+      WHERE cs.status <> 'ca' AND cs.id_empresa_ap = {$empresaId} {$sql}
       ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC")->result();
 
     return $response;
@@ -186,12 +186,13 @@ class control_maquinaria_model extends CI_Model {
     $widths = array(153, 40);
     $header = array('Vehiculo');
     $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
-    $widths2 = array(15, 12, 15, 35, 35, 10, 10, 11, 10, 10, 15, 15, 18, 20, 35);
+    $widths2 = array(15, 9, 15, 35, 35, 13, 13, 11, 10, 10, 15, 15, 18, 22, 30);
     $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
         'Litros', 'Precio', 'Total', 'Rendim lt/Hr', 'Acumulado', 'Implemento', 'Observaciones');
 
     $costoacumulado = 0;
     $auxvehi = '';
+    $total_hrs = $total_litros = $total_importe = 0;
 
     $entro = false;
     foreach($combustible as $key => $vehiculo)
@@ -221,10 +222,28 @@ class control_maquinaria_model extends CI_Model {
 
         $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
         $costoacumulado = 0;
+
+        $pdf->SetX(6);
+        $pdf->SetAligns(['R', 'R', 'R', 'R']);
+        $pdf->SetWidths([135, 11, 10, 25]);
+
+        $pdf->SetFont('Arial','B',9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Row(array('TOTALES',
+            MyString::formatoNumero($total_hrs, 2, '', false),
+            MyString::formatoNumero($total_litros, 2, '', false),
+            MyString::formatoNumero($total_importe, 2, '', false)
+          ),
+          true, false
+        );
+        $total_hrs = $total_litros = $total_importe = 0;
       }
 
       $hrs = ($vehiculo->odometro_fin - $vehiculo->odometro);
       $costoacumulado += $vehiculo->precio*$vehiculo->lts_combustible;
+      $total_hrs      += $hrs;
+      $total_litros   += $vehiculo->lts_combustible;
+      $total_importe  += ($vehiculo->precio*$vehiculo->lts_combustible);
 
       $pdf->SetFont('Arial','',7);
       $pdf->SetTextColor(0,0,0);
@@ -233,7 +252,7 @@ class control_maquinaria_model extends CI_Model {
       $pdf->SetWidths($widths2);
       $pdf->Row(array(
         $vehiculo->fecha,
-        substr($vehiculo->hora_carga, 0, 8),
+        substr($vehiculo->hora_carga, 0, 5),
         $vehiculo->folio,
         $vehiculo->rancho,
         $vehiculo->operador,
@@ -251,17 +270,19 @@ class control_maquinaria_model extends CI_Model {
 
     }
 
-    // $pdf->SetX(6);
-    // $pdf->SetAligns($aligns);
-    // $pdf->SetWidths($widths);
+    $pdf->SetX(6);
+    $pdf->SetAligns(['R', 'R', 'R', 'R']);
+    $pdf->SetWidths([135, 11, 10, 25]);
 
-    // $pdf->SetFont('Arial','B',9);
-    // $pdf->SetTextColor(0,0,0);
-    // $pdf->Row(array('TOTALES',
-    //     MyString::formatoNumero($lts_combustible, 2, '', false),
-    //     MyString::formatoNumero($horas_totales, 2, '', false),
-    //     MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
-    // true, false);
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES',
+        MyString::formatoNumero($total_hrs, 2, '', false),
+        MyString::formatoNumero($total_litros, 2, '', false),
+        MyString::formatoNumero($total_importe, 2, '', false)
+      ),
+      true, false
+    );
 
     $pdf->Output('reporte_combustible.pdf', 'I');
   }
