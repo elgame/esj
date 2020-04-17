@@ -193,6 +193,7 @@ class control_maquinaria_model extends CI_Model {
     $costoacumulado = 0;
     $auxvehi = '';
     $total_hrs = $total_litros = $total_importe = 0;
+    $ttotal_hrs = $ttotal_litros = $ttotal_importe = 0;
 
     $entro = false;
     foreach($combustible as $key => $vehiculo)
@@ -223,19 +224,21 @@ class control_maquinaria_model extends CI_Model {
         $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
         $costoacumulado = 0;
 
-        $pdf->SetX(6);
-        $pdf->SetAligns(['R', 'R', 'R', 'R']);
-        $pdf->SetWidths([135, 11, 10, 25]);
+        if ($key != 0) {
+          $pdf->SetX(6);
+          $pdf->SetAligns(['R', 'R', 'R', 'R']);
+          $pdf->SetWidths([135, 11, 10, 25]);
 
-        $pdf->SetFont('Arial','B',9);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->Row(array('TOTALES',
-            MyString::formatoNumero($total_hrs, 2, '', false),
-            MyString::formatoNumero($total_litros, 2, '', false),
-            MyString::formatoNumero($total_importe, 2, '', false)
-          ),
-          true, false
-        );
+          $pdf->SetFont('Arial','B',9);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->Row(array('TOTALES',
+              MyString::formatoNumero($total_hrs, 2, '', false),
+              MyString::formatoNumero($total_litros, 2, '', false),
+              MyString::formatoNumero($total_importe, 2, '', false)
+            ),
+            true, false
+          );
+        }
         $total_hrs = $total_litros = $total_importe = 0;
       }
 
@@ -244,6 +247,10 @@ class control_maquinaria_model extends CI_Model {
       $total_hrs      += $hrs;
       $total_litros   += $vehiculo->lts_combustible;
       $total_importe  += ($vehiculo->precio*$vehiculo->lts_combustible);
+
+      $ttotal_hrs      += $hrs;
+      $ttotal_litros   += $vehiculo->lts_combustible;
+      $ttotal_importe  += ($vehiculo->precio*$vehiculo->lts_combustible);
 
       $pdf->SetFont('Arial','',7);
       $pdf->SetTextColor(0,0,0);
@@ -277,9 +284,9 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        MyString::formatoNumero($total_hrs, 2, '', false),
-        MyString::formatoNumero($total_litros, 2, '', false),
-        MyString::formatoNumero($total_importe, 2, '', false)
+        MyString::formatoNumero($ttotal_hrs, 2, '', false),
+        MyString::formatoNumero($ttotal_litros, 2, '', false),
+        MyString::formatoNumero($ttotal_importe, 2, '', false)
       ),
       true, false
     );
