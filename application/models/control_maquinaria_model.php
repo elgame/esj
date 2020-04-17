@@ -208,22 +208,6 @@ class control_maquinaria_model extends CI_Model {
       }
 
       if ($auxvehi != ($vehiculo->id_activo.$vehiculo->labor)) {
-        $pdf->SetFont('Arial','B',7);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row([$vehiculo->activo, $vehiculo->labor], false);
-
-        $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(180,180,180);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns2);
-        $pdf->SetWidths($widths2);
-        $pdf->Row($header2, true);
-
-        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
-        $costoacumulado = 0;
-
         if ($key != 0) {
           $pdf->SetX(6);
           $pdf->SetAligns(['R', 'R', 'R', 'R']);
@@ -240,6 +224,22 @@ class control_maquinaria_model extends CI_Model {
           );
         }
         $total_hrs = $total_litros = $total_importe = 0;
+
+        $pdf->SetFont('Arial','B',7);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row([$vehiculo->activo, $vehiculo->labor], false);
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(180,180,180);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row($header2, true);
+
+        $auxvehi = $vehiculo->id_activo.$vehiculo->labor;
+        $costoacumulado = 0;
       }
 
       $hrs = ($vehiculo->odometro_fin - $vehiculo->odometro);
