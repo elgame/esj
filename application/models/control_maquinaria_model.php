@@ -297,10 +297,10 @@ class control_maquinaria_model extends CI_Model {
 
   public function rptcombustible_xls()
   {
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=reporte_combustible.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    // header("Content-Disposition: attachment; filename=reporte_combustible.xls");
+    // header("Pragma: no-cache");
+    // header("Expires: 0");
 
     $combustible = $this->getDataCombutible();
 
