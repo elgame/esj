@@ -183,7 +183,7 @@ class control_maquinaria_model extends CI_Model {
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R', 'R', 'R');
-    $widths = array(153, 40);
+    $widths = array(153, 50);
     $header = array('Vehiculo');
     $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
     $widths2 = array(15, 9, 15, 35, 35, 14, 14, 17, 12, 10, 15, 15, 18, 22, 20);
@@ -222,6 +222,7 @@ class control_maquinaria_model extends CI_Model {
             ),
             true, false
           );
+          $pdf->SetY($pdf->GetY()+2);
         }
         $total_hrs = $total_litros = $total_importe = 0;
 
@@ -281,7 +282,7 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetAligns(['R', 'R', 'R', 'R']);
     $pdf->SetWidths([137, 17, 12, 25]);
 
-    $pdf->SetFont('Arial','B',9);
+    $pdf->SetFont('Arial','B',7);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
         MyString::formatoNumero($ttotal_hrs, 2, '', false),
