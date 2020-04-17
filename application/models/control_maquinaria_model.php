@@ -365,13 +365,6 @@ class control_maquinaria_model extends CI_Model {
             <td colspan="7" style="border:1px solid #000;background-color: #ffffff;">'.$vehiculo->labor.'</td>
           </tr>';
 
-        $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(180,180,180);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns2);
-        $pdf->SetWidths($widths2);
-        $pdf->Row($header2, true);
-
         $html .= '<tr style="font-weight:bold">';
         foreach ($header2 as $keyhh => $head) {
           $html .= '<td style="border:1px solid #000;background-color: #cccccc;">'.$head.'</td>';
