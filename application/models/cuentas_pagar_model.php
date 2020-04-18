@@ -288,11 +288,20 @@ class cuentas_pagar_model extends privilegios_model{
       $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
     }
 
-    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = '';
+    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = $sql_only_sel_fiels = '';
     if (isset($otros['only_select'])) { // solo los seleccionados para pago masivo
-      $sql_only_sel_table = " INNER JOIN banco_pagos_compras bpc ON f.id_compra = bpc.id_compra";
+      $sql_only_sel_table = " INNER JOIN banco_pagos_compras bpc ON f.id_compra = bpc.id_compra
+        LEFT JOIN (
+          SELECT
+              cf.id_compra,
+              ('Ordenes: ' || String_agg(co.folio::character varying, ', ')) AS ordenes
+          FROM compras_ordenes co
+            INNER JOIN compras_facturas as cf ON co.id_orden = cf.id_orden
+          GROUP BY cf.id_compra
+        ) ord ON f.id_compra = ord.id_compra";
       $sql_only_sel_where = " AND bpc.status = 'f'";
       $sql_only_sel_order = 'proveedor ASC,';
+      $sql_only_sel_fiels = ', ord.ordenes';
     }
 
 		/*** Saldo anterior ***/
@@ -378,7 +387,7 @@ class cuentas_pagar_model extends privilegios_model{
 				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago,
-        p.nombre_fiscal AS proveedor
+        p.nombre_fiscal AS proveedor {$sql_only_sel_fiels}
 			FROM
 				compras AS f
         {$sql_only_sel_table}
@@ -918,9 +927,9 @@ class cuentas_pagar_model extends privilegios_model{
 
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('C', 'C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
-    $widths = array(17, 11, 20, 40, 50, 28, 28, 28, 16, 17, 15);
-    $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D. Trans.');
+    $aligns = array('C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+    $widths = array(17, 26, 47, 50, 28, 28, 28, 16, 17, 13);
+    $header = array('Fecha', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D Trans');
 
     $total_cargo = 0;
     $total_abono = 0;
@@ -950,7 +959,7 @@ class cuentas_pagar_model extends privilegios_model{
           $pdf->AddPage();
 
         $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
+        $pdf->SetTextColor(0,0,0);
         $pdf->SetFillColor(160,160,160);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
@@ -964,12 +973,33 @@ class cuentas_pagar_model extends privilegios_model{
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array('', '', '', $res['anterior']->concepto, '',
+        $pdf->Row(array('', '', $res['anterior']->concepto, '',
           MyString::formatoNumero($res['anterior']->total, 2, '$', false),
           MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
           MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
           '', '', ''), false);
         $bad_saldo_ante = false;
+      }
+
+
+      // if (!isset($res['cuentas'][$key+1]) || $aux_prov != $res['cuentas'][$key+1]->proveedor) {
+      if ($aux_prov != $res['cuentas'][$key]->proveedor) {
+        if ($key > 0) {
+          $pdf->SetX(6);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(220,220,220);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(140, 28, 28, 28));
+          $pdf->Row(array('Totales:',
+              MyString::formatoNumero($total_cargo_p, 2, '$', false),
+              MyString::formatoNumero($total_abono_p, 2, '$', false),
+              MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+        }
+
+        $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+        $pdf->SetY($pdf->GetY()+3);
+        $aux_prov = $res['cuentas'][$key]->proveedor;
       }
 
       $pdf->SetFont('Arial','',8);
@@ -981,9 +1011,8 @@ class cuentas_pagar_model extends privilegios_model{
       }
 
       $datos = array($item->fecha,
-                  $item->serie,
-                  $item->folio,
-                  $item->concepto,
+                  $item->serie.$item->folio,
+                  $item->ordenes,
                   $item->proveedor,
                   MyString::formatoNumero($item->cargo, 2, '$', false),
                   MyString::formatoNumero($item->abono, 2, '$', false),
@@ -1004,34 +1033,25 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->SetWidths($widths);
       $pdf->Row($datos, false);
 
-
-      if (!isset($res['cuentas'][$key+1]) || $aux_prov != $res['cuentas'][$key+1]->proveedor) {
-        $pdf->SetX(6);
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(220,220,220);
-        $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-        $pdf->SetWidths(array(138, 28, 28, 28));
-        $pdf->Row(array('Totales:',
-            MyString::formatoNumero($total_cargo_p, 2, '$', false),
-            MyString::formatoNumero($total_abono_p, 2, '$', false),
-            MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
-
-        $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
-        $pdf->SetY($pdf->GetY()+3);
-        if (isset($res['cuentas'][$key+1])) {
-          $aux_prov = $res['cuentas'][$key+1]->proveedor;
-        }
-      }
-
     }
 
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
-    $pdf->SetTextColor(255,255,255);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(220,220,220);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(140, 28, 28, 28));
+    $pdf->Row(array('Totales:',
+        MyString::formatoNumero($total_cargo_p, 2, '$', false),
+        MyString::formatoNumero($total_abono_p, 2, '$', false),
+        MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
     $pdf->SetFillColor(160,160,160);
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(138, 28, 28, 28));
+    $pdf->SetWidths(array(140, 28, 28, 28));
     $pdf->Row(array('Totales:',
         MyString::formatoNumero($total_cargo, 2, '$', false),
         MyString::formatoNumero($total_abono, 2, '$', false),
