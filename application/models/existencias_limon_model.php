@@ -186,7 +186,8 @@ class existencias_limon_model extends CI_Model {
 
     $existencia_anterior = $this->db->query(
       "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
-        ele.cantidad, ele.importe, c.nombre AS clasificacion, Coalesce(u.codigo, u.nombre) AS unidad
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        '' AS clasificacion
       FROM otros.existencias_limon_existencia ele
         INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
@@ -400,14 +401,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
-    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
 
     $venta_importe = $venta_kilos = $venta_cantidad = 0;
     foreach ($caja['ventas'] as $venta) {
@@ -428,6 +429,7 @@ class existencias_limon_model extends CI_Model {
         $venta->serie.$venta->folio,
         $venta->no_salida_fruta,
         $venta->nombre_fiscal,
+        $venta->calibre,
         $venta->clasificacion,
         $venta->unidad,
         MyString::formatoNumero($venta->kilos, 2, '', false),
@@ -440,6 +442,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       '',
@@ -461,14 +464,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
     foreach ($caja['existencia'] as $existencia) {
@@ -486,6 +489,7 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $existencia->calibre,
         $existencia->clasificacion,
         $existencia->unidad,
         MyString::formatoNumero($existencia->kilos, 2, '', false),
@@ -498,6 +502,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       MyString::formatoNumero($existencia_kilos, 2, '', false),
@@ -516,14 +521,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(100, 30, 30, 40));
-    $pdf->Row(array('CLASIF', 'KILOS', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(40, 70, 25, 25, 40));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'KILOS', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(100, 30, 30, 40));
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(40, 70, 25, 25, 40));
 
     $compra_fruta_kilos = $compra_fruta_importe = 0;
     foreach ($caja['compra_fruta'] as $com_fruta) {
@@ -551,6 +556,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->Row(array(
       '',
+      '',
       MyString::formatoNumero($compra_fruta_kilos, 2, '', false),
       MyString::formatoNumero(($compra_fruta_importe/($compra_fruta_kilos==0? 1: $compra_fruta_kilos)), 2, '', false),
       MyString::formatoNumero($compra_fruta_importe, 2, '', false),
@@ -566,14 +572,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array( 30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
     foreach ($caja['produccion'] as $produccion) {
@@ -591,6 +597,7 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $produccion->calibre,
         $produccion->clasificacion,
         $produccion->unidad,
         MyString::formatoNumero($produccion->kilos, 2, '', false),
@@ -603,6 +610,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       MyString::formatoNumero($produccion_kilos, 2, '', false),
@@ -621,14 +629,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
     foreach ($caja['existencia_anterior'] as $existencia_ant) {
@@ -646,6 +654,7 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $existencia_ant->calibre,
         $existencia_ant->clasificacion,
         $existencia_ant->unidad,
         MyString::formatoNumero($existencia_ant->kilos, 2, '', false),
@@ -658,6 +667,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       MyString::formatoNumero($existencia_ant_kilos, 2, '', false),
