@@ -287,7 +287,7 @@
       tipoo: 'sa',
       accion: (accion? accion: ['en', 'p', 'b']),
       filtro: $("#filBoleta").val(),
-      area: 26 // 26 = agro insumos
+      // area: 26 // 26 = agro insumos
     };
     $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
       var html = '';
