@@ -201,8 +201,19 @@
                 <label class="control-label" for="duso_cfdi">Uso de CFDI</label>
                 <div class="controls">
                   <select name="duso_cfdi" class="span9" id="duso_cfdi">
-                    <?php foreach ($usoCfdi as $key => $usoCfdi) { ?>
-                      <option value="<?php echo $usoCfdi['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfdi['key'], ($orden['info'][0]->uso_cfdi == $usoCfdi['key'])); ?>><?php echo $usoCfdi['key'].' - '.$usoCfdi['value'] ?></option>
+                    <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
+                      <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], ($orden['info'][0]->uso_cfdi == $usoCfd['key'])); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dforma_pago">Forma de Pago</label>
+                <div class="controls">
+                  <select name="dforma_pago" class="span9" id="dforma_pago">
+                    <?php foreach ($formPagos as $key => $formPago) { ?>
+                      <option value="<?php echo $formPago['key'] ?>" <?php echo set_select('dforma_pago', $formPago['key'], ($orden['info'][0]->forma_pago == $formPago['key'])); ?>><?php echo $formPago['key'].' - '.$formPago['value'] ?></option>
                     <?php } ?>
                   </select>
                 </div>

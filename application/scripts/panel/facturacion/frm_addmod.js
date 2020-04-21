@@ -813,7 +813,8 @@ function addProducto(unidades, prod) {
 
   var prod_nombre = '', prod_id = '', pallet = '', remision = '', prod_cajas = 0,
       ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false,
-      prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '';
+      prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '',
+      prod_dtamanio_prod = '', prod_did_tamanio_prod = '';
 
   // Pasa los gastos a la otra tabla
   pasaGastosTabla();
@@ -855,11 +856,13 @@ function addProducto(unidades, prod) {
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
     prod_certificado =  prod.certificado === 't' ? true : false;
 
-    prod_dcalidad      = prod.areas_calidad;
-    prod_did_calidad   = prod.id_calidad;
-    prod_dtamanio      = prod.areas_tamanio;
-    prod_did_tamanio   = prod.id_tamanio;
-    prod_ddescripcion2 = prod.descripcion2;
+    prod_dcalidad         = prod.areas_calidad;
+    prod_did_calidad      = prod.id_calidad;
+    prod_dtamanio         = prod.areas_tamanio;
+    prod_did_tamanio      = prod.id_tamanio;
+    prod_dtamanio_prod    = prod['areas_tamanio_prod']? prod.areas_tamanio_prod: '';
+    prod_did_tamanio_prod = prod['id_tamanio_prod']? prod.id_tamanio_prod: '';
+    prod_ddescripcion2    = prod.descripcion2;
 
   } else {
     idUnidad = unidades[0].id_unidad;
@@ -969,6 +972,11 @@ function addProducto(unidades, prod) {
                       '<li class="clearfix">' +
                         '<label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="'+prod_dtamanio+'" id="prod_dtamanio" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                         '<input type="hidden" name="prod_did_tamanio[]" value="'+prod_did_tamanio+'" id="prod_did_tamanio" class="span12">' +
+                      '</li>' +
+                      '<li class="divider"></li>' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="'+prod_dtamanio_prod+'" id="prod_dtamanio_prod" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                        '<input type="hidden" name="prod_did_tamanio_prod[]" value="'+prod_did_tamanio_prod+'" id="prod_did_tamanio_prod" class="span12">' +
                       '</li>' +
                       '<li class="divider"></li>' +
                       '<li class="clearfix">' +

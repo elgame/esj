@@ -124,12 +124,13 @@ class Ventas_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
-                fp.ieps, fp.porcentaje_ieps')
+                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
         ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
         ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
+        ->join('calibres as cal', 'cal.id_calibre = fp.id_calibres', 'left')
         ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
         ->get();
 
@@ -443,6 +444,7 @@ class Ventas_model extends privilegios_model{
           'unidad_c'              => $dunidad_c,
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
         );
@@ -795,6 +797,7 @@ class Ventas_model extends privilegios_model{
           'unidad_c'              => $dunidad_c,
           'id_calidad'            => (isset($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
         );

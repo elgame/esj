@@ -142,6 +142,7 @@ class compras_requisicion extends MY_Controller {
     );
 
     $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
 
     $params['next_folio']    = $this->compras_requisicion_model->folio();
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
@@ -149,6 +150,7 @@ class compras_requisicion extends MY_Controller {
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
     $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
@@ -242,12 +244,14 @@ class compras_requisicion extends MY_Controller {
     );
 
     $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
 
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_requisicion_model->departamentos();
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
     $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
@@ -611,6 +615,9 @@ class compras_requisicion extends MY_Controller {
             'rules' => ''),
       array('field' => 'duso_cfdi',
             'label' => 'Uso de CFDI',
+            'rules' => 'required'),
+      array('field' => 'dforma_pago',
+            'label' => 'Forma de Pago',
             'rules' => 'required'),
       array('field' => 'tipoPago',
             'label' => 'Tipo de Pago',

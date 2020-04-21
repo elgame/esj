@@ -1,6 +1,21 @@
 
+ ☐ Reporte de productos por color en cada empresa
+ ✔ En ordenes de compra poner la forma de pago (transfer, efectivo) y que se registra la fecha de registro y esa fecha que se tome en las polizas @done (20-04-14 21:06)
+     -- pcc|lap|san
+     ALTER TABLE public.compras_requisicion ADD COLUMN forma_pago character varying(50) COLLATE pg_catalog."default";
+     ALTER TABLE public.compras_ordenes ADD COLUMN forma_pago character varying(50) COLLATE pg_catalog."default";
+
+ ✔ Cuentas por pagar 2 que imprima solo las facturas marcadas @done (20-04-14 17:12)
+ ✔ Reporte de existencias de limón @done (20-04-20 21:45)
+    -- lap|pcc|san
+    ALTER TABLE public.facturacion_productos ADD COLUMN id_calibres integer;
+    COMMENT ON COLUMN public.facturacion_productos.id_calibres IS 'Unidad usada en producción';
+    ALTER TABLE public.facturacion_productos ADD CONSTRAINT facturacion_productos_id_calibres_fkey FOREIGN KEY (id_calibres) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE public.calibres ADD COLUMN status boolean NOT NULL DEFAULT true;
+    -- En la tabla otros.existencias_limon_existencia y otros.existencias_limon_produccion trucar los registros y cambiar id_clasificacion x id_calibre y Pk/Fk.
+
  ✔ Cambios en ordenes de compra y requisición, proyectos @done (20-04-08 19:29)
-   -- pcc
+   -- pcc|san|lap
    ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja bigint;
    ALTER TABLE public.compras_requisicion ADD COLUMN uso_cfdi character varying(50) COLLATE pg_catalog."default";
    ALTER TABLE public.compras_ordenes ADD COLUMN folio_hoja bigint;

@@ -254,11 +254,13 @@ class compras_ordenes extends MY_Controller {
     );
 
     $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
 
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_ordenes_model->departamentos();
     $params['unidades']      = $this->compras_ordenes_model->unidades();
     $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     if ( ! isset($_GET['m']))
     {

@@ -134,8 +134,8 @@ class existencias_limon extends MY_Controller {
       $rules[] = array('field' => 'produccion_id_produccion[]',
                       'label' => 'Produccion',
                       'rules' => '');
-      $rules[] = array('field' => 'produccion_id_clasificacion[]',
-                      'label' => 'Produccion clasificacion',
+      $rules[] = array('field' => 'produccion_id_calibre[]',
+                      'label' => 'Produccion calibre',
                       'rules' => 'required|numeric');
       $rules[] = array('field' => 'produccion_id_unidad[]',
                       'label' => 'Produccion unidad',

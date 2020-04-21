@@ -115,13 +115,14 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ventas">
                           <thead>
                             <tr>
-                              <th colspan="4">VENTAS</th>
+                              <th colspan="5">VENTAS</th>
                               <th colspan="4" id="dvfondo_caja"></th>
                             </tr>
                             <tr>
                               <!-- <th>FECHA</th> -->
                               <th>FOLIO</th>
                               <th>CLIENTE</th>
+                              <th>CALIBRE</th>
                               <th>CLASIF</th>
                               <th>UNIDAD</th>
                               <th>KILOS</th>
@@ -141,6 +142,7 @@
                                     <tr>
                                       <td><?php echo $venta->serie.$venta->folio ?></td>
                                       <td><?php echo $venta->nombre_fiscal ?></td>
+                                      <td><?php echo $venta->calibre ?></td>
                                       <td><?php echo $venta->clasificacion ?></td>
                                       <td><?php echo $venta->unidad ?></td>
                                       <td><?php echo $venta->kilos ?></td>
@@ -150,7 +152,7 @@
                                     </tr>
                             <?php } ?>
                             <tr>
-                              <th colspan="4"></th>
+                              <th colspan="5"></th>
                               <th><?php echo $venta_kilos ?></th>
                               <th><?php echo $venta_cantidad ?></th>
                               <th></th>
@@ -168,9 +170,10 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia">
                           <thead>
                             <tr>
-                              <th colspan="5">EXISTENCIA</th>
+                              <th colspan="6">EXISTENCIA</th>
                             </tr>
                             <tr>
+                              <th>CALIBRE</th>
                               <th>CLASIFICACION</th>
                               <th>UNIDAD</th>
                               <th>KILOS</th>
@@ -187,8 +190,9 @@
                                 $existencia_importe  += floatval($existencia->importe);
                             ?>
                               <tr>
+                                <td><?php echo $existencia->calibre ?></td>
                                 <td><?php echo $existencia->clasificacion ?>
-                                  <input type="hidden" name="existencia_id_clasificacion[]" value="<?php echo $existencia->id_clasificacion ?>">
+                                  <input type="hidden" name="existencia_id_calibre[]" value="<?php echo $existencia->id_calibre ?>">
                                   <input type="hidden" name="existencia_id_unidad[]" value="<?php echo $existencia->id_unidad ?>">
                                   <input type="hidden" name="existencia_costo[] " value="<?php echo $existencia->costo ?>">
                                   <input type="hidden" name="existencia_kilos[]" value="<?php echo $existencia->kilos ?>">
@@ -203,7 +207,7 @@
                             <?php } ?>
 
                             <tr>
-                              <th colspan="2"></th>
+                              <th colspan="3"></th>
                               <th><?php echo $existencia_kilos ?></th>
                               <th><?php echo $existencia_cantidad ?></th>
                               <th><?php echo $existencia_importe ?></th>
@@ -255,10 +259,11 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-produccion">
                           <thead>
                             <tr>
-                              <th colspan="6">PRODUCCION</th>
+                              <th colspan="7">PRODUCCION</th>
                             </tr>
                             <tr>
                               <th>COSTO X ENVACE</th>
+                              <th>CALIBRE</th>
                               <th>CLASIFICACION</th>
                               <th>UNIDAD</th>
                               <th>KILOS</th>
@@ -278,12 +283,13 @@
                                 <td style="width: 100px;">
                                   <input type="text" name="produccion_costo[]" value="<?php echo $produccion->costo ?>" class="input-small produccion_costo" style="width: 150px;" <?php echo $readonly ?>>
                                   <input type="hidden" name="produccion_id_produccion[]" value="<?php echo $produccion->id_produccion ?>" id="produccion_id_produccion" class="input-small vpositive">
-                                  <input type="hidden" name="produccion_id_clasificacion[]" value="<?php echo $produccion->id_clasificacion ?>" id="produccion_id_clasificacion" class="input-small vpositive">
+                                  <input type="hidden" name="produccion_id_calibre[]" value="<?php echo $produccion->id_calibre ?>" id="produccion_id_calibre" class="input-small vpositive">
                                   <input type="hidden" name="produccion_id_unidad[]" value="<?php echo $produccion->id_unidad ?>" class="input-small produccion_id_unidad vpositive gasto-cargo-id">
                                   <!-- <input type="hidden" name="produccion_kilos[]" value="<?php echo $produccion->kilos ?>" class="input-small produccion_kilos vpositive gasto-cargo-id"> -->
                                   <!-- <input type="hidden" name="produccion_cantidad[]" value="<?php echo $produccion->cantidad ?>" class="input-small tproduccion_cantidad vpositive gasto-cargo-id"> -->
                                   <input type="hidden" name="produccion_importe[]" value="<?php echo $produccion->importe ?>" class="input-small tproduccion_importe vpositive gasto-cargo-id">
                                 </td>
+                                <td><?php echo $produccion->calibre ?></td>
                                 <td><?php echo $produccion->clasificacion ?></td>
                                 <td><?php echo $produccion->unidad ?></td>
                                 <td><?php echo $produccion->kilos ?></td>
@@ -293,7 +299,7 @@
                             <?php } ?>
 
                             <tr>
-                              <th colspan="3"></th>
+                              <th colspan="4"></th>
                               <th><?php echo $produccion_kilos ?></th>
                               <th><?php echo $produccion_cantidad ?></th>
                               <th><?php echo $produccion_importe ?></th>
@@ -310,9 +316,10 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia_ant">
                           <thead>
                             <tr>
-                              <th colspan="5">EXISTENCIA ANTERIOR</th>
+                              <th colspan="6">EXISTENCIA ANTERIOR</th>
                             </tr>
                             <tr>
+                              <th>CALIBRE</th>
                               <th>CLASIFICACION</th>
                               <th>UNIDAD</th>
                               <th>KILOS</th>
@@ -329,6 +336,7 @@
                                 $existencia_ant_importe  += floatval($existencia_ant->importe);
                             ?>
                               <tr>
+                                <td><?php echo $existencia_ant->calibre ?></td>
                                 <td><?php echo $existencia_ant->clasificacion ?></td>
                                 <td><?php echo $existencia_ant->unidad ?></td>
                                 <td><?php echo $existencia_ant->kilos ?></td>
@@ -338,7 +346,7 @@
                             <?php } ?>
 
                             <tr>
-                              <th colspan="2"></th>
+                              <th colspan="3"></th>
                               <th><?php echo $existencia_ant_kilos ?></th>
                               <th><?php echo $existencia_ant_cantidad ?></th>
                               <th><?php echo $existencia_ant_importe ?></th>

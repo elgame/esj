@@ -346,6 +346,8 @@
                             $_POST['prod_dtamanio'][$key]           = $p->areas_tamanio;
                             $_POST['prod_did_tamanio'][$key]        = $p->id_tamanio;
                             $_POST['prod_ddescripcion2'][$key]      = $p->descripcion2;
+                            $_POST['prod_dtamanio_prod'][$key]      = $p->areas_calibre;
+                            $_POST['prod_did_tamanio_prod'][$key]   = $p->id_calibre;
 
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
                             $_POST['prod_importe'][$key]            = $p->importe;
@@ -393,6 +395,11 @@
                                       <li class="clearfix">
                                         <label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="<?php echo $_POST['prod_dtamanio'][$k]?>" id="prod_dtamanio" class="span9 pull-right">
                                         <input type="hidden" name="prod_did_tamanio[]" value="<?php echo $_POST['prod_did_tamanio'][$k]?>" id="prod_did_tamanio" class="span12">
+                                      </li>
+                                      <li class="divider"></li>
+                                      <li class="clearfix">
+                                        <label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="<?php echo $_POST['prod_dtamanio_prod'][$k]?>" id="prod_dtamanio_prod" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_tamanio_prod[]" value="<?php echo $_POST['prod_did_tamanio_prod'][$k]?>" id="prod_did_tamanio_prod" class="span12">
                                       </li>
                                       <li class="divider"></li>
                                       <li class="clearfix">
@@ -489,6 +496,11 @@
                           <li class="clearfix">
                             <label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="" id="prod_dtamanio" class="span9 pull-right">
                             <input type="hidden" name="prod_did_tamanio[]" value="" id="prod_did_tamanio" class="span12">
+                          </li>
+                          <li class="divider"></li>
+                          <li class="clearfix">
+                            <label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="" id="prod_dtamanio_prod" class="span9 pull-right">
+                            <input type="hidden" name="prod_did_tamanio_prod[]" value="" id="prod_did_tamanio_prod" class="span12">
                           </li>
                           <li class="divider"></li>
                           <li class="clearfix">

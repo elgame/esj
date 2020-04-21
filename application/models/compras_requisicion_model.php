@@ -116,6 +116,7 @@ class compras_requisicion_model extends CI_Model {
       'id_proyecto'     => (!empty($this->input->post('proyecto'))? $_POST['proyecto']: NULL),
       'folio_hoja'      => (!empty($this->input->post('folioHoja'))? $_POST['folioHoja']: NULL),
       'uso_cfdi'        => (!empty($this->input->post('duso_cfdi'))? $_POST['duso_cfdi']: 'G03'),
+      'forma_pago'      => (!empty($this->input->post('dforma_pago'))? $_POST['dforma_pago']: '99'),
     );
 
     // Si es un gasto son requeridos los campos de catálogos
@@ -395,6 +396,7 @@ class compras_requisicion_model extends CI_Model {
         'id_proyecto'     => (!empty($this->input->post('proyecto'))? $_POST['proyecto']: NULL),
         'folio_hoja'      => (!empty($this->input->post('folioHoja'))? $_POST['folioHoja']: NULL),
         'uso_cfdi'        => (!empty($this->input->post('duso_cfdi'))? $_POST['duso_cfdi']: 'G03'),
+        'forma_pago'      => (!empty($this->input->post('dforma_pago'))? $_POST['dforma_pago']: '99'),
       );
 
       // Si es un gasto son requeridos los campos de catálogos
@@ -654,6 +656,7 @@ class compras_requisicion_model extends CI_Model {
           'id_proyecto'         => (!empty($data->id_proyecto)? $data->id_proyecto: NULL),
           'folio_hoja'          => (!empty($data->folio_hoja)? $data->folio_hoja: NULL),
           'uso_cfdi'            => (!empty($data->uso_cfdi)? $data->uso_cfdi: 'G03'),
+          'forma_pago'          => (!empty($data->forma_pago)? $data->forma_pago: '99'),
         );
 
         $dataOrdenCats['requisiciones'][] = [
@@ -1029,7 +1032,7 @@ class compras_requisicion_model extends CI_Model {
               co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo, co.id_empresa_ap,
-              otros_datos, co.id_proyecto, co.folio_hoja, co.uso_cfdi
+              otros_datos, co.id_proyecto, co.folio_hoja, co.uso_cfdi, co.forma_pago
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
