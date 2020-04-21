@@ -292,6 +292,9 @@
       select: function( event, ui ) {
         var $empresa =  $(this);
 
+        $("#empresaId_ap").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+
         limpiaEmpresa();
       }
     }).on("keydown", function(event) {
