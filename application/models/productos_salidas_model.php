@@ -250,7 +250,7 @@ class productos_salidas_model extends CI_Model {
         'fecha'           => substr($_POST['fecha'], 0, 10),
         'implemento'      => $_POST['cimplemento'],
         'hora_carga'      => $_POST['chora_carga'],
-        'odometro'        => $_POST['codometro'],
+        'odometro_fin'    => $_POST['codometro'],
         'lts_combustible' => $_POST['clitros'],
         'precio'          => $_POST['cprecio']
       ], ['id_combustible' => $id_combustible]);
@@ -261,7 +261,7 @@ class productos_salidas_model extends CI_Model {
         'fecha'           => substr($_POST['fecha'], 0, 10),
         'implemento'      => $_POST['cimplemento'],
         'hora_carga'      => (isset($_POST['chora_carga'])? $_POST['chora_carga'].':00' : date("H:i:s")),
-        'odometro'        => floatval($_POST['codometro']),
+        'odometro_fin'    => floatval($_POST['codometro']),
         'lts_combustible' => floatval($_POST['clitros']),
         'precio'          => floatval($_POST['cprecio'])
       ]);
@@ -269,22 +269,25 @@ class productos_salidas_model extends CI_Model {
     }
 
     if (isset($data['id_activo'])) {
-      $this->updateHorometroFin($idSalida, $data['id_activo'], floatval($_POST['codometro']));
+      $this->updateHorometroFin($idSalida, $data['id_activo'], floatval($_POST['codometro']), $id_combustible);
     }
   }
 
-  public function updateHorometroFin($idSalida, $idActivo, $horometro)
+  public function updateHorometroFin($idSalida, $idActivo, $horometro, $id_combustible)
   {
     $combust = $this->db->query("SELECT
-        cs.id_salida, csc.id_combustible, csc.odometro, csc.odometro_fin
+        cs.id_salida, csc.id_combustible, csc.odometro, csc.odometro_fin, cs.fecha_creacion
       FROM compras_salidas cs
         INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
       WHERE cs.tipo = 'c' AND cs.status = 's' AND cs.id_activo = {$idActivo}
         AND cs.id_salida < {$idSalida}
       ORDER BY cs.id_salida DESC
       LIMIT 1")->row();
-    if (isset($combust->id_combustible)) {
-      $this->db->update('compras_salidas_combustible', ['odometro_fin' => $horometro], "id_combustible = {$combust->id_combustible}");
+    if ($id_combustible > 0 && isset($combust->odometro_fin)) {
+      $this->db->update('compras_salidas_combustible',
+        ['odometro' => $combust->odometro_fin, 'fecha' => substr($combust->fecha_creacion, 0, 10)],
+        "id_combustible = {$id_combustible}"
+      );
     }
   }
 
