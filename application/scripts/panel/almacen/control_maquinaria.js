@@ -33,7 +33,7 @@
     });
 
     // Asigna evento focusout a los inputs que estan en existete, linea1, linea2
-    $('#tableClasif').on('focusout', '#flts_combustible, #fodometro, #fodometro_fin', function(event) {
+    $('#tableClasif').on('focusout', '#flts_combustible, #fhorometro, #fhorometro_fin, #fodometro, #fodometro_fin', function(event) {
       var $this = $(this),
           $tr =  $this.parent().parent();
 
@@ -201,6 +201,8 @@
     postData.implemento      = $tr.find('#fimplemento').val();
     postData.lts_combustible = $tr.find('#flts_combustible').val();
     postData.precio          = $tr.find('#fprecio').val();
+    postData.horometro       = $tr.find('#fhorometro').val();
+    postData.horometro_fin   = $tr.find('#fhorometro_fin').val();
     postData.odometro        = $tr.find('#fodometro').val();
     postData.odometro_fin    = $tr.find('#fodometro_fin').val();
     postData.horas_totales   = $tr.find('#ftotal_hrs').val();
@@ -301,10 +303,10 @@
           '<input type="number" id="fprecio" value="" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
         '</td>' +
         '<td>' +
-          '<input type="number" name="fodometro" id="fodometro" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+          '<input type="number" name="fhorometro" id="fhorometro" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
         '</td>' +
         '<td>' +
-          '<input type="number" name="fodometro_fin" id="fodometro_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+          '<input type="number" name="fhorometro_fin" id="fhorometro_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
         '</td>' +
         '<td>' +
           '<input type="text" id="ftotal_hrs" value="" class="span12" readonly>' +
@@ -312,6 +314,12 @@
         '<td>' +
           '<input type="text" id="flitro_hr" value="" class="span12" readonly>' +
         '</td>' +
+        '<td>'+
+          '<input type="number" name="fodometro" id="fodometro" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
+        '<td>'+
+          '<input type="number" name="fodometro_fin" id="fodometro_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
         '<td>' +
           '<button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>' +
           '<button type="button" class="btn btn-danger btn-small" id="btnDelClasif">Eliminar</button>' +
@@ -331,13 +339,16 @@
 
   var calculaTotalesHrs = function ($tr) {
     var $flts_combustible = $tr.find('#flts_combustible'),
-        $fhr_ini    = $tr.find('#fodometro'),
-        $fhr_fin    = $tr.find('#fodometro_fin'),
+        $fhr_ini    = $tr.find('#fhorometro'),
+        $fhr_fin    = $tr.find('#fhorometro_fin'),
+        $fkm_ini    = $tr.find('#fodometro'),
+        $fkm_fin    = $tr.find('#fodometro_fin'),
 
         $ftotal_hrs = $tr.find('#ftotal_hrs'),
         $flitro_hr  = $tr.find('#flitro_hr'),
 
-        total_hrs = (parseFloat($fhr_fin.val())||0) - (parseFloat($fhr_ini.val())||0);
+    total_hrs = (parseFloat($fhr_fin.val())||0) - (parseFloat($fhr_ini.val())||0);
+    total_kms = (parseFloat($fkm_fin.val())||0) - (parseFloat($fkm_ini.val())||0);
         // total_hrs = calculaHoras($("#gfecha").val(), $fhr_ini.val()+':00', $fhr_fin.val()+':00').toFixed(2);
 
     if(total_hrs) {
