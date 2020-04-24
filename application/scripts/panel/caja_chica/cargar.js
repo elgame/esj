@@ -207,7 +207,7 @@
                 '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
                 '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
               '</td>' +
-              '<td style=""><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
+              '<td style=""><input type="number" step="any" name="remision_importe[]" value="'+abono+'" max="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
               '<td style="width: 30px;">'+
                 '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
                 '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
