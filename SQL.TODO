@@ -2,7 +2,7 @@
  ☐ Reporte de productos por color en cada empresa
  ☐ Generar ticket de salidas de almacen, con ordenes de salida de almacen y que esas se combiertan en salidas de almacen con la imprecion como recetas
  ✔ Acomodar reporte de combustible y agregar odometro @done (20-04-22 14:54)
-     -- pcc
+     -- pcc|san
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro TO horometro;
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro_fin TO horometro_fin;
      ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro double precision NOT NULL DEFAULT 0;
