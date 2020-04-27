@@ -57,6 +57,8 @@
                     <th>Hor Final</th>
                     <th style="width:55px;">Total Hrs</th>
                     <th style="width:55px;">Lts/Hrs</th>
+                    <th>Km Inicio</th>
+                    <th>Km Final</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -87,16 +89,22 @@
                         <input type="number" id="fprecio" value="<?php echo $c->precio ?>" class="span12 vpositive">
                       </td>
                       <td>
-                        <input type="number" name="fodometro" id="fodometro" value="<?php echo $c->odometro; ?>" class="span12">
+                        <input type="number" name="fhorometro" id="fhorometro" value="<?php echo $c->horometro; ?>" class="span12">
                       </td>
                       <td>
-                        <input type="number" name="fodometro_fin" id="fodometro_fin" value="<?php echo $c->odometro_fin; ?>" class="span12">
+                        <input type="number" name="fhorometro_fin" id="fhorometro_fin" value="<?php echo $c->horometro_fin; ?>" class="span12">
                       </td>
                       <td>
                         <input type="text" id="ftotal_hrs" value="<?php echo $c->horas_totales ?>" class="span12" readonly>
                       </td>
                       <td>
                         <input type="text" id="flitro_hr" value="<?php echo round($c->lts_combustible/($c->horas_totales>0?$c->horas_totales:1), 2) ?>" class="span12" readonly>
+                      </td>
+                      <td>
+                        <input type="number" name="fodometro" id="fodometro" value="<?php echo $c->odometro; ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="number" name="fodometro_fin" id="fodometro_fin" value="<?php echo $c->odometro_fin; ?>" class="span12">
                       </td>
                       <td>
                         <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>

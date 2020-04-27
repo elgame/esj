@@ -628,6 +628,9 @@ class productos_salidas extends MY_Controller {
       $rules[] = array('field' => 'codometro',
             'label' => 'Odometro',
             'rules' => 'required|numeric');
+      $rules[] = array('field' => 'chorometro',
+            'label' => 'Horómetro',
+            'rules' => 'required|numeric');
       $rules[] = array('field' => 'cprecio',
             'label' => 'Precio',
             'rules' => 'required|numeric');

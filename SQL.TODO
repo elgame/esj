@@ -1,5 +1,13 @@
 
  ☐ Reporte de productos por color en cada empresa
+ ☐ Generar ticket de salidas de almacen, con ordenes de salida de almacen y que esas se combiertan en salidas de almacen con la imprecion como recetas
+ ✔ Acomodar reporte de combustible y agregar odometro @done (20-04-22 14:54)
+     -- pcc|san
+     ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro TO horometro;
+     ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro_fin TO horometro_fin;
+     ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro double precision NOT NULL DEFAULT 0;
+     ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro_fin double precision NOT NULL DEFAULT 0;
+
  ✔ En ordenes de compra poner la forma de pago (transfer, efectivo) y que se registra la fecha de registro y esa fecha que se tome en las polizas @done (20-04-14 21:06)
      -- pcc|lap|san
      ALTER TABLE public.compras_requisicion ADD COLUMN forma_pago character varying(50) COLLATE pg_catalog."default";

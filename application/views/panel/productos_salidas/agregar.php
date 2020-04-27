@@ -440,7 +440,16 @@
                 <div class="span6">
 
                   <div class="control-group">
-                    <label class="control-label" for="codometro">Horómetro</label>
+                    <label class="control-label" for="chorometro">Horómetro (Hrs)</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="number" step="any" name="chorometro" min="0" class="span11" id="chorometro" value="<?php echo set_value('chorometro') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="codometro">Odómetro (Km)</label>
                     <div class="controls">
                       <div class="input-append span12">
                         <input type="number" step="any" name="codometro" min="0" class="span11" id="codometro" value="<?php echo set_value('codometro') ?>" placeholder="">

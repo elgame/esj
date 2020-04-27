@@ -504,6 +504,8 @@ class MyString {
         return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. substr($partes[1], -2, 2) . $hr;
       elseif($formato == 'in')
         return $partes[3] .'/'. $partes[2] .'/'. $partes[1] . $hr;
+      elseif($formato == 'inm')
+        return $partes[3] .'/'. $partes[2] .'/'. substr($partes[1], -2, 2) . $hr;
       else{
         $mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
         if ($formato == 'u') {
