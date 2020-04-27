@@ -997,6 +997,10 @@ class compras_ordenes extends MY_Controller {
             'label' => 'Plazo Credito',
             'rules' => ''),
 
+      array('field' => 'tipo_documento',
+            'label' => 'Tipo Documento',
+            'rules' => 'required'),
+
       array('field' => 'totalLetra',
             'label' => '',
             'rules' => ''),
