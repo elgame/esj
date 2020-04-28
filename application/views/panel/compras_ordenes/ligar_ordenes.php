@@ -118,6 +118,17 @@
                       </div>
                     </div> -->
                   </div>
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Tipo Documento
+                        <select name="tipo_documento" id="tipo_documento" class="span12">
+                          <option value="fa" <?php echo set_select('tipo_documento', 'fa'); ?>>Factura</option>
+                          <option value="nv" <?php echo set_select('tipo_documento', 'nv'); ?>>Remisión</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="row-fluid" id="group_pago_contado" style="display: none;">
                   <div class="span3">

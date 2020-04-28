@@ -658,7 +658,7 @@ class compras_ordenes_model extends CI_Model {
       'folio'               => $_POST['folio'],
       'condicion_pago'      => $_POST['condicionPago'],
       'plazo_credito'       => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
-      // 'tipo_documento'   => $_POST['algo'],
+      'tipo_documento'      => $_POST['tipo_documento'],
       'fecha'               => str_replace('T', ' ', $_POST['fecha']),
       'subtotal'            => $_POST['totalImporte'],
       'importe_iva'         => $_POST['totalImpuestosTrasladados'],

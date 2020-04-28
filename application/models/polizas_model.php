@@ -1097,7 +1097,7 @@ class polizas_model extends CI_Model {
         "SELECT id_compra
          FROM compras AS f
         WHERE status <> 'ca' AND id_nc IS NULL
-            AND poliza_diario = 'f'
+            AND poliza_diario = 'f' AND tipo_documento = 'fa'
            {$sql} {$sql_fecha1}
         ORDER BY id_compra ASC
         ");
@@ -1312,7 +1312,7 @@ class polizas_model extends CI_Model {
         "SELECT id_compra
          FROM compras AS f
         WHERE status <> 'ca' AND status <> 'b'
-            AND poliza_diario = 'f' AND id_nc IS NOT NULL
+            AND poliza_diario = 'f' AND id_nc IS NOT NULL AND tipo_documento = 'fa'
            {$sql} {$sql_fecha}
         ORDER BY id_compra ASC
         ");
@@ -2739,7 +2739,7 @@ class polizas_model extends CI_Model {
             INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
             INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
-          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
+          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f' AND f.tipo_documento = 'fa'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bm.uuid

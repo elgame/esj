@@ -488,7 +488,7 @@ class compras_model extends privilegios_model{
       'folio' => $data['folio'],
       // 'condicion_pago' => $data['asdasdasd'],
       // 'plazo_credito' => $data['asdasdasd'],
-      // 'tipo_documento' => $data['asdasdasd'],
+      'tipo_documento' => $compra['info']->tipo_documento,
       'fecha' => $data['fecha'],
       'subtotal' => $data['totalImporte'],
       'importe_iva' => $data['totalImpuestosTrasladados'],
