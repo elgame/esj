@@ -241,6 +241,9 @@ class vehiculos extends MY_Controller {
 			array('field' => 'fmarca',
 						'label' => 'Marca',
 						'rules' => 'max_length[15]'),
+      array('field' => 'funidad',
+            'label' => 'Unidad',
+            'rules' => 'required'),
 		);
 
 		$this->form_validation->set_rules($rules);

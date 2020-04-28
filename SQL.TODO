@@ -1,8 +1,16 @@
 
+ ☐ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor
+ ☐ Cambiar el nombre del modulo de Producción de productos -> Producción de soluciones
+ ☐ En catalogo de vehículos sanjorge/panel/vehiculos/agregar/ poner campo de millas o km y en el reporte indicar que son millas
+   -- lap
+   ALTER TABLE public.compras_vehiculos ADD COLUMN unidad character varying(5) NOT NULL DEFAULT 'km';
+ ☐ En las familias de productos ponerle un tipo como en la hoja insumos agrícolas de campo
+ ✔ Reporte de de combustible en control de maquinaria que muestre sin empresa el historial del vehiculo y agregar a la tabla en que empresa trabajo @done (20-04-28 16:51)
+ ✔ Reporte de vehículos cambiar la fecha de aceptacion por la otra @done (20-04-28 15:50)
  ☐ Reporte de productos por color en cada empresa
  ☐ Generar ticket de salidas de almacen, con ordenes de salida de almacen y que esas se combiertan en salidas de almacen con la imprecion como recetas
  ✔ Acomodar reporte de combustible y agregar odometro @done (20-04-22 14:54)
-     -- pcc|san
+     -- pcc|san|lap
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro TO horometro;
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro_fin TO horometro_fin;
      ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro double precision NOT NULL DEFAULT 0;

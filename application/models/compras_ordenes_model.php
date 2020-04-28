@@ -1799,8 +1799,8 @@ class compras_ordenes_model extends CI_Model {
 
       $pdf->titulo3 = 'Almacen: '.$orden['info'][0]->almacen;
       $tipo_orden = 'ORDEN DE COMPRA';
-      // if($orden['info'][0]->tipo_orden == 'd')
-      //   $tipo_orden = 'ORDEN DE SERVICIO';
+      if($orden['info'][0]->tipo_orden == 'd')
+        $tipo_orden = 'ORDEN DE SERVICIO';
       if($orden['info'][0]->tipo_orden == 'f')
         $tipo_orden = 'ORDEN DE FLETE';
       // $pdf->titulo2 = $tipo_orden;

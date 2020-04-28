@@ -63,11 +63,12 @@ class vehiculos_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'placa'  => $this->input->post('fplacas'),
-						'modelo' => $this->input->post('fmodelo'),
-            			'marca'  => $this->input->post('fmarca'),
-						'color'  => $this->input->post('fcolor'),
-						);
+          'placa'  => $this->input->post('fplacas'),
+          'modelo' => $this->input->post('fmodelo'),
+          'marca'  => $this->input->post('fmarca'),
+          'color'  => $this->input->post('fcolor'),
+          'unidad' => $this->input->post('funidad'),
+				);
 		}
 
 		$this->db->insert('compras_vehiculos', $data);
@@ -88,11 +89,12 @@ class vehiculos_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'placa'  => $this->input->post('fplacas'),
-						'modelo' => $this->input->post('fmodelo'),
-						'marca'  => $this->input->post('fmarca'),
-            			'color'  => $this->input->post('fcolor'),
-						);
+        'placa'  => $this->input->post('fplacas'),
+        'modelo' => $this->input->post('fmodelo'),
+        'marca'  => $this->input->post('fmarca'),
+        'color'  => $this->input->post('fcolor'),
+        'unidad' => $this->input->post('funidad'),
+      );
 		}
 
 		$this->db->update('compras_vehiculos', $data, array('id_vehiculo' => $id_vehiculo));
@@ -375,7 +377,7 @@ class vehiculos_model extends CI_Model {
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
 		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
-		$sqlf1 = " AND Date(c.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+		$sqlf1 = " AND Date(c.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 		$sqlf2 = " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
 		if($this->input->get('fid_vehiculo') == '') $_GET['fid_vehiculo'] = 0;
