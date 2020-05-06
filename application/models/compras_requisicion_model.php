@@ -274,6 +274,7 @@ class compras_requisicion_model extends CI_Model {
           'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'observaciones'        => (!empty($_POST['observacionesP'][$key])? $_POST['observacionesP'][$key]: ''),
           'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
         );
       }
@@ -583,6 +584,7 @@ class compras_requisicion_model extends CI_Model {
             'prod_sel'             => $prod_sel,
             'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
             'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+            'observaciones'        => (!empty($_POST['observacionesP'][$key])? $_POST['observacionesP'][$key]: ''),
             'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
           );
         }
@@ -798,6 +800,7 @@ class compras_requisicion_model extends CI_Model {
             $prod->campo           => $prod->id_area,
             'retencion_isr'        => $prod->retencion_isr,
             'porcentaje_isr'       => $prod->porcentaje_isr,
+            'observaciones'        => $prod->observaciones,
           );
           $rows_compras++;
         }
@@ -1065,7 +1068,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo,
-                  activos
+                  activos, cp.observaciones
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto

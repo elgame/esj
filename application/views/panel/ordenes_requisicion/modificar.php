@@ -770,6 +770,10 @@
                                   <div class="arrow"></div><h3 class="popover-title">Activos</h3>
                                   <div class="popover-content">
 
+                                    <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="observacionesP[]" class="span11" value="<?php echo $concepto->observaciones ?>" placeholder="Observaciones">
+                                    </div>
+
                                     <div class="control-group activosGrup" style="width: 375px;display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
                                       <div class="input-append span12">
                                         <input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">

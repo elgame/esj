@@ -1,8 +1,12 @@
 
  ☐ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor
- ☐ Cambiar el nombre del modulo de Producción de productos -> Producción de soluciones
- ☐ En catalogo de vehículos sanjorge/panel/vehiculos/agregar/ poner campo de millas o km y en el reporte indicar que son millas
-   -- lap
+   -- pcc
+   ALTER TABLE public.compras_requisicion_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
+   ALTER TABLE public.compras_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Servicios por Proveedor',367,true,'inventario/sproveedor/','print',true);
+ ✔ Cambiar el nombre del modulo de Producción de productos -> Producción de soluciones @done (20-05-04 11:44)
+ ✔ En catalogo de vehículos sanjorge/panel/vehiculos/agregar/ poner campo de millas o km y en el reporte indicar que son millas @done (20-05-04 11:40)
+   -- lap|pcc
    ALTER TABLE public.compras_vehiculos ADD COLUMN unidad character varying(5) NOT NULL DEFAULT 'km';
  ☐ En las familias de productos ponerle un tipo como en la hoja insumos agrícolas de campo
  ✔ Reporte de de combustible en control de maquinaria que muestre sin empresa el historial del vehiculo y agregar a la tabla en que empresa trabajo @done (20-04-28 16:51)

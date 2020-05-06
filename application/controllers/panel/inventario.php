@@ -14,6 +14,8 @@ class inventario extends MY_Controller {
     'inventario/cunproductos_pdf/',
     'inventario/cunproductos_xls/',
     'inventario/cseguimiento_pdf/',
+    'inventario/sproveedor_pdf/',
+    'inventario/sproveedor_xls/',
 
     'inventario/epu_pdf/',
     'inventario/epu_xls/',
@@ -86,6 +88,38 @@ class inventario extends MY_Controller {
   public function cproveedor_xls(){
     $this->load->model('inventario_model');
     $this->inventario_model->getCProveedorXls();
+  }
+
+  public function sproveedor()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Servicios por Proveedor');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/sproveedor',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function sproveedor_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getSProveedorPdf();
+
+  }
+  public function sproveedor_xls(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getSProveedorXls();
   }
 
   public function cproductos()

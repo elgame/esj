@@ -729,7 +729,8 @@
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
                               </td>
                               <td>
-                                  <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12 vpositive">
+                                  <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
+                                  <input type="hidden" name="observaciones[]" value="<?php echo $_POST['observaciones'][$key] ?>" id="observaciones" class="span12">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>
@@ -871,6 +872,7 @@
                                  </td>
                                  <td style="<?php echo $redBg ?>">
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
+                                    <input type="hidden" name="observaciones[]" value="<?php echo $prod->observaciones ?>" id="observaciones" class="span12">
                                 </td>
                                  <td style="width: 35px;<?php echo $redBg ?>">
                                   <?php if ($showButton && $prod->status != 'a'){ ?>

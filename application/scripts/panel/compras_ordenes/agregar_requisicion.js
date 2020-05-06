@@ -1541,6 +1541,9 @@
                       '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
                         '<div class="arrow"></div><h3 class="popover-title">Activos</h3>'+
                         '<div class="popover-content">'+
+                          '<div class="control-group" style="width: 375px;">'+
+                            '<input type="text" name="observacionesP[]" class="span11 observacionesP" value="" placeholder="Observaciones">'+
+                          '</div>'+
                           '<div class="control-group activosGrup" style="width: 375px;display: '+ ($('#tipoOrden').find('option:selected').val() !== 'f'? 'block' : 'none') +';">'+
                             '<div class="input-append span12">'+
                               '<input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">'+

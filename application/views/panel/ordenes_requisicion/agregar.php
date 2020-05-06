@@ -722,6 +722,10 @@
                                   <div class="arrow"></div><h3 class="popover-title">Activos</h3>
                                   <div class="popover-content">
 
+                                    <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="observacionesP[]" class="span11" value="<?php echo $_POST['observacionesP'][$key] ?>" placeholder="Observaciones">
+                                    </div>
+
                                     <div class="control-group activosGrup" style="width: 375px;">
                                       <div class="input-append span12">
                                         <input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">
