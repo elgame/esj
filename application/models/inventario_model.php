@@ -15,7 +15,7 @@ class inventario_model extends privilegios_model{
 	 * @return
 	 */
 	public function getCProveedorData()
-  	{
+  {
 		$sql = '';
 	   $idsproveedores = '';
 
@@ -173,6 +173,271 @@ class inventario_model extends privilegios_model{
 	}
 
   public function getCProveedorXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getCProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras por Proveedor';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre (Producto, Servicio)</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+      </tr>';
+    $familia = '';
+    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="6" style="font-weight:bold">'.$item->nombre_fiscal.'</td>
+        </tr>';
+
+      $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+      foreach ($item->productos as $key => $producto)
+      {
+        $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.$producto->nombre.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+          </tr>';
+
+        $proveedor_cantidad  += $producto->cantidad;
+        $proveedor_importe   += $producto->importe;
+        $proveedor_impuestos += $producto->impuestos;
+        $proveedor_total     += $producto->total;
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="2">Total Proveedor</td>
+            <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_impuestos.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>';
+      $total_cantidad  += $proveedor_cantidad;
+      $total_importe   += $proveedor_importe;
+      $total_impuestos += $proveedor_impuestos;
+      $total_total     += $proveedor_total;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2">Total General</td>
+          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_impuestos.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getSProveedorData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    if($this->input->get('fid_producto') != ''){
+      $sql .= " AND cp.id_producto = ".$this->input->get('fid_producto');
+    }
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if(is_array($this->input->get('ids_proveedores')))
+    {
+      $sql .= " AND c.id_proveedor IN(".implode(',', $this->input->get('ids_proveedores')).")";
+    }
+
+    $productos = $this->db->query("
+      SELECT c.id_compra, (c.serie||c.folio) AS folio_compra, co.folio AS folio_orden,
+        p.id_proveedor, p.nombre_fiscal AS proveedor, pr.nombre AS producto, cp.observaciones,
+        cp.cantidad, cp.importe, (cp.iva - cp.retencion_iva) AS impuestos, cp.total, pu.nombre AS unidad
+      FROM compras c
+        INNER JOIN compras_productos cp ON c.id_compra = cp.id_compra
+        INNER JOIN productos pr ON pr.id_producto = cp.id_producto
+        INNER JOIN productos_unidades pu ON pu.id_unidad = pr.id_unidad
+        INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+        INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+      WHERE c.status <> 'ca' AND co.tipo_orden = 'd' {$sql}
+        AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+      ORDER BY p.nombre_fiscal ASC, cp.id_orden ASC, cp.num_row ASC");
+
+    $response = $productos->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getSProveedorPdf(){
+    $res = $this->getSProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de Servicios por Proveedor';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'R', 'C', 'R', 'R', 'R');
+    $widths = array(95, 20, 20, 25, 20, 25);
+    $header = array('Servicio', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
+
+    $proveedor = '';
+    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $item){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      if ($proveedor != $item->id_proveedor) {
+
+        if ($key > 0) {
+          $datos = array('Total Proveedor',
+            MyString::formatoNumero($proveedor_cantidad, 2, '', false),
+            '',
+            MyString::formatoNumero($proveedor_importe, 2, '', false),
+            MyString::formatoNumero($proveedor_impuestos, 2, '', false),
+            MyString::formatoNumero(($proveedor_total), 2, '', false),
+          );
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false, 'B');
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths(array(150));
+        $pdf->Row(array($item->proveedor), false, false);
+
+        $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+        $proveedor = $item->id_proveedor;
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $datos = array($item->producto."({$item->observaciones})",
+        MyString::formatoNumero($item->cantidad, 2, '', false),
+        $item->unidad,
+        MyString::formatoNumero($item->importe, 2, '', false),
+        MyString::formatoNumero($item->impuestos, 2, '', false),
+        MyString::formatoNumero(($item->total), 2, '', false),
+      );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, 'B');
+
+      $proveedor_cantidad  += $item->cantidad;
+      $proveedor_importe   += $item->importe;
+      $proveedor_impuestos += $item->impuestos;
+      $proveedor_total     += $item->total;
+
+      $total_cantidad  += $item->cantidad;
+      $total_importe   += $item->importe;
+      $total_impuestos += $item->impuestos;
+      $total_total     += $item->total;
+    }
+
+    $pdf->SetFont('Arial','B',8);
+    $datos = array('Total Proveedor',
+      MyString::formatoNumero($proveedor_cantidad, 2, '', false),
+      '',
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
+      MyString::formatoNumero($proveedor_impuestos, 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($datos, false, 'B');
+
+    $datos = array('Total General',
+      MyString::formatoNumero($total_cantidad, 2, '', false),
+      '',
+      MyString::formatoNumero($total_importe, 2, '', false),
+      MyString::formatoNumero($total_impuestos, 2, '', false),
+      MyString::formatoNumero(($total_total), 2, '', false),
+      );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($datos, false, 'B');
+
+    $pdf->Output('servicios_proveedor.pdf', 'I');
+  }
+
+  public function getSProveedorXls()
   {
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
     header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");

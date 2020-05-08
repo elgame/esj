@@ -495,6 +495,7 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_retencion' => $_POST['ret_iva'][$key],
           'faltantes'            => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
           'observacion'          => $_POST['observacion'][$key],
+          'observaciones'        => $_POST['observaciones'][$key],
           'status'               => $statusp,
           'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
@@ -881,7 +882,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion
+                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -1255,6 +1256,7 @@ class compras_ordenes_model extends CI_Model {
         // 'fecha_aceptacion'     => date('Y-m-d H:i:s'),
         'faltantes'            => $faltantesProd,
         'observacion'          => $_POST['observacion'][$key],
+        'observaciones'        => $_POST['observaciones'][$key],
         'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
         'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
@@ -1298,6 +1300,7 @@ class compras_ordenes_model extends CI_Model {
           'fecha_aceptacion'     => date('Y-m-d H:i:s'),
           'faltantes'            => 0,
           'observacion'          => $_POST['observacion'][$key],
+          'observaciones'        => $_POST['observaciones'][$key],
           'ieps'                 => ($faltantesProd * $pu * floatval($_POST['iepsPorcent'][$key])/100),
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
@@ -1799,9 +1802,9 @@ class compras_ordenes_model extends CI_Model {
 
       $pdf->titulo3 = 'Almacen: '.$orden['info'][0]->almacen;
       $tipo_orden = 'ORDEN DE COMPRA';
-      // if($orden['info'][0]->tipo_orden == 'd')
-      //   $tipo_orden = 'ORDEN DE SERVICIO';
-      if($orden['info'][0]->tipo_orden == 'f')
+      if($orden['info'][0]->tipo_orden == 'd')
+        $tipo_orden = 'ORDEN DE SERVICIO';
+      elseif($orden['info'][0]->tipo_orden == 'f')
         $tipo_orden = 'ORDEN DE FLETE';
       // $pdf->titulo2 = $tipo_orden;
       // $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;

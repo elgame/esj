@@ -121,7 +121,9 @@ class control_maquinaria_model extends CI_Model {
 
     $sql2 = $sql;
 
-    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
+    if (isset($_GET['did_empresa']{0})) {
+      $sql .= " AND cs.id_empresa_ap = {$_GET['did_empresa']}";
+    }
 
     // vehiculos
     if (isset($_GET['activoId']) && intval($_GET['activoId']) > 0)
@@ -133,20 +135,21 @@ class control_maquinaria_model extends CI_Model {
 
     // Totales de vehiculos
     $response = $this->db->query(
-      "SELECT cs.id_activo, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
+      "SELECT cs.id_activo, e.nombre_fiscal, e.rfc, p.nombre AS activo, csc.fecha, csc.hora_carga, cs.folio, cs.solicito AS operador,
         csc.lts_combustible, csc.precio, csc.implemento, csl.nombre AS labor, cs.observaciones,
         ran.rancho, csc.odometro, csc.odometro_fin, csc.horometro, csc.horometro_fin
       FROM compras_salidas cs
         INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
         INNER JOIN productos p On p.id_producto = cs.id_activo
         INNER JOIN compras_salidas_labores csl ON csl.id_labor = csc.id_labor
+        INNER JOIN empresas e ON e.id_empresa = cs.id_empresa_ap
         LEFT JOIN (
           SELECT csr.id_salida, string_agg(r.nombre, ', ') AS rancho
           FROM compras_salidas_rancho csr
             INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
           GROUP BY csr.id_salida
         ) ran ON ran.id_salida = cs.id_salida
-      WHERE cs.status <> 'ca' AND cs.id_empresa_ap = {$empresaId} {$sql}
+      WHERE cs.status <> 'ca' {$sql}
       ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC")->result();
 
     return $response;
@@ -165,7 +168,7 @@ class control_maquinaria_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Legal'); // Letter
     $pdf->show_head = true;
 
     if ($empresa['info']->logo !== '')
@@ -188,17 +191,17 @@ class control_maquinaria_model extends CI_Model {
     $aligns = array('L', 'R', 'R', 'R');
     $widths = array(150, 62);
     $header = array('Vehiculo');
-    $aligns2 = array('L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
-    $widths2 = array(12, 9, 15, 30, 30, 14, 14, 14, 12, 10, 14, 20, 18);
-    $header2 = array('Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
+    $aligns2 = array('L', 'L', 'L', 'C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'L', 'L');
+    $widths2 = array(12, 13, 11, 16, 40, 40, 16, 16, 16, 14, 12, 17, 29, 26);
+    $header2 = array('Emp', 'Fecha', 'Hr Carga', 'Folio Salida', 'Rancho', 'Operador', 'Hor Ini', 'Hor Fin', 'Hor Total',
         'Litros', 'Precio', 'Total', 'Implemento', 'Observa');
 
     $aligns3 = array('R', 'R', 'R', 'R');
-    $widths3 = array(10, 16, 10, 16);
+    $widths3 = array(14, 18, 14, 18);
     $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
 
     $alignst = [['R', 'R', 'R', 'R', 'R'], $aligns3];
-    $widthst = [[124, 14, 12, 10, 14], $widths3];
+    $widthst = [[164, 16, 14, 12, 17], $widths3];
 
     $costoacumulado = 0;
     $auxvehi = '';
@@ -225,7 +228,7 @@ class control_maquinaria_model extends CI_Model {
           $pdf->SetAligns($alignst[0]);
           $pdf->SetWidths($widthst[0]);
 
-          $pdf->SetFont('Arial', 'B', 7);
+          $pdf->SetFont('Arial', 'B',  7.5);
           $pdf->SetTextColor(0, 0, 0);
           $pdf->Row(array('TOTALES',
               MyString::formatoNumero($total_hrs, 2, '', false),
@@ -238,7 +241,7 @@ class control_maquinaria_model extends CI_Model {
 
           $pdf->SetY($auxy);
 
-          $pdf->SetX(220);
+          $pdf->SetX(285);
           $pdf->SetAligns($aligns3);
           $pdf->SetWidths($widths3);
           $pdf->Row([
@@ -253,7 +256,7 @@ class control_maquinaria_model extends CI_Model {
         }
         $total_kms = $total_hrs = $total_litros = $total_importe = 0;
 
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 7.5);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
@@ -270,7 +273,7 @@ class control_maquinaria_model extends CI_Model {
 
         $pdf->SetY($auxy);
 
-        $pdf->SetX(220);
+        $pdf->SetX(285);
         $pdf->SetAligns($aligns3);
         $pdf->SetWidths($widths3);
         $pdf->Row($header3, true);
@@ -295,12 +298,13 @@ class control_maquinaria_model extends CI_Model {
 
       // ------
       $auxy = $pdf->GetY();
-      $pdf->SetFont('Arial','',7);
+      $pdf->SetFont('Arial','', 7.5);
       $pdf->SetTextColor(0,0,0);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns2);
       $pdf->SetWidths($widths2);
       $pdf->Row(array(
+        substr($vehiculo->rfc, 0, 3),
         MyString::fechaATexto($vehiculo->fecha, 'inm'),
         substr($vehiculo->hora_carga, 0, 5),
         $vehiculo->folio,
@@ -320,7 +324,7 @@ class control_maquinaria_model extends CI_Model {
 
       $pdf->SetY($auxy);
 
-      $pdf->SetX(220);
+      $pdf->SetX(285);
       $pdf->SetAligns($aligns3);
       $pdf->SetWidths($widths3);
       $pdf->Row(array(
@@ -339,7 +343,7 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetAligns($alignst[0]);
     $pdf->SetWidths($widthst[0]);
 
-    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetFont('Arial', 'B',  7.5);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->Row(array('TOTALES',
         MyString::formatoNumero($total_hrs, 2, '', false),
@@ -352,7 +356,7 @@ class control_maquinaria_model extends CI_Model {
 
     $pdf->SetY($auxy);
 
-    $pdf->SetX(220);
+    $pdf->SetX(285);
     $pdf->SetAligns($aligns3);
     $pdf->SetWidths($widths3);
     $pdf->Row([
@@ -371,7 +375,7 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetAligns($alignst[0]);
     $pdf->SetWidths($widthst[0]);
 
-    $pdf->SetFont('Arial','B',7);
+    $pdf->SetFont('Arial','B', 7.5);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES GENERALES',
         MyString::formatoNumero($ttotal_hrs, 2, '', false),
@@ -384,7 +388,7 @@ class control_maquinaria_model extends CI_Model {
 
     $pdf->SetY($auxy);
 
-    $pdf->SetX(220);
+    $pdf->SetX(285);
     $pdf->SetAligns($aligns3);
     $pdf->SetWidths($widths3);
     $pdf->Row([

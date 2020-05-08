@@ -124,7 +124,7 @@ class Ventas_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
-                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre')
+                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
@@ -430,7 +430,8 @@ class Ventas_model extends privilegios_model{
           'iva'                   => $_POST['prod_diva_total'][$key],
           'unidad'                => $_POST['prod_dmedida'][$key],
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => $_POST['dieps_total'][$key],
           'porcentaje_ieps'       => $_POST['dieps'][$key],
@@ -783,7 +784,8 @@ class Ventas_model extends privilegios_model{
           'iva'                   => $_POST['prod_diva_total'][$key],
           'unidad'                => $_POST['prod_dmedida'][$key],
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => $_POST['dieps_total'][$key],
           'porcentaje_ieps'       => $_POST['dieps'][$key],

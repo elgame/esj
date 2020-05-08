@@ -151,6 +151,8 @@ class MYpdf extends FPDF {
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
+      $this->limiteY = 255; //limite de alto
+
       $this->Line(6, 26, 210, 26);
     }
     /**
@@ -180,6 +182,8 @@ class MYpdf extends FPDF {
       $this->SetXY(333, 8);
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+
+      $this->limiteY = 190; //limite de alto
 
       $this->Line(6, 26, 349, 26);
     }

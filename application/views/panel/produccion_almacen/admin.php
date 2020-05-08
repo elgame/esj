@@ -11,7 +11,7 @@
 
           </li>
           <li>
-            Producción de productos
+            Producción de soluciones
           </li>
         </ul>
       </div>
@@ -19,7 +19,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-shopping-cart"></i> Producción de productos</h2>
+            <h2><i class="icon-shopping-cart"></i> Producción de soluciones</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>

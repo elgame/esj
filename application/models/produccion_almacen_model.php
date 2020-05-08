@@ -102,7 +102,7 @@ class produccion_almacen_model extends CI_Model {
       'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $this->productos_salidas_model->folio(),
-      'concepto'        => 'Salida generada automáticamente en Producción de productos',
+      'concepto'        => 'Salida generada automáticamente en Producción de soluciones',
       'status'          => 's',
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha_produccion']),
       'fecha_registro'  => date("Y-m-d H:i:s"),
@@ -141,7 +141,7 @@ class produccion_almacen_model extends CI_Model {
       'fecha_autorizacion' => $fecha,
       'fecha_aceptacion'   => $fecha,
       'fecha_creacion'     => $fecha,
-      'descripcion'        => 'Entrada generada automáticamente en Producción de productos'
+      'descripcion'        => 'Entrada generada automáticamente en Producción de soluciones'
     );
 
     $res = $this->compras_ordenes_model->agregarData($data);
@@ -231,7 +231,7 @@ class produccion_almacen_model extends CI_Model {
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
 
-    $tituloo = 'PRODUCCION DE PRODUCTO';
+    $tituloo = 'PRODUCCION DE SOLUCION';
 
     // Título
     $pdf->SetFont($pdf->fount_txt, 'B', 8.5);

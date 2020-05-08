@@ -33,7 +33,7 @@ class vehiculos_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("
-				SELECT p.id_vehiculo, p.placa, p.modelo, p.marca, p.status
+				SELECT p.id_vehiculo, p.placa, p.modelo, p.marca, p.status, p.unidad
 				FROM compras_vehiculos p
 				".$sql."
 				ORDER BY p.placa ASC
@@ -63,11 +63,12 @@ class vehiculos_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'placa'  => $this->input->post('fplacas'),
-						'modelo' => $this->input->post('fmodelo'),
-            			'marca'  => $this->input->post('fmarca'),
-						'color'  => $this->input->post('fcolor'),
-						);
+          'placa'  => $this->input->post('fplacas'),
+          'modelo' => $this->input->post('fmodelo'),
+          'marca'  => $this->input->post('fmarca'),
+          'color'  => $this->input->post('fcolor'),
+          'unidad' => $this->input->post('funidad'),
+				);
 		}
 
 		$this->db->insert('compras_vehiculos', $data);
@@ -88,11 +89,12 @@ class vehiculos_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'placa'  => $this->input->post('fplacas'),
-						'modelo' => $this->input->post('fmodelo'),
-						'marca'  => $this->input->post('fmarca'),
-            			'color'  => $this->input->post('fcolor'),
-						);
+        'placa'  => $this->input->post('fplacas'),
+        'modelo' => $this->input->post('fmodelo'),
+        'marca'  => $this->input->post('fmarca'),
+        'color'  => $this->input->post('fcolor'),
+        'unidad' => $this->input->post('funidad'),
+      );
 		}
 
 		$this->db->update('compras_vehiculos', $data, array('id_vehiculo' => $id_vehiculo));
@@ -110,7 +112,7 @@ class vehiculos_model extends CI_Model {
 	{
 		$id_vehiculo = ($id_vehiculo!==FALSE)? $id_vehiculo: $_GET['id'];
 
-		$sql_res = $this->db->select("id_vehiculo, placa, modelo, marca, status, color, (placa || ' ' || modelo || ' ' || marca) AS nombre" )
+		$sql_res = $this->db->select("id_vehiculo, placa, modelo, marca, status, color, unidad, (placa || ' ' || modelo || ' ' || marca) AS nombre" )
 												->from("compras_vehiculos")
 												->where("id_vehiculo", $id_vehiculo)
 												->get();
@@ -197,7 +199,7 @@ class vehiculos_model extends CI_Model {
         "SELECT * FROM (
         (
           SELECT 1 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo, cv.unidad
           FROM compras_ordenes AS c
             INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
             INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -208,7 +210,7 @@ class vehiculos_model extends CI_Model {
         UNION
         (
           SELECT 2 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo, cv.unidad
           FROM compras_ordenes AS c
             INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
             INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -219,7 +221,7 @@ class vehiculos_model extends CI_Model {
         UNION
         (
           SELECT 3 AS orden, cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
-            0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
+            0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo, cv.unidad
           FROM compras_ordenes AS c
             INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
             INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -231,9 +233,9 @@ class vehiculos_model extends CI_Model {
       ")->result();
       if (count($res) == 3) {
         $res[2]->nombre     = $res[0]->nombre;
-        $res[2]->kilometros = $res[1]->kilometros-$res[0]->kilometros;
-        $res[2]->litros     = $res[2]->litros-$res[0]->litros;
-        $res[2]->km_litro     = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
+        $res[2]->kilometros = ($res[1]->kilometros-$res[0]->kilometros) * ($res[0]->unidad === 'km'? 1: 1.609);
+        $res[2]->litros     = ($res[2]->litros-$res[0]->litros);
+        $res[2]->km_litro   = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
         $res[2]->id_empresa = $res[0]->id_empresa;
         $res_vehiculo[] = $res[2];
       }
@@ -244,7 +246,7 @@ class vehiculos_model extends CI_Model {
         FROM (
           (
             SELECT 1 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo, cv.unidad
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -255,7 +257,7 @@ class vehiculos_model extends CI_Model {
           UNION
           (
             SELECT 2 AS orden, cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo
+              (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Diesel' AS tipo, cv.unidad
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -266,7 +268,7 @@ class vehiculos_model extends CI_Model {
           UNION
           (
             SELECT 3 AS orden, cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
-              0 AS total, 0 AS id_empresa, 0 AS folio, 'Diesel' AS tipo
+              0 AS total, 0 AS id_empresa, 0 AS folio, 'Diesel' AS tipo, cv.unidad
             FROM compras_ordenes AS c
               INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
               INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -278,9 +280,9 @@ class vehiculos_model extends CI_Model {
         ")->result();
       if (count($res) == 3) {
         $res[2]->nombre     = $res[0]->nombre;
-        $res[2]->kilometros = $res[1]->kilometros-$res[0]->kilometros;
+        $res[2]->kilometros = ($res[1]->kilometros-$res[0]->kilometros) * ($res[0]->unidad === 'km'? 1: 1.609);
         $res[2]->litros     = $res[2]->litros-$res[0]->litros;
-        $res[2]->km_litro     = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
+        $res[2]->km_litro   = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
         $res[2]->id_empresa = $res[0]->id_empresa;
         $res_vehiculo[] = $res[2];
       }
@@ -375,7 +377,7 @@ class vehiculos_model extends CI_Model {
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
 		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
-		$sqlf1 = " AND Date(c.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+		$sqlf1 = " AND Date(c.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 		$sqlf2 = " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
 		if($this->input->get('fid_vehiculo') == '') $_GET['fid_vehiculo'] = 0;
@@ -392,7 +394,7 @@ class vehiculos_model extends CI_Model {
 		//Gasolina
 		$res = $this->db->query(
 			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio
+				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, cv.unidad
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -409,7 +411,7 @@ class vehiculos_model extends CI_Model {
 		//Disel
 		$res = $this->db->query(
 			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio
+				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, cv.unidad
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -513,24 +515,24 @@ class vehiculos_model extends CI_Model {
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
 				$datos = array(MyString::fechaAT($item->fecha),
 					$item->folio,
-					MyString::formatoNumero($item->kilometros, 2, ''),
+					MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad), 2, ''),
           '',
 					MyString::formatoNumero($item->litros, 2, ''),
 					// MyString::formatoNumero($precio, 2, ''),
 					'', '',
 					MyString::formatoNumero($item->total, 2, '$', false),
-					);
+				);
 				if ($key > 0)
 				{
-					$rendimiento = ($item->kilometros - $res['gasolina'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
-          $datos[3] = MyString::formatoNumero($item->kilometros - $res['gasolina'][$key-1]->kilometros, 2, '');
+					$rendimiento = ($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['gasolina'][$key-1]->kilometros, $res['gasolina'][$key-1]->unidad))/($item->litros>0? $item->litros: 1);
+          $datos[3] = MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['gasolina'][$key-1]->kilometros, $res['gasolina'][$key-1]->unidad), 2, '');
 
 					$datos[5] = MyString::formatoNumero( $rendimiento , 2, '');
 					$datos[6] = MyString::formatoNumero( (100/($rendimiento == 0 ? 1 : $rendimiento)) , 2, '');
 
-					$total_kilometros += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
+					$total_kilometros += $this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['gasolina'][$key-1]->kilometros, $res['gasolina'][$key-1]->unidad);
 					$total_litros     += $item->litros;
-          $totalRecorridos += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
+          $totalRecorridos += $this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['gasolina'][$key-1]->kilometros, $res['gasolina'][$key-1]->unidad);
 				}
 				$total_gasolina += $item->total;
 
@@ -588,25 +590,25 @@ class vehiculos_model extends CI_Model {
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
 				$datos = array(MyString::fechaAT($item->fecha),
 					$item->folio,
-					MyString::formatoNumero($item->kilometros, 2, ''),
+					MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad), 2, ''),
           '',
 					MyString::formatoNumero($item->litros, 2, ''),
 					// MyString::formatoNumero($precio, 2, ''),
 					'', '',
 					MyString::formatoNumero($item->total, 2, '$', false),
-					);
+				);
 				if ($key > 0)
 				{
-          $rendimiento = ($item->kilometros - $res['disel'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
+          $rendimiento = ($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad))/($item->litros>0? $item->litros: 1);
 					$rendimiento = $rendimiento==0? 1 : $rendimiento;
-          $datos[2] = MyString::formatoNumero($item->kilometros - $res['disel'][$key-1]->kilometros, 2, '');
+          $datos[2] = MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad), 2, '');
 
 					$datos[4] = MyString::formatoNumero( $rendimiento , 2, '');
 					$datos[5] = MyString::formatoNumero( (100/$rendimiento) , 2, '');
 
-					$total_kilometros += $item->kilometros - $res['disel'][$key-1]->kilometros;
+					$total_kilometros += $this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad);
 					$total_litros     += $item->litros;
-          $totalRecorridos += $item->kilometros - $res['disel'][$key-1]->kilometros;
+          $totalRecorridos += $this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad);
 				}
 				$total_disel += $item->total;
 
@@ -708,6 +710,12 @@ class vehiculos_model extends CI_Model {
 
 		$pdf->Output('vehiculo.pdf', 'I');
 	}
+
+  public function millasToKm($kilometros, $unidad)
+  {
+    $millas = $kilometros * ($unidad === 'km'? 1: 1.609);
+    return $millas;
+  }
 
 }
 /* End of file usuarios_model.php */

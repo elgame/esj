@@ -674,6 +674,10 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Activo del producto',
             'rules' => ($valGasto && !$valFlete? '': '')),
 
+      array('field' => 'observacionesP[]',
+            'label' => 'Observaciones del producto',
+            'rules' => ''),
+
       array('field' => 'proveedorId[]',
             'label' => 'Proveedor',
             'rules' => 'numeric'),

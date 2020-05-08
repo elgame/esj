@@ -59,6 +59,16 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="funidad">Unidad de medida </label>
+                  <div class="controls">
+                    <select name="funidad" id="funidad">
+                      <option value="km" <?php echo set_select('funidad', 'km') ?>>Km</option>
+                      <option value="mi" <?php echo set_select('funidad', 'mi') ?>>Millas</option>
+                    </select>
+                  </div>
+                </div>
+
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>
 								  <a href="<?php echo base_url('panel/vehiculos/'); ?>" class="btn">Cancelar</a>
