@@ -1,4 +1,9 @@
 
+ ☐ Iva excento
+   -pcc
+   ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default";
+   UPDATE public.facturacion_productos SET porcentaje_iva_real = porcentaje_iva::character varying;
+
  ☐ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor
    -- pcc
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
@@ -108,7 +113,7 @@
      ALTER TABLE public.compras_salidas ADD COLUMN id_proyecto bigint;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
- ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san
+ ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san|pcc
      CREATE OR REPLACE VIEW public.unidades_unq
          AS
          SELECT DISTINCT ON (unidades.nombre) unidades.nombre,

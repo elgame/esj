@@ -513,7 +513,7 @@ function calculaTotalProducto ($tr, $calculaT) {
       $totalIeps      = $tr.find('#dieps_total'),
 
       totalImporte   = trunc2Dec(parseFloat($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0) ),
-      totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
+      totalIva       = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100),
       totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val())),
       totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100)
       ;
