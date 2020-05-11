@@ -443,6 +443,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
         'unidad'                => $value->unidad,
         'retencion_iva'         => 0,
         'porcentaje_iva'        => 0,
+        'porcentaje_iva_real'   => 0,
         'porcentaje_retencion'  => 0,
         'ids_pallets'           => null,
         'kilos'                 => $value->kilos,

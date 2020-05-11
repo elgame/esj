@@ -1,10 +1,10 @@
 
- ☐ Iva excento
+ ✔ Iva excento @done (20-05-11 12:33)
    -pcc|san
-   ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default";
+   ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default" DEFAULT 0;
    UPDATE public.facturacion_productos SET porcentaje_iva_real = porcentaje_iva::character varying;
 
- ☐ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor
+ ✔ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor @done (20-05-11 12:33)
    -- pcc|san
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
    ALTER TABLE public.compras_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
