@@ -677,6 +677,196 @@ class productos_model extends CI_Model {
     return $query->result();
   }
 
+
+
+
+  /**
+   * Reporte de salidas por codigo
+   *
+   * @return
+   */
+  public function getListaColoresData()
+  {
+    $sqlr = $sqlc = $sql = '';
+
+    //Filtros para buscar
+    if($this->input->get('fid_producto') != ''){
+      $id_producto = $this->input->get('fid_producto');
+      $sql .= " AND p.id_producto = ".$id_producto;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : 20); // agro insumos
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : '');
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('empresaApId') > 0) {
+      $sql .= " AND pc.id_empresa = ".$this->input->get('empresaApId');
+    }
+
+    $res = $this->db->query(
+      "SELECT p.id_producto, p.nombre AS producto, pf.nombre AS familia, pc.color, pc.tipo_apli
+      FROM productos p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_color_agro pc ON p.id_producto = pc.id_producto
+      WHERE 1 = 1 {$sql}
+      ORDER BY color ASC, producto ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+
+  /**
+   * Reporte salidas de productos
+   */
+  public function getListaColoresPdf(){
+    $res = $this->getListaColoresData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Productos por Colores';
+    // $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    // $pdf->titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    // $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    // $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    // $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L');
+    $widths = array(90, 80, 30);
+    $header = array('Producto', 'Familia', 'Tipo Aplic');
+
+    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+    $total_importe = 0;
+    $aux_color = '';
+    foreach($res as $key => $item){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      if ($item->color != $aux_color) {
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([200]);
+        $pdf->Row([$colores[$item->color]], false, false);
+
+        $pdf->SetFillColor(200, 200, 200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        $aux_color = $item->color;
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->producto,
+        $item->familia,
+        $tipo_apli[$item->tipo_apli]
+      );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->Output('colores_productos.pdf', 'I');
+  }
+
+  public function getListaColoresXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=salidas_productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getProductosSalidasCodData('producto');
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Salidas por Producto';
+    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Costo</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+
+    $total_importe = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td style="width:30px;border:1px solid #000;"></td>
+          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->unidad.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->cantidad.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->precio_unitario.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+        </tr>';
+      $total_importe += $item->importe;
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="5"></td>
+              <td style="border:1px solid #000;">'.$total_importe.'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

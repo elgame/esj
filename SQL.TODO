@@ -1,4 +1,6 @@
 
+ ☐ Reporte de empresas colores
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Productos por Colores', 366, true, 'productos/rpt_lista_colores/', 'print', true);
  ✔ Iva excento @done (20-05-11 12:33)
    -pcc|san
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default" DEFAULT 0;
