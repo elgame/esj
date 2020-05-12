@@ -707,6 +707,10 @@ class productos_model extends CI_Model {
       $sql .= " AND pc.id_empresa = ".$this->input->get('empresaApId');
     }
 
+    if ($this->input->get('dcolor')) {
+      $sql .= " AND pc.color = '{$this->input->get('dcolor')}'";
+    }
+
     $res = $this->db->query(
       "SELECT p.id_producto, p.nombre AS producto, pf.nombre AS familia, pc.color, pc.tipo_apli
       FROM productos p
@@ -730,8 +734,11 @@ class productos_model extends CI_Model {
     $res = $this->getListaColoresData();
 
     $this->load->model('empresas_model');
-    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -740,13 +747,13 @@ class productos_model extends CI_Model {
     if ($empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
 
+    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Productos por Colores';
-    // $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
-    // $pdf->titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
-    // $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
-    // $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
-    // $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $pdf->titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -755,8 +762,6 @@ class productos_model extends CI_Model {
     $widths = array(90, 80, 30);
     $header = array('Producto', 'Familia', 'Tipo Aplic');
 
-    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
-    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
     $total_importe = 0;
     $aux_color = '';
     foreach($res as $key => $item){
@@ -800,66 +805,67 @@ class productos_model extends CI_Model {
 
   public function getListaColoresXls(){
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=salidas_productos.xls");
+    header("Content-Disposition: attachment; filename=color_productos.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $res = $this->getProductosSalidasCodData('producto');
+    $res = $this->getListaColoresData();
 
     $this->load->model('empresas_model');
-    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
-    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
+
+    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
 
     $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = 'Reporte Salidas por Producto';
-    $titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
-    $titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
-    $titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
-    $titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
-    $titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $titulo2 = 'Productos por Colores';
+    $titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
 
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
-        </tr>
-        <tr style="font-weight:bold">
-          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
-          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
-          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
-          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Costo</td>
-          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+          <td colspan="3"></td>
         </tr>';
 
-    $total_importe = 0;
+    $aux_color = '';
     foreach($res as $key => $item){
-      $html .= '<tr>
-          <td style="width:30px;border:1px solid #000;"></td>
-          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
-          <td style="width:200px;border:1px solid #000;">'.$item->unidad.'</td>
-          <td style="width:200px;border:1px solid #000;">'.$item->cantidad.'</td>
-          <td style="width:200px;border:1px solid #000;">'.$item->precio_unitario.'</td>
-          <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
-        </tr>';
-      $total_importe += $item->importe;
-    }
+      if ($item->color != $aux_color) {
+        $html .= '
+          <tr>
+            <td colspan="3"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="3" style="background-color: #cccccc;">'.$colores[$item->color].'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Familia</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Tipo Aplic</td>
+          </tr>';
 
-    $html .= '
-            <tr style="font-weight:bold">
-              <td colspan="5"></td>
-              <td style="border:1px solid #000;">'.$total_importe.'</td>
-            </tr>';
+        $aux_color = $item->color;
+      }
+
+      $html .= '<tr>
+          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->familia.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$tipo_apli[$item->tipo_apli].'</td>
+        </tr>';
+    }
 
     $html .= '</tbody>
     </table>';

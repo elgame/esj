@@ -1,13 +1,18 @@
 
+ ☐ Cambio de nombre de produccion de productos
+   -- lap
+   UPDATE public.privilegios SET nombre='Producción de soluciones' WHERE nombre='Producción de productos';
+
  ☐ Reporte de empresas colores
+   -- pcc|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Productos por Colores', 366, true, 'productos/rpt_lista_colores/', 'print', true);
  ✔ Iva excento @done (20-05-11 12:33)
-   -pcc|san
+   -pcc|san|lap
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default" DEFAULT 0;
    UPDATE public.facturacion_productos SET porcentaje_iva_real = porcentaje_iva::character varying;
 
  ✔ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor @done (20-05-11 12:33)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
    ALTER TABLE public.compras_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Servicios por Proveedor',367,true,'inventario/sproveedor/','print',true);

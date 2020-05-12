@@ -31,6 +31,9 @@
                     <div class="input-append span12">
                       <select name="dcolor" id="dcolor" class="span11">
                         <option value=""></option>
+                        <option value="v">Verde</option>
+                        <option value="a">Amarillo</option>
+                        <option value="r">Rojo</option>
                       </select>
                     </div>
                   </div>

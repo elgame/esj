@@ -406,9 +406,6 @@ class productos extends MY_Controller {
     $params['info_empleado'] = $this->info_empleado['info'];
     $params['seo']           = array('titulo' => 'Productos por Colores');
 
-    $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
-    $params['data']          = $this->productos_model->getFamilias(false, 'p');
-
     $resp_selemp = $this->session->userdata('selempresa');
     $this->session->set_userdata('selempresa', 20); // agro insumo
     $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
