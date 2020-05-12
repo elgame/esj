@@ -389,7 +389,7 @@ class recetas_model extends CI_Model {
         'cantidad' => $_POST['cantidad'][$key],
       ];
     }
-    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos, ['empresa' => $_POST['empresaId']] );
+    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos, ['empresa' => $_POST['empresaId', 'con_req' => false]] );
     if (!$res['passes']) {
       return $res;
     }
