@@ -405,7 +405,9 @@ class productos_salidas_model extends CI_Model {
       foreach ($productos as $key => $producto) {
         $item = $this->inventario_model->getEPUData($producto['id'], $id_almacen, true, $extras);
         if (isset($item[0]->saldo_anterior)) {
-          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          $existencia = $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-
+                        ((!isset($extras['con_req']) || $extras['con_req'])? $item[0]->con_req: 0);
+          $existencia = MyString::float( $existencia );
           if ( MyString::float($existencia-$producto['cantidad']) < 0) {
             $response[] = $item[0]->nombre_producto.' ('.($existencia-$producto['cantidad']).')';
           }
