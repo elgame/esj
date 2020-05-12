@@ -557,7 +557,7 @@ class caja_chica_model extends CI_Model {
           cg.nombre, cg.status, cg.folio_sig, cg.folio_ant,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
           {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
-          (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < Coalesce(cg.fecha_cancelado, Date(now())))) AS show_back_cortes
+          (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < cg.fecha_cancelado)) AS show_back_cortes
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -585,6 +585,9 @@ class caja_chica_model extends CI_Model {
         if (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes === 't') {
           $value->monto = $value->monto_ini;
           $value->saldo = $value->monto - $value->abonos;
+        } elseif (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes == '') {
+          $value->saldo = $value->monto_ini - $value->abonos;
+          $value->monto = $value->saldo;
         }
       }
     }
