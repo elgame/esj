@@ -677,6 +677,202 @@ class productos_model extends CI_Model {
     return $query->result();
   }
 
+
+
+
+  /**
+   * Reporte de salidas por codigo
+   *
+   * @return
+   */
+  public function getListaColoresData()
+  {
+    $sqlr = $sqlc = $sql = '';
+
+    //Filtros para buscar
+    if($this->input->get('fid_producto') != ''){
+      $id_producto = $this->input->get('fid_producto');
+      $sql .= " AND p.id_producto = ".$id_producto;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : 20); // agro insumos
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : '');
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('empresaApId') > 0) {
+      $sql .= " AND pc.id_empresa = ".$this->input->get('empresaApId');
+    }
+
+    if ($this->input->get('dcolor')) {
+      $sql .= " AND pc.color = '{$this->input->get('dcolor')}'";
+    }
+
+    $res = $this->db->query(
+      "SELECT p.id_producto, p.nombre AS producto, pf.nombre AS familia, pc.color, pc.tipo_apli
+      FROM productos p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_color_agro pc ON p.id_producto = pc.id_producto
+      WHERE 1 = 1 {$sql}
+      ORDER BY color ASC, producto ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+
+  /**
+   * Reporte salidas de productos
+   */
+  public function getListaColoresPdf(){
+    $res = $this->getListaColoresData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Productos por Colores';
+    $pdf->titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $pdf->titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L');
+    $widths = array(90, 80, 30);
+    $header = array('Producto', 'Familia', 'Tipo Aplic');
+
+    $total_importe = 0;
+    $aux_color = '';
+    foreach($res as $key => $item){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      if ($item->color != $aux_color) {
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([200]);
+        $pdf->Row([$colores[$item->color]], false, false);
+
+        $pdf->SetFillColor(200, 200, 200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        $aux_color = $item->color;
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->producto,
+        $item->familia,
+        $tipo_apli[$item->tipo_apli]
+      );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->Output('colores_productos.pdf', 'I');
+  }
+
+  public function getListaColoresXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=color_productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getListaColoresData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
+
+    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Productos por Colores';
+    $titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>';
+
+    $aux_color = '';
+    foreach($res as $key => $item){
+      if ($item->color != $aux_color) {
+        $html .= '
+          <tr>
+            <td colspan="3"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="3" style="background-color: #cccccc;">'.$colores[$item->color].'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Familia</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Tipo Aplic</td>
+          </tr>';
+
+        $aux_color = $item->color;
+      }
+
+      $html .= '<tr>
+          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->familia.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$tipo_apli[$item->tipo_apli].'</td>
+        </tr>';
+    }
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */
