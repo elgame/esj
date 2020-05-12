@@ -1,10 +1,15 @@
 
- ☐ Cambio de nombre de produccion de productos
-   -- lap
+ ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion,
+   revisar que no carga los productos a la requisicion, al dar salidas de almacen desde recetas no asigna la empresa de aplicacion
+ ☐ Al reporte de salidas por producto y codigo, poner el color de los productos cuando seleccionen la empresa
+ ☐ Reporte vehiculos/combustible_pdf acomodar los campos estan desacomodados
+ ☐ En factura que puedan seleccionar la sustitucion de cfdi en las facturas
+ ✔ Cambio de nombre de produccion de productos @done (20-05-12 13:33)
+   -- lap|san
    UPDATE public.privilegios SET nombre='Producción de soluciones' WHERE nombre='Producción de productos';
 
- ☐ Reporte de empresas colores
-   -- pcc|lap
+ ✔ Reporte de empresas colores @done (20-05-12 13:33)
+   -- pcc|lap|san
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Productos por Colores', 366, true, 'productos/rpt_lista_colores/', 'print', true);
  ✔ Iva excento @done (20-05-11 12:33)
    -pcc|san|lap
