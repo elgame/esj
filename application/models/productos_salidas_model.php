@@ -1575,6 +1575,10 @@ class productos_salidas_model extends CI_Model {
   public function getProductosSalidasCodData($tipo = 'salida')
   {
     $sqlr = $sqlc = $sql = '';
+    $sqcol = [
+      'fields' => ", '' AS color, '' AS tipo_apli",
+      'table' => ''
+    ];
 
     //Filtros para buscar
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -1600,6 +1604,12 @@ class productos_salidas_model extends CI_Model {
 
     if ($this->input->get('empresaApId') > 0) {
       $sql .= " AND co.id_empresa_ap = ".$this->input->get('empresaApId');
+      $sqcol['fields'] = ", String_agg(DISTINCT pca.color, ',') AS color, String_agg(DISTINCT pca.tipo_apli, ',') AS tipo_apli";
+      $sqcol['table'] = "LEFT JOIN (
+          SELECT id_producto, id_empresa, color, tipo_apli
+          FROM productos_color_agro
+          WHERE id_empresa = {$this->input->get('empresaApId')}
+        ) pca ON pca.id_producto = p.id_producto";
     }
 
     if ($this->input->get('areaId') > 0) {
@@ -1658,7 +1668,7 @@ class productos_salidas_model extends CI_Model {
           SELECT
             p.id_producto, p.nombre producto, Sum(cp.cantidad*cp.precio_unitario) importe, Sum(cp.cantidad) AS cantidad,
             (Sum(cp.cantidad*cp.precio_unitario) / Coalesce(NULLIF(Sum(cp.cantidad), 0), 1))::Numeric(10, 2) AS precio_unitario,
-            pu.nombre AS unidad
+            pu.nombre AS unidad {$sqcol['fields']}
           FROM compras_salidas co
             INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
             INNER JOIN productos p ON p.id_producto = cp.id_producto
@@ -1675,6 +1685,7 @@ class productos_salidas_model extends CI_Model {
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
               GROUP BY cscc.id_salida
             ) cscc ON cscc.id_salida = co.id_salida
+            {$sqcol['table']}
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
           GROUP BY p.id_producto, p.nombre, pu.nombre
         ) t
@@ -1718,9 +1729,9 @@ class productos_salidas_model extends CI_Model {
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'R', 'R', 'R');
-    $widths = array(110, 30, 30, 30, 30);
-    $header = array('Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
+    $aligns = array('L', 'L', 'R', 'R', 'R', 'L');
+    $widths = array(110, 30, 30, 30, 30, 30);
+    $header = array('Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe', 'Color / Aplic');
 
     $total_importe = 0;
     foreach($res as $key => $item){
@@ -1746,6 +1757,7 @@ class productos_salidas_model extends CI_Model {
         MyString::formatoNumero($item->cantidad, 2, '', false),
         MyString::formatoNumero($item->precio_unitario, 2, '', false),
         MyString::formatoNumero($item->importe, 2, '', false),
+        "{$item->color} / {$item->tipo_apli}",
       );
       $total_importe += $item->importe;
 
@@ -1864,9 +1876,9 @@ class productos_salidas_model extends CI_Model {
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
-    $widths = array(18, 18, 45, 55, 55, 18, 20, 20, 20);
-    $header = array('Fecha', 'Folio', 'Solicito', 'C Costo', 'Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
+    $widths = array(17, 18, 35, 31, 45, 45, 18, 20, 20, 20);
+    $header = array('Fecha', 'Folio', 'Solicito', 'Área', 'C Costo', 'Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
 
     $total_importe = 0;
     foreach($res as $key => $item){
@@ -1890,6 +1902,7 @@ class productos_salidas_model extends CI_Model {
         MyString::fechaAT($item->fecha_orden),
         $item->folio_orden,
         $item->solicito,
+        $item->ranchos,
         $item->centro_costo,
         $item->producto,
         $item->unidad,
