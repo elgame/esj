@@ -1708,6 +1708,7 @@ class productos_salidas_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $this->load->model('almacenes_model');
+    $this->load->model('productos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
     $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
@@ -1757,7 +1758,7 @@ class productos_salidas_model extends CI_Model {
         MyString::formatoNumero($item->cantidad, 2, '', false),
         MyString::formatoNumero($item->precio_unitario, 2, '', false),
         MyString::formatoNumero($item->importe, 2, '', false),
-        "{$item->color} / {$item->tipo_apli}",
+        "{$this->productos_model->colores[$item->color]} / {$this->productos_model->tipo_apli[$item->tipo_apli]}",
       );
       $total_importe += $item->importe;
 

@@ -730,6 +730,9 @@ class productos_model extends CI_Model {
   /**
    * Reporte salidas de productos
    */
+  public $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad', '' => ''];
+  public $colores   = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo', '' => ''];
+
   public function getListaColoresPdf(){
     $res = $this->getListaColoresData();
 
@@ -747,13 +750,10 @@ class productos_model extends CI_Model {
     if ($empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
 
-    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
-    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
-
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Productos por Colores';
     $pdf->titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
-    $pdf->titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
+    $pdf->titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$this->colores[$_GET['dcolor']]}": '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -774,7 +774,7 @@ class productos_model extends CI_Model {
         $pdf->SetX(6);
         $pdf->SetAligns(['L']);
         $pdf->SetWidths([200]);
-        $pdf->Row([$colores[$item->color]], false, false);
+        $pdf->Row([$this->colores[$item->color]], false, false);
 
         $pdf->SetFillColor(200, 200, 200);
         $pdf->SetX(6);
@@ -791,7 +791,7 @@ class productos_model extends CI_Model {
       $datos = array(
         $item->producto,
         $item->familia,
-        $tipo_apli[$item->tipo_apli]
+        $this->tipo_apli[$item->tipo_apli]
       );
 
       $pdf->SetX(6);
@@ -818,13 +818,13 @@ class productos_model extends CI_Model {
       $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
     }
 
-    $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
-    $colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+    $this->tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $this->colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Productos por Colores';
     $titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
-    $titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$colores[$_GET['dcolor']]}": '');
+    $titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$this->colores[$_GET['dcolor']]}": '');
 
     $html = '<table>
       <tbody>
@@ -849,7 +849,7 @@ class productos_model extends CI_Model {
             <td colspan="3"></td>
           </tr>
           <tr style="font-weight:bold">
-            <td colspan="3" style="background-color: #cccccc;">'.$colores[$item->color].'</td>
+            <td colspan="3" style="background-color: #cccccc;">'.$this->colores[$item->color].'</td>
           </tr>
           <tr style="font-weight:bold">
             <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
@@ -863,7 +863,7 @@ class productos_model extends CI_Model {
       $html .= '<tr>
           <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->familia.'</td>
-          <td style="width:200px;border:1px solid #000;">'.$tipo_apli[$item->tipo_apli].'</td>
+          <td style="width:200px;border:1px solid #000;">'.$this->tipo_apli[$item->tipo_apli].'</td>
         </tr>';
     }
 
