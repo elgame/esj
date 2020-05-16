@@ -277,6 +277,7 @@ class facturacion extends MY_Controller {
     $metodosPago       = new MetodosPago();
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
+    $tipoRelacion      = new TipoRelacion();
     $tipoDeComprobante = new TipoDeComprobante();
     $ceUnidades        = new UnidadesMedida();
     $ceMotTraslado     = new MotivoTraslado();
@@ -285,6 +286,7 @@ class facturacion extends MY_Controller {
     $params['metodosPago']       = $metodosPago->get()->all();
     $params['formaPago']         = $formaPago->get()->all();
     $params['usoCfdi']           = $usoCfdi->get()->all();
+    $params['tipoRelacion']      = $tipoRelacion->get()->all();
     $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
     $params['ceUnidades']        = $ceUnidades->getCE()->all();
     $params['ceMotTraslado']     = $ceMotTraslado->get()->all();

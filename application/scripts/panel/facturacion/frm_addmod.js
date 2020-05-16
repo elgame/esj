@@ -580,6 +580,7 @@ var modalCfdiRel = function () {
         $('#cfdiRelPrev').val($uuid);
         $('#cfdiRelPrevText').text($uuid);
         $('#modal-cfdiRelPrev').modal('hide');
+        $('#cfdiRelPrevTipo').show();
       } else {
         alert('No se encontró el UUID en el archivo XML.');
       }
@@ -595,6 +596,7 @@ var modalCfdiRel = function () {
     $('#cfdiRelPrevText').text('');
     $('#fileCfdiRelPrev').val('');
     $('#modal-cfdiRelPrev').modal('hide');
+    $('#cfdiRelPrevTipo').hide();
   });
 };
 

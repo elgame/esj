@@ -549,7 +549,7 @@ class vehiculos_model extends CI_Model {
 			$pdf->SetWidths($widths);
 			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
 			$pdf->Row(array('', '',
-						MyString::formatoNumero( $total_kilometros , 2, ''),
+						'', // MyString::formatoNumero( $total_kilometros , 2, ''),
             MyString::formatoNumero( $totalRecorridos, 2, ''),
 						MyString::formatoNumero( $total_litros , 2, ''),
 						MyString::formatoNumero( $total_rendimiento , 2, ''),
@@ -589,22 +589,22 @@ class vehiculos_model extends CI_Model {
 				$pdf->SetTextColor(0,0,0);
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
 				$datos = array(MyString::fechaAT($item->fecha),
-					$item->folio,
-					MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad), 2, ''),
+          $item->folio,
+          MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad), 2, ''),
           '',
-					MyString::formatoNumero($item->litros, 2, ''),
-					// MyString::formatoNumero($precio, 2, ''),
-					'', '',
-					MyString::formatoNumero($item->total, 2, '$', false),
-				);
+          MyString::formatoNumero($item->litros, 2, ''),
+          // MyString::formatoNumero($precio, 2, ''),
+          '', '',
+          MyString::formatoNumero($item->total, 2, '$', false),
+        );
 				if ($key > 0)
 				{
           $rendimiento = ($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad))/($item->litros>0? $item->litros: 1);
 					$rendimiento = $rendimiento==0? 1 : $rendimiento;
-          $datos[2] = MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad), 2, '');
+          $datos[3] = MyString::formatoNumero($this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad), 2, '');
 
-					$datos[4] = MyString::formatoNumero( $rendimiento , 2, '');
-					$datos[5] = MyString::formatoNumero( (100/$rendimiento) , 2, '');
+					$datos[5] = MyString::formatoNumero( $rendimiento , 2, '');
+					$datos[6] = MyString::formatoNumero( (100/$rendimiento) , 2, '');
 
 					$total_kilometros += $this->millasToKm($item->kilometros, $item->unidad) - $this->millasToKm($res['disel'][$key-1]->kilometros, $res['disel'][$key-1]->unidad);
 					$total_litros     += $item->litros;
@@ -625,7 +625,7 @@ class vehiculos_model extends CI_Model {
 			$pdf->SetWidths($widths);
 			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
 			$pdf->Row(array('', '',
-						MyString::formatoNumero( $total_kilometros , 2, ''),
+						'', //MyString::formatoNumero( $total_kilometros , 2, ''),
             MyString::formatoNumero( $totalRecorridos, 2, ''),
 						MyString::formatoNumero( $total_litros , 2, ''),
 						MyString::formatoNumero( $total_rendimiento , 2, ''),

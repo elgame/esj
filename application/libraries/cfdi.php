@@ -958,7 +958,7 @@ class cfdi{
 
     if (isset($data['cfdiRelPrev']) && $data['cfdiRelPrev'] != '') {
       $cfdiRel = array(
-        'tipoRelacion' => '04',
+        'tipoRelacion' => (!empty($data['cfdiRelPrevTipo'])? $data['cfdiRelPrevTipo']: '04'),
         'cfdiRelacionado' => array(
           array(
             'uuid' => $data['cfdiRelPrev'],
