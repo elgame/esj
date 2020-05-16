@@ -585,6 +585,7 @@ class caja_chica_model extends CI_Model {
         if (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes === 't') {
           $value->monto = $value->monto_ini;
           $value->saldo = $value->monto - $value->abonos;
+          $value->monto = $value->saldo;
         } elseif (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes == '') {
           $value->saldo = $value->monto_ini - $value->abonos;
           $value->monto = $value->saldo;
