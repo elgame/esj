@@ -322,8 +322,8 @@
                         <?php
                           $metodo = isset($borrador) ? $borrador['info']->cfdi_ext->uso_cfdi : '';
                          ?>
-                        <?php foreach ($usoCfdi as $key => $usoCfdi) { ?>
-                          <option value="<?php echo $usoCfdi['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfdi['key'], $metodo === $usoCfdi['key'] ? true : false); ?>><?php echo $usoCfdi['key'].' - '.$usoCfdi['value'] ?></option>
+                        <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
+                          <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], $metodo === $usoCfd['key'] ? true : false); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
                         <?php } ?>
                       </select>
                     </div>
@@ -336,6 +336,13 @@
                     <br>
                     <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
                     <br>
+                    <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: none;width: 55%;">
+                      <?php
+                      $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04';
+                      foreach ($tipoRelacion as $key => $tipoRel) { ?>
+                        <option value="<?php echo $tipoRel['key'] ?>" <?php echo set_select('cfdiRelPrevTipo', $tipoRel['key'], ($cfdirel === $tipoRel['key'] ? true : false)); ?>><?php echo $tipoRel['key'].' - '.$tipoRel['value'] ?></option>
+                      <?php } ?>
+                    </select>
                   </div>
 
                   <div class="control-group">

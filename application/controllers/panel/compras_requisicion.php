@@ -280,7 +280,7 @@ class compras_requisicion extends MY_Controller {
 
     $_GET['did_empresa'] = $params['orden']['info'][0]->id_empresa;
     $this->load->model('proyectos_model');
-    $params['proyectos'] = $this->proyectos_model->getProyectosAjax();
+    // $params['proyectos'] = $this->proyectos_model->getProyectosAjax();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
