@@ -1789,6 +1789,8 @@ class productos_salidas_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $this->load->model('almacenes_model');
+    $this->load->model('productos_model');
+
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
     $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
@@ -1821,6 +1823,7 @@ class productos_salidas_model extends CI_Model {
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Costo</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Color / Aplic</td>
         </tr>';
 
     $total_importe = 0;
@@ -1832,6 +1835,7 @@ class productos_salidas_model extends CI_Model {
           <td style="width:200px;border:1px solid #000;">'.$item->cantidad.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->precio_unitario.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->importe.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$this->productos_model->colores[$item->color].' / '.$this->productos_model->tipo_apli[$item->tipo_apli].'</td>
         </tr>';
       $total_importe += $item->importe;
     }
@@ -1954,22 +1958,23 @@ class productos_salidas_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="10" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="11" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="10" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="11" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="10" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="11" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="10"></td>
+          <td colspan="11"></td>
         </tr>
         <tr style="font-weight:bold">
           <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
           <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Folio</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Solicito</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Area</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
           <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
@@ -1985,6 +1990,7 @@ class productos_salidas_model extends CI_Model {
           <td style="width:300px;border:1px solid #000;">'.MyString::fechaAT($item->fecha_orden).'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->folio_orden.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->solicito.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->ranchos.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->centro_costo.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
           <td style="width:200px;border:1px solid #000;">'.$item->unidad.'</td>
@@ -1997,7 +2003,7 @@ class productos_salidas_model extends CI_Model {
 
     $html .= '
             <tr style="font-weight:bold">
-              <td colspan="9"></td>
+              <td colspan="10"></td>
               <td style="border:1px solid #000;">'.$total_importe.'</td>
             </tr>';
 
