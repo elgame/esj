@@ -619,36 +619,38 @@ class recetas_model extends CI_Model {
           $requisiciones[$key]['otros_datos']['noRecetas'][] = $item2->folio;
         }
 
-        $requisiciones_productos[$key][] = [
-          'id_requisicion'       => '',
-          'id_proveedor'         => $item2->id_proveedor,
-          'num_row'              => $key2,
-          'id_producto'          => $item2->id_producto,
-          'id_presentacion'      => null,
-          'descripcion'          => $item2->producto,
-          'cantidad'             => $item2->aplicacion_total,
-          'precio_unitario'      => $item2->precio,
-          'importe'              => $item2->importe,
-          'iva'                  => 0,
-          'retencion_iva'        => 0,
-          'total'                => $item2->importe,
-          'porcentaje_iva'       => 0,
-          'porcentaje_retencion' => 0,
-          'observacion'          => '',
-          'ieps'                 => 0,
-          'porcentaje_ieps'      => 0,
-          'tipo_cambio'          => 0,
-          'id_cat_codigos'       => null,
-          'retencion_isr'        => 0,
-          'porcentaje_isr'       => 0,
-          'activos'              => NULL,
+        if ($item2->id_proveedor) {
+          $requisiciones_productos[$key][] = [
+            'id_requisicion'       => '',
+            'id_proveedor'         => $item2->id_proveedor,
+            'num_row'              => $key2,
+            'id_producto'          => $item2->id_producto,
+            'id_presentacion'      => null,
+            'descripcion'          => $item2->producto,
+            'cantidad'             => $item2->aplicacion_total,
+            'precio_unitario'      => $item2->precio,
+            'importe'              => $item2->importe,
+            'iva'                  => 0,
+            'retencion_iva'        => 0,
+            'total'                => $item2->importe,
+            'porcentaje_iva'       => 0,
+            'porcentaje_retencion' => 0,
+            'observacion'          => '',
+            'ieps'                 => 0,
+            'porcentaje_ieps'      => 0,
+            'tipo_cambio'          => 0,
+            'id_cat_codigos'       => null,
+            'retencion_isr'        => 0,
+            'porcentaje_isr'       => 0,
+            'activos'              => NULL,
 
-          'prodSurtir' => [
-            'id_receta'   => $item2->id_recetas,
-            'id_producto' => $item2->id_producto,
-            'rows'        => $item2->rows
-          ]
-        ];
+            'prodSurtir' => [
+              'id_receta'   => $item2->id_recetas,
+              'id_producto' => $item2->id_producto,
+              'rows'        => $item2->rows
+            ]
+          ];
+        }
 
         if (isset($receta['info']->rancho) && count($receta['info']->rancho)> 0) {
           foreach ($receta['info']->rancho as $keyR => $rancho) {

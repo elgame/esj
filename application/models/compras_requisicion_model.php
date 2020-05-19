@@ -291,46 +291,48 @@ class compras_requisicion_model extends CI_Model {
     $productosReq = [];
 
     foreach ($productos as $key => $prodsareas) {
-      $requisiciones[$key]['folio'] = $this->folio('p');
-      $this->db->insert('compras_requisicion', $requisiciones[$key]);
-      $ordenId = $this->db->insert_id('compras_requisicion_id_requisicion_seq');
+      if (count($prodsareas) > 0) {
+        $requisiciones[$key]['folio'] = $this->folio('p');
+        $this->db->insert('compras_requisicion', $requisiciones[$key]);
+        $ordenId = $this->db->insert_id('compras_requisicion_id_requisicion_seq');
 
-      // Bitacora
-      $this->bitacora_model->_insert('compras_requisicion', $ordenId,
-                                    array(':accion'     => 'la orden de requisicion (del modulo de recetas)', ':seccion' => 'ordenes de compra',
-                                          ':folio'      => $requisiciones[$key]['folio'],
-                                          ':id_empresa' => $requisiciones[$key]['id_empresa'],
-                                          ':empresa'    => 'en '));
+        // Bitacora
+        $this->bitacora_model->_insert('compras_requisicion', $ordenId,
+                                      array(':accion'     => 'la orden de requisicion (del modulo de recetas)', ':seccion' => 'ordenes de compra',
+                                            ':folio'      => $requisiciones[$key]['folio'],
+                                            ':id_empresa' => $requisiciones[$key]['id_empresa'],
+                                            ':empresa'    => 'en '));
 
-      // productos
-      foreach ($prodsareas as $key2 => $prod) {
-        $productos[$key][$key2]['id_requisicion'] = $ordenId;
+        // productos
+        foreach ($prodsareas as $key2 => $prod) {
+          $productos[$key][$key2]['id_requisicion'] = $ordenId;
 
-        $productosReq[$ordenId][] = $prod['prodSurtir'];
+          $productosReq[$ordenId][] = $prod['prodSurtir'];
 
-        unset($productos[$key][$key2]['prodSurtir']);
-      }
-      $this->db->insert_batch('compras_requisicion_productos', $productos[$key]);
-
-      // Inserta los ranchos
-      if (isset($ranchos[$key]) && count($ranchos[$key]) > 0) {
-        foreach ($ranchos[$key] as $keyr => $id_rancho) {
-          $this->db->insert('compras_requisicion_rancho', [
-            'id_rancho'      => $id_rancho,
-            'id_requisicion' => $ordenId,
-            'num'            => count($ranchos[$key])
-          ]);
+          unset($productos[$key][$key2]['prodSurtir']);
         }
-      }
+        $this->db->insert_batch('compras_requisicion_productos', $productos[$key]);
 
-      // Inserta los centros de costo
-      if (isset($centrosCostos[$key]) && count($centrosCostos[$key]) > 0) {
-        foreach ($centrosCostos[$key] as $keyr => $id_centro_costo) {
-          $this->db->insert('compras_requisicion_centro_costo', [
-            'id_centro_costo' => $id_centro_costo,
-            'id_requisicion'  => $ordenId,
-            'num'             => count($centrosCostos[$key])
-          ]);
+        // Inserta los ranchos
+        if (isset($ranchos[$key]) && count($ranchos[$key]) > 0) {
+          foreach ($ranchos[$key] as $keyr => $id_rancho) {
+            $this->db->insert('compras_requisicion_rancho', [
+              'id_rancho'      => $id_rancho,
+              'id_requisicion' => $ordenId,
+              'num'            => count($ranchos[$key])
+            ]);
+          }
+        }
+
+        // Inserta los centros de costo
+        if (isset($centrosCostos[$key]) && count($centrosCostos[$key]) > 0) {
+          foreach ($centrosCostos[$key] as $keyr => $id_centro_costo) {
+            $this->db->insert('compras_requisicion_centro_costo', [
+              'id_centro_costo' => $id_centro_costo,
+              'id_requisicion'  => $ordenId,
+              'num'             => count($centrosCostos[$key])
+            ]);
+          }
         }
       }
     }
