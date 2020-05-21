@@ -1,5 +1,5 @@
 
- ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion,
+ ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicación y que ponga agro insumo la de aplicacion,
    revisar que no carga los productos a la requisicion, al dar salidas de almacen desde recetas no asigna la empresa de aplicacion
  ✔ Al reporte de salidas por producto y codigo, poner el color de los productos cuando seleccionen la empresa y agregar el AREA como comento tryana @done (20-05-15 13:12)
  ✔ Reporte vehiculos/combustible_pdf acomodar los campos estan desacomodados @done (20-05-15 21:20)
