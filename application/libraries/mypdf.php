@@ -19,6 +19,7 @@ class MYpdf extends FPDF {
   var $noShowPages = true;
   var $noShowDate = true;
   var $noShowPagesPos = null;
+  var $heightHeader = 20;
 
   var $auxy = 0;
 
@@ -50,7 +51,7 @@ class MYpdf extends FPDF {
       $this->{$this->hheader}();
 
       // Salto de línea
-      $this->Ln(20);
+      $this->Ln($this->heightHeader);
     }
 
     $this->auxy = 0;

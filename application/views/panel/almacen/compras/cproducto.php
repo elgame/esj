@@ -65,6 +65,36 @@
                   </div>
                 </div>
 
+                <div class="control-group" id="cultivosGrup">
+                  <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+                    </div>
+                    <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+                  </div>
+                  <div style="clear: both;"></div>
+                </div><!--/control-group -->
+
+                <div class="control-group" id="ranchosGrup">
+                  <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+                    </div>
+                  </div>
+                  <ul class="tags" id="tagsRanchoIds">
+                  <?php if (isset($_POST['ranchoId'])) {
+                    foreach ($_POST['ranchoId'] as $key => $ranchoId) { ?>
+                      <li><span class="tag"><?php echo $_POST['ranchoText'][$key] ?></span>
+                        <input type="hidden" name="ranchoId[]" class="ranchoId" value="<?php echo $ranchoId ?>">
+                        <input type="hidden" name="ranchoText[]" class="ranchoText" value="<?php echo $_POST['ranchoText'][$key] ?>">
+                      </li>
+                   <?php }} ?>
+                  </ul>
+                  <div style="clear: both;"></div>
+                </div><!--/control-group -->
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
