@@ -93,7 +93,7 @@ class MyString {
       if (is_string($val)) {
         if(array_search($key, $quit) === false)
           $vars .= '&'.$key.'='.$val;
-      } else {
+      } elseif(is_array($val) && count($val) > 0) {
         foreach ($val as $key2 => $val2) {
           if(array_search($key, $quit) === false)
             $vars .= '&'.$key.'[]='.$val2;
