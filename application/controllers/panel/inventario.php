@@ -128,6 +128,9 @@ class inventario extends MY_Controller {
       array('general/msgbox.js'),
       array('panel/almacen/rpt_compras.js'),
     ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
 
     $this->load->library('pagination');
     $this->load->model('empresas_model');

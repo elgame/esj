@@ -539,9 +539,9 @@ class inventario_model extends privilegios_model{
 	 * @return
 	 */
 	public function getCProductosData()
-  	{
+  {
 		$sql = '';
-	    $idsproveedores = '';
+	  $idsproveedores = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -564,27 +564,51 @@ class inventario_model extends privilegios_model{
         $idsproveedores .= " AND p.id_familia IN(".implode(',', $this->input->get('familias')).")";
       }
 
-      if ($this->input->get('dcon_mov') == 'si')
+      if ($this->input->get('dcon_mov') == 'si') {
         $idsproveedores .= " AND COALESCE(cp.total, 0) > 0";
+      }
+
+      $sql_area = '';
+      if ($this->input->get('areaId') > 0) {
+        $sql_area .= " WHERE id_area = ".$this->input->get('areaId');
+      }
+
+      $sql_rancho = '';
+      if(is_array($this->input->get('ranchoId'))){
+        $sql_rancho .= " WHERE id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+      }
 
 	    $response = array();
     	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
-    				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
+            COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
             pf.nombre AS familia
-				FROM
-					productos AS p LEFT JOIN (
-						SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe, (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
-						FROM compras AS c
-							INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
-							INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
-						WHERE c.status <> 'ca' AND cp.id_producto IS NOT NULL {$sql} AND
-							Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-						GROUP BY cp.id_producto
-					) AS cp ON p.id_producto = cp.id_producto
-    			INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+        FROM productos AS p
+          INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
           INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
-    			{$idsproveedores}
-				ORDER BY pf.nombre ASC, p.nombre ASC");
+          LEFT JOIN (
+            SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe,
+              (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
+            FROM compras AS c
+              INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
+              INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
+              INNER JOIN (
+                SELECT id_orden, array_agg(id_area) AS id_areas
+                FROM public.compras_ordenes_areas
+                {$sql_area}
+                GROUP BY id_orden
+              ) AS coa ON coa.id_orden = cp.id_orden
+              INNER JOIN (
+                SELECT id_orden, array_agg(id_rancho) AS id_ranchos
+                FROM public.compras_ordenes_rancho
+                {$sql_rancho}
+                GROUP BY id_orden
+              ) AS cor ON cor.id_orden = cp.id_orden
+            WHERE c.status <> 'ca' AND cp.id_producto IS NOT NULL {$sql} AND
+              Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            GROUP BY cp.id_producto
+          ) AS cp ON p.id_producto = cp.id_producto
+          {$idsproveedores}
+        ORDER BY pf.nombre ASC, p.nombre ASC");
     	$response = $productos->result();
 
 		return $response;
@@ -596,19 +620,28 @@ class inventario_model extends privilegios_model{
 		$res = $this->getCProductosData();
 
     $this->load->model('empresas_model');
+    $this->load->model('areas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->heightHeader = 25;
 
     if ($empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
 		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    if ($this->input->get('areaId') > 0) {
+      $darea = $this->areas_model->getAreaInfo($this->input->get('areaId'), true);
+      $pdf->titulo3 .= "Cultivo / Actividad / Producto: {$darea['info']->nombre} \n";
+    }
+    if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+      $pdf->titulo3 .= "Areas / Ranchos / Lineas: ".implode(',', $this->input->get('ranchoText'))." \n";
+    }
+
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -701,6 +734,12 @@ class inventario_model extends privilegios_model{
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Compras por Producto';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    if ($this->input->get('areaId') > 0) {
+      $titulo3 .= "Cultivo / Actividad / Producto: {$this->input->get('area')} \n";
+    }
+    if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+      $titulo3 .= "Areas / Ranchos / Lineas: ".implode(',', $this->input->get('ranchoText'))." \n";
+    }
 
 
     $html = '<table>
@@ -1048,7 +1087,7 @@ class inventario_model extends privilegios_model{
 	 * @return
 	 */
 	public function getCProductoData()
-  	{
+  {
 		$sql = '';
 
 		//Filtros para buscar
@@ -1060,14 +1099,24 @@ class inventario_model extends privilegios_model{
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
-	    }
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
 
-	    $idsproveedores = $this->input->get('id_producto');
+    $sql_area = '';
+    if ($this->input->get('areaId') > 0) {
+      $sql_area .= " WHERE id_area = ".$this->input->get('areaId');
+    }
 
-	    $response = array();
-    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(Sum(cp.cantidad), 0) AS cantidad,
+    $sql_rancho = '';
+    if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+      $sql_rancho .= " WHERE id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    $idsproveedores = $this->input->get('id_producto');
+
+    $response = array();
+  	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(Sum(cp.cantidad), 0) AS cantidad,
 				COALESCE(Sum(cp.importe), 0) AS importe, COALESCE(Sum(cp.impuestos), 0) AS impuestos, COALESCE(Sum(cp.total), 0) AS total,
 				cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
 			FROM
@@ -1078,6 +1127,18 @@ class inventario_model extends privilegios_model{
 						INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 						INNER JOIN compras_ordenes AS co ON cf.id_orden = co.id_orden
 						INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
+            INNER JOIN (
+                SELECT id_orden, array_agg(id_area) AS id_areas
+                FROM public.compras_ordenes_areas
+                {$sql_area}
+                GROUP BY id_orden
+              ) AS coa ON coa.id_orden = cp.id_orden
+              INNER JOIN (
+                SELECT id_orden, array_agg(id_rancho) AS id_ranchos
+                FROM public.compras_ordenes_rancho
+                {$sql_rancho}
+                GROUP BY id_orden
+              ) AS cor ON cor.id_orden = cp.id_orden
 					WHERE c.status <> 'ca' AND cp.id_producto = {$idsproveedores} {$sql} AND
 						Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 				) AS cp ON p.id_producto = cp.id_producto
@@ -1108,6 +1169,13 @@ class inventario_model extends privilegios_model{
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
 		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    if ($this->input->get('areaId') > 0) {
+      $pdf->titulo3 .= "Cultivo / Actividad / Producto: {$this->input->get('area')} \n";
+    }
+    if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+      $pdf->titulo3 .= "Areas / Ranchos / Lineas: ".implode(',', $this->input->get('ranchoText'))." \n";
+    }
+
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 

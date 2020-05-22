@@ -332,7 +332,7 @@ class nomina_fiscal_model extends CI_Model {
       ";
 
       if ($nm_tipo == 'pt') { // es ptu
-        $utilidadEmpresa = $utilidadEmpresa;//*2; // multiplica por 2 para calcular el ptu total ya que lo timbran en 2 partes
+        $utilidadEmpresa = $utilidadEmpresa*2; // multiplica por 2 para calcular el ptu total ya que lo timbran en 2 partes
         $sql_query_nom = "SELECT u.id,
             u.no_empleado,
             (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,

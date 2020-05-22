@@ -90,8 +90,15 @@ class MyString {
   public static function getVarsLink($quit=array()){
     $vars = '';
     foreach($_GET as $key => $val){
-      if(array_search($key, $quit) === false)
-        $vars .= '&'.$key.'='.$val;
+      if (is_string($val)) {
+        if(array_search($key, $quit) === false)
+          $vars .= '&'.$key.'='.$val;
+      } else {
+        foreach ($val as $key2 => $val2) {
+          if(array_search($key, $quit) === false)
+            $vars .= '&'.$key.'[]='.$val2;
+        }
+      }
     }
 
     return substr($vars, 1);

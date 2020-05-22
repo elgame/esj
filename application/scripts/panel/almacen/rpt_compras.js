@@ -7,12 +7,22 @@ $(function(){
         dempresa: $("#dempresa").val(),
         did_empresa: $("#did_empresa").val(),
         dcon_mov: $("#dcon_mov:checked").val(),
+        area: $("#area").val(),
+        areaId: $("#areaId").val(),
 
         ids_productos: [],
+        ranchoId: [],
+        ranchoText: [],
       };
 
     $("input.ids_productos").each(function(index, el) {
       url.ids_productos.push($(this).val());
+    });
+    $("input.ranchoId").each(function(index, el) {
+      url.ranchoId.push($(this).val());
+    });
+    $("input.ranchoText").each(function(index, el) {
+      url.ranchoText.push($(this).val());
     });
 
     linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
@@ -209,6 +219,9 @@ $(function(){
   $("#btnAddProducto").on('click', addProducto);
   $(document).on('click', '.remove_producto', removeProducto);
 
+
+  autocompleteCultivo();
+  autocompleteRanchos();
 });
 
 
@@ -272,3 +285,95 @@ function getFamilias(id_empresa, idset = 'lista_familias'){
     }
   });
 }
+
+var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        $area.val(ui.item.id);
+        $("#areaId").val(ui.item.id);
+        $area.css("background-color", "#A1F57A");
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#area").css("background-color", "#FFD071");
+        $("#areaId").val('');
+        $('#tagsRanchoIds').html('');
+        $("#rancho").val('').css("background-color", "#FFD071");
+        // $("#ranchoId").val('');
+      }
+    });
+};
+
+var autocompleteRanchos = function () {
+  $("#rancho").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#empresaId").val()) > 0)
+        params.did_empresa = $("#empresaId").val();
+      if(parseInt($("#areaId").val()) > 0)
+        params.area = $("#areaId").val();
+      $.ajax({
+          url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $rancho =  $(this);
+
+      addRanchoTag(ui.item);
+      setTimeout(function () {
+        $rancho.val('');
+      }, 200);
+      // $rancho.val(ui.item.id);
+      // $("#ranchoId").val(ui.item.id);
+      // $rancho.css("background-color", "#A1F57A");
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $("#rancho").css("background-color", "#FFD071");
+      // $("#ranchoId").val('');
+    }
+  });
+
+  function addRanchoTag(item) {
+    if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+      $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+        '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+        '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+        '</li>');
+    } else {
+      noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+    }
+  };
+
+  $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+    $(this).remove();
+  });
+};
