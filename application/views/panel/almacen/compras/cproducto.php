@@ -65,7 +65,7 @@
                   </div>
                 </div>
 
-                <div class="control-group" id="cultivosGrup">
+                <!-- <div class="control-group" id="cultivosGrup">
                   <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                   <div class="controls">
                     <div class="input-append span12">
@@ -74,9 +74,10 @@
                     <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                   </div>
                   <div style="clear: both;"></div>
-                </div><!--/control-group -->
+                </div> -->
+                <!--/control-group -->
 
-                <div class="control-group" id="ranchosGrup">
+                <!-- <div class="control-group" id="ranchosGrup">
                   <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                   <div class="controls">
                     <div class="input-append span12">
@@ -93,7 +94,8 @@
                    <?php }} ?>
                   </ul>
                   <div style="clear: both;"></div>
-                </div><!--/control-group -->
+                </div> -->
+                <!--/control-group -->
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
