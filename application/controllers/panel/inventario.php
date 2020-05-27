@@ -17,6 +17,10 @@ class inventario extends MY_Controller {
     'inventario/sproveedor_pdf/',
     'inventario/sproveedor_xls/',
 
+    'inventario/cproductosOrden_pdf/',
+    'inventario/cproductosOrden_xls/',
+    'inventario/cproductoOrden_pdf/',
+
     'inventario/epu_pdf/',
     'inventario/epu_xls/',
     'inventario/epc_pdf/',
@@ -195,7 +199,7 @@ class inventario extends MY_Controller {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header',$params);
-    $this->load->view('panel/almacen/compras/cproducto',$params);
+    $this->load->view('panel/almacen/compras/cproductoOrdenes',$params);
     $this->load->view('panel/footer',$params);
   }
   public function cproductosOrden_pdf(){
