@@ -10,11 +10,15 @@ $(function(){
         area: $("#area").val(),
         areaId: $("#areaId").val(),
 
+        familias: [],
         ids_productos: [],
         ranchoId: [],
         ranchoText: [],
       };
 
+    $('#lista_familias input[type=checkbox]:checked').each(function(index, el) {
+      url.familias.push($(this).val());
+    });
     $("input.ids_productos").each(function(index, el) {
       url.ids_productos.push($(this).val());
     });
@@ -290,8 +294,8 @@ var autocompleteCultivo = function () {
     $("#area").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#did_empresa").val()) > 0)
+          params.did_empresa = $("#did_empresa").val();
         $.ajax({
             url: base_url + 'panel/areas/ajax_get_areas/',
             dataType: "json",
@@ -329,8 +333,8 @@ var autocompleteRanchos = function () {
   $("#rancho").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
-      if(parseInt($("#empresaId").val()) > 0)
-        params.did_empresa = $("#empresaId").val();
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
       if(parseInt($("#areaId").val()) > 0)
         params.area = $("#areaId").val();
       $.ajax({

@@ -1,7 +1,11 @@
 
 
- ☐ Checar PTU
+ ✔ Checar PTU @done (20-05-27 11:59)
+ ☐ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios
+ ☐ Poder imprimir el registro de las boletas en bascula/admin_movimientos
  ☐ Reporte de compras por producto meter filtros de cultivo y rancho
+   -- lap|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras por Producto Ordenes', 367, true, 'inventario/cproductosOrden/', 'print', true);
  ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion,
    revisar que no carga los productos a la requisicion, al dar salidas de almacen desde recetas no asigna la empresa de aplicacion
  ✔ Al reporte de salidas por producto y codigo, poner el color de los productos cuando seleccionen la empresa y agregar el AREA como comento tryana @done (20-05-15 13:12)
