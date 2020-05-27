@@ -1809,16 +1809,16 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     foreach ($nomina[0]->nomina->otrosPagos as $key => $value) {
-      if (floatval($value['total']) >= 0.01) {
+      if (floatval($value['total']) >= 0) { // 0.01
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
         $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
-        if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] > 0) {
+        if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] >= 0) {
           $datosApi['data'][0]["{$value['ApiKey']}causado"] = $value['SubsidioAlEmpleo']['SubsidioCausado'];
         } else if ($value['ApiKey'] === 'top_subsidio_empleo_') {
-          unset($datosApi['data'][0]["{$value['ApiKey']}clave"]   ,
-          $datosApi['data'][0]["{$value['ApiKey']}concepto"],
-          $datosApi['data'][0]["{$value['ApiKey']}importe"]);
+          unset($datosApi['data'][0]["{$value['ApiKey']}clave"],
+            $datosApi['data'][0]["{$value['ApiKey']}concepto"],
+            $datosApi['data'][0]["{$value['ApiKey']}importe"]);
         }
       }
     }
@@ -10114,8 +10114,8 @@ class nomina_fiscal_model extends CI_Model {
           log_message('error', json_encode($datosApi));
           $result = $this->timbrar($datosApi);
           // echo "<pre>";
-          //   var_dump($archivo, $result, base64_encode($result['xml']), $cadenaOriginal);
-          // echo "</pre>";
+          //   var_dump($result, $datosApi);
+          // echo "</pre>";exit;
 
           // Si la nomina se timbro entonces agrega al array nominas la nomina del
           // empleado para despues insertarla en la bdd.
