@@ -1809,16 +1809,16 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     foreach ($nomina[0]->nomina->otrosPagos as $key => $value) {
-      if (floatval($value['total']) >= 0.01) {
+      if (floatval($value['total']) >= 0) { // 0.01
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
         $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
-        if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] > 0) {
+        if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] >= 0) {
           $datosApi['data'][0]["{$value['ApiKey']}causado"] = $value['SubsidioAlEmpleo']['SubsidioCausado'];
         } else if ($value['ApiKey'] === 'top_subsidio_empleo_') {
-          unset($datosApi['data'][0]["{$value['ApiKey']}clave"]   ,
-          $datosApi['data'][0]["{$value['ApiKey']}concepto"],
-          $datosApi['data'][0]["{$value['ApiKey']}importe"]);
+          unset($datosApi['data'][0]["{$value['ApiKey']}clave"],
+            $datosApi['data'][0]["{$value['ApiKey']}concepto"],
+            $datosApi['data'][0]["{$value['ApiKey']}importe"]);
         }
       }
     }
@@ -10033,10 +10033,10 @@ class nomina_fiscal_model extends CI_Model {
           'ptu'
         );
 
-        // Ajuste de Ptu
-        // ===================
-        $this->load->model('nomina_ajustes_model');
-        $this->nomina_ajustes_model->confAjustePtu2019()->ajustePtu2019($empleadoNomina);
+        // // Ajuste de Ptu
+        // // ===================
+        // $this->load->model('nomina_ajustes_model');
+        // $this->nomina_ajustes_model->confAjustePtu2019()->ajustePtu2019($empleadoNomina);
 
         $empleadoNomina[0]->folio = 'AG'.$datos['anio'].''.$datos['numSemana'];
 
@@ -10047,32 +10047,32 @@ class nomina_fiscal_model extends CI_Model {
           if ($empleadoNomina[0]->nomina_guardada === 'f') {
             // Ajuste de Ptu
             // ===================
-            $empleadoNomina[0]->ptu_empleado_dias = round($empleadoNomina[0]->ptu_empleado_dias, 2);// /2, 2);
-            $empleadoNomina[0]->ptu_empleado_percepciones = round($empleadoNomina[0]->ptu_empleado_percepciones, 2);// /2, 2);
-            $empleadoNomina[0]->utilidad_empresa = round($empleadoNomina[0]->utilidad_empresa, 2);// /2, 2);
-            $empleadoNomina[0]->utilidad_empresa_ptu = round($empleadoNomina[0]->utilidad_empresa_ptu, 2);// /2, 2);
+            $empleadoNomina[0]->ptu_empleado_dias = round($empleadoNomina[0]->ptu_empleado_dias/2, 2);  // , 2);
+            $empleadoNomina[0]->ptu_empleado_percepciones = round($empleadoNomina[0]->ptu_empleado_percepciones/2, 2);  // , 2);
+            $empleadoNomina[0]->utilidad_empresa = round($empleadoNomina[0]->utilidad_empresa/2, 2);  // , 2);
+            $empleadoNomina[0]->utilidad_empresa_ptu = round($empleadoNomina[0]->utilidad_empresa_ptu/2, 2);  // , 2);
 
-            $empleadoNomina[0]->nomina->TotalPercepciones = round($empleadoNomina[0]->nomina->TotalPercepciones, 2);// /2, 2);
-            $empleadoNomina[0]->nomina->TotalDeducciones = round($empleadoNomina[0]->nomina->TotalDeducciones, 2);// /2, 2);
-            $empleadoNomina[0]->nomina->TotalOtrosPagos = round($empleadoNomina[0]->nomina->TotalOtrosPagos, 2);// /2, 2);
-            $empleadoNomina[0]->nomina->subtotal = round($empleadoNomina[0]->nomina->subtotal, 2);// /2, 2);
-            $empleadoNomina[0]->nomina->descuento = round($empleadoNomina[0]->nomina->descuento, 2);// /2, 2);
-            $empleadoNomina[0]->nomina->isr = round($empleadoNomina[0]->nomina->isr, 2);// /2, 2);
+            $empleadoNomina[0]->nomina->TotalPercepciones = round($empleadoNomina[0]->nomina->TotalPercepciones/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->TotalDeducciones = round($empleadoNomina[0]->nomina->TotalDeducciones/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->TotalOtrosPagos = round($empleadoNomina[0]->nomina->TotalOtrosPagos/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->subtotal = round($empleadoNomina[0]->nomina->subtotal/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->descuento = round($empleadoNomina[0]->nomina->descuento/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->isr = round($empleadoNomina[0]->nomina->isr/2, 2);  // , 2);
 
-            $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->percepciones['ptu']['total'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['total'], 2);// /2, 2);
+            $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->percepciones['ptu']['total'] = round($empleadoNomina[0]->nomina->percepciones['ptu']['total']/2, 2);  // , 2);
 
-            $empleadoNomina[0]->nomina->deducciones['isr']['ImporteGravado'] = round($empleadoNomina[0]->nomina->deducciones['isr']['ImporteGravado'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->deducciones['isr']['ImporteExcento'] = round($empleadoNomina[0]->nomina->deducciones['isr']['ImporteExcento'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->deducciones['isr']['total'] = round($empleadoNomina[0]->nomina->deducciones['isr']['total'], 2);// /2, 2);
+            $empleadoNomina[0]->nomina->deducciones['isr']['ImporteGravado'] = round($empleadoNomina[0]->nomina->deducciones['isr']['ImporteGravado']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->deducciones['isr']['ImporteExcento'] = round($empleadoNomina[0]->nomina->deducciones['isr']['ImporteExcento']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->deducciones['isr']['total'] = round($empleadoNomina[0]->nomina->deducciones['isr']['total']/2, 2);  // , 2);
 
-            $empleadoNomina[0]->nomina->deduccionesTotales['TotalOtrasDeducciones'] = round($empleadoNomina[0]->nomina->deduccionesTotales['TotalOtrasDeducciones'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->deduccionesTotales['TotalImpuestosRetenidos'] = round($empleadoNomina[0]->nomina->deduccionesTotales['TotalImpuestosRetenidos'], 2);// /2, 2);
+            $empleadoNomina[0]->nomina->deduccionesTotales['TotalOtrasDeducciones'] = round($empleadoNomina[0]->nomina->deduccionesTotales['TotalOtrasDeducciones']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->deduccionesTotales['TotalImpuestosRetenidos'] = round($empleadoNomina[0]->nomina->deduccionesTotales['TotalImpuestosRetenidos']/2, 2);  // , 2);
 
-            $empleadoNomina[0]->nomina->percepcionesTotales['TotalGravado'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalGravado'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->percepcionesTotales['TotalExento'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalExento'], 2);// /2, 2);
-            $empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos'], 2);// /2, 2);
+            $empleadoNomina[0]->nomina->percepcionesTotales['TotalGravado'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalGravado']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->percepcionesTotales['TotalExento'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalExento']/2, 2);  // , 2);
+            $empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos']/2, 2);  // , 2);
           }
 
           // Obtiene los datos para la cadena original.
@@ -10114,8 +10114,8 @@ class nomina_fiscal_model extends CI_Model {
           log_message('error', json_encode($datosApi));
           $result = $this->timbrar($datosApi);
           // echo "<pre>";
-          //   var_dump($archivo, $result, base64_encode($result['xml']), $cadenaOriginal);
-          // echo "</pre>";
+          //   var_dump($result, $datosApi);
+          // echo "</pre>";exit;
 
           // Si la nomina se timbro entonces agrega al array nominas la nomina del
           // empleado para despues insertarla en la bdd.
