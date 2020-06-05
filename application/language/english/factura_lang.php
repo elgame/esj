@@ -49,6 +49,7 @@ $lang['factura_totales_metodo_pago']            = "Payment method";
 $lang['factura_totales_subtotal']               = "Subtotal";
 $lang['factura_totales_iva']                    = "IVA";
 $lang['factura_totales_iva_retenido']           = "IVA withheld";
+$lang['factura_totales_ieps']                   = "IEPS";
 $lang['factura_totales_total']                  = "TOTAL";
 
 $lang['factura_otros_observaciones']            = "Observations";

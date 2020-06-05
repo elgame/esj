@@ -4754,6 +4754,15 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->importe_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
 
+    if ($factura['info']->ieps > 0)
+    {
+      $pdf->SetXY(156, $pdf->GetY() + 5);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_ieps', 'IEPS')}", 1, 0, 'C', 1);
+
+      $pdf->SetXY(186, $pdf->GetY());
+      $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->ieps/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
+    }
+
     if ($factura['info']->retencion_iva > 0)
     {
       $pdf->SetXY(156, $pdf->GetY() + 5);
