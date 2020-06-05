@@ -60,7 +60,7 @@
             <td><?php echo $producto->nombre_producto; ?>
               <input type="hidden" class="idproducto" name="idproducto[]" value="<?php echo $producto->id_producto; ?>">
               <input type="hidden" class="descripcion" name="descripcion[]" value="<?php echo $producto->nombre_producto; ?>">
-              <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo round($producto->ul_precio_unitario, 6); ?>">
+              <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo number_format(round($producto->ul_precio_unitario, 6), 6, '.', ''); ?>">
               <input type="hidden" class="esistema" name="esistema[]" value="<?php echo round($producto->data[0], 6); ?>">
             </td>
             <td><?php echo MyString::formatoNumero($producto->data[0], 4, '').' '.$producto->abreviatura; ?></td>
