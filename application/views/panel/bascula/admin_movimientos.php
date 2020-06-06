@@ -67,6 +67,8 @@
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de cancelar el pago?', 'bascula', this); return false;"))
                       );
                     ?>
+                  <a class="btn btn-info" href="<?php echo base_url('panel/bascula/imprimir_movimiento/?id='.$b->id_pago) ?>" title="Imprimir" target="_blank">
+                    <i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
                 </td>
               </tr>
           <?php }?>

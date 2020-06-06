@@ -2,7 +2,7 @@
 
  ✔ Checar PTU @done (20-05-27 11:59)
  ☐ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios
- ☐ Poder imprimir el registro de las boletas en bascula/admin_movimientos
+ ✔ Poder imprimir el registro de las boletas en bascula/admin_movimientos @done (20-06-06 11:16)
  ☐ Reporte de compras por producto meter filtros de cultivo y rancho
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras por Producto Ordenes', 367, true, 'inventario/cproductosOrden/', 'print', true);
