@@ -269,6 +269,8 @@
                                               <option value="4" <?php echo $prod->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
                                               <option value="10.6667" <?php echo $prod->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                               <option value="16" <?php echo $prod->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                              <option value="6" <?php echo $prod->porcentaje_retencion === '6' ? "selected" : '' ?>>6 %</option>
+                                              <option value="8" <?php echo $prod->porcentaje_retencion === '8' ? "selected" : '' ?>>8 %</option>
                                             </select>
                                              <input type="hidden" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                          </td>
