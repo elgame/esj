@@ -37,7 +37,7 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
         if ($value['monto'] > 0 && strlen($value['proveedor_cuenta']) > 5) {
           $reg .= 'DAP';
           $reg .= $this->string("PAGO{$renglon}", 20);
-          $reg .= $this->string($value->beneficiario_clave, 30);
+          $reg .= $this->string($value['beneficiario_clave'], 30);
           $reg .= 'PDA';
           $reg .= $this->llena0(1, $value['tipo_cuenta']);
           $reg .= '00000000000000000000               ';
