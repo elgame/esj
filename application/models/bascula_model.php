@@ -1142,6 +1142,78 @@ class bascula_model extends CI_Model {
       // $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
   }
 
+  public function imprimir_pago($id_pago)
+  {
+    $data = $this->db->query("SELECT
+        bp.id_pago, b.id_empresa,
+        bp.tipo_pago, bp.monto, bp.concepto,
+        Date(bp.fecha) AS fecha_pago,
+        string_agg(b.folio::text, ', ') AS folios,
+        string_agg(Date(b.fecha_tara)::text, ', ') AS fechas,
+        string_agg(bpb.monto::text, ', ') AS pagos,
+        p.nombre_fiscal AS proveedor
+      FROM bascula AS b
+        INNER JOIN areas AS a ON a.id_area = b.id_area
+        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        INNER JOIN bascula_pagos_basculas AS bpb ON b.id_bascula = bpb.id_bascula
+        INNER JOIN bascula_pagos AS bp ON bpb.id_pago = bp.id_pago
+      WHERE bp.id_pago = {$id_pago}
+      GROUP BY b.id_empresa, p.nombre_fiscal, bp.id_pago, bp.tipo_pago, bp.monto, bp.concepto
+      ORDER BY bp.id_pago DESC
+    ")->row();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($data->id_empresa);
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = "Pago de boletas";
+    // $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    // $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+    // $pdf->titulo3 .= (isset($_GET['ftkilos']{0}) && $_GET['ftkilos']=='kb')?' Kilos de la bascula': ' Kilos calculados';
+
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $pdf->SetAligns(array('R', 'L', 'R', 'L'));
+    $pdf->SetWidths(array(25, 128, 20, 33));
+    $pdf->SetFounts(['helvetica', 'helvetica', 'helvetica', 'helvetica'], [0, 0, 0, 0], ['B', '', 'B', '']);
+    $pdf->SetX(6);
+    $pdf->Row2(["PROVEEDOR:", $data->proveedor, "FECHA:", $data->fecha_pago], false, false);
+
+    $pdf->SetX(6);
+    $pdf->Row2(["CONCEPTO:", $data->concepto, "TOTAL:", MyString::formatoNumero($data->monto, 2, '$', false)], false, false);
+
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetAligns(['C', 'C', 'R']);
+    $pdf->SetWidths([40, 50, 55]);
+    $pdf->SetX(6);
+    $pdf->Row(['FECHA', 'BOLETA', 'IMPORTE'], false, true);
+
+
+    $folios = explode(', ', $data->folios);
+    $fechas = explode(', ', $data->fechas);
+    $pagos  = explode(', ', $data->pagos);
+    foreach($folios as $keya => $row)
+    {
+      $pdf->SetX(6);
+      $pdf->Row([$fechas[$keya], $row, MyString::formatoNumero($pagos[$keya], 2, '$', false)], false, false);
+    }
+
+    $pdf->Output('pago_boletas.pdf', 'I');
+  }
+
 
   /*
    |-------------------------------------------------------------------------

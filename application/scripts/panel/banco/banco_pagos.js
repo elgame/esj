@@ -49,12 +49,22 @@ $(function(){
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
     bajio = $("#downloadBajio").attr('href').split('&cuentaretiro'),
+    bancomer = $("#downloadBancomer").attr('href').split('&cuentaretiro'),
     aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
     id_empresa = $("#did_empresa").val();
-    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
-    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
-    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
+    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
+    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
+    $("#downloadBancomer").attr('href', bancomer[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
     $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+
+    var $this = $(this);
+    if ($this.find('option:selected').attr('data-banco') === '2') { // banamex
+      $("#downloadBanamex").show();
+      $("#downloadInterban").show();
+    } else if ($this.find('option:selected').attr('data-banco') === '6') { // bancomer
+      $("#downloadBancomer").show();
+    }
   });
 
   $("#dempresa").autocomplete({

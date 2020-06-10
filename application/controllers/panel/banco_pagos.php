@@ -96,6 +96,8 @@ class banco_pagos extends MY_Controller {
       $this->banco_pagos_model->layoutBanamex();
     } elseif ($this->input->get('layout') === 'bajio') {
       $this->banco_pagos_model->layoutBajio();
+    } elseif ($this->input->get('layout') === 'bancomer') {
+      $this->banco_pagos_model->layoutBancomer();
     }
   }
 

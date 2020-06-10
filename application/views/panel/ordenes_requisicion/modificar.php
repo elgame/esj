@@ -583,6 +583,8 @@
                         <option value="4">4%</option>
                         <option value="10.6667">2 Terceras</option>
                         <option value="16">100 %</option>
+                        <option value="6">6 %</option>
+                        <option value="8">8 %</option>
                       </select>
                     </div><!--/span1 -->
                     <div class="span1">
@@ -819,6 +821,8 @@
                                               <option value="4" <?php echo $concepto->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
                                               <option value="10.6667" <?php echo $concepto->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                               <option value="16" <?php echo $concepto->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                              <option value="6" <?php echo $concepto->porcentaje_retencion === '6' ? "selected" : '' ?>>6 %</option>
+                                              <option value="8" <?php echo $concepto->porcentaje_retencion === '8' ? "selected" : '' ?>>8 %</option>
                                             </select>
                                         </td>
                                         <td style="width: 66px;">

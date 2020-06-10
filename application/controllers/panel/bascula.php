@@ -63,6 +63,8 @@ class bascula extends MY_Controller {
     'bascula/rdefull_xls/',
 
     'bascula/rpt_auditorias_pdf/',
+
+    'bascula/imprimir_movimiento/'
     );
 
   public function _remap($method){
@@ -955,6 +957,12 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
     }else
       redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
+  }
+
+  public function imprimir_movimiento()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->imprimir_pago($_GET['id']);
   }
 
   public function pago_basculas()
