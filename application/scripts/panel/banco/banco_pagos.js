@@ -66,6 +66,7 @@ $(function(){
       $("#downloadBancomer").show();
     }
   });
+  $("#cuenta_retiro").change();
 
   $("#dempresa").autocomplete({
       source: base_url+'panel/empresas/ajax_get_empresas/',
