@@ -1,10 +1,13 @@
 
-
+ ☐ Reporte de productos aplicados en las recetas
+ ☐ Imprimir el listado de productos con el color
  ✔ Checar PTU @done (20-05-27 11:59)
  ☐ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Activos Ordenes',367,True,'compras_ordenes/activosGastos/','print',True);
  ✔ Archivo de banco @done (20-06-08 20:09)
  ✔ Poder imprimir el registro de las boletas en bascula/admin_movimientos @done (20-06-06 11:16)
- ☐ Reporte de compras por producto meter filtros de cultivo y rancho
+ ✔ Reporte de compras por producto meter filtros de cultivo y rancho @done (20-06-10 13:08)
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras por Producto Ordenes', 367, true, 'inventario/cproductosOrden/', 'print', true);
  ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion,

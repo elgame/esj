@@ -3619,6 +3619,230 @@ class compras_ordenes_model extends CI_Model {
     echo $html;
   }
 
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getActivosGastosData()
+  {
+    $sql = '';
+    $ids_productos = '';
+    $ids_activos = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $sql .= " AND Date(co.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND co.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if(is_array($this->input->get('ids_productos')))
+      $ids_productos = " WHERE p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
+
+    if(is_array($this->input->get('ids_activos'))){
+      $ids_activos = " WHERE a.id_producto IN(".implode(',', $this->input->get('ids_activos')).")";
+    }
+
+    $response = array();
+    $productos = $this->db->query("SELECT co.id_orden, Date(co.fecha_creacion) AS fecha, co.folio, cp.ids_productos, cp.productos, coa.ids_activos, coa.activos,
+        coa.num, coa.num_real, (cp.importe/coa.num*coa.num_real) AS importe, cp.importe, cp.cantidad, co.descripcion
+      FROM compras_ordenes co
+        INNER JOIN (
+          SELECT cp.id_orden, Sum(cp.importe) AS importe, string_agg(Distinct(p.nombre), ', ') productos,
+            string_agg(Distinct(p.id_producto::text), ', ') ids_productos, Sum(cp.cantidad) AS cantidad
+          FROM productos p
+            INNER JOIN compras_productos cp ON p.id_producto = cp.id_producto
+          {$ids_productos}
+          GROUP BY cp.id_orden
+          ORDER BY id_orden desc
+        ) cp ON cp.id_orden = co.id_orden
+        INNER JOIN (
+          SELECT coa.id_orden, string_agg(Distinct(a.nombre), ', ') activos, string_agg(Distinct(a.id_producto::text), ', ') ids_activos,
+            coa.num, Count(coa.num) AS num_real
+          FROM productos a
+            INNER JOIN compras_ordenes_activos coa ON a.id_producto = coa.id_activo
+          {$ids_activos}
+          GROUP BY coa.id_orden, coa.num
+          ORDER BY id_orden desc
+        ) coa ON coa.id_orden = co.id_orden
+      WHERE co.status in('a', 'f') {$sql}
+      ORDER BY id_orden DESC");
+    $response = $productos->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getActivosGastosPdf(){
+    $res = $this->getActivosGastosData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('areas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->heightHeader = 25;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Gasto de Activos';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    // if ($this->input->get('areaId') > 0) {
+    //   $darea = $this->areas_model->getAreaInfo($this->input->get('areaId'), true);
+    //   $pdf->titulo3 .= "Cultivo / Actividad / Producto: {$darea['info']->nombre} \n";
+    // }
+    // if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+    //   $pdf->titulo3 .= "Areas / Ranchos / Lineas: ".implode(',', $this->input->get('ranchoText'))." \n";
+    // }
+
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'L');
+    $widths = array(18, 18, 50, 50, 20, 20, 30);
+    $header = array('Fecha', 'Folio', 'Productos', 'Activos', 'Cantidad', 'Importe', 'Descripcion');
+
+    $familia = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $producto){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array(
+        $producto->fecha,
+        $producto->folio,
+        $producto->productos,
+        $producto->activos,
+        MyString::formatoNumero($producto->cantidad, 2, '', false),
+        MyString::formatoNumero($producto->importe, 2, '', false),
+        $producto->descripcion
+      );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      $proveedor_cantidad  += $producto->cantidad;
+      $proveedor_importe   += $producto->importe;
+    }
+
+    $datos = array(
+      '',
+      '',
+      '',
+      'Total General',
+      MyString::formatoNumero($proveedor_cantidad, 2, '', false),
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->SetMyLinks(array());
+    $pdf->Row($datos, false);
+
+    $pdf->Output('activos_gastos.pdf', 'I');
+  }
+
+  public function getActivosGastosXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=activos_gastos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getActivosGastosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte Gasto de Activos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    // if ($this->input->get('areaId') > 0) {
+    //   $titulo3 .= "Cultivo / Actividad / Producto: {$this->input->get('area')} \n";
+    // }
+    // if (is_array($this->input->get('ranchoId')) && count($this->input->get('ranchoId')) > 0) {
+    //   $titulo3 .= "Areas / Ranchos / Lineas: ".implode(',', $this->input->get('ranchoText'))." \n";
+    // }
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Productos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Activos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+      </tr>';
+    $familia = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $producto) {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$producto->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->productos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->activos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($producto->cantidad, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($producto->importe, 2, '', false).'</td>
+        </tr>';
+
+      $proveedor_cantidad  += $producto->cantidad;
+      $proveedor_importe   += $producto->importe;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTALES</td>
+          <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 
   /**
    * Regresa el MES que corresponde en texto.

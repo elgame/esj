@@ -72,7 +72,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dtipo">Tipo:</label>
                   <div class="controls">
-                    <select name="dtipo">
+                    <select name="dtipo" id="dtipo">
                       <option value="f">Remisiones</option>
                       <option value="t">Facturas</option>
                       <option value="">Remisiones y facturas</option>
@@ -91,7 +91,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dpagadas">Pagadas</label>
                   <div class="controls">
-                    <input type="checkbox" name="dpagadas" value="1">
+                    <input type="checkbox" name="dpagadas" value="1" id="dpagadas">
                   </div>
                 </div>
 
