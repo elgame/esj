@@ -3,7 +3,7 @@
  ✔ Agregar reporte de lo que se captura en bascula de piña @done (20-06-17 21:58)
    -- pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Entrada de Piña', 365, true, 'bascula/rpt_ent_pina/', 'print', true);
- ☐ Imprimir el listado de productos con el color
+ ✔ Imprimir el listado de productos con el color @done (20-06-18 14:14)
  ✔ Checar PTU @done (20-05-27 11:59)
  ☐ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios
    -- lap|pcc
