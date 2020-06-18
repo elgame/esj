@@ -16,7 +16,7 @@
               <fieldset class="row-fluid">
                 <legend></legend>
 
-                <input type="hidden" name="id_salida" id="id_salida" value="">
+                <input type="hidden" name="id_salida_pina" id="id_salida_pina" value="<?php echo (isset($pina['info']->id)? $pina['info']->id: '') ?>">
                 <input type="hidden" name="id_bascula" id="id_bascula" value="<?php echo $boleta->id_bascula ?>">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo $boleta->id_empresa ?>">
                 <input type="hidden" name="id_area" id="id_area" value="<?php echo $boleta->id_area ?>">
