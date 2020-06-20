@@ -2065,7 +2065,7 @@ class facturacion_model extends privilegios_model{
    *
    * @return array
 	 */
-	public function getSeriesFolios($per_pag='30')
+	public function getSeriesFolios($per_pag='30', $sql2='')
     {
 		//paginacion
 		$params = array(
@@ -2078,13 +2078,13 @@ class facturacion_model extends privilegios_model{
 
 		$sql = '';
     if($this->input->get('fserie') != '')
-        $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
+        $sql .= " AND lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
 
 		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
 				FROM facturacion_series_folios AS fsf
 				INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
-        {$sql}
+        WHERE 1 = 1 {$sql} {$sql2}
 				ORDER BY fsf.serie", $params, true);
 
         $res = $this->db->query($query['query']);

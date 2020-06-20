@@ -920,8 +920,14 @@ function calculaTotal ($calculaT) {
 
 function loadSerieFolio (ide, forceLoad) {
   var objselect = $('#dserie');
+
+  var url = 'panel/facturacion/get_series/?tipof=r&ide=';
+  if ($('#isNotaCredito').length > 0) {
+    url = 'panel/notas_credito/ajax_get_series_folio/?ide=';
+  }
+
   loader.create();
-    $.getJSON(base_url+'panel/facturacion/get_series/?tipof=r&ide='+ide,
+    $.getJSON(base_url+url+ide,
       function(res){
         if(res.data) {
           var html_option = '<option value="void"></option>',
