@@ -21,6 +21,8 @@ class MYpdf extends FPDF {
   var $noShowPagesPos = null;
   var $heightHeader = 20;
 
+  var $onAddPage = 0;
+
   var $auxy = 0;
 
   /**
@@ -348,8 +350,12 @@ class MYpdf extends FPDF {
         if (count($this->pages) > $this->page) {
           $this->page++;
           $this->SetXY(111, 10);
-        } else
+        } else {
           $this->AddPage($this->CurOrientation);
+          if ($this->onAddPage > 0) {
+            $this->SetY($this->GetY()+$this->onAddPage);
+          }
+        }
       }
     }
 

@@ -2611,6 +2611,7 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetMargins(0, 0, 0);
     $pdf->SetAutoPageBreak(false);
     $pdf->show_head = false;
+    $pdf->onAddPage = 6;
 
     // $pdf->show_head = true;
     // $pdf->titulo1 = $orden['info'][0]->empresa;
