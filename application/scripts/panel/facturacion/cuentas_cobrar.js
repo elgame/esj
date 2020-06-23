@@ -232,7 +232,7 @@ var modalAbonos = (function($){
         msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'Alerta', this, function(){
           $enviar = true;
           $("#form").submit();
-        }, function (){}, 'top: 30% !important;');
+        }, function (){}, 'top: 60% !important;');
         return false;
       }else{ //es igual o menor el cargo
         return true;

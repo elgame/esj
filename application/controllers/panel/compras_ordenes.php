@@ -28,6 +28,8 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/rpt_gastos_xls/',
     'compras_ordenes/rpt_ordenes_pdf/',
     'compras_ordenes/rpt_ordenes_xls/',
+    'compras_ordenes/activosGastos_pdf/',
+    'compras_ordenes/activosGastos_xls/',
     );
 
   public function _remap($method){
@@ -621,6 +623,44 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $this->compras_ordenes_model->rpt_gastos_xls();
+  }
+
+
+  public function activosGastos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_activos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Compras por Producto');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['familias'] = $this->productos_model->getFamiliasAjax(['id_empresa' => $params['empresa']->id_empresa]);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/rptactivos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function activosGastos_pdf(){
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->getActivosGastosPdf();
+  }
+  public function activosGastos_xls(){
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->getActivosGastosXls();
   }
 
 

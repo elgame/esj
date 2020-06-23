@@ -54,7 +54,8 @@ class bascula_pina_model extends CI_Model {
         bsp.folio, bsp.id_usuario, bsp.fecha_registro, r.nombre AS rancho
       FROM otros.bascula_salida_pina bsp
         INNER JOIN otros.ranchos r ON r.id_rancho = bsp.id_rancho
-      WHERE {$tipo} = {$id}");
+      WHERE {$tipo} = {$id}
+      LIMIT 1");
 
     $data['info'] = array();
     $data['estibas'] = array();

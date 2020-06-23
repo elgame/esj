@@ -1140,6 +1140,8 @@
                         '<option value="4" '+(producto.ret_iva === '4' ? "selected" : '' )+'>4%</option>'+
                         '<option value="10.6667" '+(producto.ret_iva === '10.6667' ? "selected" : '' )+'>2 Terceras</option>'+
                         '<option value="16" '+(producto.ret_iva === '16' ? "selected" : '')+'>100 %</option>'+
+                        '<option value="6" '+(producto.ret_iva === '6' ? "selected" : "")+'>6 %</option>'+
+                        '<option value="8" '+(producto.ret_iva === '8' ? "selected" : "")+'>8 %</option>'+
                       '</select>'+
                       '<input type="text" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>'+
                   '</td>'+

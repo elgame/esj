@@ -19,9 +19,13 @@
             dcalidad: $("#dcalidad").val(),
             did_tamanio: $("#did_tamanio").val(),
             dtamanio: $("#dtamanio").val(),
+            dtipo: $("#dtipo").val(),
             ids_productos: [],
             did_producto: '',
           };
+          if ($('#dpagadas').is(':checked')) {
+            url.dpagadas = '1';
+          }
           // url = "?ffecha1="+$("#ffecha1").val()+"&ffecha2="+$("#ffecha2").val()+
           //       "&dempresa="+encodeURIComponent($("#dempresa").val())+
           //       "&did_empresa="+$("#did_empresa").val()+

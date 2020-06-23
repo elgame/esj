@@ -786,7 +786,7 @@ class bodega_guadalajara_model extends CI_Model {
               INNER JOIN clientes c ON c.id_cliente = f.id_cliente
               INNER JOIN empresas e ON e.id_empresa = f.id_empresa
               LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) <= '{$fecha}')
-            WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+            WHERE f.is_factura = 'f' AND f.id_nc IS NULL AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
               AND Date(f.fecha) < '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente
             HAVING f.status = 'p' OR (f.status='pa' AND (f.total-Coalesce(Sum(fa.total),0)) > 0)
@@ -798,7 +798,7 @@ class bodega_guadalajara_model extends CI_Model {
               INNER JOIN clientes c ON c.id_cliente = f.id_cliente
               INNER JOIN empresas e ON e.id_empresa = f.id_empresa
               LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) = '{$fecha}')
-            WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+            WHERE f.is_factura = 'f' AND f.id_nc IS NULL AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
               AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
       ) t

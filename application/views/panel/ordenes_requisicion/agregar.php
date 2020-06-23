@@ -557,6 +557,8 @@
                         <option value="4">4%</option>
                         <option value="10.6667">2 Terceras</option>
                         <option value="16">100 %</option>
+                        <option value="6">6 %</option>
+                        <option value="8">8 %</option>
                       </select>
                     </div><!--/span1 -->
                     <div class="span1">
@@ -773,6 +775,8 @@
                                               <option value="4" <?php echo $_POST['ret_iva'][$key] === '4' ? "selected" : '' ?>>4%</option>
                                               <option value="10.6667" <?php echo $_POST['ret_iva'][$key] === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                               <option value="16" <?php echo $_POST['ret_iva'][$key] === '16' ? "selected" : '' ?>>100 %</option>
+                                              <option value="6" <?php echo $_POST['ret_iva'][$key] === '6' ? "selected" : '' ?>>6 %</option>
+                                              <option value="8" <?php echo $_POST['ret_iva'][$key] === '8' ? "selected" : '' ?>>8 %</option>
                                             </select>
                                         </td>
                                         <td style="width: 66px;">

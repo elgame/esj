@@ -42,6 +42,9 @@ class bascula extends MY_Controller {
     'bascula/rbp_pdf/',
     'bascula/rbp_xls/',
 
+    'bascula/rpt_ent_pina_pdf/',
+    'bascula/rpt_ent_pina_xls/',
+
     'bascula/imprimir_pagadas/',
 
     'bascula/snapshot/',
@@ -63,7 +66,9 @@ class bascula extends MY_Controller {
     'bascula/rdefull_xls/',
 
     'bascula/rpt_auditorias_pdf/',
-    );
+
+    'bascula/imprimir_movimiento/'
+  );
 
   public function _remap($method){
 
@@ -781,6 +786,45 @@ class bascula extends MY_Controller {
     $this->bascula_model->rbp_xls();
   }
 
+  public function rpt_ent_pina()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rpt_ent_pina.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Boletas Pagadas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_ent_pina', $params);
+    $this->load->view('panel/footer');
+  }
+  /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rpt_ent_pina_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rpt_entrada_fruta_pdf();
+  }
+  public function rpt_ent_pina_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rpt_entrada_fruta_xls();
+  }
+
   /**
    * Procesa los datos para mostrar el reporte rcr en pdf
    * @return void
@@ -955,6 +999,12 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
     }else
       redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
+  }
+
+  public function imprimir_movimiento()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->imprimir_pago($_GET['id']);
   }
 
   public function pago_basculas()
