@@ -99,12 +99,13 @@ class compras_requisicion_model extends CI_Model {
    */
   public function agregar()
   {
+    $folio = $this->folio($_POST['tipoOrden']);
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
       // 'id_proveedor' => $_POST['proveedorId'],
       'id_departamento' => (is_numeric($_POST['departamento'])? $_POST['departamento']: NULL),
       'id_empleado'     => $this->session->userdata('id_usuario'),
-      'folio'           => $_POST['folio'],
+      'folio'           => $folio,
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
       'tipo_pago'       => $_POST['tipoPago'],
       'tipo_orden'      => $_POST['tipoOrden'],
@@ -307,7 +308,9 @@ class compras_requisicion_model extends CI_Model {
         foreach ($prodsareas as $key2 => $prod) {
           $productos[$key][$key2]['id_requisicion'] = $ordenId;
 
-          $productosReq[$ordenId][] = $prod['prodSurtir'];
+          foreach ($prod['prodSurtir'] as $keyps => $prodSurtir) {
+            $productosReq[$ordenId][] = $prodSurtir;
+          }
 
           unset($productos[$key][$key2]['prodSurtir']);
         }

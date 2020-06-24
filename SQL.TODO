@@ -1,19 +1,27 @@
 
+ ✔ En recetas duplica folio de las ordenes y de recetas @done (20-06-24 12:10)
+ ✔ Al crear las ordenes de requisicion desde recetas, crear por proveedor las requiciciones y agrupar los productos si es el mismo @done (20-06-24 18:10)
+ ☐ Salidas de almacen poder quitar productos ya registrados
+ ✔ Validar que las salidas de almacen se den si la empresa tiene existencia no la de aplicacion, revisar al dar salidas en recetas @done (20-06-24 14:00)
  ☐ Reporte de productos aplicados en las recetas
+ ☐ Acomodar Reporte de existencia de fruta de acuerdo a los nuevos codigos
+   -- lap|san
+    UPDATE public.calibres SET status='F' WHERE id_calibre <> 98;
+    INSERT INTO public.calibres(nombre) VALUES ('VERDE 4'), ('VERDE 5'), ('VERDE 2'), ('AMC 3,4,5'), ('AMV 3,4,5'), ('ALC 5'), ('ALV 5'), ('2AL 2'), ('EXT 5'), ('PIÑA 5'), ('PIÑA 6'), ('PIÑA 7'), ('PIÑA 8'), ('ECV 3,4,5');
  ✔ Agregar reporte de lo que se captura en bascula de piña @done (20-06-17 21:58)
-   -- pcc
+   -- pcc|san|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Entrada de Piña', 365, true, 'bascula/rpt_ent_pina/', 'print', true);
  ✔ Imprimir el listado de productos con el color @done (20-06-18 14:14)
  ✔ Checar PTU @done (20-05-27 11:59)
- ☐ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios
-   -- lap|pcc
+ ✔ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios @done (20-06-24 18:11)
+   -- lap|pcc|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Activos Ordenes',367,True,'compras_ordenes/activosGastos/','print',True);
  ✔ Archivo de banco @done (20-06-08 20:09)
  ✔ Poder imprimir el registro de las boletas en bascula/admin_movimientos @done (20-06-06 11:16)
  ✔ Reporte de compras por producto meter filtros de cultivo y rancho @done (20-06-10 13:08)
    -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras por Producto Ordenes', 367, true, 'inventario/cproductosOrden/', 'print', true);
- ☐ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion,
+ ✔ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion, @done (20-06-24 18:11)
    revisar que no carga los productos a la requisicion, al dar salidas de almacen desde recetas no asigna la empresa de aplicacion
  ✔ Al reporte de salidas por producto y codigo, poner el color de los productos cuando seleccionen la empresa y agregar el AREA como comento tryana @done (20-05-15 13:12)
  ✔ Reporte vehiculos/combustible_pdf acomodar los campos estan desacomodados @done (20-05-15 21:20)
