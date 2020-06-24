@@ -53,7 +53,7 @@ class calibres_model extends CI_Model {
     $res = $this->db->query("
         SELECT id_calibre, nombre
         FROM calibres
-        WHERE lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+        WHERE status = 't' AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
         ORDER BY nombre ASC
         LIMIT 20");
 

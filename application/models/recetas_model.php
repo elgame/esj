@@ -169,6 +169,8 @@ class recetas_model extends CI_Model {
     $ff = explode('-', $_POST['fecha']);
     $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
 
+    $folio = $this->folio($_POST['empresaId'], $_POST['tipo']);
+
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
       'id_empresa_ap'     => (!empty($_POST['empresaId_ap'])? $_POST['empresaId_ap']: NULL),
@@ -178,7 +180,7 @@ class recetas_model extends CI_Model {
       'id_autorizo'       => $_POST['autorizoId'],
       'id_area'           => $_POST['areaId'],
       'fecha'             => $_POST['fecha'],
-      'folio'             => $_POST['folio'],
+      'folio'             => $folio,
       'folio_hoja'        => $_POST['folio_hoja'],
       'objetivo'          => $_POST['objetivo'],
       'semana'            => $semana['semana'],
@@ -528,7 +530,7 @@ class recetas_model extends CI_Model {
 
     $res = $this->db->query(
       "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
-        f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
+        f.nombre, r.folio, r.folio_hoja, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
         p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir,
         r.id_empresa_ap
@@ -575,7 +577,7 @@ class recetas_model extends CI_Model {
     $auxarea = '';
     foreach ($productos_recetas as $key => $value) {
       if ($value->surtir == 't') {
-        $productos_recetasg[$value->id_area][] = $value;
+        $productos_recetasg["{$value->id_empresa}.{$value->id_proveedor}.{$value->id_area}"][] = $value;
       }
     }
 
@@ -615,8 +617,8 @@ class recetas_model extends CI_Model {
         $receta = $this->info($item2->id_recetas, true);
         $requisiciones[$key]['solicito'] = $receta['info']->solicito;
 
-        if (!in_array($item2->folio, $requisiciones[$key]['otros_datos']['noRecetas'])) {
-          $requisiciones[$key]['otros_datos']['noRecetas'][] = $item2->folio;
+        if (!in_array("{$item2->folio}/{$item2->folio_hoja}", $requisiciones[$key]['otros_datos']['noRecetas'])) {
+          $requisiciones[$key]['otros_datos']['noRecetas'][] = "{$item2->folio}/{$item2->folio_hoja}";
         }
 
         if ($item2->id_proveedor) {
@@ -645,9 +647,11 @@ class recetas_model extends CI_Model {
             'activos'              => NULL,
 
             'prodSurtir' => [
-              'id_receta'   => $item2->id_recetas,
-              'id_producto' => $item2->id_producto,
-              'rows'        => $item2->rows
+              [
+                'id_receta'   => $item2->id_recetas,
+                'id_producto' => $item2->id_producto,
+                'rows'        => $item2->rows
+              ]
             ]
           ];
         }
@@ -680,8 +684,27 @@ class recetas_model extends CI_Model {
       $requisiciones[$key]['otros_datos'] = json_encode($requisiciones[$key]['otros_datos']);
     }
 
+    // Unir productos repetidos
+    $requisiciones_productos2 = [];
+    foreach ($requisiciones_productos as $key => $reqs) {
+      foreach ($reqs as $key2 => $prod) {
+        if (!isset($requisiciones_productos2[$key][$prod['id_producto']])) {
+          $requisiciones_productos2[$key][$prod['id_producto']] = $prod;
+        } else {
+          $requisiciones_productos2[$key][$prod['id_producto']]['cantidad'] += $prod['cantidad'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['importe'] += $prod['importe'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['total'] += $prod['total'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['prodSurtir'][] = $prod['prodSurtir'][0];
+        }
+      }
+    }
+
+    // echo "<pre>";
+    // var_dump($requisiciones, $requisiciones_productos, $requisiciones_productos2);
+    // echo "</pre>";exit;
+
     // Agrega las ordenes de requisición
-    $response = $this->compras_requisicion_model->agregarData($requisiciones, $requisiciones_productos, $requisiciones_ranchos, $requisiciones_centros);
+    $response = $this->compras_requisicion_model->agregarData($requisiciones, $requisiciones_productos2, $requisiciones_ranchos, $requisiciones_centros);
 
     // Se actualizan los productos de las recetas con el id de la requisición
     if ($response['passes']) {

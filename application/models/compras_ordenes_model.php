@@ -2606,12 +2606,13 @@ class compras_ordenes_model extends CI_Model {
 
     $orden = $this->info($ordenId, true);
 
-    $pdf = new MYpdf('P', 'mm', array(63, 150));
+    $hh = 150;
+    $pdf = new MYpdf('P', 'mm', array(63, $hh));
     $pdf->limiteY = 50;
     $pdf->SetMargins(0, 0, 0);
-    $pdf->SetAutoPageBreak(false);
+    // $pdf->SetAutoPageBreak(false);
     $pdf->show_head = false;
-    $pdf->onAddPage = 6;
+    $pdf->onAddPage = 0;
 
     // $pdf->show_head = true;
     // $pdf->titulo1 = $orden['info'][0]->empresa;

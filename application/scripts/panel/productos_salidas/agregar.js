@@ -45,12 +45,14 @@
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
         getProyectos();
+        clearDatos();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
         getProyectos();
+        clearDatos();
       }
     });
 
@@ -507,7 +509,7 @@
       var $parent = $(this).parent().parent();
       $parent.remove();
 
-      calculaTotal();
+      // calculaTotal();
     });
   };
 
@@ -656,6 +658,14 @@
     } else {
       $('#proyecto').html(hhtml);
     }
+  };
+
+  var clearDatos = function () {
+    $('#table-productos tbody tr').remove();
+    $("#empresaAp, #empresaApId, #area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+    $(".secCombustible").val('');
+
+    // calculaTotal();
   };
 
 });
