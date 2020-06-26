@@ -5,21 +5,21 @@
  ✔ Validar que las salidas de almacen se den si la empresa tiene existencia no la de aplicacion, revisar al dar salidas en recetas @done (20-06-24 14:00)
  ☐ Reporte de productos aplicados en las recetas
  ☐ Acomodar Reporte de existencia de fruta de acuerdo a los nuevos codigos
-   -- lap|san
+   -- lap|san|pct
     UPDATE public.calibres SET status='F' WHERE id_calibre <> 98;
     INSERT INTO public.calibres(nombre) VALUES ('VERDE 4'), ('VERDE 5'), ('VERDE 2'), ('AMC 3,4,5'), ('AMV 3,4,5'), ('ALC 5'), ('ALV 5'), ('2AL 2'), ('EXT 5'), ('PIÑA 5'), ('PIÑA 6'), ('PIÑA 7'), ('PIÑA 8'), ('ECV 3,4,5');
  ✔ Agregar reporte de lo que se captura en bascula de piña @done (20-06-17 21:58)
-   -- pcc|san|lap
+   -- pcc|san|lap|pct
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Entrada de Piña', 365, true, 'bascula/rpt_ent_pina/', 'print', true);
  ✔ Imprimir el listado de productos con el color @done (20-06-18 14:14)
  ✔ Checar PTU @done (20-05-27 11:59)
  ✔ Crear un reporte de ordenes de compra y activos asignados en cada producto que se promedie si seleccionan varios @done (20-06-24 18:11)
-   -- lap|pcc|san
+   -- lap|pcc|san|pct
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Activos Ordenes',367,True,'compras_ordenes/activosGastos/','print',True);
  ✔ Archivo de banco @done (20-06-08 20:09)
  ✔ Poder imprimir el registro de las boletas en bascula/admin_movimientos @done (20-06-06 11:16)
  ✔ Reporte de compras por producto meter filtros de cultivo y rancho @done (20-06-10 13:08)
-   -- lap|san|pcc
+   -- lap|san|pcc|pct
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras por Producto Ordenes', 367, true, 'inventario/cproductosOrden/', 'print', true);
  ✔ En recetas (pedidos) cuando se creen las ordenes de req que agregue los proveedores de agro insumo (empresa padre) no la de aplicacion y que ponga agro insumo la de aplicacion, @done (20-06-24 18:11)
    revisar que no carga los productos a la requisicion, al dar salidas de almacen desde recetas no asigna la empresa de aplicacion
@@ -28,25 +28,25 @@
  ✔ En factura que puedan seleccionar la sustitucion de cfdi en las facturas @done (20-05-15 21:58)
  ☐ fecha de carga y fecha de labor en reporte de combustible
  ✔ Cambio de nombre de produccion de productos @done (20-05-12 13:33)
-   -- lap|san|pcc
+   -- lap|san|pcc|pct
    UPDATE public.privilegios SET nombre='Producción de soluciones' WHERE nombre='Producción de productos';
 
  ✔ Reporte de empresas colores @done (20-05-12 13:33)
-   -- pcc|lap|san
+   -- pcc|lap|san|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Productos por Colores', 366, true, 'productos/rpt_lista_colores/', 'print', true);
  ✔ Iva excento @done (20-05-11 12:33)
-   -pcc|san|lap
+   -- pcc|san|lap|pct
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_iva_real character varying COLLATE pg_catalog."default" DEFAULT 0;
    UPDATE public.facturacion_productos SET porcentaje_iva_real = porcentaje_iva::character varying;
 
  ✔ En las ordenes de compra, poner el titulo de la orden, cuando sea una orden de servicio que puedan poner observación en cada producto y hacer un reporte de Reporte de servicios por proveedor @done (20-05-11 12:33)
-   -- pcc|san|lap
+   -- pcc|san|lap|pct
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
    ALTER TABLE public.compras_productos ADD COLUMN observaciones character varying(500) COLLATE pg_catalog."default";
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Servicios por Proveedor',367,true,'inventario/sproveedor/','print',true);
  ✔ Cambiar el nombre del modulo de Producción de productos -> Producción de soluciones @done (20-05-04 11:44)
  ✔ En catalogo de vehículos sanjorge/panel/vehiculos/agregar/ poner campo de millas o km y en el reporte indicar que son millas @done (20-05-04 11:40)
-   -- lap|pcc|san
+   -- lap|pcc|san|pct
    ALTER TABLE public.compras_vehiculos ADD COLUMN unidad character varying(5) NOT NULL DEFAULT 'km';
  ☐ En las familias de productos ponerle un tipo como en la hoja insumos agrícolas de campo
  ✔ Reporte de de combustible en control de maquinaria que muestre sin empresa el historial del vehiculo y agregar a la tabla en que empresa trabajo @done (20-04-28 16:51)
@@ -54,20 +54,20 @@
  ☐ Reporte de productos por color en cada empresa
  ☐ Generar ticket de salidas de almacen, con ordenes de salida de almacen y que esas se combiertan en salidas de almacen con la imprecion como recetas
  ✔ Acomodar reporte de combustible y agregar odometro @done (20-04-22 14:54)
-     -- pcc|san|lap
+     -- pcc|san|lap|pct
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro TO horometro;
      ALTER TABLE compras_salidas_combustible RENAME COLUMN odometro_fin TO horometro_fin;
      ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro double precision NOT NULL DEFAULT 0;
      ALTER TABLE public.compras_salidas_combustible ADD COLUMN odometro_fin double precision NOT NULL DEFAULT 0;
 
  ✔ En ordenes de compra poner la forma de pago (transfer, efectivo) y que se registra la fecha de registro y esa fecha que se tome en las polizas @done (20-04-14 21:06)
-     -- pcc|lap|san
+     -- pcc|lap|san|pct
      ALTER TABLE public.compras_requisicion ADD COLUMN forma_pago character varying(50) COLLATE pg_catalog."default";
      ALTER TABLE public.compras_ordenes ADD COLUMN forma_pago character varying(50) COLLATE pg_catalog."default";
 
  ✔ Cuentas por pagar 2 que imprima solo las facturas marcadas @done (20-04-14 17:12)
  ✔ Reporte de existencias de limón @done (20-04-20 21:45)
-    -- lap|pcc|san
+    -- lap|pcc|san|pct
     ALTER TABLE public.facturacion_productos ADD COLUMN id_calibres integer;
     COMMENT ON COLUMN public.facturacion_productos.id_calibres IS 'Unidad usada en producción';
     ALTER TABLE public.facturacion_productos ADD CONSTRAINT facturacion_productos_id_calibres_fkey FOREIGN KEY (id_calibres) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
@@ -75,7 +75,7 @@
     -- En la tabla otros.existencias_limon_existencia y otros.existencias_limon_produccion trucar los registros y cambiar id_clasificacion x id_calibre y Pk/Fk.
 
  ✔ Cambios en ordenes de compra y requisición, proyectos @done (20-04-08 19:29)
-   -- pcc|san|lap
+   -- pcc|san|lap|pct
    ALTER TABLE public.compras_requisicion ADD COLUMN folio_hoja bigint;
    ALTER TABLE public.compras_requisicion ADD COLUMN uso_cfdi character varying(50) COLLATE pg_catalog."default";
    ALTER TABLE public.compras_ordenes ADD COLUMN folio_hoja bigint;
@@ -90,7 +90,7 @@
     quitarlo de las tablas facturacion_ventas_remision_pivot,  facturacion_remision_hist
  ✔ Reporte de movimientos de bascula que salga el titulo de la empresa seleccionada @done (20-03-23 18:43)
  ✔ Apartado de producción en almacen que descuente productos e incremente el producido @done (20-03-23 18:43)
-     -- pcc|san|lap
+     -- pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Producción de productos',128,TRUE,'produccion_almacen/','briefcase',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',546,TRUE,'produccion_almacen/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',546,FALSE,'produccion_almacen/cancelar/','ban-circle',FALSE);
@@ -116,7 +116,7 @@
         COMMENT ON TABLE public.compras_salidas_produccion IS 'Produccion de productos, indica que salida y orden de compra (nivelación)';
 
  ☐ Modulo de proyectos, seleccionar en ordenes de gastos y servicios, gastos directos y en salidas de almacen, que tenga presupuesto e imprima un reporte de lo gastado
-     -- lap|pcc|san
+     -- lap|pcc|san|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Proyectos',0,TRUE,'proyectos/','magnet',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',540,TRUE,'proyectos/agregar/','plus',FALSE);
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',540,FALSE,'proyectos/modificar/','edit',FALSE);
@@ -137,7 +137,7 @@
         ) WITH (OIDS = FALSE)
         TABLESPACE pg_default;
         ALTER TABLE otros.proyectos OWNER to programa;
-     -- pcc|san|lap
+     -- pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',540,FALSE,'proyectos/imprimir/','file',FALSE);
      ALTER TABLE public.compras ADD COLUMN id_proyecto bigint;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
@@ -148,7 +148,7 @@
      ALTER TABLE public.compras_salidas ADD COLUMN id_proyecto bigint;
      ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_proyecto_fkey FOREIGN KEY (id_proyecto) REFERENCES otros.proyectos (id_proyecto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 
- ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san|pcc
+ ✔ Imprimir fac ventas @done (20-03-17 13:26) lap|san|pcc|pct
      CREATE OR REPLACE VIEW public.unidades_unq
          AS
          SELECT DISTINCT ON (unidades.nombre) unidades.nombre,

@@ -443,7 +443,7 @@
                     <label class="control-label" for="chorometro">Horómetro (Hrs)</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="number" step="any" name="chorometro secCombustible" min="0" class="span11" id="chorometro" value="<?php echo set_value('chorometro') ?>" placeholder="">
+                        <input type="number" step="any" name="chorometro" min="0" class="span11 secCombustible" id="chorometro" value="<?php echo set_value('chorometro') ?>" placeholder="">
                       </div>
                     </div>
                   </div>
@@ -452,7 +452,7 @@
                     <label class="control-label" for="codometro">Odómetro (Km)</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="number" step="any" name="codometro secCombustible" min="0" class="span11" id="codometro" value="<?php echo set_value('codometro') ?>" placeholder="">
+                        <input type="number" step="any" name="codometro" min="0" class="span11 secCombustible" id="codometro" value="<?php echo set_value('codometro') ?>" placeholder="">
                       </div>
                     </div>
                   </div>
@@ -461,7 +461,7 @@
                     <label class="control-label" for="clitros">Litros</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="number" step="any" name="clitros secCombustible" min="0" class="span11" id="clitros" value="<?php echo set_value('clitros') ?>" placeholder="">
+                        <input type="number" step="any" name="clitros" min="0" class="span11 secCombustible" id="clitros" value="<?php echo set_value('clitros') ?>" placeholder="">
                       </div>
                     </div>
                   </div>
@@ -470,7 +470,7 @@
                     <label class="control-label" for="cprecio">Precio</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="number" step="any" name="cprecio secCombustible" min="0" class="span11" id="cprecio" value="<?php echo set_value('cprecio') ?>" placeholder="">
+                        <input type="number" step="any" name="cprecio" min="0" class="span11 secCombustible" id="cprecio" value="<?php echo set_value('cprecio') ?>" placeholder="">
                       </div>
                     </div>
                   </div>
