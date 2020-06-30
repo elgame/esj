@@ -5,9 +5,30 @@
  ✔ Validar que las salidas de almacen se den si la empresa tiene existencia no la de aplicacion, revisar al dar salidas en recetas @done (20-06-24 14:00)
  ☐ Reporte de productos aplicados en las recetas
  ☐ Acomodar Reporte de existencia de fruta de acuerdo a los nuevos codigos
-   -- lap|san|pct
+   -- lap|san|pct|pcc
     UPDATE public.calibres SET status='F' WHERE id_calibre <> 98;
     INSERT INTO public.calibres(nombre) VALUES ('VERDE 4'), ('VERDE 5'), ('VERDE 2'), ('AMC 3,4,5'), ('AMV 3,4,5'), ('ALC 5'), ('ALV 5'), ('2AL 2'), ('EXT 5'), ('PIÑA 5'), ('PIÑA 6'), ('PIÑA 7'), ('PIÑA 8'), ('ECV 3,4,5');
+   -- pcc|pct
+    TRUNCATE otros.existencias_limon_existencia CASCADE;
+    TRUNCATE otros.existencias_limon_produccion CASCADE;
+    ALTER TABLE otros.existencias_limon_existencia DROP CONSTRAINT existencias_limon_existencia_pkey;
+    ALTER TABLE otros.existencias_limon_existencia DROP COLUMN id_clasificacion;
+    ALTER TABLE otros.existencias_limon_existencia ADD COLUMN id_calibre integer NOT NULL;
+    ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja);
+    ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE otros.existencias_limon_produccion DROP COLUMN id_clasificacion;
+    ALTER TABLE otros.existencias_limon_produccion ADD COLUMN id_calibre integer NOT NULL;
+    ALTER TABLE otros.existencias_limon_produccion ADD CONSTRAINT existencias_limon_produccion_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   -- pcc
+    ALTER TABLE public.calibres ADD COLUMN tipo character varying(2) COLLATE pg_catalog."default" DEFAULT 't'::character varying;
+    COMMENT ON COLUMN public.calibres.tipo IS 't: tamaño, c: calibre';
+    UPDATE public.calibres SET tipo='c' WHERE status = 't';
+    UPDATE public.calibres SET status = 't' WHERE status = 'f';
+    UPDATE public.calibres SET nombre = 'NO' WHERE id_calibre = 99;
+    UPDATE public.calibres SET status = 'f' WHERE id_calibre in(89,90,91,92,93,94,95,96,97,50,54,64);
+    COMMENT ON COLUMN public.rastria_rendimiento_clasif.id_calibre IS 'Es el tamaño del cliente (esta cambiado con id_size)';
+    COMMENT ON COLUMN public.rastria_rendimiento_clasif.id_size IS 'Es el calibre del cliente (esta cambiado con id_calibre)';
+
  ✔ Agregar reporte de lo que se captura en bascula de piña @done (20-06-17 21:58)
    -- pcc|san|lap|pct
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Entrada de Piña', 365, true, 'bascula/rpt_ent_pina/', 'print', true);

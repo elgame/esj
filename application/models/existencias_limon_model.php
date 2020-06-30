@@ -157,7 +157,7 @@ class existencias_limon_model extends CI_Model {
         elp.id AS id_produccion, ca.id_calibre, ca.nombre AS calibre
       FROM rastria_rendimiento rr
         INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
-        INNER JOIN calibres ca ON ca.id_calibre = rrc.id_calibre
+        INNER JOIN calibres ca ON ca.id_calibre = rrc.id_size
         INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
         LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_calibre = ca.id_calibre
@@ -166,7 +166,7 @@ class existencias_limon_model extends CI_Model {
         AND Date(rr.fecha) = '{$fecha}' AND (elp.no_caja = {$noCaja} OR elp.no_caja IS NULL)
         AND Date(rr.fecha) >= '{$fechaa_inicioo}'
       GROUP BY ca.id_calibre, u.id_unidad, elp.id
-      ORDER BY tipo ASC, id_calibre ASC, id_unidad ASC"
+      ORDER BY id_calibre ASC, id_unidad ASC"
     );
 
     if ($produccion->num_rows() > 0)
@@ -223,6 +223,10 @@ class existencias_limon_model extends CI_Model {
     }
     foreach ($info['produccion'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        if ($existencia[$item->id_calibre.$item->id_unidad]->costo == 0) {
+          $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
+        }
+
         $existencia[$item->id_calibre.$item->id_unidad]->cantidad += $item->cantidad;
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    += $item->kilos;
         $existencia[$item->id_calibre.$item->id_unidad]->importe  += $item->importe;

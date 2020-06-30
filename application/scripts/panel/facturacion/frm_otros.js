@@ -113,7 +113,7 @@ function autocompleteTamanioLive () {
 function autocompleteTamanioProdLive () {
   $('#table_prod').on('focus', 'input#prod_dtamanio_prod:not(.ui-autocomplete-input)', function(event) {
     $(this).autocomplete({
-      source: base_url+'panel/rastreabilidad/ajax_get_calibres/',
+      source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
