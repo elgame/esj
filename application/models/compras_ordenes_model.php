@@ -1483,33 +1483,114 @@ class compras_ordenes_model extends CI_Model {
 
   public function creaOrdenFaltantes($idOrden, $productos)
   {
-    $data = $this->info($idOrden);
+    $data = $this->info($idOrden, true);
     $data['info'] = $data['info'][0];
     $dataOrden = array(
-      'id_empresa'         => $data['info']->id_empresa,
-      'id_proveedor'       => $data['info']->id_proveedor,
-      'id_departamento'    => $data['info']->id_departamento,
-      'id_empleado'        => $data['info']->id_empleado,
-      'folio'              => $this->folio($data['info']->tipo_orden),
-      'status'             => 'p',
-      'autorizado'         => 't',
-      'fecha_autorizacion' => $data['info']->fecha_autorizacion,
-      'fecha_aceptacion'   => $data['info']->fecha_aceptacion,
-      'fecha_creacion'     => $data['info']->fecha,
-      'tipo_pago'          => $data['info']->tipo_pago,
-      'tipo_orden'         => $data['info']->tipo_orden,
-      'solicito'           => $data['info']->empleado_solicito,
-      'id_cliente'         => (is_numeric($data['info']->id_cliente)? $data['info']->id_cliente: NULL),
-      'descripcion'        => $data['info']->descripcion,
-      'id_autorizo'        => $data['info']->id_autorizo,
+      'id_empresa'          => $data['info']->id_empresa,
+      'id_proveedor'        => $data['info']->id_proveedor,
+      'id_departamento'     => $data['info']->id_departamento,
+      'id_empleado'         => $data['info']->id_empleado,
+      'id_autorizo'         => $data['info']->id_autorizo,
+      'folio'               => $this->folio($data['info']->tipo_orden),
+      'fecha_autorizacion'  => $data['info']->fecha_autorizacion,
+      'fecha_aceptacion'    => $data['info']->fecha_aceptacion,
+      'fecha_creacion'      => $data['info']->fecha,
+      'tipo_pago'           => $data['info']->tipo_pago,
+      'tipo_orden'          => $data['info']->tipo_orden,
+      'status'              => 'p',
+      'autorizado'          => 't',
+      'id_cliente'          => (is_numeric($data['info']->id_cliente)? $data['info']->id_cliente: NULL),
+      'solicito'            => $data['info']->empleado_solicito,
+      'descripcion'         => $data['info']->descripcion,
+
+      'id_vehiculo'         => $data['info']->id_vehiculo,
+      'tipo_vehiculo'       => $data['info']->tipo_vehiculo,
+      'ids_facrem'          => $data['info']->ids_facrem,
+      'id_almacen'          => $data['info']->id_almacen,
+      'regresa_product'     => $data['info']->regresa_product,
+      'flete_de'            => $data['info']->flete_de,
+      'cont_x_dia'          => $data['info']->cont_x_dia,
+      'id_registra'         => $data['info']->id_registra,
+      'otros_datos'         => json_encode($data['info']->otros_datos),
+      'es_receta'           => $data['info']->es_receta,
+      // 'ids_compras'         => $data['info']->ids_compras,
+      'id_empresa_ap'       => $data['info']->id_empresa_ap,
+      // 'id_orden_aplico'     => $data['info']->id_orden_aplico,
+      // 'ids_salidas_almacen' => $data['info']->ids_salidas_almacen,
+      // 'ids_gastos_caja'     => $data['info']->ids_gastos_caja,
+      'id_proyecto'         => $data['info']->id_proyecto,
+      'folio_hoja'          => $data['info']->folio_hoja,
+      'uso_cfdi'            => $data['info']->uso_cfdi,
+      'forma_pago'          => $data['info']->forma_pago,
     );
+
     //si es flete
     if ($data['info']->tipo_orden == 'f')
     {
       $dataOrden['ids_facrem'] = $data['info']->ids_facrem;
     }
 
-    $res = $this->agregarData($dataOrden);
+
+    $dataOrdenCats = [];
+    if (isset($data['info']->requisiciones)) {
+      $dataOrdenCats['requisiciones'][] = [
+        'id_requisicion' => $data['info']->requisiciones[0]->id_requisicion,
+        'id_orden'       => '',
+        'num_row'        => 0
+      ];
+    }
+
+    // Si es un gasto son requeridos los campos de catálogos
+    if ($data['info']->tipo_orden == 'd' || $data['info']->tipo_orden == 'oc' || $data['info']->tipo_orden == 'f' ||
+        $data['info']->tipo_orden == 'a' || $data['info']->tipo_orden == 'p') {
+
+
+      // Inserta las areas
+      if (isset($data['info']->area) && count($data['info']->area) > 0) {
+        foreach ($data['info']->area as $key => $area) {
+          $dataOrdenCats['area'][] = [
+            'id_area' => $area->id_area,
+            'id_orden'  => '',
+            'num'       => count($data['info']->area)
+          ];
+        }
+      }
+
+      // Inserta los ranchos
+      if (isset($data['info']->rancho) && count($data['info']->rancho) > 0) {
+        foreach ($data['info']->rancho as $keyr => $drancho) {
+          $dataOrdenCats['rancho'][] = [
+            'id_rancho' => $drancho->id_rancho,
+            'id_orden'  => '',
+            'num'       => count($data['info']->rancho)
+          ];
+        }
+      }
+
+      // Inserta los centros de costo
+      if (isset($data['info']->centroCosto) && count($data['info']->centroCosto) > 0) {
+        foreach ($data['info']->centroCosto as $keyr => $dcentro_costo) {
+          $dataOrdenCats['centroCosto'][] = [
+            'id_centro_costo' => $dcentro_costo->id_centro_costo,
+            'id_orden'        => '',
+            'num'             => count($data['info']->centroCosto)
+          ];
+        }
+      }
+
+      // Inserta los activos
+      if (isset($data['info']->activo) && count($data['info']->activo) > 0) {
+        foreach ($data['info']->activo as $orkey => $activ) {
+          $dataOrdenCats['activo'][] = [
+            'id_activo' => $activ->id_activo,
+            'id_orden'  => '',
+            'num'       => count($data['info']->activo)
+          ];
+        }
+      }
+    }
+
+    $res = $this->agregarData($dataOrden, [], $dataOrdenCats);
     $id_orden = $res['id_orden'];
 
     // Productos
