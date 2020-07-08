@@ -989,7 +989,7 @@ class productos_salidas_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', array(63, 180));
+    $pdf = new MYpdf('P', 'mm', array(63, 280));
     $pdf->show_head = false;
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
