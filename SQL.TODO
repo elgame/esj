@@ -1,4 +1,8 @@
 
+ ☐ En traspasos de almacen ver como poner una empresa de aplicación para que se cambie de empresa los productos tambien
+ ☐ En nivelacion ver como hacer que no tarde tanto
+ ☐ Reporte de inventario de almacen como la hoja
+ ☐ Al dejar ordenes con faltantes no pasa los codigos de cultivo, areas y centros de costo, etc al crear la orden automatica
  ✔ En recetas duplica folio de las ordenes y de recetas @done (20-06-24 12:10)
    -- lap|san
      CREATE FUNCTION public.insert_compras_salidas_folio()
