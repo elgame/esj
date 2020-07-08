@@ -192,6 +192,11 @@ class bitacora_model extends bitacora_msg_model {
       $sql .= " AND em.id_empresa = {$_GET['fid_empresa']}";
     }
 
+    if (isset($_GET['fid_usuario']) && $_GET['fid_usuario'])
+    {
+      $sql .= " AND us.id = {$_GET['fid_usuario']}";
+    }
+
     if (isset($_GET['fdescripcion']) && $_GET['fdescripcion'])
     {
       $sql .= " AND LOWER(bb.descripcion) LIKE LOWER('%{$_GET['fdescripcion']}%')";

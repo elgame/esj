@@ -196,8 +196,8 @@
                       <input type="hidden" id="fidsize_old" value="" class="span12">
                     </td>
                     <td>
-                      <input type="text" id="fetiqueta" value="" class="span12">
-                      <input type="hidden" id="fidetiqueta" value="" class="span12">
+                      <input type="text" id="fetiqueta" value="SIN MARCA" class="span12">
+                      <input type="hidden" id="fidetiqueta" value="15" class="span12">
                       <input type="hidden" id="fidetiqueta_old" value="" class="span12">
                     </td>
                     <td>

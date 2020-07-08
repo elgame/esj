@@ -377,7 +377,7 @@ class recetas_model extends CI_Model {
   {
     $this->load->model('productos_salidas_model');
 
-    $receta = $this->info($_GET['id'], true);
+    $receta = $this->info($recetaId, true);
     // echo "<pre>";
     //   var_dump($_POST, $receta);
     // echo "</pre>";exit;

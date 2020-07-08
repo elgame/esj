@@ -19,6 +19,7 @@
                   <label class="control-label" for="name">Area</label>
                   <div class="controls">
                     <select name="farea" class="span12">
+                      <option value="">TODOS</option>
                       <?php foreach ($areas['areas'] as $area) { ?>
                         <?php echo '<option value="'.$area->id_area.'">'.$area->nombre.'</option>' ?>
                       <?php } ?>
@@ -30,6 +31,7 @@
                   <label class="control-label" for="ftipo">Tipo</label>
                   <div class="controls">
                     <select name="ftipo">
+                      <option value="">TODOS</option>
                       <option value="en">ENTRADA</option>
                       <option value="sa">SALIDA</option>
                     </select>

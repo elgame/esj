@@ -317,9 +317,9 @@ class existencias_limon_model extends CI_Model {
 
     // Existencia
     $existencia_inst = array();
+    $this->db->delete('otros.existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']}");
     foreach ($data['existencia_id_calibre'] as $key => $id_cat)
     {
-      $this->db->delete('existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']}");
       $existencia_inst[] = array(
         'id_calibre' => $data['existencia_id_calibre'][$key],
         'id_unidad'  => $data['existencia_id_unidad'][$key],
