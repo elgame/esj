@@ -50,10 +50,15 @@ class calibres_model extends CI_Model {
   public function getCalibresAjax()
   {
     $sql = '';
+    if ($this->input->get('tipo')) {
+      $sql .= " AND tipo = '{$_GET['tipo']}'";
+    }
+
     $res = $this->db->query("
         SELECT id_calibre, nombre
         FROM calibres
-        WHERE status = 't' AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+        WHERE status = 't' {$sql}
+          AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
         ORDER BY nombre ASC
         LIMIT 20");
 

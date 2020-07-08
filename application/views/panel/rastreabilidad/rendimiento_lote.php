@@ -106,7 +106,7 @@
                     <th>CLASIFICACIÓN</th>
                     <th style="width:110px;">CAJA</th>
                     <th style="width:55px;">TAMAÑO</th>
-                    <th style="width:55px;">PRET</th>
+                    <th style="width:55px;">CALIBRE</th>
                     <th style="width:110px;">ETIQUETA</th>
                     <th style="width:55px;">KILOS</th>
                     <th style="width:55px;">EXISTENTE</th>

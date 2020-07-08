@@ -2606,7 +2606,7 @@ class compras_ordenes_model extends CI_Model {
 
     $orden = $this->info($ordenId, true);
 
-    $hh = 150;
+    $hh = 270;
     $pdf = new MYpdf('P', 'mm', array(63, $hh));
     $pdf->limiteY = 50;
     $pdf->SetMargins(0, 0, 0);
@@ -2665,6 +2665,7 @@ class compras_ordenes_model extends CI_Model {
 
     foreach ($orden['info'][0]->productos as $key => $prod)
     {
+
       $tipoCambio = 1;
       if ($prod->tipo_cambio != 0)
       {

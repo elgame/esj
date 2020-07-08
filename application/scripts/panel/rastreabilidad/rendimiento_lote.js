@@ -335,7 +335,7 @@
   //Autocomplete Calibre
   var autocompleteCalibre = function () {
     $("input#fcalibre").autocomplete({
-      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=t',
       minLength: 1,
       selectFirst: true,
       select: funcAutocompleteCalibre
@@ -345,7 +345,7 @@
   var autocompleteCalibreLive = function () {
     $("#tableClasif").on("focus", 'input#fcalibre:not(.ui-autocomplete-input)', function (event) {
         $(this).autocomplete({
-          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=t',
           minLength: 1,
           selectFirst: true,
           select: funcAutocompleteCalibre
@@ -384,7 +384,7 @@
   //Autocomplete Size
   var autocompleteSize = function () {
     $("input#fsize").autocomplete({
-      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
       minLength: 1,
       selectFirst: true,
       select: funcAutocompleteSize
@@ -394,7 +394,7 @@
   var autocompleteSizeLive = function () {
     $("#tableClasif").on("focus", 'input#fsize:not(.ui-autocomplete-input)', function (event) {
         $(this).autocomplete({
-          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
           minLength: 1,
           selectFirst: true,
           select: funcAutocompleteSize
