@@ -90,7 +90,7 @@ class produccion_model extends CI_Model {
       'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $this->productos_salidas_model->folio(),
-      'concepto'        => 'Salida generada automaticamente en Produccion',
+      'concepto'        => 'Salida generada automáticamente en Producción',
       'status'          => 's',
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha_produccion']),
       'fecha_registro'  => date("Y-m-d H:i:s"),

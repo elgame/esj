@@ -585,7 +585,8 @@ class productos_salidas_model extends CI_Model {
   {
     $res = $this->db->select('folio')
       ->from('compras_salidas')
-      ->where('concepto', null)
+      ->where('status !=', 'n')
+      ->where('folio >', 0)
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 

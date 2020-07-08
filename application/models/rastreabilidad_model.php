@@ -562,21 +562,20 @@ class rastreabilidad_model extends CI_Model {
                                         $id_unidad, $id_calibre, $id_etiqueta,
                                         $id_size, $kilos)
   {
-
-    //Si no es un id, se inserta o se obtiene el calibre
-    if ( ! is_numeric($id_calibre))
-    {
-      $this->load->model('calibres_model');
-      $data_calibre = $this->calibres_model->addCalibre($_GET['fcalibre']);
-      $id_calibre   = $data_calibre['id'];
-    }
-    //Si no es un id, se inserta o se obtiene el calibre
-    if ( ! is_numeric($id_size))
-    {
-      $this->load->model('calibres_model');
-      $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
-      $id_size   = $data_size['id'];
-    }
+    // //Si no es un id, se inserta o se obtiene el calibre
+    // if ( ! is_numeric($id_calibre))
+    // {
+    //   $this->load->model('calibres_model');
+    //   $data_calibre = $this->calibres_model->addCalibre($_GET['fcalibre']);
+    //   $id_calibre   = $data_calibre['id'];
+    // }
+    // //Si no es un id, se inserta o se obtiene el calibre
+    // if ( ! is_numeric($id_size))
+    // {
+    //   $this->load->model('calibres_model');
+    //   $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
+    //   $id_size   = $data_size['id'];
+    // }
 
     $info = $this->getLoteInfo($id_rendimiento, false);
 
