@@ -900,7 +900,7 @@ class compras_ordenes_model extends CI_Model {
         $query->free_result();
 
         $data['info'][0]->gasolina = array();
-        if ($data['info'][0]->id_vehiculo)
+        if ($data['info'][0]->id_vehiculo > 0)
         {
           // Vehiculo
           $query = $this->db->query(
@@ -911,6 +911,25 @@ class compras_ordenes_model extends CI_Model {
           if ($query->num_rows() > 0)
           {
             $data['info'][0]->gasolina = $query->result();
+          }
+
+          if ($data['info'][0]->tipo_vehiculo != 'ot') {
+            // Vehiculo anterior
+            $query = $this->db->query(
+              "SELECT co.id_orden, co.folio, co.id_vehiculo, co.tipo_vehiculo,
+                cvg.kilometros, cvg.litros, cvg.precio, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS vehiculo
+              FROM compras_ordenes co
+                INNER JOIN compras_vehiculos_gasolina cvg ON co.id_orden = cvg.id_orden
+                INNER JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
+              WHERE co.id_orden <> {$data['info'][0]->id_orden}
+                AND co.id_vehiculo = {$data['info'][0]->id_vehiculo}
+                AND co.tipo_vehiculo <> 'ot'
+              ORDER BY co.id_orden DESC LIMIT 100");
+
+            if ($query->num_rows() > 0)
+            {
+              $data['info'][0]->gasolina_ant = $query->row();
+            }
           }
         }
 
@@ -2356,6 +2375,8 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
 
+        $y_compras = $pdf->GetY();
+
         if (!empty($orden['info'][0]->ordenAplico)) {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->Row(array("ORDEN GENERADA AUTOMATICAMENTE DE LA EMPRESA {$orden['info'][0]->ordenAplico->empresa} CON FOLIO {$orden['info'][0]->ordenAplico->folio} EL DIA {$orden['info'][0]->ordenAplico->fecha}"), false, false);
@@ -2613,6 +2634,52 @@ class compras_ordenes_model extends CI_Model {
         }
       }
 
+      //a si es vehiculo
+      if($orden['info'][0]->tipo_orden == 'd' && $orden['info'][0]->tipo_vehiculo != 'ot' && $orden['info'][0]->id_vehiculo > 0){
+        $pdf->SetY($y_compras);
+
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetAligns(array('C', 'L'));
+        $pdf->SetWidths(array(55));
+        $pdf->SetX(85);
+        $pdf->Row(array('ULTIMA/COMP'), false, true);
+
+        if (isset($orden['info'][0]->gasolina_ant)) {
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(15, 40));
+          $pdf->SetX(85);
+          $pdf->Row(array('Vehículo', $orden['info'][0]->gasolina_ant->vehiculo), false, true);
+          $pdf->SetX(85);
+          $pdf->Row(array('Tipo', ($orden['info'][0]->gasolina_ant->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
+          $pdf->SetX(85);
+          $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina_ant->kilometros, 2, '', false)), false, true);
+          $pdf->SetX(85);
+          $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina_ant->litros, 2, '', false)), false, true);
+          $pdf->SetX(85);
+          $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina_ant->precio, 2, '', false)), false, true);
+        }
+
+        $pdf->SetY($y_compras);
+        $pdf->SetAligns(array('C', 'L'));
+        $pdf->SetWidths(array(55));
+        $pdf->SetX(140);
+        $pdf->Row(array('COMP/ACTUAL'), false, true);
+
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(15, 40));
+        $pdf->SetX(140);
+        $pdf->Row(array('Vehículo', $orden['info'][0]->placa.' '.$orden['info'][0]->modelo.' '.$orden['info'][0]->marca), false, true);
+        $pdf->SetX(140);
+        $pdf->Row(array('Tipo', ($orden['info'][0]->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
+        $pdf->SetX(140);
+        $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina[0]->kilometros, 2, '', false)), false, true);
+        $pdf->SetX(140);
+        $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina[0]->litros, 2, '', false)), false, true);
+        $pdf->SetX(140);
+        $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina[0]->precio, 2, '', false)), false, true);
+
+        $pdf->SetFont('Arial', '', 8);
+      }
 
       //a si es flete
       if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){

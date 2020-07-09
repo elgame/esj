@@ -5,6 +5,7 @@ class productos_salidas_model extends CI_Model {
   function __construct()
   {
     parent::__construct();
+    $this->load->model('bitacora_model');
   }
 
   /**
@@ -102,7 +103,7 @@ class productos_salidas_model extends CI_Model {
       $data = array(
         'id_empresa'        => $_POST['empresaId'],
         'id_empleado'       => $this->session->userdata('id_usuario'),
-        'folio'             => $_POST['folio'],
+        'folio'             => $this->folio(),
         'fecha_creacion'    => str_replace('T', ' ', $_POST['fecha']),
         'fecha_registro'    => date("Y-m-d H:i:s"),
         // 'concepto'       => '', //$_POST['conceptoSalida']
@@ -160,6 +161,18 @@ class productos_salidas_model extends CI_Model {
     if ($this->input->post('tipo') === 'c') {
       $this->agregarCombustible($id_salida, $data);
     }
+
+    // Bitacora
+    if (empty($this->input->post('empresa'))) {
+      $this->load->model('empresas_model');
+      $empp = $this->empresas_model->getInfoEmpresa($data['id_empresa']);
+      $_POST['empresa'] = $empp['info']->nombre_fiscal;
+    }
+    $this->bitacora_model->_insert('compras_salidas', $id_salida,
+                                    array(':accion'     => 'la salida de almacen', ':seccion' => 'salida de almacen',
+                                          ':folio'      => $data['folio'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'    => 'en '.$this->input->post('empresa')));
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
   }
@@ -446,9 +459,18 @@ class productos_salidas_model extends CI_Model {
     $this->db->update('compras_salidas', array('status' => 'ca'), array('id_salida' => $idOrden));
 
     $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
-    $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
-
+    if (isset($orden->id_orden)) {
+      $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
+    }
     $this->db->delete('otros.recetas_salidas', "id_salida = {$idOrden}");
+
+    // Bitacora
+    $salidaa = $this->info($idOrden);
+    $this->bitacora_model->_cancel('compras_salidas', $idOrden,
+                                    array(':accion'     => 'la salida de almacen', ':seccion' => 'salida de almacen',
+                                          ':folio'      => $salidaa['info'][0]->folio,
+                                          ':id_empresa' => $salidaa['info'][0]->id_empresa,
+                                          ':empresa'    => 'en '.$salidaa['info'][0]->empresa));
 
     $this->db->query("SELECT refreshallmaterializedviews();");
 

@@ -42,8 +42,11 @@ class bitacora_msg_model extends CI_Model {
     'cajachica_ingresos_update'  => 'Se modifico :accion :folio :empresa',
     'cajachica_gastos_insert'    => 'Se agrego :accion :folio :empresa',
     'cajachica_gastos_update'    => 'Se modifico :accion :folio :empresa',
-    'cajachica_deudores_insert'    => 'Se agrego :accion :folio :empresa',
-    'cajachica_deudores_update'    => 'Se modifico :accion :folio :empresa',
+    'cajachica_deudores_insert'  => 'Se agrego :accion :folio :empresa',
+    'cajachica_deudores_update'  => 'Se modifico :accion :folio :empresa',
+    'compras_salidas_insert'     => 'Se agrego :accion :folio :empresa',
+    'compras_salidas_cancel'     => 'Se elimino :accion :folio :empresa',
+    'compras_salidas_update'     => 'Se modifico :accion :folio :empresa',
 		);
 
   protected $secciones = array(
@@ -59,6 +62,7 @@ class bitacora_msg_model extends CI_Model {
     'banco',
     'cuentas por cobrar',
     'caja chica',
+    'salida de almacen',
 
     );
 
