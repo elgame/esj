@@ -354,8 +354,9 @@ class productos_salidas_model extends CI_Model {
       $rows_compras = 0;
       $proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
       $departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
+      $empresaIdd = !empty($_POST['empresaTransId'])? $_POST['empresaTransId']: $_POST['empresaId'];
       $data = array(
-        'id_empresa'         => $_POST['empresaId'],
+        'id_empresa'         => $empresaIdd,
         'id_proveedor'       => $proveedor->id_proveedor,
         'id_departamento'    => $departamento->id_departamento,
         'id_empleado'        => $this->session->userdata('id_usuario'),
@@ -374,6 +375,11 @@ class productos_salidas_model extends CI_Model {
       $compra = array();
       foreach ($productos as $key => $produto)
       {
+        if (!empty($_POST['empresaTransId'])) {
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          $produto['id_producto'] = $data_prod->id_producto;
+        }
+
         $ultima_compra = $this->compras_ordenes_model->getUltimaCompra($produto['id_producto']);
         $precio_unitario = (isset($ultima_compra->precio_unitario)? $ultima_compra->precio_unitario: 0);
         $presenta = $this->db->query("SELECT p.nombre, pp.id_presentacion

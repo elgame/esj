@@ -446,7 +446,7 @@ class productos_salidas extends MY_Controller {
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
-            'rules' => 'required|callback_productos_existencia'),
+            'rules' => 'required|callback_productos_existencia|callback_val_productos_traspaso'),
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
@@ -514,7 +514,15 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => $req1.'|greater_than[0]')
+            'rules' => $req1.'|greater_than[0]'),
+
+      array('field' => 'empresaTrans',
+            'label' => 'Transferir a',
+            'rules' => ''),
+      array('field' => 'empresaTransId',
+            'label' => 'Transferir a',
+            'rules' => ''),
+
     );
 
     if ($this->input->post('tipo') == 'r') { // recetas
@@ -660,6 +668,33 @@ class productos_salidas extends MY_Controller {
       $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
       return FALSE;
     }
+    return true;
+  }
+
+  public function val_productos_traspaso($auto)
+  {
+    if (!empty($_POST['tid_almacen'])) {
+      if (is_array($this->input->post('productoId')) && count($this->input->post('productoId')) > 0)
+      {
+        $response = true;
+        $responseText = '';
+        foreach ($this->input->post('productoId') as $key => $item) {
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          if (empty($data_prod)) {
+            $response = false;
+            $responseText .= "{$_POST['concepto'][$key]}, ";
+          }
+        }
+        $this->form_validation->set_message('val_productos_traspaso', "El/Los productos {$responseText} no se encuentran en la empresa {$_POST['empresaTrans']}, se tienen que llamar igual en ambas empresas.");
+        return $response;
+      }
+      else
+      {
+        $this->form_validation->set_message('val_productos_traspaso', 'Para registrar el traspaso con empresa de aplicación se requiere que agregue productos.');
+        return false;
+      }
+    }
+
     return true;
   }
 
