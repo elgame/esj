@@ -1,10 +1,11 @@
 
- ☐ En traspasos de almacen ver como poner una empresa de aplicación para que se cambie de empresa los productos tambien
+ ✔ En traspasos de almacen ver como poner una empresa de aplicación para que se cambie de empresa los productos tambien @done (20-07-10 18:32)
  ☐ En nivelacion ver como hacer que no tarde tanto
  ☐ Reporte de inventario de almacen como la hoja
+ ✔ En las ordenes de compra (servicio) que seleccionan el vehiculo y diesel o gasolina, en la impresion del pdf que salga cual fue la ultima compra de combustible de ese vehiculo @done (20-07-09 16:25)
  ✔ Al dejar ordenes con faltantes no pasa los codigos de cultivo, areas y centros de costo, etc al crear la orden automatica @done (20-07-08 17:52)
  ✔ En recetas duplica folio de las ordenes y de recetas @done (20-06-24 12:10)
-   -- lap|san
+   -- lap|san|pct
      CREATE FUNCTION public.insert_compras_salidas_folio()
           RETURNS trigger
           LANGUAGE 'plpgsql'
@@ -53,7 +54,7 @@
     ALTER TABLE otros.existencias_limon_produccion DROP COLUMN id_clasificacion;
     ALTER TABLE otros.existencias_limon_produccion ADD COLUMN id_calibre integer NOT NULL;
     ALTER TABLE otros.existencias_limon_produccion ADD CONSTRAINT existencias_limon_produccion_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-   -- pcc|lap|san
+   -- pcc|lap|san|pct
     ALTER TABLE public.calibres ADD COLUMN tipo character varying(2) COLLATE pg_catalog."default" DEFAULT 't'::character varying;
     COMMENT ON COLUMN public.calibres.tipo IS 't: tamaño, c: calibre';
     UPDATE public.calibres SET tipo='c' WHERE status = 't';

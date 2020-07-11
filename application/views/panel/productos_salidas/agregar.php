@@ -94,6 +94,16 @@
                 </div>
               </div>
 
+              <div class="control-group" id="transferirEmpresa" style="<?php echo (isset($_POST['empresaTransId'])? 'display: block': 'display: none') ?>;">
+                <label class="control-label" for="empresaTrans">Transferir a Empresa <i class="icon-info-sign" title="Si seleccionas una empresa, los productos se moveran de almacen y de empresa"></i>: </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="empresaTrans" class="span11" id="empresaTrans" value="<?php echo set_value('empresaTrans') ?>" placeholder="Empaque, Mamita, etc">
+                  </div>
+                  <input type="hidden" name="empresaTransId" id="empresaTransId" value="<?php echo set_value('empresaTransId') ?>">
+                </div>
+              </div><!--/control-group -->
+
               <!-- <div class="control-group">
                 <label class="control-label" for="empresa">Concepto </label>
                 <div class="controls">

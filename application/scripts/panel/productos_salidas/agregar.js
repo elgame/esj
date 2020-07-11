@@ -72,7 +72,25 @@
       if(event.which == 8 || event.which == 46) {
         $("#empresaAp").css("background-color", "#FFD071");
         $("#empresaApId").val('');
-        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+        $("#empresaTrans, #empresaTransId, #area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
+
+    $("#empresaTrans").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaTrans =  $(this);
+
+        $empresaTrans.val(ui.item.id);
+        $("#empresaTransId").val(ui.item.id);
+        $empresaTrans.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaTrans").css("background-color", "#FFD071");
+        $("#empresaTransId").val('');
       }
     });
   };
@@ -524,8 +542,10 @@
   var eventChangeTraspaso = function () {
     $('#tid_almacen').change(function(event) {
       $('#groupCatalogos').show();
+       $('#transferirEmpresa').hide();
       if ($(this).val() != '') {
         $('#groupCatalogos').hide();
+        $('#transferirEmpresa').show();
       }
     });
   };

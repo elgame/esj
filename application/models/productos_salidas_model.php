@@ -5,6 +5,7 @@ class productos_salidas_model extends CI_Model {
   function __construct()
   {
     parent::__construct();
+    $this->load->model('bitacora_model');
   }
 
   /**
@@ -102,7 +103,7 @@ class productos_salidas_model extends CI_Model {
       $data = array(
         'id_empresa'        => $_POST['empresaId'],
         'id_empleado'       => $this->session->userdata('id_usuario'),
-        'folio'             => $_POST['folio'],
+        'folio'             => $this->folio(),
         'fecha_creacion'    => str_replace('T', ' ', $_POST['fecha']),
         'fecha_registro'    => date("Y-m-d H:i:s"),
         // 'concepto'       => '', //$_POST['conceptoSalida']
@@ -160,6 +161,18 @@ class productos_salidas_model extends CI_Model {
     if ($this->input->post('tipo') === 'c') {
       $this->agregarCombustible($id_salida, $data);
     }
+
+    // Bitacora
+    if (empty($this->input->post('empresa'))) {
+      $this->load->model('empresas_model');
+      $empp = $this->empresas_model->getInfoEmpresa($data['id_empresa']);
+      $_POST['empresa'] = $empp['info']->nombre_fiscal;
+    }
+    $this->bitacora_model->_insert('compras_salidas', $id_salida,
+                                    array(':accion'     => 'la salida de almacen', ':seccion' => 'salida de almacen',
+                                          ':folio'      => $data['folio'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'    => 'en '.$this->input->post('empresa')));
 
     return array('passes' => true, 'msg' => 3, 'id_salida' => $id_salida);
   }
@@ -341,8 +354,9 @@ class productos_salidas_model extends CI_Model {
       $rows_compras = 0;
       $proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
       $departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
+      $empresaIdd = !empty($_POST['empresaTransId'])? $_POST['empresaTransId']: $_POST['empresaId'];
       $data = array(
-        'id_empresa'         => $_POST['empresaId'],
+        'id_empresa'         => $empresaIdd,
         'id_proveedor'       => $proveedor->id_proveedor,
         'id_departamento'    => $departamento->id_departamento,
         'id_empleado'        => $this->session->userdata('id_usuario'),
@@ -361,6 +375,11 @@ class productos_salidas_model extends CI_Model {
       $compra = array();
       foreach ($productos as $key => $produto)
       {
+        if (!empty($_POST['empresaTransId'])) {
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          $produto['id_producto'] = $data_prod->id_producto;
+        }
+
         $ultima_compra = $this->compras_ordenes_model->getUltimaCompra($produto['id_producto']);
         $precio_unitario = (isset($ultima_compra->precio_unitario)? $ultima_compra->precio_unitario: 0);
         $presenta = $this->db->query("SELECT p.nombre, pp.id_presentacion
@@ -446,9 +465,18 @@ class productos_salidas_model extends CI_Model {
     $this->db->update('compras_salidas', array('status' => 'ca'), array('id_salida' => $idOrden));
 
     $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
-    $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
-
+    if (isset($orden->id_orden)) {
+      $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
+    }
     $this->db->delete('otros.recetas_salidas', "id_salida = {$idOrden}");
+
+    // Bitacora
+    $salidaa = $this->info($idOrden);
+    $this->bitacora_model->_cancel('compras_salidas', $idOrden,
+                                    array(':accion'     => 'la salida de almacen', ':seccion' => 'salida de almacen',
+                                          ':folio'      => $salidaa['info'][0]->folio,
+                                          ':id_empresa' => $salidaa['info'][0]->id_empresa,
+                                          ':empresa'    => 'en '.$salidaa['info'][0]->empresa));
 
     $this->db->query("SELECT refreshallmaterializedviews();");
 
@@ -989,7 +1017,7 @@ class productos_salidas_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', array(63, 280));
+    $pdf = new MYpdf('P', 'mm', array(63, 600));
     $pdf->show_head = false;
     $pdf->AddPage();
     $pdf->AddFont($pdf->fount_num, '');
@@ -1000,199 +1028,228 @@ class productos_salidas_model extends CI_Model {
     elseif ($orden['info'][0]->tipo == 'r')
       $tituloo = 'SALIDA DE COMBUSTIBLE';
 
-    // Título
-    $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
-    $pdf->SetXY(0, 3);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $tituloo.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
-    $pdf->SetFont($pdf->fount_txt, '', 8);
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $orden['info'][0]->empresa, 0, 'C');
-    $pdf->SetFont($pdf->fount_txt, '', 7);
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+    $pdf->SetY(0);
 
-    $pdf->SetWidths(array(10, 20, 11, 20));
-    $pdf->SetAligns(array('L','L', 'R', 'R'));
-    $pdf->SetFounts(array($pdf->fount_txt));
-    $pdf->SetX(0);
-    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
+    for ($noimp=0; $noimp < 2; $noimp++) {
+      // Título
+      $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
+      $pdf->SetXY(0, $pdf->GetY()+5);
+      $pdf->MultiCell($pdf->pag_size[0], 4, $tituloo.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
+      $pdf->SetFont($pdf->fount_txt, '', 8);
+      $pdf->SetX(0);
+      $pdf->MultiCell($pdf->pag_size[0], 4, $orden['info'][0]->empresa, 0, 'C');
+      $pdf->SetFont($pdf->fount_txt, '', 7);
+      $pdf->SetX(0);
+      $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+      if ($noimp > 0) {
+        $pdf->SetX(0);
+        $pdf->MultiCell($pdf->pag_size[0], 4, 'Vigilancia', 0, 'C');
+      }
 
-    $semana = MyString::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
+      $pdf->SetWidths(array(10, 20, 11, 20));
+      $pdf->SetAligns(array('L','L', 'R', 'R'));
+      $pdf->SetFounts(array($pdf->fount_txt));
+      $pdf->SetX(0);
+      $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
 
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-    $pdf->SetWidths(array(64));
-    $pdf->SetAligns(array('L', 'L'));
+      $semana = MyString::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
 
-    if (isset($orden['info'][0]->proyecto)) {
       $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+      $pdf->SetWidths(array(64));
+      $pdf->SetAligns(array('L', 'L'));
+
+      if (isset($orden['info'][0]->proyecto)) {
+        $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+        $pdf->SetXY(0, $pdf->GetY()-1);
+        $pdf->Row2(array('Proyecto: '. $orden['info'][0]->proyecto['info']->nombre), false, false);
+      }
+
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array('Proyecto: '. $orden['info'][0]->proyecto['info']->nombre), false, false);
-    }
-
-    $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array('Empresa aplicación: '), false, false);
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array($orden['info'][0]->empresa_ap), false, false);
-
-    if (isset($orden['info'][0]->area->nombre)) {
-      $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Cultivo / Actividad / Producto: '), false, false);
+      $pdf->Row2(array('Empresa aplicación: '), false, false);
       $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array($orden['info'][0]->area->nombre), false, false);
-    }
+      $pdf->Row2(array($orden['info'][0]->empresa_ap), false, false);
 
-    $txtranchos = [];
-    if (count($orden['info'][0]->rancho) > 0) {
-      $pdf->SetXY(0, $pdf->GetY()-1);
-      $txtranchos = array_column($orden['info'][0]->rancho, 'nombre');
-    }
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-    $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array('Areas / Ranchos / Lineas: '), false, false);
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array(implode(', ', $txtranchos)), false, false);
+      if (isset($orden['info'][0]->area->nombre)) {
+        $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Cultivo / Actividad / Producto: '), false, false);
+        $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array($orden['info'][0]->area->nombre), false, false);
+      }
 
-    $txtcentroCostos = [];
-    if (count($orden['info'][0]->centroCosto) > 0) {
-      $txtcentroCostos = array_column($orden['info'][0]->centroCosto, 'nombre');
-    }
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Centros de costo: '), false, false);
-    $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array(implode(', ', $txtcentroCostos)), false, false);
-
-    if (isset($orden['info'][0]->activo->nombre)) {
+      $txtranchos = [];
+      if (count($orden['info'][0]->rancho) > 0) {
+        $pdf->SetXY(0, $pdf->GetY()-1);
+        $txtranchos = array_column($orden['info'][0]->rancho, 'nombre');
+      }
       $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array('Activo: '), false, false);
+      $pdf->Row2(array('Areas / Ranchos / Lineas: '), false, false);
       $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array($orden['info'][0]->activo->nombre), false, false);
-    }
+      $pdf->Row2(array(implode(', ', $txtranchos)), false, false);
 
-    if ($orden['info'][0]->tipo == 'c' && isset($orden['info'][0]->combustible)) {
+      $txtcentroCostos = [];
+      if (count($orden['info'][0]->centroCosto) > 0) {
+        $txtcentroCostos = array_column($orden['info'][0]->centroCosto, 'nombre');
+      }
+      $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Centros de costo: '), false, false);
+      $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array(implode(', ', $txtcentroCostos)), false, false);
+
+      if (isset($orden['info'][0]->activo->nombre)) {
+        $pdf->SetFounts(array($pdf->fount_txt), [], ['B']);
+        $pdf->SetXY(0, $pdf->GetY()-1);
+        $pdf->Row2(array('Activo: '), false, false);
+        $pdf->SetFounts(array($pdf->fount_txt), [], ['']);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array($orden['info'][0]->activo->nombre), false, false);
+      }
+
+      if ($orden['info'][0]->tipo == 'c' && isset($orden['info'][0]->combustible)) {
+        $pdf->SetWidths(array(32, 32));
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Odometro: '.MyString::formatoNumero($orden['info'][0]->combustible->odometro, 2, ''),
+                        'Hr Carga: '.substr($orden['info'][0]->combustible->hora_carga, 0, 8) ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Labor: '.$orden['info'][0]->combustible->labor, 'Implemento: '.$orden['info'][0]->combustible->implemento ), false, false);
+      }
+
+      if ($orden['info'][0]->tipo == 'r') {
+        $pdf->SetWidths(array(32, 32));
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('No Receta: '.$orden['info'][0]->no_receta, 'Semana: '.$semana['semana'] ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Etapa: '.$orden['info'][0]->etapa, 'Rancho: '.$orden['info'][0]->rancho_n ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('CC: '.$orden['info'][0]->centro_c, 'Hectareas: '.$orden['info'][0]->hectareas ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Grupo: '.$orden['info'][0]->grupo, 'No melgas: '.$orden['info'][0]->no_secciones ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('DD FS: '.$orden['info'][0]->dias_despues_de, 'Metodo A: '.$orden['info'][0]->metodo_aplicacion ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
+      }
+
       $pdf->SetWidths(array(32, 32));
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Odometro: '.MyString::formatoNumero($orden['info'][0]->combustible->odometro, 2, ''),
-                      'Hr Carga: '.substr($orden['info'][0]->combustible->hora_carga, 0, 8) ), false, false);
+      $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+      if (isset($orden['info'][0]->traspaso)) {
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Traspaso: '.$orden['info'][0]->traspaso->almacen, 'Fecha: '.MyString::fechaAT($orden['info'][0]->traspaso->fecha) ), false, false);
+      }
+      $pdf->SetWidths(array(65));
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Labor: '.$orden['info'][0]->combustible->labor, 'Implemento: '.$orden['info'][0]->combustible->implemento ), false, false);
-    }
+      $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
 
-    if ($orden['info'][0]->tipo == 'r') {
-      $pdf->SetWidths(array(32, 32));
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('No Receta: '.$orden['info'][0]->no_receta, 'Semana: '.$semana['semana'] ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Etapa: '.$orden['info'][0]->etapa, 'Rancho: '.$orden['info'][0]->rancho_n ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('CC: '.$orden['info'][0]->centro_c, 'Hectareas: '.$orden['info'][0]->hectareas ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Grupo: '.$orden['info'][0]->grupo, 'No melgas: '.$orden['info'][0]->no_secciones ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('DD FS: '.$orden['info'][0]->dias_despues_de, 'Metodo A: '.$orden['info'][0]->metodo_aplicacion ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
-    }
+      $pdf->SetFont($pdf->fount_txt, '', 7);
+      $pdf->SetX(0);
+      $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
+      $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-1);
 
-    $pdf->SetWidths(array(32, 32));
-    $pdf->SetAligns(array('L', 'L'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
-    if (isset($orden['info'][0]->traspaso)) {
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Traspaso: '.$orden['info'][0]->traspaso->almacen, 'Fecha: '.MyString::fechaAT($orden['info'][0]->traspaso->fecha) ), false, false);
-    }
-    $pdf->SetWidths(array(65));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
+      if ($noimp > 0) {
+        $pdf->SetWidths(array(15, 48));
+        $pdf->SetAligns(array('L','L'));
+        $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2));
+        $pdf->SetX(0);
+        $pdf->Row2(array('CANT.', 'DESCRIPCION'), false, true, 5);
 
-    $pdf->SetFont($pdf->fount_txt, '', 7);
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
-    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-1);
+        $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                       array(0,-1.5,-1.3,-1.2));
+      } else {
+        $pdf->SetWidths(array(10, 28, 11, 14));
+        $pdf->SetAligns(array('L','L','R','R'));
+        $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
+        $pdf->SetX(0);
+        $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
 
-    $pdf->SetWidths(array(10, 28, 11, 14));
-    $pdf->SetAligns(array('L','L','R','R'));
-    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
-    $pdf->SetX(0);
-    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
+        $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                       array(0,-1.5,-1.3,-1.2));
+      }
+      $subtotal = $iva = $total = $retencion = $ieps = 0;
+      $tipoCambio = 0;
+      $codigoAreas = array();
+      foreach ($orden['info'][0]->productos as $key => $prod) {
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        if ($noimp > 0) {
+          $pdf->Row2(array(
+            $prod->cantidad.' '.$prod->abreviatura,
+            $prod->producto,
+          ), false, false);
+        } else {
+          $pdf->Row2(array(
+            $prod->cantidad.' '.$prod->abreviatura,
+            $prod->producto,
+            MyString::formatoNumero($prod->precio_unitario, 2, '', true),
+            MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),
+          ), false, false);
+        }
 
-    $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(0,-1.5,-1.3,-1.2));
-    $subtotal = $iva = $total = $retencion = $ieps = 0;
-    $tipoCambio = 0;
-    $codigoAreas = array();
-    foreach ($orden['info'][0]->productos as $key => $prod) {
-      $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array(
-        $prod->cantidad.' '.$prod->abreviatura,
-        $prod->producto,
-        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
-        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+        $total += floatval($prod->precio_unitario*$prod->cantidad);
 
-      $total += floatval($prod->precio_unitario*$prod->cantidad);
+        if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
+          $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
+        $this->load->model('catalogos_sft_model');
+      }
 
-      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
-        $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
-      $this->load->model('catalogos_sft_model');
-    }
+      // $pdf->SetX(29);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(13, 20));
+      // $pdf->SetX(29);
+      // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
+      if ($noimp == 0) {
+        $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+        $pdf->SetX(30);
+        $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '', true)), false, true, 5);
+      }
 
-    // $pdf->SetX(29);
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetWidths(array(13, 20));
-    // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
-    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
-    $pdf->SetX(30);
-    $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '', true)), false, true, 5);
+      if ($orden['info'][0]->concepto != '') {
+        $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(66));
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Row2(array($orden['info'][0]->concepto), false, false);
+      }
 
-    if ($orden['info'][0]->concepto != '') {
-      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(66));
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(66, 0));
       $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row2(array($orden['info'][0]->concepto), false, false);
-    }
+      $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
 
-    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetWidths(array(66, 0));
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
-
-    $pdf->SetXY(0, $pdf->GetY()+3);
-    $pdf->Row2(array('_____________________________________________'), false, false);
-    $yy2 = $pdf->GetY();
-    if(count($codigoAreas) > 0){
+      $pdf->SetXY(0, $pdf->GetY()+3);
+      $pdf->Row2(array('_____________________________________________'), false, false);
       $yy2 = $pdf->GetY();
-      $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
-    }
+      if(count($codigoAreas) > 0){
+        $yy2 = $pdf->GetY();
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+      }
 
-    if ($orden['info'][0]->trabajador != '') {
+      if ($orden['info'][0]->trabajador != '') {
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+      }
+
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+      $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
+
+      $pdf->SetX(0);
+      $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
+      $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
     }
-
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
-
-    $pdf->SetX(0);
-    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
-    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
     $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
 
