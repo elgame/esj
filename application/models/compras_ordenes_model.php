@@ -916,7 +916,7 @@ class compras_ordenes_model extends CI_Model {
           if ($data['info'][0]->tipo_vehiculo != 'ot') {
             // Vehiculo anterior
             $query = $this->db->query(
-              "SELECT co.id_orden, co.folio, co.id_vehiculo, co.tipo_vehiculo,
+              "SELECT co.id_orden, co.folio, co.fecha_creacion AS fecha, co.id_vehiculo, co.tipo_vehiculo,
                 cvg.kilometros, cvg.litros, cvg.precio, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS vehiculo
               FROM compras_ordenes co
                 INNER JOIN compras_vehiculos_gasolina cvg ON co.id_orden = cvg.id_orden
@@ -2648,6 +2648,8 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(15, 40));
           $pdf->SetX(85);
+          $pdf->Row(array('Fecha', substr($orden['info'][0]->gasolina_ant->fecha, 0, 10)), false, true);
+          $pdf->SetX(85);
           $pdf->Row(array('Vehículo', $orden['info'][0]->gasolina_ant->vehiculo), false, true);
           $pdf->SetX(85);
           $pdf->Row(array('Tipo', ($orden['info'][0]->gasolina_ant->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
@@ -2667,6 +2669,8 @@ class compras_ordenes_model extends CI_Model {
 
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(15, 40));
+        $pdf->SetX(140);
+        $pdf->Row(array('Fecha', substr($orden['info'][0]->fecha, 0, 10)), false, true);
         $pdf->SetX(140);
         $pdf->Row(array('Vehículo', $orden['info'][0]->placa.' '.$orden['info'][0]->modelo.' '.$orden['info'][0]->marca), false, true);
         $pdf->SetX(140);
