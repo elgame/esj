@@ -32,6 +32,9 @@ class inventario extends MY_Controller {
     'inventario/eclasif_pdf/',
     'inventario/historial_nivelar_pdf/',
 
+    'inventario/rptExistencia2_pdf/',
+    'inventario/rptExistencia2_xls/',
+
     'inventario/ajax_get_familias/',
 
     'cuentas_pagar/saldos_xls/',
@@ -347,6 +350,41 @@ class inventario extends MY_Controller {
       $this->load->model('inventario_model');
       $this->inventario_model->getPromediodf();
     }
+  }
+
+  public function rptExistencia2()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de inventario 2');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/inventario/rptExistencia2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rptExistencia2_pdf() {
+    $this->load->model('inventario_model');
+    $this->inventario_model->promedioAllPdf();
+  }
+  public function rptExistencia2_xls() {
+    $this->load->model('inventario_model');
+    $this->inventario_model->promedioAllXls();
   }
 
   /**
