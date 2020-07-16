@@ -673,7 +673,7 @@ class productos_salidas extends MY_Controller {
 
   public function val_productos_traspaso($auto)
   {
-    if (!empty($_POST['tid_almacen'])) {
+    if (!empty($_POST['tid_almacen']) && !empty($_POST['empresaTransId'])) {
       if (is_array($this->input->post('productoId')) && count($this->input->post('productoId')) > 0)
       {
         $response = true;
