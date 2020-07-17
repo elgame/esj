@@ -268,6 +268,13 @@ class Usuarios_model extends privilegios_model {
     }
   }
 
+  public function copiarPrivilegios($data)
+  {
+    echo "<pre>";
+    var_dump($data);
+    echo "</pre>";exit;
+  }
+
 	/*
 	 |	Obtiene la informacion de un usuario
 	 */

@@ -1,8 +1,9 @@
 
  ✔ En traspasos de almacen ver como poner una empresa de aplicación para que se cambie de empresa los productos tambien @done (20-07-10 18:32)
  ☐ En nivelacion ver como hacer que no tarde tanto
+ ☐ Poner opcion en empresas para copiar privilegios
  ✔ Reporte de inventario de almacen como la hoja @done (20-07-15 22:49)
-   -- pcc
+   -- pcc|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de inventario 2',369,true,'inventario/rptExistencia2/','print',true);
  ✔ En las ordenes de compra (servicio) que seleccionan el vehiculo y diesel o gasolina, en la impresion del pdf que salga cual fue la ultima compra de combustible de ese vehiculo @done (20-07-09 16:25)
  ✔ Al dejar ordenes con faltantes no pasa los codigos de cultivo, areas y centros de costo, etc al crear la orden automatica @done (20-07-08 17:52)
