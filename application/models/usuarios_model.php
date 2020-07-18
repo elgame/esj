@@ -268,11 +268,18 @@ class Usuarios_model extends privilegios_model {
     }
   }
 
-  public function copiarPrivilegios($data)
+  public function copiarPrivilegios($datos)
   {
-    echo "<pre>";
-    var_dump($data);
-    echo "</pre>";exit;
+    $this->load->model('usuarios_model');
+
+    $data = $this->usuarios_model->get_usuario_info($datos['usuarioId'], false, $datos['empresaId']);
+    $privilegios = isset($data['privilegios']) ? $data['privilegios']: [];
+
+    foreach ($datos['id_empresas'] as $key => $empresa) {
+      $this->updatePrivilegios($privilegios, $datos['usuarioId'], $empresa);
+    }
+
+    return array('error' => FALSE);
   }
 
 	/*

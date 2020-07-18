@@ -1,7 +1,7 @@
 
  ✔ En traspasos de almacen ver como poner una empresa de aplicación para que se cambie de empresa los productos tambien @done (20-07-10 18:32)
  ☐ En nivelacion ver como hacer que no tarde tanto
- ☐ Poner opcion en empresas para copiar privilegios
+ ✔ Poner opcion en empresas para copiar privilegios @done (20-07-17 20:43)
  ✔ Reporte de inventario de almacen como la hoja @done (20-07-15 22:49)
    -- pcc|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de inventario 2',369,true,'inventario/rptExistencia2/','print',true);

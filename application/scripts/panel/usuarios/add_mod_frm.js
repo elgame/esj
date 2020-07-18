@@ -28,7 +28,7 @@ $(function(){
   getPrivilegiosEmpresa();
   autocompleteCultivo();
 
-  getEmpresasIds($('#btnCopiar'));
+  changeEmpresa();
 });
 
 function cargaDepaPues () {
@@ -143,6 +143,15 @@ var autocompleteCultivo = function () {
     }
   });
 };
+
+
+function changeEmpresa() {
+  getEmpresasIds($('#btnCopiar'));
+
+  $("#id_empresa").on('change', function() {
+    getEmpresasIds($('#btnCopiar'));
+  })
+}
 
 function getEmpresasIds ($button, $modal) {
   console.log('test', $button, $modal);

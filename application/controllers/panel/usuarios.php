@@ -241,8 +241,8 @@ class usuarios extends MY_Controller {
       array('general/util.js'),
       array('general/keyjump.js'),
       array('general/msgbox.js'),
-      array('panel/compras_ordenes/agregar.js'),
-      array('panel/compras/ligar_ordenes.js'),
+      // array('panel/compras_ordenes/agregar.js'),
+      // array('panel/compras/ligar_ordenes.js'),
     ));
 
     $this->load->model('empresas_model');
@@ -257,20 +257,9 @@ class usuarios extends MY_Controller {
     {
       $res_mdl = $this->usuarios_model->copiarPrivilegios($_POST);
 
-      if ($res_mdl['passes'])
-      {
-        $params['frm_errors'] = $this->showMsgs(9);
-        $params['id_movimiento'] = (isset($res_mdl['ver_cheque']) ? $res_mdl['id_movimiento'] : '');
-        $params['reload'] = true;
+      if($res_mdl['error'] == FALSE) {
+        redirect(base_url('panel/usuarios/copiar_privilegios/?'.MyString::getVarsLink(array('msg')).'&rel=true&msg=9'));
       }
-      else
-      {
-        $params['frm_errors'] = $this->showMsgs($res_mdl['msg']);
-      }
-      // if ($res_mdl['passes'])
-      // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
-      // }
     }
 
     $params['empresas'] = $this->empresas_model->getEmpresas(500);
@@ -513,6 +502,10 @@ class usuarios extends MY_Controller {
 				$txt = 'El usuario se activó correctamente.';
 				$icono = 'success';
 				break;
+      case 9:
+        $txt = 'Se modificaron correctamente los privilegios de las empresas.';
+        $icono = 'success';
+        break;
 		}
 
 		return array(
