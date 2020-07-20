@@ -1697,7 +1697,7 @@ class compras_ordenes_model extends CI_Model {
               {$tipo_prod}
               pf.status = 'ac'
         ORDER BY p.nombre ASC
-        LIMIT 20");
+        -- LIMIT 20");
 
     $response = array();
     if($res->num_rows() > 0)
@@ -1752,7 +1752,7 @@ class compras_ordenes_model extends CI_Model {
 
     $res = $this->db->query(
        "SELECT p.*,
-              pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia
+              pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura
         FROM productos as p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
@@ -1766,7 +1766,7 @@ class compras_ordenes_model extends CI_Model {
         LIMIT 20");
 
     $prod = array();
-    if($res->num_rows() > 0)
+    if(!empty($res) && $res->num_rows() > 0)
     {
       $prod = $res->result();
 
