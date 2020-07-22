@@ -28,7 +28,7 @@
                   <div class="control-group">
                     <label class="control-label" for="folio">Folio</label>
                     <div class="controls">
-                      <input type="text" name="folio" id="folio" class="span12 vpos-int" required
+                      <input type="text" name="folio" id="folio" class="span12" required
                       value="<?php echo set_value('folio', (isset($pina['info']->folio)? $pina['info']->folio: '') ); ?>" autofocus placeholder="1, 2, 40, 100">
                     </div>
                   </div>
@@ -93,9 +93,21 @@
                     </select>
                   </div>
                   <div class="span3">
-                    <label>Melga</label>
+                    <!-- <label>Melga</label>
                     <input type="text" class="span11" id="icentroCosto" placeholder="Melga 1">
-                    <input type="hidden" id="icentroCostoId">
+                    <input type="hidden" id="icentroCostoId"> -->
+
+                    <label for="centroCosto">Melga </label>
+                    <input type="text" name="centroCosto" class="span12" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Melga 1">
+                    <ul class="tags" id="tagsCCIds">
+                    <?php if (isset($_POST['centroCostoId'])) {
+                      foreach ($_POST['centroCostoId'] as $key => $centroCostoId) { ?>
+                        <li><span class="tag"><?php echo $_POST['centroCostoText'][$key] ?></span>
+                          <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
+                          <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_POST['centroCostoText'][$key] ?>">
+                        </li>
+                     <?php }} ?>
+                    </ul>
                   </div>
                   <div class="span1">
                     <a href="javascript:void(0)" id="addCaja"><i class="icon-plus-sign-alt icon-4x"></i></a>

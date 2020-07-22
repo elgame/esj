@@ -36,15 +36,26 @@ class bascula_pina_model extends CI_Model {
   public function addEstibas($id, $datos)
   {
     $this->db->delete('otros.bascula_salida_pina_estibas', "id_salida_pina = {$id}");
+    $this->db->delete('otros.bascula_salida_pina_estibas_centro_costo', "id_salida_pina = {$id}");
     foreach ($datos['estiba'] as $key => $value) {
       $this->db->insert('otros.bascula_salida_pina_estibas', [
         'id_salida_pina'  => $id,
         'estiba'          => $value,
-        'id_centro_costo' => $datos['id_centro_costo'][$key],
         'id_calidad'      => $datos['id_calidad'][$key],
         'cantidad'        => $datos['cantidad'][$key],
       ]);
+
+      $centros_costos = explode(',', $datos['id_centro_costo'][$key]);
+      foreach ($centros_costos as $keyc => $centro) {
+        $this->db->insert('otros.bascula_salida_pina_estibas_centro_costo', [
+          'id_salida_pina'  => $id,
+          'estiba'          => $value,
+          'id_centro_costo' => $centro,
+          'num'             => count($centros_costos),
+        ]);
+      }
     }
+
   }
 
   public function getInfo($id, $tipo = 'bsp.id', $basic_info=false)
@@ -68,12 +79,19 @@ class bascula_pina_model extends CI_Model {
       if ($basic_info === false)
       {
         $sql_res = $this->db->query("
-          SELECT bsp.id_salida_pina, bsp.estiba, bsp.id_centro_costo, bsp.id_calidad, bsp.cantidad,
-            cc.nombre AS centro_costo, c.nombre AS calidad
+          SELECT bsp.id_salida_pina, bsp.estiba, cc.id_centro_costo, bsp.id_calidad, bsp.cantidad,
+            cc.centro_costo, c.nombre AS calidad
           FROM otros.bascula_salida_pina_estibas bsp
-            INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = bsp.id_centro_costo
             INNER JOIN calidades c ON c.id_calidad = bsp.id_calidad
+            INNER JOIN (
+              SELECT bspec.id_salida_pina, bspec.estiba, string_agg(cc.nombre, ', ') AS centro_costo,
+                string_agg(cc.id_centro_costo::text, ',') AS id_centro_costo
+              FROM otros.bascula_salida_pina_estibas_centro_costo bspec
+                INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = bspec.id_centro_costo
+              GROUP BY bspec.id_salida_pina, bspec.estiba
+            ) AS cc ON (cc.id_salida_pina = bsp.id_salida_pina AND cc.estiba = bsp.estiba)
           WHERE bsp.id_salida_pina = {$data['info']->id}");
+
         $data['estibas'] = $sql_res->result();
         $sql_res->free_result();
       }

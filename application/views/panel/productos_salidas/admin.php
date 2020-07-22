@@ -110,8 +110,10 @@
                         );
 
                         if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
-                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida."&itipo=0").'" target="_BLANK" title="Imprimir">
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida."&itipo=1").'" target="_BLANK" title="Imprimir">
+                                  <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket Vig</span></a>';
                         }
                       } else {
                         echo $this->usuarios_model->getLinkPrivSm('productos_salidas/modificar/', array(

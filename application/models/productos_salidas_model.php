@@ -1030,7 +1030,8 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->SetY(0);
 
-    for ($noimp=0; $noimp < 2; $noimp++) {
+    $noimp = !empty($_GET['itipo'])? $_GET['itipo']: 0;
+    // for ($noimp=0; $noimp < 2; $noimp++) {
       // Título
       $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
       $pdf->SetXY(0, $pdf->GetY()+5);
@@ -1249,7 +1250,7 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetX(0);
       $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
       $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
-    }
+    // }
 
     $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
 

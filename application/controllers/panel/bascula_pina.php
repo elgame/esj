@@ -33,6 +33,7 @@ class bascula_pina extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
@@ -96,7 +97,7 @@ class bascula_pina extends MY_Controller {
     $rules = array(
       array('field' => 'folio',
             'label' => 'Folio',
-            'rules' => 'required|integer'),
+            'rules' => 'required|max_length[30]'),
       array('field' => 'rancho',
             'label' => 'Rancho',
             'rules' => ''),

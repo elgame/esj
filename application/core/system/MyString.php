@@ -647,6 +647,39 @@ class MyString {
      }
   }
 
+  public static function obtenerQuincenasDelAnio($anio, $todas = false)
+  {
+    $quincenas = [];
+
+    $fecha_actual = date("Y-m-d");
+    $fecha = new DateTime("{$anio}-01-01");
+
+    for ($i=1; $i <= 24; $i++) {
+      $siguientePrimerDia = $fecha->format("Y-m-d");
+      if ($i % 2 == 0) {
+        $fecha->modify('last day of this month');
+      } else {
+        $fecha->add(new DateInterval('P14D'));
+      }
+      $siguienteUltimoDia = $fecha->format("Y-m-d");
+
+      $fecha->add(new DateInterval('P1D'));
+
+      $quincenas[] = [
+        'fecha_inicio' => $siguientePrimerDia,
+        'fecha_final'  => $siguienteUltimoDia,
+        'anio'         => $anio,
+        'quincena'     => $i,
+      ];
+
+      if (!$todas && $fecha_actual >= $siguientePrimerDia && $fecha_actual <= $siguienteUltimoDia) {
+        break;
+      }
+    }
+
+    return $quincenas;
+  }
+
   /**
    * Obtiene las semanas del año.
    *

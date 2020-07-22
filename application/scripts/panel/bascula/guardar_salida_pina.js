@@ -19,7 +19,7 @@ $(function(){
 
 var eventosEstibas = function () {
   // Evento keypress para los input de agregar caja.
-  $('#icentroCosto').on('keypress', function(e) {
+  $('#centroCosto').on('keypress', function(e) {
     if (e.charCode == '13') {
       e.preventDefault();
       $('#addCaja').trigger('click');
@@ -34,17 +34,23 @@ var eventosEstibas = function () {
 
       var $cantidad     = $('#icantidad'),
           $calidad       = $('#icalidad'),
-          $centroCosto   = $('#icentroCosto'),
-          $centroCostoId = $('#icentroCostoId'),
+          $centroCosto   = '', // $('#icentroCosto'),
+          $centroCostoId = '', // $('#icentroCostoId'),
           trHtml         = '',
           $tabla         = $('#tableEstibas'),
           countini       = (parseInt($('#iestibaIni').val())||1),
           countfin       = (parseInt($('#iestibaFin').val())||1);
+      $('.centroCostoId').each(function(index, el) {
+        $centroCostoId += ","+$(this).val();
+      });
+      $('.centroCostoText').each(function(index, el) {
+        $centroCosto += ", "+$(this).val();
+      });
 
       while(countini <= countfin) {
         trHtml += '<tr>'+
           '<td><input type="text" name="estiba[]" value="'+countini+'" class="estiba" readonly></td>'+
-          '<td><input type="hidden" name="id_centro_costo[]" value="'+$centroCostoId.val()+'">'+$centroCosto.val()+'</td>'+
+          '<td><input type="hidden" name="id_centro_costo[]" value="'+$centroCostoId.substr(1)+'">'+$centroCosto.substr(1)+'</td>'+
           '<td><input type="hidden" name="id_calidad[]" value="'+$calidad.val()+'">'+$('#icalidad option:selected').text()+'</td>'+
           '<td><input type="text" name="cantidad[]" value="'+$cantidad.val()+'" class="cantidad" readonly></td>'+
           '<td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja"><i class="icon-trash"></i></button></td>'+
@@ -61,8 +67,9 @@ var eventosEstibas = function () {
       $('#iestibaFin').val('');
       $cantidad.val('');
       $calidad.val('');
-      $centroCosto.val('');
-      $centroCostoId.val('');
+      $('#icentroCosto').val('');
+      $('#icentroCostoId').val('');
+      $('#tagsCCIds').html('');
 
       calculaTotales();
     }
@@ -93,7 +100,7 @@ var calculaTotales = function () {
 var validaAddEstibas = function () {
   var option = $('#icalidad option:selected').val() || '';
   if ($('#icantidad').val() === '' || option === '' || $('#iestibaIni').val() === '' || $('#iestibaFin').val() === ''
-    || $('#icentroCostoId').val() === '') {
+    || $('.centroCostoId').length === 0) {
     noty({"text": "Alguno de los campos están vacíos.", "layout":"topRight", "type": 'error'});
     return false;
   }
@@ -145,7 +152,7 @@ var autocompleteRanchos = function () {
 };
 
 var autocompleteCentroCosto = function () {
-    $("#icentroCosto").autocomplete({
+    $("#centroCosto").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
 
@@ -167,14 +174,33 @@ var autocompleteCentroCosto = function () {
       select: function( event, ui ) {
         var $centroCosto =  $(this);
 
-        $centroCosto.val(ui.item.id);
-        $("#icentroCostoId").val(ui.item.id);
-        $centroCosto.css("background-color", "#A1F57A");
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#icentroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
-        $("#icentroCosto").css("background-color", "#FFD071");
-        $("#icentroCostoId").val('');
+        $("#centroCosto").css("background-color", "#FFD071");
+        // $("#icentroCostoId").val('');
       }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
     });
   };

@@ -96,6 +96,13 @@
                       'btn_type' => 'btn-info btn-large btn-block',
                       'attrs' => array('target' => '_BLANK'))
                     );
+
+                    if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
+                      echo ' <a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida['info'][0]->id_salida."&itipo=0").'" target="_BLANK" title="Imprimir">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                      echo ' <a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida['info'][0]->id_salida."&itipo=1").'" target="_BLANK" title="Imprimir">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket Vig</span></a>';
+                    }
               ?>
                     </div>
                   </div>
