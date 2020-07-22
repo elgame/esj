@@ -3818,6 +3818,11 @@ class inventario_model extends privilegios_model{
     $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
     $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
 
+    if (empty($_GET['did_empresa'])) {
+      $empresaDef = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $empresaDef->id_empresa;
+    }
+
     $id_almacen = isset($_GET['did_almacen'])? $_GET['did_almacen']: 0;
     $id_producto = isset($_GET['fid_producto'])? $_GET['fid_producto']: 0;
     $res = $this->promedioAllData($this->input->get('did_empresa'), $_GET['ffecha1'], $_GET['ffecha2'], $id_almacen, $id_producto);
