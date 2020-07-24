@@ -58,6 +58,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Filtros
     $semana = $filtros['semana'] !== '' ? $this->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']) : $this->semanaActualDelMes();
+    $tipoNomina = $filtros['dia_inicia_semana']==15? 'quincena': 'semana';
 
     $sqlpt = $sqlsegu = $sql = $sqlg = $sqle_id = '';
     if ($filtros['empresaId'] !== '')
@@ -123,16 +124,16 @@ class nomina_fiscal_model extends CI_Model {
 
     // si la nomina esta guardada
     $nm_guardada = $this->db->query("SELECT Count(*) AS num FROM nomina_fiscal_guardadas
-                               WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana['semana']} AND tipo = '{$nm_tipo}'")->row();
+                               WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana[$tipoNomina]} AND tipo = '{$nm_tipo}'")->row();
 
     // Query para obtener los empleados de la semana de la nomina.
     if($nm_guardada->num > 0)
     {
-      $sql_nm_guardadas = "((nf.anio = {$semana['anio']} AND nf.semana = {$semana['semana']}) or
-                (nagui.anio = {$semana['anio']} AND nagui.semana = {$semana['semana']})) {$sqlg}
+      $sql_nm_guardadas = "((nf.anio = {$semana['anio']} AND nf.semana = {$semana[$tipoNomina]}) or
+                (nagui.anio = {$semana['anio']} AND nagui.semana = {$semana[$tipoNomina]})) {$sqlg}
          {$ordenar}";
       if($nm_tipo == 'pt') {
-        $sql_nm_guardadas = "nptu.anio = {$semana['anio']} AND nptu.semana = {$semana['semana']} {$sqlpt} {$ordenar}";
+        $sql_nm_guardadas = "nptu.anio = {$semana['anio']} AND nptu.semana = {$semana[$tipoNomina]} {$sqlpt} {$ordenar}";
       }
 
       $show_ag = ($nm_tipo=='ag'? 't': 'f');
@@ -197,7 +198,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.rfc,
                 u.cuenta_banco,
                 u.no_seguro,
-                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
+                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]} AND id_empleado = u.id) as dias_vacaciones_fijo,
                 (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
 
                 COALESCE(nptu.uuid, 'false') AS ptu_generado,
@@ -217,14 +218,14 @@ class nomina_fiscal_model extends CI_Model {
 
                 (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
          FROM usuarios u
-         LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-         LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
-         LEFT JOIN nomina_aguinaldo nagui ON (nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']} AND 't' = '{$show_ag}')
+         LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana[$tipoNomina]}
+         LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana[$tipoNomina]}
+         LEFT JOIN nomina_aguinaldo nagui ON (nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana[$tipoNomina]} AND 't' = '{$show_ag}')
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
          LEFT JOIN (
           SELECT id_empleado, Sum(hrs) AS hrs
           FROM nomina_asistencia_hrs
-          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana['semana']}
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
           GROUP BY id_empleado
          ) hrs ON u.id = hrs.id_empleado
          WHERE {$sql_nm_guardadas2} {$sql_nm_guardadas}
@@ -290,7 +291,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.rfc,
                 u.cuenta_banco,
                 u.no_seguro,
-                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
+                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]} AND id_empleado = u.id) as dias_vacaciones_fijo,
                 (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
 
                 'false' AS ptu_generado,
@@ -311,8 +312,8 @@ class nomina_fiscal_model extends CI_Model {
                 (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
          FROM usuarios u
          LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
-         LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-         LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
+         LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana[$tipoNomina]}
+         LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana[$tipoNomina]}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
          LEFT JOIN (
           SELECT id_empleado,
@@ -324,7 +325,7 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN (
           SELECT id_empleado, Sum(hrs) AS hrs
           FROM nomina_asistencia_hrs
-          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana['semana']}
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
           GROUP BY id_empleado
          ) hrs ON u.id = hrs.id_empleado
          WHERE u.user_nomina = 't' AND u.status = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
@@ -421,7 +422,7 @@ class nomina_fiscal_model extends CI_Model {
             GROUP BY id_empleado
           ) acum_sem ON u.id = acum_sem.id_empleado
           LEFT JOIN (
-            SELECT * FROM nomina_ptu WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empresa = {$filtros['empresaId']}
+            SELECT * FROM nomina_ptu WHERE anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]} AND id_empresa = {$filtros['empresaId']}
           ) np ON np.id_empleado = u.id
             -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
@@ -512,109 +513,111 @@ class nomina_fiscal_model extends CI_Model {
           np.status, DATE(np.fecha), DATE(np.inicio_pago)
     ");
 
-      // Recorre los empleados para sacar las faltas|incapacidades y los prestamos
-      // del empleado.
+    // Recorre los empleados para sacar las faltas|incapacidades y los prestamos
+    // del empleado.
 
-      $faltasOIncapacidades = array();
-      // Si hay faltas o incapacidades entra.
-      if ($queryFi->num_rows() > 0)
+    $faltasOIncapacidades = array();
+    // Si hay faltas o incapacidades entra.
+    if ($queryFi->num_rows() > 0)
+    {
+      $faltasOIncapacidades = $queryFi->result();
+    }
+
+    $prestamos = array();
+    // Si hay prestamos entra.
+    if ($queryPrestamos->num_rows() > 0 && $nm_guardada->num == 0)
+    {
+      $prestamos = $queryPrestamos->result();
+    }
+
+
+    // Recorre los empleados para obtener las faltas|incapacidades y los
+    // prestamos de cada uno.
+    foreach ($empleados as $keye => $empleado)
+    {
+      $dias_trabajadosAux = $empleado->dias_trabajados;
+      $empleado->dias_trabajados = ($tipoNomina == 'quincena'? 15: 6);
+      $empleado->ttipo_nnomina = $tipoNomina;
+      $empleado->incapacidades = array();
+      $empleado->prestamos = array();
+
+      if (count($faltasOIncapacidades) > 0)
       {
-        $faltasOIncapacidades = $queryFi->result();
-      }
-
-      $prestamos = array();
-      // Si hay prestamos entra.
-      if ($queryPrestamos->num_rows() > 0 && $nm_guardada->num == 0)
-      {
-        $prestamos = $queryPrestamos->result();
-      }
-
-
-      // Recorre los empleados para obtener las faltas|incapacidades y los
-      // prestamos de cada uno.
-      foreach ($empleados as $keye => $empleado)
-      {
-        $dias_trabajadosAux = $empleado->dias_trabajados;
-        $empleado->dias_trabajados = 6;
-        $empleado->incapacidades = array();
-        $empleado->prestamos = array();
-
-        if (count($faltasOIncapacidades) > 0)
+        foreach ($faltasOIncapacidades as $fi)
         {
-          foreach ($faltasOIncapacidades as $fi)
+          $diasIncapacidad = 0;
+
+          // Si la falta o incapacidad pertenece al usuario actual.
+          if ($fi->id_usuario === $empleado->id)
           {
-            $diasIncapacidad = 0;
-
-            // Si la falta o incapacidad pertenece al usuario actual.
-            if ($fi->id_usuario === $empleado->id)
+            // Si es una falta entonces le resta 1 dia a los dias_trabajados.
+            if ($fi->tipo === 'f')
             {
-              // Si es una falta entonces le resta 1 dia a los dias_trabajados.
-              if ($fi->tipo === 'f')
-              {
-                $empleado->dias_trabajados -= 1;
+              $empleado->dias_trabajados -= 1;
+            }
+
+            // Si es una incapacidad entra.
+            else
+            {
+              // Obtiene el primer dia de incapacidad para la semana
+              $diaIniciaIncapacidad = strtotime($fi->fecha_ini) > strtotime($diaPrimeroDeLaSemana) ? $fi->fecha_ini : $diaPrimeroDeLaSemana;
+
+              // Obtiene el ultimo dia de incapacidad para la semana
+              $diaTerminaIncapacidad = strtotime($fi->fecha_fin) < strtotime($diaUltimoDeLaSemana) ? $fi->fecha_fin : $diaUltimoDeLaSemana;
+
+              $diasIncapacidad = intval(MyString::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
+
+              if ($nm_tipo == 'pt') { // es ptu
+                // cuando es ptu a los dias trabajados se le suma las incapasidades por maternidad y riesgo de trabajo
+                // ya que el ptu tiene que ser dias trabajados - faltas - incapasidades por enfermedad.
+                // en ptu_dias_trabajados_empleado no tiene las faltas ni las incapasidades
+                $empleado->ptu_dias_trabajados_empleado += $fi->dias_autorizados;
+              } else {
+                // Le resta a los dias trabajados los de incapacidad.
+                $empleado->dias_trabajados -= $diasIncapacidad;
               }
 
-              // Si es una incapacidad entra.
-              else
-              {
-                // Obtiene el primer dia de incapacidad para la semana
-                $diaIniciaIncapacidad = strtotime($fi->fecha_ini) > strtotime($diaPrimeroDeLaSemana) ? $fi->fecha_ini : $diaPrimeroDeLaSemana;
-
-                // Obtiene el ultimo dia de incapacidad para la semana
-                $diaTerminaIncapacidad = strtotime($fi->fecha_fin) < strtotime($diaUltimoDeLaSemana) ? $fi->fecha_fin : $diaUltimoDeLaSemana;
-
-                $diasIncapacidad = intval(MyString::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
-
-                if ($nm_tipo == 'pt') { // es ptu
-                  // cuando es ptu a los dias trabajados se le suma las incapasidades por maternidad y riesgo de trabajo
-                  // ya que el ptu tiene que ser dias trabajados - faltas - incapasidades por enfermedad.
-                  // en ptu_dias_trabajados_empleado no tiene las faltas ni las incapasidades
-                  $empleado->ptu_dias_trabajados_empleado += $fi->dias_autorizados;
-                } else {
-                  // Le resta a los dias trabajados los de incapacidad.
-                  $empleado->dias_trabajados -= $diasIncapacidad;
-                }
-
-                // Agrega esa incapacidad al array de incapacidades.
-                // el descuento es multiplicado por el salario_diario que es el salario con el que
-                // se hara el timbrado.
-                $empleado->incapacidades[] = array(
-                  'DiasIncapacidad' => $diasIncapacidad,
-                  'TipoIncapacidad' => $fi->sat_clave,
-                  'ImporteMonetario' => number_format(floatval($diasIncapacidad) * floatval($empleado->salario_diario), 2),
-                );
-              }
+              // Agrega esa incapacidad al array de incapacidades.
+              // el descuento es multiplicado por el salario_diario que es el salario con el que
+              // se hara el timbrado.
+              $empleado->incapacidades[] = array(
+                'DiasIncapacidad' => $diasIncapacidad,
+                'TipoIncapacidad' => $fi->sat_clave,
+                'ImporteMonetario' => number_format(floatval($diasIncapacidad) * floatval($empleado->salario_diario), 2),
+              );
             }
           }
         }
+      }
 
-        if (count($prestamos) > 0)
+      if (count($prestamos) > 0)
+      {
+        foreach ($prestamos as $key => $prestamo)
         {
-          foreach ($prestamos as $key => $prestamo)
+          if ($prestamo->id_usuario === $empleado->id)
           {
-            if ($prestamo->id_usuario === $empleado->id)
+            // Obtiene lo que falta de pagar.
+            $diff = $prestamo->prestado - $prestamo->total_pagado;
+
+            // Si lo que falta de pagar es mayor o igual al pago que
+            // se da semalmente entra.
+            if ($diff >= $prestamo->pago_semana)
             {
-              // Obtiene lo que falta de pagar.
-              $diff = $prestamo->prestado - $prestamo->total_pagado;
-
-              // Si lo que falta de pagar es mayor o igual al pago que
-              // se da semalmente entra.
-              if ($diff >= $prestamo->pago_semana)
-              {
-                $prestamo->pago_semana_descontar = $prestamo->pago_semana;
-              }
-              else
-              {
-                $prestamo->pago_semana_descontar = $diff;
-              }
-
-              $empleado->prestamos[] = (array)$prestamo;
-              unset($prestamos[$key]);
+              $prestamo->pago_semana_descontar = $prestamo->pago_semana;
             }
+            else
+            {
+              $prestamo->pago_semana_descontar = $diff;
+            }
+
+            $empleado->prestamos[] = (array)$prestamo;
+            unset($prestamos[$key]);
           }
         }
+      }
 
-        // Calcula proporcional el septimo dia a los asegurados.
+      // Calcula proporcional el septimo dia a los asegurados.
+      if ($empleado->ttipo_nnomina == 'semana') {
         if ($empleado->esta_asegurado == 't')
         {
           $empleado->dias_trabajados = round((($empleado->dias_trabajados >= 0 ? $empleado->dias_trabajados : 0) * 7) / 6, 2);
@@ -623,20 +626,21 @@ class nomina_fiscal_model extends CI_Model {
         {
           $empleado->dias_trabajados += 1;
         }
-
-        if($dias_trabajadosAux != -1 && $nm_guardada->num > 0) {
-          $empleado->dias_trabajados = $dias_trabajadosAux;
-        }
-
-        //quita al trabajador si esta de vacaciones
-        if($empleado->en_vacaciones == '')
-          true;
-        elseif( $diaUltimoDeLaSemana >= $empleado->en_vacaciones  )
-          true;
-        elseif($empleado->dias_trabajados == 0 && $tipo !== 'ag' && $tipo !== 'ptu')
-          unset($empleados[$keye]);
-
       }
+
+      if($dias_trabajadosAux != -1 && $nm_guardada->num > 0) {
+        $empleado->dias_trabajados = $dias_trabajadosAux;
+      }
+
+      //quita al trabajador si esta de vacaciones
+      if($empleado->en_vacaciones == '')
+        true;
+      elseif( $diaUltimoDeLaSemana >= $empleado->en_vacaciones  )
+        true;
+      elseif($empleado->dias_trabajados == 0 && $tipo !== 'ag' && $tipo !== 'ptu')
+        unset($empleados[$keye]);
+
+    }
 
     $total_dias_trabajados = 0;
     $ptu_percepciones_empleados = 0;
@@ -1215,7 +1219,7 @@ class nomina_fiscal_model extends CI_Model {
         log_message('error', "nomina");
         log_message('error', json_encode($datosApi));
         // echo "<pre>";
-        //   var_dump(json_encode($datosApi));
+        //   var_dump($datosApi);
         // echo "</pre>";exit;
         $result = $this->timbrar($datosApi);
         // $result = $this->timbrar($archivo['pathXML']);
@@ -1348,7 +1352,11 @@ class nomina_fiscal_model extends CI_Model {
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
     $diasTransAguinaldo = $fechaSalida->diff(new DateTime($fechaIniAguinaldo))->format("%a") + 1;
 
-    $semanaQueSeVa = MyString::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, $diasInicia, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
+    if ($diasInicia == 15) {
+      $semanaQueSeVa = MyString::obtenerQuincenasDelAnio($fechaSalida->format('Y'), true, $fechaSalida->format('Y-m-d'));
+    } else {
+      $semanaQueSeVa = MyString::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, $diasInicia, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
+    }
     $fechaInicioSemana = new DateTime($semanaQueSeVa['fecha_inicio']);
     $diasTrabajadosSemana = $fechaInicioSemana->diff($fechaSalida)->days + 1;
 
@@ -1566,7 +1574,7 @@ class nomina_fiscal_model extends CI_Model {
     log_message('error', json_encode($datosApi));
     $result = $this->timbrar($datosApi);
     // echo "<pre>";
-    //   var_dump($archivo, $result, $cadenaOriginal);
+    //   var_dump($result, $datosApi);
     // echo "</pre>";exit;
 
     $msg = '';
@@ -2998,7 +3006,11 @@ class nomina_fiscal_model extends CI_Model {
   public function semanasDelAno($diaComienza, $anio=null)
   {
     $anio = $anio==null? date('Y'): $anio;
-    return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza);
+    if ($diaComienza == 15) {
+      return MyString::obtenerQuincenasDelAnio($anio);
+    } else {
+      return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza);
+    }
   }
 
   /**
@@ -3020,7 +3032,11 @@ class nomina_fiscal_model extends CI_Model {
   public function semanaActualDelMes($anio=null, $mes = 0, $diaInicia = 4)
   {
     $anio = $anio!=null? $anio: date('Y');
-    $semanas = MyString::obtenerSemanasDelAnioV2(date('Y'), $mes, $diaInicia);
+    if ($diaInicia == 15) {
+      $semanas = MyString::obtenerQuincenasDelAnio($anio);
+    } else {
+      $semanas = MyString::obtenerSemanasDelAnioV2($anio, $mes, $diaInicia);
+    }
     return end($semanas);
   }
 
@@ -3033,7 +3049,14 @@ class nomina_fiscal_model extends CI_Model {
   public function fechasDeUnaSemana($semanaABuscar, $anio=null, $diaComienza=4)
   {
     $anio = $anio!=null? $anio: date('Y');
-    return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza, false, $semanaABuscar);
+    if ($diaComienza == 15) {
+      return MyString::obtenerQuincenasDelAnio($anio, true, $semanaABuscar);
+    } else {
+      // echo "<pre>";
+      //   var_dump(MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza, false, $semanaABuscar));
+      // echo "</pre>";exit;
+      return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza, false, $semanaABuscar);
+    }
   }
 
   /**
@@ -3083,14 +3106,15 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
-    $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros);
-    $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
+    $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
     $content           = array();
     $contentSantr      = array();
@@ -3294,12 +3318,13 @@ class nomina_fiscal_model extends CI_Model {
       $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $diaComienza = '4';
+    $tipoNomina = $diaComienza == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
     $filtros = array(
-      'semana' => $semana['semana'],
+      'semana' => $semana[$tipoNomina],
       'anio' => $anio,
       'empresaId' => $empresaId,
       'asegurado' => 'si',
@@ -3322,7 +3347,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->show_head = true;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -5426,6 +5451,8 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+
+    $tipoNomina = $empresa['info']->dia_inicia_semana == 15? 'quincena': 'semana';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
 
     $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
@@ -5439,7 +5466,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->logo = $empresa['info']->logo;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -5922,7 +5949,7 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($finiquitos as $key => $empleado)
     {
       $numero_empleado++;
-      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana['semana'], $semana['anio'], $empresa['info']->dia_inicia_semana);
+      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana[$tipoNomina], $semana['anio'], $empresa['info']->dia_inicia_semana);
       $bonos_suma = 0;
       foreach ($bonos as $keybb => $value)
         $bonos_suma += $value->bono+$value->otro;
@@ -6066,7 +6093,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $this->load->model('nomina_ranchos_model');
       $filtros = array(
-        'semana'    => $semana['semana'],
+        'semana'    => $semana[$tipoNomina],
         'anio'      => $semana['anio'],
         'empresaId' => $empresa['info']->id_empresa,
         'puestoId'  => '',
@@ -6331,14 +6358,17 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+
+    $tipoNomina = $empresa['info']->dia_inicia_semana == 15? 'quincena': 'semana';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+
     $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
       WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
 
     $html = '<table>';
     $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
     $html .= $this->rowXls( array("Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}") );
-    $html .= $this->rowXls( array("Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}") );
+    $html .= $this->rowXls( array("Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}") );
     $html .= $this->rowXls( array() );
 
     //no mostrar algunas columnas
@@ -6756,7 +6786,7 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($finiquitos as $key => $empleado)
     {
       $numero_empleado++;
-      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana['semana'], $semana['anio'], $empresa['info']->dia_inicia_semana);
+      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana[$tipoNomina], $semana['anio'], $empresa['info']->dia_inicia_semana);
       $bonos_suma = 0;
       foreach ($bonos as $keybb => $value)
         $bonos_suma += $value->bono+$value->otro;
@@ -6892,7 +6922,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $this->load->model('nomina_ranchos_model');
       $filtros = array(
-        'semana'    => $semana['semana'],
+        'semana'    => $semana[$tipoNomina],
         'anio'      => $semana['anio'],
         'empresaId' => $empresa['info']->id_empresa,
         'puestoId'  => '',
@@ -7111,10 +7141,11 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'ordenar' => " ORDER BY u.id ASC", 'anio' => $anio,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
@@ -7125,14 +7156,14 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($empleados as $key => $value)
     {
       if ($value->esta_asegurado == 't')
-        $this->pdfReciboNominaFiscal($value->id, $semana['semana'], $anio, $empresaId, $pdf);
+        $this->pdfReciboNominaFiscal($value->id, $semana[$tipoNomina], $anio, $empresaId, $pdf);
     }
 
     $finiquitos = $this->db->query("SELECT * FROM finiquito AS f
       WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
     foreach ($finiquitos as $key => $value)
     {
-      $this->pdfReciboNominaFiscalFiniquito($value->id_empleado, $semana['semana'], $anio, $empresaId, $pdf);
+      $this->pdfReciboNominaFiscalFiniquito($value->id_empleado, $semana[$tipoNomina], $anio, $empresaId, $pdf);
     }
 
     $pdf->Output('Nomina.pdf', 'I');
@@ -7147,10 +7178,11 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
@@ -7162,7 +7194,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_fiscal WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_fiscal WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     if (!isset($nomina->xml)) {
       return false;
@@ -7188,7 +7220,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->logo = $empresa['info']->logo;
       $pdf->titulo2 = "Recibo de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-      $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+      $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
@@ -7704,10 +7736,11 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana['semana'], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
@@ -7719,7 +7752,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_fiscal WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_fiscal WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     if (!isset($nomina->xml)) {
       return false;
@@ -7742,7 +7775,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->logo = $empresa['info']->logo;
     $pdf->titulo2 = "Recibo de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -7852,16 +7885,18 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       // Sueldo Séptimo día
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('L', 'L', 'R'));
-      $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array("001", '7 Dia Sueldo Gravado', MyString::formatoNumero($septimo_dia_gravado, 2, '$', false)), false, 0, null, 1, 1);
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array("001", '7 Dia Sueldo Exento', MyString::formatoNumero($septimo_dia_exento, 2, '$', false)), false, 0, null, 1, 1);
-      if($pdf->GetY() >= $pdf->limiteY)
-      {
-        $pdf->AddPage();
-        $y2 = $pdf->GetY();
+      if ($tipoNomina == 'semana') {
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array("001", '7 Dia Sueldo Gravado', MyString::formatoNumero($septimo_dia_gravado, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array("001", '7 Dia Sueldo Exento', MyString::formatoNumero($septimo_dia_exento, 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
       }
 
       // P ASISTENCIA
@@ -8717,6 +8752,7 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
@@ -8763,7 +8799,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->show_head = true;
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = "Recibo de Finiquito de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-      $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+      $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
@@ -10269,11 +10305,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
@@ -10286,7 +10323,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_ptu WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_ptu WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
 
@@ -10312,7 +10349,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->logo = $empresa['info']->logo;
       // $pdf->titulo2 = "Recibo de PTU de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
       $pdf->titulo2 = "Recibo de PTU";
-      $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+      $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
@@ -10629,11 +10666,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
@@ -10646,7 +10684,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_ptu WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_ptu WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
 
@@ -10669,7 +10707,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->logo = $empresa['info']->logo;
     // $pdf->titulo2 = "Recibo de PTU de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     $pdf->titulo2 = "Recibo de PTU";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -10981,10 +11019,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
+
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
@@ -10994,7 +11034,7 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($empleados as $key => $value)
     {
       if ($value->esta_asegurado == 't')
-        $this->pdfReciboNominaFiscalPtu($value->id, $semana['semana'], $anio, $empresaId, $pdf);
+        $this->pdfReciboNominaFiscalPtu($value->id, $semana[$tipoNomina], $anio, $empresaId, $pdf);
     }
 
     $pdf->Output('PTU.pdf', 'I');
@@ -11010,11 +11050,12 @@ class nomina_fiscal_model extends CI_Model {
       $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $diaComienza = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si',
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'asegurado' => 'si',
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
       'ordenar' => "ORDER BY u.id ASC", 'anio' => $semana['anio']);
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
@@ -11033,7 +11074,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     // $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     $pdf->titulo2 = "PTU - Reparto de Utilidades";
-    // $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    // $pdf->titulo3 = "Periodo Semanal No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -11587,6 +11628,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $tipoNomina = $empresa['info']->dia_inicia_semana == 15? 'quincena': 'semana';
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -11595,7 +11637,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->logo = $empresa['info']->logo;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "PTU - Reparto de Utilidades";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -11792,7 +11834,7 @@ class nomina_fiscal_model extends CI_Model {
     $html = '<table>';
     $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
     $html .= $this->rowXls( array("PTU - Reparto de Utilidades") );
-    $html .= $this->rowXls( array("Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}") );
+    $html .= $this->rowXls( array("Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}") );
     $html .= $this->rowXls( array() );
 
     $columnas = array('n' => array(), 'w' => array(5, 64, 20, 20, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
@@ -11953,12 +11995,12 @@ class nomina_fiscal_model extends CI_Model {
 
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
               'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado' => true,
               'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
             );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
-    // $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
+    // $nombre = "PAGO-{$semana['anio']}-SEM-{$semana[$tipoNomina]}.txt";
     $nombre = "PAGO-PTU-{$semana['anio']}.txt";
 
     $content           = array();
@@ -12438,11 +12480,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
                 'dia_inicia_semana' => $dia,
                 'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
               );
@@ -12465,7 +12508,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_aguinaldo WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_aguinaldo WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
 
@@ -12492,7 +12535,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->logo = $empresa['info']->logo;
       // $pdf->titulo2 = "Recibo de PTU de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
       $pdf->titulo2 = "Aguinaldo";
-      $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+      $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
       $pdf->AliasNbPages();
       $pdf->AddPage();
 
@@ -12809,11 +12852,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ag' );
@@ -12825,7 +12869,7 @@ class nomina_fiscal_model extends CI_Model {
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_aguinaldo WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+    $nomina = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_aguinaldo WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}")->row();
 
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
 
@@ -12848,7 +12892,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->logo = $empresa['info']->logo;
     // $pdf->titulo2 = "Recibo de PTU de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     $pdf->titulo2 = "Aguinaldo";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo ".ucfirst($tipoNomina)."l No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -13160,10 +13204,12 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
+
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
                 'dia_inicia_semana' => $dia,
                 'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
                 );
@@ -13185,7 +13231,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $value->aguinaldo_generado = $value->aguinaldo_generado === 'false'? '': $value->aguinaldo_generado;
       if ($value->esta_asegurado == 't' || $value->aguinaldo_generado != '')
-        $this->pdfReciboNominaFiscalAguinaldo($value->id, $semana['semana'], $anio, $empresaId, $pdf);
+        $this->pdfReciboNominaFiscalAguinaldo($value->id, $semana[$tipoNomina], $anio, $empresaId, $pdf);
     }
 
     $pdf->Output('AGUINALDOS.pdf', 'I');
@@ -13197,10 +13243,17 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
 
+    if ($empresaId !== '')
+      $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $diaComienza = '4';
+    $tipoNomina = $diaComienza == 15? 'quincena': 'semana';
+
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
+
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId,
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
       'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC", 'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
     $empleados = $this->nomina($configuraciones, $filtros,
@@ -13227,7 +13280,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     // $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     $pdf->titulo2 = "Aguinaldo";
-    // $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    // $pdf->titulo3 = "Periodo Semanal No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -13557,6 +13610,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $tipoNomina = $empresa['info']->dia_inicia_semana==15? 'quincena': 'semana';
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -13565,7 +13619,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->logo = $empresa['info']->logo;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "AGUINALDO";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo Semanal No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
@@ -13738,13 +13792,15 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $tipoNomina = $empresa['info']->dia_inicia_semana==15? 'quincena': 'semana';
+
     $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
       WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
 
     $html = '<table>';
     $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
     $html .= $this->rowXls( array("AGUINALDO") );
-    $html .= $this->rowXls( array("Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}") );
+    $html .= $this->rowXls( array("Periodo Semanal No. {$semana[$tipoNomina]} del Año {$semana['anio']}") );
     $html .= $this->rowXls( array() );
 
     $columnas = array('n' => array(), 'w' => array(5, 64, 20, 20), 'a' => array('L', 'L', 'R', 'R'));
@@ -13892,7 +13948,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');

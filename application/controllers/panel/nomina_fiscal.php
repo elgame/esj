@@ -209,16 +209,17 @@ class nomina_fiscal extends MY_Controller {
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
 
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
-    $filtros['semana'] = $filtros['semana'] != ''? $filtros['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
+    $filtros['semana'] = $filtros['semana'] != ''? $filtros['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -317,7 +318,9 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 
     // // Ajuste de Ptu
     // // ===================
@@ -328,13 +331,13 @@ class nomina_fiscal extends MY_Controller {
     // // echo "</pre>";exit;
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -433,15 +436,16 @@ class nomina_fiscal extends MY_Controller {
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
 
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();

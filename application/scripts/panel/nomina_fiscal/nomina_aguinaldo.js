@@ -556,14 +556,20 @@
   };
 
   var cargaSemanas = function () {
-    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'did_empresa': $("#empresaId").val()},
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
       function(data){
-        var html = '', i;
+        var html = '', i, tipoNomina = 'semana';
         console.log(data);
+
+        if (data.length > 0 && data[0]['quincena']) {
+          tipoNomina = 'quincena';
+        }
+
         for (i in data) {
-          html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
+          html += '<option value="'+data[i][tipoNomina]+'">'+data[i][tipoNomina]+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
         }
         $('#semanas').html(html);
+        $('.txtTiponomin').text(tipoNomina.charAt(0).toUpperCase() + tipoNomina.slice(1));
     });
   };
 

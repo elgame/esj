@@ -547,22 +547,30 @@ class Usuarios_model extends privilegios_model {
    * Obtiene el listado de empresas para usar en peticiones Ajax.
    */
   public function getUsuariosAjax(){
-    $sql = '';
+    $sql = "";
     if($this->input->get('empleados')!='')
       $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
       $sql .= " AND id_empresa = ".$this->input->get('did_empresa');
     if($this->input->get('only_usuario')!='')
       $sql .= " AND usuario IS NOT NULL";
+    if($this->input->get('status')!='') {
+      $status = $this->input->get('status')==='all'? '': $this->input->get('status');
+      if (!empty($status)) {
+        $sql .= " AND status = '{$status}'";
+      }
+    } else {
+      $sql .= " AND status = 't'";
+    }
 
     $res = $this->db->query(
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,
                 DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
-        WHERE status = 't' AND
-                (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                 lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                 lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
+        WHERE
+              (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+               lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+               lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
           {$sql}
         ORDER BY nombre ASC
         LIMIT 20");

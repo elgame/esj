@@ -617,6 +617,8 @@ class nomina
       $septimo = $this->empleado->salario_diario * $dias;
       $this->empleado->nomina->sueldo += round($septimo, 2);
 
+      $septimo = $this->empleado->ttipo_nnomina == 'quincena'? 0: $septimo;
+
       return array(
         'TipoPercepcion' => '001',
         'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'sueldo1': 'sueldo2')],
@@ -637,6 +639,7 @@ class nomina
   public function pPremioPuntualidad()
   {
     $premioPuntualidad = $this->empleado->nomina->sueldo * ($this->empresaConfig->puntualidad / 100);
+    $premioPuntualidad = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioPuntualidad;
 
     return array(
       'TipoPercepcion' => '010',
@@ -657,6 +660,7 @@ class nomina
   public function pPremioAsistencia()
   {
     $premioAsistencia = $this->empleado->nomina->sueldo * ($this->empresaConfig->asistencia / 100);
+    $premioAsistencia = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioAsistencia;
 
     return array(
       'TipoPercepcion' => '049',

@@ -41,8 +41,8 @@ var autocompleteRanchos = function () {
   $("#rancho").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
-      // if(parseInt($("#did_empresa").val()) > 0)
-      //   params.did_empresa = $("#did_empresa").val();
+      if(parseInt($("#fid_empresa").val()) > 0)
+        params.did_empresa = $("#fid_empresa").val();
       if(parseInt(window.parent.$("#parea").val()) > 0)
         params.area = window.parent.$("#parea").val();
       $.ajax({

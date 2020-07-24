@@ -647,7 +647,7 @@ class MyString {
      }
   }
 
-  public static function obtenerQuincenasDelAnio($anio, $todas = false)
+  public static function obtenerQuincenasDelAnio($anio, $todas = false, $quincenaBus = null)
   {
     $quincenas = [];
 
@@ -674,6 +674,10 @@ class MyString {
 
       if (!$todas && $fecha_actual >= $siguientePrimerDia && $fecha_actual <= $siguienteUltimoDia) {
         break;
+      }
+
+      if ($quincenaBus && ($quincenaBus == $i || ($siguientePrimerDia <= $quincenaBus && $siguienteUltimoDia >= $quincenaBus)) ) {
+        return $quincenas[$i-1];
       }
     }
 

@@ -31,17 +31,17 @@
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
-                <label for="ffecha1" style="margin-top: 15px;">Semana</label>
+                <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {
-                      if ($semana['semana'] == $numSemanaSelected) {
+                      if ($semana[$tipoNomina] == $numSemanaSelected) {
                         $semana2 =  $semana;
                       }
                     ?>
-                    <option value="<?php echo $semana['semana'] ?>" <?php echo $semana['semana'] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana['semana']} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
+                    <option value="<?php echo $semana[$tipoNomina] ?>" <?php echo $semana[$tipoNomina] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana[$tipoNomina]} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
                   <?php }
                     $_GET['anio'] = isset($_GET['anio']) ? $_GET['anio'] : date("Y");
-                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2['semana'];
+                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2[$tipoNomina];
                     $_GET['empresaId'] = isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa;
                     $_GET['empresa'] = isset($_GET['empresa']) ? $_GET['empresa'] : $empresaDefault->nombre_fiscal;
                   ?>
@@ -86,7 +86,7 @@
                 </div>
                 <div class="span5" style="text-align: center;">
                   <div style="font-size: 1.5em;">
-                    <?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
+                    <?php echo ucfirst($tipoNomina)." <span class=\"label\" style=\"font-size: 1em;\">{$semana2[$tipoNomina]}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
                   </div>
                 </div>
                 <form action="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_rpt_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" target="_blank">

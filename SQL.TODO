@@ -1,17 +1,16 @@
 
- ☐ Meter nomina 15nal para una empresa
+ ✔ Meter nomina 15nal para una empresa @done (20-07-24 16:22)
  ☐ Reporte despido de trabajadores en un rango de fecha
  arrendadora la guadalupana
  ☐ En ordenes de requicicion de tipo servicio poner un check para indicar si es orden de taller y cambiar el titulo a Servicio Interno
  ☐ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones
  ☐ Reporte de total de combustible cargado por area (limon, banana, etc) basado en el rancho que se captura en la salida
  ✔ Faltaron calibres en rastreabilidad (2EC Economico alimonado 2), (EAL Economico alimonado) @done (20-07-22 14:01)
-   -- lap
+   -- lap|pcc
      INSERT INTO public.calibres(nombre, tipo) VALUES ('2EC', 'c'), ('EAL', 'c');
  ✔ En salidas de almacén, el ticket imprimir la segunda copia con un botón @done (20-07-22 12:29)
- ☐ Ver en bascula en la captura de piña que puedan capturar varios folio y varias melgas x estiva, Revisar el reporte
-     Nota: falta el reporte
-   -- lap
+ ✔ Ver en bascula en la captura de piña que puedan capturar varios folio y varias melgas x estiva, Revisar el reporte @done (20-07-23 14:41)
+   -- lap|pcc
     ALTER TABLE otros.bascula_salida_pina ADD COLUMN folio_tem character varying(30) COLLATE pg_catalog."default";
     UPDATE otros.bascula_salida_pina SET folio_tem=folio;
     ALTER TABLE otros.bascula_salida_pina DROP COLUMN folio;
