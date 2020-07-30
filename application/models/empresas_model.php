@@ -309,10 +309,17 @@ class empresas_model extends CI_Model{
 	 */
 	public function getEmpresasAjax(){
 		$sql = '';
+
+    $ids = $this->usuarios_model->getEmpresasPermiso('ids');
+    if (count($ids) > 0) {
+      $sql = " AND id_empresa in(".implode(',', $ids).")";
+    }
+
 		$res = $this->db->query("
 				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, pais, predeterminado
 				FROM empresas
 				WHERE status = 't' AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+          {$sql}
 				ORDER BY nombre_fiscal ASC
 				LIMIT 20");
 
@@ -343,6 +350,11 @@ class empresas_model extends CI_Model{
 
     if ( ! is_null($sqlX))
       $sql .= $sqlX;
+
+    $ids = $this->usuarios_model->getEmpresasPermiso('ids');
+    if (count($ids) > 0) {
+      $sql .= " AND id_empresa in(".implode(',', $ids).")";
+    }
 
     $res = $this->db->query(
       "SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono

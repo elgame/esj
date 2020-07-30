@@ -2257,6 +2257,12 @@ class facturacion_model extends privilegios_model{
     public function getFacEmpresasAjax()
     {
         $sql = '';
+
+        $ids = $this->usuarios_model->getEmpresasPermiso('ids');
+        if (count($ids) > 0) {
+          $sql .= " AND id_empresa in(".implode(',', $ids).")";
+        }
+
         $res = $this->db->query("
             SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
                   e.no_exterior, e.no_interior, e.rfc
@@ -2276,6 +2282,7 @@ class facturacion_model extends privilegios_model{
                   pass != '' AND
                   cfdi_version != '' AND
                   status = true
+                  {$sql}
             ORDER BY nombre_fiscal ASC
             LIMIT 20");
 

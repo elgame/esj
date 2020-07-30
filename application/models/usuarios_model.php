@@ -447,7 +447,7 @@ class Usuarios_model extends privilegios_model {
 		return false;
 	}
 
-  public function getEmpresasPermiso()
+  public function getEmpresasPermiso($tipo=null)
   {
     if ($this->session->userdata('selempresa') == false) {
       $this->load->model('empresas_model');
@@ -463,13 +463,14 @@ class Usuarios_model extends privilegios_model {
       $result = $result->result();
     }
 
-    // $result = $this->db->query(
-    //   "SELECT p.id, p.nombre, p.url_accion
-    //   FROM usuarios u
-    //     INNER JOIN usuarios_privilegios up ON u.id = up.usuario_id
-    //     INNER JOIN privilegios p ON p.id = up.privilegio_id
-    //   WHERE u.id = ".$this->session->userdata('id_usuario')."
-    //     AND up.privilegio_id in(SELECT id FROM privilegios WHERE id_padre = 382)");
+    if ($tipo == 'ids') {
+      $ids = [];
+      foreach ($result as $key => $value) {
+        $ids[] = $value->id_empresa;
+      }
+      return $ids;
+    }
+
     return $result;
   }
 

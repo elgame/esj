@@ -2128,9 +2128,11 @@ class compras_ordenes_model extends CI_Model {
       foreach ($orden['info'][0]->productos as $key => $prod)
       {
         $tipoCambio = 1;
+        $decimales = 2;
         if ($prod->tipo_cambio != 0)
         {
           $tipoCambio = $prod->tipo_cambio;
+          $decimales = 4;
         }
 
         $band_head = false;
@@ -2181,7 +2183,7 @@ class compras_ordenes_model extends CI_Model {
         $datos[] = $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '');
         // $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
         $datos[] = $prod->cantidad.' '.$prod->abreviatura;
-        $datos[] = MyString::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false);
+        $datos[] = MyString::formatoNumero($prod->precio_unitario/$tipoCambio, $decimales, '$', false);
         $datos[] = MyString::formatoNumero($prod->importe/$tipoCambio, 2, '$', false);
 
         if ($orientacion === 'L') {
