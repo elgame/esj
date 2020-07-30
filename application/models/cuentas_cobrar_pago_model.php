@@ -354,7 +354,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         // Obtiene la info de la factura.
         $factura = $this->getInfoComPago($idFactura);
 
-        $cliente = strtoupper($factura->cfdi_ext->receptor->nombreFiscal);
+        $cliente = MyString::quitAcentos(strtoupper($factura->cfdi_ext->receptor->nombreFiscal));
         $fecha   = explode('-', $factura->fecha);
         $ano     = $fecha[0];
         $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
