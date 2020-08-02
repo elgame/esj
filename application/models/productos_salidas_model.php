@@ -275,8 +275,10 @@ class productos_salidas_model extends CI_Model {
         'fecha'           => substr($_POST['fecha'], 0, 10),
         'implemento'      => $_POST['cimplemento'],
         'hora_carga'      => (isset($_POST['chora_carga'])? $_POST['chora_carga'].':00' : date("H:i:s")),
-        'horometro_fin'   => floatval($_POST['chorometro']),
-        'odometro_fin'    => floatval($_POST['codometro']),
+        'horometro'       => floatval($_POST['chorometro']),
+        'odometro'        => floatval($_POST['codometro']),
+        /*'horometro_fin'   => floatval($_POST['chorometro']),
+        'odometro_fin'    => floatval($_POST['codometro']),*/
         'lts_combustible' => floatval($_POST['clitros']),
         'precio'          => floatval($_POST['cprecio'])
       ]);
@@ -300,8 +302,8 @@ class productos_salidas_model extends CI_Model {
       LIMIT 1")->row();
     if ($id_combustible > 0 && isset($combust->horometro_fin)) {
       $this->db->update('compras_salidas_combustible',
-        ['horometro' => $combust->horometro_fin, 'odometro' => $combust->odometro_fin, 'fecha' => substr($combust->fecha_creacion, 0, 10)],
-        "id_combustible = {$id_combustible}"
+        ['horometro_fin' => $horometro, 'odometro_fin' => $odometro],
+        "id_combustible = {$combust->id_combustible}"
       );
     }
   }
