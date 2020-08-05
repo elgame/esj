@@ -222,7 +222,8 @@ $(function(){
           data: {
             term : request.term,
             ide: $('#did_empresa').val(),
-            tipo: 'a' //p
+            tipo: 'a', //p
+            status: 'all'
           },
           success: function (data) {
             response(data)

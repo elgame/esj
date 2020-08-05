@@ -626,6 +626,12 @@ class productos_model extends CI_Model {
         $sql .= " AND pf.tipo = '".$this->input->get('tipo')."'";
     }
 
+    if ($this->input->get('status') == 'all') {
+      $sql .= "";
+    } else {
+      $sql .= " AND p.status = 'ac'";
+    }
+
     if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
       $sql .= " AND p.id_empresa in(".$this->input->get('did_empresa').")";
 
@@ -633,7 +639,7 @@ class productos_model extends CI_Model {
         "SELECT p.id_producto, p.nombre, p.codigo, p.tipo, pf.nombre AS familia
         FROM productos p
           INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
-        WHERE pf.status = 'ac' AND p.status = 'ac'
+        WHERE pf.status = 'ac'
           {$sql}
         ORDER BY p.nombre ASC
         LIMIT 20"
