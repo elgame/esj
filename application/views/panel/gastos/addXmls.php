@@ -75,7 +75,7 @@
               </tr>
             </thead>
             <tbody>
-              <?php if (isset($files) && is_array($file) && count($files) > 0): ?>
+              <?php if (isset($files) && count($files) > 0 && is_array($file)): ?>
                 <?php foreach ($files as $key => $file): ?>
                 <tr class="itemXml" style="cursor: pointer;"
                   data-uuid="<?php echo $file['uuid'] ?>"

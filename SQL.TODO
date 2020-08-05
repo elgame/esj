@@ -1,12 +1,13 @@
 
+ ☐ En la caja de la bodega agregar un reporte que ponga el estado de resultado por rango de fecha dia x dia
+ ☐ Reporte despido de trabajadores en un rango de fecha
+ ☐ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones
+ ☐ Reporte de total de combustible cargado por area (limon, banana, etc) basado en el rancho que se captura en la salida
  ✔ Meter nomina 15nal para una empresa @done (20-07-24 16:22)
  ✔ En los autocomplete de empresas filtrar solo las que tenga en permisos y en las ordenes con tipo de cambio que ponga todos los decimales en la impresión @done (20-07-29 21:46)
- ☐ Reporte despido de trabajadores en un rango de fecha
  arrendadora la guadalupana
  ✔ En nivelacion ver como hacer que no tarde tanto @done (20-08-03 21:48)
  ✔ En ordenes de requicicion de tipo servicio poner un check para indicar si es orden de taller y cambiar el titulo a Servicio Interno @done (20-08-03 11:34)
- ☐ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones
- ☐ Reporte de total de combustible cargado por area (limon, banana, etc) basado en el rancho que se captura en la salida
  ✔ Faltaron calibres en rastreabilidad (2EC Economico alimonado 2), (EAL Economico alimonado) @done (20-07-22 14:01)
    -- lap|pcc|san
      INSERT INTO public.calibres(nombre, tipo) VALUES ('2EC', 'c'), ('EAL', 'c');
