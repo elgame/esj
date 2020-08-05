@@ -1705,17 +1705,17 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(50, 25));
 
-    if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
-      $pdf->Row(array('UTILIDAD O PERDIDA:', MyString::formatoNumero( $caja['utilidad'] , 2, '$', false)), false, false);
-      $pdf->SetXY(80, $pdf->GetY()+5);
-      $pdf->Row(array('ACUMULADO BULTOS VENDIDOS:', MyString::formatoNumero( $caja['a_bultos_vendidos'] , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('ACUMULADO DE GASTOS:', MyString::formatoNumero( $caja['a_gastos'] , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('PRECIO PROMEDIO BULTOS:', MyString::formatoNumero( $caja['a_gastos']/($caja['a_bultos_vendidos']>0? $caja['a_bultos_vendidos'] : 1) , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('UTILIDAD ACUMULADA', MyString::formatoNumero( $caja['a_utilidad'] , 2, '$', false)), false, false);
-    }
+    // if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
+    //   $pdf->Row(array('UTILIDAD O PERDIDA:', MyString::formatoNumero( $caja['utilidad'] , 2, '$', false)), false, false);
+    //   $pdf->SetXY(80, $pdf->GetY()+5);
+    //   $pdf->Row(array('ACUMULADO BULTOS VENDIDOS:', MyString::formatoNumero( $caja['a_bultos_vendidos'] , 2, '$', false)), false, false);
+    //   $pdf->SetX(80);
+    //   $pdf->Row(array('ACUMULADO DE GASTOS:', MyString::formatoNumero( $caja['a_gastos'] , 2, '$', false)), false, false);
+    //   $pdf->SetX(80);
+    //   $pdf->Row(array('PRECIO PROMEDIO BULTOS:', MyString::formatoNumero( $caja['a_gastos']/($caja['a_bultos_vendidos']>0? $caja['a_bultos_vendidos'] : 1) , 2, '$', false)), false, false);
+    //   $pdf->SetX(80);
+    //   $pdf->Row(array('UTILIDAD ACUMULADA', MyString::formatoNumero( $caja['a_utilidad'] , 2, '$', false)), false, false);
+    // }
     $pdf->SetXY(80, $pdf->GetY()+5);
     $pdf->Row(array('SALDO DE CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
 
