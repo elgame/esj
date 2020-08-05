@@ -724,7 +724,9 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
 
-    $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND".(strlen($_GET['term'])<3? " 1 = 2 AND ": "");
+    $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+                ".(!empty($_GET['id_familia'])? "AND p.id_familia = '{$_GET['id_familia']}' ": '')."
+                AND".(strlen($_GET['term'])<3? " 1 = 2 AND ": "");
 
     $id_almacen = isset($_GET['id_almacen']{0}) && $_GET['id_almacen'] > 0? $_GET['id_almacen']: 1;
     $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'],

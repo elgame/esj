@@ -4863,11 +4863,16 @@ class facturacion_model extends privilegios_model{
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFont('helvetica','B', 10);
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce', 'Comercio Exterior')} V{$ceExtras->version}", 0, 0, 'L', 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce', 'Comercio Exterior')} V{$ceExtras->version}"
+      ), false, true, null, 2, 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4904,9 +4909,16 @@ class facturacion_model extends privilegios_model{
             '', ''
           ), false, true, null, 2, 1);
 
+      if ($pdf->GetY()+10 >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": ''), 0, 0, 'L', 1);
+      $pdf->SetFont('helvetica','B', 10);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": '')
+      ), false, true, null, 2, 1);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
@@ -4940,9 +4952,14 @@ class facturacion_model extends privilegios_model{
           ), false, true, null, 2, 1);
 
       if ($ceExtras->propietario[0]->numRegIdTrib != '') {
-        $pdf->SetXY(0, $pdf->GetY() + 1);
         $pdf->SetFont('helvetica','B', 8);
-        $pdf->Cell(216, 4, "Propietario ", 0, 0, 'L', 1);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Row(array(
+          "Propietario "
+        ), false, true, null, 2, 1);
+
         $pdf->SetFont('helvetica','', 8);
         $pdf->SetXY(0, $pdf->GetY() + 4);
         $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
@@ -4954,9 +4971,14 @@ class facturacion_model extends privilegios_model{
             ), false, true, null, 2, 1);
       }
 
-      $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": ''), 0, 0, 'L', 1);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": '')
+      ), false, true, null, 2, 1);
+
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
@@ -4983,9 +5005,15 @@ class facturacion_model extends privilegios_model{
             $this->lang->line('factura_ce_referencia', 'Referencia'), '',
           ), false, true, null, 2, 1);
 
-      $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Destinatario", 0, 0, 'L', 1);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "Destinatario"
+      ), false, true, null, 2, 1);
+
+
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));

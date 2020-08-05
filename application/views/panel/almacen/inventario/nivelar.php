@@ -11,6 +11,7 @@
 
               <label class="control-label" for="dfamilias">Familias</label>
               <select name="dfamilias" id="dfamilias">
+                <option value=""></option>
               <?php foreach ($familias['familias'] as $key => $value)
               {
               ?>
@@ -27,6 +28,10 @@
                 <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
               <?php } ?>
               </select>
+
+              <label class="control-label" for="dproducto">Producto</label>
+              <input type="text" name="dproducto" id="dproducto" value="<?php echo (isset($_GET['dproducto'])? $_GET['dproducto']: '') ?>" class="input-large" placeholder="Producto">
+              <input type="hidden" name="dproductoId" id="dproductoId" value="<?php echo (isset($_GET['dproductoId'])? $_GET['dproductoId']: '') ?>">
 
               <label class="control-label" for="dfecha">Fecha Nivelación</label><input type="date" name="dfecha" value="<?php echo (isset($_GET['dfecha'])? $_GET['dfecha']: date('Y-m-d')) ?>" class="input-large">
 
