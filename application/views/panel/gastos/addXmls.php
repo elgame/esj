@@ -75,7 +75,7 @@
               </tr>
             </thead>
             <tbody>
-              <?php if (isset($files) && count($files) > 0 && is_array($file)): ?>
+              <?php if (isset($files) && count($files) > 0 && is_array($files)): ?>
                 <?php foreach ($files as $key => $file): ?>
                 <tr class="itemXml" style="cursor: pointer;"
                   data-uuid="<?php echo $file['uuid'] ?>"
@@ -92,7 +92,7 @@
                 <?php endforeach ?>
               <?php else: ?>
                 <tr>
-                  <td><?php echo $files ?></td>
+                  <td colspan="5"><?php echo $files ?></td>
                 </tr>
               <?php endif ?>
             </tbody>
