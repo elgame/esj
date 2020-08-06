@@ -95,15 +95,6 @@ class bascula_pina extends MY_Controller {
   {
     $this->load->library('form_validation');
     $rules = array(
-      array('field' => 'folio',
-            'label' => 'Folio',
-            'rules' => 'required|max_length[30]'),
-      array('field' => 'rancho',
-            'label' => 'Rancho',
-            'rules' => ''),
-      array('field' => 'ranchoId',
-            'label' => 'Rancho',
-            'rules' => 'required'),
       array('field' => 'kilos_neto',
             'label' => 'Kilos netos',
             'rules' => 'required'),
@@ -114,6 +105,15 @@ class bascula_pina extends MY_Controller {
             'label' => 'Kg x Pieza',
             'rules' => 'required'),
 
+      array('field' => 'folio[]',
+            'label' => 'Folio',
+            'rules' => 'required'),
+      array('field' => 'rancho[]',
+            'label' => 'Rancho',
+            'rules' => ''),
+      array('field' => 'ranchoId[]',
+            'label' => 'Rancho',
+            'rules' => 'required'),
       array('field' => 'estiba[]',
             'label' => 'Estiba',
             'rules' => 'required'),

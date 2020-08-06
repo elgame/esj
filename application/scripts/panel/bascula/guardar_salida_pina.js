@@ -32,7 +32,10 @@ var eventosEstibas = function () {
 
     if (validaAddEstibas()) {
 
-      var $cantidad     = $('#icantidad'),
+      var $cantidad      = $('#icantidad'),
+          $folio         = $('#folio'),
+          $ranchoId      = $('#ranchoId'),
+          $rancho        = $('#rancho'),
           $calidad       = $('#icalidad'),
           $centroCosto   = '', // $('#icentroCosto'),
           $centroCostoId = '', // $('#icentroCostoId'),
@@ -48,13 +51,15 @@ var eventosEstibas = function () {
       });
 
       while(countini <= countfin) {
-        trHtml += '<tr>'+
+        trHtml += '<tr class="tr-'+$folio.val()+'-'+countini+'">'+
+          '<td><input type="text" name="folio[]" value="'+$folio.val()+'" class="folio" readonly></td>'+
+          '<td><input type="hidden" name="ranchoId[]" value="'+$ranchoId.val()+'">'+$rancho.val()+'</td>'+
           '<td><input type="text" name="estiba[]" value="'+countini+'" class="estiba" readonly></td>'+
           '<td><input type="hidden" name="id_centro_costo[]" value="'+$centroCostoId.substr(1)+'">'+$centroCosto.substr(1)+'</td>'+
           '<td><input type="hidden" name="id_calidad[]" value="'+$calidad.val()+'">'+$('#icalidad option:selected').text()+'</td>'+
           '<td><input type="text" name="cantidad[]" value="'+$cantidad.val()+'" class="cantidad" readonly></td>'+
           '<td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja"><i class="icon-trash"></i></button></td>'+
-        '</tr>'
+        '</tr>';
         ++countini;
       }
 
@@ -100,16 +105,16 @@ var calculaTotales = function () {
 var validaAddEstibas = function () {
   var option = $('#icalidad option:selected').val() || '';
   if ($('#icantidad').val() === '' || option === '' || $('#iestibaIni').val() === '' || $('#iestibaFin').val() === ''
-    || $('.centroCostoId').length === 0) {
+    || $('#folio').val() === '' || $('#ranchoId').val() === '' || $('.centroCostoId').length === 0) {
     noty({"text": "Alguno de los campos están vacíos.", "layout":"topRight", "type": 'error'});
     return false;
   }
   var $tabla = $('#tableEstibas'), countini = (parseInt($('#iestibaIni').val())||1),
     countfin = (parseInt($('#iestibaFin').val())||1), band = true;
   while(countini <= countfin && band) {
-    if ($tabla.find('tr input.estiba[value='+countini+']').length > 0) {
+    if ($tabla.find('tr.tr-'+$('#folio').val()+'-'+countini).length > 0) {
       band = false;
-      noty({"text": "La estibas "+countini+" ya esta agregada al listado.", "layout":"topRight", "type": 'error'});
+      noty({"text": "La estiba "+countini+" del folio "+$('#folio').val()+" ya esta agregada al listado.", "layout":"topRight", "type": 'error'});
     }
     ++countini;
   }

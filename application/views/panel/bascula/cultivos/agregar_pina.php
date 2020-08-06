@@ -24,51 +24,38 @@
                 <input type="hidden" name="total_piezas" value="<?php echo $boleta->total_piezas ?>">
                  -->
 
-                <div class="span5">
-                  <div class="control-group">
-                    <label class="control-label" for="folio">Folio</label>
-                    <div class="controls">
-                      <input type="text" name="folio" id="folio" class="span12" required
-                      value="<?php echo set_value('folio', (isset($pina['info']->folio)? $pina['info']->folio: '') ); ?>" autofocus placeholder="1, 2, 40, 100">
-                    </div>
+                <div class="span12">
+                  <div class="span4">
+                    <label for="kilos_neto">Kilos Neto</label>
+                    <input type="text" name="kilos_neto" id="kilos_neto" class="span12 vpos-int"
+                      value="<?php echo set_value('kilos_neto', (isset($pina['info']->kilos_neto)? $pina['info']->kilos_neto: $boleta->kilos_neto) ); ?>" readonly>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="rancho">Rancho</label>
-                    <div class="controls">
-                      <input type="text" name="rancho" id="rancho" class="span12" required
-                        value="<?php echo set_value('rancho', (isset($pina['info']->rancho)? $pina['info']->rancho: '') ); ?>" placeholder="Milagro A" data-next="icantidad">
-                      <input type="hidden" name="ranchoId" id="ranchoId"
-                        value="<?php echo set_value('ranchoId', (isset($pina['info']->id_rancho)? $pina['info']->id_rancho: '') ) ?>">
-                    </div>
+                  <div class="span4">
+                    <label for="total_piezas">Piezas</label>
+                    <input type="text" name="total_piezas" id="total_piezas" class="span12"
+                      value="<?php echo set_value('total_piezas', (isset($pina['info']->total_piezas)? $pina['info']->total_piezas: '')); ?>" readonly>
                   </div>
-                </div>
-
-                <div class="span5">
-                  <div class="control-group">
-                    <label class="control-label" for="kilos_neto">Kilos Neto</label>
-                    <div class="controls">
-                      <input type="text" name="kilos_neto" id="kilos_neto" class="span12 vpos-int"
-                        value="<?php echo set_value('kilos_neto', (isset($pina['info']->kilos_neto)? $pina['info']->kilos_neto: $boleta->kilos_neto) ); ?>" readonly>
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label class="control-label" for="total_piezas">Piezas</label>
-                    <div class="controls">
-                      <input type="text" name="total_piezas" id="total_piezas" class="span12"
-                        value="<?php echo set_value('total_piezas', (isset($pina['info']->total_piezas)? $pina['info']->total_piezas: '')); ?>" readonly>
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label class="control-label" for="kg_pieza">Kg por pieza</label>
-                    <div class="controls">
-                      <input type="text" name="kg_pieza" id="kg_pieza" class="span12"
-                        value="<?php echo set_value('kg_pieza', (isset($pina['info']->kg_pieza)? $pina['info']->kg_pieza: '')); ?>" readonly>
-                    </div>
+                  <div class="span4">
+                    <label for="kg_pieza">Kg por pieza</label>
+                    <input type="text" name="kg_pieza" id="kg_pieza" class="span12"
+                      value="<?php echo set_value('kg_pieza', (isset($pina['info']->kg_pieza)? $pina['info']->kg_pieza: '')); ?>" readonly>
                   </div>
                 </div>
 
                 <div class="clearfix"></div>
                 <hr>
+
+                <div class="row-fluid">
+                  <div class="span2">
+                    <label for="folio">Folio</label>
+                    <input type="text" id="folio" class="span12" autofocus placeholder="1, 2, 40, 100">
+                  </div>
+                  <div class="span4">
+                    <label for="rancho">Rancho</label>
+                    <input type="text" id="rancho" class="span12" placeholder="Milagro A" data-next="icantidad">
+                    <input type="hidden" id="ranchoId">
+                  </div>
+                </div>
 
                 <div class="row-fluid">
                   <div class="span1">
@@ -120,6 +107,8 @@
                     <table class="table table-striped table-bordered table-hover" id="tableEstibas">
                       <thead>
                         <tr>
+                          <th>Folio</th>
+                          <th>Rancho</th>
                           <th>Estiba</th>
                           <th>Melga</th>
                           <th>Calidad</th>
@@ -131,7 +120,9 @@
                         <?php if (isset($pina['estibas']) && count($pina['estibas']) > 0) {
                                 foreach ($pina['estibas'] as $key => $estiba) {
                         ?>
-                          <tr>
+                          <tr class="tr-<?php echo "{$estiba->folio}-{$estiba->estiba}" ?>">
+                            <td><input type="text" name="folio[]" value="<?php echo $estiba->folio ?>" class="folio" readonly></td>
+                            <td><input type="hidden" name="ranchoId[]" value="<?php echo $estiba->id_rancho ?>"><?php echo $estiba->rancho ?></td>
                             <td><input type="text" name="estiba[]" value="<?php echo $estiba->estiba ?>" class="estiba" readonly></td>
                             <td><input type="hidden" name="id_centro_costo[]" value="<?php echo $estiba->id_centro_costo ?>"><?php echo $estiba->centro_costo ?></td>
                             <td><input type="hidden" name="id_calidad[]" value="<?php echo $estiba->id_calidad ?>"><?php echo $estiba->calidad ?></td>
