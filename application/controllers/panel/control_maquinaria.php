@@ -12,6 +12,8 @@ class control_maquinaria extends MY_Controller {
 
     'control_maquinaria/rptcombustible_pdf/',
     'control_maquinaria/rptcombustible_xls/',
+    'control_maquinaria/rptcombustibleAcumulado_pdf/',
+    'control_maquinaria/rptcombustibleAcumulado_xls/',
     'control_maquinaria/ajax_get_implemento/',
   );
 
@@ -103,6 +105,39 @@ class control_maquinaria extends MY_Controller {
   {
     $this->load->model('control_maquinaria_model');
     $this->control_maquinaria_model->rptcombustible_xls();
+  }
+
+  public function rptcombustibleAcumulado()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.treeview.css', 'screen')
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.treeview.js'),
+      array('panel/facturacion/admin.js'),
+      array('panel/almacen/rpt_combustible.js'),
+    ));
+
+    $this->load->model('compras_areas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte Combustible Acumulado');
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/almacen/control_maquinaria/rptcombustibleAcumulado',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rptcombustibleAcumulado_pdf()
+  {
+    $this->load->model('control_maquinaria_model');
+    $this->control_maquinaria_model->rptcombustibleAcumulado_pdf();
+  }
+  public function rptcombustibleAcumulado_xls()
+  {
+    $this->load->model('control_maquinaria_model');
+    $this->control_maquinaria_model->rptcombustibleAcumulado_xls();
   }
 
   /*

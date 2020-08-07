@@ -1,12 +1,14 @@
 
  ☐ En la caja de la bodega agregar un reporte que ponga el estado de resultado por rango de fecha dia x dia
  ☐ Reporte despido de trabajadores en un rango de fecha
- ☐ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones
- ☐ En control de combustible meter nuevo reporte que ponga el total de litros por empresa
- ☐ Reporte de total de combustible cargado por area (limon, banana, etc) basado en el rancho que se captura en la salida
- ☐ En captura de piña de bascula acomodar el reporte como la hoja
+ ✔ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones @done (20-08-07 18:18)
+ ✔ En control de combustible meter nuevo reporte que ponga el total de litros por empresa @done (20-08-07 18:18)
+ ✔ Reporte de total de combustible cargado por area (limon, banana, etc) basado en el rancho que se captura en la salida @done (20-08-07 18:18)
+   -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de combustible Acumulado',341,true,'control_maquinaria/rptcombustibleAcumulado/','print',true);
+ ✔ En captura de piña de bascula acomodar el reporte como la hoja @done (20-08-07 12:30)
  ✔ En captura de piña de bascula cambiarlo a que puedan meter varios folios y cada folio con sus estivas (que se puedan repetir) @done (20-08-05 19:05)
-   -- lap|san
+   -- lap|san|pcc
       ALTER TABLE otros.bascula_salida_pina_estibas ADD COLUMN id_rancho bigint;
       ALTER TABLE otros.bascula_salida_pina_estibas ADD CONSTRAINT bascula_salida_pina_estibas_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
       UPDATE otros.bascula_salida_pina_estibas SET id_rancho = sp.id_rancho FROM otros.bascula_salida_pina AS sp WHERE sp.id = bascula_salida_pina_estibas.id_salida_pina;

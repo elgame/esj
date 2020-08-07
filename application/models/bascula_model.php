@@ -2742,21 +2742,39 @@ class bascula_model extends CI_Model {
     $sql .= " AND {$fecha_compara} BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
 
     $query = $this->db->query(
-      "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha, bsp.folio,
-        r.id_rancho, r.nombre AS rancho, bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
-        esti.estibas
+      "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
+              bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
+              bspe.folio, bspe.estiba, c.nombre AS calidad, r.nombre AS rancho,
+              cc.nombre AS centro_costo, bspe.cantidad, bspec.num, (bspe.cantidad/bspec.num) AS cc_cantidad
       FROM bascula b
         INNER JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
-        INNER JOIN (
-          SELECT id_salida_pina, max(estiba) AS estibas
-          FROM otros.bascula_salida_pina_estibas
-          GROUP BY id_salida_pina
-        ) AS esti ON esti.id_salida_pina = bsp.id
-        INNER JOIN otros.ranchos r ON r.id_rancho = bsp.id_rancho
+        INNER JOIN otros.bascula_salida_pina_estibas bspe ON bsp.id = bspe.id_salida_pina
+        INNER JOIN otros.bascula_salida_pina_estibas_centro_costo bspec ON
+          (bspe.id_salida_pina = bspec.id_salida_pina AND bspe.estiba = bspec.estiba AND bspe.folio = bspec.folio)
+        INNER JOIN calidades c ON c.id_calidad = bspe.id_calidad
+        INNER JOIN otros.ranchos r ON r.id_rancho = bspe.id_rancho
+        INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = bspec.id_centro_costo
       WHERE 1 = 1 {$sql}
-      ORDER BY bascula ASC, folio ASC
+      ORDER BY bascula ASC, folio ASC, estiba ASC
       "
     );
+
+    // $query = $this->db->query(
+    //   "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha, bsp.folio,
+    //     r.id_rancho, r.nombre AS rancho, bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
+    //     esti.estibas
+    //   FROM bascula b
+    //     INNER JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
+    //     INNER JOIN (
+    //       SELECT id_salida_pina, max(estiba) AS estibas
+    //       FROM otros.bascula_salida_pina_estibas
+    //       GROUP BY id_salida_pina
+    //     ) AS esti ON esti.id_salida_pina = bsp.id
+    //     INNER JOIN otros.ranchos r ON r.id_rancho = bsp.id_rancho
+    //   WHERE 1 = 1 {$sql}
+    //   ORDER BY bascula ASC, folio ASC
+    //   "
+    // );
 
     $response = array();
     if ($query->num_rows() > 0)
@@ -2801,12 +2819,13 @@ class bascula_model extends CI_Model {
     $pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'R');
-    $widths = array(18, 20, 20, 50, 18, 18, 18, 18);
-    $header = array('FECHA', 'BOLETA', 'ENTRADA', 'RANCHO', 'KILOS', 'PIEZAS', 'KG/PIEZA', 'ESTIBAS');
+    $aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'L', 'L', 'R', 'R');
+    $widths = array(17, 18, 18, 33, 15, 15, 27, 30, 18, 13);
+    $header = array('FECHA', 'BOLETA', 'ENTRADA', 'RANCHO', 'KILOS', 'PIEZAS', 'CALIDAD', 'MELGA', 'KG/PIEZA', 'ESTIBA');
 
     $total_kg    = 0;
     $total_piezas  = 0;
+    $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
 
     foreach ($data as $key => $valuerp) {
 
@@ -2825,22 +2844,23 @@ class bascula_model extends CI_Model {
         $pdf->Row($header, false);
       }
 
-
       $pdf->SetFont('helvetica','',8);
       $pdf->SetTextColor(0,0,0);
 
-      $total_kg     += $valuerp->kilos_neto;
-      $total_piezas += $valuerp->total_piezas;
+      $total_kg     += ($auxx['kilos_neto'] != $valuerp->kilos_neto? $valuerp->kilos_neto: 0);
+      $total_piezas += $valuerp->cc_cantidad;
 
       $datos = array(
-        MyString::fechaAT($valuerp->fecha),
-        $valuerp->bascula,
-        $valuerp->folio,
-        $valuerp->rancho,
-        MyString::formatoNumero($valuerp->kilos_neto, 0, '', false),
-        MyString::formatoNumero($valuerp->total_piezas, 0, '', false),
-        MyString::formatoNumero($valuerp->kg_pieza, 2, '', false),
-        MyString::formatoNumero($valuerp->estibas, 2, '', false)
+        ($auxx['fecha'] != $valuerp->fecha? MyString::fechaAT($valuerp->fecha): ''),
+        ($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: ''),
+        ($auxx['folio'] != $valuerp->folio? $valuerp->folio: ''),
+        ($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: ''),
+        ($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 0, '', false): ''),
+        MyString::formatoNumero($valuerp->cc_cantidad, 0, '', false),
+        $valuerp->calidad,
+        $valuerp->centro_costo,
+        ($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): ''),
+        $valuerp->estiba
       );
 
       $pdf->SetY($pdf->GetY()-2);
@@ -2848,6 +2868,13 @@ class bascula_model extends CI_Model {
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
       $pdf->Row($datos, false, false);
+
+      $auxx['fecha'] = $valuerp->fecha;
+      $auxx['bascula'] = $valuerp->bascula;
+      $auxx['folio'] = $valuerp->folio;
+      $auxx['rancho'] = $valuerp->rancho;
+      $auxx['kilos_neto'] = $valuerp->kilos_neto;
+      $auxx['kg_pieza'] = $valuerp->kg_pieza;
     }
 
     if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
@@ -2859,11 +2886,12 @@ class bascula_model extends CI_Model {
     $pdf->SetY($pdf->GetY()-1);
     $pdf->SetX(6);
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(108, 18, 18, 18));
+    $pdf->SetWidths(array(86, 15, 15, 27, 30, 18));
     $pdf->Row(array(
       'TOTALES',
       MyString::formatoNumero($total_kg, 0, '', false),
       MyString::formatoNumero($total_piezas, 0, '', false),
+      '', '',
       MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false)
     ), false, false);
 
@@ -2899,16 +2927,16 @@ class bascula_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="8" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="10" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="8" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="10" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="8" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="10" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="8"></td>
+          <td colspan="10"></td>
         </tr>';
       $html .= '<tr style="font-weight:bold">
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
@@ -2917,33 +2945,46 @@ class bascula_model extends CI_Model {
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RANCHO</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PIEZAS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CALIDAD</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">MELGA</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KG/PIEZA</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTIBAS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTIBA</td>
       </tr>';
     $total_kg    = 0;
     $total_piezas  = 0;
+    $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
 
     foreach ($data as $key => $valuerp) {
-      $total_kg     += $valuerp->kilos_neto;
-      $total_piezas += $valuerp->total_piezas;
+      $total_kg     += ($auxx['kilos_neto'] != $valuerp->kilos_neto? $valuerp->kilos_neto: 0);
+      $total_piezas += $valuerp->cc_cantidad;
 
       $html .= '<tr>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::fechaAT($valuerp->fecha).'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->bascula.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->folio.'</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->rancho.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->kilos_neto, 0, '', false).'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->total_piezas, 0, '', false).'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->kg_pieza, 2, '', false).'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->estibas, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['fecha'] != $valuerp->fecha? MyString::fechaAT($valuerp->fecha): '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['folio'] != $valuerp->folio? $valuerp->folio: '').'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 0, '', false): '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_cantidad, 0, '', false).'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->calidad.'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->centro_costo.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->estiba.'</td>
         </tr>';
 
+      $auxx['fecha'] = $valuerp->fecha;
+      $auxx['bascula'] = $valuerp->bascula;
+      $auxx['folio'] = $valuerp->folio;
+      $auxx['rancho'] = $valuerp->rancho;
+      $auxx['kilos_neto'] = $valuerp->kilos_neto;
+      $auxx['kg_pieza'] = $valuerp->kg_pieza;
     }
     $html .= '
         <tr style="font-weight:bold">
           <td colspan="4">TOTALES</td>
           <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kg, 0, '', false).'</td>
           <td style="border:1px solid #000;">'.MyString::formatoNumero($total_piezas, 0, '', false).'</td>
+          <td></td>
+          <td></td>
           <td style="border:1px solid #000;">'.MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false).'</td>
           <td></td>
         </tr>';

@@ -300,7 +300,7 @@ class productos_salidas_model extends CI_Model {
         AND cs.id_salida < {$idSalida}
       ORDER BY cs.id_salida DESC
       LIMIT 1")->row();
-    if ($id_combustible > 0 && isset($combust->horometro_fin)) {
+    if ($id_combustible > 0 && isset($combust->id_combustible)) {
       $this->db->update('compras_salidas_combustible',
         ['horometro_fin' => $horometro, 'odometro_fin' => $odometro],
         "id_combustible = {$combust->id_combustible}"

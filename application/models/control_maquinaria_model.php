@@ -67,7 +67,7 @@ class control_maquinaria_model extends CI_Model {
           GROUP BY csr.id_salida
         ) ran ON ran.id_salida = cs.id_salida
       WHERE csc.fecha = '{$fecha}'
-      ORDER BY id_activo ASC, labor ASC, fecha ASC, hora_carga ASC
+      ORDER BY id_combustible ASC, id_activo ASC, labor ASC, fecha ASC, hora_carga ASC
       ");
 
     if ($sql->num_rows() > 0)
@@ -541,6 +541,199 @@ class control_maquinaria_model extends CI_Model {
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_kms, 2, '', false).'</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false).'</td>
           <td style=""></td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function getDataCombutibleAcumulado()
+  {
+    $sql = $sql2 = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(csc.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    elseif($this->input->get('ffecha1') != '')
+      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
+    elseif($this->input->get('ffecha2') != '')
+      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
+
+    $response = array();
+
+    // Totales de vehiculos
+    $response = $this->db->query(
+      "SELECT  e.nombre_fiscal AS empresa, Sum(csc.lts_combustible) AS lts_combustible, Sum(csc.lts_combustible * csc.precio) AS importe,
+        Sum(csc.horometro_fin -  csc.horometro) AS hrs
+      FROM compras_salidas cs
+        INNER JOIN compras_salidas_combustible csc ON cs.id_salida = csc.id_salida
+        INNER JOIN empresas e ON e.id_empresa = cs.id_empresa_ap
+      WHERE cs.status <> 'ca' {$sql}
+      GROUP BY e.id_empresa
+      ORDER BY empresa ASC")->result();
+
+    return $response;
+  }
+  public function rptcombustibleAcumulado_pdf()
+  {
+    $combustible = $this->getDataCombutibleAcumulado();
+
+    $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
+
+    // echo "<pre>";
+    //   var_dump($combustible);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter'); // Letter
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Combustible Acumulado";
+
+    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R', 'R', 'R');
+    $widths = array(80, 20, 20, 20);
+    $header = array('EMPRESA', 'LITROS', 'HRS', 'IMPORTE');
+
+    $total_litros = $total_hrs = $total_importe = 0;
+
+    $entro = false;
+    foreach($combustible as $key => $vehiculo)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetX(6);
+        $pdf->SetFont('Arial','B', 8);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true, false);
+      }
+
+      $total_hrs      += $vehiculo->hrs;
+      $total_litros   += $vehiculo->lts_combustible;
+      $total_importe  += $vehiculo->importe;
+
+      // ------
+      $auxy = $pdf->GetY();
+      $pdf->SetFont('Arial','', 7.5);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $vehiculo->empresa,
+        MyString::formatoNumero($vehiculo->lts_combustible, 2, ''),
+        MyString::formatoNumero($vehiculo->hrs, 2, ''),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
+      ), false, false);
+    }
+
+    $pdf->SetY($pdf->GetY()+2);
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B', 7.5);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES GENERALES',
+        MyString::formatoNumero($total_litros, 2, '', false),
+        MyString::formatoNumero($total_hrs, 2, '', false),
+        MyString::formatoNumero($total_importe, 2, '', false)
+      ),
+      true, false
+    );
+
+    $pdf->Output('reporte_combustible_acumulad.pdf', 'I');
+  }
+  public function rptcombustibleAcumulado_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_combustible_acumulad.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $combustible = $this->getDataCombutibleAcumulado();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Reporte de Combustible Acumulado";
+    $titulo3 = "";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="4" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="4"></td>
+        </tr>
+
+        <tr><td></td></tr>
+
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #ffffff;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #ffffff;">LITROS</td>
+          <td style="border:1px solid #000;background-color: #ffffff;">HRS</td>
+          <td style="border:1px solid #000;background-color: #ffffff;">IMPORTE</td>
+        </tr>';
+
+    $total_litros = $total_hrs = $total_importe = 0;
+
+    foreach ($combustible as $key => $vehiculo)
+    {
+      $total_hrs      += $vehiculo->hrs;
+      $total_litros   += $vehiculo->lts_combustible;
+      $total_importe  += $vehiculo->importe;
+
+      $html .= '<tr style="">
+          <td style="width:400px;border:1px solid #000;">'.$vehiculo->empresa.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->lts_combustible, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->hrs, 2, '').'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($vehiculo->importe, 2, '', false).'</td>
+        </tr>';
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTALES GENERALES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_litros, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_hrs, 2, '', false).'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($total_importe, 2, '', false).'</td>
         </tr>
       </tbody>
     </table>';
