@@ -78,7 +78,7 @@
               </div>
               <div class="span4">
                 <div class="row-fluid">
-                  <input type="hidden" name="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
+                  <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
                   <?php if ($show){ ?>
                     <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
@@ -945,6 +945,18 @@
                           <input type="hidden" name="a_gastos" value="<?php echo $caja['a_gastos'] ?>" id="a_gastos" class="input-small" <?php echo $readonly ?>>
                           <input type="hidden" name="a_bultos_vendidos" value="<?php echo $caja['a_bultos_vendidos'] ?>" id="a_bultos_vendidos" class="input-small" <?php echo $readonly ?>>
                           <input type="hidden" name="a_utilidad" value="<?php echo $caja['a_utilidad']+($caja['utilidad']!=0? 0: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamosRestas-$totalExisD)) ) ?>" id="a_utilidad" class="input-small" <?php echo $readonly ?>>
+
+                          <input type="hidden" name="totalesGrl[totalVentas]" id="grltotalVentas" value="<?php echo $totalVentas ?>">
+                          <input type="hidden" name="totalesGrl[totalExisAnt]" id="grltotalExisAnt" value="<?php echo $totalExisAnt ?>">
+                          <input type="hidden" name="totalesGrl[totalIngresos]" id="grltotalIngresos" value="<?php echo $totalIngresos ?>">
+                          <input type="hidden" name="totalesGrl[totalExisD]" id="grltotalExisD" value="<?php echo $totalExisD ?>">
+                          <input type="hidden" name="totalesGrl[totalPrestamos]" id="grltotalPrestamos" value="<?php echo $totalPrestamos ?>">
+                          <input type="hidden" name="totalesGrl[costoVenta]" id="grlcostoVenta" value="<?php echo ($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos) ?>">
+                          <input type="hidden" name="totalesGrl[totalGastos]" id="grltotalGastos" value="<?php echo $totalGastos ?>">
+                          <input type="hidden" name="totalesGrl[utilidad]" id="grlutilidad" value="<?php echo ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos) ?>">
+                          <input type="hidden" name="totalesGrl[bultosVentas]" id="grlbultosVentas" value="<?php echo $bultosVentas ?>">
+                          <input type="hidden" name="totalesGrl[utilidadBulto]" id="grlutilidadBulto" value="<?php echo ( ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1) ) ?>">
+                          <input type="hidden" name="totalesGrl[clientes]" id="grlclientes" value="<?php echo ($totalSal+$saldoVentas) ?>">
                         </tbody>
                       </table>
                     </div>

@@ -8,6 +8,7 @@ class bodega_guadalajara extends MY_Controller {
   private $excepcion_privilegio = array(
     'bodega_guadalajara/cargar/',
     'bodega_guadalajara/guardar/',
+    'bodega_guadalajara/saveTotales/',
     'bodega_guadalajara/ajax_get_categorias/',
     'bodega_guadalajara/cerrar_caja/',
     'bodega_guadalajara/print_caja/',
@@ -17,6 +18,8 @@ class bodega_guadalajara extends MY_Controller {
     'bodega_guadalajara/rpt_gastos_xls/',
     'bodega_guadalajara/rpt_ingresos_pdf/',
     'bodega_guadalajara/rpt_ingresos_xls/',
+    'bodega_guadalajara/rpt_estado_res_pdf/',
+    'bodega_guadalajara/rpt_estado_res_xls/',
   );
 
   public function _remap($method)
@@ -128,6 +131,14 @@ class bodega_guadalajara extends MY_Controller {
     $this->load->view('panel/bodega_guadalajara/generar', $params);
   }
 
+  public function saveTotales()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    $res_mdl = $this->bodega_guadalajara_model->saveTotales($_POST);
+
+    return $res_mdl;
+  }
+
   /**
    * REPORTES
    * @return [type] [description]
@@ -162,6 +173,38 @@ class bodega_guadalajara extends MY_Controller {
   public function rpt_gastos_xls(){
     $this->load->model('bodega_guadalajara_model');
     $this->bodega_guadalajara_model->getRptGastosXls();
+  }
+
+  public function rpt_estado_res()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/rpt_gastos.js'),
+    ));
+
+    // $this->load->library('pagination');
+    $this->load->model('bodega_guadalajara_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de gastos');
+
+    $params['nomenclatura'] = $this->bodega_guadalajara_model->getNomenclaturas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/bodega_guadalajara/rpt_estado_res',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_estado_res_pdf(){
+    $this->load->model('bodega_guadalajara_model');
+    $this->bodega_guadalajara_model->getRptEstadoResXls();
+  }
+  public function rpt_estado_res_xls(){
+    $this->load->model('bodega_guadalajara_model');
+    $this->bodega_guadalajara_model->getRptEstadoResXls(true);
   }
 
   public function rpt_ingresos()
