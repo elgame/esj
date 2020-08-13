@@ -442,6 +442,7 @@ class bodega_guadalajara_model extends CI_Model {
     $efectivo['utilidad']          = $data['utilidad'];
     $efectivo['costo_venta']       = $data['costo_venta'];
     $efectivo['a_utilidad']        = $data['a_utilidad'];
+    $efectivo['totales_json']      = json_encode($data['totalesGrl']);
 
     $this->db->insert('otros.bodega_efectivo', $efectivo);
 
@@ -552,6 +553,12 @@ class bodega_guadalajara_model extends CI_Model {
     }
 
     return true;
+  }
+
+  public function saveTotales($data)
+  {
+    $this->db->update('otros.bodega_efectivo', ['totales_json' => json_encode($data['totalesGrl'])], array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    return 'guardado';
   }
 
   public function getRemisiones($fecha)
@@ -2296,6 +2303,106 @@ class bodega_guadalajara_model extends CI_Model {
     $proveedor_total    = 0;
     $total_nomenclatura = array();
     return $html;
+  }
+
+  public function getRptEstadoResXls($download = false){
+    if ($download) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=reporte_estado_resultado.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $fecha1 = new DateTime($this->input->get('ffecha1'));
+    $fecha2 = new DateTime($this->input->get('ffecha2'));
+
+    $response = array();
+    $totales = $this->db->query("SELECT fecha, totales_json
+        FROM otros.bodega_efectivo
+        WHERE no_caja = 1 AND fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        ORDER BY fecha ASC");
+    $res = $totales->result();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Estados de Resultado';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $datos_acom = [];
+      $item = [];
+    foreach($res as $key => $estado) {
+      $datos = json_decode($estado->totales_json);
+
+      $datos_acom['FECHA'][] = $estado->fecha;
+      $datos_acom['FECHA'][] = '';
+
+      $datos_acom['VENTAS'][] = $datos->totalVentas;
+      $datos_acom['VENTAS'][] = '';
+
+      $datos_acom['(+) EXIS. ANT'][] = $datos->totalExisAnt;
+      $datos_acom['(+) EXIS. ANT'][] = '';
+
+      $datos_acom['(+) COMPRAS'][] = $datos->totalIngresos;
+      $datos_acom['(+) COMPRAS'][] = '';
+
+      $datos_acom['(-) EXIS. ACTUAL'][] = $datos->totalExisD;
+      $datos_acom['(-) EXIS. ACTUAL'][] = '';
+
+      $datos_acom['(-) DEV S/COMPRA'][] = $datos->totalPrestamos;
+      $datos_acom['(-) DEV S/COMPRA'][] = '';
+
+      $datos_acom['(=) COSTO DE VTA'][] = $datos->costoVenta;
+      $datos_acom['(=) COSTO DE VTA'][] = '';
+
+      $datos_acom['(-) GASTOS'][] = $datos->totalGastos;
+      $datos_acom['(-) GASTOS'][] = '';
+
+      $datos_acom['(=) UTILIDAD'][] = $datos->utilidad;
+      $datos_acom['(=) UTILIDAD'][] = '';
+
+      $datos_acom['BULTOS VENDIDOS'][] = $datos->bultosVentas;
+      $datos_acom['BULTOS VENDIDOS'][] = '';
+
+      $datos_acom['UTILIDAD POR BULTO'][] = $datos->utilidadBulto;
+      $datos_acom['UTILIDAD POR BULTO'][] = '';
+
+      $datos_acom['CLIENTES'][] = $datos->clientes;
+      $datos_acom['CLIENTES'][] = '';
+
+    }
+
+    foreach ($datos_acom as $key => $value) {
+      $html .= '<tr style="">';
+
+      $html .= '<td style="border:1px solid #000;">'.$key.'</td>';
+      foreach ($value as $key3 => $item3) {
+        $html .= '<td style="border:1px solid #000;">'.$item3.'</td>';
+      }
+
+      $html .= '</tr>';
+    }
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
   /**

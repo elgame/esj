@@ -42,7 +42,32 @@
     searchModalMovimientos();
 
     $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
+
+    saveTotales();
   });
+
+  var saveTotales = function () {
+    var datos = {
+      fecha_caja_chica: $('#fecha_caja').val(),
+      fno_caja: $('#fno_caja').val(),
+      totalesGrl: {}
+    };
+    datos.totalesGrl['totalVentas']    = $('#grltotalVentas').val();
+    datos.totalesGrl['totalExisAnt']   = $('#grltotalExisAnt').val();
+    datos.totalesGrl['totalIngresos']  = $('#grltotalIngresos').val();
+    datos.totalesGrl['totalExisD']     = $('#grltotalExisD').val();
+    datos.totalesGrl['totalPrestamos'] = $('#grltotalPrestamos').val();
+    datos.totalesGrl['costoVenta']     = $('#grlcostoVenta').val();
+    datos.totalesGrl['totalGastos']    = $('#grltotalGastos').val();
+    datos.totalesGrl['utilidad']       = $('#grlutilidad').val();
+    datos.totalesGrl['bultosVentas']   = $('#grlbultosVentas').val();
+    datos.totalesGrl['utilidadBulto']  = $('#grlutilidadBulto').val();
+    datos.totalesGrl['clientes']       = $('#grlclientes').val();
+
+    $.post(base_url+'panel/bodega_guadalajara/saveTotales/', datos, function(data, textStatus, xhr) {
+      console.log('test', data, textStatus);
+    });
+  };
 
   var btnAddIngreso = function () {
     $('#btn-add-ingreso').on('click', function(event) {
