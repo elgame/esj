@@ -1,5 +1,7 @@
 
- ☐ En la caja de la bodega agregar un reporte que ponga el estado de resultado por rango de fecha dia x dia
+ ✔ En la caja de la bodega agregar un reporte que ponga el estado de resultado por rango de fecha dia x dia @done (20-08-12 22:03)
+   -- pcc
+     ALTER TABLE otros.bodega_efectivo ADD COLUMN totales_json json;
  ☐ Reporte despido de trabajadores en un rango de fecha
  ✔ Reporte de Control de maquinaria en las salidas de combustible, quitar kilometros, el reporte seria hacia adelante (la nueva salida es el horometro inicial y el final de la salida pasada), modificar en control de maquinara observaciones @done (20-08-07 18:18)
  ✔ En control de combustible meter nuevo reporte que ponga el total de litros por empresa @done (20-08-07 18:18)
