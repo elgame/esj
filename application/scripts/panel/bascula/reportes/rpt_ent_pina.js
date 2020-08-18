@@ -33,7 +33,7 @@ $(function(){
   });
 
   autocompleteRanchos();
-
+  autocompleteCentroCosto();
 });
 
 
@@ -68,5 +68,58 @@ var autocompleteRanchos = function () {
       $("#rancho").css("background-color", "#FFD071");
       $("#ranchoId").val('');
     }
+  });
+};
+
+
+var autocompleteCentroCosto = function () {
+  $("#centroCosto").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+
+      params.tipo = ['gasto', 'melga', 'tabla', 'seccion', 'costosventa', 'servicio'];
+
+      $.ajax({
+          url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $centroCosto =  $(this);
+
+      addCCTag(ui.item);
+      setTimeout(function () {
+        $centroCosto.val('');
+      }, 200);
+      // $centroCosto.val(ui.item.id);
+      // $("#centroCostoId").val(ui.item.id);
+      // $centroCosto.css("background-color", "#A1F57A");
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $("#centroCosto").css("background-color", "#FFD071");
+      // $("#centroCostoId").val('');
+    }
+  });
+
+  function addCCTag(item) {
+    if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+      $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+        '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+        '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+        '</li>');
+    } else {
+      noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+    }
+  };
+
+  $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+    $(this).remove();
   });
 };

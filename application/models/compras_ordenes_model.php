@@ -1504,6 +1504,21 @@ class compras_ordenes_model extends CI_Model {
   {
     $data = $this->info($idOrden, true);
     $data['info'] = $data['info'][0];
+
+    if (is_object($data['info']->otros_datos)) {
+      $data['info']->otros_datos->prev_orden_faltantes = [
+        'id_orden' => $idOrden,
+        'folio'    => $data['info']->folio,
+        'fecha'    => substr($data['info']->fecha_aceptacion, 0, 10)
+      ];
+    } else {
+      $data['info']->otros_datos['prev_orden_faltantes'] = [
+        'id_orden' => $idOrden,
+        'folio'    => $data['info']->folio,
+        'fecha'    => substr($data['info']->fecha_aceptacion, 0, 10)
+      ];
+    }
+
     $dataOrden = array(
       'id_empresa'          => $data['info']->id_empresa,
       'id_proveedor'        => $data['info']->id_proveedor,
@@ -2410,6 +2425,13 @@ class compras_ordenes_model extends CI_Model {
             $requiss[] = $value->folio;
           }
           $pdf->Row(array('ENLACE', "Requisicion(es) ".implode(' | ', $requiss)), false, true);
+        }
+        if (!empty($orden['info'][0]->otros_datos->prev_orden_faltantes)) {
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetXY(5, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(25, 50));
+          $pdf->Row(array('O. FALTANTES', $orden['info'][0]->otros_datos->prev_orden_faltantes->folio), false, true);
         }
         if (!empty($orden['info'][0]->area)) {
           $pdf->SetFont('Arial','',8);

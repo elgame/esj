@@ -793,6 +793,9 @@ class bascula extends MY_Controller {
       array('panel/bascula/admin.js'),
       array('panel/bascula/reportes/rpt_ent_pina.js')
     ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(

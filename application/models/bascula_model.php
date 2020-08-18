@@ -2735,6 +2735,11 @@ class bascula_model extends CI_Model {
       $sql .= " AND r.id_rancho = " . $_GET['ranchoId'];
     }
 
+    if ($this->input->get('centroCostoId') != ''){
+      $centrosIds = implode(',', $_GET['centroCostoId']);
+      $sql .= " AND cc.id_centro_costo IN({$centrosIds})";
+    }
+
     if ($this->input->get('fid_empresa') != ''){
       $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
     }
@@ -2745,7 +2750,8 @@ class bascula_model extends CI_Model {
       "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
               bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
               bspe.folio, bspe.estiba, c.nombre AS calidad, r.nombre AS rancho,
-              cc.nombre AS centro_costo, bspe.cantidad, bspec.num, (bspe.cantidad/bspec.num) AS cc_cantidad
+              cc.nombre AS centro_costo, bspe.cantidad, bspec.num, (bspe.cantidad/bspec.num) AS cc_cantidad,
+              ((bspe.cantidad/bspec.num) * bsp.kg_pieza) AS cc_kilos
       FROM bascula b
         INNER JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
         INNER JOIN otros.bascula_salida_pina_estibas bspe ON bsp.id = bspe.id_salida_pina
@@ -2847,7 +2853,11 @@ class bascula_model extends CI_Model {
       $pdf->SetFont('helvetica','',8);
       $pdf->SetTextColor(0,0,0);
 
-      $total_kg     += ($auxx['kilos_neto'] != $valuerp->kilos_neto? $valuerp->kilos_neto: 0);
+      // if($auxx['kilos_neto'] != $valuerp->kilos_neto) {
+      //   $total_kg = 0;
+      // }
+
+      $total_kg     += $valuerp->cc_kilos;
       $total_piezas += $valuerp->cc_cantidad;
 
       $datos = array(
@@ -2855,8 +2865,9 @@ class bascula_model extends CI_Model {
         ($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: ''),
         ($auxx['folio'] != $valuerp->folio? $valuerp->folio: ''),
         ($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: ''),
-        ($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 0, '', false): ''),
-        MyString::formatoNumero($valuerp->cc_cantidad, 0, '', false),
+        // ($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 2, '', false): ''),
+        MyString::formatoNumero($valuerp->cc_kilos, 2, '', false),
+        MyString::formatoNumero($valuerp->cc_cantidad, 2, '', false),
         $valuerp->calidad,
         $valuerp->centro_costo,
         ($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): ''),
@@ -2955,7 +2966,7 @@ class bascula_model extends CI_Model {
     $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
 
     foreach ($data as $key => $valuerp) {
-      $total_kg     += ($auxx['kilos_neto'] != $valuerp->kilos_neto? $valuerp->kilos_neto: 0);
+      $total_kg     += $valuerp->cc_kilos;
       $total_piezas += $valuerp->cc_cantidad;
 
       $html .= '<tr>
@@ -2964,7 +2975,8 @@ class bascula_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['folio'] != $valuerp->folio? $valuerp->folio: '').'</td>
           <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: '').'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 0, '', false): '').'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_cantidad, 0, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_kilos, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_cantidad, 2, '', false).'</td>
           <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->calidad.'</td>
           <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->centro_costo.'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): '').'</td>

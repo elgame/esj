@@ -34,6 +34,24 @@
                   </div>
                 </div>
 
+                <div class="control-group" id="centrosCostosGrup">
+                  <label class="control-label" for="centroCosto">Centro de costo </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+                    </div>
+                  </div>
+                  <ul class="tags" id="tagsCCIds">
+                  <?php if (isset($_GET['centroCostoId'])) {
+                    foreach ($_GET['centroCostoId'] as $key => $centroCostoId) { ?>
+                      <li><span class="tag"><?php echo $_GET['centroCostoText'][$key] ?></span>
+                        <input type="hidden" name="centroCostoId[]" class="centroCostoId" value="<?php echo $centroCostoId ?>">
+                        <input type="hidden" name="centroCostoText[]" class="centroCostoText" value="<?php echo $_GET['centroCostoText'][$key] ?>">
+                      </li>
+                   <?php }} ?>
+                  </ul>
+                  <div style="clear: both;"></div>
+                </div><!--/control-group -->
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
