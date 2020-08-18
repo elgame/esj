@@ -92,7 +92,7 @@
                 <?php endforeach ?>
               <?php else: ?>
                 <tr>
-                  <td colspan="5"><?php echo $files ?></td>
+                  <td colspan="5"><?php echo (is_string($files)? $files: '') ?></td>
                 </tr>
               <?php endif ?>
             </tbody>
