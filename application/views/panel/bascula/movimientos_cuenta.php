@@ -157,6 +157,7 @@
                           <th><input type="checkbox" checked id="checkPesadas"></th>
                           <th>TIPO</th>
                           <th>BOLETA</th>
+                          <th>REM/FAC</th>
                           <th>FECHA</th>
                           <th>CALIDAD</th>
                           <th>CAJAS</th>
@@ -189,6 +190,11 @@
                           <td>
                             <?php if ($mov->folio != $lastboleta) {
                                    echo $mov->folio;
+                                 } ?>
+                          </td>
+                           <td>
+                            <?php if ($mov->folio != $lastboleta) {
+                                   echo "{$mov->folio_rem}/{$mov->folio_fact}";
                                  } ?>
                           </td>
                           <td>

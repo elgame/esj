@@ -891,17 +891,34 @@ class bascula_model extends CI_Model {
                pagos.concepto,
                b.id_bonificacion,
                b.rancho,
-               COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago
+               COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago,
+               fol.folio_rem, fol.folio_fact
         FROM bascula AS b
           LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
           LEFT JOIN bascula_productos AS bp ON b.id_bascula = bp.id_bascula
           {$table_ms}
           LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
-          LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
-                    FROM bascula_pagos AS bp
-                    INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
-                    WHERE bp.status = 't') AS pagos
-                    ON pagos.id_bascula = b.id_bascula
+          LEFT JOIN (
+            SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
+            FROM bascula_pagos AS bp
+              INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
+            WHERE bp.status = 't'
+          ) AS pagos ON pagos.id_bascula = b.id_bascula
+          LEFT JOIN (
+            SELECT ps.id_paleta_salida, b.id_bascula, b.folio, fol.folio_rem, fol.folio_fact
+            FROM otros.paletas_salidas ps
+              INNER JOIN bascula b ON b.id_bascula = ps.id_bascula
+              INNER JOIN (
+                SELECT fo.id_paleta_salida, (f.serie || f.folio) AS folio_rem,
+                  (ff.serie || ff.folio) AS folio_fact
+                FROM facturacion f
+                  INNER JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+                  LEFT JOIN facturacion_remision_hist fh ON f.id_factura = fh.id_remision
+                  LEFT JOIN facturacion ff ON (ff.id_factura = fh.id_factura AND ff.status <> 'ca' AND ff.status <> 'pf')
+                WHERE f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'pf' AND fo.id_paleta_salida IS NOT NULL
+                ORDER BY f.id_factura ASC
+              ) fol ON ps.id_paleta_salida = fol.id_paleta_salida
+          ) fol ON b.id_bascula = fol.id_bascula
         WHERE
               b.status = true
               {$sql}

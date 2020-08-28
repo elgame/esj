@@ -100,7 +100,8 @@
 						<tr class="br_bottom">
 							<!-- <td></td> -->
 							<td>TIPO</td>
-							<td>BOLETA</td>
+              <td>BOLETA</td>
+							<td>REM/FAC</td>
 							<td>FECHA</td>
 							<td>CALIDAD</td>
 							<td class="txt_right">CAJS</td>
@@ -124,7 +125,8 @@
         		<tr>
 							<!-- <td><?php echo ($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : ''; ?></td> -->
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->tipo : ''; ?></td>
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->folio : ''; ?></td>
+              <td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->folio : ''; ?></td>
+							<td><?php echo ($caja->id_bascula != $lastFolio) ? "{$caja->folio_rem}/{$caja->folio_fact}" : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->fecha : ''; ?></td>
 							<td><?php echo $isXml? $caja->calidad: substr($caja->calidad, 0, 9); ?></td>
 							<td class="txt_right"><?php echo $caja->cajas; ?></td>
