@@ -2703,12 +2703,17 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('Vehículo', $orden['info'][0]->placa.' '.$orden['info'][0]->modelo.' '.$orden['info'][0]->marca), false, true);
         $pdf->SetX(140);
         $pdf->Row(array('Tipo', ($orden['info'][0]->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
-        $pdf->SetX(140);
-        $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina[0]->kilometros, 2, '', false)), false, true);
-        $pdf->SetX(140);
-        $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina[0]->litros, 2, '', false)), false, true);
-        $pdf->SetX(140);
-        $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina[0]->precio, 2, '', false)), false, true);
+        if (isset($orden['info'][0]->gasolina[0])) {
+          $pdf->SetX(140);
+          $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina[0]->kilometros, 2, '', false)), false, true);
+          $pdf->SetX(140);
+          $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina[0]->litros, 2, '', false)), false, true);
+          $pdf->SetX(140);
+          $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina[0]->precio, 2, '', false)), false, true);
+        } else {
+          $pdf->SetX(140);
+          $pdf->Row(array('No Capturados', ''), false, true);
+        }
 
         $pdf->SetFont('Arial', '', 8);
       }
