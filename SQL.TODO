@@ -2,6 +2,8 @@
  ✔ Datos @done (20-08-18 18:13)
    -- lap|san
      INSERT INTO public.calibres(nombre, tipo) VALUES ('EAL2', 'c'), ('REV', 'c');
+   -- lap|san
+     INSERT INTO public.calibres(nombre, tipo) VALUES ('AM2', 'c'), ('CAN', 'c');
  ✔ En las ordenes de faltantes que se generan poner que orden fue la anterior @done (20-08-18 17:48)
  ✔ En el reporte de piña meter filtro de melga @done (20-08-18 14:46)
  ✔ En la caja de la bodega agregar un reporte que ponga el estado de resultado por rango de fecha dia x dia @done (20-08-12 22:03)

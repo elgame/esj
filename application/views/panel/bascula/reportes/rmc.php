@@ -151,6 +151,7 @@
 							<!-- <td></td> -->
 							<td></td>
 							<td></td>
+              <td></td>
 							<td></td>
 							<td></td>
 							<td class="txt_right"><?php echo $data['totales']['cajas']; ?></td>
