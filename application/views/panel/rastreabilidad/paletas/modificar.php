@@ -226,6 +226,43 @@
                             </td>
                           </tr>
                         <?php endforeach ?>
+                      <?php elseif($disabled !== 'disabled'): ?>
+                          <tr data-pallet="">
+                            <td>
+                              <input type="text" name="prod_cliente[]" value="" id="prod_cliente" class="span12" data-next="prod_ddescripcion" <?php echo $readonly ?>>
+                              <input type="hidden" name="prod_id_cliente[]" value="" id="prod_id_cliente" class="span12">
+                              <input type="hidden" name="prod_id_pallet[]" value="" id="prod_id_pallet" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida" <?php echo $readonly ?>>
+                              <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                            </td>
+                            <td>
+                              <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad" <?php echo $disabled ?>>
+                                <?php
+                                foreach ($unidades as $keyu => $u) {
+                                  $selected = '';
+                                  if ($keyu === 0) {
+                                    $selected = 'selected';
+                                    $uni = $u->id_unidad;
+                                  }
+                                ?>
+                                  <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo $selected ?>><?php echo $u->nombre ?></option>
+                                <?php } ?>
+                              </select>
+                              <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dcantidad[]" value="" id="prod_dcantidad" class="span12 vpositive" <?php echo $readonly ?>>
+                            </td>
+                            <td>
+                              <span id="prod_dmedida_kilos_text"></span>
+                              <input type="hidden" name="prod_dmedida_kilos[]" value="" id="prod_dmedida_kilos" class="span12 vpositive" readonly="readonly">
+                            </td>
+                            <td>
+                              <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                            </td>
+                          </tr>
                       <?php endif ?>
                         <!-- <tr data-pallet="">
                           <td>
