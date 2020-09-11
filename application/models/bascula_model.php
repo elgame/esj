@@ -368,40 +368,56 @@ class bascula_model extends CI_Model {
     return array('passes' => true);
   }
 
-  public function addSnapshot($idBascula, $tipo='en')
+  public function addSnapshot($idBascula, $tipo='en', $insert=true)
   {
     $path = UploadFiles::validaDir(date("Y-m"), 'application/media/bascula_snap/');
 
     if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+      $time_start1 = microtime(true);
+
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 1')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam1_{$tipo}.jpg";
         file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
-        $datos = [
-          'id_bascula' => $idBascula,
-          'no_camara'  => '1',
-          'url_foto'   => $url,
-          'tipo'       => $tipo
-        ];
-        $this->db->insert('bascula_fotos', $datos);
+        if ($insert) {
+          $datos = [
+            'id_bascula' => $idBascula,
+            'no_camara'  => '1',
+            'url_foto'   => $url,
+            'tipo'       => $tipo
+          ];
+          $this->db->insert('bascula_fotos', $datos);
+        }
       }
+
+      $time_end1 = microtime(true);
+      $time1 = $time_end1 - $time_start1;
+      log_message('debug', "{$time1} = {$time_end1} - {$time_start1}");
     }
 
     if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+      $time_start2 = microtime(true);
+
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 2')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam2_{$tipo}.jpg";
         file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
-        $datos = [
-          'id_bascula' => $idBascula,
-          'no_camara'  => '2',
-          'url_foto'   => $url,
-          'tipo'       => $tipo
-        ];
-        $this->db->insert('bascula_fotos', $datos);
+        if ($insert) {
+          $datos = [
+            'id_bascula' => $idBascula,
+            'no_camara'  => '2',
+            'url_foto'   => $url,
+            'tipo'       => $tipo
+          ];
+          $this->db->insert('bascula_fotos', $datos);
+        }
       }
+
+      $time_end2 = microtime(true);
+      $time2 = $time_end2 - $time_start2;
+      log_message('debug', "{$time2} = {$time_end2} - {$time_start2}");
     }
 
   }
