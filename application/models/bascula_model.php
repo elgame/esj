@@ -419,7 +419,10 @@ class bascula_model extends CI_Model {
       $time_end2 = microtime(true);
       $time2 = $time_end2 - $time_start2;
       log_message('error', "BasculaSnap");
-      log_message('error', "Bascula: {$time2} = {$time_end2} - {$time_start2}");
+    }
+
+    if (isset($time1) && isset($time2)) {
+      log_message('error', "Bascula: ".($time_end2 - $time_start1));
     }
 
   }
