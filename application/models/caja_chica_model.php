@@ -2544,9 +2544,9 @@ class caja_chica_model extends CI_Model {
           ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
           ($traspaso->afectar_fondo=='t'? 'Si': 'No'),
           ($traspaso->status == 't'? $traspaso->concepto: 0),
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($traspaso->status == 't'? $traspaso->monto: 0),
-            2, '', false))), false, true, $colortxt);
+            2, '', false)), false, true, $colortxt);
       }
 
       $pdf->SetTextColor(0, 0, 0);
@@ -2763,9 +2763,9 @@ class caja_chica_model extends CI_Model {
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2844,9 +2844,9 @@ class caja_chica_model extends CI_Model {
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2927,9 +2927,9 @@ class caja_chica_model extends CI_Model {
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -3015,7 +3015,7 @@ class caja_chica_model extends CI_Model {
         $pdf->Row(array(
           $gasto->proveedor,
           $gasto->centro_costo,
-          MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+          MyString::formatoNumero($gasto->monto, 2, '', false)
         ), false, true);
       }
 

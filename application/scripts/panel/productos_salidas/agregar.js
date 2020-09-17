@@ -118,13 +118,17 @@
     $("#fconcepto").autocomplete({
       source: function (request, response) {
         if (isEmpresaSelected()) {
+          var tipoo = 'p';
+          if ($('#tipo').val() == 'c') {
+            tipoo = '';
+          }
           $.ajax({
             url: base_url + 'panel/compras_ordenes/ajax_producto/',
             dataType: 'json',
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: ''
+              tipo: tipoo
             },
             success: function (data) {
               response(data)
