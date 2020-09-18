@@ -318,6 +318,7 @@ class productos_salidas_model extends CI_Model {
     if ( ! $productos)
     {
       $this->load->model('inventario_model');
+      $this->load->model('compras_ordenes_model');
 
       $productos = array();
       foreach ($_POST['concepto'] as $key => $concepto)
@@ -326,6 +327,10 @@ class productos_salidas_model extends CI_Model {
           $res = $this->inventario_model->promedioData($_POST['productoId'][$key], date('Y-m-d'), date('Y-m-d'));
           $saldo = array_shift($res);
           $saldo = $saldo['saldo'][1];
+          if (floatval($saldo) <= 0) {
+            $res = $this->compras_ordenes_model->getUltimaCompra($_POST['productoId'][$key]);
+            $saldo = isset($res->precio_unitario)? $res->precio_unitario: 0;
+          }
         }else
           $saldo = $_POST['precioUnit'][$key];
 

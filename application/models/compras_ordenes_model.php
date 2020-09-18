@@ -3068,11 +3068,12 @@ class compras_ordenes_model extends CI_Model {
     return isset($query->fecha)? $query->fecha: '';
    }
 
-  public function getUltimaCompra($id_producto, $id_orden = null)
+  public function getUltimaCompra($id_producto, $id_orden = null, $sql = '')
   {
     $query = null;
     if ($id_producto > 0) {
-      $sql = isset($id_orden)? " AND co.id_orden < {$id_orden}": '';
+      $sql .= isset($id_orden)? " AND co.id_orden < {$id_orden}": '';
+
       $query = $this->db->query("SELECT cp.*, co.fecha_creacion
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
