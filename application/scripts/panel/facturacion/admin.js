@@ -35,7 +35,7 @@
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
-          $("#dempresa").val("").css("background-color", "#FFD9B3");
+          $("#dempresa").css("background-color", "#FFD9B3");
           $("#did_empresa").val("");
         }
     });
@@ -64,7 +64,7 @@
       }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
-          $("#dcliente").val("").css("background-color", "#FFD9B3");
+          $("#dcliente").css("background-color", "#FFD9B3");
           $("#fid_cliente").val("");
         }
     });
