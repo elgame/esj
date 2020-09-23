@@ -377,6 +377,7 @@ class bascula_model extends CI_Model {
     $path = UploadFiles::validaDir(date("Y-m"), 'application/media/bascula_snap/');
 
     // if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+    if ($this->snapshotCam1 != '') {
       $time_start1 = microtime(true);
 
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
@@ -400,9 +401,10 @@ class bascula_model extends CI_Model {
       $time1 = $time_end1 - $time_start1;
       log_message('error', "BasculaSnap");
       log_message('error', "Bascula: {$time1} = {$time_end1} - {$time_start1}");
-    // }
+    }
 
     // if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+    if ($this->snapshotCam2 != '') {
       $time_start2 = microtime(true);
 
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
@@ -425,7 +427,7 @@ class bascula_model extends CI_Model {
       $time_end2 = microtime(true);
       $time2 = $time_end2 - $time_start2;
       log_message('error', "BasculaSnap");
-    // }
+    }
 
     if (isset($time1) && isset($time2)) {
       log_message('error', "Bascula end: ".($time_end2 - $time_start1));
