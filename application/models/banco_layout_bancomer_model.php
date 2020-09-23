@@ -162,12 +162,12 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
   {
     $string = mb_strtolower($string, 'UTF-8');
     $string = str_replace(
-      [' ','ñ','á','é','í','ó','ú','*','#','$','%','=','+','&','^','-','_',',','.',';',':'],
-      ['','n','a','e','i','o','u','','','','','','','','','','','','','','',''], $string);
+      ['ñ','á','é','í','ó','ú','*','#','$','%','=','+','&','^','-','_',',','.',';',':'], //' ',
+      ['n','a','e','i','o','u','','','','','','','','','','','','','','',''], $string); //'',
     if ($upper) {
-      $string = mb_strtoupper($string);
+      $string = mb_strtoupper($string, 'UTF-8');
     }
-    return $string;
+    return trim($string);
   }
 
   function getNombre($nombre){
