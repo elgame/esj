@@ -311,7 +311,8 @@
                     <select name="fbanco" id="fbanco">
                       <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, $this->input->post('fbanco')); ?>>BBVA Bancomer</option>
                       <option value="santr" <?php echo set_select('fbanco', 'santr', false, $this->input->post('fbanco')); ?>>Santander</option>
-                      <option value="banor" <?php echo set_select('fbanco', 'banor', false, $this->input->post('fbanco')); ?>>Santander</option>
+                      <option value="banor" <?php echo set_select('fbanco', 'banor', false, $this->input->post('fbanco')); ?>>Banorte</option>
+                      <option value="efectivo" <?php echo set_select('fbanco', 'efectivo', false, $this->input->post('fbanco')); ?>>Efectivo</option>
                     </select>
                     </div>
                   </div>
