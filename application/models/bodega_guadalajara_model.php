@@ -2350,41 +2350,43 @@ class bodega_guadalajara_model extends CI_Model {
     foreach($res as $key => $estado) {
       $datos = json_decode($estado->totales_json);
 
-      $datos_acom['FECHA'][] = $estado->fecha;
-      $datos_acom['FECHA'][] = '';
+      if (isset($datos->totalVentas)) {
+        $datos_acom['FECHA'][] = $estado->fecha;
+        $datos_acom['FECHA'][] = '';
 
-      $datos_acom['VENTAS'][] = $datos->totalVentas;
-      $datos_acom['VENTAS'][] = '';
+        $datos_acom['VENTAS'][] = $datos->totalVentas;
+        $datos_acom['VENTAS'][] = '';
 
-      $datos_acom['(+) EXIS. ANT'][] = $datos->totalExisAnt;
-      $datos_acom['(+) EXIS. ANT'][] = '';
+        $datos_acom['(+) EXIS. ANT'][] = $datos->totalExisAnt;
+        $datos_acom['(+) EXIS. ANT'][] = '';
 
-      $datos_acom['(+) COMPRAS'][] = $datos->totalIngresos;
-      $datos_acom['(+) COMPRAS'][] = '';
+        $datos_acom['(+) COMPRAS'][] = $datos->totalIngresos;
+        $datos_acom['(+) COMPRAS'][] = '';
 
-      $datos_acom['(-) EXIS. ACTUAL'][] = $datos->totalExisD;
-      $datos_acom['(-) EXIS. ACTUAL'][] = '';
+        $datos_acom['(-) EXIS. ACTUAL'][] = $datos->totalExisD;
+        $datos_acom['(-) EXIS. ACTUAL'][] = '';
 
-      $datos_acom['(-) DEV S/COMPRA'][] = $datos->totalPrestamos;
-      $datos_acom['(-) DEV S/COMPRA'][] = '';
+        $datos_acom['(-) DEV S/COMPRA'][] = $datos->totalPrestamos;
+        $datos_acom['(-) DEV S/COMPRA'][] = '';
 
-      $datos_acom['(=) COSTO DE VTA'][] = $datos->costoVenta;
-      $datos_acom['(=) COSTO DE VTA'][] = '';
+        $datos_acom['(=) COSTO DE VTA'][] = $datos->costoVenta;
+        $datos_acom['(=) COSTO DE VTA'][] = '';
 
-      $datos_acom['(-) GASTOS'][] = $datos->totalGastos;
-      $datos_acom['(-) GASTOS'][] = '';
+        $datos_acom['(-) GASTOS'][] = $datos->totalGastos;
+        $datos_acom['(-) GASTOS'][] = '';
 
-      $datos_acom['(=) UTILIDAD'][] = $datos->utilidad;
-      $datos_acom['(=) UTILIDAD'][] = '';
+        $datos_acom['(=) UTILIDAD'][] = $datos->utilidad;
+        $datos_acom['(=) UTILIDAD'][] = '';
 
-      $datos_acom['BULTOS VENDIDOS'][] = $datos->bultosVentas;
-      $datos_acom['BULTOS VENDIDOS'][] = '';
+        $datos_acom['BULTOS VENDIDOS'][] = $datos->bultosVentas;
+        $datos_acom['BULTOS VENDIDOS'][] = '';
 
-      $datos_acom['UTILIDAD POR BULTO'][] = $datos->utilidadBulto;
-      $datos_acom['UTILIDAD POR BULTO'][] = '';
+        $datos_acom['UTILIDAD POR BULTO'][] = $datos->utilidadBulto;
+        $datos_acom['UTILIDAD POR BULTO'][] = '';
 
-      $datos_acom['CLIENTES'][] = $datos->clientes;
-      $datos_acom['CLIENTES'][] = '';
+        $datos_acom['CLIENTES'][] = $datos->clientes;
+        $datos_acom['CLIENTES'][] = '';
+      }
 
     }
 
