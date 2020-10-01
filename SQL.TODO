@@ -1,6 +1,6 @@
 
  ☐ Nomina banorte
-   -- pcc
+   -- pcc|san
      ALTER TABLE public.usuarios ADD COLUMN no_proveedor_banorte character varying(13) COLLATE pg_catalog."default";
  ✔ Datos @done (20-08-18 18:13)
    -- lap|san|pcc

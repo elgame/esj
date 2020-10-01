@@ -297,7 +297,8 @@ class Usuarios_model extends privilegios_model {
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
-            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato" )
+            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato,
+            u.no_proveedor_banorte" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")
