@@ -197,6 +197,7 @@ class nomina_fiscal_model extends CI_Model {
                 (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']}{$sqlsegu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
                 u.rfc,
                 u.cuenta_banco,
+                u.no_proveedor_banorte,
                 u.no_seguro,
                 (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]} AND id_empleado = u.id) as dias_vacaciones_fijo,
                 (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
@@ -290,6 +291,7 @@ class nomina_fiscal_model extends CI_Model {
                 (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']}{$sqlsegu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
                 u.rfc,
                 u.cuenta_banco,
+                u.no_proveedor_banorte,
                 u.no_seguro,
                 (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]} AND id_empleado = u.id) as dias_vacaciones_fijo,
                 (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
@@ -391,6 +393,7 @@ class nomina_fiscal_model extends CI_Model {
             -- COALESCE(SUM(nf.dias_trabajados), 0) as ptu_dias_trabajados_empleado,
             u.rfc,
             u.cuenta_banco,
+            u.no_proveedor_banorte,
             u.no_seguro,
             0 as dias_vacaciones_fijo,
             null AS en_vacaciones,
@@ -3152,10 +3155,10 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
         } elseif($empleado->banco == 'banor') {
-          $contentBanorte[] = '02' .
-                      "'142335" . // $empleado->no_proveedor_banorte
-                      $this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
+          $contentBanorte[] = "'02" .
+                      "'{$empleado->no_proveedor_banorte}" .
+                      "'".$this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
+                      "'".$this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
                       $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
@@ -3196,10 +3199,10 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
         } elseif($empleado->banco == 'banor') {
-          $contentBanorte[] = '02' .
-                      "'142335" . // $empleado->no_proveedor_banorte
-                      $this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
+          $contentBanorte[] = "'02" .
+                      "'{$empleado->no_proveedor_banorte}" .
+                      "'".$this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
+                      "'".$this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
                       $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .

@@ -1,8 +1,10 @@
 
+ ☐ Nomina banorte
+   -- pcc
+     ALTER TABLE public.usuarios ADD COLUMN no_proveedor_banorte character varying(13) COLLATE pg_catalog."default";
  ✔ Datos @done (20-08-18 18:13)
-   -- lap|san
+   -- lap|san|pcc
      INSERT INTO public.calibres(nombre, tipo) VALUES ('EAL2', 'c'), ('REV', 'c');
-   -- lap|san
      INSERT INTO public.calibres(nombre, tipo) VALUES ('AM2', 'c'), ('CAN', 'c');
  ✔ En las ordenes de faltantes que se generan poner que orden fue la anterior @done (20-08-18 17:48)
  ✔ En el reporte de piña meter filtro de melga @done (20-08-18 14:46)

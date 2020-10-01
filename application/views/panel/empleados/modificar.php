@@ -349,6 +349,13 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="dno_proveedor_banorte">Clave Proveedor Banco </label>
+                    <div class="controls">
+                      <input type="text" name="dno_proveedor_banorte" id="dno_proveedor_banorte" class="span12 vpositive" value="<?php echo isset($data['info'][0]->no_proveedor_banorte)?$data['info'][0]->no_proveedor_banorte:''; ?>" maxlength="13" placeholder="Clave Proveedor Banco">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="dno_seguro">No Seguro </label>
                     <div class="controls">
                       <input type="text" name="dno_seguro" id="dno_seguro" class="span12 vpositive" value="<?php echo isset($data['info'][0]->no_seguro)?$data['info'][0]->no_seguro:''; ?>" maxlength="12" placeholder="# Seguro">

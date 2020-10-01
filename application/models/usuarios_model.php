@@ -210,20 +210,21 @@ class Usuarios_model extends privilegios_model {
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
 						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
 
-            'cuenta_banco'    => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
-            'no_seguro'       => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
-            'user_nomina'     => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
-            'id_departamente' => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
-            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
-            'no_empleado'     => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
-            'no_checador'     => trim($this->input->post('dno_checador'))? intval($this->input->post('dno_checador')): NULL,
+            'cuenta_banco'         => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
+            'no_proveedor_banorte' => trim($this->input->post('dno_proveedor_banorte'))?$this->input->post('dno_proveedor_banorte'): '',
+            'no_seguro'            => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+            'user_nomina'          => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+            'id_departamente'      => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'            => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+            'no_empleado'          => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+            'no_checador'          => trim($this->input->post('dno_checador'))? intval($this->input->post('dno_checador')): NULL,
 
-            'tipo_contrato'   => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
-            // 'tipo_regimen'    => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
-            'tipo_jornada'    => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
-            'riesgo_puesto'   => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+            'tipo_contrato'        => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
+            // 'tipo_regimen'      => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
+            'tipo_jornada'         => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
+            'riesgo_puesto'        => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
 
-            'fecha_contrato' => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
+            'fecha_contrato'       => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');
