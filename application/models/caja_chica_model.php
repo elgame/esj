@@ -4204,7 +4204,9 @@ class caja_chica_model extends CI_Model {
     $this->load->model('catalogos_sft_model');
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4305,7 +4307,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptGastosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Gastos';
@@ -4549,7 +4553,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4644,7 +4650,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Ingresos';
@@ -4848,7 +4856,8 @@ class caja_chica_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $id_empresa = $this->input->get('did_empresa');
-    $empresa = $this->empresas_model->getInfoEmpresa(($id_empresa>0? $id_empresa: 2));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4888,7 +4897,8 @@ class caja_chica_model extends CI_Model {
 
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
-      $datos = array($item->fecha,
+      $datos = array(
+        $item->fecha,
         $item->categoria,
         ucfirst($item->tipo),
         $item->observacion,
@@ -4926,10 +4936,12 @@ class caja_chica_model extends CI_Model {
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $res = $this->getRptIngresosData();
+    $res = $this->getRptIngresosGastosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Ingresos';
@@ -4938,70 +4950,60 @@ class caja_chica_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
-        </tr>';
-    $aux_categoria = '';
-    $total_nomenclatura = array();
-    $aux_proveedor_total = $proveedor_total = 0;
-    foreach($res['movimientos'] as $key => $producto){
-
-      if($key==0 || $aux_categoria != $producto->id_categoria) {
-        if($aux_categoria != $producto->id_categoria && $key > 0)
-        {
-          $aux_proveedor_total = $proveedor_total;
-          $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
-
-          $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
-        }elseif($key == 0)
-          $aux_categoria = $producto->id_categoria;
-
-        $html .= '<tr style="font-weight:bold">
-          <td colspan="6"></td>
+          <td colspan="7"></td>
         </tr>
-        <tr style="font-weight:bold">
-          <td colspan="6" style="background-color: #cccccc;">'.$producto->categoria.'</td>
-        </tr>
+        <tr><td colspan="7"></td></tr>
         <tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Poliza</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Empresa</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Tipo</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Observacion</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Caja</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Ingreso</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Gasto</td>
         </tr>';
+
+    $total_ingresos = $total_gastos = 0;
+    foreach($res as $key => $item){
+
+      $ingreso = $gasto = 0;
+      if ($item->ingreso == 1) {
+        $ingreso = MyString::formatoNumero($item->monto, 2, '', false);
+        $total_ingresos += $item->monto;
+      } else {
+        $gasto = MyString::formatoNumero($item->monto, 2, '', false);
+        $total_gastos += $item->monto;
       }
 
       $html .= '<tr style="">
-          <td style="border:1px solid #000;">'.$producto->fecha.'</td>
-          <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
-          <td style="border:1px solid #000;">'.$producto->poliza.'</td>
-          <td style="border:1px solid #000;">'.$producto->concepto.'</td>
-          <td style="border:1px solid #000;">'.$producto->monto.'</td>
+          <td style="border:1px solid #000;">'.$item->fecha.'</td>
+          <td style="border:1px solid #000;">'.$item->categoria.'</td>
+          <td style="border:1px solid #000;">'.ucfirst($item->tipo).'</td>
+          <td style="border:1px solid #000;">'.$item->observacion.'</td>
+          <td style="border:1px solid #000;">'.$item->no_caja.'</td>
+          <td style="border:1px solid #000;">'.$ingreso.'</td>
+          <td style="border:1px solid #000;">'.$gasto.'</td>
         </tr>';
-
-      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
-        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
-      else
-        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
-
-      $proveedor_total += $producto->monto;
     }
 
-    if(isset($producto))
-    {
-      $aux_proveedor_total = $proveedor_total;
-      $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
-
-      $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
-    }
+    $html .= '<tr style="">
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;font-weight:bold;">'.$total_ingresos.'</td>
+        <td style="border:1px solid #000;font-weight:bold;">'.$total_gastos.'</td>
+      </tr>';
 
     $html .= '
       </tbody>

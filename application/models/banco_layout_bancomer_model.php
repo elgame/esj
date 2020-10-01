@@ -23,7 +23,7 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
       $header .= $cuenta_retiro->no_cliente;
       $header .= $fecha;
       $header .= $this->llena0(2, $noFile);  //Consecutivo de archivo en el día
-      $header .= $this->string('PAGOS', 30);
+      $header .= $this->string("PAGOS".str_replace('-', '', $fecha), 30);
       $header .= "00                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ";
       $header .= "\r\n";
 
@@ -47,7 +47,9 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
           $reg .= '                                                                                    N                                                                                                                                                                                           MXP                    ';
           $reg .= 'FA';
           $reg .= $this->llena0(15, number_format($value['monto'], 2, '', ''));
-          $reg .= '00000000000000000                                                  N000000000000';
+          $reg .= '0000000000000000';
+          $reg .= '0'; // 0:sin confirmacion, 1:confirmar email, 3:confirmar msn
+          $reg .= '                                                  N000000000000';
           $reg .= "{$fecha}0001-01-010001-01-010001-01-01{$fecha}N 0001-01-01700                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                0001-01-01";
           $reg .= "\r\n";
 
@@ -89,7 +91,7 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
           'proveedor_sucursal' => $pago->pagos[0]->sucursal,
           'proveedor_cuenta'   => $pago->pagos[0]->cuenta,
           'ref_alfanumerica'   => $pago->pagos[0]->ref_alfanumerica,
-          'beneficiario_clave' => $this->cleanStr($pago->nombre_fiscal, true),
+          'beneficiario_clave' => $this->cleanStr($pago->pagos[0]->alias, true),
           'beneficiario'       => $pago->nombre_fiscal,
           'es_moral'           => $pago->es_moral,
           'clave_banco'        => $pago->pagos[0]->codigo_bajio,
@@ -106,9 +108,15 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
 
   public function getTipoCuenta($pago, $cuenta_retiro)
   {
+    // 1 = Pago en Ventanilla
+    // 2 = Pago a cuenta Bancomer
+    // 3 = Pago a convenio CIE
+    // 4 = Pago a cuenta Internacional vía SWIFT
+    // 5 = Pago a cuenta Interbancaria día siguiente
+    // 6 = Pago a cuenta Interbancaria mismo día
     $tipo = '6'; // interbancarias
     $leng = strlen($pago->cuenta);
-    if ($pago->id_banco == $cuenta_retiro->id_banco) { // cuentas bajio
+    if ($pago->id_banco == $cuenta_retiro->id_banco) { // cuentas bancomer
       $tipo = '2';
     }
     return $tipo;
@@ -154,12 +162,12 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
   {
     $string = mb_strtolower($string, 'UTF-8');
     $string = str_replace(
-      [' ','ñ','á','é','í','ó','ú','*','#','$','%','=','+','&','^','-','_',',','.',';',':'],
-      ['','n','a','e','i','o','u','','','','','','','','','','','','','','',''], $string);
+      ['ñ','á','é','í','ó','ú','*','#','$','%','=','+','&','^','-','_',',','.',';',':'], //' ',
+      ['n','a','e','i','o','u','','','','','','','','','','','','','','',''], $string); //'',
     if ($upper) {
-      $string = mb_strtoupper($string);
+      $string = mb_strtoupper($string, 'UTF-8');
     }
-    return $string;
+    return trim($string);
   }
 
   function getNombre($nombre){

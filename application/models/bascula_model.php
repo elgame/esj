@@ -2,6 +2,9 @@
 
 class bascula_model extends CI_Model {
 
+  private $snapshotCam1 = '';
+  private $snapshotCam2 = '';
+
   function __construct()
   {
     parent::__construct();
@@ -105,6 +108,7 @@ class bascula_model extends CI_Model {
     if (is_null($data))
     {
       $idb = isset($_POST['pidb']) ? $_POST['pidb'] : '';
+      $this->getPreSnapshot();
 
       if ($_POST['paccion'] == 'n') // nueva boleta
       {
@@ -372,14 +376,16 @@ class bascula_model extends CI_Model {
   {
     $path = UploadFiles::validaDir(date("Y-m"), 'application/media/bascula_snap/');
 
-    if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+    // if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+    if ($this->snapshotCam1 != '') {
       $time_start1 = microtime(true);
 
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 1')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam1_{$tipo}.jpg";
-        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
+        file_put_contents($url, $this->snapshotCam1);
+        // file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
         if ($insert) {
           $datos = [
             'id_bascula' => $idBascula,
@@ -397,14 +403,16 @@ class bascula_model extends CI_Model {
       log_message('error', "Bascula: {$time1} = {$time_end1} - {$time_start1}");
     }
 
-    if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+    // if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+    if ($this->snapshotCam2 != '') {
       $time_start2 = microtime(true);
 
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 2')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam2_{$tipo}.jpg";
-        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
+        file_put_contents($url, $this->snapshotCam2);
+        // file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
         if ($insert) {
           $datos = [
             'id_bascula' => $idBascula,
@@ -422,9 +430,25 @@ class bascula_model extends CI_Model {
     }
 
     if (isset($time1) && isset($time2)) {
-      log_message('error', "Bascula: ".($time_end2 - $time_start1));
+      log_message('error', "Bascula end: ".($time_end2 - $time_start1));
     }
 
+  }
+
+  private function getPreSnapshot()
+  {
+    $this->snapshotCam1 = $this->snapshotCam2 = '';
+    try {
+      $this->snapshotCam1 = file_get_contents($this->config->item('snapshot_cam1'));
+    } catch (Exception $e) {
+      $this->snapshotCam1 = '';
+    }
+
+    try {
+      $this->snapshotCam2 = file_get_contents($this->config->item('snapshot_cam2'));
+    } catch (Exception $e) {
+      $this->snapshotCam2 = '';
+    }
   }
 
   public function ligarOrdenes($idb, $data)
