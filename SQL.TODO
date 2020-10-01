@@ -1,5 +1,14 @@
 
- ☐ Nomina banorte
+ ☐ Recetas
+   -- pcc|san
+    ALTER TABLE otros.recetas ALTER COLUMN a_etapa TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_ciclo TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_dds TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_turno TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_via TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_aplic TYPE character varying(40) COLLATE pg_catalog."default";
+    ALTER TABLE otros.recetas ALTER COLUMN a_equipo TYPE character varying(40) COLLATE pg_catalog."default";
+ ✔ Nomina banorte @done (20-10-01 16:45)
    -- pcc|san
      ALTER TABLE public.usuarios ADD COLUMN no_proveedor_banorte character varying(13) COLLATE pg_catalog."default";
  ✔ Datos @done (20-08-18 18:13)
