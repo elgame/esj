@@ -76,6 +76,7 @@
                     <th>Producto</th>
                     <th>Proveedor</th>
                     <th>Aplicar</th>
+                    <th>Quitar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -100,6 +101,12 @@
                       <select name="aplicar[]">
                         <option value="t" <?php echo ($receta->surtir == 't'? 'selected': '') ?>>Si</option>
                         <option value="f" <?php echo ($receta->surtir == 'f'? 'selected': '') ?>>No</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select name="quitar[]">
+                        <option value="f" <?php echo ($receta->quitar == 'f'? 'selected': '') ?>>No</option>
+                        <option value="t" <?php echo ($receta->quitar == 't'? 'selected': '') ?>>Si</option>
                       </select>
                     </td>
                   </tr>

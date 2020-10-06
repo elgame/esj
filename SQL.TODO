@@ -1,5 +1,9 @@
 
- ☐ Recetas
+
+ ✔ Recetas en surtir productos, poner opcion para quitar los productos no surtidos @done (20-10-05 20:09)
+   -- pcc
+    ALTER TABLE otros.recetas_productos ADD COLUMN quitar boolean NOT NULL DEFAULT false;
+    COMMENT ON COLUMN otros.recetas_productos.quitar IS 'Es un status, si es TRUE indica que ese producto se quito de surtir recetas (no se surtio), si es FALSE indica que se puede surtir o si id_requisicion no es null ya se surtio';
    -- pcc|san
     ALTER TABLE otros.recetas ALTER COLUMN a_etapa TYPE character varying(40) COLLATE pg_catalog."default";
     ALTER TABLE otros.recetas ALTER COLUMN a_ciclo TYPE character varying(40) COLLATE pg_catalog."default";

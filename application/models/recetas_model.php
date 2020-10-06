@@ -533,14 +533,14 @@ class recetas_model extends CI_Model {
         f.nombre, r.folio, r.folio_hoja, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
         rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
         p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir,
-        r.id_empresa_ap
+        r.id_empresa_ap, rp.quitar
       FROM otros.recetas_productos rp
         INNER JOIN productos pr ON pr.id_producto = rp.id_producto
         INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
         INNER JOIN areas a ON a.id_area = r.id_area
         LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
         LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
-      WHERE r.status = 't' AND rp.id_requisicion IS NULL {$sql}
+      WHERE r.status = 't' AND rp.id_requisicion IS NULL AND rp.quitar = 'f' {$sql}
       ORDER BY r.folio DESC, p.id_proveedor ASC, pr.nombre ASC
       ");
 
@@ -553,16 +553,17 @@ class recetas_model extends CI_Model {
   {
     if (isset($_POST['id_proveedor']) && count($_POST['id_proveedor']) > 0) {
       foreach ($_POST['id_proveedor'] as $key => $id_proveedor) {
-        if ($id_proveedor > 0) {
-          $this->db->update('otros.recetas_productos', [
-            'id_proveedor' => $id_proveedor,
-            'surtir'       => $_POST['aplicar'][$key],
-          ], [
-            'id_receta'   => $_POST['id_receta'][$key],
-            'id_producto' => $_POST['id_producto'][$key],
-            'rows'        => $_POST['rows'][$key],
-          ]);
-        }
+        $id_proveedor = ($id_proveedor > 0? $id_proveedor : null);
+
+        $this->db->update('otros.recetas_productos', [
+          'id_proveedor' => $id_proveedor,
+          'surtir'       => $_POST['aplicar'][$key],
+          'quitar'       => $_POST['quitar'][$key],
+        ], [
+          'id_receta'   => $_POST['id_receta'][$key],
+          'id_producto' => $_POST['id_producto'][$key],
+          'rows'        => $_POST['rows'][$key],
+        ]);
       }
     }
   }
