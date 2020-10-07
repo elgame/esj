@@ -68,6 +68,21 @@
                         <option value="IvaRetPagado" <?php echo set_select('dtipo_cuenta', 'IvaRetPagado', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado</option>
                         <option value="IvaRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IvaRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Por Pagar Honorarios</option>
                         <option value="IvaRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IvaRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado Honorarios</option>
+
+                        <option value="IepsPagar6Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar6Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X PAGAR 6% GASTOS</option>
+                        <option value="IepsPagar7Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar7Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X PAGAR 7% GASTOS</option>
+                        <option value="IepsPagar9Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar9Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X PAGAR 9% GASTOS</option>
+                        <option value="IepsPagado6Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado6Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS PAGADO 6% EGRESO</option>
+                        <option value="IepsPagado7Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado7Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS PAGADO 7% EGRESO</option>
+                        <option value="IepsPagado9Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado9Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS PAGADO 9% EGRESO</option>
+
+                        <option value="IepsCobrar6Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar6Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X COBRAR 6% VENTAS</option>
+                        <option value="IepsCobrar7Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar7Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X COBRAR 7% VENTAS</option>
+                        <option value="IepsCobrar9Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar9Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS X COBRAR 9% VENTAS</option>
+                        <option value="IepsCobrado6Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado6Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS COBRADO 6% INGRESOS</option>
+                        <option value="IepsCobrado7Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado7Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS COBRADO 7% INGRESOS</option>
+                        <option value="IepsCobrado9Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado9Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>IEPS COBRADO 9% INGRESOS</option>
+
                         <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar Honorarios</option>
                         <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IsrRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado Honorarios</option>
                         <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagar', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar</option>

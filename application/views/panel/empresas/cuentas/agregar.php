@@ -68,6 +68,21 @@
                         <option value="IvaRetPagado" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Pagado</option>
                         <option value="IvaRetXPagarHono" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Por Pagar Honorarios</option>
                         <option value="IvaRetPagadoHono" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Pagado Honorarios</option>
+
+                        <option value="IepsPagar6Gasto" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X PAGAR 6% GASTOS</option>
+                        <option value="IepsPagar7Gasto" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X PAGAR 7% GASTOS</option>
+                        <option value="IepsPagar9Gasto" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X PAGAR 9% GASTOS</option>
+                        <option value="IepsPagado6Egreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS PAGADO 6% EGRESO</option>
+                        <option value="IepsPagado7Egreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS PAGADO 7% EGRESO</option>
+                        <option value="IepsPagado9Egreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS PAGADO 9% EGRESO</option>
+
+                        <option value="IepsCobrar6Ventas" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X COBRAR 6% VENTAS</option>
+                        <option value="IepsCobrar7Ventas" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X COBRAR 7% VENTAS</option>
+                        <option value="IepsCobrar9Ventas" <?php echo set_select('dtipo_cuenta'); ?>>IEPS X COBRAR 9% VENTAS</option>
+                        <option value="IepsCobrado6Ingreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS COBRADO 6% INGRESOS</option>
+                        <option value="IepsCobrado7Ingreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS COBRADO 7% INGRESOS</option>
+                        <option value="IepsCobrado9Ingreso" <?php echo set_select('dtipo_cuenta'); ?>>IEPS COBRADO 9% INGRESOS</option>
+
                         <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar Honorarios</option>
                         <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Pagado Honorarios</option>
                         <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar</option>
