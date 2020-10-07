@@ -136,7 +136,8 @@ class compras_model extends privilegios_model{
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
-                  cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
+                  cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
+                  cp.ieps, cp.porcentaje_ieps,
                   cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
            FROM compras_facturas AS cf
              INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden

@@ -243,6 +243,26 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIepsPagarGasto($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsPagar{$tasa}Gasto'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsPagadoEgreso($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsPagado{$tasa}Egreso'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsCobrarVentas($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsCobrar{$tasa}Ventas'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsCobradoIngreso($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsCobrado{$tasa}Ingreso'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaIsrRetXPagarHono($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //sanjorge
@@ -759,6 +779,7 @@ class polizas_model extends CI_Model {
   {
     $response = array('data' => '', 'facturas' => array(), 'folio' => '');
     $sql = $sql2 = '';
+    $cuenta_cpi = '';
 
     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
       $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
@@ -798,7 +819,11 @@ class polizas_model extends CI_Model {
         $this->load->model('facturacion_model');
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
+                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '0'),
+                         );
 
         $this->uuidsADD = '';
         //Agregamos el header de la poliza
@@ -862,6 +887,9 @@ class polizas_model extends CI_Model {
 
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
+            $impuestos['ieps_cobrar6']['importe']  = 0;
+            $impuestos['ieps_cobrar7']['importe']  = 0;
+            $impuestos['ieps_cobrar9']['importe']  = 0;
             //Colocamos los Ingresos de la factura (41040000)
             foreach ($inf_factura['productos'] as $key => $value)
             {
@@ -878,6 +906,16 @@ class polizas_model extends CI_Model {
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+                if ($value->ieps > 0) {
+                  if ($value->porcentaje_ieps == 6) {
+                    $impuestos['ieps_cobrar6']['importe'] += $value->ieps;
+                  } elseif ($value->porcentaje_ieps == 7){
+                    $impuestos['ieps_cobrar7']['importe'] += $value->ieps;
+                  } elseif ($value->porcentaje_ieps == 9) {
+                    $impuestos['ieps_cobrar9']['importe'] += $value->ieps;
+                  }
+                }
+
                 $response['data'] .= $this->setEspacios('M',2).
                                 $this->setEspacios(($value->cuenta_cpi!=''? $value->cuenta_cpi: '41040000'),30).
                                 $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
@@ -1123,7 +1161,11 @@ class polizas_model extends CI_Model {
 
         $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '0'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '1'),
-                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'), );
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_pagar6' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar7' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar9' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '0'),
+                         );
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -1145,6 +1187,9 @@ class polizas_model extends CI_Model {
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
           $impuestos['isr_retenido']['importe']  = 0;
+          $impuestos['ieps_pagar6']['importe']  = 0;
+          $impuestos['ieps_pagar7']['importe']  = 0;
+          $impuestos['ieps_pagar9']['importe']  = 0;
           $productos_grups = array();
           //Colocamos los productos de la factura
           foreach ($inf_compra['productos'] as $key => $value)
@@ -1152,6 +1197,16 @@ class polizas_model extends CI_Model {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
             $impuestos['isr_retenido']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            if ($value->ieps > 0) {
+              if ($value->porcentaje_ieps == 6) {
+                $impuestos['ieps_pagar6']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 7){
+                $impuestos['ieps_pagar7']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 9) {
+                $impuestos['ieps_pagar9']['importe'] += $value->ieps;
+              }
+            }
+            $impuestos['iva_acreditar']['importe'] += $value->iva;
             $value->cuenta_cpi = ($value->cuenta_cpi!=''? $value->cuenta_cpi: $this->getCuentaCuadreGasto() );
 
             if (array_key_exists($value->cuenta_cpi, $productos_grups))
@@ -2257,7 +2312,8 @@ class polizas_model extends CI_Model {
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
-            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid
+            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid,
+            tieps.ieps, tieps.porcentaje_ieps
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -2272,11 +2328,25 @@ class polizas_model extends CI_Model {
               GROUP BY id_nc
             ) nc ON nc.id_factura = f.id_factura
             LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bmf.id_movimiento
+
+            LEFT JOIN (
+              SELECT id_movimiento, String_agg(ieps::text, ',') AS ieps, String_agg(porcentaje_ieps::text, ',') AS porcentaje_ieps
+              FROM (
+                SELECT bmc.id_movimiento, cp.porcentaje_ieps, Sum(cp.ieps) AS ieps
+                FROM facturacion_productos cp
+                  INNER JOIN facturacion_abonos AS fa ON fa.id_factura = cp.id_factura
+                  INNER JOIN banco_movimientos_facturas AS bmc ON bmc.id_abono_factura = fa.id_abono
+                WHERE cp.porcentaje_ieps in(6,7,9)
+                GROUP BY bmc.id_movimiento, cp.porcentaje_ieps
+              ) e
+              GROUP BY id_movimiento
+            ) tieps ON bmf.id_movimiento = tieps.id_movimiento
           WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
              {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
              AND f.id_abono_factura IS NULL AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
           GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), bmcp.uuid
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha),
+            bmcp.uuid, tieps.ieps, tieps.porcentaje_ieps
           ORDER BY bmf.id_movimiento ASC
         )
         UNION
@@ -2288,7 +2358,8 @@ class polizas_model extends CI_Model {
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
             0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
             'banco'::character varying AS tipoo,
-            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso, bmcp.uuid
+            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso, bmcp.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
@@ -2317,7 +2388,15 @@ class polizas_model extends CI_Model {
         'iva_trasladar'  => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '0'),
         'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
-        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '1'),
+
+        'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrado6' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrado7' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrado9' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(9), 'importe' => 0, 'tipo' => '0'),
+      );
 
       $folio = $this->input->get('ffolio');
       //Contenido de la Poliza
@@ -2378,6 +2457,29 @@ class polizas_model extends CI_Model {
           $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
           $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
+
+          $impuestos['ieps_cobrar6']['importe'] = 0;
+          $impuestos['ieps_cobrar7']['importe'] = 0;
+          $impuestos['ieps_cobrar9']['importe'] = 0;
+          $impuestos['ieps_cobrado6']['importe'] = 0;
+          $impuestos['ieps_cobrado7']['importe'] = 0;
+          $impuestos['ieps_cobrado9']['importe'] = 0;
+          if (!empty($value->ieps)) {
+            $aieps = explode(',', $value->ieps);
+            $aieps_porc = explode(',', $value->porcentaje_ieps);
+            foreach ($aieps as $kieps => $ieps) {
+              if ($aieps_porc[$kieps] == 6) {
+                $impuestos['ieps_cobrar6']['importe'] += $ieps;
+                $impuestos['ieps_cobrado6']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 7){
+                $impuestos['ieps_cobrar7']['importe'] += $ieps;
+                $impuestos['ieps_cobrado7']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 9) {
+                $impuestos['ieps_cobrar9']['importe'] += $ieps;
+                $impuestos['ieps_cobrado9']['importe'] += $ieps;
+              }
+            }
+          }
 
           //Colocamos el Cargo al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -2659,7 +2761,8 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2679,7 +2782,8 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, 0 AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2732,17 +2836,31 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid,
+            tieps.ieps, tieps.porcentaje_ieps
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
             INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
+            LEFT JOIN (
+              SELECT id_movimiento, String_agg(ieps::text, ',') AS ieps, String_agg(porcentaje_ieps::text, ',') AS porcentaje_ieps
+              FROM (
+                SELECT bmc.id_movimiento, cp.porcentaje_ieps, Sum(cp.ieps) AS ieps
+                FROM compras_productos cp
+                  INNER JOIN compras_abonos AS fa ON fa.id_compra = cp.id_compra
+                  INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+                WHERE cp.id_compra IS NOT NULL AND cp.porcentaje_ieps in(6,7,9)
+                GROUP BY bmc.id_movimiento, cp.porcentaje_ieps
+              ) e
+              GROUP BY id_movimiento
+            ) tieps ON bm.id_movimiento = tieps.id_movimiento
           WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f' AND f.tipo_documento = 'fa'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bm.uuid
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha),
+            bm.tcambio, bm.uuid, tieps.ieps, tieps.porcentaje_ieps
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -2753,7 +2871,8 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -2804,8 +2923,15 @@ class polizas_model extends CI_Model {
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
         'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
         'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
-        'ieps_acreditado'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        'ieps_acreditar'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
+        // 'ieps_acreditado'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+        // 'ieps_acreditar'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagado6' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado7' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado9' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagar6' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar7' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar9' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
+      );
 
       $folio = $this->input->get('ffolio');
       $aux_idmovimiento = 0;
@@ -2850,8 +2976,31 @@ class polizas_model extends CI_Model {
           $impuestos['iva_acreditar']['importe']  = $value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_acreditado']['importe'] = $impuestos['iva_acreditar']['importe'];
 
-          $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
-          $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
+          // $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
+          // $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
+
+          $impuestos['ieps_pagar6']['importe'] = 0;
+          $impuestos['ieps_pagado6']['importe'] = 0;
+          $impuestos['ieps_pagar7']['importe'] = 0;
+          $impuestos['ieps_pagado7']['importe'] = 0;
+          $impuestos['ieps_pagar9']['importe'] = 0;
+          $impuestos['ieps_pagado9']['importe'] = 0;
+          if (!empty($value->ieps)) {
+            $aieps = explode(',', $value->ieps);
+            $aieps_porc = explode(',', $value->porcentaje_ieps);
+            foreach ($aieps as $kieps => $ieps) {
+              if ($aieps_porc[$kieps] == 6) {
+                $impuestos['ieps_pagar6']['importe'] += $ieps;
+                $impuestos['ieps_pagado6']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 7){
+                $impuestos['ieps_pagar7']['importe'] += $ieps;
+                $impuestos['ieps_pagado7']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 9) {
+                $impuestos['ieps_pagar9']['importe'] += $ieps;
+                $impuestos['ieps_pagado9']['importe'] += $ieps;
+              }
+            }
+          }
 
           $subtotal = $subtotal2 = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
 
