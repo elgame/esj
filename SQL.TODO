@@ -1,10 +1,9 @@
 
 
  ✔ Recetas en surtir productos, poner opcion para quitar los productos no surtidos @done (20-10-05 20:09)
-   -- pcc
+   -- pcc|san|lap
     ALTER TABLE otros.recetas_productos ADD COLUMN quitar boolean NOT NULL DEFAULT false;
     COMMENT ON COLUMN otros.recetas_productos.quitar IS 'Es un status, si es TRUE indica que ese producto se quito de surtir recetas (no se surtio), si es FALSE indica que se puede surtir o si id_requisicion no es null ya se surtio';
-   -- pcc|san
     ALTER TABLE otros.recetas ALTER COLUMN a_etapa TYPE character varying(40) COLLATE pg_catalog."default";
     ALTER TABLE otros.recetas ALTER COLUMN a_ciclo TYPE character varying(40) COLLATE pg_catalog."default";
     ALTER TABLE otros.recetas ALTER COLUMN a_dds TYPE character varying(40) COLLATE pg_catalog."default";
@@ -13,7 +12,7 @@
     ALTER TABLE otros.recetas ALTER COLUMN a_aplic TYPE character varying(40) COLLATE pg_catalog."default";
     ALTER TABLE otros.recetas ALTER COLUMN a_equipo TYPE character varying(40) COLLATE pg_catalog."default";
  ✔ Nomina banorte @done (20-10-01 16:45)
-   -- pcc|san
+   -- pcc|san|lap
      ALTER TABLE public.usuarios ADD COLUMN no_proveedor_banorte character varying(13) COLLATE pg_catalog."default";
  ✔ Datos @done (20-08-18 18:13)
    -- lap|san|pcc

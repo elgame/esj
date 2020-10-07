@@ -1716,11 +1716,12 @@ class productos_salidas_model extends CI_Model {
               GROUP BY csr.id_salida
             ) csr ON csr.id_salida = co.id_salida
             LEFT JOIN (
-              SELECT cscc.id_salida, String_agg(DISTINCT cc.codigo, ',') AS centro_costo
+              SELECT cscc.id_salida, String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') AS centro_costo
               FROM compras_salidas_centro_costo cscc
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
               WHERE 1 = 1 {$sqlc}
-              GROUP BY cscc.id_salida
+              GROUP BY cscc.id_salida, cc.id_centro_costo
+              HAVING String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') IS NOT NULL
             ) cscc ON cscc.id_salida = co.id_salida
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
           GROUP BY co.id_salida, p.nombre, cp.cantidad, cp.precio_unitario, pu.nombre
@@ -1746,10 +1747,10 @@ class productos_salidas_model extends CI_Model {
               GROUP BY csr.id_salida
             ) csr ON csr.id_salida = co.id_salida
             LEFT JOIN (
-              SELECT cscc.id_salida, String_agg(DISTINCT cc.codigo, ',') AS centro_costo
+              SELECT cscc.id_salida, String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') AS centro_costo
               FROM compras_salidas_centro_costo cscc
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
-              GROUP BY cscc.id_salida
+              GROUP BY cscc.id_salida, cc.id_centro_costo
             ) cscc ON cscc.id_salida = co.id_salida
             {$sqcol['table']}
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
