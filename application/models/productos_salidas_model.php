@@ -1720,7 +1720,7 @@ class productos_salidas_model extends CI_Model {
               FROM compras_salidas_centro_costo cscc
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
               WHERE 1 = 1 {$sqlc}
-              GROUP BY cscc.id_salida, cc.id_centro_costo
+              GROUP BY cscc.id_salida
               HAVING String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') IS NOT NULL
             ) cscc ON cscc.id_salida = co.id_salida
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
@@ -1750,7 +1750,7 @@ class productos_salidas_model extends CI_Model {
               SELECT cscc.id_salida, String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') AS centro_costo
               FROM compras_salidas_centro_costo cscc
                 LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
-              GROUP BY cscc.id_salida, cc.id_centro_costo
+              GROUP BY cscc.id_salida
             ) cscc ON cscc.id_salida = co.id_salida
             {$sqcol['table']}
           WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}

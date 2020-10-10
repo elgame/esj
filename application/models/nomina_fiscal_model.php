@@ -3125,8 +3125,8 @@ class nomina_fiscal_model extends CI_Model {
     $contador          = 1;
     $contadorSantr     = 1;
     $contadorBanorte   = 1;
-    $cuentaSantr       = '92001449876'; // Cuenta cargo santander
-    $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte
+    $cuentaSantr       = '92001449876'; // Cuenta cargo santander empaque
+    $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
     $total_nominaSantr = 0;
 
     //header santader
