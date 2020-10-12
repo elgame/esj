@@ -1206,7 +1206,6 @@ class polizas_model extends CI_Model {
                 $impuestos['ieps_pagar9']['importe'] += $value->ieps;
               }
             }
-            $impuestos['iva_acreditar']['importe'] += $value->iva;
             $value->cuenta_cpi = ($value->cuenta_cpi!=''? $value->cuenta_cpi: $this->getCuentaCuadreGasto() );
 
             if (array_key_exists($value->cuenta_cpi, $productos_grups))
