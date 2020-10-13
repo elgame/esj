@@ -2803,7 +2803,8 @@ class polizas_model extends CI_Model {
             COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
