@@ -144,9 +144,11 @@
                 <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
                 <div class="controls">
                   <select name="proyecto" id="proyecto" class="span9" style="float: left;">
-                    <!-- <?php foreach ($proyectos as $key => $value): ?>
+                    <?php if (isset($proyectos) && is_array($proyectos)): ?>
+                    <?php foreach ($proyectos as $key => $value): ?>
                       <option value="<?php echo $value->id_proyecto; ?>" <?php echo set_select('proyecto', $value->id_proyecto); ?>><?php echo $value->nombre; ?></option>
-                    <?php endforeach ?> -->
+                    <?php endforeach ?>
+                    <?php endif ?>
                   </select>
                 </div>
               </div>

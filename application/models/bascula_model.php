@@ -399,8 +399,7 @@ class bascula_model extends CI_Model {
 
       $time_end1 = microtime(true);
       $time1 = $time_end1 - $time_start1;
-      log_message('error', "BasculaSnap");
-      log_message('error', "Bascula: {$time1} = {$time_end1} - {$time_start1}");
+      log_message('error', "BasculaSnap1 {$idBascula}: {$time1} = {$time_end1} - {$time_start1}");
     }
 
     // if ($this->urlExists($this->config->item('snapshot_cam2'))) {
@@ -426,11 +425,11 @@ class bascula_model extends CI_Model {
 
       $time_end2 = microtime(true);
       $time2 = $time_end2 - $time_start2;
-      log_message('error', "BasculaSnap");
+      log_message('error', "BasculaSnap2 {$idBascula}: {$time2} = {$time_end2} - {$time_start2}");
     }
 
     if (isset($time1) && isset($time2)) {
-      log_message('error', "Bascula end: ".($time_end2 - $time_start1));
+      log_message('error', "BasculaEnd {$idBascula}: ".($time_end2 - $time_start1));
     }
 
   }
