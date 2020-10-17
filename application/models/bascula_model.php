@@ -319,6 +319,7 @@ class bascula_model extends CI_Model {
         $this->updateBascula($idb, $data2, $cajas, $logBitacora, $usuario_auth);
       // }
 
+      log_message('error', "SegundaSnap {$idb}: bonificacion={$bonificacion} | accion=".$data2['accion']);
       if (!$bonificacion && isset($data2['accion']) && $data2['accion'] == 'sa') {
         $this->addSnapshot($idb, $data2['accion']);
       }

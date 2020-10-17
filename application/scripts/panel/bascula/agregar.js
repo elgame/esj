@@ -619,7 +619,8 @@ $(function(){
     }).on('focusout', function(event) {
       var $this = $(this);
 
-      if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() !== 'sa') {
+      if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() !== 'sa'
+         && $('#paccion').val() === 'n') {
         $('#form').submit();
       }
 
