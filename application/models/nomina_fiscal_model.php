@@ -3199,18 +3199,18 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
         } elseif($empleado->banco == 'banor') {
-          $contentBanorte[] = "'02" .
-                      "'{$empleado->no_proveedor_banorte}" .
+          $contentBanorte[] = "'01" . $this->addTab() .
+                      "" . $this->addTab() . // '{$empleado->no_proveedor_banorte}
                       "'".$this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
                       "'".$this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
                       $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
                       $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
                       $this->formatoBanco('', '', 13, 'D'). $this->addTab() .
-                      $this->formatoBanco('', '', 14, 'I'). $this->addTab() .
+                      $this->formatoBanco('0', '', 14, 'I'). $this->addTab() .
                       $this->formatoBanco('', '', 10, 'I'). $this->addTab() .
-                      $this->formatoBanco('x', '', 1, 'I'). $this->addTab() .
-                      $this->formatoBanco('0', '', 1, 'D');
+                      $this->formatoBanco('x', '', 100, 'I'). $this->addTab() .
+                      $this->formatoBanco('0', '', 7, 'D');
           $contadorBanorte++;
         }
       }
