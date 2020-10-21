@@ -820,9 +820,9 @@ class polizas_model extends CI_Model {
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
-                           'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '0'),
-                           'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '0'),
-                           'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '1'),
                          );
 
         $this->uuidsADD = '';
@@ -2389,12 +2389,12 @@ class polizas_model extends CI_Model {
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '1'),
 
-        'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '1'),
-        'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '1'),
-        'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '1'),
-        'ieps_cobrado6' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(6), 'importe' => 0, 'tipo' => '0'),
-        'ieps_cobrado7' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(7), 'importe' => 0, 'tipo' => '0'),
-        'ieps_cobrado9' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrado6' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrado7' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrado9' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(9), 'importe' => 0, 'tipo' => '1'),
       );
 
       $folio = $this->input->get('ffolio');
