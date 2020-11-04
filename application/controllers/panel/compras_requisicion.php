@@ -502,22 +502,22 @@ class compras_requisicion extends MY_Controller {
 
   public function ajax_get_tipo_cambio($fecha=null)
   {
-    $fecha = MyString::suma_fechas(($fecha? $fecha: date("Y-m-d")), -1);
-    $isDia = MyString::dia($fecha, 'c');
-    if ($isDia == 'DO' || $isDia == 'SA') {
-      $fecha = date('Y-m-d', strtotime('previous friday', strtotime($fecha)));
-    }
-    $fecha = explode('-', $fecha);
-    $dia = $fecha[2];
-    $mes = $fecha[1];
-    $anio = $fecha[0];
-    $html_string = file_get_contents("https://dof.gob.mx/indicadores_detalle.php?cod_tipo_indicador=158&dfecha={$dia}%2F{$mes}%2F{$anio}&hfecha={$dia}%2F{$mes}%2F{$anio}");
-    preg_match('/\<td width="52%" align="center" class="txt"\>(\d+.?\d+)\<\/td\>/', $html_string, $coincidencias);
-    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[1]);
+    // $fecha = MyString::suma_fechas(($fecha? $fecha: date("Y-m-d")), -1);
+    // $isDia = MyString::dia($fecha, 'c');
+    // if ($isDia == 'DO' || $isDia == 'SA') {
+    //   $fecha = date('Y-m-d', strtotime('previous friday', strtotime($fecha)));
+    // }
+    // $fecha = explode('-', $fecha);
+    // $dia = $fecha[2];
+    // $mes = $fecha[1];
+    // $anio = $fecha[0];
+    // $html_string = file_get_contents("https://dof.gob.mx/indicadores_detalle.php?cod_tipo_indicador=158&dfecha={$dia}%2F{$mes}%2F{$anio}&hfecha={$dia}%2F{$mes}%2F{$anio}");
+    // preg_match('/\<td width="52%" align="center" class="txt"\>(\d+.?\d+)\<\/td\>/', $html_string, $coincidencias);
+    // echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[1]);
 
-    // $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
-    // preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
-    // echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
+    $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
+    preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
+    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
   }
 
   /*
