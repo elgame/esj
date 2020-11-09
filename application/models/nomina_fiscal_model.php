@@ -3217,6 +3217,7 @@ class nomina_fiscal_model extends CI_Model {
                       "0" .
                       " " .
                       $this->formatoBanco('0', '0', 8, 'I');
+          $total_nominaBanor += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
           $contadorBanorte++;
         }
       }
@@ -3224,6 +3225,8 @@ class nomina_fiscal_model extends CI_Model {
     //footer santader
     $contentSantr[] = "3" . $this->formatoBanco($contadorSantr+1, '0', 5, 'I') . $this->formatoBanco($contadorSantr-1, '0', 5, 'I') .
                       $this->formatoBanco($total_nominaSantr, '0', 18, 'I', true);
+    //footer banorte
+    $contentBanorte[0] = str_replace(['{npagos}', '{total}'], [$this->formatoBanco($contadorBanorte, '0', 6, 'I'), $this->formatoBanco($total_nominaBanor, '0', 15, 'I', true)], $contentBanorte[0]);
 
     $content[]      = '';
     $contentSantr[] = '';
