@@ -3163,7 +3163,7 @@ class nomina_fiscal_model extends CI_Model {
           $contentBanorte[] = "D" .
                       date("Ymd") .
                       $this->formatoBanco($empleado->id, 0, 10, 'I') .
-                      $this->formatoBanco('', ' ', 40, 'D') .
+                      $this->formatoBanco(' ', ' ', 40, 'D') .
                       $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
                       "072" .
@@ -3208,7 +3208,7 @@ class nomina_fiscal_model extends CI_Model {
           $contentBanorte[] = "D" .
                       date("Ymd") .
                       $this->formatoBanco($empleado->id, 0, 10, 'I') .
-                      $this->formatoBanco('', ' ', 40, 'D') .
+                      $this->formatoBanco(' ', ' ', 40, 'D') .
                       $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
                       "072" .
