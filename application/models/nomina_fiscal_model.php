@@ -3127,10 +3127,15 @@ class nomina_fiscal_model extends CI_Model {
     $contadorBanorte   = 1;
     $cuentaSantr       = '92001449876'; // Cuenta cargo santander empaque
     $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
+    $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;
+    $total_nominaBanor = 0;
 
     //header santader
     $contentSantr[] = "100001E" . date("mdY") . $this->formatoBanco($cuentaSantr, ' ', 16, 'D') . date("mdY");
+    //header banorte
+    $contentBanorte[] = "HNE{$emisoraBanorte}" . date("Ymd") . "01{npagos}{total}0000000000000000000000000000000000000000000000000";
+
     foreach ($empleados as $key => $empleado)
     {
       if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
@@ -3155,18 +3160,19 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
         } elseif($empleado->banco == 'banor') {
-          $contentBanorte[] = "'01" . $this->addTab() .
-                      "" . $this->addTab() . // '{$empleado->no_proveedor_banorte}
-                      "'".$this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
-                      "'".$this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
-                      $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
-                      $this->formatoBanco('', '', 13, 'D'). $this->addTab() .
-                      $this->formatoBanco('0', '', 14, 'I'). $this->addTab() .
-                      $this->formatoBanco('', '', 10, 'I'). $this->addTab() .
-                      $this->formatoBanco('x', '', 100, 'I'). $this->addTab() .
-                      $this->formatoBanco('0', '', 7, 'D');
+          $contentBanorte[] = "D" .
+                      date("Ymd") .
+                      $this->formatoBanco($empleado->id, 0, 10, 'I') .
+                      $this->formatoBanco('', ' ', 40, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
+                      "072" .
+                      "01" .
+                      $this->formatoBanco($empleado->cuenta_banco, '0', 18, 'I') .
+                      "0" .
+                      " " .
+                      $this->formatoBanco('0', '0', 8, 'I');
+          $total_nominaBanor += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
           $contadorBanorte++;
         }
       }
@@ -3199,18 +3205,18 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
         } elseif($empleado->banco == 'banor') {
-          $contentBanorte[] = "'01" . $this->addTab() .
-                      "" . $this->addTab() . // '{$empleado->no_proveedor_banorte}
-                      "'".$this->formatoBanco($cuentaBanorte, '0', 10, 'I') . $this->addTab() .
-                      "'".$this->formatoBanco($empleado->cuenta_banco, '0', 10, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '', 16, 'I') . $this->addTab() .
-                      $this->formatoBanco($empleado->id, '', 7, 'I') . $this->addTab() .
-                      $this->formatoBanco($this->removeTrash($empleado->nombre), '', 40, 'D') . $this->addTab() .
-                      $this->formatoBanco('', '', 13, 'D'). $this->addTab() .
-                      $this->formatoBanco('0', '', 14, 'I'). $this->addTab() .
-                      $this->formatoBanco('', '', 10, 'I'). $this->addTab() .
-                      $this->formatoBanco('x', '', 100, 'I'). $this->addTab() .
-                      $this->formatoBanco('0', '', 7, 'D');
+          $contentBanorte[] = "D" .
+                      date("Ymd") .
+                      $this->formatoBanco($empleado->id, 0, 10, 'I') .
+                      $this->formatoBanco('', ' ', 40, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
+                      "072" .
+                      "01" .
+                      $this->formatoBanco($empleado->cuenta_banco, '0', 18, 'I') .
+                      "0" .
+                      " " .
+                      $this->formatoBanco('0', '0', 8, 'I');
           $contadorBanorte++;
         }
       }
@@ -3234,7 +3240,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $zip->addFromString('SANTANDER.txt', $contentSantr);
       $zip->addFromString('BBVA Bancomer.txt', $content);
-      $zip->addFromString('BANORTE.txt', $contentBanorte);
+      $zip->addFromString("NI{$emisoraBanorte}01.PAG", $contentBanorte);
 
       $zip->close();
     }
