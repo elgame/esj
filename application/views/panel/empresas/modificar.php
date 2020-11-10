@@ -45,6 +45,14 @@
 											</div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="dsucursal">Sucursal:</label>
+                      <div class="controls">
+                        <input type="text" name="dsucursal" id="dsucursal" class="span12"
+                          value="<?php echo (isset($info['info']->sucursal)? $info['info']->sucursal: ''); ?>" maxlength="130">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 											<label class="control-label" for="dcalle">Calle:</label>
 											<div class="controls">

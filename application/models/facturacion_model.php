@@ -2265,7 +2265,7 @@ class facturacion_model extends privilegios_model{
 
         $res = $this->db->query("
             SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
-                  e.no_exterior, e.no_interior, e.rfc
+                  e.no_exterior, e.no_interior, e.rfc, e.sucursal
             FROM empresas AS e
             WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
                   rfc != '' AND
@@ -2297,8 +2297,8 @@ class facturacion_model extends privilegios_model{
 
             $response[] = array(
                 'id' => $itm->id_empresa,
-                'label' => $itm->nombre_fiscal,
-                'value' => $itm->nombre_fiscal,
+                'label' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
+                'value' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
                 'item' => $itm,
             );
           }

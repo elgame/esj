@@ -37,7 +37,7 @@ class empresas_model extends CI_Model{
 			$sql .= ($sql==''? 'WHERE': ' AND')." status='".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("
-				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, status
+				SELECT id_empresa, nombre_fiscal, rfc, sucursal, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, status
 				FROM empresas
 				".$sql."
 				ORDER BY nombre_fiscal ASC
@@ -151,6 +151,7 @@ class empresas_model extends CI_Model{
 
 		$data = array(
       'nombre_fiscal'     => $this->input->post('dnombre_fiscal'),
+      'sucursal'          => $this->input->post('dsucursal'),
       'calle'             => $this->input->post('dcalle'),
       'no_exterior'       => $this->input->post('dno_exterior'),
       'no_interior'       => $this->input->post('dno_interior'),
@@ -242,6 +243,7 @@ class empresas_model extends CI_Model{
 
 		$data = array(
       'nombre_fiscal'     => $this->input->post('dnombre_fiscal'),
+      'sucursal'          => $this->input->post('dsucursal'),
       'calle'             => $this->input->post('dcalle'),
       'no_exterior'       => $this->input->post('dno_exterior'),
       'no_interior'       => $this->input->post('dno_interior'),
@@ -316,7 +318,8 @@ class empresas_model extends CI_Model{
     }
 
 		$res = $this->db->query("
-				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, pais, predeterminado
+				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia,
+          localidad, municipio, estado, pais, predeterminado, sucursal
 				FROM empresas
 				WHERE status = 't' AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
           {$sql}
@@ -328,8 +331,8 @@ class empresas_model extends CI_Model{
 			foreach($res->result() as $itm){
 				$response[] = array(
 						'id' => $itm->id_empresa,
-						'label' => $itm->nombre_fiscal,
-						'value' => $itm->nombre_fiscal,
+						'label' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
+						'value' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
 						'item' => $itm,
 				);
 			}
