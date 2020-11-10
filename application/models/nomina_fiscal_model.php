@@ -3171,7 +3171,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->cuenta_banco, '0', 18, 'I') .
                       "0" .
                       " " .
-                      $this->formatoBanco(0, '0', 8, 'I') .
+                      "00000000" .
                       $this->formatoBanco(' ', ' ', 18, 'D');
           $total_nominaBanor += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
           $contadorBanorte++;
@@ -3217,7 +3217,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->cuenta_banco, '0', 18, 'I') .
                       "0" .
                       " " .
-                      $this->formatoBanco(0, '0', 8, 'I') .
+                      "00000000" .
                       $this->formatoBanco(' ', ' ', 18, 'D');
           $total_nominaBanor += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
           $contadorBanorte++;
