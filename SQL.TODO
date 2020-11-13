@@ -1,5 +1,5 @@
 
- ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc
+ ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc|san
      ALTER TABLE public.empresas ADD COLUMN sucursal character varying(130) COLLATE pg_catalog."default";
  ☐ Poner el calculo mensual en nominas
  ✔ Caja de tryana cuando se comprueba un gasto y se le pone el check de que es un gasto no se asignan los codigos @done (20-11-09 15:34)
