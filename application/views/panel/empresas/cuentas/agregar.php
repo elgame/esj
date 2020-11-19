@@ -86,6 +86,8 @@
                         <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar Honorarios</option>
                         <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Pagado Honorarios</option>
                         <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar</option>
+                        <option value="IsrRetPagado" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Pagado</option>
+
                         <option value="NCGasto" <?php echo set_select('dtipo_cuenta'); ?>>Rebajas Y Bonificaciones Gastos</option>
                         <option value="CuadreGasto" <?php echo set_select('dtipo_cuenta'); ?>>Cuenta Cuadre Gasto</option>
                         <option value="NSueldo" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Sueldo</option>

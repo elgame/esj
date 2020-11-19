@@ -86,6 +86,8 @@
                         <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar Honorarios</option>
                         <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IsrRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado Honorarios</option>
                         <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagar', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar</option>
+                        <option value="IsrRetPagado" <?php echo set_select('dtipo_cuenta', 'IsrRetPagado', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado</option>
+
                         <option value="NCGasto" <?php echo set_select('dtipo_cuenta', 'NCGasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Rebajas Y Bonificaciones Gastos</option>
                         <option value="CuadreGasto" <?php echo set_select('dtipo_cuenta', 'CuadreGasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Cuenta Cuadre Gasto</option>
                         <option value="NSueldo" <?php echo set_select('dtipo_cuenta', 'NSueldo', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Sueldo</option>

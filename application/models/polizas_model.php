@@ -317,6 +317,14 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIsrRetPagado($basic=true){
+    $sql = " AND nombre like '%ISR RETENIDO PAGADO%'"; //tests carga las de sanjorge
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetPagado'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaNCGasto($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //sanjorge
@@ -2921,16 +2929,16 @@ class polizas_model extends CI_Model {
         'iva_acreditar'  => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
-        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
-        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
-        // 'ieps_acreditado'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        // 'ieps_acreditar'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
-        'ieps_pagado6' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
-        'ieps_pagado7' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
-        'ieps_pagado9' => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
-        'ieps_pagar6' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '1'),
-        'ieps_pagar7' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '1'),
-        'ieps_pagar9' => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenerHo'  => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidoHo' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagado6'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado7'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado9'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagar6'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar7'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar9'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
       );
 
       $folio = $this->input->get('ffolio');
