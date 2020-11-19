@@ -2857,7 +2857,7 @@ class polizas_model extends CI_Model {
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid,
-            tieps.ieps, tieps.porcentaje_ieps, String_agg(f.concepto, ', ') AS observaciones
+            tieps.ieps, tieps.porcentaje_ieps, String_agg(UPPER(f.concepto), ', ') AS observaciones
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
