@@ -653,6 +653,18 @@ class polizas_model extends CI_Model {
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
 
+  public function getTipoISRCompras($observaciones)
+  {
+    $tipo = 'ho';
+    if (strpos($observaciones, 'HONORARIOS') !== false) {
+      $tipo = 'ho';
+    } elseif (strpos($observaciones, 'RENTA') !== false) {
+      $tipo = 'ar';
+    }
+
+    return $tipo;
+  }
+
 
   public function setEspacios($texto, $posiciones, $direccion='l')
   {
@@ -2769,7 +2781,7 @@ class polizas_model extends CI_Model {
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
-            '' AS ieps, '' AS porcentaje_ieps
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2790,7 +2802,7 @@ class polizas_model extends CI_Model {
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
-            '' AS ieps, '' AS porcentaje_ieps
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2812,7 +2824,7 @@ class polizas_model extends CI_Model {
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
             bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
-            '' AS ieps, '' AS porcentaje_ieps
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -2845,7 +2857,7 @@ class polizas_model extends CI_Model {
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid,
-            tieps.ieps, tieps.porcentaje_ieps
+            tieps.ieps, tieps.porcentaje_ieps, String_agg(f.concepto, ', ') AS observaciones
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -2880,7 +2892,7 @@ class polizas_model extends CI_Model {
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
             bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
-            '' AS ieps, '' AS porcentaje_ieps
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -2931,8 +2943,8 @@ class polizas_model extends CI_Model {
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
         'isr_retenerHo'  => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
         'isr_retenidoHo' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
-        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagado(), 'importe' => 0, 'tipo' => '1'),
         'ieps_pagado6'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
         'ieps_pagado7'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
         'ieps_pagado9'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
@@ -2978,8 +2990,16 @@ class polizas_model extends CI_Model {
           $impuestos['iva_retener']['importe']    = $value->retencion_iva; //$factor*$value->retencion_iva/100;
           $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
 
-          $impuestos['isr_retener']['importe']    = $value->retencion_isr; //
-          $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+          if ($value->retencion_isr > 0) {
+            if ($this->getTipoISRCompras($value->observaciones) == 'ar') {
+              $impuestos['isr_retener']['importe']    = $value->retencion_isr; //
+              $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+            } else {
+              $impuestos['isr_retenerHo']['importe']    = $value->retencion_isr; //
+              $impuestos['isr_retenidoHo']['importe']   = $impuestos['isr_retener']['importe'];
+            }
+
+          }
 
           $impuestos['iva_acreditar']['importe']  = $value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_acreditado']['importe'] = $impuestos['iva_acreditar']['importe'];

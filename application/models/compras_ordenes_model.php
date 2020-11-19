@@ -646,7 +646,8 @@ class compras_ordenes_model extends CI_Model {
     if ($ordenesIdssss != '') {
       $ids_comprass = $this->db->query("SELECT String_agg(ids_compras, '') AS ids_compras,
           String_agg(ids_salidas_almacen, '') AS ids_salidas_almacen,
-          String_agg(ids_gastos_caja, '') AS ids_gastos_caja
+          String_agg(ids_gastos_caja, '') AS ids_gastos_caja,
+          String_agg(descripcion, ', ') AS descripcion
         FROM compras_ordenes WHERE id_orden in({$ordenesIdssss})")->row();
     }
 
@@ -667,7 +668,7 @@ class compras_ordenes_model extends CI_Model {
       'retencion_iva'       => $_POST['totalRetencion'],
       'retencion_isr'       => $_POST['totalRetencionIsr'],
       'total'               => $_POST['totalOrden'],
-      'concepto'            => 'Concepto',
+      'concepto'            => (isset($ids_comprass->descripcion)? $ids_comprass->descripcion: 'Concepto'),
       'isgasto'             => 'f',
       'status'              => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
       'uuid'                => $this->input->post('uuid'),
