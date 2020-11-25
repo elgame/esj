@@ -343,11 +343,14 @@
                         if (isset($factura) && ! isset($_POST['prod_did_prod']))
                         {
                           foreach ($factura['productos'] as $key => $p) {
+                            $_POST['no_identificacion'][$key]       = $p->no_identificacion;
                             $_POST['prod_dcalidad'][$key]           = $p->areas_calidad;
                             $_POST['prod_did_calidad'][$key]        = $p->id_calidad;
                             $_POST['prod_dtamanio'][$key]           = $p->areas_tamanio;
                             $_POST['prod_did_tamanio'][$key]        = $p->id_tamanio;
                             $_POST['prod_ddescripcion2'][$key]      = $p->descripcion2;
+                            $_POST['prod_dtamanio_prod'][$key]      = $p->areas_calibre;
+                            $_POST['prod_did_tamanio_prod'][$key]   = $p->id_calibre;
 
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
                             $_POST['prod_importe'][$key]            = $p->importe/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1);
@@ -389,6 +392,10 @@
                                     </button>
                                     <ul class="dropdown-menu ventasmore">
                                       <li class="clearfix">
+                                        <label class="pull-left"># ident:</label> <input type="text" name="no_identificacion[]" value="<?php echo $_POST['no_identificacion'][$k]?>" id="no_identificacion" class="span9 pull-right">
+                                      </li>
+                                      <li class="divider"></li>
+                                      <li class="clearfix">
                                         <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="<?php echo $_POST['prod_dcalidad'][$k]?>" id="prod_dcalidad" class="span9 pull-right">
                                         <input type="hidden" name="prod_did_calidad[]" value="<?php echo $_POST['prod_did_calidad'][$k]?>" id="prod_did_calidad" class="span12">
                                       </li>
@@ -396,6 +403,11 @@
                                       <li class="clearfix">
                                         <label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="<?php echo $_POST['prod_dtamanio'][$k]?>" id="prod_dtamanio" class="span9 pull-right">
                                         <input type="hidden" name="prod_did_tamanio[]" value="<?php echo $_POST['prod_did_tamanio'][$k]?>" id="prod_did_tamanio" class="span12">
+                                      </li>
+                                      <li class="divider"></li>
+                                      <li class="clearfix">
+                                        <label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="<?php echo $_POST['prod_dtamanio_prod'][$k]?>" id="prod_dtamanio_prod" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_tamanio_prod[]" value="<?php echo $_POST['prod_did_tamanio_prod'][$k]?>" id="prod_did_tamanio_prod" class="span12">
                                       </li>
                                       <li class="divider"></li>
                                       <li class="clearfix">
@@ -482,6 +494,10 @@
                         </button>
                         <ul class="dropdown-menu ventasmore">
                           <li class="clearfix">
+                            <label class="pull-left"># ident:</label> <input type="text" name="no_identificacion[]" value="" id="no_identificacion" class="span9 pull-right">
+                          </li>
+                          <li class="divider"></li>
+                          <li class="clearfix">
                             <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="" id="prod_dcalidad" class="span9 pull-right">
                             <input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span12">
                           </li>
@@ -489,6 +505,11 @@
                           <li class="clearfix">
                             <label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="" id="prod_dtamanio" class="span9 pull-right">
                             <input type="hidden" name="prod_did_tamanio[]" value="" id="prod_did_tamanio" class="span12">
+                          </li>
+                          <li class="divider"></li>
+                          <li class="clearfix">
+                            <label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="" id="prod_dtamanio_prod" class="span9 pull-right">
+                            <input type="hidden" name="prod_did_tamanio_prod[]" value="" id="prod_did_tamanio_prod" class="span12">
                           </li>
                           <li class="divider"></li>
                           <li class="clearfix">
