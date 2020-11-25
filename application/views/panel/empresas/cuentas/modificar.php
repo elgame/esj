@@ -68,6 +68,8 @@
                         <option value="IvaRetPagado" <?php echo set_select('dtipo_cuenta', 'IvaRetPagado', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado</option>
                         <option value="IvaRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IvaRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Por Pagar Honorarios</option>
                         <option value="IvaRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IvaRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado Honorarios</option>
+                        <option value="IvaRetXPagarArrend" <?php echo set_select('dtipo_cuenta', 'IvaRetXPagarArrend', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Por Pagar Arrendamiento</option>
+                        <option value="IvaRetPagadoArrend" <?php echo set_select('dtipo_cuenta', 'IvaRetPagadoArrend', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado Arrendamiento</option>
 
                         <option value="IepsPagar6Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar6Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Pagar 6% Gastos</option>
                         <option value="IepsPagar7Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar7Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Pagar 7% Gastos</option>
