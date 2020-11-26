@@ -7,6 +7,7 @@ class productos_regreso extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'productos_regreso/imprimir/',
     'productos_regreso/rpt_gastos_pdf/',
     'productos_regreso/rpt_gastos_xls/',
     'productos_regreso/imprimirticket/',
@@ -184,6 +185,11 @@ class productos_regreso extends MY_Controller {
     $this->productos_regreso_model->cancelar($_GET['id']);
 
     redirect(base_url('panel/productos_regreso/?' . MyString::getVarsLink(array('id')).'&msg=4'));
+  }
+
+  public function imprimir()
+  {
+    redirect(base_url('panel/compras_ordenes/ticket/?' . MyString::getVarsLink([])));
   }
 
 

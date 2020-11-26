@@ -83,31 +83,40 @@ class nomina_fiscal extends MY_Controller {
 
   public function parcheGeneraXML()
   {
-    $nominas = $this->db->query("SELECT nf.*, u.rfc FROM nomina_fiscal nf
-      INNER JOIN usuarios u ON u.id = nf.id_empleado WHERE nf.anio = 2019 AND nf.uuid <> ''
-      ORDER BY nf.id_empresa ASC")->result();
-    $this->load->library('cfdi');
-    $auxempresa = 0;
+    $nominas = $this->db->query("SELECT * FROM public.nomina_fiscal WHERE id_empresa = 2 and semana = 48")->result();
     foreach ($nominas as $key => $value) {
-      if ($auxempresa != $value->id_empresa) {
-        $this->cfdi->cargaDatosFiscales($value->id_empresa);
-        $auxempresa = $value->id_empresa;
-      }
-      $this->cfdi->anio = $value->anio;
-      $this->cfdi->semana = $value->semana;
-      $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
+      $cfdi_ext = strlen(trim($value->cfdi_ext))>0? "'".pg_escape_string($value->cfdi_ext)."'": 'NULL';
+      $otros_datos = strlen(trim($value->otros_datos))>0? "'".pg_escape_string($value->otros_datos)."'": 'NULL';
+      echo "INSERT INTO public.nomina_fiscal(id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, fecha, dias_trabajados, salario_diario, salario_integral, subsidio, sueldo_semanal, bonos, otros, subsidio_pagado, vacaciones, prima_vacacional_grabable, prima_vacacional_exento, prima_vacacional, aguinaldo_grabable, aguinaldo_exento, aguinaldo, total_percepcion, imss, vejez, isr, infonavit, subsidio_cobrado, prestamos, deduccion_otros, total_deduccion, total_neto, id_empleado_creador, ptu_exento, ptu_grabable, ptu, id_puesto, salario_real, sueldo_real, total_no_fiscal, horas_extras, horas_extras_grabable, horas_extras_excento, descuento_playeras, xml, uuid, utilidad_empresa, descuento_otros, domingo, esta_asegurado, fondo_ahorro, pasistencia, despensa, cfdi_ext, descuento_cocina, otros_datos)
+            VALUES ({$value->id_empleado}, {$value->id_empresa}, {$value->anio}, {$value->semana}, '{$value->fecha_inicio}', '{$value->fecha_final}', '{$value->fecha}', {$value->dias_trabajados}, {$value->salario_diario}, {$value->salario_integral}, {$value->subsidio}, {$value->sueldo_semanal}, {$value->bonos}, {$value->otros}, {$value->subsidio_pagado}, {$value->vacaciones}, {$value->prima_vacacional_grabable}, {$value->prima_vacacional_exento}, {$value->prima_vacacional}, {$value->aguinaldo_grabable}, {$value->aguinaldo_exento}, {$value->aguinaldo}, {$value->total_percepcion}, {$value->imss}, {$value->vejez}, {$value->isr}, {$value->infonavit}, {$value->subsidio_cobrado}, {$value->prestamos}, {$value->deduccion_otros}, {$value->total_deduccion}, {$value->total_neto}, {$value->id_empleado_creador}, {$value->ptu_exento}, {$value->ptu_grabable}, {$value->ptu}, {$value->id_puesto}, {$value->salario_real}, {$value->sueldo_real}, {$value->total_no_fiscal}, {$value->horas_extras}, {$value->horas_extras_grabable}, {$value->horas_extras_excento}, {$value->descuento_playeras}, '".pg_escape_string($value->xml)."', '{$value->uuid}', {$value->utilidad_empresa}, {$value->descuento_otros}, {$value->domingo}, '{$value->esta_asegurado}', {$value->fondo_ahorro}, {$value->pasistencia}, {$value->despensa}, {$cfdi_ext}, {$value->descuento_cocina}, {$otros_datos});\n\n";
     }
 
-    // $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
-    //   ORDER BY f.id_empresa ASC")->result();
+
+    // $nominas = $this->db->query("SELECT nf.*, u.rfc FROM nomina_fiscal nf
+    //   INNER JOIN usuarios u ON u.id = nf.id_empleado WHERE nf.anio = 2019 AND nf.uuid <> ''
+    //   ORDER BY nf.id_empresa ASC")->result();
+    // $this->load->library('cfdi');
     // $auxempresa = 0;
     // foreach ($nominas as $key => $value) {
     //   if ($auxempresa != $value->id_empresa) {
     //     $this->cfdi->cargaDatosFiscales($value->id_empresa);
     //     $auxempresa = $value->id_empresa;
     //   }
-    //   $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    //   $this->cfdi->anio = $value->anio;
+    //   $this->cfdi->semana = $value->semana;
+    //   $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
     // }
+
+    // // $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
+    // //   ORDER BY f.id_empresa ASC")->result();
+    // // $auxempresa = 0;
+    // // foreach ($nominas as $key => $value) {
+    // //   if ($auxempresa != $value->id_empresa) {
+    // //     $this->cfdi->cargaDatosFiscales($value->id_empresa);
+    // //     $auxempresa = $value->id_empresa;
+    // //   }
+    // //   $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    // // }
   }
 
   public function rpt_dim()

@@ -118,11 +118,11 @@
                         );
                       }
 
-                      if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'p')
+                      if ($orden->status === 'n')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('productos_regreso/imprimir/', array(
                           'params'   => 'id='.$orden->id_orden.'&p=true',
-                          'btn_type' => 'btn-success',
+                          'btn_type' => 'btn-info',
                           'attrs' => array('target' => '_BLANK'))
                         );
                       }
