@@ -2,6 +2,7 @@
 
 class nomina
 {
+  use nominaCalMensual;
 
   /**
    * Almacena la informacion del empleado.
@@ -246,6 +247,10 @@ class nomina
 
     $this->emisor();
     $this->receptor();
+
+    if ($this->nominaFiltros['calcMes'] && $this->empleado->id != 87) {
+      $this->calculoMensual();
+    }
 
     return $this->empleado;
   }

@@ -33,9 +33,12 @@
 
                 <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
-                  <?php foreach ($semanasDelAno as $semana) {
+                  <?php
+                    $calcMes = 'false';
+                    foreach ($semanasDelAno as $semana) {
                       if ($semana[$tipoNomina] == $numSemanaSelected) {
                         $semana2 =  $semana;
+                        $calcMes = ($semana['calcmes']? 'true': 'false');
                       }
                     ?>
                     <option value="<?php echo $semana[$tipoNomina] ?>" <?php echo $semana[$tipoNomina] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana[$tipoNomina]} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
@@ -46,6 +49,7 @@
                     $_GET['empresa'] = isset($_GET['empresa']) ? $_GET['empresa'] : $empresaDefault->nombre_fiscal;
                   ?>
                 </select>
+                <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
 
                <!--  <label for="ffecha1" style="margin-top: 15px;">Puesto</label>
                   <select name="puestoId" class="input-large">
@@ -112,6 +116,7 @@
               </div>
 
               <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
+              <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
                 <table class="table table-striped" style="display: block; overflow-x: auto;">
                   <thead>
                     <tr>

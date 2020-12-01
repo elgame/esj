@@ -49,16 +49,22 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->library('nomina');
 
     $filtros = array_merge(array(
-      'semana'    => '',
-      'anio'    => '',
-      'empresaId' => '',
-      'puestoId'  => '',
+      'calcMes'           => false,
+      'semana'            => '',
+      'anio'              => '',
+      'empresaId'         => '',
+      'puestoId'          => '',
       'dia_inicia_semana' => '4',
     ), $filtros);
 
     // Filtros
     $semana = $filtros['semana'] !== '' ? $this->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']) : $this->semanaActualDelMes();
     $tipoNomina = $filtros['dia_inicia_semana']==15? 'quincena': 'semana';
+
+    if ($filtros['semana'] == '') {
+      $filtros['semana'] = $semana['semana'];
+      $filtros['calcMes'] = $semana['calcmes'];
+    }
 
     $sqlpt = $sqlsegu = $sql = $sqlg = $sqle_id = '';
     if ($filtros['empresaId'] !== '')

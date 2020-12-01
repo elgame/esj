@@ -193,10 +193,11 @@ class nomina_fiscal extends MY_Controller {
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
     $filtros = array(
-      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
-      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
-      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
-      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'calcMes'     => isset($_GET['calcMes']) ? $_GET['calcMes'] : false,
+      'semana'      => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')

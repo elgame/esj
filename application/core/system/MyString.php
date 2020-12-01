@@ -670,6 +670,7 @@ class MyString {
         'fecha_final'  => $siguienteUltimoDia,
         'anio'         => $anio,
         'quincena'     => $i,
+        'calcmes'      => ($i % 2 == 0),
       ];
 
       if (!$todas && $fecha_actual >= $siguientePrimerDia && $fecha_actual <= $siguienteUltimoDia) {
@@ -788,6 +789,7 @@ class MyString {
             'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
             'anio'         => $anio,
             'semana'       => $numeroSemana,
+            'calcmes'      => ($numeroSemana % 4 === 0),
           );
         }
       }
@@ -797,6 +799,7 @@ class MyString {
         'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
         'anio'         => $anio,
         'semana'       => $numeroSemana,
+        'calcmes'      => ($numeroSemana % 4 === 0),
       );
 
       if ($todas === false && (strtotime(date('Y-m-d')) >= $siguientePrimerDia && strtotime(date('Y-m-d')) <= $siguienteUltimoDia))
