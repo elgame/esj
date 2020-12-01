@@ -2,6 +2,54 @@
  ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc|san|lap
      ALTER TABLE public.empresas ADD COLUMN sucursal character varying(130) COLLATE pg_catalog."default";
  ☐ Poner el calculo mensual en nominas
+   -- pcc
+   CREATE TABLE public.nomina_mensual_art_113
+      (
+          id_art_113 serial NOT NULL,
+          lim_inferior double precision NOT NULL DEFAULT 0,
+          lim_superior double precision NOT NULL DEFAULT 0,
+          cuota_fija double precision NOT NULL DEFAULT 0,
+          porcentaje double precision NOT NULL DEFAULT 0,
+          anio integer DEFAULT 2020,
+          CONSTRAINT nomina_mensual_art_113_pkey PRIMARY KEY (id_art_113)
+      )
+      TABLESPACE pg_default;
+      ALTER TABLE public.nomina_mensual_art_113 OWNER to programa;
+
+      CREATE TABLE public.nomina_mensual_subsidios
+      (
+          id_subsidio serial NOT NULL,
+          de double precision NOT NULL DEFAULT 0,
+          hasta double precision NOT NULL DEFAULT 0,
+          subsidio double precision NOT NULL DEFAULT 0,
+          anio integer DEFAULT 2020,
+          CONSTRAINT nomina_mensual_subsidios_pkey PRIMARY KEY (id_subsidio)
+      )
+      TABLESPACE pg_default;
+      ALTER TABLE public.nomina_mensual_subsidios OWNER to programa;
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (0.01, 578.52, 0.00, 1.92, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (578.53, 4910.18, 11.11, 6.40, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (4910.19, 8629.20, 288.33, 10.88, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (8629.21, 10031.07, 692.96, 16.00, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (10031.08, 12009.94, 917.26, 17.92, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (12009.95, 24222.31, 1271.87, 21.36, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (24222.32, 38177.69, 3880.44, 23.52, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (38177.70, 72887.50, 7162.74, 30.00, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (72887.51, 97183.33, 17575.69, 32.00, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (97183.34, 291550.00, 25350.35, 34.00, 2020);
+    INSERT INTO public.nomina_mensual_art_113(lim_inferior, lim_superior, cuota_fija, porcentaje, anio) VALUES (291550.01, 9999999.00, 91435.02, 35.00, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (0.01, 1768.96, 407.02, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (1768.97, 2653.38, 406.83, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (2653.39, 3472.84, 406.62, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (3472.85, 3537.87, 392.77, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (3537.88, 4446.15, 382.46, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (4446.16, 4717.18, 354.23, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (4717.19, 5335.42, 324.87, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (5335.43, 6224.67, 294.63, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (6224.68, 7113.90, 253.54, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (7113.91, 7382.33, 217.61, 2020);
+    INSERT INTO public.nomina_mensual_subsidios(de, hasta, subsidio, anio) VALUES (7382.34, 999999.00, 0.00, 2020);
+
  ☐ En salidas de almacén poner opción de reutilizar compra cuando este cancelada, cargar todos los datos al formulario
  ☐
  ✔ Caja de tryana cuando se comprueba un gasto y se le pone el check de que es un gasto no se asignan los codigos @done (20-11-09 15:34)
