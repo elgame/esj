@@ -9,8 +9,10 @@ trait nominaCalMensual
     $this->ci =& get_instance();
     // echo "<pre>";
     //   var_dump($this->nominaFiltros ,$this->empleado);
-    // echo "</pre>";exit;
+    // echo "</pre>";
+    // exit;
     $this->getDataPeriodos();
+    $this->calculaMes();
   }
 
   public function getDataPeriodos()
@@ -20,7 +22,7 @@ trait nominaCalMensual
     $per1 = $per2 - $periodosAtras;
     $per2--;
 
-    $data = $this->ci->db->query(
+    $this->dataAnt = $this->ci->db->query(
       "SELECT id_empleado, Sum(sueldo_semanal) AS sueldo_semanal, Sum(vacaciones) AS vacaciones,
         Sum(prima_vacacional_grabable) AS prima_vacacional_grabable, Sum(aguinaldo_grabable) AS aguinaldo_grabable,
         Sum(ptu_grabable) AS ptu_grabable, Sum(horas_extras_grabable) AS horas_extras_grabable,
@@ -34,24 +36,71 @@ trait nominaCalMensual
       "
     )->row();
 
-    $datos = [
+    $this->datosMes = [
       'gravado'          => $this->empleado->nomina->percepcionesTotales['TotalGravado'],
       'isr'              => (isset($this->empleado->nomina->deducciones['isr'])? $this->empleado->nomina->deducciones['isr']['total']: 0),
       'isr_ant_sub'      => 0,
       'subsidio'         => (isset($this->empleado->nomina->otrosPagos['subsidio'])? $this->empleado->nomina->otrosPagos['subsidio']['total']: 0),
       'subsidio_causado' => (isset($this->empleado->nomina->otrosPagos['subsidio'])? $this->empleado->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado']: 0),
     ];
-    $datos['isr_ant_sub'] = $datos['subsidio_causado'] - $datos['subsidio'];
-    if ($data) {
-      $datos['gravado']          += $data->sueldo_semanal + $data->vacaciones + $data->prima_vacacional_grabable + $data->aguinaldo_grabable + $data->ptu_grabable + $data->horas_extras_grabable;
-      $datos['isr']              += $data->isr;
-      $datos['isr_ant_sub']      += $data->isr_ant_sub;
-      $datos['subsidio']         += $data->subsidio;
-      $datos['subsidio_causado'] += $data->subsidio_causado;
+    $this->datosMes['isr_ant_sub'] = $this->datosMes['subsidio_causado'] - $this->datosMes['subsidio'];
+    $this->datosMes['isr_ant_sub'] = $this->datosMes['isr_ant_sub'] > 0? $this->datosMes['isr_ant_sub']: $this->datosMes['isr'];
+
+    if ($this->dataAnt) {
+      $this->dataAnt->gravado = $this->dataAnt->sueldo_semanal + $this->dataAnt->vacaciones + $this->dataAnt->prima_vacacional_grabable + $this->dataAnt->aguinaldo_grabable + $this->dataAnt->ptu_grabable + $this->dataAnt->horas_extras_grabable;
+      $this->datosMes['gravado']          += $this->dataAnt->gravado;
+      $this->datosMes['isr']              += $this->dataAnt->isr;
+      $this->datosMes['isr_ant_sub']      += ($this->dataAnt->isr_ant_sub > 0? $this->dataAnt->isr_ant_sub: $this->dataAnt->isr);
+      $this->datosMes['subsidio']         += $this->dataAnt->subsidio;
+      $this->datosMes['subsidio_causado'] += $this->dataAnt->subsidio_causado;
+    } else {
+      $this->dataAnt = new stdClass;
+      $this->dataAnt->gravado = 0;
+      $this->dataAnt->isr = 0;
+      $this->dataAnt->isr_ant_sub = 0;
+      $this->dataAnt->subsidio = 0;
+      $this->dataAnt->subsidio_causado = 0;
     }
 
+    // echo "<pre>";
+    //   var_dump($this->datosMes, $this->dataAnt, $this->empleado);
+    // echo "</pre>";
+    // exit;
+  }
+
+  public function calculaMes()
+  {
+    $dataIsr = $this->ci->db->query(
+      "SELECT lim_inferior, lim_superior, cuota_fija, porcentaje, anio
+      FROM nomina_mensual_art_113
+      WHERE anio = {$this->nominaFiltros['anio']}
+        AND {$this->datosMes['gravado']} BETWEEN lim_inferior AND lim_superior
+      "
+    )->row();
+
+    $dataSub = $this->ci->db->query(
+      "SELECT de, hasta, subsidio, anio
+      FROM nomina_mensual_subsidios
+      WHERE anio = {$this->nominaFiltros['anio']}
+        AND {$this->datosMes['gravado']} BETWEEN de AND hasta
+      "
+    )->row();
+
+    $isrAntSubMes = round((($this->datosMes['gravado'] - floatval($dataIsr->lim_inferior)) * (floatval($dataIsr->porcentaje) / 100.00)) + floatval($dataIsr->cuota_fija), 4);
+    $causadoMes = floatval($dataSub->subsidio);
+    $subsidioMes = 0;
+    $isrMes = $isrAntSubMes - floatval($dataSub->subsidio);
+    if ($isrMes <= 0) {
+      $subsidioMes = abs($isrMes);
+      $isrMes = 0;
+    }
+
+    $isrUltSem = $isrAntSubMes - $this->dataAnt->isr_ant_sub;
+    $subUltSem = $causadoMes - $this->dataAnt->subsidio_causado;
+    $isrSubUltSem = $isrUltSem - $subUltSem - $isrMes;
+
     echo "<pre>";
-      var_dump($datos, $this->empleado->nomina);
+      var_dump($isrUltSem, $subUltSem, $isrSubUltSem, $isrAntSubMes, $isrMes, $subsidioMes, $causadoMes, $this->dataAnt, $this->datosMes);
     echo "</pre>";exit;
   }
 

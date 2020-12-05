@@ -248,7 +248,7 @@ class nomina
     $this->emisor();
     $this->receptor();
 
-    if ($this->nominaFiltros['calcMes'] && $this->empleado->id != 87) {
+    if ($this->nominaFiltros['calcMes'] == 'true' && $this->empleado->id != 87 && $this->empleado->id == 1481) {
       $this->calculoMensual();
     }
 
