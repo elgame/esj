@@ -2,6 +2,22 @@
  ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc|san|lap
      ALTER TABLE public.empresas ADD COLUMN sucursal character varying(130) COLLATE pg_catalog."default";
  ☐ Poner el calculo mensual en nominas
+   1. Resta el isr de la tabla menos el sub de la tabla mensual y si es < 0 se pone en subsidio si es > 0 se pone en isr de la semana
+   2. Si el subsidio causado de la tabla mensual es < al subsidio causado de las semanas pasadas (se usan los 4 conceptos de ajuste)
+      Percepcion
+        008 va el subsidio pagado de las semanas pasadas
+        007 va el isr antes de subsidio de las emanas pasadas
+      Deducciones
+        071 va el subsidio pagado de las semanas pasadas
+        107 va el subsidio causado de las semanas pasadas
+   3. Si el subsidio causado de la tabla mensual es > al subsidio causado de las semanas pasadas (se usan 1 concepto de ajuste)
+      Percepcion
+        008 -
+        007 -
+      Deducciones
+        071 va el subsidio pagado de las semanas pasadas
+        107 -
+
    -- pcc
    CREATE TABLE public.nomina_mensual_art_113
       (
