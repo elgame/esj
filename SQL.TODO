@@ -2,7 +2,7 @@
  ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc|san|lap
      ALTER TABLE public.empresas ADD COLUMN sucursal character varying(130) COLLATE pg_catalog."default";
  ☐ Poner el calculo mensual en nominas
-   -- pcc
+   -- pcc|san
    CREATE TABLE public.nomina_mensual_art_113
       (
           id_art_113 serial NOT NULL,
