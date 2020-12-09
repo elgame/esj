@@ -91,7 +91,7 @@ class banco_layout_bancomer_model extends banco_cuentas_model {
           'proveedor_sucursal' => $pago->pagos[0]->sucursal,
           'proveedor_cuenta'   => $pago->pagos[0]->cuenta,
           'ref_alfanumerica'   => $pago->pagos[0]->ref_alfanumerica,
-          'beneficiario_clave' => $this->cleanStr($pago->pagos[0]->alias, true),
+          'beneficiario_clave' => $pago->pagos[0]->cuenta, // $this->cleanStr($pago->pagos[0]->alias, true),
           'beneficiario'       => $pago->nombre_fiscal,
           'es_moral'           => $pago->es_moral,
           'clave_banco'        => $pago->pagos[0]->codigo_bajio,
