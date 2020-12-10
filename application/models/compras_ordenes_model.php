@@ -668,15 +668,15 @@ class compras_ordenes_model extends CI_Model {
       'retencion_iva'       => $_POST['totalRetencion'],
       'retencion_isr'       => $_POST['totalRetencionIsr'],
       'total'               => $_POST['totalOrden'],
-      'concepto'            => (isset($ids_comprass->descripcion)? substr($ids_comprass->descripcion, 0, 199): 'Concepto'),
+      'concepto'            => (isset($ids_comprass->descripcion)? substr($ids_comprass->descripcion, 0, 190): 'Concepto'),
       'observaciones'       => (isset($ids_comprass->descripcion)? $ids_comprass->descripcion: ''),
       'isgasto'             => 'f',
       'status'              => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
       'uuid'                => $this->input->post('uuid'),
       'no_certificado'      => $this->input->post('noCertificado'),
-      'ids_compras'         => (isset($ids_comprass->ids_compras)? $ids_comprass->ids_compras: NULL),
-      'ids_salidas_almacen' => (isset($ids_comprass->ids_salidas_almacen)? $ids_comprass->ids_salidas_almacen: NULL),
-      'ids_gastos_caja'     => (isset($ids_comprass->ids_gastos_caja)? $ids_comprass->ids_gastos_caja: NULL)
+      'ids_compras'         => (isset($ids_comprass->ids_compras{0})? $ids_comprass->ids_compras: NULL),
+      'ids_salidas_almacen' => (isset($ids_comprass->ids_salidas_almacen{0})? $ids_comprass->ids_salidas_almacen: NULL),
+      'ids_gastos_caja'     => (isset($ids_comprass->ids_gastos_caja{0})? $ids_comprass->ids_gastos_caja: NULL)
     );
 
     // //si es contado, se verifica que la cuenta tenga saldo
