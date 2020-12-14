@@ -3029,6 +3029,10 @@ class polizas_model extends CI_Model {
           $impuestos['iva_retener']['importe']  = $value->retencion_iva; //$factor*$value->retencion_iva/100;
           $impuestos['iva_retenido']['importe'] = $impuestos['iva_retener']['importe'];
 
+          $impuestos['isr_retener']['importe']    = 0;
+          $impuestos['isr_retenido']['importe']   = 0;
+          $impuestos['isr_retenerHo']['importe']  = 0;
+          $impuestos['isr_retenidoHo']['importe'] = 0;
           if ($value->retencion_isr > 0) {
             if ($this->getTipoISRCompras($value->observaciones) == 'ar') { // Arrendamiento
               $impuestos['isr_retener']['importe']    = $value->retencion_isr;
@@ -3037,7 +3041,6 @@ class polizas_model extends CI_Model {
               $impuestos['isr_retenerHo']['importe']    = $value->retencion_isr;
               $impuestos['isr_retenidoHo']['importe']   = $impuestos['isr_retenerHo']['importe'];
             }
-
           }
 
           $impuestos['iva_acreditar']['importe']  = $value->importe_iva; //$factor*($value->importe_iva)/100;
