@@ -776,20 +776,34 @@ class MyString {
     // Almacena las semanas.
     $semanas = array();
 
+    $mesAux = date('n', $siguienteUltimoDia);
     $semanasDefault = 52;
 
     while ($numeroSemana <= $semanasDefault)
     {
+      $calcmes = false;
+      $mes = date('n', $siguienteUltimoDia);
+      if ($mesAux != $mes) {
+        $semanas[count($semanas)-1]['calcmes'] = true;
+        $mesAux = $mes;
+      }
+
       if ($semanaFecha)
       {
         if ((intval($semanaFecha) === $numeroSemana) || ($siguientePrimerDia <= strtotime($semanaFecha) && $siguienteUltimoDia >= strtotime($semanaFecha)))
         {
+          $siguienteUltimoDiaAux = strtotime('+1 week', $siguienteUltimoDia);
+          $mes = date('n', $siguienteUltimoDiaAux);
+          if ($mesAux != $mes) {
+            $calcmes = true;
+          }
+
           return array(
             'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
             'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
             'anio'         => $anio,
             'semana'       => $numeroSemana,
-            'calcmes'      => ($numeroSemana % 4 === 0),
+            'calcmes'      => $calcmes,
           );
         }
       }
@@ -799,7 +813,7 @@ class MyString {
         'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
         'anio'         => $anio,
         'semana'       => $numeroSemana,
-        'calcmes'      => ($numeroSemana % 4 === 0),
+        'calcmes'      => $calcmes,
       );
 
       if ($todas === false && (strtotime(date('Y-m-d')) >= $siguientePrimerDia && strtotime(date('Y-m-d')) <= $siguienteUltimoDia))
