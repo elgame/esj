@@ -13959,6 +13959,7 @@ class nomina_fiscal_model extends CI_Model {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $dia = '4';
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
 
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
