@@ -3236,10 +3236,6 @@ class nomina_fiscal_model extends CI_Model {
     $contentSantr   = implode("\r\n", $contentSantr);
     $contentBanorte = implode("\r\n", $contentBanorte);
 
-    // $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
-    // fwrite($fp,$content);
-    // fclose($fp);
-
     $zip = new ZipArchive;
     if ($zip->open(APPPATH."media/temp/{$nombre}.zip", ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
     {
@@ -13967,17 +13963,25 @@ class nomina_fiscal_model extends CI_Model {
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
-    $nombre = "PAGO-AGUINALDO-{$semana['anio']}.txt";
+    $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
     $content           = array();
     $contentSantr      = array();
+    $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
+    $contadorBanorte   = 1;
     $cuentaSantr       = '92001449876'; // Cuenta cargo santander
+    $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
+    $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;
+    $total_nominaBanor = 0;
 
     //header santader
     $contentSantr[] = "100001E" . date("mdY") . $this->formatoBanco($cuentaSantr, ' ', 16, 'D') . date("mdY");
+    //header banorte
+    $contentBanorte[] = "HNE{$emisoraBanorte}" . date("Ymd") . "01{npagos}{total}0000000000000000000000000000000000000000000000000".$this->formatoBanco(' ', ' ', 77, 'D');
+
     foreach ($empleados as $key => $empleado)
     {
       if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
@@ -14001,6 +14005,22 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco('001', ' ', 3, 'D') .
                       $this->formatoBanco('001', ' ', 3, 'D');
           $contador++;
+        } elseif($empleado->banco == 'banor') {
+          $contentBanorte[] = "D" .
+                      date("Ymd") .
+                      $this->formatoBanco($empleado->id, 0, 10, 'I') .
+                      $this->formatoBanco(' ', ' ', 40, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                      $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
+                      "072" .
+                      "01" .
+                      $this->formatoBanco($empleado->cuenta_banco, '0', 18, 'I') .
+                      "0" .
+                      " " .
+                      "00000000" .
+                      $this->formatoBanco(' ', ' ', 18, 'D');
+          $total_nominaBanor += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
+          $contadorBanorte++;
         }
       }
     }
@@ -14008,11 +14028,14 @@ class nomina_fiscal_model extends CI_Model {
     //footer santader
     $contentSantr[] = "3" . $this->formatoBanco($contadorSantr+1, '0', 5, 'I') . $this->formatoBanco($contadorSantr-1, '0', 5, 'I') .
                       $this->formatoBanco($total_nominaSantr, '0', 18, 'I', true);
+    //footer banorte
+    $contentBanorte[0] = str_replace(['{npagos}', '{total}'], [$this->formatoBanco($contadorBanorte-1, '0', 6, 'I'), $this->formatoBanco($total_nominaBanor, '0', 15, 'I', true)], $contentBanorte[0]);
 
     $content[]      = '';
     $contentSantr[] = '';
     $content        = implode("\r\n", $content);
     $contentSantr   = implode("\r\n", $contentSantr);
+    $contentBanorte = implode("\r\n", $contentBanorte);
 
     $zip = new ZipArchive;
     if ($zip->open(APPPATH."media/temp/{$nombre}.zip", ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
