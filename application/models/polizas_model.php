@@ -1580,6 +1580,18 @@ class polizas_model extends CI_Model {
           WHERE u.esta_asegurado = 't'
              {$sql2}
         )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, 0 AS sueldo_semanal,
+            0 AS vacaciones, 0 AS prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, 0 AS subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            0 AS indemnizaciones, 'ag' AS tipo, f.uuid
+          FROM nomina_aguinaldo AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
       ) AS n
       ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
       ");
@@ -1930,6 +1942,18 @@ class polizas_model extends CI_Model {
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
           WHERE u.esta_asegurado = 't'
              {$sql2}
+        )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, 0 AS sueldo_semanal,
+            0 AS vacaciones, 0 AS prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, 0 AS subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            0 AS indemnizaciones, 'ag' AS tipo, f.uuid
+          FROM nomina_aguinaldo AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
         )
       ) AS n
       ORDER BY semana DESC, id_empleado ASC, id_empresa ASC
