@@ -11,6 +11,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/ajax_get_categorias/',
     'caja_chica/cerrar_caja/',
     'caja_chica/print_caja/',
+    'caja_chica/xls_caja/',
     'caja_chica/rpt_gastos_pdf/',
     'caja_chica/rpt_gastos_xls/',
     'caja_chica/rpt_ingresos_pdf/',
@@ -974,6 +975,17 @@ class caja_chica extends MY_Controller {
       $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
     } else
       $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+  }
+
+  public function xls_caja()
+  {
+    $this->load->model('caja_chica_model');
+    if ($_GET['fno_caja'] == 'prest1') {
+      $_GET['fno_caja'] = '1';
+      $this->load->model('caja_chica_prest_model');
+      $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+    } else
+      $this->caja_chica_model->xlsCaja($_GET['ffecha'], $_GET['fno_caja']);
   }
 
   public function print_vale()

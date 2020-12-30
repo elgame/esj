@@ -3496,6 +3496,899 @@ class caja_chica_model extends CI_Model {
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }
 
+  public function xlsCaja($fecha, $noCajas){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=caja_chica.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/'.($noCajas==1? '': "caja{$noCajas}/"), true);
+
+    $caja = $this->get($fecha, $noCajas, true);
+    $nomenclaturas = $this->nomenclaturas($noCajas);
+
+    $subtitulo = '';
+    $logo = '/images/logo.png';
+    if ($noCajas == 1)
+      $subtitulo = ' LIMON';
+    elseif ($noCajas == 2)
+      $subtitulo = ' GASTOS';
+    elseif ($noCajas == 4)
+      $subtitulo = ' GENERAL';
+    elseif ($noCajas == 5){
+      $subtitulo = ' FLETES';
+      $logo = '/images/transporte.png';
+    }
+
+
+    $titulo1 = mb_strtoupper($privilegio->nombre.$subtitulo, 'UTF-8');
+    $titulo2 = 'FECHA ' . MyString::fechaAT($fecha);
+    $titulo3 = 'SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $ttotalGastos = 0;
+    foreach ($caja['gastos'] as $gasto)
+    {
+      if ($gasto->status == 't') {
+        $ttotalGastos += floatval($gasto->monto);
+      }
+    }
+
+    // Ingresos por reposicion
+    $ttotalIngresos = $caja['saldo_inicial'];
+    $totalIngresos = 0;
+
+    if (count($caja['ingresos']) > 0) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="7" style="border:1px solid #000;background-color: #cccccc;">INGRESOS '.($noCajas == 4? 'DE CAJA': 'POR REPOSICION').'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">BANCO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONO</td>
+        </tr>';
+
+      foreach ($caja['ingresos'] as $key => $ingreso)
+      {
+        $colortxt = '#000000';
+        if ($ingreso->status == 'f') {
+          $colortxt = '#666666';
+        }
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$ingreso->folio.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->categoria.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->banco.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->poliza.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->nombre.'</td>
+          <td style="border:1px solid #000;">'.($ingreso->status == 't'? $ingreso->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;color:'.$colortxt.';">'.MyString::formatoNumero(($ingreso->status == 't'? $ingreso->monto: 0), 2, '', false).'</td>
+        </tr>';
+
+        if ($ingreso->status == 't') {
+          $totalIngresos += floatval($ingreso->monto);
+        }
+      }
+      $ttotalIngresos += $totalIngresos;
+    }
+    if ($totalIngresos > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">TOTAL: </td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // ingresos Remisiones
+    $totalRemisiones = 0;
+    if ($noCajas == 4 && count($caja['remisiones']) > 0) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">INGRESOS CLIENTES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REM FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONO</td>
+        </tr>';
+
+      foreach ($caja['remisiones'] as $key => $remision)
+      {
+        $colortxt = '#000000';
+        if ($remision->status == 'f') {
+          $colortxt = '#666666';
+        }
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$remision->cfolio.'</td>
+          <td style="border:1px solid #000;">'.$remision->empresa.'</td>
+          <td style="border:1px solid #000;">'.$remision->folio.'</td>
+          <td style="border:1px solid #000;">'.MyString::fechaAT($remision->fecha_rem).'</td>
+          <td style="border:1px solid #000;">'.($remision->status == 't'? $remision->observacion: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($remision->status == 't'? $remision->monto: 0), 2, '', false).'</td>
+        </tr>';
+
+        if ($remision->status == 't') {
+          $totalRemisiones += floatval($remision->monto);
+        }
+      }
+      $ttotalIngresos += $totalRemisiones;
+    }
+    if ($totalRemisiones > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTAL: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalRemisiones, 2, '$', false).'</td>
+        </tr>';
+    }
+    if (($totalRemisiones + $totalIngresos) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">ACUMULADO: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotalIngresos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TRASPASOS</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TIPO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">AF. FONDO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = '#666666';
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = '#000000';
+        }
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.$traspaso->folio.'</td>
+          <td style="border:1px solid #000;">'.($traspaso->tipo=='t'? 'Ingreso': 'Egreso').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->afectar_fondo=='t'? 'Si': 'No').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->status == 't'? $traspaso->concepto: 0).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($traspaso->status == 't'? $traspaso->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">SUMA: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Acreedores
+    $totalAcreedores = $totalAcreedoresHoy = 0;
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5) && count($caja['acreedores']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;"></td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['acreedores'] as $key => $acreedor)
+      {
+        $totalAcreedores += floatval($acreedor->saldo);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$acreedor->folio.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->fecha.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->nombre.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->concepto.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->monto, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->abonos, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->saldo, 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Boletas
+    $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
+    if ($noCajas == 1) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">COMPRA MATERIA PRIMA: LIMON</td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">BASCULA</td>
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">IMPORTES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FACTURADOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SUPERVISOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PENDIENTE</td>
+        </tr>';
+
+      foreach ($caja['boletas'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$boleta->boleta.'</td>
+          <td style="border:1px solid #000;">'.$boleta->fecha.'</td>
+          <td style="border:1px solid #000;">'.$boleta->proveedor.'</td>
+          <td style="border:1px solid #000;">'.$boleta->productor.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe_pagada, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe_pendiente, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletas           += floatval($boleta->importe);
+        $totalBoletasPagadas    += floatval($boleta->importe_pagada);
+        $totalBoletasPendientes += floatval($boleta->importe_pendiente);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPendientes, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Gastos x comprobar
+    $totalGastosComprobarTot = $totalGastosComprobar = 0;
+    if ($noCajas == 2 || $noCajas == 5) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS POR COMPROBAR</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">RECIBE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['gastos_comprobar'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalGastosComprobar += floatval($gasto->monto);
+          }
+
+          $totalGastosComprobarTot += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobar, 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Gastos del Dia
+    $totalGastos = 0;
+    if (count($caja['gastos']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS GENERALES</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['gastos'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          $totalGastos += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.(!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Reposición de gastos
+    $totalReposicionGastosAnt = $totalReposicionGastos = 0;
+    if ($noCajas == 2) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">REPOSICION DE GASTOS</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">RECIBE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['reposicion_gastos'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalReposicionGastos += floatval($gasto->monto);
+          }
+
+          $totalReposicionGastosAnt += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.(!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+
+    } else if ($noCajas == 5) { // caja de fletes
+      $codigoAreas = array();
+      $aux_emp = 0;
+      $totalReposicionGastosEmp = 0;
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">GASTOS FACTURADOS</td>
+        </tr>';
+
+      foreach ($caja['reposicion_gastos'] as $key => $gasto)
+      {
+        if ($aux_emp !== $gasto->id_categoria) {
+          if ($aux_emp > 0) {
+            $html .= '<tr style="font-weight:bold">
+              <td style="border:1px solid #000;background-color: #cccccc;"></td>
+              <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+              <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosEmp, 2, '$', false).'</td>
+            </tr>';
+          }
+
+          $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$gasto->empresa.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          </tr>';
+
+          $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">CENTRO COSTO</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          </tr>';
+
+          $aux_emp = $gasto->id_categoria;
+          $totalReposicionGastosEmp = 0;
+        }
+
+        // $totalReposicionGastos += floatval($gasto->monto);
+        $totalReposicionGastosAnt += floatval($gasto->monto);
+        $totalReposicionGastosEmp += floatval($gasto->monto);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$gasto->proveedor.'</td>
+          <td style="border:1px solid #000;">'.$gasto->centro_costo.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($gasto->monto, 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosEmp, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Deudores
+    $totalDeudores = 0;
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5) && count($caja['deudores']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">DEUDORES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['deudores'] as $key => $deudor)
+      {
+        $totalDeudores += floatval($deudor->saldo);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$deudor->folio.'</td>
+          <td style="border:1px solid #000;">'.$deudor->fecha.'</td>
+          <td style="border:1px solid #000;">'.$deudor->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$deudor->nombre.'</td>
+          <td style="border:1px solid #000;">'.$deudor->concepto.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->monto, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->abonos, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->saldo, 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Boletas pendientes x recuperar
+    $totalBoletas2 = 0;
+    $page_aux = null;
+    $y_aux = null;
+    if ($noCajas == 1 || $noCajas == 3) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">PENDIENTES DE RECUPERAR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FACTURADOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      foreach ($caja['boletas_arecuperar'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$boleta->proveedor.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletas2 += floatval($boleta->importe);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletas2, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // cheques de boletas en transito
+    $totalBoletasTransito = 0;
+    if ($noCajas == 1 || $noCajas == 3) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REF</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRODUTOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      foreach ($caja['boletas_ch_entransito'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.MyString::fechaAT($boleta->fecha).'</td>
+          <td style="border:1px solid #000;">'.$boleta->numero_ref.'</td>
+          <td style="border:1px solid #000;">'.$boleta->nombre_fiscal.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->monto, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletasTransito += floatval($boleta->monto);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasTransito, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Saldo de clientes remisiones
+    $totalSaldoClientes = 0;
+    if ($noCajas == 4) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO DE CLIENTES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">CLIENTE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      foreach ($caja['saldo_clientes'] as $key => $empresa)
+      {
+        if (count($empresa->clientes) > 0) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="2" style="border:1px solid #000;">'.$empresa->nombre_fiscal.'</td>
+          </tr>';
+
+          foreach ($empresa->clientes as $key => $cliente)
+          {
+            $html .= '<tr style="">
+              <td style="border:1px solid #000;">'.$cliente->nombre.'</td>
+              <td style="border:1px solid #000;">'.MyString::formatoNumero($cliente->saldo, 2, '', false).'</td>
+            </tr>';
+
+            $totalSaldoClientes += floatval($cliente->saldo);
+          }
+        }
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalSaldoClientes, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Tabulaciones
+    $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TABULACION DE EFECTIVO</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">NUMERO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DENOMIN</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+        </tr>';
+
+    $totalEfectivo = 0;
+    foreach ($caja['denominaciones'] as $key => $denominacion)
+    {
+      $html .= '<tr style="">
+              <td style="border:1px solid #000;">'.$denominacion['cantidad'].'</td>
+              <td style="border:1px solid #000;">'.$denominacion['denominacion'].'</td>
+              <td style="border:1px solid #000;">'.MyString::formatoNumero($denominacion['total'], 2, '', false).'</td>
+            </tr>';
+
+      $totalEfectivo += floatval($denominacion['total']);
+    }
+    $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL EFECTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo, 2, '$', false).'</td>
+        </tr>';
+
+
+    if ($noCajas == 1) {
+      $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
+      $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalFondoCaja = false;
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DIFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivoCorte , 2, '$', false).'</td>
+        </tr>
+        <tr><td></td></tr>';
+    } else {
+      if ($noCajas == 4) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+          $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+
+        $totalFondoCaja = false;
+      } else {
+        $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
+          $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'];
+
+        $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
+           $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] - $totalAcreedores;
+      }
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DIFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo - $totalEfectivoCorte , 2, '$', false).'</td>
+        </tr>
+        <tr><td></td></tr>';
+    }
+
+
+    if ($noCajas == 1) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['fondo_caja'], 2, '$', false).'</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
+        </tr>';
+
+      if ($totalDeudores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalAcreedores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
+        </tr>';
+      }
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO EFECTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($saldoEfectivo, 2, '$', false).'</td>
+        </tr>';
+
+      $pdf->SetY($pdf->GetY()+5);
+      if ($totalIngresos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPagadas > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO LIMON EF</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPendientes > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO LIMON CR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPendientes, 2, '$', false).'</td>
+        </tr>';
+      }
+    } else {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO INICIAL CR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false).'</td>
+        </tr>';
+      if ($totalIngresos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalRemisiones > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS REM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalRemisiones, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalAcreedores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPagadas > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO TOT LIMON</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalGastosComprobarTot > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO GASTOS COM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($ttotalGastos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO TOT GASTOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotalGastos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalReposicionGastosAnt > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL REPOSICION GASTOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalDeudores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalTraspasos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL TRASPASOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($noCajas == 1 && ($caja['boletas_arecuperar_total'] > 0 || $caja['cheques_transito_total'] > 0)) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
+        </tr>';
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EFECT. DEL CORTE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivoCorte, 2, '$', false).'</td>
+        </tr>';
+      if ($totalFondoCaja !== false) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalFondoCaja, 2, '$', false).'</td>
+        </tr>';
+      }
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
   public function nomenclaturas($noCaja = 0)
   {
     $sql = '';
