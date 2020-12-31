@@ -808,6 +808,10 @@ class MyString {
         }
       }
 
+      if ($numeroSemana === 53)
+      {
+        $calcmes = true;
+      }
       $semanas[] = array(
         'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
         'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),

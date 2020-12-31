@@ -18,7 +18,7 @@
         071 va el subsidio pagado de las semanas pasadas
         107 -
 
-   -- pcc|san
+   -- pcc|san|lap
    CREATE TABLE public.nomina_mensual_art_113
       (
           id_art_113 serial NOT NULL,
