@@ -5098,7 +5098,7 @@ class caja_chica_model extends CI_Model {
     $this->load->model('catalogos_sft_model');
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5201,7 +5201,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptGastosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5447,7 +5447,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5544,7 +5544,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
