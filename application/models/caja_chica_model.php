@@ -765,7 +765,8 @@ class caja_chica_model extends CI_Model {
     $ingresos = array();
 
     $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes'];
-    $anio = date('Y');
+    $fpartes = explode('-', $data['fecha_caja_chica']);
+    $anio = $fpartes[0]; // date('Y');
 
     // ingresos
     if (isset($data['ingreso_concepto']) && is_array($data['ingreso_concepto'])) {
@@ -5097,7 +5098,7 @@ class caja_chica_model extends CI_Model {
     $this->load->model('catalogos_sft_model');
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5200,7 +5201,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptGastosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5446,7 +5447,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
@@ -5543,7 +5544,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $id_empresa = $this->input->get('did_empresa');
+    $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
