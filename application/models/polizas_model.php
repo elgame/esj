@@ -1230,10 +1230,10 @@ class polizas_model extends CI_Model {
 
             $ret_iva_pos = ($value->retencion_iva/($value->importe>0 ? $value->importe : 1))*100;
 
-            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagado();
+            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetxPagar();
             if($ret_iva_pos > 15)
             { // Asigana las cuentas de retencion al 100%
-              $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetPagado100();
+              $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagar100();
             }elseif($ret_iva_pos > 4.5)
             { // Asigana las cuentas de honorarios o arrendamiento
               if ($this->getTipoISRCompras($inf_compra['info']->concepto) == 'ar') { // Arrendamiento
