@@ -112,6 +112,15 @@ class nomina
   public function setFiltros($filtros)
   {
     $this->nominaFiltros = $filtros;
+    if (isset($filtros['calcMes'])) {
+      $semanas = MyString::obtenerSemanasDelAnioV2($this->nominaFiltros['anio'], 0, $this->nominaFiltros['dia_inicia_semana'], true);
+      for ($i=count($semanas)-1; $i >= 0; $i--) {
+        if ($this->nominaFiltros['semana'] == $semanas[$i]['semana']) {
+          $this->nominaFiltros['calcMes'] = $semanas[$i]['calcmes'];
+        }
+      }
+    }
+
     return $this;
   }
 
@@ -248,7 +257,7 @@ class nomina
     $this->emisor();
     $this->receptor();
 
-    if ($this->nominaFiltros['calcMes'] == 'true' && $this->empleado->id != 87 && $this->empleado->id == 1481) {
+    if ($this->nominaFiltros['calcMes'] == true && $this->empleado->id != 87 && $this->empleado->id == 23) {
       $this->calculoMensual();
     }
 

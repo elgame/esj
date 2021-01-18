@@ -18,9 +18,8 @@ trait nominaCalMensual
   public function getDataPeriodos()
   {
     $periodosAtras = ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se'? 3: 1);
-    $per2 = $this->nominaFiltros['semana'];
-    // $per1 = $per2 - $periodosAtras;
-    // $per2--;
+    $per2 = intval($this->nominaFiltros['semana']);
+    $per1 = 1;
     $semanas = MyString::obtenerSemanasDelAnioV2($this->nominaFiltros['anio'], 0, $this->nominaFiltros['dia_inicia_semana'], true);
     $band = false;
     for ($i=count($semanas)-1; $i >= 0; $i--) {
@@ -31,7 +30,11 @@ trait nominaCalMensual
         break;
       }
     }
-    $per2--;
+    // $per2--;
+
+    if (empty($per1)) {
+      return '';
+    }
 
     $this->dataAnt = $this->ci->db->query(
       "SELECT id_empleado, Sum(sueldo_semanal) AS sueldo_semanal, Sum(vacaciones) AS vacaciones,
@@ -163,9 +166,9 @@ trait nominaCalMensual
     $subUltSem = $causadoMes - $this->dataAnt->subsidio_causado;
     $isrSubUltSem = $isrUltSem - $subUltSem - $isrMes;
 
-    echo "<pre>";
-      var_dump($isrUltSem, $subUltSem, $isrSubUltSem, $isrAntSubMes, $isrMes, $subsidioMes, $causadoMes, $this->dataAnt, $this->datosMes, $this->empleado);
-    echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($isrUltSem, $subUltSem, $isrSubUltSem, $isrAntSubMes, "isrMes => {$isrMes}", "subsidioMes => $subsidioMes", "causadoMes => {$causadoMes}", $this->dataAnt, $this->datosMes, $this->empleado);
+    // echo "</pre>";exit;
   }
 
 }
