@@ -191,23 +191,40 @@
                           </thead>
                           <tbody>
                             <?php
+                                  $tipoo = '';
                                   $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
                                   $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+                                  $totalpreslp_ef_rec = [];
                                   foreach ($caja['prestamos_lp'] as $prestamo) {
                                       $totalpreslp_salini += floatval($prestamo->saldo_ini);
                                       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
                                       $totalpreslp_salfin += floatval($prestamo->saldo_fin);
-                                      if ($prestamo->tipo == 'fi') {
+                                      if ($prestamo->tipo == 'ef') {
+                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                        if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                          $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                        } else {
+                                          $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                        }
+                                      } else {
                                         $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
                                         $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
                                         $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
                                       }
-                                      else {
-                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
-                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+                                        $tipo = $prestamo->tipo == 'ef'? 'Efectivo': 'Fiscal';
+                                        $tipoo = $prestamo->tipo;
+                            ?>
+                                    <tr>
+                                      <td colspan="10"><strong><?php echo $tipo ?></strong></td>
+                                    </tr>
+                            <?php
                                       }
-                                    ?>
+                            ?>
                                     <tr>
                                       <td><?php echo $prestamo->categoria ?></td>
                                       <td><?php echo $prestamo->empleado ?></td>
@@ -255,6 +272,26 @@
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
+                            <?php
+                              if (count($totalpreslp_ef_rec) > 0) {
+                            ?>
+                                <tr class="row-total">
+                                  <td colspan="10"><strong>Recuperar Efectivo</strong></td>
+                                </tr>
+                            <?php
+                                foreach ($totalpreslp_ef_rec as $key => $value) {
+                                  if ($value > 0) {
+                            ?>
+                                <tr class="row-total">
+                                  <td><?php echo $key ?></td>
+                                  <td><?php echo $value ?></td>
+                                  <td colspan="8"></td>
+                                </tr>
+                            <?php
+                                  }
+                                }
+                              }
+                            ?>
                           </tbody>
                         </table>
                       </div>

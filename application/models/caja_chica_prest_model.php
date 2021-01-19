@@ -133,7 +133,8 @@ class caja_chica_prest_model extends CI_Model {
 
     // Prestamos a largo plazo
     $prestamos = $this->db->query(
-      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria,
+        COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
         ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
         Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
@@ -155,7 +156,7 @@ class caja_chica_prest_model extends CI_Model {
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
       WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
-      ORDER BY fecha ASC, id_prestamo_nom ASC"
+      ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
     );
 
     if ($prestamos->num_rows() > 0)
@@ -163,7 +164,7 @@ class caja_chica_prest_model extends CI_Model {
       $info['prestamos_lp'] = $prestamos->result();
       foreach ($info['prestamos_lp'] as $key => $item) {
         $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
+        $item->saldo_fin = $item->saldo_ini - $item->pago_dia;
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
         if ($item->saldo_ini == 0)
