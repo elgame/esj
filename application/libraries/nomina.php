@@ -246,9 +246,13 @@ class nomina
 
     $this->calculoNominaTotaltes();
 
+    if ($this->empleado->otros_datos != 'false') {
+      $this->empleado->otros_datos = json_decode($this->empleado->otros_datos);
+    }
+
     if (isset($this->empleado->calculo_anual) && $this->empleado->esta_asegurado === 't') {
       $this->setCalculoAnual();
-    } elseif ($this->empleado->otros_datos != 'false' && $this->empleado->esta_asegurado === 't') {
+    } elseif (isset($this->empleado->otros_datos->calculoAnual) && $this->empleado->esta_asegurado === 't') {
       $this->setCalculoAnual(true);
     }
 
@@ -257,9 +261,9 @@ class nomina
     $this->emisor();
     $this->receptor();
 
-    if ($this->nominaFiltros['calcMes'] == true && $this->empleado->id != 87 && $this->empleado->id == 23) {
-      $this->calculoMensual();
-    }
+    // if ($this->nominaFiltros['calcMes'] == true) {
+    //   $this->calculoMensual();
+    // }
 
     return $this->empleado;
   }
@@ -1197,8 +1201,8 @@ class nomina
   public function setCalculoAnual($set=false)
   {
     if ($set) {
-      $calculo_anual = json_decode($this->empleado->otros_datos);
-      $calculo_anual = $calculo_anual->calculoAnual;
+      // $calculo_anual = json_decode($this->empleado->otros_datos);
+      $calculo_anual = $this->empleado->otros_datos->calculoAnual; // $calculo_anual->calculoAnual;
       if ($calculo_anual->tipo === 't') { // isr a pagar
         $this->empleado->nomina->deducciones['isrAnual'] = array(
           'TipoDeduccion'  => '101',

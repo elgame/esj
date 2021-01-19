@@ -101,7 +101,7 @@ trait nominaCalMensual
     )->row();
 
     $isrAntSubMes = round((($this->datosMes['gravado'] - floatval($dataIsr->lim_inferior)) * (floatval($dataIsr->porcentaje) / 100.00)) + floatval($dataIsr->cuota_fija), 4);
-    $causadoMes = floatval($dataSub->subsidio);
+    $causadoMes = round(floatval($dataSub->subsidio), 2);
     $subsidioMes = 0;
     // 1. Resta el isr de la tabla menos el sub de la tabla mensual y si es < 0 se pone en subsidio si es > 0 se pone en isr de la semana
     $isrMes = $isrAntSubMes - $causadoMes;
@@ -109,15 +109,15 @@ trait nominaCalMensual
       $subsidioMes = abs($isrMes);
       $isrMes = 0;
 
-      $this->empleado->nomina->otrosPagos['subsidio']['ImporteExcento'] = $subsidioMes;
-      $this->empleado->nomina->otrosPagos['subsidio']['total'] = $subsidioMes;
+      $this->empleado->nomina->otrosPagos['subsidio']['ImporteExcento'] = round($subsidioMes, 2);
+      $this->empleado->nomina->otrosPagos['subsidio']['total'] = round($subsidioMes, 2);
       $this->empleado->nomina->deducciones['isr']['ImporteExcento'] = 0;
       $this->empleado->nomina->deducciones['isr']['total'] = 0;
     } else {
-      $this->empleado->nomina->otrosPagos['subsidio']['ImporteExcento'] = 0.01;
-      $this->empleado->nomina->otrosPagos['subsidio']['total'] = 0.01;
-      $this->empleado->nomina->deducciones['isr']['ImporteExcento'] = $isrMes;
-      $this->empleado->nomina->deducciones['isr']['total'] = $isrMes;
+      $this->empleado->nomina->otrosPagos['subsidio']['ImporteExcento'] = $causadoMes > 0? 0.01: 0;
+      $this->empleado->nomina->otrosPagos['subsidio']['total'] = $causadoMes > 0? 0.01: 0;
+      $this->empleado->nomina->deducciones['isr']['ImporteExcento'] = round($isrMes, 2);
+      $this->empleado->nomina->deducciones['isr']['total'] = round($isrMes, 2);
     }
     $this->empleado->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'] = $causadoMes;
 

@@ -80,7 +80,7 @@ class nomina_fiscal_model extends CI_Model {
       $sqlpt .= " AND u.id_puesto = {$filtros['puestoId']}";
       $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_puesto = {$filtros['puestoId']}";
     }
-
+    $empleadoId = 23;
     if ($empleadoId)
     {
       $sql .= " AND u.id = {$empleadoId}";
@@ -514,7 +514,8 @@ class nomina_fiscal_model extends CI_Model {
               np.status,
               DATE(np.fecha) as fecha,
               DATE(np.inicio_pago) as inicio_pago,
-              COALESCE(SUM(nfp.monto), 0) as total_pagado
+              COALESCE(SUM(nfp.monto), 0) as total_pagado,
+              np.tipo
         FROM nomina_prestamos np
         LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
         WHERE np.status = 't' AND np.pausado = 'f' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
@@ -822,6 +823,8 @@ class nomina_fiscal_model extends CI_Model {
       $result = array('xml' => '', 'uuid' => '');
       if($datos['esta_asegurado'] == 't')
       {
+        $otros_datos = null;
+
         // Obtiene los datos para la cadena original.
         // $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
         $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
@@ -897,10 +900,15 @@ class nomina_fiscal_model extends CI_Model {
             : 0;
 
           $totalPrestamos = 0;
+          $totalPrestamosEf = 0;
           // Recorre los prestamos del empleado para
           foreach ($empleadoNomina[0]->prestamos as $prestamo)
           {
-            $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
+            if ($prestamo['tipo'] == 'ef') {
+              $totalPrestamosEf += floatval($prestamo['pago_semana_descontar']);
+            } else {
+              $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
+            }
 
             $prestamosEmpleados[] = array(
               'id_empleado' => $empleadoId,
@@ -923,10 +931,10 @@ class nomina_fiscal_model extends CI_Model {
             //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
             // }
           }
+          $otros_datos['totalPrestamosEf'] = $totalPrestamosEf;
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
 
-          $otros_datos = null;
           if (isset($empleadoNomina[0]->calculo_anual)) {
             $otros_datos['calculoAnual'] = $empleadoNomina[0]->calculo_anual;
           }
@@ -1003,10 +1011,15 @@ class nomina_fiscal_model extends CI_Model {
       }else
       {
         $totalPrestamos = 0;
+        $totalPrestamosEf = 0;
         // Recorre los prestamos del empleado para
         foreach ($empleadoNomina[0]->prestamos as $prestamo)
         {
-          $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
+          if ($prestamo['tipo'] == 'ef') {
+            $totalPrestamosEf += floatval($prestamo['pago_semana_descontar']);
+          } else {
+            $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
+          }
 
           $prestamosEmpleados[] = array(
             'id_empleado' => $empleadoId,
@@ -1029,6 +1042,7 @@ class nomina_fiscal_model extends CI_Model {
           //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
           // }
         }
+        $otros_datos['totalPrestamosEf'] = $totalPrestamosEf;
 
         $totalNoFiscal = floatval($datos['total_no_fiscal']);
 
@@ -1085,6 +1099,7 @@ class nomina_fiscal_model extends CI_Model {
             'fondo_ahorro' => $empleadoNomina[0]->fondo_ahorro,
             'pasistencia' => 0,
             'despensa' => 0,
+            'otros_datos' => ($otros_datos? json_encode($otros_datos): NULL),
           );
 
         $msg = 'Registrado, no asegurado.';
@@ -1825,6 +1840,7 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
 
+    $quiSubsidio = false;
     foreach ($nomina[0]->nomina->otrosPagos as $key => $value) {
       if (floatval($value['total']) >= 0) { // 0.01
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
@@ -1832,12 +1848,18 @@ class nomina_fiscal_model extends CI_Model {
         $datosApi['data'][0]["{$value['ApiKey']}importe"]  = $value['total'];
         if ($value['ApiKey'] === 'top_subsidio_empleo_' && $value['SubsidioAlEmpleo']['SubsidioCausado'] >= 0) {
           $datosApi['data'][0]["{$value['ApiKey']}causado"] = $value['SubsidioAlEmpleo']['SubsidioCausado'];
-        } else if ($value['ApiKey'] === 'top_subsidio_empleo_') {
-          unset($datosApi['data'][0]["{$value['ApiKey']}clave"],
-            $datosApi['data'][0]["{$value['ApiKey']}concepto"],
-            $datosApi['data'][0]["{$value['ApiKey']}importe"]);
+        }
+
+        if ($value['ApiKey'] === 'top_subsidio_efectivamente_entregado_' || $value['ApiKey'] === 'top_isr_ajustado_subsidio_') {
+          $quiSubsidio = true;
         }
       }
+    }
+    if ($quiSubsidio) {
+      unset($datosApi['data'][0]["top_subsidio_empleo_clave"],
+        $datosApi['data'][0]["top_subsidio_empleo_concepto"],
+        $datosApi['data'][0]["top_subsidio_empleo_importe"],
+        $datosApi['data'][0]["top_subsidio_empleo_causado"]);
     }
 
     return $datosApi;

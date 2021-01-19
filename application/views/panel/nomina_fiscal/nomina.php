@@ -162,9 +162,10 @@
                       <th style="background-color: #EEEEBC;">BONOS</th>
                       <th style="background-color: #EEEEBC;">OTRAS</th>
                       <th style="background-color: #EEEEBC;">DOMINGO</th>
-                      <th style="background-color: #EEBCBC;">DESC. PLAY</th>
-                      <th style="background-color: #EEBCBC;">DESC. OTRO</th>
-                      <th style="background-color: #EEBCBC;">DESC. COCINA</th>
+                      <th style="background-color: #EEBCBC;">DESC PLAY</th>
+                      <th style="background-color: #EEBCBC;">DESC OTRO</th>
+                      <th style="background-color: #EEBCBC;">DESC COCINA</th>
+                      <th style="background-color: #EEBCBC;">DESC PREST EF</th>
                       <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
@@ -193,6 +194,7 @@
                       $totalDescuentoPlayeras = 0;
                       $totalDescuentoOtros = 0;
                       $totalDescuentoCocina = 0;
+                      $ttotalPrestamosEmpleadoEf = 0;
                       $totalIsrs = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
@@ -404,14 +406,21 @@
                         <td style="<?php echo $bgColor ?>"><!-- prestamos -->
                           <?php
                                 $totalPrestamosEmpleado = 0;
+                                $totalPrestamosEmpleadoEf = 0;
                                 if (floatval($e->nomina_fiscal_prestamos) != 'false')
                                 {
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
+                                  $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
+
                                 }
                                 else
                                 {
                                   foreach ($e->prestamos as $key => $prestamo) {
-                                    $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
+                                    if ($prestamo['tipo'] == 'ef') {
+                                      $totalPrestamosEmpleadoEf += $prestamo['pago_semana_descontar'];
+                                    } else {
+                                      $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
+                                    }
                                   }
                                 }
 
@@ -464,6 +473,7 @@
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_cocina[]" value="<?php echo $e->descuento_cocina ?>" class="span12 vpositive descuento-cocina" <?php echo $readonly ?>></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_prestamoef[]" value="<?php echo $totalPrestamosEmpleadoEf ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php
 
@@ -478,7 +488,8 @@
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros -
-                                                  $e->descuento_cocina;
+                                                  $e->descuento_cocina -
+                                                  $totalPrestamosEmpleadoEf;
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo MyString::formatoNumero($totalComplementoEmpleado) ?></span>
@@ -486,33 +497,34 @@
                         </td>
                       </tr>
                     <?php
-                      $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
-                      $totalPasistencia        += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'];
-                      // $totalDespensa           += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'];
-                      $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
-                      $totalDiasTrabajados     += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
-                      $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
-                      $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
-                      $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
-                      $totalHorasExtras        += $e->horas_extras_dinero;
-                      $totalAguinaldos         += $e->esta_asegurado=='f'?0:0;
-                      $totalSubsidios          += $e->esta_asegurado=='f'?0:$subsidioEmpleado+$subsidioAnualEmpleado;
-                      $totalPtu                += $e->esta_asegurado=='f'?0:$ptuEmpleado;
-                      $totalPercepciones       += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
-                      $totalInfonavit          += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
-                      $totalFondoAhorro        += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
-                      $totalImss               += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
-                      $totalPrestamos          += $totalPrestamosEmpleado;
-                      $totalDescuentoPlayeras  += $e->descuento_playeras;
-                      $totalDescuentoOtros     += $e->descuento_otros;
-                      $totalDescuentoCocina    += $e->descuento_cocina;
-                      $totalIsrs               += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
-                      $totalDeducciones        += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
-                      $totalTransferencias     += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
-                      $totalBonos              += $e->bonos;
-                      $totalOtras              += $e->otros;
-                      $totalDomingos           += $e->domingo;
-                      $totalComplementos       += $totalComplementoEmpleado;
+                      $totalSalarios             += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
+                      $totalPasistencia          += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'];
+                      // $totalDespensa          += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'];
+                      $totalSdi                  += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
+                      $totalDiasTrabajados       += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
+                      $totalSueldos              += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
+                      $totalVacaciones           += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
+                      $totalPrimasVacacionales   += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
+                      $totalHorasExtras          += $e->horas_extras_dinero;
+                      $totalAguinaldos           += $e->esta_asegurado=='f'?0:0;
+                      $totalSubsidios            += $e->esta_asegurado=='f'?0:$subsidioEmpleado+$subsidioAnualEmpleado;
+                      $totalPtu                  += $e->esta_asegurado=='f'?0:$ptuEmpleado;
+                      $totalPercepciones         += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
+                      $totalInfonavit            += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
+                      $totalFondoAhorro          += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
+                      $totalImss                 += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
+                      $totalPrestamos            += $totalPrestamosEmpleado;
+                      $totalDescuentoPlayeras    += $e->descuento_playeras;
+                      $totalDescuentoOtros       += $e->descuento_otros;
+                      $totalDescuentoCocina      += $e->descuento_cocina;
+                      $ttotalPrestamosEmpleadoEf += $totalPrestamosEmpleadoEf;
+                      $totalIsrs                 += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
+                      $totalDeducciones          += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
+                      $totalTransferencias       += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
+                      $totalBonos                += $e->bonos;
+                      $totalOtras                += $e->otros;
+                      $totalDomingos             += $e->domingo;
+                      $totalComplementos         += $totalComplementoEmpleado;
                     } ?>
                     <tr>
                       <td colspan="2" style="width:202px; position: absolute; background-color: #BCD4EE; text-align: right; font-weight: bold;border-right: 1px #ccc solid;">TOTALES</td>
@@ -543,6 +555,7 @@
                       <td id="totales-descuento-playeras" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoPlayeras) ?></td>
                       <td id="totales-descuento-otros" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoOtros) ?></td>
                       <td id="totales-descuento-cocina" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoCocina) ?></td>
+                      <td id="totales-descuento-presef" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($ttotalPrestamosEmpleadoEf) ?></td>
                       <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>
