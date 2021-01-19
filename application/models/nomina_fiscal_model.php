@@ -80,7 +80,7 @@ class nomina_fiscal_model extends CI_Model {
       $sqlpt .= " AND u.id_puesto = {$filtros['puestoId']}";
       $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_puesto = {$filtros['puestoId']}";
     }
-    $empleadoId = 23;
+
     if ($empleadoId)
     {
       $sql .= " AND u.id = {$empleadoId}";
