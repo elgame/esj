@@ -5517,15 +5517,16 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $empleados_sin_departamento = [];
-    $ver_total_prestamos = $ver_total_domingo = $ver_total_otros = $ver_infonavit = $ver_trans = $ver_fondo_arro = 0;
+    $ver_total_prestamos_ef = $ver_total_prestamos = $ver_total_domingo = $ver_total_otros = $ver_infonavit = $ver_trans = $ver_fondo_arro = 0;
     foreach ($_POST['empleado_id'] as $key => $empleado)
     {
-      $ver_infonavit       += $_POST['total_infonavit'][$key];
-      $ver_trans           += $_POST['ttotal_nomina'][$key];
-      $ver_fondo_arro      += $_POST['fondo_ahorro'][$key];
-      $ver_total_prestamos += $_POST['total_prestamos'][$key];
-      $ver_total_domingo   += $_POST['domingo'][$key];
-      $ver_total_otros     += $_POST['bonos'][$key]+$_POST['otros'][$key];
+      $ver_infonavit          += $_POST['total_infonavit'][$key];
+      $ver_trans              += $_POST['ttotal_nomina'][$key];
+      $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
+      $ver_total_prestamos    += $_POST['total_prestamos'][$key];
+      $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
+      $ver_total_domingo      += $_POST['domingo'][$key];
+      $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
 
       $empleados_sin_departamento[$key] = [
         'row_post'    => $key,
@@ -5556,7 +5557,7 @@ class nomina_fiscal_model extends CI_Model {
       $columnas['a'][] = 'R';
     }
 
-    if ($ver_total_prestamos != 0)
+    if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
     {
       $columnas['n'][] = 'PTMO';
       $columnas['w'][] = 15;
@@ -5669,6 +5670,7 @@ class nomina_fiscal_model extends CI_Model {
             $_POST['total_infonavit'][$key] -
             $_POST['descuento_playeras'][$key] -
             $_POST['descuento_otros'][$key] -
+            $_POST['descuento_prestamoef'][$key] -
             $_POST['fondo_ahorro'][$key];
           $pdf->SetXY(6, $pdf->GetY());
 
@@ -5684,8 +5686,8 @@ class nomina_fiscal_model extends CI_Model {
             $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
           if ($ver_total_domingo != 0)
             $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
-          if ($ver_total_prestamos != 0)
-            $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
+          if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
+            $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]), 2, '$', false);
 
           if ($ver_fondo_arro != 0)
           {
@@ -5721,7 +5723,7 @@ class nomina_fiscal_model extends CI_Model {
           // $despensa            += $_POST['despensa'][$key];
           $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
           $domingo             += $_POST['domingo'][$key];
-          $total_prestamos     += $_POST['total_prestamos'][$key];
+          $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key];
           $total_infonavit     += $_POST['total_infonavit'][$key];
           $total_fondo         += $_POST['fondo_ahorro'][$key];
           $descuento_playeras  += $_POST['descuento_playeras'][$key];
@@ -5737,7 +5739,7 @@ class nomina_fiscal_model extends CI_Model {
           // $despensa1            += $_POST['despensa'][$key];
           $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
           $domingo1             += $_POST['domingo'][$key];
-          $total_prestamos1     += $_POST['total_prestamos'][$key];
+          $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key];
           $total_infonavit1     += $_POST['total_infonavit'][$key];
           $total_fondo1         += $_POST['fondo_ahorro'][$key];
           $descuento_playeras1  += $_POST['descuento_playeras'][$key];
@@ -5768,7 +5770,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
         $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
       if ($ver_fondo_arro != 0)
@@ -5843,6 +5845,7 @@ class nomina_fiscal_model extends CI_Model {
           $_POST['total_infonavit'][$key] -
           $_POST['descuento_playeras'][$key] -
           $_POST['descuento_otros'][$key] -
+          $_POST['descuento_prestamoef'][$key] -
           $_POST['fondo_ahorro'][$key];
         $pdf->SetXY(6, $pdf->GetY());
 
@@ -5858,8 +5861,8 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
         if ($ver_total_domingo != 0)
           $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
-        if ($ver_total_prestamos != 0)
-          $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
+        if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
+          $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]), 2, '$', false);
 
         if ($ver_fondo_arro != 0)
         {
@@ -5895,7 +5898,7 @@ class nomina_fiscal_model extends CI_Model {
         // $despensa            += $_POST['despensa'][$key];
         $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
         $domingo             += $_POST['domingo'][$key];
-        $total_prestamos     += $_POST['total_prestamos'][$key];
+        $total_prestamos     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key];
         $total_infonavit     += $_POST['total_infonavit'][$key];
         $total_fondo         += $_POST['fondo_ahorro'][$key];
         $descuento_playeras  += $_POST['descuento_playeras'][$key];
@@ -5911,7 +5914,7 @@ class nomina_fiscal_model extends CI_Model {
         // $despensa1            += $_POST['despensa'][$key];
         $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
         $domingo1             += $_POST['domingo'][$key];
-        $total_prestamos1     += $_POST['total_prestamos'][$key];
+        $total_prestamos1     += $_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key];
         $total_infonavit1     += $_POST['total_infonavit'][$key];
         $total_fondo1         += $_POST['fondo_ahorro'][$key];
         $descuento_playeras1  += $_POST['descuento_playeras'][$key];
@@ -5939,7 +5942,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
         $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
       if ($ver_fondo_arro != 0)
@@ -6024,7 +6027,7 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr[] = MyString::formatoNumero($bonos_suma, 2, '$', false); //bonos + otros
       if ($ver_total_domingo != 0)
         $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         $dataarr[] = MyString::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '$', false);
 
       if ($ver_fondo_arro != 0)
@@ -6096,7 +6099,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
     if ($ver_total_domingo != 0)
       $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
-    if ($ver_total_prestamos != 0)
+    if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
     if ($ver_fondo_arro != 0)
@@ -6142,11 +6145,11 @@ class nomina_fiscal_model extends CI_Model {
         $total_prestamos_limon += $value->prestamo['total'];
       }
     }
+
     // Si es diferente a sanjorge agrega empleados ficticios para recuperar los prestamos
     // Se registran como otro departamento y empleados
-    if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
-    {
-
+    // if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
+    // {
       $pdf->SetFont('Helvetica','B', 10);
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Cell(130, 6, 'Otros', 0, 0, 'L', 0);
@@ -6154,7 +6157,10 @@ class nomina_fiscal_model extends CI_Model {
       $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 =
       $descuento_playeras1 = $descuento_otros1 = $descuento_cocina1 = $ttotal_pagar1 = $ttotal_nomina1 =
       $total_no_fiscal1 = 0;
-      $data_otross = array('PRESTAMO FIJO' => $total_prestamos, 'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon);
+      $data_otross = array(
+        'PRESTAMO FIJO' => ($total_prestamos-$ver_total_prestamos_ef), 'PRESTAMO EFECTIVO' => $ver_total_prestamos_ef,
+        'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon
+      );
 
       foreach ($data_otross as $keyotss => $dottoss)
       {
@@ -6183,7 +6189,7 @@ class nomina_fiscal_model extends CI_Model {
             $dataarr[] = MyString::formatoNumero($dottoss, 2, '$', false);
           if ($ver_total_domingo != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
-          if ($ver_total_prestamos != 0)
+          if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if ($ver_fondo_arro != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
@@ -6227,7 +6233,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
         $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
       if ($ver_fondo_arro != 0)
         $datatto[] = MyString::formatoNumero($ver_fondo_arro, 2, '$', false);
@@ -6244,7 +6250,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '$', false);
       $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
-    }
+    // }
 
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetFont('Helvetica','B', 8);
@@ -6261,7 +6267,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = MyString::formatoNumero($otras_percepciones, 2, '$', false);
     if ($ver_total_domingo != 0)
       $datatto[] = MyString::formatoNumero($domingo, 2, '$', false);
-    if ($ver_total_prestamos != 0)
+    if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       $datatto[] = MyString::formatoNumero($total_prestamos, 2, '$', false);
     if ($ver_fondo_arro != 0)
       $datatto[] = MyString::formatoNumero($ver_fondo_arro, 2, '$', false);
@@ -6418,15 +6424,16 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $empleados_sin_departamento = [];
-    $ver_total_otros = $ver_total_domingo = $ver_total_prestamos = $ver_fondo_arro = $ver_infonavit = $ver_trans = 0;
+    $ver_total_prestamos_ef = $ver_total_otros = $ver_total_domingo = $ver_total_prestamos = $ver_fondo_arro = $ver_infonavit = $ver_trans = 0;
     foreach ($_POST['empleado_id'] as $key => $empleado)
     {
-      $ver_infonavit       += $_POST['total_infonavit'][$key];
-      $ver_trans           += $_POST['ttotal_nomina'][$key];
-      $ver_fondo_arro      += $_POST['fondo_ahorro'][$key];
-      $ver_total_prestamos += $_POST['total_prestamos'][$key];
-      $ver_total_domingo   += $_POST['domingo'][$key];
-      $ver_total_otros   += $_POST['bonos'][$key]+$_POST['otros'][$key];
+      $ver_infonavit          += $_POST['total_infonavit'][$key];
+      $ver_trans              += $_POST['ttotal_nomina'][$key];
+      $ver_fondo_arro         += $_POST['fondo_ahorro'][$key];
+      $ver_total_prestamos    += $_POST['total_prestamos'][$key];
+      $ver_total_prestamos_ef += $_POST['descuento_prestamoef'][$key];
+      $ver_total_domingo      += $_POST['domingo'][$key];
+      $ver_total_otros        += $_POST['bonos'][$key]+$_POST['otros'][$key];
 
       $empleados_sin_departamento[$key] = [
         'row_post'    => $key,
@@ -6454,7 +6461,7 @@ class nomina_fiscal_model extends CI_Model {
       $columnas['a'][] = 'R';
     }
 
-    if ($ver_total_prestamos != 0)
+    if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
     {
       $columnas['n'][] = 'PTMO';
       $columnas['w'][] = 20;
@@ -6535,6 +6542,7 @@ class nomina_fiscal_model extends CI_Model {
             $_POST['descuento_playeras'][$key] -
             $_POST['descuento_otros'][$key] -
             $_POST['descuento_cocina'][$key] -
+            $_POST['descuento_prestamoef'][$key] -
             $_POST['fondo_ahorro'][$key];
 
           $dataarr = array();
@@ -6553,9 +6561,9 @@ class nomina_fiscal_model extends CI_Model {
             $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '', false);
           }
 
-          if ($ver_total_prestamos != 0)
+          if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
           {
-            $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]), 2, '', false);
           }
 
           if ($ver_fondo_arro != 0)
@@ -6589,7 +6597,7 @@ class nomina_fiscal_model extends CI_Model {
           $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
           $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
           $domingo             += $_POST['domingo'][$key];
-          $total_prestamos     += $_POST['total_prestamos'][$key];
+          $total_prestamos     += ($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]);
           $total_infonavit     += $_POST['total_infonavit'][$key];
           $fondo_ahorro        += $_POST['fondo_ahorro'][$key];
           $descuento_playeras  += $_POST['descuento_playeras'][$key];
@@ -6603,7 +6611,7 @@ class nomina_fiscal_model extends CI_Model {
           $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
           $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
           $domingo1             += $_POST['domingo'][$key];
-          $total_prestamos1     += $_POST['total_prestamos'][$key];
+          $total_prestamos1     += ($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]);
           $total_infonavit1     += $_POST['total_infonavit'][$key];
           $fondo_ahorro1        += $_POST['fondo_ahorro'][$key];
           $descuento_playeras1  += $_POST['descuento_playeras'][$key];
@@ -6633,7 +6641,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
       }
 
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       {
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       }
@@ -6688,6 +6696,7 @@ class nomina_fiscal_model extends CI_Model {
           $_POST['descuento_playeras'][$key] -
           $_POST['descuento_otros'][$key] -
           $_POST['descuento_cocina'][$key] -
+          $_POST['descuento_prestamoef'][$key] -
           $_POST['fondo_ahorro'][$key];
 
         $dataarr = array();
@@ -6706,9 +6715,9 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '', false);
         }
 
-        if ($ver_total_prestamos != 0)
+        if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         {
-          $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero(($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]), 2, '', false);
         }
 
         if ($ver_fondo_arro != 0)
@@ -6742,7 +6751,7 @@ class nomina_fiscal_model extends CI_Model {
         $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
         $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
         $domingo             += $_POST['domingo'][$key];
-        $total_prestamos     += $_POST['total_prestamos'][$key];
+        $total_prestamos     += ($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]);
         $total_infonavit     += $_POST['total_infonavit'][$key];
         $fondo_ahorro        += $_POST['fondo_ahorro'][$key];
         $descuento_playeras  += $_POST['descuento_playeras'][$key];
@@ -6756,7 +6765,7 @@ class nomina_fiscal_model extends CI_Model {
         $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
         $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
         $domingo1             += $_POST['domingo'][$key];
-        $total_prestamos1     += $_POST['total_prestamos'][$key];
+        $total_prestamos1     += ($_POST['total_prestamos'][$key]+$_POST['descuento_prestamoef'][$key]);
         $total_infonavit1     += $_POST['total_infonavit'][$key];
         $fondo_ahorro1        += $_POST['fondo_ahorro'][$key];
         $descuento_playeras1  += $_POST['descuento_playeras'][$key];
@@ -6783,7 +6792,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
       }
 
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       {
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       }
@@ -6849,7 +6858,7 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr[] = MyString::formatoNumero(0, 2, '', false);
       }
 
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       {
         $dataarr[] = MyString::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '', false);
       }
@@ -6922,7 +6931,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
     }
 
-    if ($ver_total_prestamos != 0)
+    if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
     {
       $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
     }
@@ -6971,15 +6980,19 @@ class nomina_fiscal_model extends CI_Model {
         $total_prestamos_limon += is_numeric($value->prestamo)? $value->prestamo: $value->prestamo['total'];
       }
     }
+
     // Si es diferente a sanjorge agrega empleados ficticios para recuperar los prestamos
     // Se registran como otro departamento y empleados
-    if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
-    {
+    // if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
+    // {
       $html .= $this->rowXls(array('Otros'), 'style="font-weight:bold;font-size:14px;"');
       $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 =
       $descuento_playeras1 = $descuento_otros1 = $descuento_cocina1 = $ttotal_pagar1 = $ttotal_nomina1 =
       $total_no_fiscal1 = 0;
-      $data_otross = array('PRESTAMO FIJO' => $total_prestamos, 'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon);
+      $data_otross = array(
+        'PRESTAMO FIJO' => ($total_prestamos-$ver_total_prestamos_ef), 'PRESTAMO EFECTIVO' => $ver_total_prestamos_ef,
+        'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon
+      );
       foreach ($data_otross as $keyotss => $dottoss)
       {
         if ($dottoss > 0)
@@ -6994,7 +7007,7 @@ class nomina_fiscal_model extends CI_Model {
             $dataarr[] = MyString::formatoNumero($dottoss, 2, '', false);
           if ($ver_total_domingo != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '', false);
-          if ($ver_total_prestamos != 0)
+          if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if ($ver_fondo_arro != 0)
             $dataarr[] = MyString::formatoNumero('0', 2, '', false);
@@ -7033,7 +7046,7 @@ class nomina_fiscal_model extends CI_Model {
         $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '', false);
       if ($ver_total_domingo != 0)
         $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
-      if ($ver_total_prestamos != 0)
+      if (($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
         $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       if ($ver_fondo_arro != 0)
         $datatto[] = MyString::formatoNumero('0', 2, '', false);
@@ -7052,7 +7065,7 @@ class nomina_fiscal_model extends CI_Model {
       // $pdf->Row($datatto, false, true, null, 2, 1);
       $html .= $this->rowXls($datatto, 'style="font-weight:bold;font-size:14px;"');
       $html .= $this->rowXls(array(''));
-    }
+    // }
 
     $datatto = array();
     $datatto[] = '';
@@ -7063,7 +7076,7 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = MyString::formatoNumero($otras_percepciones, 2, '', false);
     if($ver_total_domingo != 0)
       $datatto[] = MyString::formatoNumero($domingo, 2, '', false);
-    if($ver_total_prestamos != 0)
+    if(($ver_total_prestamos+$ver_total_prestamos_ef) != 0)
       $datatto[] = MyString::formatoNumero($total_prestamos, 2, '', false);
     if($ver_fondo_arro != 0)
       $datatto[] = MyString::formatoNumero($fondo_ahorro, 2, '', false);
