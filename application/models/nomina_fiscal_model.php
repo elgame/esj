@@ -932,6 +932,7 @@ class nomina_fiscal_model extends CI_Model {
             // }
           }
           $otros_datos['totalPrestamosEf'] = $totalPrestamosEf;
+          $total = $total + $otros_datos['totalPrestamosEf']; // a lo trasferido le sumamos los 100 pesos
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
 
@@ -1119,13 +1120,20 @@ class nomina_fiscal_model extends CI_Model {
       foreach ($prestamosEmpleados as $key => $prestamo) {
         $pres = $prestamo['prestamo'];
 
-        $data_nomina = $this->db->select('prestamos')->from('nomina_fiscal')
+        $data_nomina = $this->db->select('prestamos, otros_datos')->from('nomina_fiscal')
              ->where('id_empleado', $prestamo['id_empleado'])
              ->where('id_empresa', $prestamo['id_empresa'])
              ->where('anio', $prestamo['anio'])
              ->where('semana', $prestamo['semana'])->get()->row();
+        $prestamos_ef = 0;
+        if (isset($data_nomina->otros_datos)) {
+          $otros_datos = json_decode($data_nomina->otros_datos);
+          if (isset($otros_datos->totalPrestamosEf)) {
+            $prestamos_ef = floatval($otros_datos->totalPrestamosEf);
+          }
+        }
 
-        if (isset($data_nomina->prestamos) && $data_nomina->prestamos > 0) {
+        if (isset($data_nomina->prestamos) && ($data_nomina->prestamos+$prestamos_ef) > 0) {
           unset($prestamo['prestamo']);
 
           $this->db->insert('nomina_fiscal_prestamos', $prestamo);

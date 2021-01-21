@@ -411,10 +411,9 @@
                                 {
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
                                   $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
-
-                                }
-                                else
-                                {
+                                } elseif (isset($e->otros_datos->totalPrestamosEf)) {
+                                  $totalPrestamosEmpleadoEf = $e->otros_datos->totalPrestamosEf;
+                                } else {
                                   foreach ($e->prestamos as $key => $prestamo) {
                                     if ($prestamo['tipo'] == 'ef') {
                                       $totalPrestamosEmpleadoEf += $prestamo['pago_semana_descontar'];
