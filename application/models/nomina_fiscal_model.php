@@ -932,7 +932,9 @@ class nomina_fiscal_model extends CI_Model {
             // }
           }
           $otros_datos['totalPrestamosEf'] = $totalPrestamosEf;
-          $total = $total + $otros_datos['totalPrestamosEf']; // a lo trasferido le sumamos los 100 pesos
+
+          $total += $otros_datos['totalPrestamosEf']; // a lo trasferido le sumamos los prestamos en efectivo
+          $empleadoNomina[0]->nomina->TotalDeducciones -= $otros_datos['totalPrestamosEf']; // a lo trasferido le restamos los prestamos en efectivo
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
 
