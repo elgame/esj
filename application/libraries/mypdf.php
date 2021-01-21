@@ -267,6 +267,10 @@ class MYpdf extends FPDF {
           elseif($bordes===true)
             $this->Rect($x,$y,$w,$h);
           else {
+            if ($header===true) {
+              $this->Rect($x,$y,$w,$h,'F');
+            }
+
             if ($bordes === 'B') {
               $this->Line($x,$y+$h,$x+$w,$y+$h);
             }

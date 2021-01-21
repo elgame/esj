@@ -719,7 +719,7 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetFillColor(240, 240, 240);
 
     // Fecha
     $pdf->SetXY(6, $pdf->GetY() - 20);
@@ -742,7 +742,7 @@ class caja_chica_prest_model extends CI_Model {
     $page_aux = $pdf->page;
 
     // Deudores diversos
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetXY(6, 32);
@@ -789,11 +789,11 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     // PRESTAMOS A LARGO PLAZO
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
+    $pdf->SetWidths(array(206));
     $pdf->SetXY(6, $pdf->GetY()+3);
     $pdf->Row(array('PRESTAMOS A LARGO PLAZO'), true, 'B');
 
@@ -808,10 +808,12 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
     $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
 
+    $tipoo = '';
     $totalpreslp_salini = $totalpreslp_pago_dia = 0;
     $totalpreslp_salfin = 0;
     $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
     $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+    $totalpreslp_ef_rec = [];
     foreach ($caja['prestamos_lp'] as $prestamo) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
@@ -824,17 +826,35 @@ class caja_chica_prest_model extends CI_Model {
       $totalpreslp_salini += floatval($prestamo->saldo_ini);
       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
       $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
-      if ($prestamo->tipo      == 'fi') {
-        $totalpreslp_salini_fi   += floatval($prestamo->saldo_ini);
-        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
-        $totalpreslp_salfin_fi   += floatval($prestamo->saldo_fin);
-      }
-      else {
-        $totalpreslp_salini_ef   += floatval($prestamo->saldo_ini);
+      if ($prestamo->tipo == 'ef') {
+        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
         $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-        $totalpreslp_salfin_ef   += floatval($prestamo->saldo_fin);
+        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+        if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+          $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        } else {
+          $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        }
+      } else {
+        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
       }
 
+      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+        $tipo = $prestamo->tipo == 'ef'? 'Efectivo': 'Fiscal';
+        $tipoo = $prestamo->tipo;
+
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->SetWidths(array(206));
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetX(6);
+        $pdf->Row(array($tipo), true, 'B');
+      }
+
+      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
         $prestamo->categoria,
@@ -876,8 +896,27 @@ class caja_chica_prest_model extends CI_Model {
       MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false),
       ), true, 'B');
 
+    if (count($totalpreslp_ef_rec) > 0) {
+      $pdf->SetFillColor(240, 240, 240);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(68));
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array('Recuperar Efectivo'), true, 'B');
+
+      foreach ($totalpreslp_ef_rec as $key => $value) {
+        if ($value > 0) {
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(20, 48));
+          $pdf->SetFont('Arial', 'B', 7);
+          $pdf->SetX(6);
+          $pdf->Row(array($key, $value), false, 'B');
+        }
+      }
+    }
+
     // PRESTAMOS A CORTO PLAZO
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
@@ -940,7 +979,7 @@ class caja_chica_prest_model extends CI_Model {
       ), true, 'B');
 
     // PRESTAMOS DEL DIA
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
