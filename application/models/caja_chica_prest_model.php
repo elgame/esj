@@ -813,6 +813,7 @@ class caja_chica_prest_model extends CI_Model {
     $totalpreslp_salfin = 0;
     $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
     $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+    $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
     $totalpreslp_ef_rec = [];
     foreach ($caja['prestamos_lp'] as $prestamo) {
       if($pdf->GetY() >= $pdf->limiteY){
@@ -826,16 +827,26 @@ class caja_chica_prest_model extends CI_Model {
       $totalpreslp_salini += floatval($prestamo->saldo_ini);
       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
       $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
-      if ($prestamo->tipo == 'ef') {
-        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
-        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+      if ($prestamo->tipo == 'efd') {
+        $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
 
         if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
           $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
         } else {
           $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
         }
+      } elseif ($prestamo->tipo == 'ef') {
+        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+        // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        // } else {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        // }
       } else {
         $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
         $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
@@ -843,7 +854,11 @@ class caja_chica_prest_model extends CI_Model {
       }
 
       if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
-        $tipo = $prestamo->tipo == 'ef'? 'Efectivo': 'Fiscal';
+        switch ($prestamo->tipo) {
+          case 'efd': $tipo = 'Efectivo Directo'; break;
+          case 'ef': $tipo = 'Efectivo'; break;
+          default: $tipo = 'Fiscal'; break;
+        }
         $tipoo = $prestamo->tipo;
 
         $pdf->SetFillColor(240, 240, 240);
@@ -895,6 +910,13 @@ class caja_chica_prest_model extends CI_Model {
       '', '',
       MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false),
       ), true, 'B');
+    $pdf->SetX(120);
+    $pdf->Row(array('Efectivo Directo',
+      MyString::formatoNumero($totalpreslp_salini_efd, 2, '$', false),
+      MyString::formatoNumero($totalpreslp_pago_dia_efd, 2, '$', false),
+      '', '',
+      MyString::formatoNumero($totalpreslp_salfin_efd, 2, '$', false),
+      ), true, 'B');
 
     if (count($totalpreslp_ef_rec) > 0) {
       $pdf->SetFillColor(240, 240, 240);
@@ -902,7 +924,7 @@ class caja_chica_prest_model extends CI_Model {
       $pdf->SetWidths(array(68));
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(6);
-      $pdf->Row(array('Recuperar Efectivo'), true, 'B');
+      $pdf->Row(array('Recuperar Efectivo Directo'), true, 'B');
 
       foreach ($totalpreslp_ef_rec as $key => $value) {
         if ($value > 0) {

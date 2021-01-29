@@ -194,21 +194,33 @@
                                   $tipoo = '';
                                   $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
                                   $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+                                  $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
                                   $totalpreslp_ef_rec = [];
                                   foreach ($caja['prestamos_lp'] as $prestamo) {
                                       $totalpreslp_salini += floatval($prestamo->saldo_ini);
                                       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
                                       $totalpreslp_salfin += floatval($prestamo->saldo_fin);
-                                      if ($prestamo->tipo == 'ef') {
-                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
-                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                      if ($prestamo->tipo == 'efd') {
+                                        $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
 
                                         if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
                                           $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
                                         } else {
                                           $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
                                         }
+                                      } elseif ($prestamo->tipo == 'ef') {
+                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                        // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                        //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                        // } else {
+                                        //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                        // }
                                       } else {
                                         $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
                                         $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
@@ -216,7 +228,11 @@
                                       }
 
                                       if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
-                                        $tipo = $prestamo->tipo == 'ef'? 'Efectivo': 'Fiscal';
+                                        switch ($prestamo->tipo) {
+                                          case 'efd': $tipo = 'Efectivo Directo'; break;
+                                          case 'ef': $tipo = 'Efectivo'; break;
+                                          default: $tipo = 'Fiscal'; break;
+                                        }
                                         $tipoo = $prestamo->tipo;
                             ?>
                                     <tr>
@@ -272,11 +288,18 @@
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
+                                  <tr class="row-total">
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo Directo</td>
+                                    <td><?php echo $totalpreslp_salini_efd ?></td>
+                                    <td><?php echo $totalpreslp_pago_dia_efd ?></td>
+                                    <td colspan="2"></td>
+                                    <td><?php echo $totalpreslp_salfin_efd ?></td>
+                                  </tr>
                             <?php
                               if (count($totalpreslp_ef_rec) > 0) {
                             ?>
                                 <tr class="row-total">
-                                  <td colspan="10"><strong>Recuperar Efectivo</strong></td>
+                                  <td colspan="10"><strong>Recuperar Efectivo Directo</strong></td>
                                 </tr>
                             <?php
                                 foreach ($totalpreslp_ef_rec as $key => $value) {

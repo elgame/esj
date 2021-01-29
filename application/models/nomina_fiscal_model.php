@@ -904,7 +904,7 @@ class nomina_fiscal_model extends CI_Model {
           // Recorre los prestamos del empleado para
           foreach ($empleadoNomina[0]->prestamos as $prestamo)
           {
-            if ($prestamo['tipo'] == 'ef') {
+            if ($prestamo['tipo'] == 'ef' || $prestamo['tipo'] == 'efd') {
               $totalPrestamosEf += floatval($prestamo['pago_semana_descontar']);
             } else {
               $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
@@ -1018,7 +1018,7 @@ class nomina_fiscal_model extends CI_Model {
         // Recorre los prestamos del empleado para
         foreach ($empleadoNomina[0]->prestamos as $prestamo)
         {
-          if ($prestamo['tipo'] == 'ef') {
+          if ($prestamo['tipo'] == 'ef' || $prestamo['tipo'] == 'efd') {
             $totalPrestamosEf += floatval($prestamo['pago_semana_descontar']);
           } else {
             $totalPrestamos += floatval($prestamo['pago_semana_descontar']);

@@ -415,7 +415,7 @@
                                   $totalPrestamosEmpleadoEf = $e->otros_datos->totalPrestamosEf;
                                 } else {
                                   foreach ($e->prestamos as $key => $prestamo) {
-                                    if ($prestamo['tipo'] == 'ef') {
+                                    if ($prestamo['tipo'] == 'ef' || $prestamo['tipo'] == 'efd') {
                                       $totalPrestamosEmpleadoEf += $prestamo['pago_semana_descontar'];
                                     } else {
                                       $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
