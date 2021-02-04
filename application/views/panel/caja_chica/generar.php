@@ -401,12 +401,12 @@
                                         <th colspan="2">IMPORTE</th>
                                       </tr>
                                       <tr>
-                                        <th>TRASPASAR A</th>
-                                        <th>TIPO</th>
-                                        <th title="Afectar el fondo de la caja">AF. FONDO</th>
-                                        <th>CONCEPTO</th>
-                                        <th>CARGO</th>
-                                        <th></th>
+                                        <th style="width: 15%;">TRASPASAR A</th>
+                                        <th style="width: 15%;">TIPO</th>
+                                        <th style="width: 15%;" title="Afectar el fondo de la caja">AF. FONDO</th>
+                                        <th style="width: 37%;">CONCEPTO</th>
+                                        <th style="width: 15%;">CARGO</th>
+                                        <th style="width: 3%;"></th>
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -426,6 +426,7 @@
                                                 <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                                 <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
                                                 <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                                <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
                                               </select>
                                               <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
                                               <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">

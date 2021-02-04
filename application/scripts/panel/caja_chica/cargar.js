@@ -1181,6 +1181,7 @@
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Caja Préstamo</option>'+
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
                   '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+

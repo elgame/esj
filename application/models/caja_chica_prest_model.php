@@ -88,7 +88,7 @@ class caja_chica_prest_model extends CI_Model {
     return $info;
   }
 
-  public function get($fecha, $noCaja)
+  public function get($fecha, $noCaja, $all = false)
   {
     $info = array(
       'saldo_inicial'    => 0,
@@ -100,6 +100,8 @@ class caja_chica_prest_model extends CI_Model {
       'denominaciones'   => array(),
       'categorias'       => array(),
       'saldos_empleados' => array(),
+      'traspasos'        => 0,
+      'saldo_prest_fijo' => 0,
     );
 
     // Obtiene el saldo incial.
@@ -336,6 +338,21 @@ class caja_chica_prest_model extends CI_Model {
       $info['saldos_empleados'] = $saldos->result();
     }
 
+    // Saldo prestamos fijos anterior
+    $prest_fijo_sald = $this->db->query(
+      "SELECT *
+       FROM otros.cajaprestamo_efectivo
+       WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
+       ORDER BY fecha DESC LIMIT 1"
+    )->row();
+    if (isset($prest_fijo_sald->saldo_prest_fijo)) {
+      $info['saldo_prest_fijo'] = $prest_fijo_sald->saldo_prest_fijo;
+    }
+
+    // Traspasos
+    $traspasos = $this->getTraspasos($fecha, 'caja_prestamo', true, (!$all? " AND bt.status = 't'": ''));
+    $info['traspasos'] = $traspasos;
+
     // denominaciones
     $denominaciones = $this->db->query(
       "SELECT *
@@ -421,6 +438,30 @@ class caja_chica_prest_model extends CI_Model {
      WHERE status = 't'")->result();
 
     return $info;
+  }
+
+  public function getTraspasos($fecha, $tno_caja, $total=false, $sql = '')
+  {
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM public.cajachica_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}"
+      )->row();
+      return floatval($traspaso->monto);
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones,
+        bt.id_usuario, bt.fecha_creacion, bt.afectar_fondo, bt.folio, bt.status,
+        (NOT bt.tipo) AS tipo,
+        false AS guardado, bt.tipo_caja
+       FROM public.cajachica_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}
+       ORDER BY bt.folio ASC"
+    );
+
+    return $traspaso->result();
   }
 
   public function guardar($data)
@@ -855,7 +896,7 @@ class caja_chica_prest_model extends CI_Model {
 
       if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
         switch ($prestamo->tipo) {
-          case 'efd': $tipo = 'Efectivo Directo'; break;
+          case 'efd': $tipo = 'Efectivo Fijo'; break;
           case 'ef': $tipo = 'Efectivo'; break;
           default: $tipo = 'Fiscal'; break;
         }
@@ -911,20 +952,32 @@ class caja_chica_prest_model extends CI_Model {
       MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false),
       ), true, 'B');
     $pdf->SetX(120);
-    $pdf->Row(array('Efectivo Directo',
+    $pdf->Row(array('Efectivo Fijo',
       MyString::formatoNumero($totalpreslp_salini_efd, 2, '$', false),
       MyString::formatoNumero($totalpreslp_pago_dia_efd, 2, '$', false),
       '', '',
       MyString::formatoNumero($totalpreslp_salfin_efd, 2, '$', false),
       ), true, 'B');
 
+
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(68));
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array('Recuperar Efectivo Fijo'), true, 'B');
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Saldo Anterior', MyString::formatoNumero($caja['saldo_prest_fijo'], 2, '$', false)), false, 'B');
+
+    $total_prestamos_recuperar = 0;
     if (count($totalpreslp_ef_rec) > 0) {
-      $pdf->SetFillColor(240, 240, 240);
       $pdf->SetAligns(array('L'));
       $pdf->SetWidths(array(68));
-      $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(6);
-      $pdf->Row(array('Recuperar Efectivo Directo'), true, 'B');
+      $pdf->Row(array('Cobro Prestamos Fijos'), true, 'B');
 
       foreach ($totalpreslp_ef_rec as $key => $value) {
         if ($value > 0) {
@@ -932,10 +985,23 @@ class caja_chica_prest_model extends CI_Model {
           $pdf->SetWidths(array(20, 48));
           $pdf->SetFont('Arial', 'B', 7);
           $pdf->SetX(6);
-          $pdf->Row(array($key, $value), false, 'B');
+          $pdf->Row(array($key, MyString::formatoNumero($value, 2, '$', false)), false, 'B');
+
+          $total_prestamos_recuperar += $value;
         }
       }
     }
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Traspasos', MyString::formatoNumero($caja['traspasos'], 2, '$', false)), false, 'B');
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos']), 2, '$', false) ), false, 'B');
+
 
     // PRESTAMOS A CORTO PLAZO
     $pdf->SetFont('Arial','B', 8);

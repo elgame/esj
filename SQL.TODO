@@ -1,7 +1,8 @@
 
  ☐ Acomodar los prestamos de nomina y que salgan en caja de prestamos
-    -- pcc
+    -- pcc|lap|san
     COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja), mt: materiales, efd: efectivo directo (mostrar en caja sin afectarla)';
+    ALTER TABLE otros.cajaprestamo_efectivo ADD COLUMN saldo_prest_fijo double precision NOT NULL DEFAULT 0;
  ✔ Crear la empresa de plásticos con sucursal y series @done (20-11-09 22:03) pcc|san|lap
      ALTER TABLE public.empresas ADD COLUMN sucursal character varying(130) COLLATE pg_catalog."default";
  ☐ Poner el calculo mensual en nominas

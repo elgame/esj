@@ -229,7 +229,7 @@
 
                                       if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
                                         switch ($prestamo->tipo) {
-                                          case 'efd': $tipo = 'Efectivo Directo'; break;
+                                          case 'efd': $tipo = 'Efectivo Fijo'; break;
                                           case 'ef': $tipo = 'Efectivo'; break;
                                           default: $tipo = 'Fiscal'; break;
                                         }
@@ -289,21 +289,32 @@
                                     <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
                                   <tr class="row-total">
-                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo Directo</td>
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo Fijo</td>
                                     <td><?php echo $totalpreslp_salini_efd ?></td>
                                     <td><?php echo $totalpreslp_pago_dia_efd ?></td>
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_efd ?></td>
                                   </tr>
+
+                                  <tr class="row-total">
+                                    <td colspan="10"><strong>Recuperar Efectivo Fijo</strong></td>
+                                  </tr>
+                                  <tr class="row-total">
+                                    <td><strong>Saldo Anterior</strong></td>
+                                    <td><?php echo $caja['saldo_prest_fijo'] ?></td>
+                                    <td colspan="8"></td>
+                                  </tr>
                             <?php
+                              $total_prestamos_recuperar = 0;
                               if (count($totalpreslp_ef_rec) > 0) {
                             ?>
                                 <tr class="row-total">
-                                  <td colspan="10"><strong>Recuperar Efectivo Directo</strong></td>
+                                  <td colspan="10"><strong>Cobro Prestamos Fijos</strong></td>
                                 </tr>
                             <?php
                                 foreach ($totalpreslp_ef_rec as $key => $value) {
                                   if ($value > 0) {
+                                    $total_prestamos_recuperar += $value;
                             ?>
                                 <tr class="row-total">
                                   <td><?php echo $key ?></td>
@@ -315,6 +326,18 @@
                                 }
                               }
                             ?>
+                            <tr class="row-total">
+                              <td><strong>Traspasos</strong></td>
+                              <td><?php echo $caja['traspasos'] ?></td>
+                              <td colspan="8"></td>
+                            </tr>
+                            <tr class="row-total">
+                              <td><strong>Saldo</strong></td>
+                              <td><?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?></td>
+                              <td colspan="8">
+                                <input type="hidden" name="saldo_prest_fijo" value="<?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?>">
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
