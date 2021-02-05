@@ -122,8 +122,8 @@
                     <tr>
                       <th style="width: 202px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
                       <th colspan="4"></th>
-                      <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="6" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
+                      <th colspan="7" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                       <th colspan="7" style="background-color: #EEEEBC;"></th>
                     </tr>
@@ -144,6 +144,7 @@
                       <th style="background-color: #BEEEBC;">HRS. EXT.</th>
                       <th id="head-aguinaldo" style="display: none;background-color: #BEEEBC;">AGUINALDO</th>
                       <th style="background-color: #BEEEBC;">SUBSIDIO</th>
+                      <th style="background-color: #BEEEBC;">AJUSTES</th>
                       <th id="head-ptu" style="display: none;background-color: #BEEEBC;">PTU</th>
                       <th style="background-color: #BEEEBC;">TOTAL</th>
 
@@ -153,6 +154,7 @@
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
                       <th style="background-color: #EEBCBC;">FA</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
+                      <th style="background-color: #EEBCBC;">AJUSTES</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
                       <!-- Total nomina -->
@@ -185,6 +187,7 @@
                       $totalHorasExtras = 0;
                       $totalAguinaldos = 0;
                       $totalSubsidios = 0;
+                      $totalAjustesOtrosPagos = 0;
                       $totalPtu = 0;
                       $totalPercepciones = 0; // total de todas las percepciones.
                       $totalInfonavit = 0;
@@ -196,6 +199,7 @@
                       $totalDescuentoCocina = 0;
                       $ttotalPrestamosEmpleadoEf = 0;
                       $totalIsrs = 0;
+                      $totalAjustesDeducciones = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
                       $totalBonos = 0;
@@ -242,10 +246,13 @@
                         $generarNomina = '1';
 
                         $subsidioEmpleado = $e->nomina->otrosPagos['subsidio']['total'];
+                        $ajustesOtrosPagos = (isset($e->ajustesOtrosPagos) ? $e->ajustesOtrosPagos : 0);
                         $subsidioAnualEmpleado = (isset($e->nomina->otrosPagos['subsidioAnual'])? $e->nomina->otrosPagos['subsidioAnual']['total']: 0);
                         $subsidioEmpleadoCausado = $e->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'];
+
                         $isrEmpleado = $e->nomina->deducciones['isr']['total'];
                         $isrAnualEmpleado = (isset($e->nomina->deducciones['isrAnual'])? $e->nomina->deducciones['isrAnual']['total']: 0);
+                        $ajustesDeducciones = (isset($e->ajustesDeducciones) ? $e->ajustesDeducciones : 0);
                         // $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
                         $ptuEmpleado = 0;
 
@@ -258,6 +265,8 @@
                           $subsidioEmpleado = $e->nomina_fiscal_subsidio;
                           $subsidioEmpleadoCausado = $e->nomina_fiscal_subsidio_causado;
                           $isrEmpleado = $e->nomina_fiscal_isr;
+                          $ajustesOtrosPagos = (isset($e->otros_datos->ajustesOtrosPagos) ? $e->otros_datos->ajustesOtrosPagos : 0);
+                          $ajustesDeducciones = (isset($e->otros_datos->ajustesDeducciones) ? $e->otros_datos->ajustesDeducciones : 0);
 
                           // $subsidioAnualEmpleado = (isset($e->nomina->otrosPagos['subsidioAnual'])? $e->nomina->otrosPagos['subsidioAnual']['total']: 0);
                           // $isrAnualEmpleado = (isset($e->nomina->deducciones['isrAnual'])? $e->nomina->deducciones['isrAnual']['total']: 0);
@@ -292,8 +301,8 @@
                         //   var_dump($totalPercepcionesEmpleado, $ptuEmpleado);
                         // echo "</pre>";exit;
 
-                        $totalPercepcionesEmpleado += $subsidioEmpleado + $ptuEmpleado + $subsidioAnualEmpleado;
-                        $totalDeduccionesEmpleado += $isrEmpleado + $isrAnualEmpleado;
+                        $totalPercepcionesEmpleado += $subsidioEmpleado + $ptuEmpleado + $subsidioAnualEmpleado + $ajustesOtrosPagos;
+                        $totalDeduccionesEmpleado += $isrEmpleado + $isrAnualEmpleado + $ajustesDeducciones;
 
                         $utilidadEmpresa = $e->utilidad_empresa;
 
@@ -385,6 +394,10 @@
                           <input type="hidden" name="subsidioCausado[]" value="<?php echo $e->esta_asegurado=='f'?0:$subsidioEmpleadoCausado ?>" class="span12 subsidioCausado">
                           <input type="hidden" name="subsidioAnual[]" value="<?php echo $e->esta_asegurado=='f'?0:$subsidioAnualEmpleado ?>" class="span12 subsidioAnual">
                         </td>
+                        <td id="td-subsidio" style="<?php echo $bgColor ?>">
+                          <span class="ajustesOtrosPagos-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$ajustesOtrosPagos) ?></span>
+                          <input type="hidden" name="ajustesOtrosPagos[]" value="<?php echo $e->esta_asegurado=='f'?0:$ajustesOtrosPagos ?>" class="span12 subsidioAnual">
+                        </td>
                         <td id="td-ptu" style="display: none; <?php echo $bgColor ?>">
                           <span class="ptu-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$ptuEmpleado) ?></span>
                           <input type="hidden" name="ptu[]" value="<?php echo $e->esta_asegurado=='f'?0:$ptuEmpleado ?>" class="span12 ptu">
@@ -436,6 +449,10 @@
                           <span class="isr-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrEmpleado ?>" class="span12 isr">
                           <input type="hidden" name="isrAnual[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrAnualEmpleado ?>" class="span12 isrAnual">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="ajustesDeducciones-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$ajustesDeducciones) ?></span>
+                          <input type="hidden" name="ajustesDeducciones[]" value="<?php echo $e->esta_asegurado=='f'?0:$ajustesDeducciones ?>" class="span12 isr">
                         </td>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-deducciones-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado) ?></span>
@@ -507,6 +524,7 @@
                       $totalHorasExtras          += $e->horas_extras_dinero;
                       $totalAguinaldos           += $e->esta_asegurado=='f'?0:0;
                       $totalSubsidios            += $e->esta_asegurado=='f'?0:$subsidioEmpleado+$subsidioAnualEmpleado;
+                      $totalAjustesOtrosPagos    += $e->esta_asegurado=='f'?0:$ajustesOtrosPagos;
                       $totalPtu                  += $e->esta_asegurado=='f'?0:$ptuEmpleado;
                       $totalPercepciones         += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
                       $totalInfonavit            += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
@@ -518,6 +536,7 @@
                       $totalDescuentoCocina      += $e->descuento_cocina;
                       $ttotalPrestamosEmpleadoEf += $totalPrestamosEmpleadoEf;
                       $totalIsrs                 += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
+                      $totalAjustesDeducciones   += $e->esta_asegurado=='f'?0:$ajustesDeducciones;
                       $totalDeducciones          += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
                       $totalTransferencias       += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
                       $totalBonos                += $e->bonos;
@@ -539,6 +558,7 @@
                       <td id="totales-horas-extras" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalHorasExtras) ?></td>
                       <td id="totales-aguinaldo" style="background-color: #BCD4EE; display: none;"><?php echo MyString::formatoNumero($totalAguinaldos) ?></td>
                       <td id="totales-subsidios" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalSubsidios) ?></td>
+                      <td id="totales-ajustesOtrosPagos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalAjustesOtrosPagos) ?></td>
                       <td id="totales-ptus" style="background-color: #BCD4EE; display: none;"><?php echo MyString::formatoNumero($totalPtu) ?><input type="hidden" id="totales-ptu-input" value="<?php echo $utilidadEmpresa?>"></td>
                       <td id="totales-percepciones" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPercepciones) ?></td>
                       <td id="totales-infonavit" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalInfonavit) ?></td>
@@ -546,6 +566,7 @@
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPrestamos) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalFondoAhorro) ?></td>
                       <td id="totales-isrs" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalIsrs) ?></td>
+                      <td id="totales-ajustesDeducciones" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalAjustesDeducciones) ?></td>
                       <td id="totales-deducciones" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDeducciones) ?></td>
                       <td id="totales-transferencias" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalTransferencias) ?></td>
                       <td id="totales-bonos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalBonos) ?></td>

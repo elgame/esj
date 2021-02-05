@@ -942,6 +942,14 @@ class nomina_fiscal_model extends CI_Model {
             $otros_datos['calculoAnual'] = $empleadoNomina[0]->calculo_anual;
           }
 
+          // Ajustes mensuales
+          if (isset($empleadoNomina[0]->ajustesOtrosPagos)) {
+            $otros_datos['ajustesOtrosPagos'] = $empleadoNomina[0]->ajustesOtrosPagos;
+          }
+          if (isset($empleadoNomina[0]->ajustesDeducciones)) {
+            $otros_datos['ajustesDeducciones'] = $empleadoNomina[0]->ajustesDeducciones;
+          }
+
           $nominasEmpleados[] = array(
             'id_empleado'               => $empleadoId,
             'id_empresa'                => $empresaId,

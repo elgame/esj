@@ -22,6 +22,7 @@ trait nominaCalMensual
     $per1 = 1;
     $semanas = MyString::obtenerSemanasDelAnioV2($this->nominaFiltros['anio'], 0, $this->nominaFiltros['dia_inicia_semana'], true);
     $band = false;
+
     for ($i=count($semanas)-1; $i >= 0; $i--) {
       if ($per2 == $semanas[$i]['semana']) {
         $band = true;
@@ -30,7 +31,7 @@ trait nominaCalMensual
         break;
       }
     }
-    // $per2--;
+    $per2--;
 
     if (empty($per1)) {
       return '';
@@ -40,7 +41,7 @@ trait nominaCalMensual
       "SELECT id_empleado, Sum(sueldo_semanal) AS sueldo_semanal, Sum(vacaciones) AS vacaciones,
         Sum(prima_vacacional_grabable) AS prima_vacacional_grabable, Sum(aguinaldo_grabable) AS aguinaldo_grabable,
         Sum(ptu_grabable) AS ptu_grabable, Sum(horas_extras_grabable) AS horas_extras_grabable,
-        Sum(isr) AS isr, Sum(subsidio_pagado - subsidio) AS isr_ant_sub, Sum(subsidio) AS subsidio,
+        Sum(isr) AS isr, Sum(isr + subsidio_pagado - subsidio) AS isr_ant_sub, Sum(subsidio) AS subsidio,
         Sum(subsidio_pagado) AS subsidio_causado
       FROM nomina_fiscal
       WHERE id_empleado = {$this->empleado->id} AND id_empresa = {$this->nominaFiltros['empresaId']}
@@ -64,7 +65,7 @@ trait nominaCalMensual
       $this->dataAnt->gravado = $this->dataAnt->sueldo_semanal + $this->dataAnt->vacaciones + $this->dataAnt->prima_vacacional_grabable + $this->dataAnt->aguinaldo_grabable + $this->dataAnt->ptu_grabable + $this->dataAnt->horas_extras_grabable;
       $this->datosMes['gravado']          += $this->dataAnt->gravado;
       $this->datosMes['isr']              += $this->dataAnt->isr;
-      $this->datosMes['isr_ant_sub']      += ($this->dataAnt->isr_ant_sub > 0? $this->dataAnt->isr_ant_sub: $this->dataAnt->isr);
+      $this->datosMes['isr_ant_sub']      += $this->dataAnt->isr_ant_sub;
       $this->datosMes['subsidio']         += $this->dataAnt->subsidio;
       $this->datosMes['subsidio_causado'] += $this->dataAnt->subsidio_causado;
     } else {
@@ -121,6 +122,13 @@ trait nominaCalMensual
     }
     $this->empleado->nomina->otrosPagos['subsidio']['SubsidioAlEmpleo']['SubsidioCausado'] = $causadoMes;
 
+    // 2. Si el subsidio causado de la tabla mensual es < al subsidio causado de las semanas pasadas (se usan los 4 conceptos de ajuste)
+    //   Percepcion
+    //     008 va el subsidio pagado de las semanas pasadas
+    //     007 va el isr antes de subsidio de las emanas pasadas
+    //   Deducciones
+    //     071 va el subsidio pagado de las semanas pasadas
+    //     107 va el subsidio causado de las semanas pasadas
     if ($causadoMes < $this->dataAnt->subsidio_causado) {
       $this->empleado->nomina->otrosPagos['subsidio_efec_ent'] = array(
         'TipoOtroPago'     => '008',
@@ -140,6 +148,11 @@ trait nominaCalMensual
         'total'            => round(($this->dataAnt->isr_ant_sub > 0? $this->dataAnt->isr_ant_sub: $this->dataAnt->isr), 2) + 0,
         'ApiKey'           => 'top_isr_ajustado_subsidio_',
       );
+      if ($this->empleado->nomina_guardada == 'f') {
+        $this->empleado->ajustesOtrosPagos = $this->empleado->nomina->otrosPagos['subsidio_efec_ent']['total'] + $this->empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+      } else {
+        $this->empleado->ajustesOtrosPagos = $this->empleado->otros_datos->ajustesOtrosPagos;
+      }
 
       $this->empleado->nomina->deducciones['a_subsidio_emp'] = array(
         'TipoDeduccion'  => '071',
@@ -150,7 +163,7 @@ trait nominaCalMensual
         'total'          => round($this->dataAnt->subsidio, 2) + 0,
         'ApiKey'         => 'de_a_subsidio_empleo_',
       );
-      $this->empleado->nomina->deducciones['a_subsidio_emp'] = array(
+      $this->empleado->nomina->deducciones['a_subsidio_causado'] = array(
         'TipoDeduccion'  => '107',
         'Clave'          => $this->clavesPatron['subsidio'],
         'Concepto'       => 'Ajuste Subsidio Causado',
@@ -159,15 +172,35 @@ trait nominaCalMensual
         'total'          => round($this->dataAnt->subsidio_causado, 2) + 0,
         'ApiKey'         => 'de_ajuste_subsidio_causado_',
       );
+
+      if ($this->empleado->nomina_guardada == 'f') {
+        $this->empleado->ajustesDeducciones = $this->empleado->nomina->deducciones['a_subsidio_emp']['total'] + $this->empleado->nomina->deducciones['a_subsidio_causado']['total'];
+      } else {
+        $this->empleado->ajustesDeducciones = $this->empleado->otros_datos->ajustesDeducciones;
+      }
+    }
+    // 3. Si el subsidio causado de la tabla mensual es > al subsidio causado de las semanas pasadas (se usan 1 concepto de ajuste)
+    //   Percepcion
+    //     008 -
+    //     007 -
+    //   Deducciones
+    //     071 va el subsidio pagado de las semanas pasadas
+    //     107 -
+    else {
+      $this->empleado->nomina->deducciones['a_subsidio_emp'] = array(
+        'TipoDeduccion'  => '071',
+        'Clave'          => $this->clavesPatron['subsidio'],
+        'Concepto'       => 'A. Subsidio al empleo',
+        'ImporteGravado' => 0,
+        'ImporteExcento' => round($this->dataAnt->subsidio, 2),
+        'total'          => round($this->dataAnt->subsidio, 2) + 0,
+        'ApiKey'         => 'de_a_subsidio_empleo_',
+      );
+      $this->empleado->ajustesDeducciones = $this->empleado->nomina->deducciones['a_subsidio_emp']['total'];
     }
 
-
-    $isrUltSem = $isrAntSubMes - $this->dataAnt->isr_ant_sub;
-    $subUltSem = $causadoMes - $this->dataAnt->subsidio_causado;
-    $isrSubUltSem = $isrUltSem - $subUltSem - $isrMes;
-
     // echo "<pre>";
-    //   var_dump($isrUltSem, $subUltSem, $isrSubUltSem, $isrAntSubMes, "isrMes => {$isrMes}", "subsidioMes => $subsidioMes", "causadoMes => {$causadoMes}", $this->dataAnt, $this->datosMes, $this->empleado);
+    //   var_dump($this->empleado);
     // echo "</pre>";exit;
   }
 
