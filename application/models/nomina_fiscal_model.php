@@ -1498,7 +1498,7 @@ class nomina_fiscal_model extends CI_Model {
     $prestamos = $this->db->query("SELECT id_prestamo, prestado, pago_semana, status, DATE(fecha) as fecha, DATE(inicio_pago) as inicio_pago, pausado,
                                 COALESCE((SELECT Sum(monto) FROM nomina_fiscal_prestamos WHERE id_prestamo = nomina_prestamos.id_prestamo), 0) AS pagado
                                FROM nomina_prestamos
-                               WHERE id_usuario = {$empleadoId} AND status = 't'
+                               WHERE id_usuario = {$empleadoId} AND status = 't' AND tipo = 'fi'
                                ORDER BY DATE(fecha) ASC")->result();
 
     $empleado[0]->prestamos_pendientes = $prestamos;
