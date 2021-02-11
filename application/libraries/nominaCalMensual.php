@@ -125,7 +125,7 @@ trait nominaCalMensual
     // 2. Si el subsidio causado de la tabla mensual es < al subsidio causado de las semanas pasadas (se usan los 4 conceptos de ajuste)
     //   Percepcion
     //     008 va el subsidio pagado de las semanas pasadas
-    //     007 va el isr antes de subsidio de las emanas pasadas
+    //     007 va el isr antes de subsidio de las semanas pasadas
     //   Deducciones
     //     071 va el subsidio pagado de las semanas pasadas
     //     107 va el subsidio causado de las semanas pasadas
