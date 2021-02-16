@@ -302,7 +302,8 @@ class Usuarios_model extends privilegios_model {
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")
-												->where("id", $id_usuario)
+                        ->where("id", $id_usuario)
+												->where("e.status", 't')
 												->get();
 		$data['info'] = array();
 
