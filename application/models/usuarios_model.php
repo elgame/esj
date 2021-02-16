@@ -462,7 +462,8 @@ class Usuarios_model extends privilegios_model {
     if ($this->session->userdata('id_usuario') > 0) {
       $result = $this->db->query("SELECT e.id_empresa, e.nombre_fiscal
         FROM empresas e INNER JOIN usuarios_privilegios up ON e.id_empresa = up.id_empresa
-        WHERE up.usuario_id = ".$this->session->userdata('id_usuario')." GROUP BY e.id_empresa");
+        WHERE e.status = 't' AND up.usuario_id = ".$this->session->userdata('id_usuario')."
+        GROUP BY e.id_empresa");
       $result = $result->result();
     }
 
