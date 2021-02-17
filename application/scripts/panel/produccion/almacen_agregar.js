@@ -30,6 +30,10 @@
       });
     });
 
+    autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+
     // copyCodigoAll();
   });
 
@@ -38,6 +42,156 @@
    | Autocompletes
    |------------------------------------------------------------------------
    */
+
+  // Codigos
+  var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        $area.val(ui.item.id);
+        $("#areaId").val(ui.item.id);
+        $area.css("background-color", "#A1F57A");
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#area").css("background-color", "#FFD071");
+        $("#areaId").val('');
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $('#tagsRanchoIds').html('');
+        // $("#ranchoId").val('');
+      }
+    });
+  };
+
+  var autocompleteRanchos = function () {
+    $("#rancho").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#areaId").val()) > 0)
+          params.area = $("#areaId").val();
+        $.ajax({
+            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $rancho =  $(this);
+
+        addRanchoTag(ui.item);
+        setTimeout(function () {
+          $rancho.val('');
+        }, 200);
+        // $rancho.val(ui.item.id);
+        // $("#ranchoId").val(ui.item.id);
+        // $rancho.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#rancho").css("background-color", "#FFD071");
+        // $("#ranchoId").val('');
+      }
+    });
+
+    function addRanchoTag(item) {
+      if ($('#tagsRanchoIds .ranchoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsRanchoIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="ranchoId[]" class="ranchoId" value="'+item.id+'">'+
+          '<input type="hidden" name="ranchoText[]" class="ranchoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Areas, Ranchos o Lineas.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsRanchoIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
+
+  var autocompleteCentroCosto = function () {
+    $("#centroCosto").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+
+        params.tipo = ['gasto'];
+        if ($('#tipoOrden').find('option:selected').val() == 'd') {
+          params.tipo = ['servicio'];
+        } else if ($('#tipoOrden').find('option:selected').val() == 'p') {
+          params.tipo = ['gasto', 'melga', 'tabla', 'seccion'];
+        }
+
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $centroCosto =  $(this);
+
+        addCCTag(ui.item);
+        setTimeout(function () {
+          $centroCosto.val('');
+        }, 200);
+        // $centroCosto.val(ui.item.id);
+        // $("#centroCostoId").val(ui.item.id);
+        // $centroCosto.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#centroCosto").css("background-color", "#FFD071");
+        // $("#centroCostoId").val('');
+      }
+    });
+
+    function addCCTag(item) {
+      if ($('#tagsCCIds .centroCostoId[value="'+item.id+'"]').length === 0) {
+        $('#tagsCCIds').append('<li><span class="tag">'+item.value+'</span>'+
+          '<input type="hidden" name="centroCostoId[]" class="centroCostoId" value="'+item.id+'">'+
+          '<input type="hidden" name="centroCostoText[]" class="centroCostoText" value="'+item.value+'">'+
+          '</li>');
+      } else {
+        noty({"text": 'Ya esta agregada el Centro de costo.', "layout":"topRight", "type": 'error'});
+      }
+    };
+
+    $('#tagsCCIds').on('click', 'li:not(.disable)', function(event) {
+      $(this).remove();
+    });
+  };
 
   // Autocomplete para las empresas.
   var autocompleteEmpresas = function () {
