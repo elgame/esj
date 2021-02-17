@@ -96,18 +96,25 @@ class produccion_almacen_model extends CI_Model {
   {
     $this->load->model('productos_salidas_model');
 
+    // ============================================================
     // Se registra la salida de almacen con la materia prima
     $res = $this->productos_salidas_model->agregar(array(
-      'id_empresa'      => $this->input->post('empresaId'),
-      'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
-      'id_empleado'     => $this->session->userdata('id_usuario'),
-      'folio'           => $this->productos_salidas_model->folio(),
-      'concepto'        => 'Salida generada automáticamente en Producción de soluciones',
-      'status'          => 's',
-      'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha_produccion']),
-      'fecha_registro'  => date("Y-m-d H:i:s"),
+      'id_empresa'     => $this->input->post('empresaId'),
+      'id_almacen'     => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
+      'id_empleado'    => $this->session->userdata('id_usuario'),
+      'folio'          => $this->productos_salidas_model->folio(),
+      'concepto'       => 'Salida generada automáticamente en Producción de soluciones',
+      'status'         => 's',
+      'fecha_creacion' => str_replace('T', ' ', $_POST['fecha_produccion']),
+      'fecha_registro' => date("Y-m-d H:i:s"),
+      'tipo'           => 's',
+      'id_empresa_ap'  => $this->input->post('empresaId'),
+
+      'id_area'        => ($this->input->post('areaId')? $_POST['areaId']: NULL),
     ));
     $id_salida = $res['id_salida'];
+
+    // En productos_salidas_model->agregar se insertan los ranchos y centros de costo del POST
 
     $salida = array();
     foreach ($_POST['productoId'] as $key => $produto)
@@ -123,6 +130,7 @@ class produccion_almacen_model extends CI_Model {
     $this->productos_salidas_model->agregarProductos($id_salida, $salida);
 
 
+    // ==============================================================
     // Se registra la orden de compra para ingresar los productos
     $this->load->model('compras_ordenes_model');
     $fecha = date("Y-m-d");
@@ -134,6 +142,7 @@ class produccion_almacen_model extends CI_Model {
       'id_departamento'    => $departamento->id_departamento,
       'id_empleado'        => $this->session->userdata('id_usuario'),
       'id_almacen'         => ($this->input->post('id_almacen_produc')>0?$this->input->post('id_almacen_produc'):1),
+      'id_autorizo'        => $this->session->userdata('id_usuario'),
       'folio'              => 0,
       'status'             => 'n',
       'tipo_orden'         => 'p',
@@ -144,7 +153,41 @@ class produccion_almacen_model extends CI_Model {
       'descripcion'        => 'Entrada generada automáticamente en Producción de soluciones'
     );
 
-    $res = $this->compras_ordenes_model->agregarData($data);
+    // Si es un gasto son requeridos los campos de catálogos
+    $dataOrden['id_empresa_ap'] = $this->input->post('empresaId');
+    $dataOrdenCats = [];
+    // Inserta las areas
+    if (isset($this->input->post('areaId')) && $this->input->post('areaId') > 0) {
+      $dataOrdenCats['area'][] = [
+        'id_area'  => $this->input->post('areaId'),
+        'id_orden' => '',
+        'num'      => 1
+      ];
+    }
+
+    // Inserta los ranchos
+    if (isset($_POST['ranchoId']) && count($_POST['ranchoId']) > 0) {
+      foreach ($_POST['ranchoId'] as $keyr => $drancho) {
+        $dataOrdenCats['rancho'][] = [
+          'id_rancho' => $drancho,
+          'id_orden'  => '',
+          'num'       => count($_POST['ranchoId'])
+        ];
+      }
+    }
+
+    // Inserta los centros de costo
+    if (isset($_POST['centroCostoId']) && count($_POST['centroCostoId']) > 0) {
+      foreach ($_POST['centroCostoId'] as $keyr => $dcentro_costo) {
+        $dataOrdenCats['centroCosto'][] = [
+          'id_centro_costo' => $dcentro_costo,
+          'id_orden'        => '',
+          'num'             => count($_POST['centroCostoId'])
+        ];
+      }
+    }
+
+    $res = $this->compras_ordenes_model->agregarData($data, [], $dataOrdenCats);
     $id_orden = $res['id_orden'];
 
     $rows_compras = 0;

@@ -65,6 +65,7 @@ class produccion_almacen extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
     ));
 
     $this->carabiner->js(array(
