@@ -157,7 +157,7 @@ class produccion_almacen_model extends CI_Model {
     $dataOrden['id_empresa_ap'] = $this->input->post('empresaId');
     $dataOrdenCats = [];
     // Inserta las areas
-    if (isset($this->input->post('areaId')) && $this->input->post('areaId') > 0) {
+    if ($this->input->post('areaId') && $this->input->post('areaId') > 0) {
       $dataOrdenCats['area'][] = [
         'id_area'  => $this->input->post('areaId'),
         'id_orden' => '',
