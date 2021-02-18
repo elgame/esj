@@ -261,8 +261,15 @@ class nomina
     $this->emisor();
     $this->receptor();
 
-    if ($this->nominaFiltros['calcMes'] == true && $this->empleado->id == 23) {
+    if ($this->nominaFiltros['calcMes'] == true
+      // && ($this->empleado->id == 2376 || $this->empleado->id == 1481 || $this->empleado->id == 876)
+    ) {
       $this->calculoMensual();
+      $this->datosNomina(false);
+      $this->sumaNominaTotales();
+      // echo "<pre>";
+      // var_dump($this->empleado);
+      // echo "</pre>";exit;
     }
 
     return $this->empleado;
@@ -279,6 +286,11 @@ class nomina
 
     $this->confDeducciones();
 
+    $this->sumaNominaTotales();
+  }
+
+  public function sumaNominaTotales()
+  {
     // Totales Percepciones
     $totalSueldosClaves = array('022', '023', '025', '039', '044');
     $totalSeparacionIndemnizacionClaves = array('022', '023', '025');

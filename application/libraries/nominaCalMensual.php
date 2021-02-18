@@ -13,6 +13,8 @@ trait nominaCalMensual
     // exit;
     $this->getDataPeriodos();
     $this->calculaMes();
+
+    return $this;
   }
 
   public function getDataPeriodos()
@@ -151,7 +153,7 @@ trait nominaCalMensual
       if ($this->empleado->nomina_guardada == 'f') {
         $this->empleado->ajustesOtrosPagos = $this->empleado->nomina->otrosPagos['subsidio_efec_ent']['total'] + $this->empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
       } else {
-        $this->empleado->ajustesOtrosPagos = $this->empleado->otros_datos->ajustesOtrosPagos;
+        $this->empleado->ajustesOtrosPagos = (isset($this->empleado->otros_datos->ajustesOtrosPagos)? $this->empleado->otros_datos->ajustesOtrosPagos: 0);
       }
 
       $this->empleado->nomina->deducciones['a_subsidio_emp'] = array(
@@ -176,7 +178,7 @@ trait nominaCalMensual
       if ($this->empleado->nomina_guardada == 'f') {
         $this->empleado->ajustesDeducciones = $this->empleado->nomina->deducciones['a_subsidio_emp']['total'] + $this->empleado->nomina->deducciones['a_subsidio_causado']['total'];
       } else {
-        $this->empleado->ajustesDeducciones = $this->empleado->otros_datos->ajustesDeducciones;
+        $this->empleado->ajustesDeducciones = (isset($this->empleado->otros_datos->ajustesDeducciones)? $this->empleado->otros_datos->ajustesDeducciones : 0);
       }
     }
     // 3. Si el subsidio causado de la tabla mensual es > al subsidio causado de las semanas pasadas (se usan 1 concepto de ajuste)
@@ -200,7 +202,7 @@ trait nominaCalMensual
     }
 
     // echo "<pre>";
-    //   var_dump($this->empleado);
+    //   var_dump($isrMes, $subsidioMes, $isrAntSubMes, $causadoMes, $this->dataAnt, $this->empleado);
     // echo "</pre>";exit;
   }
 
