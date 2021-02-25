@@ -1,6 +1,10 @@
 
-☐ En producción de soluciones poner los códigos de area, cultivo, centros costo y que las salidas se registren esos códigos
- ☐ Acomodar los prestamos de nomina y que salgan en caja de prestamos
+ ✔ Reporte de movimientos, poner uta tabla de Rendimiento x calidad, kilos de cada calidad y % de los kilos totales @done (21-02-25 13:31)
+ ✔ Reporte Entrada de Piña, poner una tabla de Rendimiento x melga y kilos de cada una. @done (21-02-25 14:30)
+   Poner una tabla abajo de las boletas que no tengan asignado los datos de las melgas.
+   En el excel los títulos están mal
+ ✔ En producción de soluciones poner los códigos de area, cultivo, centros costo y que las salidas se registren esos códigos @done (21-02-24 11:10)
+ ✔ Acomodar los prestamos de nomina y que salgan en caja de prestamos @done (21-02-24 11:10)
     -- pcc|lap|san
     COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja), mt: materiales, efd: efectivo directo (mostrar en caja sin afectarla)';
     ALTER TABLE otros.cajaprestamo_efectivo ADD COLUMN saldo_prest_fijo double precision NOT NULL DEFAULT 0;
