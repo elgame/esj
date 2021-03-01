@@ -3047,6 +3047,7 @@ class bascula_model extends CI_Model {
       ), false, true);
     }
 
+    $auxpage2 = $pdf->page;
     $pdf->page = $auxpage;
     $pdf->SetY($auxy);
     $pdf->SetFont('helvetica','B',8);
@@ -3066,6 +3067,8 @@ class bascula_model extends CI_Model {
         $value->bascula,
       ), false, true);
     }
+
+    $pdf->page = $auxpage2;
 
     $pdf->Output('reporte_entradas_pina.pdf', 'I');
   }
