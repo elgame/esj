@@ -12514,17 +12514,19 @@ class nomina_fiscal_model extends CI_Model {
       if (!empty($query->otros_datos)) {
         $calculo_anual = json_decode($query->otros_datos);
 
-        $data_calcc = $this->db->query("SELECT aplicado
-             FROM nomina_calculo_anual
-             WHERE id_empleado = {$calculo_anual->calculoAnual->id_empleado} AND
-                  id_empresa = {$calculo_anual->calculoAnual->id_empresa} AND
-                  anio = {$calculo_anual->calculoAnual->anio}")->row();
+        if (isset($calculo_anual->calculoAnual)) {
+          $data_calcc = $this->db->query("SELECT aplicado
+               FROM nomina_calculo_anual
+               WHERE id_empleado = {$calculo_anual->calculoAnual->id_empleado} AND
+                    id_empresa = {$calculo_anual->calculoAnual->id_empresa} AND
+                    anio = {$calculo_anual->calculoAnual->anio}")->row();
 
-        $this->db->update('nomina_calculo_anual',
-            ['aplicado' => $data_calcc->aplicado-$calculo_anual->calculoAnual->desc_abon],
-            "id_empleado = {$calculo_anual->calculoAnual->id_empleado} AND
-            id_empresa = {$calculo_anual->calculoAnual->id_empresa} AND
-            anio = {$calculo_anual->calculoAnual->anio}");
+          $this->db->update('nomina_calculo_anual',
+              ['aplicado' => $data_calcc->aplicado-$calculo_anual->calculoAnual->desc_abon],
+              "id_empleado = {$calculo_anual->calculoAnual->id_empleado} AND
+              id_empresa = {$calculo_anual->calculoAnual->id_empresa} AND
+              anio = {$calculo_anual->calculoAnual->anio}");
+        }
       }
 
       // Si se eliminaron entonces borra la nomina guardada para que recalcule
