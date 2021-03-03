@@ -597,7 +597,7 @@ class nomina
    */
   public function sdi()
   {
-    return round($this->empleado->factor_integracion * $this->empleado->salario_diario);
+    return round($this->empleado->factor_integracion * $this->empleado->salario_diario, 2);
   }
 
 
