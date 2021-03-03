@@ -534,10 +534,11 @@ class inventario extends MY_Controller {
     {
       $res_mdl = $this->inventario_model->nivelar();
 
-      if ($res_mdl['passes'])
-      {
-        redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
-      }
+      // if ($res_mdl['passes'])
+      // {
+      //   redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      // }
+      $_GET['msg'] = $res_mdl['msg'];
     }
 
     $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
