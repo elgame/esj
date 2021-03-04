@@ -3360,16 +3360,21 @@ class inventario_model extends privilegios_model{
     // }
 
     $res = $this->db->query(
-      "SELECT DISTINCT(fecha), u.nombre, t.descripcion
+      "SELECT t.fecha, t.id_empleado, u.nombre, t.descripcion
       FROM (
-        SELECT Date(fecha_creacion) AS fecha, id_empleado, concepto AS descripcion FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+        SELECT Date(fecha_creacion) AS fecha, id_empleado, concepto AS descripcion
+        FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+
         UNION
-        SELECT Date(fecha_aceptacion) AS fecha, id_empleado, descripcion FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+
+        SELECT Date(fecha_aceptacion) AS fecha, id_empleado, descripcion
+        FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
       ) t
       INNER JOIN usuarios u ON u.id = t.id_empleado
-      ORDER BY fecha ASC");
+      GROUP BY t.fecha, t.id_empleado, u.nombre, t.descripcion
+      ORDER BY fecha ASC, nombre ASC");
 
     $response = array();
     if($res->num_rows() > 0)
@@ -3386,12 +3391,19 @@ class inventario_model extends privilegios_model{
                 SELECT cp.id_producto, cp.cantidad AS entrada, 0 AS salida
                 FROM compras_ordenes co
                   INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
-                WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}' AND co.id_empresa = {$_GET['did_empresa']}
+                WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}'
+                  AND co.id_empresa = {$_GET['did_empresa']}
+                  AND co.id_empleado = {$value->id_empleado}
+
                 UNION
+
                 SELECT cp.id_producto, 0 AS entrada, cp.cantidad AS salida
                 FROM compras_salidas cs
                   INNER JOIN compras_salidas_productos cp ON cs.id_salida = cp.id_salida
-                WHERE cs.status = 'n' AND cp.tipo_orden = 'p' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}
+                WHERE cs.status = 'n' AND cp.tipo_orden = 'p'
+                  AND Date(cs.fecha_creacion) = '{$value->fecha}'
+                  AND cs.id_empresa = {$_GET['did_empresa']}
+                  AND cs.id_empleado = {$value->id_empleado}
               ) es
               GROUP BY id_producto
             ) AS es
