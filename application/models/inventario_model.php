@@ -4084,7 +4084,9 @@ class inventario_model extends privilegios_model{
 			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) AS rows
           FROM compras_salidas AS cs
             LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
-          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_salida")->row();
+          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}'
+            AND cs.id_almacen = {$id_almacen} AND cs.id_empresa = {$_GET['did_empresa']}
+          GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
 			if (isset($res_salidas->rows) && $res_salidas->rows > 0) //ya existe una salida nivelacion en el dia
@@ -4121,7 +4123,9 @@ class inventario_model extends privilegios_model{
 			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden)
         FROM compras_ordenes AS cs
 				  LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
-				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_orden")->row();
+				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}'
+          AND cs.id_almacen = {$id_almacen} AND cs.id_empresa = {$_GET['did_empresa']}
+        GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
 			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia
