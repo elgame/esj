@@ -2339,96 +2339,6 @@ class facturacion_model extends privilegios_model{
         return $query->result();
     }
 
-    public function getRPF()
-    {
-      $sql = '';
-      $response = array();
-
-      if ( !is_array($this->input->get('ids_productos')) && $this->input->get('dcontiene') == '')
-      {
-        exit();
-      }
-
-      if ($this->input->get('dcontiene') != '') {
-        $_GET['ids_productos'] = array($this->input->get('dcontiene'));
-      }
-
-      foreach ($this->input->get('ids_productos') as $key => $prod)
-      {
-        $sql = "WHERE 1 = 1";
-        if (is_numeric($prod)) {
-          $sql .= " AND fp.id_clasificacion = {$prod}";
-        } else {
-          $prod = mb_strtoupper($prod, 'UTF-8');
-          $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
-        }
-
-        //Filtro de fecha.
-        if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-          $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-        elseif($this->input->get('ffecha1') != '')
-          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
-        elseif($this->input->get('ffecha2') != '')
-          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
-
-        if ($this->input->get('fid_cliente') != '')
-        {
-          $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
-        }
-
-        if ($this->input->get('did_empresa') != '')
-        {
-          $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
-
-          if ($this->input->get('did_empresa') == 12) {
-            $sql .= " AND f.id_factura <> 23525";
-          }
-        }
-
-        if ($this->input->get('dtipo') != '')
-        {
-          $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
-        }
-
-        // filtra por pagadas
-        if (isset($_GET['dpagadas']))
-        {
-          $sql .= " AND f.status = 'pa'";
-        }
-
-        // filtra por las que esten pendientes y pagadas.
-        else
-        {
-          $sql .= " AND f.status != 'ca'";
-        }
-
-        $query = $this->db->query(
-            "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
-                    SUM(cantidad) as cantidad, fp.precio_unitario,
-                    SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza
-            FROM facturacion f
-            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
-            INNER JOIN clientes c ON c.id_cliente= f.id_cliente
-            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
-            {$sql}
-            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado
-            ORDER BY f.fecha ASC");
-
-        if (is_numeric($prod)) {
-          $prodcto = $this->db->query(
-              "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
-        } else {
-          $prodcto = $this->db->query(
-              "SELECT 0 AS id_clasificacion, '{$prod}' AS nombre")->row();
-        }
-
-        $response[] = array('producto' => $prodcto, 'listado' => $query->result());
-        $query->free_result();
-      }
-
-      return $response;
-    }
-
     public function rvc_pdf()
     {
         $_GET['ffecha1'] = date("Y-m").'-01';
@@ -2550,6 +2460,190 @@ class facturacion_model extends privilegios_model{
 
       $pdf->Output('Reporte_Ventas_Productos.pdf', 'I');
     }
+
+    public function getRPF()
+    {
+      $sql = '';
+      $response = array();
+
+      if ( !is_array($this->input->get('ids_productos')) && $this->input->get('dcontiene') == '')
+      {
+        exit();
+      }
+
+      if ($this->input->get('dcontiene') != '') {
+        $_GET['ids_productos'] = array($this->input->get('dcontiene'));
+      }
+
+      foreach ($this->input->get('ids_productos') as $key => $prod)
+      {
+        $sql = "WHERE 1 = 1";
+        if (is_numeric($prod)) {
+          $sql .= " AND fp.id_clasificacion = {$prod}";
+        } else {
+          $prod = mb_strtoupper($prod, 'UTF-8');
+          $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
+        }
+
+        //Filtro de fecha.
+        if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+          $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+        elseif($this->input->get('ffecha1') != '')
+          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+        elseif($this->input->get('ffecha2') != '')
+          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+
+        if ($this->input->get('fid_cliente') != '')
+        {
+          $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
+        }
+
+        if ($this->input->get('did_empresa') != '')
+        {
+          $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+
+          if ($this->input->get('did_empresa') == 12) {
+            $sql .= " AND f.id_factura <> 23525";
+          }
+        }
+
+        if ($this->input->get('dtipo') != '')
+        {
+          $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
+        }
+
+        // filtra por pagadas
+        if (isset($_GET['dpagadas']))
+        {
+          $sql .= " AND f.status = 'pa'";
+        }
+
+        // filtra por las que esten pendientes y pagadas.
+        else
+        {
+          $sql .= " AND f.status != 'ca'";
+        }
+
+        $query = $this->db->query(
+            "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
+                    SUM(cantidad) as cantidad, fp.precio_unitario,
+                    SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza
+            FROM facturacion f
+            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
+            INNER JOIN clientes c ON c.id_cliente= f.id_cliente
+            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
+            {$sql}
+            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado
+            ORDER BY f.fecha ASC");
+
+        if (is_numeric($prod)) {
+          $prodcto = $this->db->query(
+              "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
+        } else {
+          $prodcto = $this->db->query(
+              "SELECT 0 AS id_clasificacion, '{$prod}' AS nombre")->row();
+        }
+
+        $response[] = array('producto' => $prodcto, 'listado' => $query->result());
+        $query->free_result();
+      }
+
+      return $response;
+    }
+
+    public function getRPF2()
+    {
+      $response = array();
+
+      $sql = "WHERE 1 = 1";
+
+      $prod = null;
+      if ($this->input->get('dcontiene') != '') {
+        $prod = mb_strtoupper($prod, 'UTF-8');
+        $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
+      }
+
+      if (is_array($this->input->get('ids_productos'))) {
+        $sql .= " AND fp.id_clasificacion in(".implode(', ', $this->input->get('ids_productos')).")";
+      }
+
+      //Filtro de fecha.
+      if($this->input->get('ffecha1') == '' && $this->input->get('ffecha2') == '')
+        $sql .= " AND Date(f.fecha) BETWEEN '".date("Y-m")."-01' AND '".date("Y-m-d")."'";
+      elseif($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+        $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      elseif($this->input->get('ffecha1') != '')
+        $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+      elseif($this->input->get('ffecha2') != '')
+        $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+
+      if ($this->input->get('fid_cliente') != '')
+      {
+        $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
+      }
+
+      if ($this->input->get('did_empresa') != '')
+      {
+        $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+      }
+
+      if ($this->input->get('dtipo') != '')
+      {
+        $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
+      }
+
+      // filtra por pagadas
+      if (isset($_GET['dpagadas']))
+      {
+        $sql .= " AND f.status = 'pa'";
+      }
+      // filtra por las que esten pendientes y pagadas.
+      else
+      {
+        $sql .= " AND f.status != 'ca'";
+      }
+
+      $query = $this->db->query(
+          "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
+                  SUM(cantidad) as cantidad, fp.precio_unitario,
+                  SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza,
+                  cl.id_clasificacion, cl.nombre
+          FROM facturacion f
+            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
+            INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+            INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
+            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
+          {$sql}
+          GROUP BY f.id_factura, c.id_cliente, fp.precio_unitario, fc.pol_seg, fc.certificado, cl.id_clasificacion
+          ORDER BY cl.nombre ASC, f.fecha ASC");
+
+      $productos = $query->result();
+      if (count($productos) > 0) {
+        $auxp = 0;
+        $lista = [];
+        $prodcto = ['id_clasificacion' => $productos[0]->id_clasificacion, 'nombre' => $productos[0]->nombre];
+        foreach ($productos as $key => $prod)
+        {
+          if ($prod->id_clasificacion != $auxp) {
+            if ($key > 0) {
+              $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
+            }
+
+            $auxp = $prod->id_clasificacion;
+            $lista = [];
+          } else {
+            $prodcto['nombre'] = $prod->nombre;
+            $prodcto['id_clasificacion'] = $prod->id_clasificacion;
+          }
+
+          $lista[] = $prod;
+        }
+        $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
+      }
+
+      return $response;
+    }
+
     /**
      * Reportes Productos Facturados.
      *
@@ -2557,9 +2651,14 @@ class facturacion_model extends privilegios_model{
      */
     public function prodfact_pdf()
     {
-      if (isset($_GET['did_producto']))
-      {
-        $facturas = $this->getRPF();
+      // if (isset($_GET['did_producto']))
+      // {
+        if (empty($_GET['did_empresa'])) {
+          $empresaDef = $this->empresas_model->getDefaultEmpresa();
+          $_GET['did_empresa'] = $empresaDef->id_empresa;
+        }
+
+        $facturas = $this->getRPF2();
 
         $this->load->model('empresas_model');
         $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -2684,7 +2783,7 @@ class facturacion_model extends privilegios_model{
             MyString::formatoNumero($importet, 2, '$', false) ), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
-      }
+      // }
     }
 
     public function prodfact_xls()
@@ -2694,7 +2793,7 @@ class facturacion_model extends privilegios_model{
       header("Pragma: no-cache");
       header("Expires: 0");
 
-      $facturas = $this->getRPF();
+      $facturas = $this->getRPF2();
 
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));

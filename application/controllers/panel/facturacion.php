@@ -2268,12 +2268,12 @@ class facturacion extends MY_Controller {
     ));
 
     $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
