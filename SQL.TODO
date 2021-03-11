@@ -1,6 +1,6 @@
 
- ☐ Formato de papeletas de salida y pallet
-   -- pcc
+ ✔ Formato de papeletas de salida y pallet @done (21-03-11 13:56)
+   -- pcc|san
    ALTER TABLE public.rastria_pallets ADD COLUMN folio_int bigint;
    COMMENT ON COLUMN public.rastria_pallets.folio_int IS 'folio interno de sanjorge';
    ALTER TABLE public.rastria_pallets ADD COLUMN certificado character varying(5) COLLATE pg_catalog."default";
