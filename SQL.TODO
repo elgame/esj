@@ -1,4 +1,33 @@
 
+ ☐ Formato de papeletas de salida y pallet
+   -- pcc
+   ALTER TABLE public.rastria_pallets ADD COLUMN folio_int bigint;
+   COMMENT ON COLUMN public.rastria_pallets.folio_int IS 'folio interno de sanjorge';
+   ALTER TABLE public.rastria_pallets ADD COLUMN certificado character varying(5) COLLATE pg_catalog."default";
+   COMMENT ON COLUMN public.rastria_pallets.certificado IS 'N:No certificado, C:Certificado';
+   CREATE OR REPLACE VIEW public.rastria_pallets_lista
+       AS
+       SELECT rp.id_pallet,
+          rp.folio,
+          date(rp.fecha) AS fecha,
+          rp.no_cajas,
+          rp.status,
+          COALESCE(sum(rpr.cajas), 0::bigint) AS cajas,
+          rp.no_cajas - COALESCE(sum(rpr.cajas), 0::bigint) AS cajas_faltantes,
+          rp.id_cliente,
+          rp.no_hojas,
+          rp.kilos_pallet,
+          rp.calibre_fijo,
+          a.id_area,
+          a.nombre AS nombre_area,
+          rp.folio_int,
+          rp.certificado
+         FROM rastria_pallets rp
+           LEFT JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+           LEFT JOIN areas a ON a.id_area = rp.id_area
+        GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas, rp.status, rp.id_cliente, rp.no_hojas, rp.kilos_pallet, a.id_area
+        ORDER BY rp.folio;
+
  ✔ Reporte de movimientos, poner uta tabla de Rendimiento x calidad, kilos de cada calidad y % de los kilos totales @done (21-02-25 13:31)
  ✔ Reporte Entrada de Piña, poner una tabla de Rendimiento x melga y kilos de cada una. @done (21-02-25 14:30)
    Poner una tabla abajo de las boletas que no tengan asignado los datos de las melgas.

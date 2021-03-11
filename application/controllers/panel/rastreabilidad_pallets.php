@@ -307,6 +307,14 @@ class rastreabilidad_pallets extends MY_Controller {
       array('field' => 'fid_cliente',
             'label' => 'Cliente',
             'rules' => 'is_natural_no_zero'),
+
+      array('field' => 'ffolio_int',
+            'label' => 'Folio Interno',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'fcertificado',
+            'label' => 'Certificado',
+            'rules' => ''),
+
       // array('field' => 'fhojaspapel',
       //       'label' => 'Hojas de papel',
       //       'rules' => 'required|is_natural'),
