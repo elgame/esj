@@ -11,6 +11,9 @@
 			width: 100%;
 			border: 1px #000 solid;
 		}
+    .border {
+      border: 1px #000 solid;
+    }
 		.pleft{
 			float: left;
 		}
@@ -156,7 +159,7 @@
 							<td></td>
 							<td class="txt_right"><?php echo $data['totales']['cajas']; ?></td>
 							<td class="txt_right"><?php echo $data['totales']['cajas'] != 0 ? MyString::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false) : 0; ?></td>
-							<td class="txt_right"><?php echo $data['totales']['kilos']; ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['kilos'], 2, '', false); ?></td>
 							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? MyString::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
@@ -189,6 +192,29 @@
 					</table>
 				</td>
 			</tr>
+
+      <?php //if (isset($_GET['farea']) && $_GET['farea'] == 3): // Piña ?>
+        <tr>
+          <td class="marg_top20 strong">
+            <table class="marg_top20" style="width: 50%;">
+              <tbody>
+                <tr>
+                  <td>CALIDAD</td>
+                  <td>KILOS</td>
+                  <td>%</td>
+                </tr>
+                <?php foreach ($data['totalesClasif'] as $key => $tclasif): ?>
+                  <tr>
+                    <td class="border"><?php echo $key ?></td>
+                    <td class="border"><?php echo MyString::formatoNumero($tclasif, 2, '', false); ?></td>
+                    <td class="border"><?php echo MyString::formatoNumero($tclasif/$data['totales']['kilos']*100, 2, '', false); ?></td>
+                  </tr>
+                <?php endforeach ?>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      <?php //endif ?>
 
 		</tbody>
 	</table>

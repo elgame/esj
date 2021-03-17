@@ -3360,16 +3360,21 @@ class inventario_model extends privilegios_model{
     // }
 
     $res = $this->db->query(
-      "SELECT DISTINCT(fecha), u.nombre, t.descripcion
+      "SELECT t.fecha, t.id_empleado, u.nombre, t.descripcion
       FROM (
-        SELECT Date(fecha_creacion) AS fecha, id_empleado, concepto AS descripcion FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+        SELECT Date(fecha_creacion) AS fecha, id_empleado, concepto AS descripcion
+        FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+
         UNION
-        SELECT Date(fecha_aceptacion) AS fecha, id_empleado, descripcion FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+
+        SELECT Date(fecha_aceptacion) AS fecha, id_empleado, descripcion
+        FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
           AND Date(fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
       ) t
       INNER JOIN usuarios u ON u.id = t.id_empleado
-      ORDER BY fecha ASC");
+      GROUP BY t.fecha, t.id_empleado, u.nombre, t.descripcion
+      ORDER BY fecha ASC, nombre ASC");
 
     $response = array();
     if($res->num_rows() > 0)
@@ -3386,12 +3391,19 @@ class inventario_model extends privilegios_model{
                 SELECT cp.id_producto, cp.cantidad AS entrada, 0 AS salida
                 FROM compras_ordenes co
                   INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
-                WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}' AND co.id_empresa = {$_GET['did_empresa']}
+                WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}'
+                  AND co.id_empresa = {$_GET['did_empresa']}
+                  AND co.id_empleado = {$value->id_empleado}
+
                 UNION
+
                 SELECT cp.id_producto, 0 AS entrada, cp.cantidad AS salida
                 FROM compras_salidas cs
                   INNER JOIN compras_salidas_productos cp ON cs.id_salida = cp.id_salida
-                WHERE cs.status = 'n' AND cp.tipo_orden = 'p' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}
+                WHERE cs.status = 'n' AND cp.tipo_orden = 'p'
+                  AND Date(cs.fecha_creacion) = '{$value->fecha}'
+                  AND cs.id_empresa = {$_GET['did_empresa']}
+                  AND cs.id_empleado = {$value->id_empleado}
               ) es
               GROUP BY id_producto
             ) AS es
@@ -4072,7 +4084,9 @@ class inventario_model extends privilegios_model{
 			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) AS rows
           FROM compras_salidas AS cs
             LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
-          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_salida")->row();
+          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}'
+            AND cs.id_almacen = {$id_almacen} AND cs.id_empresa = {$_GET['did_empresa']}
+          GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
 			if (isset($res_salidas->rows) && $res_salidas->rows > 0) //ya existe una salida nivelacion en el dia
@@ -4109,7 +4123,9 @@ class inventario_model extends privilegios_model{
 			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden)
         FROM compras_ordenes AS cs
 				  LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
-				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_orden")->row();
+				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}'
+          AND cs.id_almacen = {$id_almacen} AND cs.id_empresa = {$_GET['did_empresa']}
+        GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
 			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia

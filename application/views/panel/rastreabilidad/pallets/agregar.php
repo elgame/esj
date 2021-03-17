@@ -72,7 +72,7 @@
 									<div class="span2">
 									  <label class="span3" for="fkilos">Kilos </label>
 										<input type="text" name="fkilos" id="fkilos" class="span7 vpositive" value="<?php echo set_value('fkilos'); ?>"
-											maxlength="25" placeholder="Kilos" required data-next="btnmodalproductosSa">
+											maxlength="25" placeholder="Kilos" required data-next="ffolio_int">
 									</div>
 
 								</div>
@@ -259,6 +259,20 @@
 										</div>
 
 									</div>
+
+                  <div class="span2">
+                    <label class="span4" for="ffolio_int">Folio Interno </label>
+                    <input type="number" name="ffolio_int" id="ffolio_int" class="span8" value="<?php echo set_value('ffolio_int'); ?>"
+                      maxlength="25" placeholder="Folio Int pallet" required data-next="fcertificado">
+                  </div>
+
+                  <div class="span2">
+                    <label class="span4" for="fcertificado">Certificado </label>
+                    <select name="fcertificado" id="fcertificado" class="span8" data-next="fclasificacion">
+                      <option value="N" <?php echo set_select('fcertificado', 'N'); ?>>No Certificado</option>
+                      <option value="C" <?php echo set_select('fcertificado', 'C'); ?>>Certificado</option>
+                    </select>
+                  </div>
 
                 </div>
                 <div class="clearfix"></div>

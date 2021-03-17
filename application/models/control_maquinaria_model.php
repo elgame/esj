@@ -198,7 +198,9 @@ class control_maquinaria_model extends CI_Model {
 
     $aligns3 = array('R', 'R', 'R', 'R');
     $widths3 = array(14, 18, 14, 18);
-    $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
+    $header3 = array('Rendi lt/Hr', 'Acumulado');
+    // $widths3 = array(14, 18, 14, 18);
+    // $header3 = array('Rendi lt/Hr', 'Kilómetros', 'Rendi Km/lt', 'Acumulado');
 
     $alignst = [['R', 'R', 'R', 'R', 'R'], $aligns3];
     $widthst = [[164, 16, 14, 12, 17], $widths3];
@@ -246,8 +248,8 @@ class control_maquinaria_model extends CI_Model {
           $pdf->SetWidths($widths3);
           $pdf->Row([
             MyString::formatoNumero($total_litros/($total_hrs>0? $total_hrs: 1), 2, '', false),
-            MyString::formatoNumero($total_kms, 2, '', false),
-            MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
+            // MyString::formatoNumero($total_kms, 2, '', false),
+            // MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
             ''
           ], false, false);
           // ------
@@ -329,8 +331,8 @@ class control_maquinaria_model extends CI_Model {
       $pdf->SetWidths($widths3);
       $pdf->Row(array(
         MyString::formatoNumero(($vehiculo->lts_combustible/($hrs>0? $hrs: 1)), 2, '', false),
-        MyString::formatoNumero($kms, 2, '', false),
-        MyString::formatoNumero(($kms/($vehiculo->lts_combustible>0? $vehiculo->lts_combustible: 1)), 2, '', false),
+        // MyString::formatoNumero($kms, 2, '', false),
+        // MyString::formatoNumero(($kms/($vehiculo->lts_combustible>0? $vehiculo->lts_combustible: 1)), 2, '', false),
         MyString::formatoNumero($costoacumulado, 2, '', false),
       ), false, false);
       // ------
@@ -361,8 +363,8 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetWidths($widths3);
     $pdf->Row([
       MyString::formatoNumero($total_litros/($total_hrs>0? $total_hrs: 1), 2, '', false),
-      MyString::formatoNumero($total_kms, 2, '', false),
-      MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
+      // MyString::formatoNumero($total_kms, 2, '', false),
+      // MyString::formatoNumero($total_kms/($total_litros>0? $total_litros: 1), 2, '', false),
       ''
     ], false, false);
     // ------
@@ -393,8 +395,8 @@ class control_maquinaria_model extends CI_Model {
     $pdf->SetWidths($widths3);
     $pdf->Row([
       MyString::formatoNumero($ttotal_litros/($ttotal_hrs>0? $ttotal_hrs: 1), 2, '', false),
-      MyString::formatoNumero($ttotal_kms, 2, '', false),
-      MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false),
+      // MyString::formatoNumero($ttotal_kms, 2, '', false),
+      // MyString::formatoNumero($ttotal_kms/($ttotal_litros>0? $ttotal_litros: 1), 2, '', false),
       ''
     ], false, false);
     // ------

@@ -848,9 +848,10 @@ class bascula_model extends CI_Model {
   public function getMovimientos()
   {
     $data =  array(
-      'movimientos' => array(),
-      'area'        => array(),
-      'proveedor'   => array(),
+      'movimientos'   => array(),
+      'area'          => array(),
+      'proveedor'     => array(),
+      'totalesClasif' => array(),
     );
 
     $data['totales'] = array(
@@ -996,6 +997,13 @@ class bascula_model extends CI_Model {
           $caja->tipo = 'E';
         elseif ($caja->tipo == 'sa')
           $caja->tipo = 'S';
+
+        // Totales x clasificaciones
+        if (isset($data['totalesClasif'][$caja->calidad])) {
+          $data['totalesClasif'][$caja->calidad] += floatval($caja->kilos);
+        } else {
+          $data['totalesClasif'][$caja->calidad] = floatval($caja->kilos);
+        }
       }
 
 
@@ -2785,6 +2793,48 @@ class bascula_model extends CI_Model {
     echo $html;
   }
 
+  public function rpt_entrada_fruta_no_data()
+  {
+    $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-').'01';
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'Date(b.fecha_tara)';
+
+    if ($this->input->get('ranchoId') != ''){
+      $sql .= " AND r.id_rancho = " . $_GET['ranchoId'];
+    }
+
+    if ($this->input->get('centroCostoId') != ''){
+      $centrosIds = implode(',', $_GET['centroCostoId']);
+      $sql .= " AND cc.id_centro_costo IN({$centrosIds})";
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    $sql .= " AND {$fecha_compara} BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
+              b.kilos_neto, bsp.id
+      FROM bascula b
+        LEFT JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
+      WHERE b.id_area = 3 AND b.tipo = 'en' AND bsp.id IS NULL {$sql}
+      ORDER BY bascula ASC
+      "
+    );
+
+    $response = array();
+    if ($query->num_rows() > 0)
+    {
+      $response = $query->result();
+    }
+
+    return $response;
+  }
+
   public function rpt_entrada_fruta_data()
   {
     $sql = $sql2 = '';
@@ -2857,6 +2907,7 @@ class bascula_model extends CI_Model {
   {
     // Obtiene los datos del reporte.
     $data = $this->rpt_entrada_fruta_data();
+    $data_noasignados = $this->rpt_entrada_fruta_no_data();
 
     // echo "<pre>";
     //   var_dump($data);
@@ -2894,6 +2945,7 @@ class bascula_model extends CI_Model {
     $total_kg    = 0;
     $total_piezas  = 0;
     $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
+    $totalesMelgas = [];
 
     foreach ($data as $key => $valuerp) {
 
@@ -2942,6 +2994,13 @@ class bascula_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row($datos, false, false);
 
+      // totales melgas
+      if (isset($totalesMelgas[$valuerp->centro_costo])) {
+        $totalesMelgas[$valuerp->centro_costo] += $valuerp->cc_kilos;
+      } else {
+        $totalesMelgas[$valuerp->centro_costo] = $valuerp->cc_kilos;
+      }
+
       $auxx['fecha'] = $valuerp->fecha;
       $auxx['bascula'] = $valuerp->bascula;
       $auxx['folio'] = $valuerp->folio;
@@ -2967,6 +3026,49 @@ class bascula_model extends CI_Model {
       '', '',
       MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false)
     ), false, false);
+
+    $auxy = $pdf->GetY();
+    $auxpage = $pdf->page;
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(70));
+    $pdf->Row(array(
+      'TOTALES X CENTRO DE COSTO',
+    ), false, true);
+    foreach ($totalesMelgas as $key => $value) {
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(50, 20));
+      $pdf->Row(array(
+        $key,
+        MyString::formatoNumero($value, 2, '', false),
+      ), false, true);
+    }
+
+    $auxpage2 = $pdf->page;
+    $pdf->page = $auxpage;
+    $pdf->SetY($auxy);
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetX(90);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(70));
+    $pdf->Row(array(
+      'BOLETAS SIN ENTRADA DE PIÑA',
+    ), false, true);
+    foreach ($data_noasignados as $key => $value) {
+      $pdf->SetX(90);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(50, 20));
+      $pdf->Row(array(
+        $value->fecha,
+        $value->bascula,
+      ), false, true);
+    }
+
+    $pdf->page = $auxpage2;
 
     $pdf->Output('reporte_entradas_pina.pdf', 'I');
   }
@@ -3026,6 +3128,7 @@ class bascula_model extends CI_Model {
     $total_kg    = 0;
     $total_piezas  = 0;
     $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
+    $totalesMelgas = [];
 
     foreach ($data as $key => $valuerp) {
       $total_kg     += $valuerp->cc_kilos;
@@ -3036,7 +3139,7 @@ class bascula_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: '').'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['folio'] != $valuerp->folio? $valuerp->folio: '').'</td>
           <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: '').'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 0, '', false): '').'</td>
+
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_kilos, 2, '', false).'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_cantidad, 2, '', false).'</td>
           <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->calidad.'</td>
@@ -3044,6 +3147,13 @@ class bascula_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): '').'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->estiba.'</td>
         </tr>';
+
+      // totales melgas
+      if (isset($totalesMelgas[$valuerp->centro_costo])) {
+        $totalesMelgas[$valuerp->centro_costo] += $valuerp->cc_kilos;
+      } else {
+        $totalesMelgas[$valuerp->centro_costo] = $valuerp->cc_kilos;
+      }
 
       $auxx['fecha'] = $valuerp->fecha;
       $auxx['bascula'] = $valuerp->bascula;
@@ -3062,6 +3172,21 @@ class bascula_model extends CI_Model {
           <td style="border:1px solid #000;">'.MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false).'</td>
           <td></td>
         </tr>';
+
+    $html .= '
+      <tr style="font-weight:bold">
+        <td colspan="2"></td>
+      </tr>
+      <tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;">TOTALES X CENTRO DE COSTO</td>
+      </tr>';
+    foreach ($totalesMelgas as $key => $value) {
+      $html .= '
+      <tr style="font-weight:bold">
+        <td style="border:1px solid #000;">'.$key.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($value, 2, '', false).'</td>
+      </tr>';
+    }
 
     $html .= '
       </tbody>

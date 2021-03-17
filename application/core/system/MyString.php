@@ -92,11 +92,11 @@ class MyString {
     foreach($_GET as $key => $val){
       if (is_string($val)) {
         if(array_search($key, $quit) === false)
-          $vars .= '&'.$key.'='.$val;
+          $vars .= '&'.$key.'='.urlencode($val);
       } elseif(is_array($val) && count($val) > 0) {
         foreach ($val as $key2 => $val2) {
           if(array_search($key, $quit) === false)
-            $vars .= '&'.$key.'[]='.$val2;
+            $vars .= '&'.$key.'[]='.urlencode($val2);
         }
       }
     }
