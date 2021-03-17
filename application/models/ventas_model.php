@@ -2794,7 +2794,7 @@ class Ventas_model extends privilegios_model{
 
       $result = $this->db->query("SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, f.total, c.id_cliente,
           c.nombre_fiscal AS cliente, c.cuenta_cpi, (fa.serie||fa.folio) AS factura, fa.is_factura,
-          e.id_empresa, e.nombre_fiscal AS empresa, fp.cantidad, fp.descripcion
+          e.id_empresa, e.nombre_fiscal AS empresa, fp.cantidad, fp.descripcion, f.status
         FROM facturacion f
           INNER JOIN clientes c ON c.id_cliente = f.id_cliente
           INNER JOIN empresas e ON e.id_empresa = f.id_empresa
@@ -2911,19 +2911,24 @@ class Ventas_model extends privilegios_model{
 
             foreach ($item['facturas'] as $keyf => $factura)
             {
-              $total_cantidad += $factura->cantidad;
-              $total_total += $factura->total;
+              $txt_cancelado = ' (Cancelada)';
+              if ($factura->status != 'ca') {
+                $total_cantidad += $factura->cantidad;
+                $total_total += $factura->total;
 
-              $total_cantidad_g += $factura->cantidad;
-              $total_total_g += $factura->total;
+                $total_cantidad_g += $factura->cantidad;
+                $total_total_g += $factura->total;
 
-              $total_cantidad_g2 += $factura->cantidad;
-              $total_total_g2 += $factura->total;
+                $total_cantidad_g2 += $factura->cantidad;
+                $total_total_g2 += $factura->total;
+
+                $txt_cancelado = '';
+              }
 
               $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
                       $factura->serie,
                       $factura->folio,
-                      $factura->descripcion,
+                      $factura->descripcion.$txt_cancelado,
                       MyString::formatoNumero($factura->cantidad, 2, '', false),
                       MyString::formatoNumero($factura->total, 2, '', false),
                       $factura->factura,
@@ -3057,20 +3062,25 @@ class Ventas_model extends privilegios_model{
 
             foreach ($item['facturas'] as $keyf => $factura)
             {
-              $total_cantidad += $factura->cantidad;
-              $total_total += $factura->total;
+              $txt_cancelado = ' (Cancelada)';
+              if ($factura->status != 'ca') {
+                $total_cantidad += $factura->cantidad;
+                $total_total += $factura->total;
 
-              $total_cantidad_g += $factura->cantidad;
-              $total_total_g += $factura->total;
+                $total_cantidad_g += $factura->cantidad;
+                $total_total_g += $factura->total;
 
-              $total_cantidad_g2 += $factura->cantidad;
-              $total_total_g2 += $factura->total;
+                $total_cantidad_g2 += $factura->cantidad;
+                $total_total_g2 += $factura->total;
+
+                $txt_cancelado = '';
+              }
 
               $html .= '<tr>
                   <td style="width:150px;border:1px solid #000;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->serie.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->folio.'</td>
-                  <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.'</td>
+                  <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.$txt_cancelado.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->cantidad.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->total.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->factura.'</td>
