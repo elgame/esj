@@ -1440,18 +1440,26 @@ class inventario_model extends privilegios_model{
       $response = array();
       $productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
             COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
-            pf.nombre AS familia
+            pf.nombre AS familia, cp.codigo_area, cp.centros_costos
         FROM productos AS p
           INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
           INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
           LEFT JOIN (
             SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe,
-              (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
+              (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total,
+              String_agg(Distinct(cc.nombre), ', ') AS codigo_area,
+              String_agg(Distinct(coc.nombre), ', ') AS centros_costos
             FROM compras_ordenes AS co
               INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
               INNER JOIN compras c ON c.id_compra = cp.id_compra
               {$sql_area}
               {$sql_rancho}
+              LEFT JOIN otros.cat_codigos cc ON cc.id_cat_codigos = cp.id_cat_codigos
+              LEFT JOIN (
+                SELECT coc.id_orden, ccc.id_centro_costo, ccc.nombre
+                FROM otros.centro_costo ccc
+                  INNER JOIN compras_ordenes_centro_costo coc ON ccc.id_centro_costo = coc.id_centro_costo
+              ) coc ON coc.id_orden = cp.id_orden
             WHERE co.status = 'f' AND cp.id_producto IS NOT NULL {$sql} AND
               Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             GROUP BY cp.id_producto
@@ -1474,7 +1482,7 @@ class inventario_model extends privilegios_model{
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
     $pdf->heightHeader = 25;
 
     if ($empresa['info']->logo !== '')
@@ -1494,9 +1502,9 @@ class inventario_model extends privilegios_model{
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'R', 'C', 'R', 'R', 'R');
-    $widths = array(65, 30, 20, 30, 30, 30);
-    $header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
+    $aligns = array('L', 'R', 'C', 'R', 'R', 'R', 'L', 'L');
+    $widths = array(65, 20, 20, 25, 25, 25, 44, 44);
+    $header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total', 'C. Costo', 'C. Area');
 
     $familia = '';
     $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
@@ -1511,7 +1519,7 @@ class inventario_model extends privilegios_model{
         $pdf->SetFillColor(200,200,200);
         $pdf->SetX(6);
         $pdf->SetAligns(['L']);
-        $pdf->SetWidths([205]);
+        $pdf->SetWidths([268]);
         $pdf->Row([$producto->familia], true);
         $pdf->SetY($pdf->GetY()+2);
         $familia = $producto->familia;
@@ -1539,11 +1547,13 @@ class inventario_model extends privilegios_model{
         MyString::formatoNumero($producto->importe, 2, '', false),
         MyString::formatoNumero($producto->impuestos, 2, '', false),
         MyString::formatoNumero(($producto->total), 2, '', false),
+        $producto->centros_costos,
+        $producto->codigo_area,
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-      $pdf->SetMyLinks(array( base_url('panel/inventario/cproductoOrden_pdf?id_producto='.$producto->id_producto.'&'.MyString::getVarsLink(array('fproductor', 'ids_productos', 'familias'))) ));
+      $pdf->SetMyLinks(array('', base_url('panel/inventario/cproductoOrden_pdf?id_producto='.$producto->id_producto.'&'.MyString::getVarsLink(array('fproductor', 'ids_productos', 'familias'))) ));
       $pdf->Row($datos, false, false);
 
       $proveedor_cantidad  += $producto->cantidad;
@@ -1612,6 +1622,8 @@ class inventario_model extends privilegios_model{
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">C. Costo</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">C. Area</td>
       </tr>';
     $familia = '';
     $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
@@ -1623,6 +1635,8 @@ class inventario_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
           <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
           <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->centros_costos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->codigo_area.'</td>
         </tr>';
 
       $proveedor_cantidad  += $producto->cantidad;
