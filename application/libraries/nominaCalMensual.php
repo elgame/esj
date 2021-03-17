@@ -103,6 +103,10 @@ trait nominaCalMensual
       "
     )->row();
 
+    if (empty($dataIsr) && empty($dataSub)) {
+      return '';
+    }
+
     $isrAntSubMes = round((($this->datosMes['gravado'] - floatval($dataIsr->lim_inferior)) * (floatval($dataIsr->porcentaje) / 100.00)) + floatval($dataIsr->cuota_fija), 4);
     $causadoMes = round(floatval($dataSub->subsidio), 2);
     $subsidioMes = 0;
