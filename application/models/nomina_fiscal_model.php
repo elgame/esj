@@ -3418,7 +3418,9 @@ class nomina_fiscal_model extends CI_Model {
 
     $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
-      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
+      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0,
+      'a_subsidio_emp' => 0, 'a_subsidio_causado' => 0, 'subsidio_efec_ent' => 0, 'isr_ajus_sub' => 0
+    );
 
     $numero_trabajadores2 = 0;
     $empleados_sin_departamento = [];
@@ -3435,7 +3437,9 @@ class nomina_fiscal_model extends CI_Model {
     {
       $total_dep = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
         'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
-        'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
+        'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0,
+        'a_subsidio_emp' => 0, 'a_subsidio_causado' => 0, 'subsidio_efec_ent' => 0, 'isr_ajus_sub' => 0
+      );
 
       $dep_tiene_empleados = true;
       $y = $pdf->GetY();
@@ -3752,6 +3756,84 @@ class nomina_fiscal_model extends CI_Model {
             }
           }
 
+
+          // Ajuste Mensual Deducciones
+          if (isset($empleado->nomina->deducciones['a_subsidio_emp']))
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array(
+              $empleado->nomina->deducciones['a_subsidio_emp']['TipoDeduccion'],
+              $empleado->nomina->deducciones['a_subsidio_emp']['Concepto'],
+              MyString::formatoNumero($empleado->nomina->deducciones['a_subsidio_emp']['total'], 2, '$', false)
+            ), false, 0, null, 1, 1);
+            $total_dep['a_subsidio_emp'] += $empleado->nomina->deducciones['a_subsidio_emp']['total'];
+            $total_gral['a_subsidio_emp'] += $empleado->nomina->deducciones['a_subsidio_emp']['total'];
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y = $pdf->GetY();
+            }
+          }
+
+          if (isset($empleado->nomina->deducciones['a_subsidio_causado']))
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array(
+              $empleado->nomina->deducciones['a_subsidio_causado']['TipoDeduccion'],
+              $empleado->nomina->deducciones['a_subsidio_causado']['Concepto'],
+              MyString::formatoNumero($empleado->nomina->deducciones['a_subsidio_causado']['total'], 2, '$', false)
+            ), false, 0, null, 1, 1);
+            $total_dep['a_subsidio_causado'] += $empleado->nomina->deducciones['a_subsidio_causado']['total'];
+            $total_gral['a_subsidio_causado'] += $empleado->nomina->deducciones['a_subsidio_causado']['total'];
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y = $pdf->GetY();
+            }
+          }
+
+          // Ajustes Mensual Otros pagos
+          $totalOtrosPagosAjusteMensual = 0;
+          if (isset($empleado->nomina->otrosPagos['subsidio_efec_ent']))
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array($empleado->nomina->otrosPagos['subsidio_efec_ent']['TipoOtroPago'],
+              $empleado->nomina->otrosPagos['subsidio_efec_ent']['Concepto'],
+              MyString::formatoNumero(-1*$empleado->nomina->otrosPagos['subsidio_efec_ent']['total'], 2, '$', false)), false, 0, null, 1, 1);
+            $total_dep['subsidio_efec_ent'] += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+            $total_gral['subsidio_efec_ent'] += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+            $totalOtrosPagosAjusteMensual += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y2 = $pdf->GetY();
+            }
+          }
+
+          if (isset($empleado->nomina->otrosPagos['isr_ajus_sub']))
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array($empleado->nomina->otrosPagos['isr_ajus_sub']['TipoOtroPago'],
+              $empleado->nomina->otrosPagos['isr_ajus_sub']['Concepto'],
+              MyString::formatoNumero(-1*$empleado->nomina->otrosPagos['isr_ajus_sub']['total'], 2, '$', false)), false, 0, null, 1, 1);
+            $total_dep['isr_ajus_sub'] += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+            $total_gral['isr_ajus_sub'] += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+            $totalOtrosPagosAjusteMensual += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y2 = $pdf->GetY();
+            }
+          }
+
           if ($y < $pdf->GetY())
           {
             $y = $pdf->GetY();
@@ -3762,8 +3844,8 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
 
-          $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio;
-          $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio;
+          $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio + $totalOtrosPagosAjusteMensual;
+          $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio + $totalOtrosPagosAjusteMensual;
 
           $total_dep['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
@@ -3997,6 +4079,58 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
           $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['a_subsidio_emp'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'A. Subsidio al empleo', MyString::formatoNumero($total_dep['a_subsidio_emp'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['a_subsidio_causado'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Ajuste Subsidio Causado', MyString::formatoNumero($total_dep['a_subsidio_causado'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['subsidio_efec_ent'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Subsidio efectivamente entregado', MyString::formatoNumero(-1*$total_dep['subsidio_efec_ent'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['isr_ajus_sub'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'ISR ajustado por subsidio', MyString::formatoNumero(-1*$total_dep['isr_ajus_sub'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4571,6 +4705,58 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
           $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['a_subsidio_emp'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'A. Subsidio al empleo', MyString::formatoNumero($total_dep['a_subsidio_emp'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['a_subsidio_causado'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Ajuste Subsidio Causado', MyString::formatoNumero($total_dep['a_subsidio_causado'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['subsidio_efec_ent'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Subsidio efectivamente entregado', MyString::formatoNumero(-1*$total_dep['subsidio_efec_ent'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_dep['isr_ajus_sub'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'ISR ajustado por subsidio', MyString::formatoNumero(-1*$total_dep['isr_ajus_sub'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -5240,6 +5426,58 @@ class nomina_fiscal_model extends CI_Model {
         $y = $pdf->GetY();
       }
     }
+
+    if ($total_gral['a_subsidio_emp'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'A. Subsidio al empleo', MyString::formatoNumero($total_gral['a_subsidio_emp'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_gral['a_subsidio_causado'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Ajuste Subsidio Causado', MyString::formatoNumero($total_gral['a_subsidio_causado'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_gral['subsidio_efec_ent'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Subsidio efectivamente entregado', MyString::formatoNumero(-1*$total_gral['subsidio_efec_ent'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($total_gral['isr_ajus_sub'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'ISR ajustado por subsidio', MyString::formatoNumero(-1*$total_gral['isr_ajus_sub'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
 
     if ($y < $pdf->GetY())
     {
@@ -7850,11 +8088,15 @@ class nomina_fiscal_model extends CI_Model {
 
     $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
-      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
+      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0,
+      'a_subsidio_emp' => 0, 'a_subsidio_causado' => 0, 'subsidio_efec_ent' => 0, 'isr_ajus_sub' => 0
+    );
 
     $total_dep = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
-      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
+      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0,
+      'a_subsidio_emp' => 0, 'a_subsidio_causado' => 0, 'subsidio_efec_ent' => 0, 'isr_ajus_sub' => 0
+    );
 
     $this->load->model('catalogos33_model');
     $metodosPago       = new MetodosPago();
@@ -8216,6 +8458,84 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
+
+      // Ajuste Mensual Deducciones
+      if (isset($empleado->nomina->deducciones['a_subsidio_emp']))
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array(
+          $empleado->nomina->deducciones['a_subsidio_emp']['TipoDeduccion'],
+          $empleado->nomina->deducciones['a_subsidio_emp']['Concepto'],
+          MyString::formatoNumero($empleado->nomina->deducciones['a_subsidio_emp']['total'], 2, '$', false)
+        ), false, 0, null, 1, 1);
+        $total_dep['a_subsidio_emp'] += $empleado->nomina->deducciones['a_subsidio_emp']['total'];
+        $total_gral['a_subsidio_emp'] += $empleado->nomina->deducciones['a_subsidio_emp']['total'];
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
+
+      if (isset($empleado->nomina->deducciones['a_subsidio_causado']))
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array(
+          $empleado->nomina->deducciones['a_subsidio_causado']['TipoDeduccion'],
+          $empleado->nomina->deducciones['a_subsidio_causado']['Concepto'],
+          MyString::formatoNumero($empleado->nomina->deducciones['a_subsidio_causado']['total'], 2, '$', false)
+        ), false, 0, null, 1, 1);
+        $total_dep['a_subsidio_causado'] += $empleado->nomina->deducciones['a_subsidio_causado']['total'];
+        $total_gral['a_subsidio_causado'] += $empleado->nomina->deducciones['a_subsidio_causado']['total'];
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
+
+      // Ajustes Mensual Otros pagos
+      $totalOtrosPagosAjusteMensual = 0;
+      if (isset($empleado->nomina->otrosPagos['subsidio_efec_ent']))
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array($empleado->nomina->otrosPagos['subsidio_efec_ent']['TipoOtroPago'],
+          $empleado->nomina->otrosPagos['subsidio_efec_ent']['Concepto'],
+          MyString::formatoNumero(-1*$empleado->nomina->otrosPagos['subsidio_efec_ent']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['subsidio_efec_ent'] += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+        $total_gral['subsidio_efec_ent'] += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+        $totalOtrosPagosAjusteMensual += $empleado->nomina->otrosPagos['subsidio_efec_ent']['total'];
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
+      if (isset($empleado->nomina->otrosPagos['isr_ajus_sub']))
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array($empleado->nomina->otrosPagos['isr_ajus_sub']['TipoOtroPago'],
+          $empleado->nomina->otrosPagos['isr_ajus_sub']['Concepto'],
+          MyString::formatoNumero(-1*$empleado->nomina->otrosPagos['isr_ajus_sub']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['isr_ajus_sub'] += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+        $total_gral['isr_ajus_sub'] += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+        $totalOtrosPagosAjusteMensual += $empleado->nomina->otrosPagos['isr_ajus_sub']['total'];
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
       if ($y < $pdf->GetY())
       {
         $y = $pdf->GetY();
@@ -8226,8 +8546,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
 
-      $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio;
-      $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio;
+      $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio + $totalOtrosPagosAjusteMensual;
+      $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio + $totalOtrosPagosAjusteMensual;
 
       $total_dep['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
       $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
