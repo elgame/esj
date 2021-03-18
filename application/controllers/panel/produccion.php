@@ -122,6 +122,68 @@ class produccion extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  public function nivelar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('panel/produccion/nivelar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
+    ));
+
+    $this->load->model('almacenes_model');
+    $this->load->model('produccion_model');
+    $this->load->model('compras_areas_model');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Nivelar producción'
+    );
+
+    $this->configAddRegreso();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->produccion_model->agregar();
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/produccion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+      }
+    }
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['fecha']      = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/produccion/nivelar', $params);
+    $this->load->view('panel/footer');
+  }
+
   public function cancelar()
   {
     $this->load->model('produccion_model');

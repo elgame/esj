@@ -1,6 +1,9 @@
 
+ ☐ Apartado de nivelacion de producciones
+   -- lap
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Nivelar Produccion',456,true,'produccion/nivelar/','bars',false);
  ✔ Formato de papeletas de salida y pallet @done (21-03-11 13:56)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE public.rastria_pallets ADD COLUMN folio_int bigint;
    COMMENT ON COLUMN public.rastria_pallets.folio_int IS 'folio interno de sanjorge';
    ALTER TABLE public.rastria_pallets ADD COLUMN certificado character varying(5) COLLATE pg_catalog."default";

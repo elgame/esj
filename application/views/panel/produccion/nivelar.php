@@ -8,7 +8,7 @@
       <li>
         <a href="<?php echo base_url('panel/produccion/'); ?>">Ordenes de producción</a> <span class="divider">/</span>
       </li>
-      <li>Agregar</li>
+      <li>Nivelar</li>
     </ul>
   </div>
 
@@ -16,7 +16,7 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> Produccion</h2>
+        <h2><i class="icon-plus"></i> Nivelar</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
@@ -107,7 +107,7 @@
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Productos</h2>
+                <h2><i class="icon-barcode"></i> Clasificaciones</h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 </div>
@@ -116,13 +116,9 @@
                 <div class="row-fluid">
 
                   <div class="span12 mquit">
-                    <div class="span3">
-                      <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
-                    </div><!--/span3s -->
-                    <div class="span6">
+                    <div class="span5">
                       <div class="input-append span12">
-                        <input type="text" class="span12" id="fconcepto" placeholder="Producto / Descripción">
+                        <input type="text" class="span12" id="fconcepto" placeholder="Clasificacion">
                         <!-- <a href="" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a> -->
                       </div>
                       <input type="hidden" class="span1" id="fconceptoId">
@@ -130,7 +126,13 @@
                       <input type="hidden" class="span1" id="fprecio_unitario">
                     </div><!--/span3s -->
                     <div class="span1">
-                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fexistencia" min="0.01" placeholder="Existencia" readonly>
+                    </div><!--/span3s -->
+                    <div class="span2">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fnewexistencia" min="0.01" placeholder="Nueva Existencia">
+                    </div><!--/span3s -->
+                    <div class="span2">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant." readonly>
                     </div><!--/span3s -->
                     <div class="span2">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
