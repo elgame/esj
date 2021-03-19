@@ -48,7 +48,7 @@ $(function(){
   $("#cuenta_retiro").on('change', function(event) {
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
-    bajio = $("#downloadBajio").attr('href').split('&cuentaretiro'),
+    bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
     bancomer = $("#downloadBancomer").attr('href').split('&cuentaretiro'),
     aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
     id_empresa = $("#did_empresa").val();
