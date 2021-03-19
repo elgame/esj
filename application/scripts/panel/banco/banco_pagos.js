@@ -49,8 +49,8 @@ $(function(){
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
     bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
-    bancomer = $("#downloadBancomer").attr('href').split('&cuentaretiro'),
-    aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
+    bancomer = ($("#downloadBancomer").length > 0 ? $("#downloadBancomer").attr('href').split('&cuentaretiro') : ['']),
+    aplicarPagos = ($("#aplicarPagos").length > 0 ? $("#aplicarPagos").attr('href').split('?cuentaretiro') : ['']),
     id_empresa = $("#did_empresa").val();
     $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
     $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
