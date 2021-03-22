@@ -1447,19 +1447,27 @@ class inventario_model extends privilegios_model{
           LEFT JOIN (
             SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe,
               (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total,
-              String_agg(Distinct(cc.nombre), ', ') AS codigo_area,
+              String_agg(Distinct(cc.codigo_area), ' | ') AS codigo_area,
               String_agg(Distinct(coc.nombre), ', ') AS centros_costos
             FROM compras_ordenes AS co
               INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
               INNER JOIN compras c ON c.id_compra = cp.id_compra
               {$sql_area}
               {$sql_rancho}
-              LEFT JOIN otros.cat_codigos cc ON cc.id_cat_codigos = cp.id_cat_codigos
               LEFT JOIN (
-                SELECT coc.id_orden, ccc.id_centro_costo, ccc.nombre
+                SELECT cp.id_producto, String_agg(Distinct(cc.nombre), ' | ') AS codigo_area
+                FROM compras_productos cp
+                  INNER JOIN otros.cat_codigos cc ON cc.id_cat_codigos = cp.id_cat_codigos
+                GROUP BY cp.id_producto
+              ) cc ON cc.id_producto = cp.id_producto
+              LEFT JOIN (
+                SELECT cp.id_producto, String_agg(Distinct(ccc.nombre), ' | ') AS centros_costos
                 FROM otros.centro_costo ccc
                   INNER JOIN compras_ordenes_centro_costo coc ON ccc.id_centro_costo = coc.id_centro_costo
-              ) coc ON coc.id_orden = cp.id_orden
+                  INNER JOIN compras_ordenes co ON co.id_orden = coc.id_orden
+                  INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
+                GROUP BY cp.id_producto
+              ) coc ON coc.id_producto = cp.id_producto
             WHERE co.status = 'f' AND cp.id_producto IS NOT NULL {$sql} AND
               Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             GROUP BY cp.id_producto
