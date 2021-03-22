@@ -1527,7 +1527,7 @@ class inventario_model extends privilegios_model{
         $pdf->SetFillColor(200,200,200);
         $pdf->SetX(6);
         $pdf->SetAligns(['L']);
-        $pdf->SetWidths([268]);
+        $pdf->SetWidths([205]);
         $pdf->Row([$producto->familia], true);
         $pdf->SetY($pdf->GetY()+2);
         $familia = $producto->familia;
