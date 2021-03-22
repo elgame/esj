@@ -1490,7 +1490,7 @@ class inventario_model extends privilegios_model{
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->heightHeader = 25;
 
     if ($empresa['info']->logo !== '')
@@ -1511,8 +1511,8 @@ class inventario_model extends privilegios_model{
     $pdf->SetFont('Arial','',8);
 
     $aligns = array('L', 'R', 'C', 'R', 'R', 'R', 'L', 'L');
-    $widths = array(65, 20, 20, 25, 25, 25, 44, 44);
-    $header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total', 'C. Costo', 'C. Area');
+    $widths = array(65, 30, 20, 30, 30, 30);
+    $header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
 
     $familia = '';
     $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
@@ -1555,8 +1555,8 @@ class inventario_model extends privilegios_model{
         MyString::formatoNumero($producto->importe, 2, '', false),
         MyString::formatoNumero($producto->impuestos, 2, '', false),
         MyString::formatoNumero(($producto->total), 2, '', false),
-        $producto->centros_costos,
-        $producto->codigo_area,
+        // $producto->centros_costos,
+        // $producto->codigo_area,
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
