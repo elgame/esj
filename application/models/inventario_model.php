@@ -1448,7 +1448,7 @@ class inventario_model extends privilegios_model{
             SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe,
               (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total,
               String_agg(Distinct(cc.codigo_area), ' | ') AS codigo_area,
-              String_agg(Distinct(coc.nombre), ', ') AS centros_costos
+              String_agg(Distinct(coc.centros_costos), ' | ') AS centros_costos
             FROM compras_ordenes AS co
               INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
               INNER JOIN compras c ON c.id_compra = cp.id_compra
