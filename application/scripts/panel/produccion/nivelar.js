@@ -8,7 +8,7 @@
     autocompleteEmpresas();
     autocompleteClasificaciones();
     // autocompleteTrabajador();
-    autocompleteConcepto();
+    // autocompleteConcepto();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -60,69 +60,46 @@
     });
   };
 
-  // Autocomplete para los Clasificaciones.
-  var autocompleteClasificaciones = function() {
-   $("input#clasificacion").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clasificaciones/?inventario=t',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $this = $(this);
-
-        $this.css("background-color", "#B0FFB0");
-        $('#id_clasificacion').val(ui.item.id);
-      }
-    }).keydown(function(event){
-        if(event.which == 8 || event == 46){
-          var $tr = $(this).parent().parent();
-
-          $(this).css("background-color", "#FFD9B3");
-          $('#id_clasificacion').val('');
-        }
-    });
-  };
-
-  // // Autocomplete para los trabajadores.
-  // var autocompleteTrabajador = function () {
-  //   $("#ftrabajador").autocomplete({
-  //     source: base_url + 'panel/usuarios/ajax_get_usuarios/?empleados=si',
+  // // Autocomplete para los Clasificaciones.
+  // var autocompleteClasificaciones = function() {
+  //  $("input#clasificacion").autocomplete({
+  //     source: base_url+'panel/facturacion/ajax_get_clasificaciones/?inventario=t',
   //     minLength: 1,
   //     selectFirst: true,
   //     select: function( event, ui ) {
-  //       $("#fid_trabajador").val(ui.item.id);
-  //       $("#ftrabajador").val(ui.item.label).css({'background-color': '#99FF99'});
+  //       var $fconcepto    = $(this),
+  //           $fcodigo          = $('#fcodigo'),
+  //           $fconceptoId      = $('#fconceptoId'),
+  //           $fcantidad        = $('#fcantidad'),
+  //           $ftipoproducto    = $("#ftipoproducto"),
+  //           $fprecio_unitario = $("#fprecio_unitario");
+
+  //       selectedClasif = ui.item;
+  //       $fconcepto.css("background-color", "#B6E7FF");
+  //       $fcodigo.val(ui.item.item.codigo);
+  //       $fconceptoId.val(ui.item.id);
+  //       $ftipoproducto.val(ui.item.item.tipo_familia);
+  //       $fprecio_unitario.val(ui.item.item.precio_unitario);
+  //       $fcantidad.val('1');
   //     }
-  //   }).keydown(function(e){
-  //     if (e.which === 8) {
-  //       $(this).css({'background-color': '#FFD9B3'});
-  //       $('#fid_trabajador').val('');
-  //     }
+  //   }).keydown(function(event){
+  //       if(event.which == 8 || event.which == 46) {
+  //         selectedClasif = null;
+  //         $(this).css("background-color", "#FDFC9A");
+  //         $("#fcodigo").val("");
+  //         $('#fconceptoId').val('');
+  //         $('#fcantidad').val('');
+  //         $("#ftipoproducto").val('');
+  //         $("#fprecio_unitario").val('');
+  //       }
   //   });
   // };
 
   // Autocomplete para el codigo.
   var selectedClasif = null,
-  autocompleteConcepto = function () {
+  autocompleteClasificaciones = function () {
     $("#fconcepto").autocomplete({
-      source: function (request, response) {
-        if (isEmpresaSelected()) {
-          $.ajax({
-            url: base_url + 'panel/compras_ordenes/ajax_producto/',
-            dataType: 'json',
-            data: {
-              term : request.term,
-              ide: $('#empresaId').val(),
-              id_almacen: $('#id_almacen').val(),
-              tipo: 'p'
-            },
-            success: function (data) {
-              response(data)
-            }
-          });
-        } else {
-          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-        }
-      },
+      source: base_url+'panel/facturacion/ajax_get_clasificaciones/?inventario=t',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -141,16 +118,16 @@
         $fprecio_unitario.val(ui.item.item.precio_unitario);
         $fcantidad.val('1');
       }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        selectedClasif = null;
-        $(this).css("background-color", "#FDFC9A");
-        $("#fcodigo").val("");
-        $('#fconceptoId').val('');
-        $('#fcantidad').val('');
-        $("#ftipoproducto").val('');
-        $("#fprecio_unitario").val('');
-      }
+    }).keydown(function(event){
+        if(event.which == 8 || event.which == 46) {
+          selectedClasif = null;
+          $(this).css("background-color", "#FDFC9A");
+          $("#fcodigo").val("");
+          $('#fconceptoId').val('');
+          $('#fcantidad').val('');
+          $("#ftipoproducto").val('');
+          $("#fprecio_unitario").val('');
+        }
     });
   };
 

@@ -211,9 +211,18 @@ class clasificaciones_model extends CI_Model {
 				ORDER BY nombre ASC
 				LIMIT {$limit}");
 
+    $con_inventario = false;
+    if ($this->input->get('inventario') !== false) {
+      $con_inventario = true;
+    }
+
+    $this->load->model('produccion_model');
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
+        if ($con_inventario) {
+          $itm->inventario = $this->produccion_model->getInventarioData($itm->id_clasificacion)[0];
+        }
 				$response[] = array(
 						'id'    => $itm->id_clasificacion,
 						'label' => $itm->nombre,

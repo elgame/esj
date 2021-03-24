@@ -1,4 +1,29 @@
 
+ ☐ Ajustar la nomina para la integración del programa Corona
+   -- lap
+    CREATE TABLE public.nomina_fiscal_monto_real
+      (
+          id bigint NOT NULL DEFAULT nextval('nomina_fiscal_monto_real_id_seq'::regclass),
+          id_empleado bigint NOT NULL,
+          id_empresa integer NOT NULL,
+          anio integer NOT NULL,
+          semana integer NOT NULL,
+          dias_trabajados double precision NOT NULL,
+          monto double precision NOT NULL DEFAULT 0,
+          bono double precision NOT NULL DEFAULT 0,
+          CONSTRAINT nomina_fiscal_monto_real_pkey PRIMARY KEY (id),
+          CONSTRAINT nomina_fiscal_monto_real_id_empleado_fkey FOREIGN KEY (id_empleado)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT nomina_fiscal_monto_real_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+    ALTER TABLE public.nomina_fiscal_monto_real OWNER to programa;
+    COMMENT ON TABLE public.nomina_fiscal_monto_real IS 'Son los datos que se cargan del programa de Corona';
+
  ☐ Apartado de nivelacion de producciones
    -- lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Nivelar Produccion',456,true,'produccion/nivelar/','bars',false);

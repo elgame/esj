@@ -81,7 +81,7 @@
 
             <div class="span6">
               <div class="control-group">
-                <label class="control-label" for="fecha_produccion">Produccion</label>
+                <label class="control-label" for="fecha_produccion">Nivelación</label>
                 <div class="controls">
                   <input type="datetime-local" name="fecha_produccion" class="span9" id="fecha_produccion" value="<?php echo set_value('fecha_produccion', $fecha); ?>">
                 </div>

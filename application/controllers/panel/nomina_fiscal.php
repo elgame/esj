@@ -62,6 +62,8 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/show_import_asistencias/',
     'nomina_fiscal/parcheGeneraXML/',
 
+    'nomina_fiscal/show_import_nomina_corona/',
+
     'nomina_fiscal/cuadro_antiguedad_pdf/',
     'nomina_fiscal/cuadro_antiguedad_xls/',
   );
@@ -739,6 +741,78 @@ class nomina_fiscal extends MY_Controller {
   | Asigna las reglas para validar un articulo al agregarlo
   */
   public function configImportarAsistencias()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required|is_natural'),
+      array('field' => 'semana',
+            'label' => 'Semana',
+            'rules' => 'required|is_natural'),
+      array('field' => 'anio',
+            'label' => 'Año',
+            'rules' => 'required|is_natural'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function show_import_nomina_corona()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Fiscal - Importar Nomina Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
+    // Obtiene la informacion de la empresa.
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+
+    // Obtiene los dias de la semana.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empresa']->dia_inicia_semana);
+    $params['semana'] = $semana;
+
+    if (isset($_POST['id_empresa'])) {
+      $this->configImportarNominaCorona();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('nomina_fiscal_otros_model');
+        $res_mdl = $this->nomina_fiscal_otros_model->importNominaCorina($semana);
+
+        $_GET['msg'] = $res_mdl['error'];
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '500')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/nomina_fiscal/importar_nomina_corona', $params);
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function configImportarNominaCorona()
   {
     $this->load->library('form_validation');
     $rules = array(
