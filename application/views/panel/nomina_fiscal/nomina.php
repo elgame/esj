@@ -225,7 +225,12 @@
                                             $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = (($e->esta_asegurado=='f' && $e->nomina_guardada=='f'? $e->dias_trabajados-1: $e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                        $dias_complemento = (($e->esta_asegurado=='f' && $e->nomina_guardada=='f'? $e->dias_trabajados-1: $e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) );
+                        // Ajuste de nomina real con monto de Corona *********************
+                        if (isset($e->monto_corona) && $e->monto_corona > 0) {
+                          $e->salario_diario_real = $e->monto_corona / $dias_complemento;
+                        }
+                        $totalComplementoEmpleado = $dias_complemento * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';

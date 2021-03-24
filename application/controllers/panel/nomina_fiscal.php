@@ -791,8 +791,13 @@ class nomina_fiscal extends MY_Controller {
       {
         $this->load->model('nomina_fiscal_otros_model');
         $res_mdl = $this->nomina_fiscal_otros_model->importNominaCorina($semana);
-
         $_GET['msg'] = $res_mdl['error'];
+
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $params['resumen'] = $res_mdl['resumen'];
+          $_GET['msg'] = '556';
+        }
+
       }
     }
 
@@ -800,7 +805,7 @@ class nomina_fiscal extends MY_Controller {
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
-      if ($_GET['msg'] === '500')
+      if ($_GET['msg'] === '550')
       {
         $params['close'] = true;
       }
@@ -1559,6 +1564,10 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 555:
         $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 556:
+        $txt = 'La nomina se cargo correctamente, hay algunos errores en los trabajadores.';
         $icono = 'error';
         break;
     }

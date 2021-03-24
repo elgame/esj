@@ -331,19 +331,19 @@
 									  </div>
 									</div>
 
-									<div class="control-group">
+									<!-- <div class="control-group">
 									  <label class="control-label" for="dno_trabajador">No Trabajador </label>
 									  <div class="controls">
 											<input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo set_value('dno_trabajador'); ?>" maxlength="8" placeholder="# Trabajador">
 									  </div>
-									</div>
+									</div> -->
 
-                  <div class="control-group">
+                  <!-- <div class="control-group">
                     <label class="control-label" for="dno_checador">No Checador </label>
                     <div class="controls">
                       <input type="text" name="dno_checador" id="dno_checador" class="span12" value="<?php echo set_value('dno_checador'); ?>" maxlength="8" placeholder="# Checador">
                     </div>
-                  </div>
+                  </div> -->
 
                   <div class="control-group">
                     <label class="control-label" for="tipo_contrato">Tipo Contrato </label>

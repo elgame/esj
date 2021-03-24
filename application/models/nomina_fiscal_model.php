@@ -252,6 +252,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.id_puesto, u.id_departamente,
                 u.salario_diario,
                 u.salario_diario_real,
+                corona.monto_corona,
                 u.infonavit,
                 u.fondo_ahorro,
                 u.regimen_contratacion,
@@ -336,6 +337,12 @@ class nomina_fiscal_model extends CI_Model {
           WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
           GROUP BY id_empleado
          ) hrs ON u.id = hrs.id_empleado
+         LEFT JOIN (
+          SELECT id_empleado, Sum(monto+bono) AS monto_corona
+          FROM nomina_fiscal_monto_real
+          WHERE id_empresa = {$filtros['empresaId']} AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
+          GROUP BY id_empleado
+         ) corona ON u.id = corona.id_empleado
          WHERE u.user_nomina = 't' AND u.status = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
          {$ordenar}
       ";
@@ -937,6 +944,8 @@ class nomina_fiscal_model extends CI_Model {
           $empleadoNomina[0]->nomina->TotalDeducciones -= $otros_datos['totalPrestamosEf']; // a lo trasferido le restamos los prestamos en efectivo
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
+          $totalSalarioReal = floatval($datos['salario_real']);
+          $salarioDiarioReal = floatval($datos['salario_diario_real']);
 
           if (isset($empleadoNomina[0]->calculo_anual)) {
             $otros_datos['calculoAnual'] = $empleadoNomina[0]->calculo_anual;
@@ -978,8 +987,8 @@ class nomina_fiscal_model extends CI_Model {
             'ptu_grabable'              => $ptuGravado,
             'ptu'                       => $ptu,
             'id_puesto'                 => $empleadoNomina[0]->id_puesto,
-            'salario_real'              => $empleadoNomina[0]->salario_diario_real,
-            'sueldo_real'               => $empleadoNomina[0]->salario_diario_real * $empleadoNomina[0]->dias_trabajados,
+            'salario_real'              => $salarioDiarioReal, // $empleadoNomina[0]->salario_diario_real,
+            'sueldo_real'               => $totalSalarioReal, // $empleadoNomina[0]->salario_diario_real * $empleadoNomina[0]->dias_trabajados,
             'total_no_fiscal'           => $totalNoFiscal,
             'horas_extras'              => $empleadoNomina[0]->horas_extras_dinero,
             'horas_extras_grabable'     => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteGravado'],

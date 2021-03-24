@@ -290,7 +290,7 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
+		$sql_res = $this->db->select("u.id, u.id AS no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,

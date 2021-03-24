@@ -1218,7 +1218,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
             $row = $this->clenRowNominaCorona($row);
 
             if ($row[0] == $_GET['id'] && $row[5] == $_GET['sem'] && $row[6] == $_GET['anio']) {
-              $empleado = $this->usuarios_model->get_usuario_info($row[1]);
+              $empleado = $this->usuarios_model->get_usuario_info($row[1], true);
               if (isset($empleado['info'][0])) {
                 if ($empleado['info'][0]->id_empresa == $row[0]) {
                   $registro = $this->db->query("SELECT id
@@ -1262,7 +1262,11 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         fclose($handle);
 
       } else {
-        return array('error' => '552', 'resumen' => $val_resumen);
+        return array('error' => '552');
+      }
+
+      if (isset($val_resumen)) {
+        $val_res['resumen'] = $val_resumen;
       }
 
       return $val_res;

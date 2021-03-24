@@ -43,6 +43,16 @@
           <input type="hidden" name="id_empresa" value="<?php echo $empresa->id_empresa ?>">
           <input type="hidden" name="semana" value="<?php echo $semana['semana'] ?>">
           <input type="hidden" name="anio" value="<?php echo $semana['anio'] ?>">
+
+          <?php if (isset($resumen)): ?>
+            <div class="alert alert-error">
+              <ul>
+              <?php foreach ($resumen as $key => $value): ?>
+                  <li><?php echo $value ?></li>
+              <?php endforeach ?>
+              </ul>
+            </div>
+          <?php endif ?>
         </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success" id="btn-impirtar">Guardar</button>

@@ -546,6 +546,8 @@
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
         esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),
+        salario_diario_real: $tr.find('.salario-diario-real').val(),
+        salario_real: $tr.find('.sueldo-real').val(),
       },
     })
     .done(function(result) {

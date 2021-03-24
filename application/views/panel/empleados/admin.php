@@ -62,6 +62,7 @@
 						<table class="table table-striped table-bordered bootstrap-datatable">
 						  <thead>
 							  <tr>
+                  <th>No Trabajador</th>
 							  	<th>Nombre</th>
 									<th>RFC</th>
 									<th>Banco</th>
@@ -73,6 +74,7 @@
 						  <tbody>
 						<?php foreach($usuarios['usuarios'] as $usuario){ ?>
 							<tr>
+                <td><?php echo $usuario->id_usuario; ?></td>
 								<td><?php echo $usuario->nombre.' '.$usuario->apellido_paterno.' '.$usuario->apellido_materno; ?></td>
 								<td><?php echo $usuario->rfc; ?></td>
 								<td><?php echo $usuario->cuenta_banco; ?></td>
