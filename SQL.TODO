@@ -1,9 +1,9 @@
 
  ☐ Ajustar la nomina para la integración del programa Corona
-   -- lap
+   -- lap|pcc
     CREATE TABLE public.nomina_fiscal_monto_real
       (
-          id bigint NOT NULL DEFAULT nextval('nomina_fiscal_monto_real_id_seq'::regclass),
+          id bigserial NOT NULL,
           id_empleado bigint NOT NULL,
           id_empresa integer NOT NULL,
           anio integer NOT NULL,
@@ -23,6 +23,8 @@
       ) TABLESPACE pg_default;
     ALTER TABLE public.nomina_fiscal_monto_real OWNER to programa;
     COMMENT ON TABLE public.nomina_fiscal_monto_real IS 'Son los datos que se cargan del programa de Corona';
+    -- pcc
+    CREATE INDEX nomina_fiscal_monto_real_pindex ON public.nomina_fiscal_monto_real USING btree (id_empleado ASC NULLS LAST, id_empresa ASC NULLS LAST, anio ASC NULLS LAST, semana ASC NULLS LAST) TABLESPACE pg_default;
 
  ☐ Apartado de nivelacion de producciones
    -- lap

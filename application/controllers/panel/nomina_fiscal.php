@@ -1536,6 +1536,31 @@ class nomina_fiscal extends MY_Controller {
         $txt = 'Ocurrió un error al leer el archivo de asistencias.';
         $icono = 'error';
         break;
+
+      case 550:
+        $txt = 'La nomina se cargo correctamente.';
+        $icono = 'success';
+        break;
+      case 551:
+        $txt = 'Ocurrió un error al subir el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 552:
+        $txt = 'Ocurrió un error al leer el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 553:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 554:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 555:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
     }
 
     return array(
