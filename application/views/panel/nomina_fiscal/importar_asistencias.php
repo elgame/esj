@@ -38,10 +38,20 @@
     <div class="modal-body" style="max-height: none;">
       <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/show_import_asistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" enctype="multipart/form-data">
         <div>
-          <label>Seleccionar archivo: <input type="file" name="archivo_asistencias" accept=".csv" placeholder=""></label>
+          <label>Seleccionar archivo: <input type="file" name="archivo_asistencias" accept=".xls" placeholder=""></label>
           <input type="hidden" name="id_empresa" value="<?php echo $empresa->id_empresa ?>">
           <input type="hidden" name="semana" value="<?php echo $semana['semana'] ?>">
           <input type="hidden" name="anio" value="<?php echo $semana['anio'] ?>">
+
+          <?php if (isset($resumen)): ?>
+            <div class="alert alert-error">
+              <ul>
+              <?php foreach ($resumen as $key => $value): ?>
+                  <li><?php echo $value ?></li>
+              <?php endforeach ?>
+              </ul>
+            </div>
+          <?php endif ?>
         </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success" id="btn-impirtar">Guardar</button>

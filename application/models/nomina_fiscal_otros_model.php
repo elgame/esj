@@ -1177,6 +1177,112 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     }
   }
 
+  public function importAsistencias2($semana)
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('ExcelHelpersLib');
+    $excelHelper = new ExcelHelpersLib;
+
+    $this->load->library('upload', $config);
+
+    if ( ! $this->upload->do_upload('archivo_asistencias'))
+    {
+      return array('error' => '501');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $nominaAsistencia = [];
+      $resumen = [];
+
+      $arrayAsistencias = $excelHelper->excelToArray($file['full_path']);
+
+      if (count($arrayAsistencias) > 0 && !empty($arrayAsistencias[0]['Clave Empleado'])) {
+        $this->load->model('usuarios_model');
+
+        foreach ($arrayAsistencias as $key => $datos) {
+
+          if (isset($datos['Clave Empleado']) && is_numeric($datos['Clave Empleado'])) { // si es un # de trabajador
+            $fecha = $excelHelper->formatFechaAsis($datos['Calendario']);
+            $fechaSem = MyString::obtenerSemanaDeFecha($fecha, $_POST['dia_inicia_semana']);
+
+            // si esta dentro del rango de la semana
+            if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
+              $empleado = $this->db->select("u.id, u.no_checador" )->from("usuarios u")
+                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.id", $datos['Clave Empleado'])->get()->row();
+              if (isset($empleado->id)) { // si existe el trabajador en la empresa
+                $tipo = 'f';
+                if ($datos['Status'] == 'Asistencia') {
+                  $tipo = 'a';
+                }
+
+                $incapasidad = $this->db->query("SELECT id_asistencia FROM nomina_asistencia
+                                           WHERE id_usuario = {$empleado->id} AND tipo = 'in'
+                                            AND DATE(fecha_ini) >= '{$fecha}' AND DATE(fecha_fin) <= '{$fecha}'")->row();
+
+                if (!isset($incapasidad->id_asistencia)) { // si no es incapacidad
+                  $this->db->where("id_usuario = {$empleado->id} AND tipo = 'f' AND
+                    DATE(fecha_ini) = '{$fecha}' AND DATE(fecha_fin) = '{$fecha}'"
+                  );
+                  $this->db->delete('nomina_asistencia'); // elimina la falta de ese día
+
+                  if ($tipo == 'f') { // si es una falta se inserta
+                    $nominaAsistencia[] = array(
+                      'fecha_ini'   => $fecha,
+                      'fecha_fin'   => $fecha,
+                      'id_usuario'  => $empleado->id,
+                      'tipo'        => $tipo,
+                      'id_clave'    => null,
+                      'id_registro' => $this->session->userdata('id_usuario'),
+                    );
+                  }
+                }
+
+                // Agregamos las horas trabajadas
+                $this->db->where("id_empleado = {$empleado->id} AND id_empresa = {$_POST['id_empresa']} AND DATE(fecha) = '{$fecha}'");
+                $this->db->delete('nomina_asistencia_hrs'); // elimina las hrs del dia
+                if ($tipo !== 'f') {
+                  $hrs = 0;
+                  if (trim($datos['Tiempo Trabajado']) != '') {
+                    $hhrr = explode(':', $datos['Tiempo Trabajado']);
+                    $hrs = floatval($hhrr[0]);
+                    $hrs += floatval($hhrr[1])/60;
+                  }
+                  $this->db->insert('nomina_asistencia_hrs', [
+                    'id_empresa'  => $_POST['id_empresa'],
+                    'anio'        => $semana['anio'],
+                    'semana'      => $semana['semana'],
+                    'id_empleado' => $empleado->id,
+                    'fecha'       => $fecha,
+                    'hrs'         => $hrs,
+                  ]);
+                }
+
+              } else {
+                $resumen[] = "El trabajador {$datos['Clave Empleado']} No esta registrado en la empresa seleccionada.";
+              }
+            } else {
+              $resumen[] = "El trabajador {$datos['Clave Empleado']}, La fecha {$fecha} no esta dentro de la semana seleccionada.";
+            }
+          }
+        }
+
+        // Si existen faltas o incapacidades las agrega.
+        if (count($nominaAsistencia) > 0)
+        {
+          $this->db->insert_batch('nomina_asistencia', $nominaAsistencia);
+        }
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500', 'resumen' => $resumen);
+    }
+  }
+
   public function importNominaCorina($semana)
   {
     $config['upload_path'] = APPPATH.'media/temp/';

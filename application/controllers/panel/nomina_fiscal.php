@@ -708,6 +708,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los dias de la semana.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empresa']->dia_inicia_semana);
     $params['semana'] = $semana;
+    $_POST['dia_inicia_semana'] = $params['empresa']->dia_inicia_semana;
 
     if (isset($_POST['id_empresa'])) {
       $this->configImportarAsistencias();
@@ -718,7 +719,11 @@ class nomina_fiscal extends MY_Controller {
       else
       {
         $this->load->model('nomina_fiscal_otros_model');
-        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias($semana);
+        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias2($semana);
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $res_mdl['error'] = '503';
+          $params['resumen'] = $res_mdl['resumen'];
+        }
 
         $_GET['msg'] = $res_mdl['error'];
       }
@@ -1539,6 +1544,10 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 502:
         $txt = 'Ocurrió un error al leer el archivo de asistencias.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Las asistencias se guardaron correctamente, pero hay algunos detalles en algunos trabajadores.';
         $icono = 'error';
         break;
 
