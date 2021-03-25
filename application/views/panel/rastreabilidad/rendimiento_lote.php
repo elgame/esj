@@ -51,7 +51,13 @@
                           </select>
                         </td>
                         <td style="text-align: center;">
-                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
+                          <?php
+                          $certificado = '';
+                          if ((isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't') || $lote_actual == 1) {
+                            $certificado = 'checked';
+                          }
+                          ?>
+                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo $certificado ?>>
                         </td>
                         <td>
                           <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span8"

@@ -112,10 +112,13 @@ class rastreabilidad_paletas_model extends privilegios_model {
 
         $result = $this->db->query("SELECT p.id_pallet, psp.posicion, p.no_cajas, p.folio,
             string_agg(distinct c.codigo, ', ') AS clasificaciones, string_agg(distinct u.codigo, ', ') AS unidades,
-            p.folio_int, p.certificado
+            p.folio_int, p.certificado,
+            Sum(CASE rr.certificado WHEN true THEN pr.cajas ELSE 0 END) cajas_cer,
+            Sum(CASE rr.certificado WHEN false THEN pr.cajas ELSE 0 END) cajas_no_cer
           FROM otros.paletas_salidas_pallets psp
             INNER JOIN rastria_pallets p ON p.id_pallet = psp.id_pallet
             INNER JOIN rastria_pallets_rendimiento pr ON p.id_pallet = pr.id_pallet
+            INNER JOIN rastria_rendimiento rr ON rr.id_rendimiento = pr.id_rendimiento
             INNER JOIN clasificaciones c ON c.id_clasificacion = pr.id_clasificacion
             INNER JOIN unidades u ON u.id_unidad = pr.id_unidad
           WHERE psp.id_paleta_salida = {$id_paleta}
@@ -604,12 +607,14 @@ class rastreabilidad_paletas_model extends privilegios_model {
           $pallets[0][$i] = ($i*2)+1;
           $pallets[1][$i] = ($exist? $data['pallets'][($i*2)+1]->clasificaciones: '');
           $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
-          $pallets[3][$i] = ($exist? "{$data['pallets'][($i*2)+1]->folio_int}-{$data['pallets'][($i*2)+1]->certificado}": '');
+          $cajastxt = ($exist ? "{$data['pallets'][($i*2)+1]->cajas_cer}C/{$data['pallets'][($i*2)+1]->cajas_no_cer}N" : '');
+          $pallets[3][$i] = ($exist? "{$data['pallets'][($i*2)+1]->folio_int}-{$cajastxt}": '');
 
           $exist = isset($data['pallets'][($i+1)*2]);
           $pallets[4][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
           $pallets[5][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
-          $pallets[6][$i] = ($exist? "{$data['pallets'][($i+1)*2]->folio_int}-{$data['pallets'][($i+1)*2]->certificado}": '');
+          $cajastxt = ($exist ? "{$data['pallets'][($i+1)*2]->cajas_cer}C/{$data['pallets'][($i+1)*2]->cajas_no_cer}N": '');
+          $pallets[6][$i] = ($exist? "{$data['pallets'][($i+1)*2]->folio_int}-{$cajastxt}": '');
           $pallets[7][$i] = ($i+1)*2;
         }
       }
@@ -623,15 +628,18 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $pdf->Row($pallets[1], true, true);
       $pdf->SetX(6);
       $pdf->Row($pallets[2], true, true);
+      $pdf->SetFont('Arial', '', 5);
       $pdf->SetX(6);
       $pdf->Row($pallets[3], true, true);
 
       $pdf->SetFillColor(230, 230, 230);
 
+      $pdf->SetFont('Arial', '', 6);
       $pdf->SetX(6);
       $pdf->Row($pallets[4], true, true);
       $pdf->SetX(6);
       $pdf->Row($pallets[5], true, true);
+      $pdf->SetFont('Arial', '', 5);
       $pdf->SetX(6);
       $pdf->Row($pallets[6], true, true);
       $pdf->SetFillColor(200, 200, 200);
