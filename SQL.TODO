@@ -1,5 +1,5 @@
 
- ☐ Ajustar la nomina para la integración del programa Corona
+ ✔ Ajustar la nomina para la integración del programa Corona @done (21-03-26 16:06)
    -- lap|pcc|san
     CREATE TABLE public.nomina_fiscal_monto_real
       (
@@ -25,7 +25,6 @@
     COMMENT ON TABLE public.nomina_fiscal_monto_real IS 'Son los datos que se cargan del programa de Corona';
     CREATE INDEX nomina_fiscal_monto_real_pindex ON public.nomina_fiscal_monto_real USING btree (id_empleado ASC NULLS LAST, id_empresa ASC NULLS LAST, anio ASC NULLS LAST, semana ASC NULLS LAST) TABLESPACE pg_default;
     update rastria_rendimiento set certificado = 't' where lote_ext = 1 and id_area = 2;
-    -- lap|san
     ALTER TABLE otros.ranchos ADD COLUMN codigo character varying(20) COLLATE pg_catalog."default";
 
  ☐ Apartado de nivelacion de producciones
