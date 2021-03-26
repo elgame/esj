@@ -56,7 +56,7 @@
                     <label class="control-label" for="codigo">Código </label>
                     <div class="controls">
                       <input type="text" name="codigo" id="codigo" class="span10" maxlength="140"
-                      value="<?php echo set_value('codigo'); ?>" required placeholder="Codigo">
+                      value="<?php echo set_value('codigo'); ?>" placeholder="Codigo">
                     </div>
                   </div>
 
