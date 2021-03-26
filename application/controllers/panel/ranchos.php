@@ -235,6 +235,9 @@ public function fecha($fecha)
       array('field' => 'did_area',
             'label' => 'Área',
             'rules' => 'required|numeric'),
+      array('field' => 'codigo',
+            'label' => 'Código',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

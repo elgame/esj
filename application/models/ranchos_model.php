@@ -38,7 +38,7 @@ class ranchos_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND').' a.id_area = ' . $this->input->get('did_area');
 
     $query['query'] =
-    			"SELECT r.id_rancho, r.nombre, r.status, e.id_empresa, e.nombre_fiscal AS empresa,
+    			"SELECT r.id_rancho, r.nombre, r.codigo, r.status, e.id_empresa, e.nombre_fiscal AS empresa,
             a.id_area, a.nombre AS area
 					FROM otros.ranchos r
             INNER JOIN public.empresas e ON e.id_empresa = r.id_empresa
@@ -77,6 +77,7 @@ class ranchos_model extends CI_Model {
         'id_empresa' => $this->input->post('did_empresa'),
         'id_area'    => $this->input->post('did_area'),
         'nombre'     => $this->input->post('nombre'),
+        'codigo'     => $this->input->post('codigo'),
       );
 		}
 
@@ -108,6 +109,7 @@ class ranchos_model extends CI_Model {
         'id_empresa' => $this->input->post('did_empresa'),
         'id_area'    => $this->input->post('did_area'),
         'nombre'     => $this->input->post('nombre'),
+        'codigo'     => $this->input->post('codigo'),
       );
 			// Bitacora
 	    $id_bitacora = $this->bitacora_model->_update('otros.ranchos', $id_rancho, $data,
@@ -145,7 +147,7 @@ class ranchos_model extends CI_Model {
 	{
 		$id_rancho = $id_rancho? $id_rancho: (isset($_GET['id'])? $_GET['id']: 0);
 
-		$sql_res = $this->db->select("id_rancho, id_empresa, id_area, nombre, status" )
+		$sql_res = $this->db->select("id_rancho, id_empresa, id_area, nombre, codigo, status" )
 												->from("otros.ranchos")
 												->where("id_rancho", $id_rancho)
 												->get();
@@ -180,7 +182,10 @@ class ranchos_model extends CI_Model {
 	public function getRanchosAjax($sqlX = null){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND (
+        lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+        OR lower(r.codigo) LIKE '".mb_strtolower($this->input->get('term'), 'UTF-8')."'
+      )";
 
 		if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
       $sql .= " AND r.id_empresa in(".$this->input->get('did_empresa').")";

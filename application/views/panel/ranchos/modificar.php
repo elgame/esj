@@ -54,6 +54,14 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="codigo">Código </label>
+                    <div class="controls">
+                      <input type="text" name="codigo" id="codigo" class="span10" maxlength="140"
+                      value="<?php echo isset($data->codigo)? $data->codigo:''; ?>" required placeholder="Codigo">
+                    </div>
+                  </div>
+
                 </div> <!--/span-->
 
                 <div class="clearfix"></div>
