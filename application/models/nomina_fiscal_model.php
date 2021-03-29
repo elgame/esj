@@ -1057,6 +1057,8 @@ class nomina_fiscal_model extends CI_Model {
         $otros_datos['totalPrestamosEf'] = $totalPrestamosEf;
 
         $totalNoFiscal = floatval($datos['total_no_fiscal']);
+        $totalSalarioReal = floatval($datos['salario_real']);
+        $salarioDiarioReal = floatval($datos['salario_diario_real']);
 
         $nominasEmpleados[] = array(
             'id_empleado' => $empleadoId,
@@ -1094,8 +1096,8 @@ class nomina_fiscal_model extends CI_Model {
             'ptu_grabable' => 0,
             'ptu' => 0,
             'id_puesto' => $empleadoNomina[0]->id_puesto,
-            'salario_real' => $empleadoNomina[0]->salario_diario_real,
-            'sueldo_real' => $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
+            'salario_real' => $salarioDiarioReal, // $empleadoNomina[0]->salario_diario_real,
+            'sueldo_real' => $totalSalarioReal, // $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
             'total_no_fiscal' => $totalNoFiscal,
             'horas_extras' => 0,
             'horas_extras_grabable' => 0,
