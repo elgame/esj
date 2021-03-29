@@ -2,6 +2,7 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
+                  <th>Id</th>
                   <th>Codigo</th>
                   <th>Nombre</th>
                   <th>Opciones</th>
@@ -10,6 +11,7 @@
               <tbody>
             <?php foreach($productos['productos'] as $producto){ ?>
               <tr>
+                <td><?php echo $producto->id_producto; ?></td>
                 <td><?php echo $producto->codigo; ?></td>
                 <td><?php echo $producto->nombre; ?></td>
                 <td class="center">
