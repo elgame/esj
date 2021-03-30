@@ -68,6 +68,8 @@
                 'attrs' => array('style' => 'margin-bottom: 10px;') )
               );
              ?>
+             <a href="<?php echo base_url('panel/recetas/show_import_recetas_corona/?id='.set_value_get('did_empresa', $empresa_default->id_empresa).'&id_area='.set_value_get('did_area').'&cultivo='.set_value_get('darea'). '&fecha=' . set_value_get('ffecha2', $fecha)) ?>" class="btn btn-info" rel="superbox-50x450" title="Importar Recetas Corona"><i class="icon-upload"></i></a>
+
 
              <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 130px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:16px;font-weight:bold;"></div>
 

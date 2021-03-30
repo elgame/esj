@@ -13,7 +13,7 @@ class recetas extends MY_Controller {
     'recetas/ajax_get_recetas/',
     'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
-
+    'recetas/show_import_recetas_corona/'
   );
 
   public function _remap($method){
@@ -448,6 +448,79 @@ class recetas extends MY_Controller {
     $this->load->model('recetas_model');
     $this->recetas_model->crearOrdenesFaltantes();
     redirect(base_url('panel/recetas/faltantes_productos'));
+  }
+
+
+  public function show_import_recetas_corona()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Recetas - Importar Recetas Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    // Obtiene la informacion de la empresa.
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+
+    if (isset($_POST['id_empresa'])) {
+      $this->configImportarRecetasCorona();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('recetas_model');
+        $res_mdl = $this->recetas_model->importRecetasCorona($semana);
+        $_GET['msg'] = $res_mdl['error'];
+
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $params['resumen'] = $res_mdl['resumen'];
+          $_GET['msg'] = '556';
+        }
+
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/recetas/importar_recetas_corona', $params);
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function configImportarRecetasCorona()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required|is_natural'),
+      array('field' => 'id_area',
+            'label' => 'Cultivo',
+            'rules' => 'required|is_natural'),
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
   /*
