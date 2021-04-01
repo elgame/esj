@@ -478,6 +478,11 @@ class MyString {
     return $response;
   }
 
+  public static function fechaFormat($fecha, $format='d/m/Y') {
+    $fecha = DateTime::createFromFormat($format, $fecha);
+    return $fecha->format('Y-m-d');
+  }
+
 
   public static function fechaAT($fecha) {
     return self::fechaATexto($fecha, 'in');

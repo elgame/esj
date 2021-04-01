@@ -53,6 +53,16 @@
               </ul>
             </div>
           <?php endif ?>
+
+          <?php if (isset($resumenok)): ?>
+            <div class="alert alert-info">
+              <ul>
+              <?php foreach ($resumenok as $key => $value): ?>
+                  <li><?php echo $value ?></li>
+              <?php endforeach ?>
+              </ul>
+            </div>
+          <?php endif ?>
         </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success" id="btn-impirtar">Guardar</button>

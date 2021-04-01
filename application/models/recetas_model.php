@@ -1000,95 +1000,309 @@ class recetas_model extends CI_Model {
 
     $this->load->library('upload', $config);
 
-    if ( ! $this->upload->do_upload('archivo_asistencias'))
+    if ( ! $this->upload->do_upload('archivo_recetas'))
     {
       return array('error' => '501');
     }
     else
     {
       $file = $this->upload->data();
-      $nominaAsistencia = [];
+      $recetasData = [];
+      $val_resumenok = [];
 
       $handle = fopen($file['full_path'], "r");
       if ($handle) {
         $this->load->model('usuarios_model');
 
+        if ($_POST['id_empresa'] !== '')
+          $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_POST['id_empresa'])->get()->row()->dia_inicia_semana;
+        else
+          $diaComienza = '4';
+        $ff = explode('-', $_POST['fecha']);
+        $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
+
+        // Construcción de los datos de las recetas
         while (($line = fgets($handle)) !== false) {
-          $datos = str_getcsv($line);
-          if (isset($datos[0]) && is_numeric($datos[0])) { // si es un # de trabajador
-            $fecha = (DateTime::createFromFormat('d/m/Y', $datos[2]));
-            $fecha = $fecha->format('Y-m-d');
+          if (trim($line) != '') {
+            $datos = str_getcsv($line);
+            $datos = $this->clearRowRecetaCorona($datos);
 
-            // si esta dentro del rango de la semana
-            if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
-              $empleado = $this->db->select("u.id, u.no_checador" )->from("usuarios u")
-                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.no_checador", $datos[0])->get()->row();
-              if (isset($empleado->id)) { // si existe el trabajador en la empresa
-                $tipo = 'f';
-                if ($datos[4] != '' && $datos[5] != '') {
-                  $tipo = 'a';
-                } elseif($datos[4] != '' || $datos[5] != '') {
-                  $tipo = 'a';
-                }
+            if ($datos[0] == 'H') { // Cabecera
+              $cargas = explode('.', $datos[10]);
 
-                $incapasidad = $this->db->query("SELECT id_asistencia FROM nomina_asistencia
-                                           WHERE id_usuario = {$empleado->id} AND tipo = 'in'
-                                            AND DATE(fecha_ini) >= '{$fecha}' AND DATE(fecha_fin) <= '{$fecha}'")->row();
-
-                if (!isset($incapasidad->id_asistencia)) { // si no es incapacidad
-                  $this->db->where("id_usuario = {$empleado->id} AND tipo = 'f' AND
-                    DATE(fecha_ini) = '{$fecha}' AND DATE(fecha_fin) = '{$fecha}'"
-                  );
-                  $this->db->delete('nomina_asistencia'); // elimina la falta de ese día
-
-                  if ($tipo == 'f') { // si es una falta se inserta
-                    $nominaAsistencia[] = array(
-                      'fecha_ini'   => $fecha,
-                      'fecha_fin'   => $fecha,
-                      'id_usuario'  => $empleado->id,
-                      'tipo'        => $tipo,
-                      'id_clave'    => null,
-                      'id_registro' => $this->session->userdata('id_usuario'),
-                    );
-                  }
-                }
-
-                // Agregamos las horas trabajadas
-                $this->db->where("id_empleado = {$empleado->id} AND id_empresa = {$_POST['id_empresa']} AND DATE(fecha) = '{$fecha}'");
-                $this->db->delete('nomina_asistencia_hrs'); // elimina las hrs del dia
-                if ($tipo !== 'f') {
-                  $hrs = 0;
-                  if (trim($datos[8]) != '') {
-                    $hhrr = explode(':', $datos[8]);
-                    $hrs = floatval($hhrr[0]);
-                    $hrs += floatval($hhrr[1])/60;
-                  }
-                  $this->db->insert('nomina_asistencia_hrs', [
-                    'id_empresa'  => $_POST['id_empresa'],
-                    'anio'        => $semana['anio'],
-                    'semana'      => $semana['semana'],
-                    'id_empleado' => $empleado->id,
-                    'fecha'       => $fecha,
-                    'hrs'         => $hrs,
-                  ]);
-                }
-
-              }
+              $recetasData[] = [
+                'id_empresa'       => $datos[1],
+                'id_empresa_ap'    => $datos[2],
+                'folio_hoja'       => $datos[3],
+                'tipo'             => 'lts',
+                'fecha'            => MyString::fechaFormat($datos[4]),
+                'fecha_aplicacion' => MyString::fechaFormat($datos[5]),
+                'id_area'          => $datos[6],
+                'id_rancho'        => $datos[7],
+                'centros_costo'    => $datos[8],
+                'dosis_planta'     => 0,
+                'planta_ha'        => ($datos[11]/($datos[9]>0? $datos[9]: 1)),
+                'ha_neta'          => $datos[9],
+                'no_plantas'       => $datos[11],
+                'kg_totales'       => 0,
+                'ha_bruta'         => $datos[9],
+                'cargas'           => $datos[10],
+                'carga1'           => $cargas[0],
+                'carga2'           => (isset($cargas[1])? "0.{$cargas[1]}": 0),
+                'total_importe'    => 0,
+                'semana'           => $semana['semana'],
+                'calendario'       => NULL,
+                'productos'        => []
+              ];
+            } else {
+              $rowh = $recetasData[count($recetasData)-1];
+              $cantidad_carga = ($datos[2]/($rowh['cargas']>0? $rowh['cargas']: 1));
+              $recetasData[count($recetasData)-1]['productos'][] = [
+                'id_producto'            => $datos[1],
+                'dosis_mezcla'           => round($cantidad_carga, 6), // cantidad
+                'aplicacion_total'       => $datos[2],
+                'precio'                 => 0,
+                'importe'                => 0,
+                'dosis_carga1'           => round($cantidad_carga, 6),
+                'dosis_carga2'           => round($cantidad_carga*$rowh['carga2'], 6),
+                'aplicacion_total_saldo' => $datos[2],
+              ];
             }
           }
         }
         fclose($handle);
 
-        // Si existen faltas o incapacidades las agrega.
-        if (count($nominaAsistencia) > 0)
-        {
-          $this->db->insert_batch('nomina_asistencia', $nominaAsistencia);
+        // Validación
+        $val_resumen = [];
+        if (count($recetasData) > 0) {
+          foreach ($recetasData as $key => $receta) {
+            $this->validaRecetaCorona($recetasData[$key], $val_resumen);
+          }
         }
+
+        if (count($val_resumen) > 0) {
+          return ['error' => '503', 'resumen' => $val_resumen];
+        } else {
+          // Se guardan todas las recetas
+          foreach ($recetasData as $key => $receta) {
+            // Valida si ya existe la receta no se agrega
+            $res = $this->db->query("SELECT id_recetas FROM otros.recetas WHERE folio_hoja = '{$receta['folio_hoja']}' AND id_empresa = {$receta['id_empresa']} AND id_empresa_ap = {$receta['id_empresa_ap']} AND id_area = {$receta['id_area']} AND status = 't'")->row();
+            if (!isset($res->id_recetas)) {
+              $this->saveRecetaData($receta);
+            } else {
+              $val_resumenok[] = "Receta No {$receta['folio_hoja']} ya esta registrada en la empresa y cultivo seleccionados.";
+            }
+          }
+        }
+
       } else {
         return array('error' => '502');
       }
 
-      return array('error' => '500');
+      return array('error' => '500', 'resumenok' => $val_resumenok);
+    }
+  }
+
+  private function validaRecetaCorona(&$receta, &$val_resumen)
+  {
+    $areas = [3 => 21];
+    if ($receta['id_empresa'] != $this->input->post('id_empresa')) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa seleccionada no coincide con la del archivo.";
+      return false;
+    } elseif ($receta['id_area'] != $this->input->post('id_area')) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; El cultivo seleccionada no coincide con el del archivo.";
+      return false;
+    } elseif (!isset($areas[$receta['id_area']]) || $areas[$receta['id_area']] != $receta['id_empresa_ap']) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa de aplicación no coincide con el cultivo.";
+      return false;
+    } else {
+      $res = $this->db->query("SELECT id_rancho FROM otros.ranchos WHERE codigo = '{$receta['id_rancho']}' AND id_empresa = {$receta['id_empresa_ap']} AND id_area = {$receta['id_area']} AND status = 't'")->row();
+      if (!isset($res->id_rancho) ) {
+        $val_resumen[] = "Receta No {$receta['folio_hoja']}; El rancho '{$receta['id_rancho']}' no existe en la empresa de aplicación y cultivo seleccionados.";
+        return false;
+      } else {
+        $receta['id_rancho'] = $res->id_rancho;
+
+        $acentrosc = explode(',', $receta['centros_costo']);
+        if (count($acentrosc) > 0) {
+          $centros_costos = [];
+          $centros_costos_e = [];
+          foreach ($acentrosc as $key => $cc) {
+            $res = $this->db->query("SELECT id_centro_costo FROM otros.centro_costo WHERE codigo = '{$cc}' AND id_area = {$receta['id_area']} AND status = 't'")->row();
+            if (isset($res->id_centro_costo)) {
+              $centros_costos[] = $res->id_centro_costo;
+            } else {
+              $centros_costos_e[] = $cc;
+            }
+          }
+
+          if (count($centros_costos_e) > 0) {
+            $centros_costos_e = implode(', ', $centros_costos_e);
+            $val_resumen[] = "Receta No {$receta['folio_hoja']}; Los centros de costo '{$centros_costos_e}' no existen en el cultivo seleccionado.";
+            return false;
+          }
+          $receta['centros_costo'] = $centros_costos;
+
+
+          if (count($receta['productos']) > 0) {
+            $productos_e = [];
+            foreach ($receta['productos'] as $key => $pp) {
+              if (is_numeric($pp['id_producto'])) {
+                $res = $this->db->query("SELECT id_producto, last_precio FROM productos WHERE id_producto = '{$pp['id_producto']}' AND status = 'ac'")->row();
+                if (isset($res->id_producto)) {
+                  $receta['productos'][$key]['precio'] = $res->last_precio;
+                  $receta['productos'][$key]['importe'] = round($res->last_precio * $receta['productos'][$key]['aplicacion_total'], 2);
+                  $receta['kg_totales'] += $receta['productos'][$key]['aplicacion_total'];
+                  $receta['total_importe'] += $receta['productos'][$key]['importe'];
+                } else {
+                  $productos_e[] = $pp['id_producto'];
+                }
+              } else {
+                $productos_e[] = $pp['id_producto'];
+              }
+            }
+            $receta['dosis_planta'] = round($receta['kg_totales']/($receta['no_plantas']>0? $receta['no_plantas']: 1), 6);
+
+            if (count($productos_e) > 0) {
+              $productos_e = implode(', ', $productos_e);
+              $val_resumen[] = "Receta No {$receta['folio_hoja']}; Los productos '{$productos_e}' no existen en el catalogo de la empresa.";
+              return false;
+            } else {
+
+              $calendarios = $this->getCalendariosAjax($receta['id_area']);
+              if (count($calendarios) == 0) {
+                $val_resumen[] = "Receta No {$receta['folio_hoja']}; El cultivo no cuenta con un calendario asignado.";
+                return false;
+              } else {
+                $receta['calendario'] = $calendarios[0]->id;
+              }
+            }
+
+          } else {
+            $val_resumen[] = "Receta No {$receta['folio_hoja']}; No tiene productos asignados.";
+            return false;
+          }
+
+        } else {
+          $val_resumen[] = "Receta No {$receta['folio_hoja']}; No tiene centros de costo asignados.";
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  private function clearRowRecetaCorona($data)
+  {
+    foreach ($data as $key => $item) {
+      $data[$key] = trim($item);
+    }
+
+    return $data;
+  }
+
+  /**
+   * Recetas agregar
+   *
+   * @return array
+   */
+  public function saveRecetaData($receta)
+  {
+    $folio = $this->folio($receta['id_empresa'], $receta['tipo']);
+
+    $data = array(
+      'id_empresa'            => $receta['id_empresa'],
+      'id_empresa_ap'         => $receta['id_empresa_ap'],
+      'id_formula'            => NULL,
+      'id_realizo'            => $this->session->userdata('id_usuario'),
+      'id_solicito'           => 14, // sr vianey
+      'id_autorizo'           => 14,
+      'id_area'               => $receta['id_area'],
+      'fecha'                 => $receta['fecha'],
+      'folio'                 => $folio,
+      'folio_hoja'            => $receta['folio_hoja'],
+      'objetivo'              => 'Receta cargada automáticamente del sistema de Corona',
+      'semana'                => $receta['semana'],
+      'tipo'                  => $receta['tipo'],
+
+      'dosis_planta'          => floatval($receta['dosis_planta']),
+      'planta_ha'             => floatval($receta['planta_ha']),
+      'ha_neta'               => floatval($receta['ha_neta']),
+      'no_plantas'            => floatval($receta['no_plantas']),
+      'kg_totales'            => floatval($receta['kg_totales']),
+      'ha_bruta'              => floatval($receta['ha_bruta']),
+      'carga1'                => floatval($receta['carga1']),
+      'carga2'                => floatval($receta['carga2']),
+      'ph'                    => floatval(0),
+      'dosis_equipo'          => floatval(0),
+      'dosis_equipo_car2'     => floatval(0),
+
+      'a_etapa'               => '',
+      'a_ciclo'               => '',
+      'a_dds'                 => '',
+      'a_turno'               => '',
+      'a_via'                 => '',
+      'a_aplic'               => '',
+      'a_equipo'              => '',
+      'a_observaciones'       => '',
+      'fecha_aplicacion'      => $receta['fecha_aplicacion'],
+      'id_recetas_calendario' => $receta['calendario'],
+
+      'total_importe'         => floatval($receta['total_importe']),
+    );
+
+    $this->db->insert('otros.recetas', $data);
+    $recetaId = $this->db->insert_id('otros.recetas_id_recetas_seq');
+
+    $productos = array();
+    foreach ($receta['productos'] as $key => $producto)
+    {
+      $productos[] = array(
+        'id_receta'              => $recetaId,
+        'id_producto'            => $producto['id_producto'],
+        'rows'                   => $key,
+        'percent'                => round($producto['aplicacion_total']*100/$receta['kg_totales'], 2),
+        'dosis_mezcla'           => $producto['dosis_mezcla'],
+        'aplicacion_total'       => $producto['aplicacion_total'],
+        'precio'                 => $producto['precio'],
+        'importe'                => $producto['importe'],
+        'dosis_carga1'           => floatval($producto['dosis_carga1']),
+        'dosis_carga2'           => floatval($producto['dosis_carga2']),
+        'aplicacion_total_saldo' => $producto['aplicacion_total_saldo'],
+      );
+    }
+
+    if(count($productos) > 0)
+      $this->db->insert_batch('otros.recetas_productos', $productos);
+
+    $this->saveCatalogosData($recetaId, $receta);
+
+    return array('passes' => true, 'msg' => 3);
+  }
+
+  private function saveCatalogosData($recetaId, $receta)
+  {
+    // Inserta los ranchos
+    $this->db->delete('otros.recetas_rancho', ['id_receta' => $recetaId]);
+    if (isset($receta['id_rancho'])) {
+      $this->db->insert('otros.recetas_rancho', [
+        'id_rancho' => $receta['id_rancho'],
+        'id_receta' => $recetaId,
+        'num'       => 1
+      ]);
+    }
+
+    // Inserta los centros de costo
+    $this->db->delete('otros.recetas_centro_costo', ['id_receta' => $recetaId]);
+    if (isset($receta['centros_costo']) && count($receta['centros_costo']) > 0) {
+      foreach ($receta['centros_costo'] as $keyr => $id_centro_costo) {
+        $this->db->insert('otros.recetas_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_receta'       => $recetaId,
+          'num'             => count($receta['centros_costo'])
+        ]);
+      }
     }
   }
 

@@ -478,12 +478,14 @@ class recetas extends MY_Controller {
       else
       {
         $this->load->model('recetas_model');
-        $res_mdl = $this->recetas_model->importRecetasCorona($semana);
+        $res_mdl = $this->recetas_model->importRecetasCorona();
         $_GET['msg'] = $res_mdl['error'];
 
         if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
           $params['resumen'] = $res_mdl['resumen'];
-          $_GET['msg'] = '556';
+        }
+        if (isset($res_mdl['resumenok']) && count($res_mdl['resumenok']) > 0) {
+          $params['resumenok'] = $res_mdl['resumenok'];
         }
 
       }
@@ -715,6 +717,8 @@ class recetas extends MY_Controller {
    */
   private function showMsgs($tipo, $msg='', $title='Bascula')
   {
+    $txt = '';
+    $icono = 'error';
     switch($tipo){
       case 1:
         $txt = 'El campo ID es requerido.';
@@ -765,6 +769,23 @@ class recetas extends MY_Controller {
         $txt = 'La cuenta no tiene saldo suficiente.';
         $icono = 'error';
       break;
+
+      case 500:
+        $txt = 'Las recetas se guardaron correctamente.';
+        $icono = 'success';
+        break;
+      case 501:
+        $txt = 'Ocurrió un error al subir el archivo de recetas.';
+        $icono = 'error';
+        break;
+      case 502:
+        $txt = 'Ocurrió un error al leer el archivo de recetas.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Algunas recetas no se guardaron, revisar el detalle de errores.';
+        $icono = 'error';
+        break;
     }
 
     return array(
