@@ -1731,7 +1731,7 @@ class compras_requisicion_model extends CI_Model {
       if ($tipo_requisicion) {
         $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'L', 'L');
         $widths2 = array(43, 43, 43);
-        $widths = array(10, 20, 46, 65, 18, 25, 18, 25, 40);
+        $widths = array(10, 20, 46, 75, 18, 25, 18, 25, 30);
         $header = array('PROD', 'CANT', 'PROVEEDOR', 'PRODUCTO', 'P.U.', 'IMPORTE', 'ULTIMA/COM', 'PRECIO', 'Activos');
 
         $orden['info'][0]->totales['subtotal']  = 0;
@@ -1790,7 +1790,7 @@ class compras_requisicion_model extends CI_Model {
             $prod->codigo,
             ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)).''.($prod->presentacion==''? $prod->unidad: $prod->presentacion),
             $prod->proveedor,
-            $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+            "{$prod->id_producto} - ".$prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
             MyString::formatoNumero($precio_unitario1, 2, '$', false),
             MyString::formatoNumero($prod->{'importe'.$prod->id_proveedor}/$tipoCambio, 2, '$', false),
             (isset($ultimaCompra->fecha_creacion)? substr($ultimaCompra->fecha_creacion, 0, 10): ''),
@@ -1965,7 +1965,7 @@ class compras_requisicion_model extends CI_Model {
     if ($tipo_requisicion) {
       $aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
       $widths2 = array(43, 43, 43);
-      $widths = array(15, 10, 18, 30, 65, 18, 25, 18, 25, 18, 25);
+      $widths = array(15, 10, 18, 30, 70, 18, 25, 18, 20, 18, 25);
       $header = array('AREA', 'PROD', 'CANT', 'UNIDAD', 'PRODUCTO', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE', 'P.U.', 'IMPORTE');
 
       foreach ($orden['info'][0]->proveedores as $keypp => $value)
@@ -2022,7 +2022,7 @@ class compras_requisicion_model extends CI_Model {
           $prod->codigo,
           ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)),
           ($prod->presentacion==''? $prod->unidad: $prod->presentacion),
-          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+          "{$prod->id_producto} - ".$prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
           MyString::formatoNumero($precio_unitario1, 2, '$', false),
           MyString::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
           MyString::formatoNumero($precio_unitario2, 2, '$', false),
