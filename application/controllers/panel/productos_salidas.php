@@ -679,7 +679,7 @@ class productos_salidas extends MY_Controller {
         $response = true;
         $responseText = '';
         foreach ($this->input->post('productoId') as $key => $item) {
-          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE status = 'ac' AND id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
           if (empty($data_prod)) {
             $response = false;
             $responseText .= "{$_POST['concepto'][$key]}, ";

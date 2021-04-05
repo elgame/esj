@@ -387,7 +387,7 @@ class productos_salidas_model extends CI_Model {
       foreach ($productos as $key => $produto)
       {
         if (!empty($_POST['empresaTransId'])) {
-          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE status = 'ac' AND id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
           $produto['id_producto'] = $data_prod->id_producto;
         }
 

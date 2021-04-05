@@ -30,6 +30,10 @@
                 <input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
                   class="input-xlarge search-query" placeholder="Folio, Proveedor, Chofer, Camion, Placas" autofocus> |
 
+                <label for="dempresa">Empresa</label>
+                <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa', $empresa_default->nombre_fiscal) ?>" size="73">
+                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa', $empresa_default->id_empresa) ?>"> |
+
                 <label for="farea">Area</label>
                 <select name="farea" class="input-medium" id="farea">
                   <option value=""></option>

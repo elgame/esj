@@ -100,6 +100,10 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->load->model('areas_model');
 
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
     $params['basculas'] = $this->bascula_model->getBasculas(true);
     $params['areas'] = $this->areas_model->getAreas();
 
