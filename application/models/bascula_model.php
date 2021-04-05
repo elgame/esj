@@ -61,7 +61,7 @@ class bascula_model extends CI_Model {
 
     if($this->input->get('did_empresa') != '')
     {
-      $sql .= (empty($sql) ? "WHERE ": " AND ") . "  AND e.id_empresa = '".$this->input->get('did_empresa')."'";
+      $sql .= (empty($sql) ? "WHERE ": " AND ") . " e.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
     $str_query =
