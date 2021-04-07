@@ -1024,7 +1024,8 @@ class recetas_model extends CI_Model {
         // Construcción de los datos de las recetas
         while (($line = fgets($handle)) !== false) {
           if (trim($line) != '') {
-            $datos = str_getcsv($line);
+            // $datos = str_getcsv($line);
+            $datos = explode("\t", $line);
             $datos = $this->clearRowRecetaCorona($datos);
 
             if ($datos[0] == 'H') { // Cabecera
@@ -1071,6 +1072,9 @@ class recetas_model extends CI_Model {
           }
         }
         fclose($handle);
+        // echo "<pre>";
+        // var_dump($recetasData);
+        // echo "</pre>";exit;
 
         // Validación
         $val_resumen = [];
@@ -1079,6 +1083,9 @@ class recetas_model extends CI_Model {
             $this->validaRecetaCorona($recetasData[$key], $val_resumen);
           }
         }
+        // echo "<pre>";
+        // var_dump($recetasData);
+        // echo "</pre>";exit;
 
         if (count($val_resumen) > 0) {
           return ['error' => '503', 'resumen' => $val_resumen];
@@ -1197,6 +1204,7 @@ class recetas_model extends CI_Model {
   {
     foreach ($data as $key => $item) {
       $data[$key] = trim($item);
+      $data[$key] = str_replace('"', '', $data[$key]);
     }
 
     return $data;
