@@ -8,7 +8,7 @@ class banco_layout_bancomer_simple_model extends banco_cuentas_model {
 		parent::__construct();
 	}
 
-  public function get($pagos, $cuenta_retiro)
+  public function get($pagos, $cuenta_retiro, $tipo = 'compras')
   {
     // echo "<pre>";
     //   var_dump($pagos, $cuenta_retiro);
@@ -18,7 +18,11 @@ class banco_layout_bancomer_simple_model extends banco_cuentas_model {
       $noFile = isset($_GET['nofile']{0})? $_GET['nofile']: 1;
       $fecha = date("Y-m-d");
 
-      $pagos_archivo = $this->getPagosGrup($pagos, $cuenta_retiro);
+      if ($tipo == 'compras') {
+        $pagos_archivo = $this->getPagosGrup($pagos, $cuenta_retiro);
+      } else {
+        $pagos_archivo = $this->getPagosGrup($pagos, $cuenta_retiro);
+      }
       // echo "<pre>";
       // var_dump($pagos_archivo);
       // echo "</pre>";exit;
@@ -63,8 +67,12 @@ class banco_layout_bancomer_simple_model extends banco_cuentas_model {
       $zip = new ZipArchive;
       if ($zip->open(APPPATH."media/temp/{$nombre}.zip", ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
       {
-        $zip->addFromString("BBVA_Bancomer-".date('Y-m-d').".txt", $regMb);
-        $zip->addFromString("BBVA_Interbancarias-".date('Y-m-d').".txt", $regIn);
+        if (strlen($regMb) > 0) {
+          $zip->addFromString("BBVA_Bancomer-".date('Y-m-d').".txt", $regMb);
+        }
+        if (strlen($regIn) > 0) {
+          $zip->addFromString("BBVA_Interbancarias-".date('Y-m-d').".txt", $regIn);
+        }
 
         $zip->close();
       }

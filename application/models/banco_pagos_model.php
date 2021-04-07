@@ -316,15 +316,17 @@ class banco_pagos_model extends CI_Model {
     $response = $res_proveedores->result();
     foreach ($response as $key => $value)
     {
-      $value->pagos = $this->db->query("SELECT bpc.id_pago, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha_bruto) AS fecha,
-                                  COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula, bpc.descripcion, bpc.modificado_banco
-                               FROM banco_pagos_bascula AS bpc
-                               INNER JOIN bascula AS c ON c.id_bascula = bpc.id_bascula
-                               LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
-                               LEFT JOIN banco_bancos AS b ON b.id_banco = pc.id_banco
-                               WHERE bpc.status = 'f' AND bpc.id_proveedor = {$value->id_proveedor} {$sql}
-                               ORDER BY c.folio ASC")->result();
+      $value->pagos = $this->db->query("
+        SELECT bpc.id_pago, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha_bruto) AS fecha,
+          COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
+          COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula, bpc.descripcion, bpc.modificado_banco,
+          1 AS tcambio, b.codigo_bajio, pc.alias, b.id_banco, bpc.monto AS new_total
+        FROM banco_pagos_bascula AS bpc
+        INNER JOIN bascula AS c ON c.id_bascula = bpc.id_bascula
+        LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
+        LEFT JOIN banco_bancos AS b ON b.id_banco = pc.id_banco
+        WHERE bpc.status = 'f' AND bpc.id_proveedor = {$value->id_proveedor} {$sql}
+        ORDER BY c.folio ASC")->result();
       $value->cuentas_proveedor = $this->proveedores_model->getCuentas($value->id_proveedor);
     }
 
@@ -409,6 +411,19 @@ class banco_pagos_model extends CI_Model {
       );
 
     $this->banco_layout_model->get($data);
+  }
+
+  public function layoutBancomerBascula()
+  {
+    $this->load->model('banco_cuentas_model');
+    $this->load->model('banco_layout_bancomer_simple_model');
+    $tipo = $_GET['tipo'];
+    $pagos = $this->getPagosBascula(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'con_cuenta' => 'true' ));
+    $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
+
+    $this->banco_layout_bancomer_simple_model->get($pagos, $cuenta_retiro, 'bascula');
   }
 
   public function aplicarPagosBascula()

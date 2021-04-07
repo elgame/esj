@@ -191,7 +191,15 @@ class banco_pagos extends MY_Controller {
   public function layout_bascula()
   {
     $this->load->model('banco_pagos_model');
-    $this->banco_pagos_model->layoutBanamexBascula();
+    $_GET['did_empresa'] = $_GET['ide'];
+
+    if ($this->input->get('layout') === 'banamex') {
+      $this->banco_pagos_model->layoutBanamexBascula();
+    } elseif ($this->input->get('layout') === 'bajio') {
+      // $this->banco_pagos_model->layoutBajio();
+    } elseif ($this->input->get('layout') === 'bancomer') {
+      $this->banco_pagos_model->layoutBancomerBascula();
+    }
   }
 
   public function aplica_pagos_bascula()
