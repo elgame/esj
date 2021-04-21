@@ -584,6 +584,9 @@ class compras_model extends privilegios_model{
     //Actualiza la compra si es que se paga
     $this->actualizaCompra($compraId, $datos['total']);
 
+    // Se registra la salida de almacén si es que hay productos
+    $this->addSalidaAutNC($datos, $productos);
+
     return array('passes' => true, 'msg' => '5');
   }
 
@@ -714,6 +717,46 @@ class compras_model extends privilegios_model{
       $this->db->update('compras', array('status' => 'pa'), "id_compra = {$id_compra}");
     }else
       $this->db->update('compras', array('status' => 'p'), "id_compra = {$id_compra}");
+  }
+
+  public function addSalidaAutNC($nc, $productos)
+  {
+    if (count($productos) > 0) {
+      $this->load->model('productos_salidas_model');
+
+      // ============================================================
+      // Se registra la salida de almacen con la materia prima
+      $res = $this->productos_salidas_model->agregar(array(
+        'id_empresa'     => $nc['id_empresa'],
+        'id_almacen'     => 1,
+        'id_empleado'    => $nc['id_empleado'],
+        'folio'          => $this->productos_salidas_model->folio(),
+        'concepto'       => "Salida generada automáticamente por la Nota de Crédito {$nc['serie']}{$nc['folio']}",
+        'status'         => 's',
+        'fecha_creacion' => $nc['fecha'],
+        'fecha_registro' => date("Y-m-d H:i:s"),
+        'tipo'           => 's',
+        'id_empresa_ap'  => $nc['id_empresa'],
+
+        'id_area'        => NULL,
+      ));
+      $id_salida = $res['id_salida'];
+
+      // En productos_salidas_model->agregar se insertan los ranchos y centros de costo del POST
+
+      $salida = array();
+      foreach ($productos as $key => $produto)
+      {
+        $salida[] = array(
+          'id_salida'       => $id_salida,
+          'no_row'          => $key,
+          'id_producto'     => $produto['id_producto'],
+          'cantidad'        => abs($produto['cantidad']),
+          'precio_unitario' => $produto['precio_unitario'],
+        );
+      }
+      $this->productos_salidas_model->agregarProductos($id_salida, $salida);
+    }
   }
 
   /*

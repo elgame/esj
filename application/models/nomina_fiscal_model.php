@@ -3468,7 +3468,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 4);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(15, 100));
-          $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
+          $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -7326,7 +7326,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY() + 4);
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(15, 100));
-        $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
+        $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
