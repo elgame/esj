@@ -1691,9 +1691,12 @@ class polizas_model extends CI_Model {
       {
         //Se obtienen los prestamos
         $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
-                               FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
-                               WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
-                               GROUP BY u.id")->result();
+           FROM nomina_fiscal_prestamos AS nfp
+            INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+            INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+           WHERE np.tipo = 'fi' AND u.esta_asegurado = 't'
+            AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+           GROUP BY u.id")->result();
 
         //Se obtienen los fondos_ahorro
         $fondos_ahorro = $this->db->query("SELECT u.id, u.fondo_ahorro_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.fondo_ahorro), 0) AS fondo_ahorro
