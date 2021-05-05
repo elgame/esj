@@ -139,9 +139,7 @@ class produccion extends MY_Controller {
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
-    $this->load->model('almacenes_model');
     $this->load->model('produccion_model');
-    $this->load->model('compras_areas_model');
     $this->load->model('empresas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -149,25 +147,22 @@ class produccion extends MY_Controller {
       'titulo' => 'Nivelar producción'
     );
 
-    $this->configAddRegreso();
+    $this->configNivelar();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-      $res_mdl = $this->produccion_model->agregar();
+      $res_mdl = $this->produccion_model->nivelar();
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/produccion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        redirect(base_url('panel/produccion/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print=' ));
       }
     }
 
-    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['fecha']      = str_replace(' ', 'T', date("Y-m-d H:i"));
-
-    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     //imprimir
     $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
@@ -323,6 +318,50 @@ class produccion extends MY_Controller {
     return true;
   }
 
+  public function configNivelar()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'empresaId',
+            'label' => 'Empresa',
+            'rules' => 'required'),
+      array('field' => 'empresa',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'fecha',
+            'label' => 'Produccion',
+            'rules' => 'required'),
+
+      ['field' => 'concepto[]',
+        'label' => '',
+        'rules' => 'required'],
+      ['field' => 'productoId[]',
+        'label' => '',
+        'rules' => 'required'],
+      ['field' => 'cantidad[]',
+        'label' => '',
+        'rules' => ''],
+      ['field' => 'existencia[]',
+        'label' => '',
+        'rules' => ''],
+      ['field' => 'newexistencia[]',
+        'label' => '',
+        'rules' => ''],
+      ['field' => 'tipoMovimiento[]',
+        'label' => '',
+        'rules' => ''],
+      ['field' => 'precioUnit[]',
+        'label' => '',
+        'rules' => ''],
+      ['field' => 'importe[]',
+        'label' => '',
+        'rules' => ''],
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   public function configModSalida()
   {
     $this->load->library('form_validation');
@@ -364,6 +403,10 @@ class produccion extends MY_Controller {
         $txt = 'Se modifico el regreso de productos correctamente.';
         $icono = 'success';
       break;
+      case 6:
+        $txt = 'Se nivelaron los productos correctamente.';
+        $icono = 'success';
+        break;
     }
 
     return array(

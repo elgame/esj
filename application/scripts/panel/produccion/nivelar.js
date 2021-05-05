@@ -7,21 +7,10 @@
 
     autocompleteEmpresas();
     autocompleteClasificaciones();
-    // autocompleteTrabajador();
-    // autocompleteConcepto();
 
-    eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantKeypress();
-
-    $("#table-productos").on('change', '#cantidad', function(event) {
-      var $tr = $(this).parent().parent();
-      calculaProductoTotal($tr);
-    });
-    $("#costo_adicional").change(function(event) {
-      calculaTotal();
-    });
 
     $("#id_almacen").change(function(event) {
       var $table = $('#table-productos');
@@ -30,7 +19,6 @@
       });
     });
 
-    // copyCodigoAll();
   });
 
   /*
@@ -48,6 +36,10 @@
       select: function( event, ui ) {
         var $empresa =  $(this);
 
+        if ($("#empresaId").val() != ui.item.id) {
+          $('#table-productos tbody tr').remove();
+          calculaTotal();
+        }
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
@@ -60,75 +52,54 @@
     });
   };
 
-  // // Autocomplete para los Clasificaciones.
-  // var autocompleteClasificaciones = function() {
-  //  $("input#clasificacion").autocomplete({
-  //     source: base_url+'panel/facturacion/ajax_get_clasificaciones/?inventario=t',
-  //     minLength: 1,
-  //     selectFirst: true,
-  //     select: function( event, ui ) {
-  //       var $fconcepto    = $(this),
-  //           $fcodigo          = $('#fcodigo'),
-  //           $fconceptoId      = $('#fconceptoId'),
-  //           $fcantidad        = $('#fcantidad'),
-  //           $ftipoproducto    = $("#ftipoproducto"),
-  //           $fprecio_unitario = $("#fprecio_unitario");
-
-  //       selectedClasif = ui.item;
-  //       $fconcepto.css("background-color", "#B6E7FF");
-  //       $fcodigo.val(ui.item.item.codigo);
-  //       $fconceptoId.val(ui.item.id);
-  //       $ftipoproducto.val(ui.item.item.tipo_familia);
-  //       $fprecio_unitario.val(ui.item.item.precio_unitario);
-  //       $fcantidad.val('1');
-  //     }
-  //   }).keydown(function(event){
-  //       if(event.which == 8 || event.which == 46) {
-  //         selectedClasif = null;
-  //         $(this).css("background-color", "#FDFC9A");
-  //         $("#fcodigo").val("");
-  //         $('#fconceptoId').val('');
-  //         $('#fcantidad').val('');
-  //         $("#ftipoproducto").val('');
-  //         $("#fprecio_unitario").val('');
-  //       }
-  //   });
-  // };
-
   // Autocomplete para el codigo.
   var selectedClasif = null,
   autocompleteClasificaciones = function () {
     $("#fconcepto").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clasificaciones/?inventario=t',
+      source: function(request, response) {
+        $.ajax({
+          url: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+          dataType: "json",
+          data: {
+            inventario  : 't',
+            term        : request.term,
+            did_empresa : $("#empresaId").val(),
+            dempresa    : $("#empresa").val(),
+          },
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
         var $fconcepto    = $(this),
-            $fcodigo          = $('#fcodigo'),
             $fconceptoId      = $('#fconceptoId'),
             $fcantidad        = $('#fcantidad'),
-            $ftipoproducto    = $("#ftipoproducto"),
             $fprecio_unitario = $("#fprecio_unitario");
+            $fexistencia      = $("#fexistencia");
 
         selectedClasif = ui.item;
         $fconcepto.css("background-color", "#B6E7FF");
-        $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
-        $ftipoproducto.val(ui.item.item.tipo_familia);
-        $fprecio_unitario.val(ui.item.item.precio_unitario);
-        $fcantidad.val('1');
+        $fprecio_unitario.val(ui.item.item.inventario.costo_prom);
+        $fexistencia.val(ui.item.item.inventario.existencia)
+        $fcantidad.val('');
+        eventNuevaExistencia();
       }
     }).keydown(function(event){
         if(event.which == 8 || event.which == 46) {
           selectedClasif = null;
           $(this).css("background-color", "#FDFC9A");
-          $("#fcodigo").val("");
           $('#fconceptoId').val('');
           $('#fcantidad').val('');
-          $("#ftipoproducto").val('');
           $("#fprecio_unitario").val('');
+          $("#fexistencia").val('');
         }
     });
+
+    $('#fnewexistencia').on('keyup', eventNuevaExistencia);
   };
 
   /*
@@ -136,46 +107,31 @@
    | Events
    |------------------------------------------------------------------------
    */
-  var eventCodigoBarras = function () {
-    $('#fcodigo').on('keypress', function(event) {
-      var $codigo = $(this);
-      if (isEmpresaSelected()) {
-        if (event.which === 13 && $codigo.val() !== '') {
-          $.get(base_url + 'panel/compras_ordenes/ajax_producto_by_codigo/?ide=' + $('#empresaId').val() + '&cod=' + $codigo.val() + '&tipo=p', function(data) {
-            if (data.length > 0) {
-
-              producto = {
-                'codigo': data[0].codigo,
-                'concepto': data[0].nombre,
-                'id': data[0].id_producto,
-                'cantidad': '1',
-                'tipo_prod': data[0].tipo_familia,
-              };
-
-              addProducto(producto);
-
-              $codigo.val('');
-            } else {
-              noty({"text": 'No se encontro el codigo.', "layout":"topRight", "type": 'error'});
-            }
-          }, 'json');
-        }
-      } else {
-        noty({"text": 'Favor de Seleccionar una empresa.', "layout":"topRight", "type": 'error'});
-      }
-    });
-  }
+  var eventNuevaExistencia = function (event = null) {
+    if (event) {
+      event.preventDefault();
+    }
+    var existencia = (parseFloat($("#fexistencia").val())||0) - (parseFloat($("#fnewexistencia").val())||0);
+    $('#tipo_movimiento').val('');
+    if (existencia > 0) {
+      $('#tipo_movimiento').val('f');
+    } else if (existencia < 0) {
+      $('#tipo_movimiento').val('t');
+    }
+    $('#fcantidad').val( Math.abs(existencia) );
+  };
 
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
-      var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
-          $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
-          $fconceptoId = $('#fconceptoId'),
-          $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
-          $ftipoproducto = $("#ftipoproducto"),
-          $fprecio_unitario = $("#fprecio_unitario"),
+      var $fconcepto      = $('#fconcepto').css({'background-color': '#FFF'}),
+        $fconceptoId      = $('#fconceptoId'),
+        $fcantidad        = $('#fcantidad').css({'background-color': '#FFF'}),
+        $tipo_movimiento  = $("#tipo_movimiento"),
+        $fprecio_unitario = $("#fprecio_unitario").css({'background-color': '#FFF'}),
+        $fexistencia      = $("#fexistencia").css({'background-color': '#FFF'}),
+        $fnewexistencia   = $("#fnewexistencia").css({'background-color': '#FFF'}),
 
-          campos = [$fcantidad],
+          campos = [$fcantidad, $fprecio_unitario, $fexistencia, $fnewexistencia],
           producto,
           error = false;
 
@@ -192,29 +148,31 @@
 
       // Si el tipo de orden es producto entonces verifica si se selecciono
       // un producto, si no no deja agregar descripciones.
-      if ($fconceptoId.val() == '' || $ftipoproducto.val() == '') {
+      if ($fconceptoId.val() == '') {
         $fconcepto.css({'background-color': '#FDFC9A'});
         error = true;
       }
 
-      // Valida si el campo cantida es 0.
-      if ($fcantidad.val() === '0') {
-        $fcantidad.css({'background-color': '#FDFC9A'})
-        error = true;
-      }
+      // // Valida si el campo cantida es 0.
+      // if ($fcantidad.val() === '0') {
+      //   $fcantidad.css({'background-color': '#FDFC9A'})
+      //   error = true;
+      // }
 
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
 
       if ( ! error) {
         producto = {
-          'codigo': $fcodigo.val(),
-          'concepto': $fconcepto.val(),
-          'id': $fconceptoId.val(),
-          'cantidad': $fcantidad.val(),
-          'tipo_prod': $ftipoproducto.val(),
-          'precio_unitario': $fprecio_unitario.val(),
-          'selectedClasif': selectedClasif,
+          'concepto'        : $fconcepto.val(),
+          'id'              : $fconceptoId.val(),
+          'tipo_movimiento' : $tipo_movimiento.val(),
+          'precio_unitario' : $fprecio_unitario.val(),
+          'cantidad'        : $fcantidad.val(),
+          'existencia'      : $fexistencia.val(),
+          'newexistencia'   : $fnewexistencia.val(),
+          'importe'         : ((parseFloat($fprecio_unitario.val())||0) * (parseFloat($fcantidad.val())||0)),
+          'selectedClasif'  : selectedClasif,
         };
 
         addProducto(producto);
@@ -223,10 +181,9 @@
         for (var i in campos) {
           campos[i].val('').css({'background-color': '#FFF'});
         }
-
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
-        $fcodigo.val('');
+        $tipo_movimiento.val('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -247,7 +204,7 @@
   };
 
   var eventCantKeypress = function () {
-    $('#fcantidad').on('keypress', function(event) {
+    $('#fnewexistencia').on('keypress', function(event) {
       if (event.which === 13) {
         $('#btnAddProd').click();
       }
@@ -268,32 +225,24 @@
         exist     = false,
         inveario  = 0;
     if ( ! exist) {
-      // inveario  = (parseFloat(producto.selectedClasif.item.inventario.saldo_anterior)+
-      //             parseFloat(producto.selectedClasif.item.inventario.entradas)-
-      //             parseFloat(producto.selectedClasif.item.inventario.salidas));
       inveario  = producto.selectedClasif.item.inventario;
       $trHtml = $('<tr>' +
-                  '<td>'+
-                    producto.selectedClasif.item.unidad+
-                    '<input type="hidden" name="tipoProducto[]" id="tipoProducto" value="'+producto.tipo_prod+'">'+
-                    '<input type="hidden" name="precioUnit[]" id="precioUnit" value="'+(producto.precio_unitario||'0')+'">'+
-                    '<input type="hidden" name="unidad[]" id="unidad" value="'+producto.selectedClasif.item.unidad+'">'+
-                  '</td>'+
                   '<td>' +
                     producto.concepto +
                     '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
-                    '<input type="hidden" name="inventario[]" value="'+inveario+'" id="inventario" class="span12">' +
+                    '<input type="hidden" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12">' +
+                    '<input type="hidden" name="existencia[]" value="'+producto.existencia+'" id="existencia" class="span12">' +
+                    '<input type="hidden" name="newexistencia[]" value="'+producto.newexistencia+'" id="newexistencia" class="span12">' +
+                    '<input type="hidden" name="tipoMovimiento[]" id="tipoMovimiento" value="'+producto.tipo_movimiento+'">'+
+                    '<input type="hidden" name="precioUnit[]" id="precioUnit" value="'+(producto.precio_unitario||'0')+'">'+
+                    '<input type="hidden" name="importe[]" id="importe" value="'+producto.importe+'">'+
                   '</td>' +
-                  '<td>' +
-                    inveario +
-                  '</td>' +
-                  '<td style="width: 65px;">' +
-                      '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0.01" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td style="width: 85px;">' +
-                      '<input type="number" step="any" name="importe[]" value="'+(parseFloat(producto.cantidad)||0)*(parseFloat(producto.precio_unitario)||0)+'" id="importe" class="span12 vpositive jump'+jumpIndex+'" min="0.01" data-next="jump'+(++jumpIndex)+'" readonly>' +
-                  '</td>' +
+                  '<td>' + producto.existencia + '</td>' +
+                  '<td>' + producto.newexistencia + '</td>' +
+                  '<td>' + producto.cantidad + '</td>' +
+                  '<td>' + producto.precio_unitario + '</td>' +
+                  '<td>' + producto.importe + '</td>' +
                   '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +
                 '</tr>');
 
@@ -312,34 +261,14 @@
     }
   }
 
-  var calculaProductoTotal = function ($tr) {
-    var total = (parseFloat($tr.find('#cantidad').val())||0)*(parseFloat($tr.find('#precioUnit').val())||0);
-
-    $tr.find('#importe').val(total);
-    calculaTotal();
-  }
-
   var calculaTotal = function () {
     var total = 0;
     $("#table-productos #importe").each(function(index, el) {
       total += parseFloat($(this).val())||0;
     });
 
-    $("#costo_materiap").val(total);
-    $("#costo").val( (total+(parseFloat($("#costo_adicional").val())||0)) );
+    $("#costo").val( total );
   }
-
-  // var copyCodigoAll = function() {
-  //   $("#chkcopydatos").on('click', function(event) {
-  //     var obj = $("#table-productos tbody tr:first"),
-  //     codigo = obj.find('#codigoArea'),
-  //     codigoid = obj.find('#codigoAreaId');
-  //     $("#table-productos tbody tr").each(function(index, el) {
-  //       $(this).find('#codigoArea').val(codigo.val()).css('background-color', codigo.css('background-color'));
-  //       $(this).find('#codigoAreaId').val(codigoid.val()).css('background-color', codigo.css('background-color'));
-  //     });
-  //   });
-  // }
 
   /*
    |------------------------------------------------------------------------

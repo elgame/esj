@@ -662,7 +662,7 @@
                               <input type="hidden" name="prodIdOrden[]" value="<?php echo $_POST['prodIdOrden'][$key] ?>" class="span12">
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $_POST['prodIdNumRow'][$key] ?>" class="span12">
                             </td>
-                            <td style="width: 65px;">
+                            <td style="width: 120px;">
                                 <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
@@ -682,7 +682,7 @@
                               <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                             </td>
-                            <td style="width: 90px;">
+                            <td style="width: 120px;">
                               <input type="text" name="valorUnitario1[]" value="<?php echo $_POST['valorUnitario1'][$key] ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
