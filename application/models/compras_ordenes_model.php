@@ -1915,7 +1915,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf = new MYpdf($orientacion, 'mm', 'Letter');
       $pdf->show_head = false;
       $pdf->noShowPagesPos = ($orientacion==='L'? 265: 205);
-      $pdf->titulo1 = $orden['info'][0]->empresa;
+      $pdf->titulo1 = "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}";
 
       $pdf->titulo3 = 'Almacen: '.$orden['info'][0]->almacen;
       $tipo_orden = 'ORDEN DE COMPRA';
@@ -2201,7 +2201,7 @@ class compras_ordenes_model extends CI_Model {
         } else {
           $datos[] = $prod->codigo.'/'.$prod->codigo_fin;
         }
-        $datos[] = $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '');
+        $datos[] = "{$prod->id_producto} - ".$prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '');
         // $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
         $datos[] = $prod->cantidad.' '.$prod->abreviatura;
         $datos[] = MyString::formatoNumero($prod->precio_unitario/$tipoCambio, $decimales, '$', false);
@@ -2413,15 +2413,15 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial','',8);
         $pdf->SetXY(5, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 50));
-        $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+        $pdf->SetWidths(array(25, 80));
+        $pdf->Row(array('EMPRESA', "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}"), false, true);
 
         // El dato de la requisicion
         if (!empty($orden['info'][0]->requisiciones)) {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $requiss = [];
           foreach ($orden['info'][0]->requisiciones as $key => $value) {
             $requiss[] = $value->folio;
@@ -2432,14 +2432,14 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $pdf->Row(array('O. FALTANTES', $orden['info'][0]->otros_datos->prev_orden_faltantes->folio), false, true);
         }
         if (!empty($orden['info'][0]->area)) {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $areas = [];
           foreach ($orden['info'][0]->area as $key => $value) {
             $areas[] = $value->nombre;
@@ -2450,7 +2450,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $ranchos = [];
           foreach ($orden['info'][0]->rancho as $key => $value) {
             $ranchos[] = $value->nombre;
@@ -2461,7 +2461,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $centroCosto = [];
           foreach ($orden['info'][0]->centroCosto as $key => $value) {
             $centroCosto[] = $value->nombre;
@@ -2472,7 +2472,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 50));
+          $pdf->SetWidths(array(25, 80));
           $activos = [];
           foreach ($orden['info'][0]->activo as $key => $value) {
             $activos[] = $value->nombre;

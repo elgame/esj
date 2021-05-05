@@ -1864,7 +1864,7 @@ class compras_requisicion_model extends CI_Model {
         $pdf->SetXY(5, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(25, 80));
-        $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+        $pdf->Row(array('EMPRESA', "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}"), false, true);
 
         // El dato de la requisicion
         // if (!empty($orden['info'][0]->folio_requisicion)) {
@@ -2167,7 +2167,7 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetXY(5, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(25, 80));
-      $pdf->Row(array('EMPRESA', $orden['info'][0]->empresa), false, true);
+      $pdf->Row(array('EMPRESA', "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}"), false, true);
 
       // El dato de la requisicion
       // if (!empty($orden['info'][0]->folio_requisicion)) {
