@@ -1053,6 +1053,14 @@ class recetas_model extends CI_Model {
                 'total_importe'    => 0,
                 'semana'           => $semana['semana'],
                 'calendario'       => NULL,
+                'a_etapa'          => (isset($datos[12])? $datos[12]: ''),
+                'a_ciclo'          => (isset($datos[13])? $datos[13]: ''),
+                'a_dds'            => (isset($datos[14])? $datos[14]: ''),
+                'a_turno'          => (isset($datos[15])? $datos[15]: ''),
+                'a_via'            => (isset($datos[16])? $datos[16]: ''),
+                'a_aplic'          => (isset($datos[17])? $datos[17]: ''),
+                'a_equipo'         => (isset($datos[18])? $datos[18]: ''),
+                'a_observaciones'  => (isset($datos[19])? $datos[19]: ''),
                 'productos'        => []
               ];
             } else {
