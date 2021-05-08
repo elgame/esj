@@ -222,6 +222,9 @@ class clasificaciones_model extends CI_Model {
 			foreach($res->result() as $itm){
         if ($con_inventario) {
           $itm->inventario = $this->produccion_model->getInventarioData($itm->id_clasificacion)[0];
+          // echo "<pre>";
+          // var_dump($this->produccion_model->getInventarioData($itm->id_clasificacion));
+          // echo "</pre>";exit;
         }
 				$response[] = array(
 						'id'    => $itm->id_clasificacion,

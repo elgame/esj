@@ -684,7 +684,7 @@
                               <input type="hidden" name="prodIdOrden[]" value="<?php echo $concepto->id_requisicion ?>" class="span12 prodIdOrden">
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $concepto->num_row ?>" class="span12">
                             </td>
-                            <td style="width: 65px;">
+                            <td style="width: 120px;">
                                 <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
@@ -712,7 +712,7 @@
                               <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $concepto->id_proveedor ?>" class="prodSelOrden prodSelOrden1" <?php echo ($precio_unitario? 'checked': '') ?> data-uniform="false">
                             </td>
                           <?php } ?>
-                            <td style="width: 90px;">
+                            <td style="width: 120px;">
                               <input type="text" name="valorUnitario1[]" value="<?php echo $precio_unitario; ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>

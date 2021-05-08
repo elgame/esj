@@ -1480,7 +1480,7 @@
                     '<input type="hidden" name="prodIdOrden[]" value="'+(producto.id_orden || 0)+'" class="span12 prodIdOrden">' +
                     '<input type="hidden" name="prodIdNumRow[]" value="'+(producto.num_row || 0)+'" class="span12">' +
                   '</td>' +
-                  '<td style="width: 65px;">' +
+                  '<td style="width: 120px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 70px;">' +
@@ -1498,7 +1498,7 @@
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
-                  '<td style="width: 90px;">' +
+                  '<td style="width: 120px;">' +
                     '<input type="text" name="valorUnitario1[]" value="'+producto.precio_unitario+'" id="valorUnitario1" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
