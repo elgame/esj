@@ -65,6 +65,7 @@
 						<table class="table table-striped table-bordered bootstrap-datatable">
 						  <thead>
 							  <tr>
+                  <th>ID</th>
 							  	<th>Nombre</th>
 								  <th>Direccion</th>
 									<th>Telefono</th>
@@ -76,6 +77,7 @@
 						  <tbody>
 						<?php foreach($proveedores['proveedores'] as $proveedor){ ?>
 							<tr>
+                <td><?php echo $proveedor->id_proveedor; ?></td>
 								<td><?php echo $proveedor->nombre_fiscal; ?></td>
 								<td><?php echo $proveedor->direccion; ?></td>
 								<td><?php echo $proveedor->telefono; ?></td>

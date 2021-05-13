@@ -59,11 +59,14 @@ class mypdf_ticket extends FPDF {
             $this->SetFounts(array($this->fount_num), array(1));
             $this->Row(array($data->folio), false, true, 4);
 
+            $this->SetTextColor(255, 255, 255);
+            $this->Rect($this->GetX(), $this->GetY()+1, 63, 5, 'DF');
             $this->SetFounts(array($this->fount_txt), array(-1));
             $this->SetWidths(array(63));
             $this->SetAligns(array('C'));
             $this->SetXY(0, $this->GetY()+.5);
             $this->Row(array($this->reg_fed), false, false);
+            $this->SetTextColor(0, 0, 0);
 
             $this->header_entrar = false;
         }
@@ -75,10 +78,10 @@ class mypdf_ticket extends FPDF {
 
         $this->SetY($this->GetY()-1);
 
-        $this->SetWidths(array(12, 15, 20, 16));
+        $this->SetWidths(array(12, 17, 20, 14));
         $this->SetAligns(array('L', 'R', 'L', 'L'));
         $this->SetFounts(array($this->fount_txt, $this->fount_num, $this->fount_num),
-                         array(0, 1.5, 1, 1));
+                         array(0, 1.5, 0.5, 0.5));
         $this->Row(array( 'BRUTO:', MyString::formatoNumero($data->kilos_bruto, 2, ''), MyString::fechaATexto(substr($data->fecha_bruto, 0, 10), '/c'), substr($data->fecha_bruto, -11, -3)), false, false, 4);
         $this->SetY($this->GetY()+.5);
         $this->Row(array( 'TARA:', MyString::formatoNumero($data->kilos_tara, 2, ''), MyString::fechaATexto(substr($data->fecha_tara, 0, 10), '/c'), substr($data->fecha_tara, -11, -3)), false, false, 4);
