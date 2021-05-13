@@ -127,7 +127,7 @@ class recetas_model extends CI_Model {
         $query = $this->db->query(
           "SELECT rp.id_receta, rp.id_producto, rp.rows, pr.nombre AS producto, pr.codigo,
             pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
-            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo
+            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo, rp.dosis_ha
           FROM otros.recetas_productos AS rp
             INNER JOIN productos AS pr ON pr.id_producto = rp.id_producto
           WHERE rp.id_receta = {$data['info']->id_recetas}
@@ -313,6 +313,7 @@ class recetas_model extends CI_Model {
         'dosis_carga1'           => floatval($_POST['pcarga1'][$key]),
         'dosis_carga2'           => floatval($_POST['pcarga2'][$key]),
         'aplicacion_total_saldo' => $_POST['aplicacion_total'][$key],
+        'dosis_ha'               => $_POST['dosis_ha'][$key],
       );
     }
 
@@ -1055,12 +1056,12 @@ class recetas_model extends CI_Model {
                 'calendario'       => NULL,
                 'a_etapa'          => (isset($datos[12])? $datos[12]: ''),
                 'a_ciclo'          => (isset($datos[13])? $datos[13]: ''),
-                'a_dds'            => (isset($datos[14])? $datos[14]: ''),
-                'a_turno'          => (isset($datos[15])? $datos[15]: ''),
-                'a_via'            => (isset($datos[16])? $datos[16]: ''),
-                'a_aplic'          => (isset($datos[17])? $datos[17]: ''),
-                'a_equipo'         => (isset($datos[18])? $datos[18]: ''),
-                'a_observaciones'  => (isset($datos[19])? $datos[19]: ''),
+                'a_dds'            => (isset($datos[14])? $datos[14]: ''), // fecha_programada
+                'a_turno'          => (isset($datos[15])? $datos[15]: ''), // grupo
+                'a_via'            => (isset($datos[16])? $datos[16]: ''), // cosecha
+                'a_aplic'          => (isset($datos[17])? $datos[17]: ''), // tipo_aplicacion
+                'a_equipo'         => (isset($datos[18])? $datos[18]: ''), // tanque
+                'a_observaciones'  => (isset($datos[19])? $datos[19]: ''), // volumen
                 'productos'        => []
               ];
             } else {
@@ -1075,6 +1076,7 @@ class recetas_model extends CI_Model {
                 'dosis_carga1'           => round($cantidad_carga, 6),
                 'dosis_carga2'           => round($cantidad_carga*$rowh['carga2'], 6),
                 'aplicacion_total_saldo' => $datos[2],
+                'dosis_ha'               => $datos[3],
               ];
             }
           }
@@ -1254,14 +1256,14 @@ class recetas_model extends CI_Model {
       'dosis_equipo'          => floatval(0),
       'dosis_equipo_car2'     => floatval(0),
 
-      'a_etapa'               => '',
-      'a_ciclo'               => '',
-      'a_dds'                 => '',
-      'a_turno'               => '',
-      'a_via'                 => '',
-      'a_aplic'               => '',
-      'a_equipo'              => '',
-      'a_observaciones'       => '',
+      'a_etapa'               => $receta['a_etapa'],
+      'a_ciclo'               => $receta['a_ciclo'],
+      'a_dds'                 => $receta['a_dds'],
+      'a_turno'               => $receta['a_turno'],
+      'a_via'                 => $receta['a_via'],
+      'a_aplic'               => $receta['a_aplic'],
+      'a_equipo'              => $receta['a_equipo'],
+      'a_observaciones'       => $receta['a_observaciones'],
       'fecha_aplicacion'      => $receta['fecha_aplicacion'],
       'id_recetas_calendario' => $receta['calendario'],
 
@@ -1286,6 +1288,7 @@ class recetas_model extends CI_Model {
         'dosis_carga1'           => floatval($producto['dosis_carga1']),
         'dosis_carga2'           => floatval($producto['dosis_carga2']),
         'aplicacion_total_saldo' => $producto['aplicacion_total_saldo'],
+        'dosis_ha'               => $producto['dosis_ha'],
       );
     }
 
@@ -1525,10 +1528,10 @@ class recetas_model extends CI_Model {
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $widths = array(10, 50, 14, 14, 14, 17, 15, 18);
-          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
           $widths = array(10, 50, 14, 14, 14, 17);
-          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
         }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
@@ -1580,7 +1583,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
@@ -1591,7 +1594,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
@@ -1645,8 +1648,8 @@ class recetas_model extends CI_Model {
       $pdf->page = $page_aux;
       $pdf->SetXY($val_x, $yaux);
       $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths($val_widths1);
-      $pdf->Row(['PROGRAMA DE APLICACION'], true);
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->Row(['PROGRAMA DE APLICACION'], true);
 
       $pdf->SetAligns(array('R', 'L'));
       $pdf->SetWidths($val_widths2);
@@ -1655,23 +1658,29 @@ class recetas_model extends CI_Model {
       $pdf->SetX($val_x);
       $pdf->Row(['CICLO', $receta['info']->a_ciclo], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['DDS', $receta['info']->a_dds], false, false);
+      $pdf->Row(['FECHA PROGRA', $receta['info']->a_dds], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['TURNO', $receta['info']->a_turno], false, false);
+      $pdf->Row(['GRUPO', $receta['info']->a_turno], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['VIA', $receta['info']->a_via], false, false);
+      $pdf->Row(['COSECHA', $receta['info']->a_via], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['APLICACION', $receta['info']->a_aplic], false, false);
-      $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths($val_widths1);
+      $pdf->Row(['TIPO APLICACION', $receta['info']->a_aplic], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['OBSERVACIONES'], false);
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths($val_widths1);
+      $pdf->Row(['VOLUMEN', $receta['info']->a_observaciones], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row([$receta['info']->a_observaciones], false, 'B');
+      $pdf->Row(['TANQUE', $receta['info']->a_equipo], false, 'B');
+
+      // $pdf->SetAligns(array('C', 'L'));
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->SetX($val_x);
+      // $pdf->Row(['OBSERVACIONES'], false);
+      // $pdf->SetAligns(array('L', 'L'));
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->SetX($val_x);
+      // $pdf->Row([$receta['info']->a_observaciones], false, 'B');
       $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
       $pdf->Line(213, $yaux, 213, $pdf->GetY());
+      $pdf->Line($val_x, $yaux, 213, $yaux);
 
       if ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR') {
         $pdf->page = $page_aux;

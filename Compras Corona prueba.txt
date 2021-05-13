@@ -1,9 +1,9 @@
-H	        20	        21	      15	04/04/2021	07/04/2021	3	MA	"40,41,42,48,49,50,51"	 9.71	 8.09	    534050	ETAPA	CICLO	DDS	TURNO	VIA	APLICACION
-D	23792	     29.13	    3.00								
-D	23798	     29.13	    3.00								
-D	21609	     19.42	    2.00								
-D	26412	     29.13	    3.00								
-H	        20	        21	      12	04/04/2021	07/04/2021	3	MA	46	 0.60	 0.50	     33000	ETAPA	CICLO	DDS	TURNO	VIA	APLICACION
-D	23792	     12.00	   20.00								
-D	21609	      1.50	    2.50								
-D	23798	      1.50	    2.50								
+H	        20	        21	      16	04/05/2021	07/05/2021	3	MA	"40,41,42,48,49,50,51"	 9.71	 8.09	    534050	etapa	ciclo	fecha_programada	grupo	cosecha	tipo_aplicacion	tanque	volumen
+D	23792	     29.13	    3.00
+D	23798	     29.13	    3.00
+D	21609	     19.42	    2.00
+D	26412	     29.13	    3.00
+H	        20	        21	      17	04/05/2021	07/05/2021	3	MA	46	 0.60	 0.50	     33000	etapa	ciclo	fecha_programada	grupo	cosecha	tipo_aplicacion	tanque	volumen
+D	23792	     12.00	   20.00
+D	21609	      1.50	    2.50
+D	23798	      1.50	    2.50

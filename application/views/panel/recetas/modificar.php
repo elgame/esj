@@ -407,6 +407,7 @@
                               <?php echo $prod->producto ?>
                               <input type="hidden" name="concepto[]" value="<?php echo $prod->producto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
+                              <input type="hidden" name="dosis_ha[]" value="<?php echo $prod->dosis_ha ?>" id="dosis_ha" class="span12">
                             </td>
                             <td style="width: 80px;">
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
