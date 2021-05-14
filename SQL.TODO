@@ -1,5 +1,43 @@
 
- ☐ Cambios de cargar recetas corona
+ ☐ Cambiar los codigos del calibre en produccion lo pase Ceci
+ ☐ Generar los codigos QR de las salidas de almacen con los datos de corona
+   id_producto:13, descripcion:35, unidad_medida:3, cantidad, precio
+   medida 2"x1"
+ ☐ Autogenerar las boletas ficticias
+    CREACION BOLETAS.xlsx
+    $data = array(
+      'id_empresa'   => $this->input->post('pid_empresa'),
+      'id_area'      => $this->input->post('parea'),
+      'id_chofer'    => null,
+      'id_camion'    => null,
+      'folio'        => $this->input->post('pfolio'),
+      'accion'       => 'en',
+      'tipo'         => 'f',
+      'cajas_prestadas' => 0,
+      'certificado' => 'f',
+      'intangible'  => 't',
+
+      'metodo_pago'  => 'co',
+      'id_productor' => null,
+      'id_usuario' => $this->session->userdata('id_usuario'),
+
+      'kilos_bruto' => $this->input->post('pkilos_brutos'),
+      'kilos_tara' => $this->input->post('pkilos_tara'),
+      'kilos_neto' => $this->input->post('pkilos_tara'),
+      'fecha_bruto' => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
+      'fecha_tara' => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
+    );
+    $cajas[] = array(
+      'id_bascula'   => $idb,
+      'id_calidad'   => $_POST['pcalidad'][$key],
+      'cajas'        => $caja,
+      'kilos'        => $_POST['pkilos'][$key],
+      'promedio'     => $_POST['ppromedio'][$key],
+      'precio'       => $_POST['pprecio'][$key],
+      'importe'      => $_POST['pimporte'][$key],
+      'num_registro' => $key,
+    );
+ ✔ Cambios de cargar recetas corona @done (21-05-13 19:30)
      -- lap|san
     COMMENT ON COLUMN otros.recetas.a_dds IS 'fecha_programada';
     COMMENT ON COLUMN otros.recetas.a_turno IS 'grupo';
