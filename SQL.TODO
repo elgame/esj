@@ -38,7 +38,7 @@
       'num_registro' => $key,
     );
  ✔ Cambios de cargar recetas corona @done (21-05-13 19:30)
-     -- lap|san
+     -- lap|san|pcc
     COMMENT ON COLUMN otros.recetas.a_dds IS 'fecha_programada';
     COMMENT ON COLUMN otros.recetas.a_turno IS 'grupo';
     COMMENT ON COLUMN otros.recetas.a_via IS 'cosecha';
@@ -46,6 +46,8 @@
     COMMENT ON COLUMN otros.recetas.a_equipo IS 'tanque';
     COMMENT ON COLUMN otros.recetas.a_observaciones IS 'volumen';
     ALTER TABLE otros.recetas_productos ADD COLUMN dosis_ha double precision DEFAULT 0;
+    -- pcc|san
+    ALTER TABLE otros.recetas ADD COLUMN extras json;
  ✔ Póliza nomina diario solo poner prestamos fiscales @done (21-05-05 12:47)
  ✔ Agregar notas de crédito compras de productos que registre salida de almacén automática, y que se puedan agregar notas de crédito como descripción @done (21-04-21 14:04)
  ✔ Reporte Compras por Producto Ordenes descontar la cantidad de las notas de credito registradas @done (21-04-21 17:23)

@@ -102,7 +102,7 @@ class recetas_model extends CI_Model {
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
         (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario,
-        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja
+        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
@@ -120,6 +120,11 @@ class recetas_model extends CI_Model {
     if ($query->num_rows() > 0)
     {
       $data['info'] = $query->row();
+      if (!empty($data['info']->extras)) {
+        $data['info']->extras = json_decode($data['info']->extras);
+      } else {
+        $data['info']->extras = null;
+      }
 
       $query->free_result();
       if ($full)
@@ -1062,22 +1067,28 @@ class recetas_model extends CI_Model {
                 'a_aplic'          => (isset($datos[17])? $datos[17]: ''), // tipo_aplicacion
                 'a_equipo'         => (isset($datos[18])? $datos[18]: ''), // tanque
                 'a_observaciones'  => (isset($datos[19])? $datos[19]: ''), // volumen
+                'extras'           => '{}',
                 'productos'        => []
               ];
             } else {
-              $rowh = $recetasData[count($recetasData)-1];
-              $cantidad_carga = ($datos[2]/($rowh['cargas']>0? $rowh['cargas']: 1));
-              $recetasData[count($recetasData)-1]['productos'][] = [
-                'id_producto'            => $datos[1],
-                'dosis_mezcla'           => round($cantidad_carga, 6), // cantidad
-                'aplicacion_total'       => $datos[2],
-                'precio'                 => 0,
-                'importe'                => 0,
-                'dosis_carga1'           => round($cantidad_carga, 6),
-                'dosis_carga2'           => round($cantidad_carga*$rowh['carga2'], 6),
-                'aplicacion_total_saldo' => $datos[2],
-                'dosis_ha'               => $datos[3],
-              ];
+              if (strtoupper($datos[1]) === 'AGUA') {
+                $json = ['a_nombre' => 'AGUA', 'a_total' => $datos[2], 'a_ha' => $datos[3]];
+                $recetasData[count($recetasData)-1]['extras'] = json_encode($json);
+              } else {
+                $rowh = $recetasData[count($recetasData)-1];
+                $cantidad_carga = ($datos[2]/($rowh['cargas']>0? $rowh['cargas']: 1));
+                $recetasData[count($recetasData)-1]['productos'][] = [
+                  'id_producto'            => $datos[1],
+                  'dosis_mezcla'           => round($cantidad_carga, 6), // cantidad
+                  'aplicacion_total'       => $datos[2],
+                  'precio'                 => 0,
+                  'importe'                => 0,
+                  'dosis_carga1'           => round($cantidad_carga, 6),
+                  'dosis_carga2'           => round($cantidad_carga*$rowh['carga2'], 6),
+                  'aplicacion_total_saldo' => $datos[2],
+                  'dosis_ha'               => $datos[3],
+                ];
+              }
             }
           }
         }
@@ -1264,6 +1275,7 @@ class recetas_model extends CI_Model {
       'a_aplic'               => $receta['a_aplic'],
       'a_equipo'              => $receta['a_equipo'],
       'a_observaciones'       => $receta['a_observaciones'],
+      'extras'                => $receta['extras'],
       'fecha_aplicacion'      => $receta['fecha_aplicacion'],
       'id_recetas_calendario' => $receta['calendario'],
 
@@ -1636,6 +1648,37 @@ class recetas_model extends CI_Model {
             MyString::formatoNumero($tcarga2, 2, '', false),
             MyString::formatoNumero($ttaplicacion, 2, '', false)
           ], false);
+        }
+
+        // Agua $json = ['a_nombre' => 'AGUA', 'a_total' => $datos[2], 'a_ha' => $datos[3]];
+        if (!empty($receta['info']->extras) && isset($receta['info']->extras->a_nombre)) {
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Arial','', 6);
+          $pdf->SetTextColor(0,0,0);
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+            $datos = array(
+              "",
+              $receta['info']->extras->a_nombre,
+              MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              '', '',
+              MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false),
+              '', ''
+            );
+          } else {
+            $datos = array(
+              "",
+              $receta['info']->extras->a_nombre,
+              MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              '', '',
+              MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false)
+            );
+          }
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
         }
       }
 
