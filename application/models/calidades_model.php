@@ -8,7 +8,7 @@ class calidades_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getCalidades($id_area=null, $paginados = true)
+	public function getCalidades($id_area=null, $paginados = true, $id_calidad = null)
 	{
 		$sql = '';
 		//paginacion
@@ -32,6 +32,8 @@ class calidades_model extends CI_Model {
 
 		if($id_area!=null)
 			$sql .= ($sql==''? 'WHERE': ' AND')." id_area = '".$id_area."'";
+    if($id_calidad!=null)
+      $sql .= ($sql==''? 'WHERE': ' AND')." id_calidad = '".$id_calidad."'";
 
 		$str_query = "
 				SELECT id_calidad, id_area, nombre, precio_compra, status, cuenta_cpi

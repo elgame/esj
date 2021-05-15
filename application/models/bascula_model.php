@@ -4293,6 +4293,185 @@ class bascula_model extends CI_Model {
     }
   }
 
+
+
+  public function importarBoletasIntangibles()
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('upload', $config);
+
+    if ( ! $this->upload->do_upload('archivo_boletas'))
+    {
+      return array('error' => '501');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $boletasData = [];
+      $val_resumenok = [];
+
+      $handle = fopen($file['full_path'], "r");
+      if ($handle) {
+        $this->load->model('usuarios_model');
+
+        // if ($_POST['id_empresa'] !== '')
+        //   $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_POST['id_empresa'])->get()->row()->dia_inicia_semana;
+        // else
+        //   $diaComienza = '4';
+        // $ff = explode('-', $_POST['fecha']);
+        // $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
+
+        $count = 0;
+        // Construcción de los datos de las recetas
+        while (($line = fgets($handle)) !== false) {
+          if (trim($line) != '' && $count !== 0) {
+            $datos = str_getcsv($line);
+            // $datos = explode("\t", $line);
+            $datos = $this->clearRowRecetaCorona($datos);
+
+            if (count($datos) === 14 && $datos[0] > 0 && $datos[1] > 0 && $datos[3] > 0) {
+              $mins = rand(10, 80);
+              $boletasData[] = [
+                'id_empresa'      => $datos[0],
+                'id_area'         => $datos[1],
+                'id_proveedor'    => $datos[3],
+                'id_chofer'       => null,
+                'id_camion'       => null,
+                'folio'           => $datos[2],
+                'accion'          => 'f',
+                'tipo'            => 'en',
+                'cajas_prestadas' => 0,
+                'certificado'     => 'f',
+                'intangible'      => 't',
+
+                'metodo_pago'     => 'co',
+                'id_productor'    => null,
+                'id_usuario'      => $this->session->userdata('id_usuario'),
+
+                'kilos_bruto'     => $datos[4],
+                'kilos_tara'      => $datos[5],
+                'kilos_neto'      => $datos[6],
+                'fecha_bruto'     => ($datos[7]? $datos[7]->format('Y-m-d H:i:s'): ''),
+                'fecha_tara'      => ($datos[7]? $datos[7]->add(new DateInterval("PT{$mins}M"))->format('Y-m-d H:i:s'): ''),
+                'importe'         => $datos[13],
+                'compras'         => []
+              ];
+
+              if ($datos[8] > 0) {
+                $boletasData[count($boletasData)-1]['compras'][] = [
+                  'id_bascula'   => null,
+                  'id_calidad'   => $datos[8],
+                  'cajas'        => $datos[9],
+                  'kilos'        => $datos[10],
+                  'promedio'     => $datos[11],
+                  'precio'       => $datos[12],
+                  'importe'      => $datos[13],
+                  'num_registro' => 0,
+                ];
+              }
+            }
+          }
+          ++$count;
+        }
+        // fclose($handle);
+        // echo "<pre>";
+        // var_dump($boletasData);
+        // echo "</pre>";exit;
+
+        // Validación
+        $val_resumen = [];
+        if (count($boletasData) > 0) {
+          foreach ($boletasData as $key => $boleta) {
+            $this->validaBoletasIntangibles($boletasData[$key], $val_resumen);
+          }
+        }
+        // echo "<pre>";
+        // var_dump($boletasData);
+        // echo "</pre>";exit;
+
+        if (count($val_resumen) > 0) {
+          return ['error' => '503', 'resumen' => $val_resumen];
+        } else {
+          // Se guardan todas las recetas
+          foreach ($boletasData as $key => $boleta) {
+            $this->saveBoletaData($boleta);
+          }
+        }
+
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500', 'resumenok' => $val_resumenok);
+    }
+  }
+
+  public function saveBoletaData($boleta)
+  {
+    $compras = $boleta['compras'];
+    unset($boleta['compras']);
+
+    $this->db->insert('bascula', $boleta);
+    $idb = $this->db->insert_id('bascula_id_bascula_seq');
+    foreach ($compras as $key => $value) {
+      $value['id_bascula'] = $idb;
+      $this->db->insert('bascula_compra', $value);
+    }
+  }
+
+  private function validaBoletasIntangibles(&$boleta, &$val_resumen)
+  {
+    $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula WHERE folio = {$boleta['folio']} AND tipo = '{$boleta['tipo']}' AND id_area = {$boleta['id_area']}")->row();
+    if($result->num > 0) {
+      $val_resumen[] = "Boleta No {$boleta['folio']}; Ya esta registrada.";
+      return false;
+    }
+
+    $result = $this->db->query("SELECT Count(id_proveedor) AS num FROM proveedores WHERE id_empresa = {$boleta['id_empresa']} AND id_proveedor = {$boleta['id_proveedor']}")->row();
+    if($result->num === 0) {
+      $val_resumen[] = "Boleta No {$boleta['folio']}; El ID del proveedor no pertenece a la empresa seleccionada.";
+      return false;
+    }
+
+    if(count($boleta['compras']) > 0) {
+      $this->load->model('calidades_model');
+      $result = $this->calidades_model->getCalidades($boleta['id_area'], false, $boleta['compras'][0]['id_calidad']);
+      if (count($result['calidades']) === 0) {
+        $val_resumen[] = "Boleta No {$boleta['folio']}; La calidad no pertenece al área seleccionada, o no es valido el valor.";
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private function clearRowRecetaCorona($data)
+  {
+    $numeros = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13];
+    $fechas = [7];
+    $ids = [0, 1, 8];
+    foreach ($data as $key => $item) {
+      $data[$key] = trim($item);
+      $data[$key] = str_replace('"', '', $data[$key]);
+      if (in_array($key, $numeros)) {
+        $data[$key] = floatval(str_replace([',', '$'], '', $data[$key]));
+      } elseif (in_array($key, $fechas)) {
+        try {
+          $data[$key] = new DateTime($data[$key]);
+        } catch (Exception $exc) {
+          $data[$key] = false;
+        }
+      } elseif (in_array($key, $ids)) {
+        $data[$key] = intval($data[$key]);
+      }
+    }
+
+    return $data;
+  }
+
 }
 
 /* End of file bascula_model.php */

@@ -7,6 +7,8 @@ class bascula extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'bascula/import_boletas_intangibles/',
+
     'bascula/ajax_get_areas/',
     'bascula/ajax_get_empresas/',
     'bascula/ajax_get_proveedores/',
@@ -88,8 +90,9 @@ class bascula extends MY_Controller {
   public function index()
   {
     $this->carabiner->js(array(
-        array('general/msgbox.js'),
-        array('panel/bascula/admin.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -388,6 +391,46 @@ class bascula extends MY_Controller {
       if (isset($_GET['idb']{0}))
         redirect(base_url('panel/bascula/agregar/?idb='.$_GET['idb']).'&e=t');
     }
+  }
+
+  public function import_boletas_intangibles()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Recetas - Importar Recetas Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    if (isset($_FILES['archivo_boletas'])) {
+      $this->load->model('bascula_model');
+      $res_mdl = $this->bascula_model->importarBoletasIntangibles();
+      $_GET['msg'] = $res_mdl['error'];
+
+      if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+        $params['resumen'] = $res_mdl['resumen'];
+      }
+      if (isset($res_mdl['resumenok']) && count($res_mdl['resumenok']) > 0) {
+        $params['resumenok'] = $res_mdl['resumenok'];
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/bascula/importar_boletas_intangibles', $params);
   }
 
   /**
@@ -2205,6 +2248,23 @@ class bascula extends MY_Controller {
       case 20:
         $txt = 'Se modifico correctamente la compra!';
         $icono = 'success';
+        break;
+
+      case 500:
+        $txt = 'Las boletas se guardaron correctamente.';
+        $icono = 'success';
+        break;
+      case 501:
+        $txt = 'Ocurrió un error al subir el archivo de boletas.';
+        $icono = 'error';
+        break;
+      case 502:
+        $txt = 'Ocurrió un error al leer el archivo de boletas.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Algunas boletas no se guardaron, revisar el detalle de errores.';
+        $icono = 'error';
         break;
     }
 

@@ -70,6 +70,10 @@
               </fieldset>
             </form>
 
+            <?php if ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')): ?>
+              <a href="<?php echo base_url('panel/bascula/import_boletas_intangibles/') ?>" class="btn btn-info" rel="superbox-50x450" title="Crear Boletas Intangibles"><i class="icon-upload"></i></a>
+            <?php endif ?>
+
             <?php
             echo $this->usuarios_model->getLinkPrivSm('bascula/agregar/', array(
                     'params'   => '',

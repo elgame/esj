@@ -53,7 +53,7 @@
                         <td style="text-align: center;">
                           <?php
                           $certificado = '';
-                          if ((isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't') || $lote_actual == 1) {
+                          if ((isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't') || $lote_actual_ext == 1) {
                             $certificado = 'checked';
                           }
                           ?>

@@ -2161,8 +2161,8 @@ class inventario_model extends privilegios_model{
 		$pdf->SetFont('Arial','',8);
 
 		$aligns = array('L', 'R', 'R', 'R', 'R');
-		$widths = array(65, 35, 35, 35, 35);
-		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
+		$widths = array(80, 25, 25, 25, 25, 25);
+		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'E. Teórica', 'E. Real');
 
 		$familia = '';
 		$totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
@@ -2244,7 +2244,8 @@ class inventario_model extends privilegios_model{
 					MyString::formatoNumero($item->saldo_anterior, 2, '', false),
 					MyString::formatoNumero($item->entradas, 2, '', false),
 					MyString::formatoNumero($item->salidas, 2, '', false),
-					MyString::formatoNumero($existencia, 2, '', false),
+          MyString::formatoNumero($existencia, 2, '', false),
+					'',
 					);
 
 				$pdf->SetX(6);
