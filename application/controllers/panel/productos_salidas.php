@@ -10,6 +10,7 @@ class productos_salidas extends MY_Controller {
     'productos_salidas/rpt_gastos_pdf/',
     'productos_salidas/rpt_gastos_xls/',
     'productos_salidas/imprimirticket/',
+    'productos_salidas/imprimir_etiquetas/',
 
     'productos_salidas/rpt_salidas_prod_cod_pdf/',
     'productos_salidas/rpt_salidas_prod_cod_xls/',
@@ -299,6 +300,15 @@ class productos_salidas extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->productos_salidas_model->imprimir_salidaticket($_GET['id']);
+    }
+  }
+  public function imprimir_etiquetas()
+  {
+    $this->load->model('productos_salidas_model');
+
+    if (isset($_GET['id']))
+    {
+      $this->productos_salidas_model->imprimir_etiquetas($_GET['id']);
     }
   }
 

@@ -100,7 +100,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
-                  <td class="center">
+                  <td class="center" style="max-width: 250px">
                     <?php
                       if ($salida->productos > 0) {
                         echo $this->usuarios_model->getLinkPrivSm('productos_salidas/ver/', array(
@@ -114,6 +114,8 @@
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
                           echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida."&itipo=1").'" target="_BLANK" title="Imprimir">
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket Vig</span></a>';
+                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimir_etiquetas/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                                  <i class="icon-print icon-white"></i> <span class="hidden-tablet">Etiquetas</span></a>';
                         }
                       } else {
                         echo $this->usuarios_model->getLinkPrivSm('productos_salidas/modificar/', array(

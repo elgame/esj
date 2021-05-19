@@ -1269,6 +1269,58 @@ class productos_salidas_model extends CI_Model {
     $pdf->Output();
   }
 
+  public function imprimir_etiquetas($salidaID, $path = null)
+  {
+    include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+    $orden = $this->info($salidaID, true);
+    // echo "<pre>";
+    //   var_dump($orden['info']);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', [24, 50]);
+    $pdf->show_head = false;
+    $pdf->SetFont($pdf->fount_txt, 'B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetMargins(0, 0, 0);
+
+
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      $pdf->AddPage('L', [24, 50]);
+
+      $cadenaProducto = $prod->id_producto.',"'.htmlentities(substr($prod->producto, 0, 35), ENT_NOQUOTES).'",'.substr($prod->abreviatura, 0, 3).','.$prod->cantidad.','.$prod->precio_unitario.','.$prod->id_salida.','.$prod->no_row;
+
+      QRcode::png($cadenaProducto, APPPATH."media/qrtemp_salidas{$key}.png", 'H', 3);
+      $pdf->SetXY(0, 0);
+      $pdf->Image(APPPATH."media/qrtemp_salidas{$key}.png", -1, -1, 26);
+
+      $y = 0;
+      $nombre = str_split($orden['info'][0]->empresa, 15);
+      foreach ($nombre as $key => $value) {
+        $y = 3+($key*2.5);
+        $pdf->Text(25, $y, trim($value));
+      }
+
+      $y += 1;
+      $nombre = str_split(substr($prod->producto, 0, 60), 15);
+      foreach ($nombre as $key => $value) {
+        $y += 2.5;
+        $pdf->Text(25, $y, trim($value));
+      }
+
+      $pdf->Text(25, 22, "Folio: {$orden['info'][0]->folio}");
+    }
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output();
+
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      unlink(APPPATH."media/qrtemp_salidas{$key}.png");
+    }
+  }
+
 
   /**
    * Reportes
