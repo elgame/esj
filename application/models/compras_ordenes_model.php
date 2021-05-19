@@ -2413,7 +2413,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial','',8);
         $pdf->SetXY(5, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(25, 80));
+        $pdf->SetWidths(array(25, 70));
         $pdf->Row(array('EMPRESA', "{$orden['info'][0]->id_empresa} - {$orden['info'][0]->empresa}"), false, true);
 
         // El dato de la requisicion
@@ -2421,7 +2421,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $requiss = [];
           foreach ($orden['info'][0]->requisiciones as $key => $value) {
             $requiss[] = $value->folio;
@@ -2432,14 +2432,14 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $pdf->Row(array('O. FALTANTES', $orden['info'][0]->otros_datos->prev_orden_faltantes->folio), false, true);
         }
         if (!empty($orden['info'][0]->area)) {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $areas = [];
           foreach ($orden['info'][0]->area as $key => $value) {
             $areas[] = $value->nombre;
@@ -2450,7 +2450,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $ranchos = [];
           foreach ($orden['info'][0]->rancho as $key => $value) {
             $ranchos[] = $value->nombre;
@@ -2461,7 +2461,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $centroCosto = [];
           foreach ($orden['info'][0]->centroCosto as $key => $value) {
             $centroCosto[] = $value->nombre;
@@ -2472,7 +2472,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetFont('Arial','',8);
           $pdf->SetXY(5, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(25, 80));
+          $pdf->SetWidths(array(25, 70));
           $activos = [];
           foreach ($orden['info'][0]->activo as $key => $value) {
             $activos[] = $value->nombre;
@@ -2671,49 +2671,49 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetAligns(array('C', 'L'));
         $pdf->SetWidths(array(55));
-        $pdf->SetX(85);
+        $pdf->SetX(95);
         $pdf->Row(array('ULTIMA/COMP'), false, true);
 
         if (isset($orden['info'][0]->gasolina_ant)) {
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(15, 40));
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Fecha', substr($orden['info'][0]->gasolina_ant->fecha, 0, 10)), false, true);
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Vehículo', $orden['info'][0]->gasolina_ant->vehiculo), false, true);
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Tipo', ($orden['info'][0]->gasolina_ant->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina_ant->kilometros, 2, '', false)), false, true);
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina_ant->litros, 2, '', false)), false, true);
-          $pdf->SetX(85);
+          $pdf->SetX(95);
           $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina_ant->precio, 2, '', false)), false, true);
         }
 
         $pdf->SetY($y_compras);
         $pdf->SetAligns(array('C', 'L'));
         $pdf->SetWidths(array(55));
-        $pdf->SetX(140);
+        $pdf->SetX(150);
         $pdf->Row(array('COMP/ACTUAL'), false, true);
 
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(15, 40));
-        $pdf->SetX(140);
+        $pdf->SetX(150);
         $pdf->Row(array('Fecha', substr($orden['info'][0]->fecha, 0, 10)), false, true);
-        $pdf->SetX(140);
+        $pdf->SetX(150);
         $pdf->Row(array('Vehículo', $orden['info'][0]->placa.' '.$orden['info'][0]->modelo.' '.$orden['info'][0]->marca), false, true);
-        $pdf->SetX(140);
+        $pdf->SetX(150);
         $pdf->Row(array('Tipo', ($orden['info'][0]->tipo_vehiculo == 'd'? 'Diesel': 'Gasolina')), false, true);
         if (isset($orden['info'][0]->gasolina[0])) {
-          $pdf->SetX(140);
+          $pdf->SetX(150);
           $pdf->Row(array('Km', MyString::formatoNumero($orden['info'][0]->gasolina[0]->kilometros, 2, '', false)), false, true);
-          $pdf->SetX(140);
+          $pdf->SetX(150);
           $pdf->Row(array('Litros', MyString::formatoNumero($orden['info'][0]->gasolina[0]->litros, 2, '', false)), false, true);
-          $pdf->SetX(140);
+          $pdf->SetX(150);
           $pdf->Row(array('Precio', MyString::formatoNumero($orden['info'][0]->gasolina[0]->precio, 2, '', false)), false, true);
         } else {
-          $pdf->SetX(140);
+          $pdf->SetX(150);
           $pdf->Row(array('No Capturados', ''), false, true);
         }
 

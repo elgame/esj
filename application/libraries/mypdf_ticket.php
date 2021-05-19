@@ -59,8 +59,10 @@ class mypdf_ticket extends FPDF {
             $this->SetFounts(array($this->fount_num), array(1));
             $this->Row(array($data->folio), false, true, 4);
 
-            $this->SetTextColor(255, 255, 255);
-            $this->Rect($this->GetX(), $this->GetY()+1, 63, 5, 'DF');
+            if ($data->intangible == 't') {
+              $this->SetTextColor(255, 255, 255);
+              $this->Rect($this->GetX(), $this->GetY()+1, 63, 5, 'DF');
+            }
             $this->SetFounts(array($this->fount_txt), array(-1));
             $this->SetWidths(array(63));
             $this->SetAligns(array('C'));
