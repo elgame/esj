@@ -59,6 +59,7 @@
                 'attrs' => array('style' => 'margin-bottom: 10px;') )
               );
              ?>
+             <a href="<?php echo base_url('panel/productos_salidas/comprobar_etiquetas/') ?>" class="btn btn-primary" rel="superbox-50x450" title="Comprobar Etiquetas"><i class="icon-qrcode"></i></a>
 
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
@@ -68,6 +69,7 @@
                   <th>Empresa</th>
                   <th>Estado</th>
                   <th>Tipo</th>
+                  <th>E. Entregadas</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -100,6 +102,9 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><span class="label label-<?php echo (($salida->productos-$salida->entregados) == 0? 'success': 'warning') ?>">
+                    <?php echo "{$salida->entregados}/{$salida->productos}" ?></span>
+                  </td>
                   <td class="center" style="max-width: 250px">
                     <?php
                       if ($salida->productos > 0) {
@@ -114,8 +119,8 @@
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
                           echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida."&itipo=1").'" target="_BLANK" title="Imprimir">
                                   <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket Vig</span></a>';
-                          echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimir_etiquetas/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
-                                  <i class="icon-print icon-white"></i> <span class="hidden-tablet">Etiquetas</span></a>';
+                          echo '<a class="btn btn-primary" href="'.base_url('panel/productos_salidas/imprimir_etiquetas/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                                  <i class="icon-qrcode icon-white"></i> <span class="hidden-tablet">Etiquetas</span></a>';
                         }
                       } else {
                         echo $this->usuarios_model->getLinkPrivSm('productos_salidas/modificar/', array(

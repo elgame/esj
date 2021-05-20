@@ -66,12 +66,18 @@ class productos_salidas_model extends CI_Model {
                 cs.id_empresa, e.nombre_fiscal AS empresa,
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-                cs.status, cs.concepto, Count(sp.id_salida) AS productos,
+                cs.status, cs.concepto,
+                Count(sp.id_salida) AS productos, Count(spp.id_salida) AS entregados,
                 cs.tipo
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
           LEFT JOIN compras_salidas_productos sp ON cs.id_salida = sp.id_salida
+          LEFT JOIN (
+            SELECT id_salida
+            FROM compras_salidas_productos
+            WHERE retorno_etiqueta = 't'
+          ) spp ON cs.id_salida = spp.id_salida
         WHERE 1 = 1 {$sql}
         GROUP BY cs.id_salida, e.id_empresa, u.id
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
@@ -649,6 +655,43 @@ class productos_salidas_model extends CI_Model {
     if($query->num_rows() > 0)
       $response = $query->result();
     $query->free_result();
+    return $response;
+  }
+
+  public function comprobarEtiquetasAjax($codigo)
+  {
+    $datos = str_getcsv($codigo);
+    if (count($datos) === 7) {
+      foreach ($datos as $key => $value) {
+        $datos[$key] = trim(str_replace(['"', '”'], '', $value));
+      }
+      $query = $this->db->query("SELECT Count(id_salida) AS num
+                                 FROM compras_salidas_productos
+                                 WHERE id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}")->row();
+      if ($query->num == 1) {
+        $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 't'], "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+
+        $query = $this->db->query("SELECT retorno_etiqueta
+                                 FROM compras_salidas_productos
+                                 WHERE id_salida = {$datos[5]}")->result();
+        $entregados = 0;
+        foreach ($query as $key => $value) {
+          if ($value->retorno_etiqueta == 't') {
+            $entregados++;
+          }
+        }
+        $terminado = '';
+        if (count($query) == $entregados) {
+          $terminado = 'Todas las etiquetas fueron entregadas';
+        }
+
+        $response = ['status' => 'success', 'msg' => 'La etiqueta fue regresada correctamente.', 'terminado' => $terminado];
+      } else {
+        $response = ['status' => 'error', 'msg' => 'La etiqueta no fue encontrada en el sistema.'];
+      }
+    } else {
+      $response = ['status' => 'error', 'msg' => 'Esta incompleta la información del código.'];
+    }
     return $response;
   }
 
