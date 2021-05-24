@@ -102,8 +102,8 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
-                  <td><span class="label label-<?php echo (($salida->productos-$salida->entregados) == 0? 'success': 'warning') ?>">
-                    <?php echo "{$salida->entregados}/{$salida->productos}" ?></span>
+                  <td><span class="label label-<?php echo (($salida->no_etiquetas-$salida->retorno_etiqueta) == 0? 'success': 'warning') ?>">
+                    <?php echo "{$salida->retorno_etiqueta}/{$salida->no_etiquetas}" ?></span>
                   </td>
                   <td class="center" style="max-width: 250px">
                     <?php

@@ -67,17 +67,20 @@ class productos_salidas_model extends CI_Model {
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
                 cs.status, cs.concepto,
-                Count(sp.id_salida) AS productos, Count(spp.id_salida) AS entregados,
+                Count(sp.id_salida) AS productos,
+                Sum(sp.no_etiqueta) AS no_etiquetas,
+                Sum(sp.retorno_etiqueta) AS retorno_etiqueta,
+                -- Count(spp.id_salida) AS entregados,
                 cs.tipo
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
           LEFT JOIN compras_salidas_productos sp ON cs.id_salida = sp.id_salida
-          LEFT JOIN (
-            SELECT id_salida
-            FROM compras_salidas_productos
-            WHERE retorno_etiqueta = 't'
-          ) spp ON cs.id_salida = spp.id_salida
+          -- LEFT JOIN (
+          --   SELECT id_salida
+          --   FROM compras_salidas_productos
+          --   WHERE retorno_etiqueta = 't'
+          -- ) spp ON cs.id_salida = spp.id_salida
         WHERE 1 = 1 {$sql}
         GROUP BY cs.id_salida, e.id_empresa, u.id
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
