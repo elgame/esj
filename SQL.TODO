@@ -6,7 +6,14 @@
    SELECT DISTINCT ON (bascula.tabla) bascula.tabla
      FROM bascula
     ORDER BY bascula.tabla;
-  ALTER TABLE public.tablas_bascula OWNER TO programa;
+    ALTER TABLE public.tablas_bascula OWNER TO programa;
+    ALTER TABLE public.compras_salidas ALTER COLUMN ciclo TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN etapa TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN grupo TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN no_secciones TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN metodo_aplicacion TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN tipo_aplicacion TYPE character varying(40);
+    ALTER TABLE public.compras_salidas ALTER COLUMN turno TYPE character varying(40);
  ✔ Cambiar los codigos del calibre en produccion lo pase Ceci @done (21-05-17 08:39)
  ✔ Generar los codigos QR de las salidas de almacen con los datos de corona @done (21-05-20 15:22)
    -- pcc
