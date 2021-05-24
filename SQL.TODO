@@ -1,5 +1,12 @@
 
  ☐ Poner obligatorios los campos de bascula: Rancho, Tabla y calidad
+   -- pcc
+   ALTER TABLE public.bascula ADD COLUMN tabla character varying(100) COLLATE pg_catalog."default";
+   CREATE OR REPLACE VIEW public.tablas_bascula AS
+   SELECT DISTINCT ON (bascula.tabla) bascula.tabla
+     FROM bascula
+    ORDER BY bascula.tabla;
+  ALTER TABLE public.tablas_bascula OWNER TO programa;
  ✔ Cambiar los codigos del calibre en produccion lo pase Ceci @done (21-05-17 08:39)
  ✔ Generar los codigos QR de las salidas de almacen con los datos de corona @done (21-05-20 15:22)
    -- pcc

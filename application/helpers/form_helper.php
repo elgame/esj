@@ -684,6 +684,9 @@ if ( ! function_exists('set_value'))
 			return form_prep($_POST[$field], $field);
 		}
 
+    if (is_null($OBJ->set_value($field, $default))) {
+      return $default;
+    }
 		return form_prep($OBJ->set_value($field, $default), $field);
 	}
 }

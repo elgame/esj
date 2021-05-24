@@ -115,7 +115,8 @@
 							<td class="txt_right">TOTAL</td>
 							<td>TIPO PAGO</td>
 							<td>CONCEPTO</td>
-							<td>RANCHO</td>
+              <td>RANCHO</td>
+							<td>TABLA/LOTE</td>
 							<!-- <td>BONIF</td> -->
 						</tr>
 				<?php
@@ -140,7 +141,8 @@
 							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->rancho: ''; ?></td>
+              <td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->rancho: ''; ?></td>
+							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->tabla: ''; ?></td>
 							<!-- <td><?php echo ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''); ?></td> -->
 						</tr>
         <?php
@@ -165,6 +167,7 @@
 							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
 							<td></td>
 							<td></td>
+              <td></td>
 							<td></td>
 							<!-- <td></td> -->
 						</tr>

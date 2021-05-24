@@ -660,6 +660,8 @@ class productos_salidas_model extends CI_Model {
 
   public function comprobarEtiquetasAjax($codigo)
   {
+    // id_producto,nombre,unidad,cantidad,precio,id_salida,num_row
+    // 74,"DETERGENTE ROMA",Kg,0.75,29.268,53612,0
     $datos = str_getcsv($codigo);
     if (count($datos) === 7) {
       foreach ($datos as $key => $value) {

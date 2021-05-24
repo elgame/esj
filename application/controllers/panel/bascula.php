@@ -21,6 +21,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_kilos/',
     'bascula/ajax_check_limite_proveedor/',
     'bascula/ajax_get_ranchos/',
+    'bascula/ajax_get_tablas/',
 
     'bascula/fotos/',
     'bascula/ajax_pagar_boleta/',
@@ -229,6 +230,7 @@ class bascula extends MY_Controller {
           $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
           $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
           $_POST['prancho']       = $info['info'][0]->rancho;
+          $_POST['ptabla']        = $info['info'][0]->tabla;
         }
         else
         {
@@ -615,6 +617,7 @@ class bascula extends MY_Controller {
             $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
             $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
             $_POST['prancho']       = $info['info'][0]->rancho;
+            $_POST['ptabla']        = $info['info'][0]->tabla;
           }
           else
           {
@@ -624,6 +627,7 @@ class bascula extends MY_Controller {
             $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
             $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
             $_POST['prancho']     = '';
+            $_POST['ptabla']      = '';
           }
 
           if ($info['info'][0]->id_chofer != null)
@@ -1645,27 +1649,6 @@ class bascula extends MY_Controller {
             'label' => 'Observaciones',
             'rules' => 'max_length[254]'),
 
-      array('field' => 'pcajas[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pcalidad[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pcalidadtext[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pkilos[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'ppromedio[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pprecio[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pimporte[]',
-            'label' => '',
-            'rules' => ''),
       array('field' => 'pcajas_prestadas',
             'label' => 'Cajas Prestadas',
             'rules' => ''),
@@ -1687,7 +1670,10 @@ class bascula extends MY_Controller {
 
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
-                           'rules' => '');
+                           'rules' => 'required');
+          $rules[] = array('field' => 'ptabla',
+                           'label' => 'Tabla/Lote',
+                           'rules' => 'required');
         }
         else
         {
@@ -1696,6 +1682,9 @@ class bascula extends MY_Controller {
                            'rules' => 'required');
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
+                           'rules' => '');
+          $rules[] = array('field' => 'ptabla',
+                           'label' => 'Tabla/Lote',
                            'rules' => '');
         }
       }
@@ -1712,15 +1701,40 @@ class bascula extends MY_Controller {
         $rules[] = array('field' => 'pkilos_neto',
                          'label' => 'Kilos Neto',
                          'rules' => 'required');
+
+        if ($_POST['ptipo'] === 'en') {
+          $rules[] = array('field' => 'pcajas[]',
+            'label' => 'Calidad cajas',
+            'rules' => 'required');
+          $rules[] = array('field' => 'pcalidad[]',
+                'label' => 'Calidad calidad',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pcalidadtext[]',
+                'label' => 'Calidad calidadtext',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pkilos[]',
+                'label' => 'Calidad kilos',
+                'rules' => 'required');
+          $rules[] = array('field' => 'ppromedio[]',
+                'label' => 'Calidad promedio',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pprecio[]',
+                'label' => 'Calidad precio',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pimporte[]',
+                'label' => 'Calidad importe',
+                'rules' => 'required');
+        }
       }
     }
 
     if (isset($_POST['ptipo']))
     {
-      if ($_POST['ptipo'] === 'en')
+      if ($_POST['ptipo'] === 'en') {
         $rules[] = array('field'  => 'pid_proveedor',
                           'label' => 'Proveedor',
                           'rules' => 'required');
+      }
       else
       {
         $rules[] = array('field' => 'pid_cliente',
@@ -2083,6 +2097,16 @@ class bascula extends MY_Controller {
   {
     $this->load->model('proveedores_model');
     echo json_encode($this->proveedores_model->getRanchosAjax());
+  }
+
+  /**
+    * Obtiene los ranchos por peticion Ajax.
+    * @return void
+    */
+  public function ajax_get_tablas()
+  {
+    $this->load->model('proveedores_model');
+    echo json_encode($this->proveedores_model->getTablasAjax());
   }
 
   /**

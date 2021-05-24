@@ -234,6 +234,14 @@
                     </div>
                   </div>
 
+                  <div class="control-group" id="groupProveedorTabla" style="margin:0px 0px 2px 0px;">
+                    <label class="control-label" for="ptabla">Tabla/Lote</label>
+                    <div class="controls">
+                      <input type="text" name="ptabla" value="<?php echo set_value('ptabla', $this->input->post('ptabla')) ?>"
+                        id="ptabla" class="input-xlarge" placeholder="Tabla/Lote" <?php echo $disabled.$bmod['rancho']; ?>>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="groupCliente" style="display: none;">
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
