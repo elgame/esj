@@ -181,7 +181,7 @@
 
                           <tr class="rowprod">
                             <td style="width: 80px;">
-                              <input type="text" name="no_etiqueta[]" value="<?php echo $prod->no_etiqueta ?>" id="no_etiqueta" class="span12 vinteger" min="0">
+                              <input type="text" name="no_etiqueta[]" value="<?php echo set_value('no_etiqueta', $prod->no_etiqueta, $key) ?>" id="no_etiqueta" class="span12 vinteger" min="0">
                               <span class="percent" style=""><?php echo $prod->percent ?>%</span>
                               <input type="hidden" name="percent[]" value="<?php echo $prod->percent ?>" id="percent">
                               <input type="hidden" name="rows[]" value="<?php echo $prod->rows ?>">
