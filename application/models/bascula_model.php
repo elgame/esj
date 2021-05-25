@@ -167,11 +167,13 @@ class bascula_model extends CI_Model {
         {
           $data['id_proveedor'] = $this->input->post('pid_proveedor');
           $data['rancho']       = mb_strtoupper($this->input->post('prancho'), 'UTF-8');
+          $data['tabla']        = mb_strtoupper($this->input->post('ptabla'), 'UTF-8');
         }
         else
         {
           $data['id_cliente'] = $this->input->post('pid_cliente');
           $data['rancho']     = '';
+          $data['tabla']      = '';
           $data['no_trazabilidad'] = $this->input->post('dno_trazabilidad');
         }
 
@@ -186,8 +188,9 @@ class bascula_model extends CI_Model {
         'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
         'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
         'obcervaciones' => $this->input->post('pobcervaciones'),
-        'rancho'       => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
-        'certificado' => isset($_POST['certificado']) ? 't' : 'f',
+        'rancho'        => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
+        'tabla'         => mb_strtoupper($this->input->post('ptabla'), 'UTF-8'),
+        'certificado'   => isset($_POST['certificado']) ? 't' : 'f',
         'tipo' => $this->input->post('ptipo')
       );
 
@@ -942,6 +945,7 @@ class bascula_model extends CI_Model {
                pagos.concepto,
                b.id_bonificacion,
                b.rancho,
+               b.tabla,
                COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago,
                fol.folio_rem, fol.folio_fact
         FROM bascula AS b
@@ -4325,6 +4329,7 @@ class bascula_model extends CI_Model {
         // $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
 
         $count = 0;
+        // Empresa,Area,Folio,ProveedorID,KilosBruto,KilosTara,KilosNeto,Fecha Bruto,Calidad,Cajas,Kilos,Promedio,Precio,Importe
         // Construcción de los datos de las recetas
         while (($line = fgets($handle)) !== false) {
           if (trim($line) != '' && $count !== 0) {

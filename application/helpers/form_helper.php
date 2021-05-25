@@ -672,7 +672,7 @@ if ( ! function_exists('form_prep'))
  */
 if ( ! function_exists('set_value'))
 {
-	function set_value($field = '', $default = '')
+	function set_value($field = '', $default = '', $index = 0)
 	{
 		if (FALSE === ($OBJ =& _get_validation_object()))
 		{
@@ -684,6 +684,11 @@ if ( ! function_exists('set_value'))
 			return form_prep($_POST[$field], $field);
 		}
 
+    if (isset($_POST[$field]) && is_array($_POST[$field])) {
+      return (isset($_POST[$field][$index])? $_POST[$field][$index]: $default);
+    } elseif (is_null($OBJ->set_value($field, $default))) {
+      return $default;
+    }
 		return form_prep($OBJ->set_value($field, $default), $field);
 	}
 }

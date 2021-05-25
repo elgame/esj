@@ -111,19 +111,21 @@ $(function(){
       $('#btnGuardar').trigger('click');
     },
     'alt+80': function () { // alt + p
+      imprimirBoletaa();
+
       // var win=window.open($('#btnPrint').attr('href'), '_blank');
       // win.focus();
 
-      var $form = $('#form');
+      // var $form = $('#form');
 
-      // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
-      if ($('#autorizar').length === 0) {
-        $form.attr('action', $form.attr('action') + '&p=t');
-        $form.submit();
-      } else {
-        var win=window.open($('#btnPrint').attr('href'), '_blank');
-        win.focus();
-      }
+      // // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      // if ($('#autorizar').length === 0) {
+      //   $form.attr('action', $form.attr('action') + '&p=t');
+      //   $form.submit();
+      // } else {
+      //   var win=window.open($('#btnPrint').attr('href'), '_blank');
+      //   win.focus();
+      // }
     },
   });
 
@@ -292,6 +294,20 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#prancho").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+    }
+  });
+
+  // Autocomplete tablas
+  $("#ptabla").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_tablas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#ptabla").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -684,17 +700,30 @@ $(function(){
   $('a#btnPrint').on('click', function(event) {
     event.preventDefault();
 
+    imprimirBoletaa();
+  });
+  var imprimirBoletaa = function () {
     var $form = $('#form');
 
     // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
     if ($('#autorizar').length === 0) {
-      $form.attr('action', $form.attr('action') + '&p=t');
+      let printt = '';
+      if ($('#ptipo').val() == 'en') {
+        if ($('#pid_empresa').val() != '' && $('#pid_proveedor').val() != '' && $('#prancho').val() != '' &&
+          $('#tableCajas tbody #pcajas').length > 0) {
+          printt = '&p=t';
+        }
+      } else {
+        printt = '&p=t';
+      }
+
+      $form.attr('action', $form.attr('action') + printt);
       $form.submit();
     } else {
       var win=window.open($('#btnPrint').attr('href'), '_blank');
       win.focus();
     }
-  });
+  };
 
   $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
     $.ajax({

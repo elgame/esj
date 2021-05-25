@@ -10,6 +10,9 @@ class productos_salidas extends MY_Controller {
     'productos_salidas/rpt_gastos_pdf/',
     'productos_salidas/rpt_gastos_xls/',
     'productos_salidas/imprimirticket/',
+    'productos_salidas/imprimir_etiquetas/',
+    'productos_salidas/comprobar_etiquetas/',
+    'productos_salidas/comprobar_etiquetas_ajax/',
 
     'productos_salidas/rpt_salidas_prod_cod_pdf/',
     'productos_salidas/rpt_salidas_prod_cod_xls/',
@@ -59,6 +62,39 @@ class productos_salidas extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/productos_salidas/admin', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function comprobar_etiquetas()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/productos_salidas/salida_codigos.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Almacen'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Salidas de Productos - Comprobar etiquetas');
+
+    $this->load->model('empresas_model');
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/productos_salidas/comprobar_etiquetas', $params);
+  }
+
+  public function comprobar_etiquetas_ajax()
+  {
+    $this->load->model('productos_salidas_model');
+    $response = $this->productos_salidas_model->comprobarEtiquetasAjax($this->input->post('codigo'));
+    echo json_encode($response);
   }
 
   /**
@@ -299,6 +335,15 @@ class productos_salidas extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->productos_salidas_model->imprimir_salidaticket($_GET['id']);
+    }
+  }
+  public function imprimir_etiquetas()
+  {
+    $this->load->model('productos_salidas_model');
+
+    if (isset($_GET['id']))
+    {
+      $this->productos_salidas_model->imprimir_etiquetas($_GET['id']);
     }
   }
 

@@ -374,6 +374,32 @@ class proveedores_model extends CI_Model {
 		return $response;
 	}
 
+  public function getTablasAjax(){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql = " AND upper(tabla) LIKE '%".mb_strtoupper($this->input->get('term'), 'UTF-8')."%'";
+    $res = $this->db->query("
+        SELECT tabla
+        FROM tablas_bascula
+        WHERE tabla <> '' ".$sql."
+        ORDER BY tabla ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => '0',
+            'label' => $itm->tabla,
+            'value' => $itm->tabla,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
 	/**
 	 * ******* CUENTAS DE PROVEEDORES ****************
 	 * ***********************************************

@@ -66,12 +66,21 @@ class productos_salidas_model extends CI_Model {
                 cs.id_empresa, e.nombre_fiscal AS empresa,
                 cs.id_empleado, u.nombre AS empleado,
                 cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-                cs.status, cs.concepto, Count(sp.id_salida) AS productos,
+                cs.status, cs.concepto,
+                Count(sp.id_salida) AS productos,
+                Sum(sp.no_etiqueta) AS no_etiquetas,
+                Sum(sp.retorno_etiqueta) AS retorno_etiqueta,
+                -- Count(spp.id_salida) AS entregados,
                 cs.tipo
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
           INNER JOIN usuarios AS u ON u.id = cs.id_empleado
           LEFT JOIN compras_salidas_productos sp ON cs.id_salida = sp.id_salida
+          -- LEFT JOIN (
+          --   SELECT id_salida
+          --   FROM compras_salidas_productos
+          --   WHERE retorno_etiqueta = 't'
+          -- ) spp ON cs.id_salida = spp.id_salida
         WHERE 1 = 1 {$sql}
         GROUP BY cs.id_salida, e.id_empresa, u.id
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
@@ -549,7 +558,8 @@ class productos_salidas_model extends CI_Model {
                   COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
+                  csp.no_etiqueta, csp.retorno_etiqueta
            FROM compras_salidas_productos AS csp
              INNER JOIN productos AS pr ON pr.id_producto = csp.id_producto
              LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
@@ -649,6 +659,51 @@ class productos_salidas_model extends CI_Model {
     if($query->num_rows() > 0)
       $response = $query->result();
     $query->free_result();
+    return $response;
+  }
+
+  public function comprobarEtiquetasAjax($codigo)
+  {
+    // id_producto,nombre,unidad,cantidad,precio,id_salida,num_row,no_etiqueta
+    // 74,"DETERGENTE ROMA",Kg,0.75,29.268,53612,0,1
+    $datos = str_getcsv($codigo);
+    if (count($datos) === 8) {
+      foreach ($datos as $key => $value) {
+        $datos[$key] = trim(str_replace(['"', '”'], '', $value));
+      }
+      $query = $this->db->query("SELECT id_salida, retorno_etiqueta_list
+                                 FROM compras_salidas_productos
+                                 WHERE id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}")->row();
+      if (isset($query->id_salida)) {
+        $etiquetas = json_decode($query->retorno_etiqueta_list);
+        $etiquetas = $etiquetas? $etiquetas: [];
+
+        if (array_search($datos[7], $etiquetas) === false) {
+          $etiquetas[] = $datos[7];
+          $json = json_encode($etiquetas);
+
+          $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 1, 'retorno_etiqueta_list' => "{$json}"],
+            "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+
+          $query = $this->db->query("SELECT (Sum(no_etiqueta) - Sum(retorno_etiqueta)) AS saldo_etiquetas
+                                   FROM compras_salidas_productos
+                                   WHERE id_salida = {$datos[5]}
+                                   GROUP BY id_salida")->row();
+          $terminado = '';
+          if ($query->saldo_etiquetas == 0) {
+            $terminado = 'Todas las etiquetas de la salida fueron regresadas';
+          }
+
+          $response = ['status' => 'success', 'msg' => 'La etiqueta fue regresada correctamente.', 'terminado' => $terminado];
+        } else {
+          $response = ['status' => 'error', 'msg' => "La etiqueta {$datos[7]}, ya fue regresada anteriormente."];
+        }
+      } else {
+        $response = ['status' => 'error', 'msg' => 'La etiqueta no fue encontrada en el sistema.'];
+      }
+    } else {
+      $response = ['status' => 'error', 'msg' => 'Esta incompleta la información del código.'];
+    }
     return $response;
   }
 
@@ -1267,6 +1322,64 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->AutoPrint(true);
     $pdf->Output();
+  }
+
+  public function imprimir_etiquetas($salidaID, $path = null)
+  {
+    include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+    $orden = $this->info($salidaID, true);
+    // echo "<pre>";
+    //   var_dump($orden['info']);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', [24, 50]);
+    $pdf->show_head = false;
+    $pdf->SetFont($pdf->fount_txt, 'B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetMargins(0, 0, 0);
+
+
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      $orden['info'][0]->productos[$key]->no_etiqueta = $prod->no_etiqueta = ($prod->no_etiqueta > 0? $prod->no_etiqueta: 1);
+      $cantidad = round($prod->cantidad / $prod->no_etiqueta, 6);
+
+      for ($i=1; $i <= $prod->no_etiqueta; $i++) {
+        $pdf->AddPage('L', [24, 50]);
+        $cadenaProducto = $prod->id_producto.',"'.htmlentities(substr($prod->producto, 0, 35), ENT_NOQUOTES).'",'.substr($prod->abreviatura, 0, 3).','.$cantidad.','.$prod->precio_unitario.','.$prod->id_salida.','.$prod->no_row.','.$i;
+
+        QRcode::png($cadenaProducto, APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png", 'H', 3);
+        $pdf->SetXY(0, 0);
+        $pdf->Image(APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png", -1, -1, 26);
+
+        $y = 0;
+        $nombre = str_split($orden['info'][0]->empresa, 15);
+        foreach ($nombre as $key1 => $value) {
+          $y = 3+($key1*2.5);
+          $pdf->Text(25, $y, trim($value));
+        }
+
+        $y += 1;
+        $nombre = str_split(substr($prod->producto, 0, 60), 15);
+        foreach ($nombre as $key1 => $value) {
+          $y += 2.5;
+          $pdf->Text(25, $y, trim($value));
+        }
+
+        $pdf->Text(25, 22, "F: {$orden['info'][0]->folio}|E: {$i}");
+      }
+    }
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output();
+
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      for ($i=1; $i <= $prod->no_etiqueta; $i++) {
+        unlink(APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png");
+      }
+    }
   }
 
 

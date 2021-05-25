@@ -1967,8 +1967,8 @@ class polizas_model extends CI_Model {
     {
       if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
         $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
-        $value->anio = $semana['anio'];
-        $value->semana = $semana['semana'];
+        $value->anio = ($semana['anio']? $semana['anio']: 0);
+        $value->semana = ($semana['semana']? $semana['semana']: 0);
         // $value->fecha_inicio = $semana['fecha_inicio'];
         // $value->fecha_final = $semana['fecha_final'];
       }
