@@ -1343,27 +1343,27 @@ class productos_salidas_model extends CI_Model {
 
 
     foreach ($orden['info'][0]->productos as $key => $prod) {
-      $prod->no_etiqueta = ($prod->no_etiqueta > 0? $prod->no_etiqueta: 1);
+      $orden['info'][0]->productos[$key]->no_etiqueta = $prod->no_etiqueta = ($prod->no_etiqueta > 0? $prod->no_etiqueta: 1);
       $cantidad = round($prod->cantidad / $prod->no_etiqueta, 6);
 
       for ($i=1; $i <= $prod->no_etiqueta; $i++) {
         $pdf->AddPage('L', [24, 50]);
         $cadenaProducto = $prod->id_producto.',"'.htmlentities(substr($prod->producto, 0, 35), ENT_NOQUOTES).'",'.substr($prod->abreviatura, 0, 3).','.$cantidad.','.$prod->precio_unitario.','.$prod->id_salida.','.$prod->no_row.','.$i;
 
-        QRcode::png($cadenaProducto, APPPATH."media/qrtemp_salidas{$key}{$i}.png", 'H', 3);
+        QRcode::png($cadenaProducto, APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png", 'H', 3);
         $pdf->SetXY(0, 0);
-        $pdf->Image(APPPATH."media/qrtemp_salidas{$key}{$i}.png", -1, -1, 26);
+        $pdf->Image(APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png", -1, -1, 26);
 
         $y = 0;
         $nombre = str_split($orden['info'][0]->empresa, 15);
-        foreach ($nombre as $key => $value) {
-          $y = 3+($key*2.5);
+        foreach ($nombre as $key1 => $value) {
+          $y = 3+($key1*2.5);
           $pdf->Text(25, $y, trim($value));
         }
 
         $y += 1;
         $nombre = str_split(substr($prod->producto, 0, 60), 15);
-        foreach ($nombre as $key => $value) {
+        foreach ($nombre as $key1 => $value) {
           $y += 2.5;
           $pdf->Text(25, $y, trim($value));
         }
@@ -1377,7 +1377,7 @@ class productos_salidas_model extends CI_Model {
 
     foreach ($orden['info'][0]->productos as $key => $prod) {
       for ($i=1; $i <= $prod->no_etiqueta; $i++) {
-        unlink(APPPATH."media/qrtemp_salidas{$key}{$i}.png");
+        unlink(APPPATH."media/temp/qrtemp_salidas{$key}{$i}.png");
       }
     }
   }
