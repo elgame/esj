@@ -132,7 +132,7 @@ class recetas_model extends CI_Model {
         $query = $this->db->query(
           "SELECT rp.id_receta, rp.id_producto, rp.rows, pr.nombre AS producto, pr.codigo,
             pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
-            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo, rp.dosis_ha
+            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo, rp.dosis_ha, rp.no_etiqueta
           FROM otros.recetas_productos AS rp
             INNER JOIN productos AS pr ON pr.id_producto = rp.id_producto
           WHERE rp.id_receta = {$data['info']->id_recetas}
@@ -462,6 +462,7 @@ class recetas_model extends CI_Model {
         'no_row'          => $key,
         'cantidad'        => $_POST['cantidad'][$key],
         'precio_unitario' => $_POST['precio'][$key],
+        'no_etiqueta'     => $_POST['no_etiqueta'][$key],
       ];
     }
     $this->productos_salidas_model->agregarProductos($id_salida, $productos);

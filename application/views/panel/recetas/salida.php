@@ -163,16 +163,16 @@
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
                       <thead>
                         <tr>
-                          <th rowspan="2" style="vertical-align: middle;">%</th>
-                          <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
-                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
-                          <th rowspan="2" class="tipostyle" style="vertical-align: <?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">CARGA 1</th>
-                          <th rowspan="2" class="tipostyle" style="vertical-align: <?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">CARGA 2</th>
-                          <th rowspan="2" style="vertical-align: middle;">APLI TOTAL</th>
-                          <th rowspan="2" style="vertical-align: middle;">SALDO TOTAL</th>
-                          <th rowspan="2" style="vertical-align: middle;">PRECIO</th>
-                          <th rowspan="2" style="vertical-align: middle;">IMPORTE</th>
-                          <th rowspan="2" style="vertical-align: middle;">OPC</th>
+                          <th style="vertical-align: middle;">ETIQUETAS</th>
+                          <th style="vertical-align: middle;">PRODUCTO</th>
+                          <th style="vertical-align: middle;">CANT.</th>
+                          <th class="tipostyle" style="vertical-align: <?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">CARGA 1</th>
+                          <th class="tipostyle" style="vertical-align: <?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">CARGA 2</th>
+                          <th style="vertical-align: middle;">APLI TOTAL</th>
+                          <th style="vertical-align: middle;">SALDO TOTAL</th>
+                          <th style="vertical-align: middle;">PRECIO</th>
+                          <th style="vertical-align: middle;">IMPORTE</th>
+                          <th style="vertical-align: middle;">OPC</th>
                         </tr>
                       </thead>
                       <tbody class="bodyproducs">
@@ -180,8 +180,9 @@
                         foreach ($receta['info']->productos as $key => $prod) { ?>
 
                           <tr class="rowprod">
-                            <td style="width: 50px;">
-                              <span class="percent"><?php echo $prod->percent ?></span>
+                            <td style="width: 80px;">
+                              <input type="text" name="no_etiqueta[]" value="<?php echo $prod->no_etiqueta ?>" id="no_etiqueta" class="span12 vinteger" min="0">
+                              <span class="percent" style=""><?php echo $prod->percent ?>%</span>
                               <input type="hidden" name="percent[]" value="<?php echo $prod->percent ?>" id="percent">
                               <input type="hidden" name="rows[]" value="<?php echo $prod->rows ?>">
                             </td>
@@ -190,7 +191,7 @@
                               <input type="hidden" name="concepto[]" value="<?php echo $prod->producto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
                             </td>
-                            <td style="width: 80px;">
+                            <td style="width: 90px;">
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0" max="<?php echo $prod->aplicacion_total_saldo ?>">
                             </td>
                             <td class="tipostyle" style="width: 80px;<?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">
@@ -199,19 +200,19 @@
                             <td class="tipostyle" style="width: 80px;<?php echo ($receta['info']->tipo == 'lts'? '':'middle;display: none;') ?>">
                                 <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
                             </td>
-                            <td style="width: 130px;">
+                            <td style="width: 100px;">
                               <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
                             </td>
-                            <td style="width: 130px;">
+                            <td style="width: 100px;">
                               <input type="number" step="any" name="aplicacion_total_saldo[]" value="<?php echo $prod->aplicacion_total_saldo ?>" id="aplicacion_total_saldo" data-saldo="<?php echo $prod->aplicacion_total_saldo ?>" class="span12 vpositive" min="0" readonly>
                             </td>
-                            <td style="width: 130px;">
+                            <td style="width: 90px;">
                               <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive" min="0" readonly>
                             </td>
-                            <td style="width: 150px;">
+                            <td style="width: 100px;">
                               <input type="number" step="any" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive" min="0" readonly>
                             </td>
-                            <td style="width: 50px;">
+                            <td style="width: 40px;">
                               <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
                             </td>
                           </tr>

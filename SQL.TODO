@@ -19,8 +19,12 @@
    -- pcc
    ALTER TABLE public.compras_salidas_productos ADD COLUMN no_etiqueta integer DEFAULT 0;
    ALTER TABLE public.compras_salidas_productos ADD COLUMN retorno_etiqueta integer DEFAULT 0;
+   ALTER TABLE public.compras_salidas_productos ADD COLUMN retorno_etiqueta_list json DEFAULT '[]'::json;
+   ALTER TABLE otros.recetas_productos ADD COLUMN no_etiqueta integer DEFAULT 0;
+   //
    id_producto:13, descripcion:35, unidad_medida:3, cantidad, precio
    medida 2"x1"
+
  ✔ Autogenerar las boletas ficticias @done (21-05-17 08:39)
     CREACION BOLETAS.xlsx
 

@@ -11122,7 +11122,7 @@ class nomina_fiscal_model extends CI_Model {
       $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $diaComienza = '4';
-    $tipoNomina = $dia == 15? 'quincena': 'semana';
+    $tipoNomina = $diaComienza == 15? 'quincena': 'semana';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq

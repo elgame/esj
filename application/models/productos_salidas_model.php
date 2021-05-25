@@ -558,7 +558,8 @@ class productos_salidas_model extends CI_Model {
                   COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
+                  csp.no_etiqueta, csp.retorno_etiqueta
            FROM compras_salidas_productos AS csp
              INNER JOIN productos AS pr ON pr.id_producto = csp.id_producto
              LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
@@ -663,34 +664,40 @@ class productos_salidas_model extends CI_Model {
 
   public function comprobarEtiquetasAjax($codigo)
   {
-    // id_producto,nombre,unidad,cantidad,precio,id_salida,num_row
-    // 74,"DETERGENTE ROMA",Kg,0.75,29.268,53612,0
+    // id_producto,nombre,unidad,cantidad,precio,id_salida,num_row,no_etiqueta
+    // 74,"DETERGENTE ROMA",Kg,0.75,29.268,53612,0,1
     $datos = str_getcsv($codigo);
-    if (count($datos) === 7) {
+    if (count($datos) === 8) {
       foreach ($datos as $key => $value) {
         $datos[$key] = trim(str_replace(['"', '”'], '', $value));
       }
-      $query = $this->db->query("SELECT Count(id_salida) AS num
+      $query = $this->db->query("SELECT id_salida, retorno_etiqueta_list
                                  FROM compras_salidas_productos
                                  WHERE id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}")->row();
-      if ($query->num == 1) {
-        $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 't'], "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+      if (isset($query->id_salida)) {
+        $etiquetas = json_decode($query->retorno_etiqueta_list);
+        $etiquetas = $etiquetas? $etiquetas: [];
 
-        $query = $this->db->query("SELECT retorno_etiqueta
-                                 FROM compras_salidas_productos
-                                 WHERE id_salida = {$datos[5]}")->result();
-        $entregados = 0;
-        foreach ($query as $key => $value) {
-          if ($value->retorno_etiqueta == 't') {
-            $entregados++;
+        if (array_search($datos[7], $etiquetas) === false) {
+          $etiquetas[] = $datos[7];
+          $json = json_encode($etiquetas);
+
+          $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 1, 'retorno_etiqueta_list' => "{$json}"],
+            "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+
+          $query = $this->db->query("SELECT (Sum(no_etiqueta) - Sum(retorno_etiqueta)) AS saldo_etiquetas
+                                   FROM compras_salidas_productos
+                                   WHERE id_salida = {$datos[5]}
+                                   GROUP BY id_salida")->row();
+          $terminado = '';
+          if ($query->saldo_etiquetas == 0) {
+            $terminado = 'Todas las etiquetas de la salida fueron regresadas';
           }
-        }
-        $terminado = '';
-        if (count($query) == $entregados) {
-          $terminado = 'Todas las etiquetas fueron entregadas';
-        }
 
-        $response = ['status' => 'success', 'msg' => 'La etiqueta fue regresada correctamente.', 'terminado' => $terminado];
+          $response = ['status' => 'success', 'msg' => 'La etiqueta fue regresada correctamente.', 'terminado' => $terminado];
+        } else {
+          $response = ['status' => 'error', 'msg' => "La etiqueta {$datos[7]}, ya fue regresada anteriormente."];
+        }
       } else {
         $response = ['status' => 'error', 'msg' => 'La etiqueta no fue encontrada en el sistema.'];
       }
@@ -1336,36 +1343,42 @@ class productos_salidas_model extends CI_Model {
 
 
     foreach ($orden['info'][0]->productos as $key => $prod) {
-      $pdf->AddPage('L', [24, 50]);
+      $prod->no_etiqueta = ($prod->no_etiqueta > 0? $prod->no_etiqueta: 1);
+      $cantidad = round($prod->cantidad / $prod->no_etiqueta, 6);
 
-      $cadenaProducto = $prod->id_producto.',"'.htmlentities(substr($prod->producto, 0, 35), ENT_NOQUOTES).'",'.substr($prod->abreviatura, 0, 3).','.$prod->cantidad.','.$prod->precio_unitario.','.$prod->id_salida.','.$prod->no_row;
+      for ($i=1; $i <= $prod->no_etiqueta; $i++) {
+        $pdf->AddPage('L', [24, 50]);
+        $cadenaProducto = $prod->id_producto.',"'.htmlentities(substr($prod->producto, 0, 35), ENT_NOQUOTES).'",'.substr($prod->abreviatura, 0, 3).','.$cantidad.','.$prod->precio_unitario.','.$prod->id_salida.','.$prod->no_row.','.$i;
 
-      QRcode::png($cadenaProducto, APPPATH."media/qrtemp_salidas{$key}.png", 'H', 3);
-      $pdf->SetXY(0, 0);
-      $pdf->Image(APPPATH."media/qrtemp_salidas{$key}.png", -1, -1, 26);
+        QRcode::png($cadenaProducto, APPPATH."media/qrtemp_salidas{$key}{$i}.png", 'H', 3);
+        $pdf->SetXY(0, 0);
+        $pdf->Image(APPPATH."media/qrtemp_salidas{$key}{$i}.png", -1, -1, 26);
 
-      $y = 0;
-      $nombre = str_split($orden['info'][0]->empresa, 15);
-      foreach ($nombre as $key => $value) {
-        $y = 3+($key*2.5);
-        $pdf->Text(25, $y, trim($value));
+        $y = 0;
+        $nombre = str_split($orden['info'][0]->empresa, 15);
+        foreach ($nombre as $key => $value) {
+          $y = 3+($key*2.5);
+          $pdf->Text(25, $y, trim($value));
+        }
+
+        $y += 1;
+        $nombre = str_split(substr($prod->producto, 0, 60), 15);
+        foreach ($nombre as $key => $value) {
+          $y += 2.5;
+          $pdf->Text(25, $y, trim($value));
+        }
+
+        $pdf->Text(25, 22, "F: {$orden['info'][0]->folio}|E: {$i}");
       }
-
-      $y += 1;
-      $nombre = str_split(substr($prod->producto, 0, 60), 15);
-      foreach ($nombre as $key => $value) {
-        $y += 2.5;
-        $pdf->Text(25, $y, trim($value));
-      }
-
-      $pdf->Text(25, 22, "Folio: {$orden['info'][0]->folio}");
     }
 
     // $pdf->AutoPrint(true);
     $pdf->Output();
 
     foreach ($orden['info'][0]->productos as $key => $prod) {
-      unlink(APPPATH."media/qrtemp_salidas{$key}.png");
+      for ($i=1; $i <= $prod->no_etiqueta; $i++) {
+        unlink(APPPATH."media/qrtemp_salidas{$key}{$i}.png");
+      }
     }
   }
 
