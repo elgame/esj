@@ -1,5 +1,6 @@
 
- ☐ Poner obligatorios los campos de bascula: Rancho, Tabla y calidad
+ ☐ Poder agregar productos en las ordenes de requisiciones
+ ✔ Poner obligatorios los campos de bascula: Rancho, Tabla y calidad @done (21-05-26 13:54)
    -- pcc|san
    ALTER TABLE public.bascula ADD COLUMN tabla character varying(100) COLLATE pg_catalog."default";
    CREATE OR REPLACE VIEW public.tablas_bascula AS
