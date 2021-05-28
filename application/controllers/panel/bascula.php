@@ -573,7 +573,7 @@ class bascula extends MY_Controller {
         ->get()
         ->row();
 
-      $this->configAddModBascula();
+      $this->configAddModBascula(true);
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -1568,7 +1568,7 @@ class bascula extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddModBascula()
+  public function configAddModBascula($bonificacion = false)
   {
     $this->load->library('form_validation');
 
@@ -1664,16 +1664,20 @@ class bascula extends MY_Controller {
 
         if ($_POST['ptipo'] == 'en')
         {
+          $requiredd = 'required';
+          if ($bonificacion) {
+            $requiredd = '';
+          }
           $rules[] = array('field' => 'pkilos_brutos',
                            'label' => 'Kilos Brutos',
                            'rules' => 'required');
 
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
-                           'rules' => 'required');
+                           'rules' => $requiredd);
           $rules[] = array('field' => 'ptabla',
                            'label' => 'Tabla/Lote',
-                           'rules' => 'required');
+                           'rules' => $requiredd);
         }
         else
         {
