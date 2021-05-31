@@ -105,7 +105,7 @@
   $(document).ready(function(){
 
     <?php if (isset($close)) {?>
-        setInterval(function() {
+        setTimeout(function() {
           window.parent.$('#supermodal').modal('hide');
       }, 2000);
     <?php }?>

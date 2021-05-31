@@ -335,7 +335,7 @@
   $(document).ready(function(){
 
     <?php if (isset($close)) {?>
-        setInterval(function() {
+        setTimeout(function() {
           window.parent.$('#supermodal').modal('hide');
           window.parent.location.reload();
       }, 2000);

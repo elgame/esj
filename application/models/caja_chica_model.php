@@ -1485,7 +1485,9 @@ class caja_chica_model extends CI_Model {
         FROM cajachica_deudores cd
           LEFT JOIN (
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
-            WHERE no_caja = {$datos['no_caja']} AND fecha <= Date(Now()) GROUP BY id_deudor
+            WHERE id_deudor = {$datos['id']} AND no_caja = {$datos['no_caja']}
+              AND fecha <= Date(Now())
+            GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
         WHERE cd.id_deudor = {$datos['id']} AND cd.no_caja = {$datos['no_caja']}
           AND fecha <= Date(Now())"

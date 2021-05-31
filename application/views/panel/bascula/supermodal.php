@@ -36,7 +36,7 @@
   <?php if ($closeModal) { ?>
     <script>
     $(function(){
-      setInterval(function() {
+      setTimeout(function() {
         window.parent.$('#supermodal').modal('hide');
       }, 1000);
     });
