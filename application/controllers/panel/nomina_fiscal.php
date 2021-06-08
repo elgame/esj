@@ -63,6 +63,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/parcheGeneraXML/',
 
     'nomina_fiscal/show_import_nomina_corona/',
+    'nomina_fiscal/download_descuentos_corona/',
 
     'nomina_fiscal/cuadro_antiguedad_pdf/',
     'nomina_fiscal/cuadro_antiguedad_xls/',
@@ -817,6 +818,72 @@ class nomina_fiscal extends MY_Controller {
     }
 
     $this->load->view('panel/nomina_fiscal/importar_nomina_corona', $params);
+  }
+
+  public function download_descuentos_corona()
+  {
+    if (!empty($_GET['id']) && !empty($_GET['sem']) && !empty($_GET['anio'])) {
+      $this->load->model('empresas_model');
+      $this->load->model('nomina_fiscal_model');
+
+      $sem = $_GET['sem'];
+      $anio = $_GET['anio'];
+      // Obtiene la informacion de la empresa.
+      $empresa = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+      // Obtiene los dias de la semana.
+      $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($sem, $anio, $empresa->dia_inicia_semana);
+      $diaUltimoDeLaSemana = $semana['fecha_final']; // fecha del ultimo dia de la semana.
+
+      $queryPrestamos = $this->db->query(
+        "SELECT np.id_usuario,
+        				Concat(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS empleado,
+                np.id_prestamo,
+                np.prestado,
+                np.pago_semana,
+                np.status,
+                DATE(np.fecha) as fecha,
+                DATE(np.inicio_pago) as inicio_pago,
+                COALESCE(SUM(nfp.monto), 0) as total_pagado,
+                np.tipo,
+                '{$diaUltimoDeLaSemana}' AS fecha_sem
+          FROM nomina_prestamos np
+            INNER JOIN usuarios u ON u.id = np.id_usuario
+            LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
+          WHERE np.status = 't' AND np.pausado = 'f' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
+            AND u.id_empresa = {$_GET['id']}
+          GROUP BY np.id_usuario, u.id, np.id_prestamo, np.prestado, np.pago_semana,
+            np.status, DATE(np.fecha), DATE(np.inicio_pago)
+      ");
+      // Si hay prestamos entra.
+      if ($queryPrestamos->num_rows() > 0)
+      {
+      	$tipos = [
+      		'fi' => "Préstamo Fiscal", 'ef' => "Préstamo Efectivo",
+      		'mt' => 'Otros descuentos', 'efd' => 'Préstamo Efectivo Directo'
+      	];
+        $prestamos = $queryPrestamos->result();
+        foreach ($prestamos as $key => $p) {
+        	// Obtiene lo que falta de pagar.
+          $diff = $p->prestado - $p->total_pagado;
+
+          // Si lo que falta de pagar es mayor o igual al pago que
+          // se da semalmente entra.
+          if ($diff >= $p->pago_semana)
+          {
+            $p->pago_semana_descontar = $p->pago_semana;
+          }
+          else
+          {
+            $p->pago_semana_descontar = $diff;
+          }
+
+          echo "\"\"	\"\"	{$p->fecha_sem}	{$p->id_usuario}	{$p->empleado}	\"{$p->id_prestamo}-{$anio}{$sem}\"	\"{$tipos[$p->tipo]}, Año {$anio}, Sem {$sem}\"	{$p->pago_semana_descontar}	0.00	{$p->pago_semana_descontar}	\"\"	2\n";
+        }
+        header('Content-Type:text/html; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="descuentos-nomina.txt"');
+      }
+    }
   }
 
   /*

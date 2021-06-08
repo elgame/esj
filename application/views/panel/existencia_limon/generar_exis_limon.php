@@ -116,11 +116,12 @@
                           <thead>
                             <tr>
                               <th colspan="5">VENTAS</th>
-                              <th colspan="4" id="dvfondo_caja"></th>
+                              <th colspan="5" id="dvfondo_caja"></th>
                             </tr>
                             <tr>
                               <!-- <th>FECHA</th> -->
                               <th>FOLIO</th>
+                              <th>NO SALIDA</th>
                               <th>CLIENTE</th>
                               <th>CALIBRE</th>
                               <th>CLASIF</th>
@@ -141,6 +142,7 @@
                                     ?>
                                     <tr>
                                       <td><?php echo $venta->serie.$venta->folio ?></td>
+                                      <td><?php echo $venta->no_salida_fruta ?></td>
                                       <td><?php echo $venta->nombre_fiscal ?></td>
                                       <td><?php echo $venta->calibre ?></td>
                                       <td><?php echo $venta->clasificacion ?></td>
@@ -152,7 +154,7 @@
                                     </tr>
                             <?php } ?>
                             <tr>
-                              <th colspan="5"></th>
+                              <th colspan="6"></th>
                               <th><?php echo $venta_kilos ?></th>
                               <th><?php echo $venta_cantidad ?></th>
                               <th></th>
@@ -170,7 +172,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia">
                           <thead>
                             <tr>
-                              <th colspan="6">EXISTENCIA</th>
+                              <th colspan="6">EXISTENCIA EMPACADA</th>
                             </tr>
                             <tr>
                               <th>CALIBRE</th>
@@ -217,6 +219,186 @@
                       </div>
                     </div>
                     <!--/ Existencia -->
+
+                    <!-- Existencia de piso -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia-piso">
+                          <thead>
+                            <tr>
+                              <th colspan="5">EXISTENCIA DE PISO</th>
+                              <th>
+                                <button type="button" class="btn btn-success" id="btnAddExisPiso"><i class="icon-plus"></i></button>
+                                <input type="hidden" id="unidades" value='<?php echo json_encode($unidades) ?>'>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>UNIDAD</th>
+                              <th>CANTIDAD</th>
+                              <th>KILOS</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $existenciaPiso_kilos = $existenciaPiso_cantidad = $existenciaPiso_importe = 0;
+                            if (isset($_POST['existenciaPiso_id_unidad'])) {
+                              foreach ($_POST['existenciaPiso_id_unidad'] as $keyp => $existencia) {
+                                $existenciaPiso_kilos    += floatval($_POST['existenciaPiso_kilos'][$keyp]);
+                                $existenciaPiso_cantidad += floatval($_POST['existenciaPiso_cantidad'][$keyp]);
+                                $existenciaPiso_importe  += floatval($_POST['existenciaPiso_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $_POST['existenciaPiso_id_unidad'][$keyp]? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="existenciaPiso_cantidad[]" value="<?php echo $_POST['existenciaPiso_cantidad'][$keyp] ?>" class="span12 vpositive existenciaPiso_cantidad" required></td>
+                                <td><input type="text" name="existenciaPiso_kilos[]" value="<?php echo $_POST['existenciaPiso_kilos'][$keyp] ?>" class="span12 vpositive existenciaPiso_kilos" readonly></td>
+                                <td><input type="text" name="existenciaPiso_costo[]" value="<?php echo $_POST['existenciaPiso_costo'][$keyp] ?>" class="span12 vpositive existenciaPiso_costo" required></td>
+                                <td><input type="text" name="existenciaPiso_importe[]" value="<?php echo $_POST['existenciaPiso_importe'][$keyp] ?>" class="span12 vpositive existenciaPiso_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger existenciaPiso_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['existencia_piso'] as $existencia) {
+                                $existenciaPiso_kilos    += floatval($existencia->kilos);
+                                $existenciaPiso_cantidad += floatval($existencia->cantidad);
+                                $existenciaPiso_importe  += floatval($existencia->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $existencia->id_unidad? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="existenciaPiso_cantidad[]" value="<?php echo $existencia->cantidad ?>" class="span12 vpositive existenciaPiso_cantidad" required></td>
+                                <td><input type="text" name="existenciaPiso_kilos[]" value="<?php echo $existencia->kilos ?>" class="span12 vpositive existenciaPiso_kilos" readonly></td>
+                                <td><input type="text" name="existenciaPiso_costo[]" value="<?php echo $existencia->costo ?>" class="span12 vpositive existenciaPiso_costo" required></td>
+                                <td><input type="text" name="existenciaPiso_importe[]" value="<?php echo $existencia->importe ?>" class="span12 vpositive existenciaPiso_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger existenciaPiso_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th id="exisPisoCantidad"><?php echo $existenciaPiso_cantidad ?></th>
+                              <th id="exisPisoKilos"><?php echo $existenciaPiso_kilos ?></th>
+                              <th></th>
+                              <th id="exisPisoImporte"><?php echo $existenciaPiso_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Existencia de piso -->
+
+                    <!-- Existencia de reproceso -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia-reproceso">
+                          <thead>
+                            <tr>
+                              <th colspan="6">EXISTENCIA REPROCESO</th>
+                              <th style="width: 35px;">
+                                <button type="button" class="btn btn-success" id="btnAddExisRepro"><i class="icon-plus"></i></button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>CALIBRE</th>
+                              <th>UNIDAD</th>
+                              <th>CANTIDAD</th>
+                              <th>KILOS</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $existenciaReProceso_kilos = $existenciaReProceso_cantidad = $existenciaReProceso_importe = 0;
+                            if (isset($_POST['existenciaRepro_calibre'])) {
+                              foreach ($_POST['existenciaRepro_calibre'] as $keyp => $existencia) {
+                                $existenciaReProceso_kilos    += floatval($_POST['existenciaRepro_kilos'][$keyp]);
+                                $existenciaReProceso_cantidad += floatval($_POST['existenciaRepro_cantidad'][$keyp]);
+                                $existenciaReProceso_importe  += floatval($_POST['existenciaRepro_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="existenciaRepro_calibre[]" value="<?php echo $_POST['existenciaRepro_calibre'][$keyp] ?>" class="span12 existenciaRepro_calibre" required>
+                                  <input type="hidden" name="existenciaRepro_id_calibre[]" value="<?php echo $_POST['existenciaRepro_id_calibre'][$keyp] ?>" class="span12 existenciaRepro_id_calibre" required>
+                                </td>
+                                <td>
+                                  <select name="existenciaRepro_id_unidad[]" class="span12 existenciaRepro_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $_POST['existenciaRepro_id_unidad'][$keyp]? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="existenciaRepro_cantidad[]" value="<?php echo $_POST['existenciaRepro_cantidad'][$keyp] ?>" class="span12 vpositive existenciaRepro_cantidad" required></td>
+                                <td><input type="text" name="existenciaRepro_kilos[]" value="<?php echo $_POST['existenciaRepro_kilos'][$keyp] ?>" class="span12 vpositive existenciaRepro_kilos" readonly></td>
+                                <td><input type="text" name="existenciaRepro_costo[]" value="<?php echo $_POST['existenciaRepro_costo'][$keyp] ?>" class="span12 vpositive existenciaRepro_costo" required></td>
+                                <td><input type="text" name="existenciaRepro_importe[]" value="<?php echo $_POST['existenciaRepro_importe'][$keyp] ?>" class="span12 vpositive existenciaRepro_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger existenciaRepro_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['existencia_reproceso'] as $existencia) {
+                                $existenciaReProceso_kilos    += floatval($existencia->kilos);
+                                $existenciaReProceso_cantidad += floatval($existencia->cantidad);
+                                $existenciaReProceso_importe  += floatval($existencia->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="existenciaRepro_calibre[]" value="<?php echo $existencia->calibre ?>" class="span12 existenciaRepro_calibre" required>
+                                  <input type="hidden" name="existenciaRepro_id_calibre[]" value="<?php echo $existencia->id_calibre ?>" class="span12 existenciaRepro_id_calibre" required>
+                                </td>
+                                <td>
+                                  <select name="existenciaRepro_id_unidad[]" class="span12 existenciaRepro_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $existencia->id_unidad? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="existenciaRepro_cantidad[]" value="<?php echo $existencia->cantidad ?>" class="span12 vpositive existenciaRepro_cantidad" required></td>
+                                <td><input type="text" name="existenciaRepro_kilos[]" value="<?php echo $existencia->kilos ?>" class="span12 vpositive existenciaRepro_kilos" readonly></td>
+                                <td><input type="text" name="existenciaRepro_costo[]" value="<?php echo $existencia->costo ?>" class="span12 vpositive existenciaRepro_costo" required></td>
+                                <td><input type="text" name="existenciaRepro_importe[]" value="<?php echo $existencia->importe ?>" class="span12 vpositive existenciaRepro_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger existenciaRepro_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th id="exisReproCantidad"><?php echo $existenciaReProceso_cantidad ?></th>
+                              <th id="exisReproKilos"><?php echo $existenciaReProceso_kilos ?></th>
+                              <th></th>
+                              <th id="exisReproImporte"><?php echo $existenciaReProceso_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Existencia de reproceso -->
 
                     <!-- Compra de fruta -->
                     <div class="row-fluid">
@@ -356,6 +538,198 @@
                       </div>
                     </div>
                     <!--/ Existencia Anterior -->
+
+                    <!-- Costo de venta -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-costo-ventas" style="margin-bottom: 0px;">
+                          <thead>
+                            <tr>
+                              <th colspan="3">COSTO DE VENTAS</th>
+                              <th style="width: 35px;">
+                                <button type="button" class="btn btn-success" id="btnAddCostoVentas"><i class="icon-plus"></i></button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>NOMBRE</th>
+                              <th>DESCRIPCION</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $descuentoVentas_importe = 0;
+                            if (isset($_POST['descuentoVentas_nombre'])) {
+                              foreach ($_POST['descuentoVentas_nombre'] as $keyp => $desc) {
+                                $descuentoVentas_importe  += floatval($_POST['descuentoVentas_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="descuentoVentas_nombre[]" value="<?php echo $_POST['descuentoVentas_nombre'][$keyp] ?>" class="span12 descuentoVentas_nombre" required>
+                                  <input type="hidden" name="descuentoVentas_id[]" value="" class="span12 descuentoVentas_id">
+                                  <input type="hidden" name="descuentoVentas_delete[]" value="<?php echo $_POST['descuentoVentas_delete'][$keyp] ?>" class="span12 descuentoVentas_delete">
+                                </td>
+                                <td>
+                                  <input type="text" name="descuentoVentas_descripcion[]" value="<?php echo $_POST['descuentoVentas_descripcion'][$keyp] ?>" class="span12 descuentoVentas_descripcion" required>
+                                </td>
+                                <td><input type="text" name="descuentoVentas_importe[]" value="<?php echo $_POST['descuentoVentas_importe'][$keyp] ?>" class="span12 vpositive descuentoVentas_importe" required></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger descuentoVentas_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['costo_ventas'] as $desc) {
+                                $descuentoVentas_importe  += floatval($desc->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="descuentoVentas_nombre[]" value="<?php echo $desc->nombre ?>" class="span12 descuentoVentas_nombre" required>
+                                  <input type="hidden" name="descuentoVentas_id[]" value="<?php echo $desc->id ?>" class="span12 descuentoVentas_id">
+                                  <input type="hidden" name="descuentoVentas_delete[]" value="false" class="span12 descuentoVentas_delete">
+                                </td>
+                                <td>
+                                  <input type="text" name="descuentoVentas_descripcion[]" value="<?php echo $desc->descripcion ?>" class="span12 descuentoVentas_descripcion" required>
+                                </td>
+                                <td><input type="text" name="descuentoVentas_importe[]" value="<?php echo $desc->importe ?>" class="span12 vpositive descuentoVentas_importe" required></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger descuentoVentas_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th></th>
+                              <th id="descuentoVentas_importe"><?php echo $descuentoVentas_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-costo-ventas-fletes">
+                          <thead>
+                            <tr>
+                              <th colspan="3">FLETES</th>
+                            </tr>
+                            <tr>
+                              <th>NOMBRE</th>
+                              <th>CANTIDAD</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
+                              foreach ($caja['costo_ventas_fletes'] as $desc) {
+                                $descuentoVentasFletes_cantidad  += floatval($desc->cantidad);
+                                $descuentoVentasFletes_importe  += floatval($desc->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <?php echo $desc->descripcion ?>
+                                </td>
+                                <td>
+                                  <?php echo $desc->cantidad ?>
+                                </td>
+                                <td><?php echo $desc->importe ?></td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th><?php echo $descuentoVentasFletes_cantidad ?></th>
+                              <th><?php echo $descuentoVentasFletes_importe ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Costo de venta -->
+
+                    <!-- Comisiones a terceros -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-comision-terceros">
+                          <thead>
+                            <tr>
+                              <th colspan="5">COMISIONES A TERCEROS</th>
+                              <th style="width: 35px;">
+                                <button type="button" class="btn btn-success" id="btnAddComisionTerceros"><i class="icon-plus"></i></button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>NOMBRE</th>
+                              <th>DESCRIPCION</th>
+                              <th>CANTIDAD</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $comisionTerceros_cantidad = $comisionTerceros_importe = 0;
+                            if (isset($_POST['comisionTerceros_nombre'])) {
+                              foreach ($_POST['comisionTerceros_nombre'] as $keyp => $desc) {
+                                $comisionTerceros_cantidad  += floatval($_POST['comisionTerceros_cantidad'][$keyp]);
+                                $comisionTerceros_importe  += floatval($_POST['comisionTerceros_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="comisionTerceros_nombre[]" value="<?php echo $_POST['comisionTerceros_nombre'][$keyp] ?>" class="span12 comisionTerceros_nombre" required>
+                                  <input type="hidden" name="comisionTerceros_id[]" value="" class="span12 comisionTerceros_id">
+                                  <input type="hidden" name="comisionTerceros_delete[]" value="<?php echo $_POST['comisionTerceros_delete'][$keyp] ?>" class="span12 comisionTerceros_delete">
+                                </td>
+                                <td>
+                                  <input type="text" name="comisionTerceros_descripcion[]" value="<?php echo $_POST['comisionTerceros_descripcion'][$keyp] ?>" class="span12 comisionTerceros_descripcion" required>
+                                </td>
+                                <td><input type="text" name="comisionTerceros_cantidad[]" value="<?php echo $_POST['comisionTerceros_cantidad'][$keyp] ?>" class="span12 vpositive comisionTerceros_cantidad" required></td>
+                                <td><input type="text" name="comisionTerceros_costo[]" value="<?php echo $_POST['comisionTerceros_costo'][$keyp] ?>" class="span12 vpositive comisionTerceros_costo" required></td>
+                                <td><input type="text" name="comisionTerceros_importe[]" value="<?php echo $_POST['comisionTerceros_importe'][$keyp] ?>" class="span12 vpositive comisionTerceros_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger comisionTerceros_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['comision_terceros'] as $desc) {
+                                $comisionTerceros_cantidad  += floatval($desc->cantidad);
+                                $comisionTerceros_importe  += floatval($desc->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="comisionTerceros_nombre[]" value="<?php echo $desc->nombre ?>" class="span12 comisionTerceros_nombre" required>
+                                  <input type="hidden" name="comisionTerceros_id[]" value="<?php echo $desc->id ?>" class="span12 comisionTerceros_id">
+                                  <input type="hidden" name="comisionTerceros_delete[]" value="false" class="span12 comisionTerceros_delete">
+                                </td>
+                                <td>
+                                  <input type="text" name="comisionTerceros_descripcion[]" value="<?php echo $desc->descripcion ?>" class="span12 comisionTerceros_descripcion" required>
+                                </td>
+                                <td><input type="text" name="comisionTerceros_cantidad[]" value="<?php echo $desc->cantidad ?>" class="span12 vpositive comisionTerceros_cantidad" required></td>
+                                <td><input type="text" name="comisionTerceros_costo[]" value="<?php echo $desc->costo ?>" class="span12 vpositive comisionTerceros_costo" required></td>
+                                <td><input type="text" name="comisionTerceros_importe[]" value="<?php echo $desc->importe ?>" class="span12 vpositive comisionTerceros_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger comisionTerceros_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th></th>
+                              <th id="comisionTerceros_cantidad"><?php echo $comisionTerceros_cantidad ?></th>
+                              <th></th>
+                              <th id="comisionTerceros_importe"><?php echo $comisionTerceros_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Comisiones a terceros -->
 
                 </div>
               </div>

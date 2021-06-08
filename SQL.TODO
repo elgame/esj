@@ -1,4 +1,82 @@
 
+ ☐ Modificar la caja de existencia de limon
+   -- pcc
+    ALTER TABLE otros.existencias_limon_existencia ADD COLUMN id_area integer NOT NULL DEFAULT 2;
+    ALTER TABLE otros.existencias_limon_existencia DROP CONSTRAINT existencias_limon_existencia_pkey;
+    ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja, id_area);
+    ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE otros.existencias_limon_produccion ADD COLUMN id_area integer NOT NULL DEFAULT 2;
+    ALTER TABLE otros.existencias_limon_produccion ADD CONSTRAINT existencias_limon_produccion_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    CREATE TABLE otros.existencias_limon_existencia_piso
+    (
+        id_unidad integer NOT NULL,
+        fecha date NOT NULL,
+        no_caja integer NOT NULL DEFAULT 1,
+        costo double precision NOT NULL DEFAULT 0,
+        kilos double precision NOT NULL DEFAULT 0,
+        cantidad double precision NOT NULL DEFAULT 0,
+        importe double precision NOT NULL DEFAULT 0,
+        id_area integer NOT NULL DEFAULT 2,
+        CONSTRAINT existencias_limon_existencia_piso_pkey PRIMARY KEY (id_unidad, fecha, no_caja, id_area),
+        CONSTRAINT existencias_limon_existencia_piso_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT existencias_limon_existencia_piso_id_unidad_fkey FOREIGN KEY (id_unidad)
+            REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE otros.existencias_limon_existencia_piso OWNER to programa;
+    CREATE TABLE otros.existencias_limon_existencia_reproceso
+    (
+        id_calibre integer NOT NULL,
+        id_unidad integer NOT NULL,
+        id_area integer NOT NULL DEFAULT 2,
+        fecha date NOT NULL,
+        no_caja integer NOT NULL DEFAULT 1,
+        costo double precision NOT NULL DEFAULT 0,
+        kilos double precision NOT NULL DEFAULT 0,
+        cantidad double precision NOT NULL DEFAULT 0,
+        importe double precision NOT NULL DEFAULT 0,
+        CONSTRAINT existencias_limon_existencia_reproceso_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja, id_area),
+        CONSTRAINT existencias_limon_existencia_reproceso_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE,
+        CONSTRAINT existencias_limon_existencia_reproceso_id_calibre_fkey FOREIGN KEY (id_calibre)
+        REFERENCES public.calibres (id_calibre) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+        CONSTRAINT existencias_limon_existencia_reproceso_id_unidad_fkey FOREIGN KEY (id_unidad)
+            REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE otros.existencias_limon_existencia_reproceso OWNER to programa;
+    CREATE TABLE otros.existencias_limon_descuentos_ventas
+    (
+        id bigserial NOT NULL,
+        id_area integer NOT NULL DEFAULT 2,
+        fecha date NOT NULL,
+        no_caja integer NOT NULL DEFAULT 1,
+        nombre character varying(150) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying,
+        descripcion character varying(250) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying,
+        cantidad double precision NOT NULL DEFAULT 0,
+        costo double precision NOT NULL DEFAULT 0,
+        importe double precision NOT NULL DEFAULT 0,
+        tipo character varying(5) COLLATE pg_catalog."default" NOT NULL DEFAULT 'cv'::character varying,
+        CONSTRAINT existencias_limon_descuentos_ventas_pkey PRIMARY KEY (id),
+        CONSTRAINT existencias_limon_descuentos_ventas_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES public.areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE otros.existencias_limon_descuentos_ventas OWNER to programa;
+
+    COMMENT ON COLUMN otros.existencias_limon_descuentos_ventas.tipo
+        IS 'cv: costo venta, ct: comisiones a terceros';
+
  ☐ Poder agregar productos en las ordenes de requisiciones
  ✔ Poner obligatorios los campos de bascula: Rancho, Tabla y calidad @done (21-05-26 13:54)
    -- pcc|san

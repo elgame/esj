@@ -1924,26 +1924,26 @@ class recetas_model extends CI_Model {
 
     $pdf->SetX(0);
     if ($tipo_imp === 'almacen') {
-      $pdf->SetWidths(array(10, 28, 11, 14));
+      $pdf->SetWidths(array(15, 23, 11, 14));
       $pdf->SetAligns(array('L','L','R','R'));
       $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
       $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
     } elseif ($tipo_imp === 'vigilancia') {
-      $pdf->SetWidths(array(10, 40, 11, 14));
+      $pdf->SetWidths(array(15, 48, 11, 14));
       $pdf->SetAligns(array('L','L','R','R'));
       $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
       $pdf->Row2(array('CANT.', 'DESCRIPCION'), false, true, 5);
     }
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(0,-1.5,-1.3,-1.2));
+                   array(-0.5,-1.5,-1.3,-1.2));
     $cantidad = $subtotal = $iva = $total = $retencion = $ieps = 0;
     $tipoCambio = 0;
     $codigoAreas = array();
     foreach ($orden['info'][0]->productos as $key => $prod) {
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pprod = [
-        $prod->cantidad.' '.$prod->abreviatura,
+        MyString::formatoNumero($prod->cantidad, 2, '', true).' '.$prod->abreviatura,
         $prod->producto
       ];
 
@@ -1959,7 +1959,7 @@ class recetas_model extends CI_Model {
     }
 
     $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(10, 25, 14, 14));
+    $pdf->SetWidths(array(15, 18, 14, 16));
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(0);
     if ($tipo_imp === 'almacen') {

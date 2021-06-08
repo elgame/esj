@@ -97,6 +97,12 @@ class existencias_limon extends MY_Controller {
     $_GET['ffecha'] = $fecha;
     $area = isset($_GET['farea']) ? $_GET['farea'] : 2;
 
+    $params['unidades'] = $this->db->select('*')
+      ->from('unidades')
+      ->where('status', 't')
+      ->order_by('nombre')
+      ->get()->result();
+
     $params['caja'] = $this->existencias_limon_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'), $area );
 
     $params['priv_saldar_prestamo'] = $this->usuarios_model->tienePrivilegioDe('', 'existencias_limon/saldar_prestamos/');

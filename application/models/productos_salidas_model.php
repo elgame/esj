@@ -1232,7 +1232,7 @@ class productos_salidas_model extends CI_Model {
         $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
                        array(0,-1.5,-1.3,-1.2));
       } else {
-        $pdf->SetWidths(array(10, 28, 11, 14));
+        $pdf->SetWidths(array(15, 23, 11, 14));
         $pdf->SetAligns(array('L','L','R','R'));
         $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
         $pdf->SetX(0);

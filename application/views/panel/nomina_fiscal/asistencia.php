@@ -73,7 +73,8 @@
                   <div style="font-size: 1.5em;"><?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?></div>
                 </div>
                 <div class="span2">
-                  <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
+                  <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a> |
+                  <a href="<?php echo base_url('panel/nomina_fiscal/download_descuentos_corona/?id='.(isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa).'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-info" title="Descargar Descuentos Corona"><i class="icon-download"></i></a>
                 </div>
                 <div class="span1">
                   <!-- <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button> -->
