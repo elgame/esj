@@ -1,6 +1,6 @@
 
- ☐ Modificar la caja de existencia de limon
-   -- pcc
+ ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
+   -- pcc|lap|san
     ALTER TABLE otros.existencias_limon_existencia ADD COLUMN id_area integer NOT NULL DEFAULT 2;
     ALTER TABLE otros.existencias_limon_existencia DROP CONSTRAINT existencias_limon_existencia_pkey;
     ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja, id_area);
@@ -79,7 +79,7 @@
 
  ☐ Poder agregar productos en las ordenes de requisiciones
  ✔ Poner obligatorios los campos de bascula: Rancho, Tabla y calidad @done (21-05-26 13:54)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE public.bascula ADD COLUMN tabla character varying(100) COLLATE pg_catalog."default";
    CREATE OR REPLACE VIEW public.tablas_bascula AS
    SELECT DISTINCT ON (bascula.tabla) bascula.tabla
@@ -95,7 +95,7 @@
     ALTER TABLE public.compras_salidas ALTER COLUMN turno TYPE character varying(40);
  ✔ Cambiar los codigos del calibre en produccion lo pase Ceci @done (21-05-17 08:39)
  ✔ Generar los codigos QR de las salidas de almacen con los datos de corona @done (21-05-20 15:22)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE public.compras_salidas_productos ADD COLUMN no_etiqueta integer DEFAULT 0;
    ALTER TABLE public.compras_salidas_productos ADD COLUMN retorno_etiqueta integer DEFAULT 0;
    ALTER TABLE public.compras_salidas_productos ADD COLUMN retorno_etiqueta_list json DEFAULT '[]'::json;
@@ -116,7 +116,7 @@
     COMMENT ON COLUMN otros.recetas.a_equipo IS 'tanque';
     COMMENT ON COLUMN otros.recetas.a_observaciones IS 'volumen';
     ALTER TABLE otros.recetas_productos ADD COLUMN dosis_ha double precision DEFAULT 0;
-    -- pcc|san
+    -- pcc|san|lap
     ALTER TABLE otros.recetas ADD COLUMN extras json;
  ✔ Póliza nomina diario solo poner prestamos fiscales @done (21-05-05 12:47)
  ✔ Agregar notas de crédito compras de productos que registre salida de almacén automática, y que se puedan agregar notas de crédito como descripción @done (21-04-21 14:04)

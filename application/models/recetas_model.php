@@ -462,7 +462,7 @@ class recetas_model extends CI_Model {
         'no_row'          => $key,
         'cantidad'        => $_POST['cantidad'][$key],
         'precio_unitario' => $_POST['precio'][$key],
-        'no_etiqueta'     => $_POST['no_etiqueta'][$key],
+        'no_etiqueta'     => (intval($_POST['no_etiqueta'][$key])>0? $_POST['no_etiqueta'][$key]: 1),
       ];
     }
     $this->productos_salidas_model->agregarProductos($id_salida, $productos);

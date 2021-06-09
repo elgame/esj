@@ -682,8 +682,11 @@ class productos_salidas_model extends CI_Model {
           $etiquetas[] = $datos[7];
           $json = json_encode($etiquetas);
 
-          $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 1, 'retorno_etiqueta_list' => "{$json}"],
-            "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+          // $this->db->update('compras_salidas_productos', ['retorno_etiqueta' => 'retorno_etiqueta+1', 'retorno_etiqueta_list' => "{$json}"],
+          //   "id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
+          $this->db->query("UPDATE compras_salidas_productos
+            SET retorno_etiqueta = retorno_etiqueta+1, retorno_etiqueta_list = '{$json}'
+            WHERE id_salida = {$datos[5]} AND id_producto = {$datos[0]} AND no_row = {$datos[6]}");
 
           $query = $this->db->query("SELECT (Sum(no_etiqueta) - Sum(retorno_etiqueta)) AS saldo_etiquetas
                                    FROM compras_salidas_productos
@@ -1344,7 +1347,7 @@ class productos_salidas_model extends CI_Model {
 
     foreach ($orden['info'][0]->productos as $key => $prod) {
       $orden['info'][0]->productos[$key]->no_etiqueta = $prod->no_etiqueta = ($prod->no_etiqueta > 0? $prod->no_etiqueta: 1);
-      $cantidad = round($prod->cantidad / $prod->no_etiqueta, 6);
+      $cantidad = $prod->cantidad; // round($prod->cantidad / $prod->no_etiqueta, 6);
 
       for ($i=1; $i <= $prod->no_etiqueta; $i++) {
         $pdf->AddPage('L', [24, 50]);
