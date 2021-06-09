@@ -1391,28 +1391,54 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     return $row;
   }
 
-  descargarNominaCorona() {
-    $queryPrestamos = $this->db->query(
-      "SELECT np.id_usuario,
-              Concat(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS empleado,
-              np.id_prestamo,
-              np.prestado,
-              np.pago_semana,
-              np.status,
-              DATE(np.fecha) as fecha,
-              DATE(np.inicio_pago) as inicio_pago,
-              COALESCE(SUM(nfp.monto), 0) as total_pagado,
-              np.tipo,
-              '{$diaUltimoDeLaSemana}' AS fecha_sem
-        FROM nomina_prestamos np
-          INNER JOIN usuarios u ON u.id = np.id_usuario
-          LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
-        WHERE np.status = 't' AND np.pausado = 'f' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
-          AND u.id_empresa = {$_GET['id']}
-        GROUP BY np.id_usuario, u.id, np.id_prestamo, np.prestado, np.pago_semana,
-          np.status, DATE(np.fecha), DATE(np.inicio_pago)
+  public function descargarNominaCorona($params) {
+    $queryNomina = $this->db->query(
+      "SELECT nf.id_empleado, nf.id_empresa, nf.anio, nf.semana, nf.fecha_inicio, Date(nf.fecha_final) AS fecha_final, nf.fecha,
+        nf.dias_trabajados, nf.salario_diario, nf.salario_integral, nf.subsidio, nf.sueldo_semanal, nf.bonos,
+        nf.otros, nf.subsidio_pagado, nf.vacaciones, nf.prima_vacacional_grabable, nf.prima_vacacional_exento,
+        nf.prima_vacacional, nf.aguinaldo_grabable, nf.aguinaldo_exento, nf.aguinaldo, nf.total_percepcion,
+        nf.imss, nf.vejez, nf.isr, nf.infonavit, nf.subsidio_cobrado, nf.prestamos, nf.deduccion_otros,
+        nf.total_deduccion, nf.total_neto, nf.id_empleado_creador, nf.ptu_exento, nf.ptu_grabable, nf.ptu,
+        nf.id_puesto, nf.salario_real, nf.sueldo_real, nf.total_no_fiscal, nf.horas_extras, nf.horas_extras_grabable,
+        nf.horas_extras_excento, nf.descuento_playeras, nf.utilidad_empresa, nf.descuento_otros, nf.domingo,
+        nf.esta_asegurado, nf.fondo_ahorro, nf.pasistencia, nf.despensa, nf.cfdi_ext, nf.descuento_cocina,
+        nf.otros_datos, Concat(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS empleado
+      FROM nomina_fiscal AS nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+      WHERE nf.anio = {$params['anio']} AND nf.semana = {$params['sem']} AND nf.id_empresa = {$params['id']}
     ");
+    if ($queryNomina->num_rows() > 0) {
+    	$this->load->model('empresas_model');
+    	$empresa = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
 
+    	header('Content-Type:text/html; charset=UTF-8');
+      header('Content-Disposition: attachment; filename="corona-'.$empresa->nombre_fiscal.'.txt"');
+
+      $nominas = $queryNomina->result();
+      $deducc = [
+        'infonavit' => ['IN', 'Infonavit'], 'prestamos' => ['PF', 'Prestamos fiscales'],
+        'fondo_ahorro' => ['FA', 'Fondo de ahorro'], 'descuento_playeras' => ['DP', 'Descuento de playeras'],
+        'descuento_otros' => ['DM', 'Descuento materiales, etc'], 'descuento_cocina' => ['DC', 'Descuento de cocina']
+      ];
+      foreach ($nominas as $key => $p) {
+        $p->otros_datos = (!empty($p->otros_datos)? json_decode($p->otros_datos): null);
+        foreach ($deducc as $keyd => $deduc) {
+          if ($p->{$keyd} > 0) {
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"{$deduc[0]}{$p->anio}{$p->semana}\"	\"{$deduc[1]}, Año {$p->anio}, Sem {$p->semana}\"	{$p->{$keyd}}	0.00	{$p->{$keyd}}	\"\"	2\n";
+          }
+        }
+        if ($p->otros_datos) {
+          if (isset($p->otros_datos->totalPrestamosEf) && $p->otros_datos->totalPrestamosEf > 0) {
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"PE{$p->anio}{$p->semana}\"	\"Prestamos en efectivo, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalPrestamosEf}	0.00	{$p->otros_datos->totalPrestamosEf}	\"\"	2\n";
+          }
+        }
+
+        if ($p->total_percepcion > 0) {
+	        echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"S{$p->anio}{$p->semana}\"	\"Sueldo, Año {$p->anio}, Sem {$p->semana}\"	{$p->dias_trabajados}	0.00	{$p->total_percepcion}	\"\"	1\n";
+        }
+      }
+      exit;
+    }
   }
 
 }
