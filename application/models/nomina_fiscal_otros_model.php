@@ -1391,4 +1391,28 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     return $row;
   }
 
+  descargarNominaCorona() {
+    $queryPrestamos = $this->db->query(
+      "SELECT np.id_usuario,
+              Concat(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS empleado,
+              np.id_prestamo,
+              np.prestado,
+              np.pago_semana,
+              np.status,
+              DATE(np.fecha) as fecha,
+              DATE(np.inicio_pago) as inicio_pago,
+              COALESCE(SUM(nfp.monto), 0) as total_pagado,
+              np.tipo,
+              '{$diaUltimoDeLaSemana}' AS fecha_sem
+        FROM nomina_prestamos np
+          INNER JOIN usuarios u ON u.id = np.id_usuario
+          LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
+        WHERE np.status = 't' AND np.pausado = 'f' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
+          AND u.id_empresa = {$_GET['id']}
+        GROUP BY np.id_usuario, u.id, np.id_prestamo, np.prestado, np.pago_semana,
+          np.status, DATE(np.fecha), DATE(np.inicio_pago)
+    ");
+
+  }
+
 }

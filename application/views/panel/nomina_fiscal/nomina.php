@@ -107,6 +107,7 @@
                     <button type="button" name="guardar" class="btn btn-success" style="float: right;" id="guardarNomina">Guardar</button>
                     <?php endif ?>
                   <?php } else { ?>
+                    <a href="<?php echo base_url('panel/nomina_fiscal/download_descuentos_corona/?id='.(isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa).'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-info" title="Descargar Nomina Corona"><i class="icon-download"></i></a> |
                     <span class="label label-success" style="font-size: 1.3em;">Nominas generadas</span>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_cfdis/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar XML"><img src="<?php echo base_url('application/images/otros/doc_xml.png') ?>" width="40" height="40"></a>
