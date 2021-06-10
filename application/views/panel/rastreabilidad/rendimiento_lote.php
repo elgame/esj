@@ -26,7 +26,7 @@
 
               <form action="<?php echo base_url('panel/rastreabilidad/rendimiento_lote?'.MyString::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
-                <div class="control-group span7">
+                <div class="control-group span9">
                   <table class="table">
                     <thead>
                       <tr class="center">
@@ -35,6 +35,7 @@
                         <th style="background-color: #FFF; text-align: center;" class="center">Fecha</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Semana</th>
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
+                        <th style="background-color: #FFF; text-align: center;">Fecha Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Actualizar</th>
                       </tr>
@@ -65,6 +66,12 @@
                         </td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $semana ?></span></td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $dia_semana ?></span></td>
+
+                        <td style="text-align: center;">
+                          <input type="date" name="gfechaLote" value="<?php echo set_value_get('gfechaLote', $fecha_lote); ?>" id="gfechaLote" class="span8"
+                            style="margin: -7px auto 0 auto; text-align: center;" maxlength="10">
+                        </td>
+
                         <td style="text-align: center;">
                           <select name="glote" id="glote" class="span12" style="margin: -7px auto 0 auto;">
                             <option value=""></option>
@@ -87,14 +94,14 @@
                   </table>
                 </div>
 
-                <div class="span2 nomarg">
+                <div class="span1 nomarg">
 
                   <?php if ($ant_lote >= 1) { ?>
                     <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Anterior Lote</a>
                   <?php } ?>
 
                 </div>
-                <div class="span2 nomarg">
+                <div class="span1 nomarg">
                   <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Siguiente Lote</a>
                 </div>
                 <div class="span1 nomarg">

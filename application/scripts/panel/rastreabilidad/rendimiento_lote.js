@@ -33,7 +33,8 @@
             'id_rendimiento': $("#id_lote_actual").val(),
             'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote")),
             'es_certificado': ($('#esta-certificado').is(':checked') ? 1 : 0),
-            'id_area': $("#parea").val()
+            'id_area': $("#parea").val(),
+            'fecha_lote': $("#gfechaLote").val()
           },
           function(data) {
               window.location.reload(true);

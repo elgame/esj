@@ -90,7 +90,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			if(!$basic_info)
 			{
 				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext,
-            to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
+            to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rr.fecha_lote, rpr.cajas,
 						u.id_unidad, u.nombre AS unidad, u.cantidad AS unidad_cantidad, cal.id_calibre, cal.nombre AS calibre,
             e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
 						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado, c.codigo AS cls_codigo
@@ -722,7 +722,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
     $pdf->Row(array('No. LOTE', "No. DE CAJAS"), false);
     $filas = 13;
     foreach ($data['rendimientos'] as $key => $value) {
-      $fecha = strtotime($value->fecha);
+      $fecha = strtotime($value->fecha_lote);
       $pdf->SetX(26);
       $certificado = $value->certificado == 't'? 'C': 'N';
       $pdf->Row(array(date("Ww", $fecha).'-'.$value->lote_ext."/{$certificado}", $value->cajas), false);

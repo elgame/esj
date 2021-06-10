@@ -455,6 +455,7 @@ class rastreabilidad_model extends CI_Model {
     $this->db->insert('rastria_rendimiento', array(
       'lote'        => $lote,
       'fecha'       => $fecha,
+      'fecha_lote'  => $fecha,
       'lote_ext'    => $lote_ext,
       'certificado' => $certificado,
       'id_area'     => $id_area,
@@ -485,7 +486,7 @@ class rastreabilidad_model extends CI_Model {
 
   public function getLoteInfo($id_rendimiento, $full_info = true)
   {
-    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext, certificado, id_area")
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext, certificado, id_area, fecha_lote")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $id_rendimiento)
       ->get();
@@ -545,9 +546,13 @@ class rastreabilidad_model extends CI_Model {
     return intval($lote)+1;
   }
 
-  public function actualizaLoteExt($id_rendimiento, $lote_ext, $estaCertificado)
+  public function actualizaLoteExt($id_rendimiento, $lote_ext, $estaCertificado, $params = [])
   {
-    $this->db->update('rastria_rendimiento', array('lote_ext' => $lote_ext, 'certificado' => $estaCertificado), "id_rendimiento = {$id_rendimiento}");
+    $datos = array('lote_ext' => $lote_ext, 'certificado' => $estaCertificado);
+    if (isset($params['fecha_lote'])) {
+      $datos['fecha_lote'] = $params['fecha_lote'];
+    }
+    $this->db->update('rastria_rendimiento', $datos, "id_rendimiento = {$id_rendimiento}");
     return array('passess' => true);
   }
 
@@ -1787,7 +1792,7 @@ class rastreabilidad_model extends CI_Model {
           ->get()->row()->kilos
           );
 
-        $fecha = new DateTime($lote['info']->fecha);
+        $fecha = new DateTime($lote['info']->fecha_lote);
 
         $pdf->SetXY($x + 25, $y);
         $pdf->Image(APPPATH.'images/logo.png');
