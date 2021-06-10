@@ -1424,17 +1424,17 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         $p->otros_datos = (!empty($p->otros_datos)? json_decode($p->otros_datos): null);
         foreach ($deducc as $keyd => $deduc) {
           if ($p->{$keyd} > 0) {
-            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"{$deduc[0]}{$p->anio}{$p->semana}\"	\"{$deduc[1]}, Año {$p->anio}, Sem {$p->semana}\"	{$p->{$keyd}}	0.00	{$p->{$keyd}}	\"\"	2\n";
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"{$deduc[0]}{$p->anio}{$p->semana}\"	\"{$deduc[1]}, Año {$p->anio}, Sem {$p->semana}\"	{$p->{$keyd}}	0.00	{$p->{$keyd}}	\"\"	2\n";
           }
         }
         if ($p->otros_datos) {
           if (isset($p->otros_datos->totalPrestamosEf) && $p->otros_datos->totalPrestamosEf > 0) {
-            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"PE{$p->anio}{$p->semana}\"	\"Prestamos en efectivo, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalPrestamosEf}	0.00	{$p->otros_datos->totalPrestamosEf}	\"\"	2\n";
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"PE{$p->anio}{$p->semana}\"	\"Prestamos en efectivo, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalPrestamosEf}	0.00	{$p->otros_datos->totalPrestamosEf}	\"\"	2\n";
           }
         }
 
         if ($p->total_percepcion > 0) {
-	        echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	{$p->empleado}	\"S{$p->anio}{$p->semana}\"	\"Sueldo, Año {$p->anio}, Sem {$p->semana}\"	{$p->dias_trabajados}	0.00	{$p->total_percepcion}	\"\"	1\n";
+	        echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"S{$p->anio}{$p->semana}\"	\"Sueldo, Año {$p->anio}, Sem {$p->semana}\"	{$p->dias_trabajados}	0.00	{$p->total_percepcion}	\"\"	1\n";
         }
       }
       exit;
