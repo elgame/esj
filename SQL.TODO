@@ -1,6 +1,6 @@
 
  ☐ Poder repetir lotes en produccion de limon agregando una fecha de corte de limon
-   -- lap
+   -- lap|san
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
  ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
