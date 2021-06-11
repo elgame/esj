@@ -575,17 +575,19 @@ class existencias_limon_model extends CI_Model {
     $this->db->delete('otros.existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
     foreach ($data['existencia_id_calibre'] as $key => $id_cat)
     {
-      $existencia_inst[] = array(
-        'id_area'    => $data['farea'],
-        'id_calibre' => $data['existencia_id_calibre'][$key],
-        'id_unidad'  => $data['existencia_id_unidad'][$key],
-        'fecha'      => $data['fecha_caja_chica'],
-        'no_caja'    => $data['fno_caja'],
-        'costo'      => $data['existencia_costo'][$key],
-        'kilos'      => $data['existencia_kilos'][$key],
-        'cantidad'   => $data['existencia_cantidad'][$key],
-        'importe'    => $data['existencia_importe'][$key],
-      );
+      if ($data['existencia_cantidad'][$key] != 0) {
+        $existencia_inst[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['existencia_id_calibre'][$key],
+          'id_unidad'  => $data['existencia_id_unidad'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+          'costo'      => $data['existencia_costo'][$key],
+          'kilos'      => $data['existencia_kilos'][$key],
+          'cantidad'   => $data['existencia_cantidad'][$key],
+          'importe'    => $data['existencia_importe'][$key],
+        );
+      }
     }
     if (count($existencia_inst) > 0)
     {
