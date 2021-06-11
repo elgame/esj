@@ -183,7 +183,8 @@ class existencias_limon_model extends CI_Model {
     $id_calibree = ($id_area == 2? 135: 135); // A granel
     $existencia_piso = $this->db->query(
       "SELECT {$id_calibree} AS id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
-        ele.cantidad, ele.importe, 'GRANEL' AS calibre, Coalesce(u.codigo, u.nombre) AS unidad
+        ele.cantidad, ele.importe, 'GRANEL' AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        '' AS clasificacion
       FROM otros.existencias_limon_existencia_piso ele
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
       WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
@@ -198,7 +199,8 @@ class existencias_limon_model extends CI_Model {
     // Existencia reproceso
     $existencia_reproceso = $this->db->query(
       "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
-        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        '' AS clasificacion
       FROM otros.existencias_limon_existencia_reproceso ele
         INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
