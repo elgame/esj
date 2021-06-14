@@ -1032,9 +1032,10 @@ class recetas_model extends CI_Model {
         while (($line = fgets($handle)) !== false) {
           if (trim($line) != '') {
             // $datos = str_getcsv($line);
-            $datos = explode("\t", $line);
+            $datos = explode("\t", utf8_encode($line));
             $datos = $this->clearRowRecetaCorona($datos);
 
+            // tipo row, id_empresa, id_emp_aplicacion, folio_hoja, fecha, fecha_aplicacion, id_area, id_rancho, centros_costo, ha_neta, cargas
             if ($datos[0] == 'H') { // Cabecera
               $cargas = explode('.', $datos[10]);
 
@@ -1226,8 +1227,8 @@ class recetas_model extends CI_Model {
   private function clearRowRecetaCorona($data)
   {
     foreach ($data as $key => $item) {
-      $data[$key] = trim($item);
-      $data[$key] = str_replace('"', '', $data[$key]);
+      $data[$key] = str_replace(['"', '/  /'], ['', ' '], $data[$key]);
+      $data[$key] = trim($data[$key]);
     }
 
     return $data;
@@ -1257,14 +1258,14 @@ class recetas_model extends CI_Model {
       'semana'                => $receta['semana'],
       'tipo'                  => $receta['tipo'],
 
-      'dosis_planta'          => floatval($receta['dosis_planta']),
-      'planta_ha'             => floatval($receta['planta_ha']),
-      'ha_neta'               => floatval($receta['ha_neta']),
-      'no_plantas'            => floatval($receta['no_plantas']),
-      'kg_totales'            => floatval($receta['kg_totales']),
-      'ha_bruta'              => floatval($receta['ha_bruta']),
-      'carga1'                => floatval($receta['carga1']),
-      'carga2'                => floatval($receta['carga2']),
+      'dosis_planta'          => round(floatval($receta['dosis_planta']), 5),
+      'planta_ha'             => round(floatval($receta['planta_ha']), 5),
+      'ha_neta'               => round(floatval($receta['ha_neta']), 5),
+      'no_plantas'            => round(floatval($receta['no_plantas']), 5),
+      'kg_totales'            => round(floatval($receta['kg_totales']), 5),
+      'ha_bruta'              => round(floatval($receta['ha_bruta']), 5),
+      'carga1'                => round(floatval($receta['carga1']), 5),
+      'carga2'                => round(floatval($receta['carga2']), 5),
       'ph'                    => floatval(0),
       'dosis_equipo'          => floatval(0),
       'dosis_equipo_car2'     => floatval(0),
@@ -1283,7 +1284,9 @@ class recetas_model extends CI_Model {
 
       'total_importe'         => floatval($receta['total_importe']),
     );
-
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
     $this->db->insert('otros.recetas', $data);
     $recetaId = $this->db->insert_id('otros.recetas_id_recetas_seq');
 
