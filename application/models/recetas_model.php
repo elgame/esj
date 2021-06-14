@@ -1134,14 +1134,15 @@ class recetas_model extends CI_Model {
 
   private function validaRecetaCorona(&$receta, &$val_resumen)
   {
-    $areas = [3 => 21];
+    // $areas = [3 => 21, 15 => ];
+    $areas = [21 => 3, 14 => 15, 23 => 15, 3 => 2, 15 => 2];
     if ($receta['id_empresa'] != $this->input->post('id_empresa')) {
       $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa seleccionada no coincide con la del archivo.";
       return false;
     } elseif ($receta['id_area'] != $this->input->post('id_area')) {
       $val_resumen[] = "Receta No {$receta['folio_hoja']}; El cultivo seleccionada no coincide con el del archivo.";
       return false;
-    } elseif (!isset($areas[$receta['id_area']]) || $areas[$receta['id_area']] != $receta['id_empresa_ap']) {
+    } elseif (!isset($areas[$receta['id_empresa_ap']]) || $areas[$receta['id_empresa_ap']] != $receta['id_area']) {
       $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa de aplicación no coincide con el cultivo.";
       return false;
     } else {
