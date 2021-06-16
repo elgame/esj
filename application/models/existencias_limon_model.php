@@ -184,7 +184,7 @@ class existencias_limon_model extends CI_Model {
     $existencia_piso = $this->db->query(
       "SELECT {$id_calibree} AS id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
         ele.cantidad, ele.importe, 'GRANEL' AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
-        '' AS clasificacion
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
       FROM otros.existencias_limon_existencia_piso ele
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
       WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
@@ -200,7 +200,7 @@ class existencias_limon_model extends CI_Model {
     $existencia_reproceso = $this->db->query(
       "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
         ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
-        '' AS clasificacion
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
       FROM otros.existencias_limon_existencia_reproceso ele
         INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
@@ -276,7 +276,7 @@ class existencias_limon_model extends CI_Model {
     $existencia_anterior = $this->db->query(
       "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
         ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
-        '' AS clasificacion
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
       FROM otros.existencias_limon_existencia ele
         INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
@@ -297,18 +297,19 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
         $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
-        $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad     = $item->id_unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->calibre       = $item->calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion = $item->clasificacion;
-        $existencia[$item->id_calibre.$item->id_unidad]->unidad        = $item->unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad      = $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos         = $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe       = $item->importe;
-        $existencia[$item->id_calibre.$item->id_unidad]->no_caja       = $noCaja;
-        $existencia[$item->id_calibre.$item->id_unidad]->fecha         = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['produccion'] as $key => $item) {
@@ -321,18 +322,19 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
         $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
-        $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad     = $item->id_unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->calibre       = $item->calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion = $item->clasificacion;
-        $existencia[$item->id_calibre.$item->id_unidad]->unidad        = $item->unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad      = $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos         = $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe       = $item->importe;
-        $existencia[$item->id_calibre.$item->id_unidad]->no_caja       = $noCaja;
-        $existencia[$item->id_calibre.$item->id_unidad]->fecha         = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['ventas'] as $key => $item) {
@@ -341,18 +343,19 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos, 2);
         $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe, 2);
       } else {
-        $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad     = $item->id_unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->calibre       = $item->calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion = $item->clasificacion;
-        $existencia[$item->id_calibre.$item->id_unidad]->unidad        = $item->unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad      = $item->cantidad*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos         = $item->kilos*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->costo         = 0;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe       = $item->importe*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->no_caja       = $noCaja;
-        $existencia[$item->id_calibre.$item->id_unidad]->fecha         = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = 0;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['existencia_reproceso'] as $key => $item) {
@@ -361,18 +364,19 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos);
         $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe);
       } else {
-        $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad     = $item->id_unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->calibre       = $item->calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion = $item->clasificacion;
-        $existencia[$item->id_calibre.$item->id_unidad]->unidad        = $item->unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad      = $item->cantidad*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos         = $item->kilos*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe       = $item->importe*-1;
-        $existencia[$item->id_calibre.$item->id_unidad]->no_caja       = $noCaja;
-        $existencia[$item->id_calibre.$item->id_unidad]->fecha         = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['existencia_piso'] as $key => $item) {
@@ -381,23 +385,25 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
         $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
       } else {
-        $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad     = $item->id_unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->calibre       = $item->calibre;
-        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion = $item->clasificacion;
-        $existencia[$item->id_calibre.$item->id_unidad]->unidad        = $item->unidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad      = $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos         = $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe       = $item->importe;
-        $existencia[$item->id_calibre.$item->id_unidad]->no_caja       = $noCaja;
-        $existencia[$item->id_calibre.$item->id_unidad]->fecha         = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
 
     foreach ($existencia as $key => $item) {
       $existencia[$key]->importe = round($item->costo*$item->cantidad, 2);
+      $existencia[$key]->kilos = round($item->unidad_cantidad*$item->cantidad, 2);
     }
     $info['existencia'] = $existencia;
 
