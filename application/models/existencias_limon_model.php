@@ -293,9 +293,9 @@ class existencias_limon_model extends CI_Model {
     $existencia = [];
     foreach ($info['existencia_anterior'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe  += $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
         $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
         $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
@@ -317,9 +317,9 @@ class existencias_limon_model extends CI_Model {
           $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
         }
 
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe  += $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
         $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
         $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
@@ -337,9 +337,9 @@ class existencias_limon_model extends CI_Model {
     }
     foreach ($info['ventas'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe, 2);
       } else {
         $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
         $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
@@ -357,9 +357,9 @@ class existencias_limon_model extends CI_Model {
     }
     foreach ($info['existencia_reproceso'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe);
       } else {
         $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
         $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
@@ -377,9 +377,9 @@ class existencias_limon_model extends CI_Model {
     }
     foreach ($info['existencia_piso'] as $key => $item) {
       if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
-        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += $item->cantidad;
-        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += $item->kilos;
-        $existencia[$item->id_calibre.$item->id_unidad]->importe  += $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
       } else {
         $existencia[$item->id_calibre.$item->id_unidad]                = new stdClass;
         $existencia[$item->id_calibre.$item->id_unidad]->id_calibre    = $item->id_calibre;
@@ -397,7 +397,7 @@ class existencias_limon_model extends CI_Model {
     }
 
     foreach ($existencia as $key => $item) {
-      $existencia[$key]->importe = $item->costo*$item->cantidad;
+      $existencia[$key]->importe = round($item->costo*$item->cantidad, 2);
     }
     $info['existencia'] = $existencia;
 
