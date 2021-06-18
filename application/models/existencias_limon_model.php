@@ -111,7 +111,7 @@ class existencias_limon_model extends CI_Model {
       "SELECT f.id_factura, f.serie, f.folio, cl.nombre_fiscal, STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(fp.cantidad) AS cantidad,
         (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe, u.id_unidad,
         Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kilos,
-        fo.no_salida_fruta, ca.id_calibre, ca.nombre AS calibre
+        fo.no_salida_fruta, ca.id_calibre, ca.nombre AS calibre, string_agg(fh.id_factura::text, ',') AS facturas
       FROM facturacion f
         INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
@@ -119,6 +119,9 @@ class existencias_limon_model extends CI_Model {
         INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
         LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
       WHERE f.id_empresa = {$id_empresa} AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
         AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
         AND Date(f.fecha) >= '{$fechaa_inicioo}'
@@ -143,6 +146,7 @@ class existencias_limon_model extends CI_Model {
         --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
       WHERE b.id_empresa = {$id_empresa} AND b.status = 't' AND b.intangible = 'f'
         AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
+        AND b.id_bonificacion IS NULL
       GROUP BY --b.id_bascula,
         c.id_calidad
         --, pr.id_proveedor
@@ -229,18 +233,28 @@ class existencias_limon_model extends CI_Model {
     }
     // costo ventas fletes
     if (count($info['ventas']) > 0) {
-      $aidss = [];
+      $raidss = $faidss = [];
       foreach ($info['ventas'] as $keyv => $venta) {
-        $aidss[$venta->id_factura] = $venta->id_factura;
+        $raidss[$venta->id_factura] = $venta->id_factura;
+
+        $ffacturas = explode(',', $venta->facturas);
+        if (isset($ffacturas) && count($ffacturas) > 0) {
+          foreach ($ffacturas as $keyf => $fac) {
+            if ($fac > 0) {
+              $faidss[$fac] = $fac;
+            }
+          }
+        }
       }
-      $idss = 'f:'.implode('\||f:', $aidss).'\|';
+      $ridss = 'f:'.implode('\||f:', $raidss).'\|';
+      $fidss = 'f:'.implode('\||t:', $faidss).'\|';
       $costo_ventas_fletes = $this->db->query(
         "SELECT cp.id_producto, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
           Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total
         FROM compras_ordenes co
           INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
         WHERE co.status in('a', 'f') AND co.tipo_orden = 'f' and co.flete_de = 'v'
-          AND co.ids_facrem SIMILAR TO '%({$idss})%'
+          AND (co.ids_facrem SIMILAR TO '%({$ridss})%' OR co.ids_facrem SIMILAR TO '%({$fidss})%')
         GROUP BY cp.id_producto"
       );
 
