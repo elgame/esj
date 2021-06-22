@@ -99,20 +99,21 @@ class rastreabilidad_paletas_model extends privilegios_model {
         $result->free_result();
 
         $result = $this->db->query("SELECT psp.id_paleta_salida, psp.num_rows, psp.id_cliente, psp.id_clasificacion,
-            psp.clasificacion, psp.id_unidad, psp.unidad,
+            psp.clasificacion, psp.id_unidad, psp.unidad, psp.id_calibre, ca.nombre AS calibre,
             (CASE u.cantidad WHEN 0 THEN cl.unidad_cantidad ELSE u.cantidad END) AS cantidad_unidad, psp.cantidad, psp.kilos,
             psp.id_pallet, c.nombre_fiscal AS cliente
           FROM otros.paletas_salidas_productos psp
             INNER JOIN clientes c ON c.id_cliente = psp.id_cliente
             INNER JOIN clasificaciones cl ON cl.id_clasificacion = psp.id_clasificacion
             INNER JOIN unidades u ON u.id_unidad = psp.id_unidad
+            LEFT JOIN calibres ca ON ca.id_calibre = psp.id_calibre
           WHERE psp.id_paleta_salida = {$id_paleta}");
         $response['clasificaciones'] = $result->result();
         $result->free_result();
 
         $result = $this->db->query("SELECT p.id_pallet, psp.posicion, p.no_cajas, p.folio,
             string_agg(distinct c.codigo, ', ') AS clasificaciones, string_agg(distinct u.codigo, ', ') AS unidades,
-            p.folio_int, p.certificado,
+            p.folio_int, p.certificado, string_agg(distinct ca.nombre, ', ') AS calibres,
             Sum(CASE rr.certificado WHEN true THEN pr.cajas ELSE 0 END) cajas_cer,
             Sum(CASE rr.certificado WHEN false THEN pr.cajas ELSE 0 END) cajas_no_cer
           FROM otros.paletas_salidas_pallets psp
@@ -121,6 +122,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
             INNER JOIN rastria_rendimiento rr ON rr.id_rendimiento = pr.id_rendimiento
             INNER JOIN clasificaciones c ON c.id_clasificacion = pr.id_clasificacion
             INNER JOIN unidades u ON u.id_unidad = pr.id_unidad
+            INNER JOIN calibres ca ON ca.id_calibre = pr.id_size
           WHERE psp.id_paleta_salida = {$id_paleta}
           GROUP BY p.id_pallet, psp.posicion");
         $pallets = $result->result();
@@ -268,6 +270,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
             'num_rows'         => $key,
             'id_cliente'       => $this->input->post('prod_id_cliente')[$key],
             'id_clasificacion' => $this->input->post('prod_did_prod')[$key],
+            'id_calibre'       => $this->input->post('prod_did_calibre')[$key],
             'clasificacion'    => $this->input->post('prod_ddescripcion')[$key],
             'id_unidad'        => $this->input->post('prod_dmedida_id')[$key],
             'unidad'           => $this->input->post('prod_dmedida')[$key],
@@ -574,25 +577,26 @@ class rastreabilidad_paletas_model extends privilegios_model {
             $pdf->AddPage('L');
 
           $pdf->SetFont('Arial', 'B', 8);
-          $pdf->SetX(15);
-          $pdf->SetAligns(['L', 'L', 'R', 'R']);
-          $pdf->SetWidths([70, 110, 30, 35]);
-          $pdf->Row(['UNIDAD', 'DESCRIPCION', 'CANTIDAD', 'KILOS'], true, true);
+          $pdf->SetX(6);
+          $pdf->SetAligns(['L', 'L', 'L', 'R', 'R']);
+          $pdf->SetWidths([65, 95, 50, 25, 30]);
+          $pdf->Row(['UNIDAD', 'DESCRIPCION', '>CALIBRE', 'CANTIDAD', 'KILOS'], true, true);
         }
 
         $pdf->SetFont('Arial', '', 8);
-        $pdf->SetX(15);
+        $pdf->SetX(6);
         $pdf->Row(array(
           $item->unidad,
           $item->clasificacion,
+          $item->calibre,
           MyString::formatoNumero($item->cantidad, 2, '', false),
           MyString::formatoNumero($item->kilos, 2, '', false),
         ), false, true, null, 2, 1);
       }
 
-      $pdf->SetX(85);
+      $pdf->SetX(166);
       $pdf->SetAligns(['R', 'R', 'R']);
-      $pdf->SetWidths([110, 30, 35]);
+      $pdf->SetWidths([50, 25, 30]);
       $pdf->Row(array(
         'TOTAL',
         MyString::formatoNumero($data['paleta']->total_bultos, 2, '', false),
@@ -609,13 +613,15 @@ class rastreabilidad_paletas_model extends privilegios_model {
           $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
           $cajastxt = ($exist ? "{$data['pallets'][($i*2)+1]->cajas_cer}C/{$data['pallets'][($i*2)+1]->cajas_no_cer}N" : '');
           $pallets[3][$i] = ($exist? "{$data['pallets'][($i*2)+1]->folio_int}-{$cajastxt}": '');
+          $pallets[4][$i] = ($exist? ">{$data['pallets'][($i*2)+1]->calibres}": '');
 
           $exist = isset($data['pallets'][($i+1)*2]);
-          $pallets[4][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
-          $pallets[5][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
+          $pallets[5][$i] = ($exist? $data['pallets'][($i+1)*2]->clasificaciones: '');
+          $pallets[6][$i] = ($exist? $data['pallets'][($i+1)*2]->no_cajas." {$data['pallets'][($i+1)*2]->unidades}": '');
           $cajastxt = ($exist ? "{$data['pallets'][($i+1)*2]->cajas_cer}C/{$data['pallets'][($i+1)*2]->cajas_no_cer}N": '');
-          $pallets[6][$i] = ($exist? "{$data['pallets'][($i+1)*2]->folio_int}-{$cajastxt}": '');
-          $pallets[7][$i] = ($i+1)*2;
+          $pallets[7][$i] = ($exist? "{$data['pallets'][($i+1)*2]->folio_int}-{$cajastxt}": '');
+          $pallets[8][$i] = ($exist? ">{$data['pallets'][($i+1)*2]->calibres}": '');
+          $pallets[9][$i] = ($i+1)*2;
         }
       }
       $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
@@ -631,21 +637,25 @@ class rastreabilidad_paletas_model extends privilegios_model {
       $pdf->SetFont('Arial', '', 5);
       $pdf->SetX(6);
       $pdf->Row($pallets[3], true, true);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[4], true, true);
 
       $pdf->SetFillColor(230, 230, 230);
 
       $pdf->SetFont('Arial', '', 6);
       $pdf->SetX(6);
-      $pdf->Row($pallets[4], true, true);
-      $pdf->SetX(6);
       $pdf->Row($pallets[5], true, true);
-      $pdf->SetFont('Arial', '', 5);
       $pdf->SetX(6);
       $pdf->Row($pallets[6], true, true);
+      $pdf->SetFont('Arial', '', 5);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[7], true, true);
+      $pdf->SetX(6);
+      $pdf->Row($pallets[8], true, true);
       $pdf->SetFillColor(200, 200, 200);
       $pdf->SetFont('Arial', '', 8);
       $pdf->SetX(6);
-      $pdf->Row($pallets[7], false, false);
+      $pdf->Row($pallets[9], false, false);
     }
 
     if (count($data['certificados']) > 0) {

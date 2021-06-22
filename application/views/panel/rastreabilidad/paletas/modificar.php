@@ -178,6 +178,7 @@
                         <tr>
                           <th>Cliente</th>
                           <th>Clasificación</th>
+                          <th>>Calibre</th>
                           <th>Medida</th>
                           <th>Cant.</th>
                           <th>Kg</th>
@@ -194,8 +195,12 @@
                               <input type="hidden" name="prod_id_pallet[]" value="<?php echo $clasificacion->id_pallet; ?>" id="prod_id_pallet" class="span12">
                             </td>
                             <td>
-                              <input type="text" name="prod_ddescripcion[]" value="<?php echo $clasificacion->clasificacion; ?>" id="prod_ddescripcion" class="span12" data-next="prod_dmedida" <?php echo $readonly ?>>
+                              <input type="text" name="prod_ddescripcion[]" value="<?php echo $clasificacion->clasificacion; ?>" id="prod_ddescripcion" class="span12" data-next="prod_dcalibre" <?php echo $readonly ?>>
                               <input type="hidden" name="prod_did_prod[]" value="<?php echo $clasificacion->id_clasificacion; ?>" id="prod_did_prod" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dcalibre[]" value="<?php echo $clasificacion->calibre; ?>" id="prod_dcalibre" class="span12" data-next="prod_dmedida">
+                              <input type="hidden" name="prod_did_calibre[]" value="<?php echo $clasificacion->id_calibre; ?>" id="prod_did_calibre" class="span12">
                             </td>
                             <td>
                               <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad" <?php echo $disabled ?>>
@@ -234,8 +239,12 @@
                               <input type="hidden" name="prod_id_pallet[]" value="" id="prod_id_pallet" class="span12">
                             </td>
                             <td>
-                              <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida" <?php echo $readonly ?>>
+                              <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dcalibre" <?php echo $readonly ?>>
                               <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dcalibre[]" value="" id="prod_dcalibre" class="span12" data-next="prod_dmedida">
+                              <input type="hidden" name="prod_did_calibre[]" value="" id="prod_did_calibre" class="span12">
                             </td>
                             <td>
                               <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad" <?php echo $disabled ?>>

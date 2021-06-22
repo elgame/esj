@@ -164,6 +164,7 @@
                         <tr>
                           <th>Cliente</th>
                           <th>Clasificación</th>
+                          <th>>Calibre</th>
                           <th>Medida</th>
                           <th>Cant.</th>
                           <th>Kg</th>
@@ -181,8 +182,12 @@
                               <input type="hidden" name="prod_id_pallet[]" value="<?php echo $_POST['prod_id_pallet'][$key]; ?>" id="prod_id_pallet" class="span12">
                             </td>
                             <td>
-                              <input type="text" name="prod_ddescripcion[]" value="<?php echo $_POST['prod_ddescripcion'][$key]; ?>" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
+                              <input type="text" name="prod_ddescripcion[]" value="<?php echo $_POST['prod_ddescripcion'][$key]; ?>" id="prod_ddescripcion" class="span12" data-next="prod_dcalibre">
                               <input type="hidden" name="prod_did_prod[]" value="<?php echo $_POST['prod_did_prod'][$key]; ?>" id="prod_did_prod" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dcalibre[]" value="<?php echo $_POST['prod_dcalibre'][$key]; ?>" id="prod_dcalibre" class="span12" data-next="prod_dmedida">
+                              <input type="hidden" name="prod_did_calibre[]" value="<?php echo $_POST['prod_did_calibre'][$key]; ?>" id="prod_did_calibre" class="span12">
                             </td>
                             <td>
                               <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad">
@@ -217,8 +222,12 @@
                             <input type="hidden" name="prod_id_pallet[]" value="" id="prod_id_pallet" class="span12">
                           </td>
                           <td>
-                            <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
+                            <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dcalibre">
                             <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                          </td>
+                          <td>
+                            <input type="text" name="prod_dcalibre[]" value="" id="prod_dcalibre" class="span12" data-next="prod_dmedida">
+                            <input type="hidden" name="prod_did_calibre[]" value="" id="prod_did_calibre" class="span12">
                           </td>
                           <td>
                             <select name="prod_dmedida[]" id="prod_dmedida" class="span12" data-next="prod_dcantidad">

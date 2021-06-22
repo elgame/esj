@@ -4,6 +4,9 @@
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
  ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
+   -- lap
+     ALTER TABLE otros.paletas_salidas_productos ADD COLUMN id_calibre integer;
+     ALTER TABLE otros.paletas_salidas_productos ADD CONSTRAINT paletas_salidas_productos_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    -- pcc|lap|san
     ALTER TABLE otros.existencias_limon_existencia ADD COLUMN id_area integer NOT NULL DEFAULT 2;
     ALTER TABLE otros.existencias_limon_existencia DROP CONSTRAINT existencias_limon_existencia_pkey;
