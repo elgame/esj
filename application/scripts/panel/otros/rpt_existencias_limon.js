@@ -6,6 +6,7 @@
     onKeyPressProduccionCosto();
 
     onSubmit();
+    existencia();
     existenciaPiso();
     existenciaReProceso();
     descuentoVentas();
@@ -45,7 +46,50 @@
     });
   };
 
+  const existencia = () => {
+    $('#table-existencia').on('keyup', '.existencia_costo', function(event) {
+      let $tr = $(this).parents('tr');
+      let cantidad = parseFloat($tr.find('.existencia_cantidad').val())||0;
+      let costo = parseFloat($(this).val())||0;
+
+      $tr.find('.existencia_importe').text(cantidad*costo);
+      $tr.find('.existencia_importee').val(cantidad*costo);
+
+      calculaTotalExistencia();
+    });
+  };
+  const calculaTotalExistencia = () => {
+    cantidadt = kilost = importet = 0;
+    $("#table-existencia tbody tr:not(.footer)").each(function(index, el) {
+      importet += parseFloat($(el).find('.existencia_importee').val())||0;
+    });
+    $('#exisImporte').text(importet);
+  };
+
   const existenciaPiso = () => {
+    $('#table-existencia-piso').on('focus', 'input.existenciaPiso_calibre:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('.existenciaPiso_id_calibre').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('.existenciaPiso_id_calibre').val('');
+        }
+      });
+    });
+
     $('#btnAddExisPiso').click(function(event) {
       const unidades = JSON.parse($('#unidades').val());
       htmlUnidad = '';
@@ -54,20 +98,24 @@
       });
 
       html =
-      '<tr>'+
-        '<td>'+
-          '<select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>'+
-          htmlUnidad+
-          '</select>'+
-        '</td>'+
-        '<td><input type="text" name="existenciaPiso_cantidad[]" value="" class="span12 vpositive existenciaPiso_cantidad" required></td>'+
-        '<td><input type="text" name="existenciaPiso_kilos[]" value="" class="span12 vpositive existenciaPiso_kilos" readonly></td>'+
-        '<td><input type="text" name="existenciaPiso_costo[]" value="" class="span12 vpositive existenciaPiso_costo" required></td>'+
-        '<td><input type="text" name="existenciaPiso_importe[]" value="" class="span12 vpositive existenciaPiso_importe" readonly></td>'+
-        '<td style="width: 30px;">'+
-          '<button type="button" class="btn btn-danger existenciaPiso_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
-        '</td>'+
-      '</tr>';
+        '<tr>'+
+          '<td>'+
+            '<input type="text" name="existenciaPiso_calibre[]" value="" class="span12 existenciaPiso_calibre" required>'+
+            '<input type="hidden" name="existenciaPiso_id_calibre[]" value="" class="span12 existenciaPiso_id_calibre" required>'+
+          '</td>'+
+          '<td>'+
+            '<select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>'+
+            htmlUnidad+
+            '</select>'+
+          '</td>'+
+          '<td><input type="text" name="existenciaPiso_cantidad[]" value="" class="span12 vpositive existenciaPiso_cantidad" required></td>'+
+          '<td><input type="text" name="existenciaPiso_kilos[]" value="" class="span12 vpositive existenciaPiso_kilos" readonly></td>'+
+          '<td><input type="text" name="existenciaPiso_costo[]" value="" class="span12 vpositive existenciaPiso_costo" required></td>'+
+          '<td><input type="text" name="existenciaPiso_importe[]" value="" class="span12 vpositive existenciaPiso_importe" readonly></td>'+
+          '<td style="width: 30px;">'+
+            '<button type="button" class="btn btn-danger existenciaPiso_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+          '</td>'+
+        '</tr>';
       $(html).insertBefore($('#table-existencia-piso tbody tr.footer'));
       $("#table-existencia-piso tbody .vpositive").numeric({ negative: false }); //Numero positivo
     });

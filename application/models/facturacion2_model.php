@@ -94,14 +94,15 @@ class facturacion2_model extends privilegios_model{
                     SUM(fp.cantidad) as cantidad, fp.precio_unitario,
                     SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza,
                     u.nombre AS unidad, u.codigo AS unidadc, COALESCE(fp.unidad_c, u.cantidad, 1) AS unidad_cantidad,
-                    (SUM(fp.cantidad)*COALESCE(fp.unidad_c, u.cantidad, 1)) AS kilos
+                    (SUM(fp.cantidad)*COALESCE(fp.unidad_c, u.cantidad, 1)) AS kilos, ca.nombre AS calibre
             FROM facturacion f
             INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
             INNER JOIN clientes c ON c.id_cliente= f.id_cliente
             LEFT JOIN unidades u ON u.id_unidad = fp.id_unidad
+            LEFT JOIN calibres ca ON ca.id_calibre = fp.id_calibres
             LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
             {$sql}
-            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fp.unidad_c, fc.pol_seg, fc.certificado, u.id_unidad
+            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fp.unidad_c, fc.pol_seg, fc.certificado, u.id_unidad, ca.id_calibre
             ORDER BY f.fecha ASC");
 
         if (is_numeric($prod)) {
@@ -285,25 +286,28 @@ class facturacion2_model extends privilegios_model{
       $html = '<table>
         <tbody>
           <tr>
-            <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+            <td colspan="10" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
           </tr>
           <tr>
-            <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+            <td colspan="10" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
           </tr>
           <tr>
-            <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+            <td colspan="10" style="text-align:center;">'.$titulo3.'</td>
           </tr>
           <tr>
-            <td colspan="6"></td>
+            <td colspan="10"></td>
           </tr>
           <tr style="font-weight:bold">
             <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
             <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Serie/Folio</td>
             <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+            <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Poliza</td>
             <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
             <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Kgs</td>
             <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
             <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+            <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calibre</td>
           </tr>';
       $total_importe = $total_cantidad = $total_kilos = 0;
       $total_importet = $total_cantidadt = $total_kilost = 0;
@@ -320,10 +324,13 @@ class facturacion2_model extends privilegios_model{
               <td style="width:150px;border:1px solid #000;">'.$value->fecha.'</td>
               <td style="width:100px;border:1px solid #000;">'.$value->serie.$value->folio.'</td>
               <td style="width:400px;border:1px solid #000;">'.$value->cliente.'</td>
+              <td style="width:400px;border:1px solid #000;">'.$value->poliza.'</td>
               <td style="width:100px;border:1px solid #000;">'.$value->cantidad.'</td>
+              <td style="width:100px;border:1px solid #000;">'.$value->unidadc.'</td>
               <td style="width:100px;border:1px solid #000;">'.$value->kilos.'</td>
               <td style="width:150px;border:1px solid #000;">'.$value->precio_unitario.'</td>
               <td style="width:150px;border:1px solid #000;">'.$value->importe.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$value->calibre.'</td>
             </tr>';
             $total_importe   += $value->importe;
             $total_cantidad  += $value->cantidad;
@@ -334,11 +341,13 @@ class facturacion2_model extends privilegios_model{
         }
         $html .= '
           <tr style="font-weight:bold">
-            <td colspan="3">TOTAL</td>
+            <td colspan="4">TOTAL</td>
             <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+            <td style="border:1px solid #000;"></td>
             <td style="border:1px solid #000;">'.$total_kilos.'</td>
             <td style="border:1px solid #000;">'.($total_cantidad == 0 ? 0 : $total_importe/$total_cantidad).'</td>
             <td style="border:1px solid #000;">'.$total_importe.'</td>
+            <td style="border:1px solid #000;"></td>
           </tr>
           <tr>
             <td colspan="6"></td>
@@ -350,11 +359,13 @@ class facturacion2_model extends privilegios_model{
 
       $html .= '
           <tr style="font-weight:bold">
-            <td colspan="3">TOTALES</td>
+            <td colspan="4">TOTALES</td>
             <td style="border:1px solid #000;">'.$total_cantidadt.'</td>
+            <td style="border:1px solid #000;"></td>
             <td style="border:1px solid #000;">'.$total_kilost.'</td>
             <td style="border:1px solid #000;">'.($total_cantidadt == 0 ? 0 : $total_importet/$total_cantidadt).'</td>
             <td style="border:1px solid #000;">'.$total_importet.'</td>
+            <td style="border:1px solid #000;"></td>
           </tr>
         </tbody>
       </table>';

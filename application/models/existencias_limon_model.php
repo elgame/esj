@@ -111,7 +111,7 @@ class existencias_limon_model extends CI_Model {
       "SELECT f.id_factura, f.serie, f.folio, cl.nombre_fiscal, STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(fp.cantidad) AS cantidad,
         (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe, u.id_unidad,
         Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kilos,
-        fo.no_salida_fruta, ca.id_calibre, ca.nombre AS calibre
+        fo.no_salida_fruta, ca.id_calibre, ca.nombre AS calibre, string_agg(fh.id_factura::text, ',') AS facturas
       FROM facturacion f
         INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
@@ -119,6 +119,9 @@ class existencias_limon_model extends CI_Model {
         INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
         LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
       WHERE f.id_empresa = {$id_empresa} AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
         AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
         AND Date(f.fecha) >= '{$fechaa_inicioo}'
@@ -143,6 +146,7 @@ class existencias_limon_model extends CI_Model {
         --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
       WHERE b.id_empresa = {$id_empresa} AND b.status = 't' AND b.intangible = 'f'
         AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
+        AND b.id_bonificacion IS NULL
       GROUP BY --b.id_bascula,
         c.id_calidad
         --, pr.id_proveedor
@@ -182,10 +186,11 @@ class existencias_limon_model extends CI_Model {
     // Existencia piso
     $id_calibree = ($id_area == 2? 135: 135); // A granel
     $existencia_piso = $this->db->query(
-      "SELECT {$id_calibree} AS id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
-        ele.cantidad, ele.importe, 'GRANEL' AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
         u.cantidad AS unidad_cantidad, '' AS clasificacion
       FROM otros.existencias_limon_existencia_piso ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
       WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
         AND ele.id_area = {$id_area}"
@@ -228,18 +233,28 @@ class existencias_limon_model extends CI_Model {
     }
     // costo ventas fletes
     if (count($info['ventas']) > 0) {
-      $aidss = [];
+      $raidss = $faidss = [];
       foreach ($info['ventas'] as $keyv => $venta) {
-        $aidss[$venta->id_factura] = $venta->id_factura;
+        $raidss[$venta->id_factura] = $venta->id_factura;
+
+        $ffacturas = explode(',', $venta->facturas);
+        if (isset($ffacturas) && count($ffacturas) > 0) {
+          foreach ($ffacturas as $keyf => $fac) {
+            if ($fac > 0) {
+              $faidss[$fac] = $fac;
+            }
+          }
+        }
       }
-      $idss = 'f:'.implode('\||f:', $aidss).'\|';
+      $ridss = 'f:'.implode('\||f:', $raidss).'\|';
+      $fidss = 'f:'.implode('\||t:', $faidss).'\|';
       $costo_ventas_fletes = $this->db->query(
         "SELECT cp.id_producto, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
           Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total
         FROM compras_ordenes co
           INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
         WHERE co.status in('a', 'f') AND co.tipo_orden = 'f' and co.flete_de = 'v'
-          AND co.ids_facrem SIMILAR TO '%({$idss})%'
+          AND (co.ids_facrem SIMILAR TO '%({$ridss})%' OR co.ids_facrem SIMILAR TO '%({$fidss})%')
         GROUP BY cp.id_producto"
       );
 
@@ -401,19 +416,24 @@ class existencias_limon_model extends CI_Model {
       }
     }
 
+
+    $existencia_data = $this->db->query(
+      "SELECT id_calibre, id_unidad, costo
+      FROM otros.existencias_limon_existencia
+      WHERE Date(fecha) = '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}")->result();
+    $existencias_costos = [];
+    foreach ($existencia_data as $key => $item) {
+      $existencias_costos[$item->id_calibre.$item->id_unidad] = $item->costo;
+    }
     foreach ($existencia as $key => $item) {
-      $existencia[$key]->importe = round($item->costo*$item->cantidad, 2);
-      $existencia[$key]->kilos = round($item->unidad_cantidad*$item->cantidad, 2);
+      $existencia[$key]->costo   = round((isset($existencias_costos[$item->id_calibre.$item->id_unidad])? $existencias_costos[$item->id_calibre.$item->id_unidad]: 0), 2);
+      $existencia[$key]->importe = round($existencia[$key]->costo * $item->cantidad, 2);
+      $existencia[$key]->kilos   = round($item->unidad_cantidad*$item->cantidad, 2);
     }
     $info['existencia'] = $existencia;
 
-    $guardado = $this->db->query(
-      "SELECT id_calibre
-      FROM otros.existencias_limon_existencia
-      WHERE Date(fecha) = '{$fecha}' AND no_caja = {$noCaja}
-      LIMIT 1"
-    )->row();
-    $info['guardado'] = isset($guardado->id_calibre)? true: false;
+
+    $info['guardado'] = isset($existencia_data[0])? true: false;
 
 
     return $info;
@@ -428,14 +448,15 @@ class existencias_limon_model extends CI_Model {
       foreach ($data['existenciaPiso_id_unidad'] as $key => $id_cat)
       {
         $existencias_piso[] = array(
-          'id_area'   => $data['farea'],
-          'id_unidad' => $data['existenciaPiso_id_unidad'][$key],
-          'costo'     => $data['existenciaPiso_costo'][$key],
-          'kilos'     => $data['existenciaPiso_kilos'][$key],
-          'cantidad'  => $data['existenciaPiso_cantidad'][$key],
-          'importe'   => $data['existenciaPiso_importe'][$key],
-          'fecha'     => $data['fecha_caja_chica'],
-          'no_caja'   => $data['fno_caja'],
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['existenciaPiso_id_calibre'][$key],
+          'id_unidad'  => $data['existenciaPiso_id_unidad'][$key],
+          'costo'      => $data['existenciaPiso_costo'][$key],
+          'kilos'      => $data['existenciaPiso_kilos'][$key],
+          'cantidad'   => $data['existenciaPiso_cantidad'][$key],
+          'importe'    => $data['existenciaPiso_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
         );
       }
       if (count($existencias_piso) > 0)
@@ -545,28 +566,30 @@ class existencias_limon_model extends CI_Model {
     // Produccion
     $produccion_inst = array();
     $produccion_updt = array();
-    foreach ($data['produccion_costo'] as $key => $id_cat)
-    {
-      if ($data['produccion_id_produccion'][$key] > 0) {
-        $produccion_updt = array(
-          'id_calibre' => $data['produccion_id_calibre'][$key],
-          'id_unidad'  => $data['produccion_id_unidad'][$key],
-          'costo'      => $data['produccion_costo'][$key],
-          'importe'    => $data['produccion_importe'][$key],
-          'fecha'      => $data['fecha_caja_chica'],
-          'no_caja'    => $data['fno_caja'],
-        );
-        $this->db->update('otros.existencias_limon_produccion', $produccion_updt, "id = ".$data['produccion_id_produccion'][$key]);
-      } else {
-        $produccion_inst[] = array(
-          'id_area'    => $data['farea'],
-          'id_calibre' => $data['produccion_id_calibre'][$key],
-          'id_unidad'  => $data['produccion_id_unidad'][$key],
-          'costo'      => $data['produccion_costo'][$key],
-          'importe'    => $data['produccion_importe'][$key],
-          'fecha'      => $data['fecha_caja_chica'],
-          'no_caja'    => $data['fno_caja'],
-        );
+    if (isset($data['produccion_costo'])) {
+      foreach ($data['produccion_costo'] as $key => $id_cat)
+      {
+        if ($data['produccion_id_produccion'][$key] > 0) {
+          $produccion_updt = array(
+            'id_calibre' => $data['produccion_id_calibre'][$key],
+            'id_unidad'  => $data['produccion_id_unidad'][$key],
+            'costo'      => $data['produccion_costo'][$key],
+            'importe'    => $data['produccion_importe'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+          );
+          $this->db->update('otros.existencias_limon_produccion', $produccion_updt, "id = ".$data['produccion_id_produccion'][$key]);
+        } else {
+          $produccion_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => $data['produccion_id_calibre'][$key],
+            'id_unidad'  => $data['produccion_id_unidad'][$key],
+            'costo'      => $data['produccion_costo'][$key],
+            'importe'    => $data['produccion_importe'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+          );
+        }
       }
     }
 
@@ -579,27 +602,28 @@ class existencias_limon_model extends CI_Model {
     // Existencia
     $existencia_inst = array();
     $this->db->delete('otros.existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
-    foreach ($data['existencia_id_calibre'] as $key => $id_cat)
-    {
-      if ($data['existencia_cantidad'][$key] != 0) {
-        $existencia_inst[] = array(
-          'id_area'    => $data['farea'],
-          'id_calibre' => $data['existencia_id_calibre'][$key],
-          'id_unidad'  => $data['existencia_id_unidad'][$key],
-          'fecha'      => $data['fecha_caja_chica'],
-          'no_caja'    => $data['fno_caja'],
-          'costo'      => $data['existencia_costo'][$key],
-          'kilos'      => $data['existencia_kilos'][$key],
-          'cantidad'   => $data['existencia_cantidad'][$key],
-          'importe'    => $data['existencia_importe'][$key],
-        );
+    if (isset($data['existencia_id_calibre'])) {
+      foreach ($data['existencia_id_calibre'] as $key => $id_cat)
+      {
+        if ($data['existencia_cantidad'][$key] != 0) {
+          $existencia_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => $data['existencia_id_calibre'][$key],
+            'id_unidad'  => $data['existencia_id_unidad'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'costo'      => $data['existencia_costo'][$key],
+            'kilos'      => $data['existencia_kilos'][$key],
+            'cantidad'   => $data['existencia_cantidad'][$key],
+            'importe'    => $data['existencia_importe'][$key],
+          );
+        }
       }
     }
     if (count($existencia_inst) > 0)
     {
       $this->db->insert_batch('otros.existencias_limon_existencia', $existencia_inst);
     }
-
 
     return true;
   }

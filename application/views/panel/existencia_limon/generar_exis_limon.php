@@ -172,7 +172,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia">
                           <thead>
                             <tr>
-                              <th colspan="6">EXISTENCIA EMPACADA</th>
+                              <th colspan="7">EXISTENCIA EMPACADA</th>
                             </tr>
                             <tr>
                               <th>CALIBRE</th>
@@ -180,6 +180,7 @@
                               <th>UNIDAD</th>
                               <th>KILOS</th>
                               <th>CANTIDAD</th>
+                              <th>COSTO</th>
                               <th>IMPORTE</th>
                             </tr>
                           </thead>
@@ -196,23 +197,26 @@
                                 <td><?php echo $existencia->clasificacion ?>
                                   <input type="hidden" name="existencia_id_calibre[]" value="<?php echo $existencia->id_calibre ?>">
                                   <input type="hidden" name="existencia_id_unidad[]" value="<?php echo $existencia->id_unidad ?>">
-                                  <input type="hidden" name="existencia_costo[] " value="<?php echo $existencia->costo ?>">
                                   <input type="hidden" name="existencia_kilos[]" value="<?php echo $existencia->kilos ?>">
-                                  <input type="hidden" name="existencia_cantidad[]" value="<?php echo $existencia->cantidad ?>">
-                                  <input type="hidden" name="existencia_importe[]" value="<?php echo $existencia->importe ?>">
+                                  <input type="hidden" name="existencia_cantidad[]" value="<?php echo $existencia->cantidad ?>" class="existencia_cantidad">
+                                  <input type="hidden" name="existencia_importe[]" value="<?php echo $existencia->importe ?>" class="existencia_importee">
                                 </td>
                                 <td><?php echo $existencia->unidad ?></td>
                                 <td><?php echo $existencia->kilos ?></td>
                                 <td class="existencia_cantidad"><?php echo $existencia->cantidad ?></td>
+                                <td>
+                                  <input type="text" name="existencia_costo[] " value="<?php echo $existencia->costo ?>" class="span12 existencia_costo" required>
+                                </td>
                                 <td class="existencia_importe"><?php echo $existencia->importe ?></td>
                               </tr>
                             <?php } ?>
 
-                            <tr>
+                            <tr class="footer">
                               <th colspan="3"></th>
                               <th><?php echo $existencia_kilos ?></th>
                               <th><?php echo $existencia_cantidad ?></th>
-                              <th><?php echo $existencia_importe ?></th>
+                              <th></th>
+                              <th id="exisImporte"><?php echo $existencia_importe ?></th>
                             </tr>
                           </tbody>
                         </table>
@@ -233,6 +237,7 @@
                               </th>
                             </tr>
                             <tr>
+                              <th>CALIBRE</th>
                               <th>UNIDAD</th>
                               <th>CANTIDAD</th>
                               <th>KILOS</th>
@@ -251,6 +256,10 @@
                                 $existenciaPiso_importe  += floatval($_POST['existenciaPiso_importe'][$keyp]);
                             ?>
                               <tr>
+                                <td>
+                                  <input type="text" name="existenciaPiso_calibre[]" value="<?php echo $_POST['existenciaPiso_calibre'][$keyp] ?>" class="span12 existenciaPiso_calibre" required>
+                                  <input type="hidden" name="existenciaPiso_id_calibre[]" value="<?php echo $_POST['existenciaPiso_id_calibre'][$keyp] ?>" class="span12 existenciaPiso_id_calibre" required>
+                                </td>
                                 <td>
                                   <select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>
                                     <?php foreach ($unidades as $key => $u) { ?>
@@ -275,6 +284,10 @@
                                 $existenciaPiso_importe  += floatval($existencia->importe);
                             ?>
                               <tr>
+                                <td>
+                                  <input type="text" name="existenciaPiso_calibre[]" value="<?php echo $existencia->calibre ?>" class="span12 existenciaPiso_calibre" required>
+                                  <input type="hidden" name="existenciaPiso_id_calibre[]" value="<?php echo $existencia->id_calibre ?>" class="span12 existenciaPiso_id_calibre" required>
+                                </td>
                                 <td>
                                   <select name="existenciaPiso_id_unidad[]" class="span12 existenciaPiso_id_unidad" required>
                                     <?php foreach ($unidades as $key => $u) { ?>
