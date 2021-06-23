@@ -5,10 +5,9 @@ incluir ordenes de flete de las facturas, no incluir las bonificaciones
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
  ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
-   -- lap
+   -- pcc|san|lap
      ALTER TABLE otros.paletas_salidas_productos ADD COLUMN id_calibre integer;
      ALTER TABLE otros.paletas_salidas_productos ADD CONSTRAINT paletas_salidas_productos_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-   -- pcc|san|lap
     ALTER TABLE otros.existencias_limon_existencia_piso DROP CONSTRAINT existencias_limon_existencia_piso_pkey;
     ALTER TABLE otros.existencias_limon_existencia_piso ADD COLUMN id bigserial NOT NULL;
     ALTER TABLE otros.existencias_limon_existencia_piso ADD CONSTRAINT existencias_limon_existencia_piso_pkey PRIMARY KEY (id);
