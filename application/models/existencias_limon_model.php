@@ -1163,7 +1163,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(
       '',
       MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
-      MyString::formatoNumero($costoVentas_importe, 2, '', false),
+      MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
     ), false, 'B');
 
 
@@ -1195,8 +1195,8 @@ class existencias_limon_model extends CI_Model {
           $pdf->AddPage();
       }
 
-      $comisionTerceros_cantidad  += floatval($desc->cantidad);
-      $comisionTerceros_importe  += floatval($desc->importe);
+      $comisionTerceros_cantidad  += floatval($existencia->cantidad);
+      $comisionTerceros_importe  += floatval($existencia->importe);
 
       $pdf->SetX(6);
       $pdf->Row(array(
