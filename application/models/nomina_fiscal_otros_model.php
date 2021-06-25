@@ -1417,8 +1417,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $nominas = $queryNomina->result();
       $deducc = [
         'infonavit' => ['IN', 'Infonavit'], 'prestamos' => ['PF', 'Prestamos fiscales'],
-        'fondo_ahorro' => ['FA', 'Fondo de ahorro'], 'descuento_playeras' => ['DP', 'Descuento de playeras'],
-        'descuento_otros' => ['DM', 'Descuento materiales, etc'], 'descuento_cocina' => ['DC', 'Descuento de cocina']
+        'fondo_ahorro' => ['FA', 'Fondo de ahorro'], 'descuento_playeras' => ['DP', 'Descuento materiales y otros'],
+        'descuento_otros' => ['DM', 'Descuento prestamos semanales'], 'descuento_cocina' => ['DC', 'Descuento de cocina']
       ];
       foreach ($nominas as $key => $p) {
         $p->otros_datos = (!empty($p->otros_datos)? json_decode($p->otros_datos): null);
