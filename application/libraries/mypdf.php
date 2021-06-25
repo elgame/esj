@@ -348,6 +348,17 @@ class MYpdf extends FPDF {
             $this->Ln($h);
     }
 
+    public function chkSaltaPag($xy = [63, 10])
+    {
+      if($this->GetY()+10 >= $this->limiteY){
+        if (count($this->pages) > $this->page) {
+          $this->page++;
+          $this->SetXY($xy[0], $xy[1]);
+        } else
+          $this->AddPage();
+      }
+    }
+
     function CheckPageBreak($h, $limit=0){
       $limit = $limit==0? $this->PageBreakTrigger: $limit;
       if($this->GetY()+$h>$limit) {
