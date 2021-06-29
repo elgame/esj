@@ -96,7 +96,7 @@
                   <?php } ?>
 
                   <?php if ($caja['guardado']) { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/print_caja?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -624,10 +624,11 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-costo-ventas-fletes">
                           <thead>
                             <tr>
-                              <th colspan="3">FLETES</th>
+                              <th colspan="4">FLETES</th>
                             </tr>
                             <tr>
-                              <th>NOMBRE</th>
+                              <th>FOLIO</th>
+                              <th>PROVEEDOR</th>
                               <th>CANTIDAD</th>
                               <th>IMPORTE</th>
                             </tr>
@@ -640,17 +641,15 @@
                                 $descuentoVentasFletes_importe  += floatval($desc->importe);
                             ?>
                               <tr>
-                                <td>
-                                  <?php echo $desc->descripcion ?>
-                                </td>
-                                <td>
-                                  <?php echo $desc->cantidad ?>
-                                </td>
+                                <td><?php echo $desc->folio ?></td>
+                                <td><?php echo $desc->proveedor ?></td>
+                                <td><?php echo $desc->cantidad ?></td>
                                 <td><?php echo $desc->importe ?></td>
                               </tr>
                             <?php } ?>
 
                             <tr class="footer">
+                              <th></th>
                               <th></th>
                               <th><?php echo $descuentoVentasFletes_cantidad ?></th>
                               <th><?php echo $descuentoVentasFletes_importe ?></th>
@@ -744,6 +743,105 @@
                     </div>
                     <!--/ Comisiones a terceros -->
 
+                    <!-- Ventas industrial -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-ventas">
+                          <thead>
+                            <tr>
+                              <th colspan="5">VENTAS INDUSTRIAL</th>
+                              <th colspan="5" id="dvfondo_caja"></th>
+                            </tr>
+                            <tr>
+                              <!-- <th>FECHA</th> -->
+                              <th>FOLIO</th>
+                              <th>NO SALIDA</th>
+                              <th>CLIENTE</th>
+                              <th>CALIBRE</th>
+                              <th>CLASIF</th>
+                              <th>UNIDAD</th>
+                              <th>KILOS</th>
+                              <th>CANTIDAD</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody style="overflow-y: auto;max-height: 300px;">
+                            <?php
+                                $venta_importe_ind = $venta_kilos_ind = $venta_cantidad_ind = 0;
+                                  foreach ($caja['ventas_industrial'] as $venta) {
+                                      $venta_importe_ind += floatval($venta->importe);
+                                      $venta_kilos_ind += floatval($venta->kilos);
+                                      $venta_cantidad_ind += floatval($venta->cantidad);
+                                    ?>
+                                    <tr>
+                                      <td><?php echo $venta->serie.$venta->folio ?></td>
+                                      <td><?php echo $venta->no_salida_fruta ?></td>
+                                      <td><?php echo $venta->nombre_fiscal ?></td>
+                                      <td><?php echo $venta->calibre ?></td>
+                                      <td><?php echo $venta->clasificacion ?></td>
+                                      <td><?php echo $venta->unidad ?></td>
+                                      <td><?php echo $venta->kilos ?></td>
+                                      <td><?php echo $venta->cantidad ?></td>
+                                      <td><?php echo $venta->precio ?></td>
+                                      <td><?php echo $venta->importe ?></td>
+                                    </tr>
+                            <?php } ?>
+                            <tr>
+                              <th colspan="6"></th>
+                              <th><?php echo $venta_kilos_ind ?></th>
+                              <th><?php echo $venta_cantidad_ind ?></th>
+                              <th></th>
+                              <th><?php echo $venta_importe_ind ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Ventas industrial -->
+
+                    <!-- INDUSTRIAL -->
+                    <?php $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos; ?>
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-industrial">
+                          <thead>
+                            <tr>
+                              <th colspan="4">INDUSTRIAL</th>
+                            </tr>
+                            <tr>
+                              <th>CALIBRE</th>
+                              <th>KILOS</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              $industrial_kilos = $industrial_importe = 0;
+                              $industrial_kilos    = floatval($resultado_kilos);
+                              $industrial_costo    = (isset($caja['industrial']->costo)? $caja['industrial']->costo: 0);
+                              $industrial_importe  = $resultado_kilos * $industrial_costo;
+                            ?>
+                            <tr>
+                              <td>Industrial</td>
+                              <td><input type="text" name="industrial_kilos[]" value="<?php echo $industrial_kilos ?>" class="span12 vpositive industrial_kilos" readonly></td>
+                              <td><input type="text" name="industrial_costo[]" value="<?php echo $industrial_costo ?>" class="span12 vpositive industrial_costo"></td>
+                              <td><input type="text" name="industrial_importe[]" value="<?php echo $industrial_importe ?>" class="span12 vpositive industrial_importe" readonly></td>
+                            </tr>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th id="indusKilos"><?php echo $industrial_kilos ?></th>
+                              <th></th>
+                              <th id="indusImporte"><?php echo $industrial_importe ?></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ INDUSTRIAL -->
+
                 </div>
               </div>
             </div>
@@ -757,45 +855,6 @@
 
   <div class="clear"></div>
 
-  <!-- Modal -->
-  <div id="addPrestamosCp" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <form class="form-horizontal" action="<?php echo base_url();?>panel/existencias_limon/abono_prestamo_cp" method="POST" id="frmcajachicapres" name="frmcajachicapres">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel">Prestamo a corto plazo</h3>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="id_prestamo_caja" id="pc_id_prestamo_caja" value="">
-        <input type="hidden" name="no_caja" id="pc_no_caja" value="">
-        <input type="hidden" name="id_categoria" id="pc_id_categoria" value="">
-        <div class="control-group">
-          <label class="control-label" for="fecha">*Fecha </label>
-          <div class="controls">
-            <input type="date" name="fecha" id="pc_fecha" value="" class="input-xlarge" required>
-          </div>
-        </div>
-
-        <div class="control-group">
-          <label class="control-label" for="concepto">*Concepto </label>
-          <div class="controls">
-            <input type="text" name="concepto" id="pc_concepto" value="" class="input-xlarge" required>
-          </div>
-        </div>
-
-        <div class="control-group">
-          <label class="control-label" for="monto">*Monto </label>
-          <div class="controls">
-            <input type="text" name="monto" id="pc_monto" value="" class="input-xlarge vpositive" required>
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-        <button class="btn btn-primary">Guardar</button>
-      </div>
-    </form>
-  </div>
 
   <!-- Bloque de alertas -->
   <?php if(isset($frm_errors)){

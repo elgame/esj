@@ -11,6 +11,7 @@
     existenciaReProceso();
     descuentoVentas();
     comisionTerceros();
+    industrial();
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
@@ -340,6 +341,27 @@
     });
     $('#comisionTerceros_cantidad').text(cantidadt);
     $('#comisionTerceros_importe').text(importet);
+  };
+
+  const industrial = () => {
+    $('#table-industrial').on('keyup', '.industrial_costo', function(event) {
+      let $tr = $(this).parents('tr');
+      let cantidad = parseFloat($tr.find('.industrial_kilos').val())||0;
+      let costo = parseFloat($tr.find('.industrial_costo').val())||0;
+
+      $tr.find('.industrial_importe').val(cantidad*costo);
+
+      calculaTotalIndustrial();
+    });
+  };
+  const calculaTotalIndustrial = () => {
+    cantidadt = kilost = importet = 0;
+    $("#table-industrial tbody tr:not(.footer)").each(function(index, el) {
+      cantidadt += parseFloat($(el).find('.industrial_kilos').val())||0;
+      importet += parseFloat($(el).find('.industrial_importe').val())||0;
+    });
+    $('#indusKilos').text(cantidadt);
+    $('#indusImporte').text(importet);
   };
 
 });

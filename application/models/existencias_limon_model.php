@@ -96,6 +96,7 @@ class existencias_limon_model extends CI_Model {
     $info = array(
       'saldo_inicial'        => 0,
       'ventas'               => array(),
+      'ventas_industrial'    => array(),
       'compra_fruta'         => array(),
       'produccion'           => array(),
       'existencia_anterior'  => [],
@@ -105,6 +106,7 @@ class existencias_limon_model extends CI_Model {
       'costo_ventas'         => [],
       'costo_ventas_fletes'  => [],
       'comision_terceros'    => [],
+      'industrial'           => [],
     );
 
     $ventas = $this->db->query(
@@ -132,6 +134,15 @@ class existencias_limon_model extends CI_Model {
     if ($ventas->num_rows() > 0)
     {
       $info['ventas'] = $ventas->result();
+
+      if ($id_area == 2) { // limon
+        foreach ($info['ventas'] as $key => $value) {
+          if ($value->id_calibre == 133) { // INDUSTRIAL
+            $info['ventas_industrial'][] = $value;
+            unset($info['ventas'][$key]);
+          }
+        }
+      }
     }
 
 
@@ -249,13 +260,14 @@ class existencias_limon_model extends CI_Model {
       $ridss = 'f:'.implode('\||f:', $raidss).'\|';
       $fidss = 'f:'.implode('\||t:', $faidss).'\|';
       $costo_ventas_fletes = $this->db->query(
-        "SELECT cp.id_producto, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
+        "SELECT co.id_orden, p.nombre_fiscal AS proveedor, co.folio, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
           Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total
         FROM compras_ordenes co
           INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+          INNER JOIN proveedores p ON p.id_proveedor = co.id_proveedor
         WHERE co.status in('a', 'f') AND co.tipo_orden = 'f' and co.flete_de = 'v'
           AND (co.ids_facrem SIMILAR TO '%({$ridss})%' OR co.ids_facrem SIMILAR TO '%({$fidss})%')
-        GROUP BY cp.id_producto"
+        GROUP BY co.id_orden, p.nombre_fiscal"
       );
 
       if ($costo_ventas_fletes->num_rows() > 0)
@@ -276,6 +288,24 @@ class existencias_limon_model extends CI_Model {
     if ($comision_terceros->num_rows() > 0)
     {
       $info['comision_terceros'] = $comision_terceros->result();
+    }
+
+
+    // industrial
+    $industrial = $this->db->query(
+      "SELECT eli.id_calibre, eli.id_unidad, eli.fecha, eli.no_caja, eli.costo, eli.kilos,
+        eli.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_industrial eli
+        INNER JOIN calibres c ON c.id_calibre = eli.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = eli.id_unidad
+      WHERE Date(eli.fecha) = '{$fecha}' AND eli.no_caja = {$noCaja}
+        AND eli.id_area = {$id_area}"
+    );
+
+    if ($industrial->num_rows() > 0)
+    {
+      $info['industrial'] = $industrial->row();
     }
 
 
@@ -625,6 +655,31 @@ class existencias_limon_model extends CI_Model {
       $this->db->insert_batch('otros.existencias_limon_existencia', $existencia_inst);
     }
 
+    // industrial
+    $industrial_inst = array();
+    $this->db->delete('otros.existencias_limon_industrial', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    if (isset($data['industrial_kilos'])) {
+      foreach ($data['industrial_kilos'] as $key => $id_cat)
+      {
+        if ($data['industrial_costo'][$key] > 0) {
+          $industrial_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => 133, // industrial
+            'id_unidad'  => 49, // kilos a granel
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'costo'      => $data['industrial_costo'][$key],
+            'kilos'      => $data['industrial_kilos'][$key],
+            'importe'    => $data['industrial_importe'][$key],
+          );
+        }
+      }
+    }
+    if (count($industrial_inst) > 0)
+    {
+      $this->db->insert_batch('otros.existencias_limon_industrial', $industrial_inst);
+    }
+
     return true;
   }
 
@@ -695,7 +750,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
     $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
-    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
@@ -779,16 +834,18 @@ class existencias_limon_model extends CI_Model {
       $existencia_cantidad += floatval($existencia->cantidad);
       $existencia_importe  += floatval($existencia->importe);
 
-      $pdf->SetX(6);
-      $pdf->Row(array(
-        $existencia->calibre,
-        $existencia->clasificacion,
-        $existencia->unidad,
-        MyString::formatoNumero($existencia->kilos, 2, '', false),
-        MyString::formatoNumero($existencia->cantidad, 2, '', false),
-        MyString::formatoNumero($existencia->costo, 2, '', false),
-        MyString::formatoNumero($existencia->importe, 2, '', false),
-      ), false, 'B');
+      if ($existencia->cantidad != 0 ) {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->clasificacion,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
+      }
     }
 
     $pdf->SetFont('Arial','B', 7);
@@ -965,7 +1022,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(204));
-    $pdf->Row(array('PRODUCCION'), true, 'B');
+    $pdf->Row(array('COSTO DE PRODUCCIÓN'), true, 'B');
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
@@ -1129,14 +1186,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'C', 'C'));
-    $pdf->SetWidths(array(125, 40, 40));
-    $pdf->Row(array('NOMBRE', 'CANTIDAD', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
+    $pdf->Row(array('FOLIO', 'PROVEEDOR', 'CANTIDAD', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'R', 'R'));
-    $pdf->SetWidths(array(125, 40, 40));
+    $pdf->SetAligns(array('L', 'L', 'R', 'R'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
 
     $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
     foreach ($caja['costo_ventas_fletes'] as $existencia) {
@@ -1153,7 +1210,8 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
-        $existencia->descripcion,
+        $existencia->folio,
+        $existencia->proveedor,
         MyString::formatoNumero($existencia->cantidad, 2, '', false),
         MyString::formatoNumero($existencia->importe, 2, '', false),
       ), false, 'B');
@@ -1162,6 +1220,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
       MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
@@ -1219,39 +1278,152 @@ class existencias_limon_model extends CI_Model {
       MyString::formatoNumero($comisionTerceros_importe, 2, '', false),
     ), false, 'B');
 
-    $resultado_importe = 0;
-    $resultado_kilos = 0;
-    $pdf->SetXY(50, $pdf->GetY()+5);
+
+    // Ventas industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('VENTAS INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+
+    $venta_importe_ind = $venta_kilos_ind = $venta_cantidad_ind = 0;
+    foreach ($caja['ventas_industrial'] as $venta) {
+      if($pdf->GetY()+10 >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $venta_importe_ind += floatval($venta->importe);
+      $venta_kilos_ind += floatval($venta->kilos);
+      $venta_cantidad_ind += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->no_salida_fruta,
+        $venta->nombre_fiscal,
+        $venta->calibre,
+        $venta->clasificacion,
+        $venta->unidad,
+        MyString::formatoNumero($venta->kilos, 2, '', false),
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      MyString::formatoNumero($venta_kilos_ind, 2, '', false),
+      MyString::formatoNumero($venta_cantidad_ind, 2, '', false),
+      MyString::formatoNumero(($venta_importe_ind/($venta_cantidad_ind==0? 1: $venta_cantidad_ind)), 2, '', false),
+      MyString::formatoNumero($venta_importe_ind, 2, '', false),
+    ), false, 'B');
+
+
+    // industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+
+    $industrial_importe = $industrial_kilos = 0;
+    if (isset($caja['industrial']->costo)) {
+      $industrial_importe = $caja['industrial']->importe;
+      $industrial_kilos = $caja['industrial']->kilos;
+
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '', '',
+        MyString::formatoNumero($caja['industrial']->kilos, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->costo, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+
+    // TOTALES
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos;
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
+
+    $pdf->SetXY(6, $pdf->GetY()+0.3);
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(50, 30));
 
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $yaux = $pdf->GetY();
     $pageaux = $pdf->page;
-    $pdf->SetXY(50, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(+) KGS EXISTENCIA ANTERIOR', MyString::formatoNumero($existencia_ant_kilos, 2, '', false)), true, false);
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
-    $pdf->SetXY(50, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(+) KGS COMPRADOS', MyString::formatoNumero($compra_fruta_kilos, 2, '', false)), true, false);
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
-    $pdf->SetXY(50, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(-) KGS EXISTENCIA EMPACADA', MyString::formatoNumero($existencia_kilos, 2, '', false)), true, false);
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
-    $pdf->SetXY(50, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(+) KGS PROCESADOS', MyString::formatoNumero($existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos, 2, '', false)), true, 'B');
-    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos;
 
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
-    $pdf->SetXY(50, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(-) KGS VENDIDOS', MyString::formatoNumero($venta_kilos, 2, '', false)), true, 'B');
-    $resultado_kilos -= $venta_kilos;
 
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
-    $pdf->SetXY(50, $pdf->GetY());
-    $pdf->Row(array('DIFERENCIA DE KGS', MyString::formatoNumero($resultado_kilos, 2, '', false)), true, 'B');
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('INDUSTRIAL KGS', MyString::formatoNumero($resultado_kilos, 2, '', false)), true, 'B');
 
     if (count($pdf->pages) > $pageaux) {
       $pdf->page = $pageaux;
@@ -1264,7 +1436,6 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(130, $pdf->GetY());
     $pdf->Row(array('(+) VENTAS', MyString::formatoNumero($venta_importe, 2, '', false)), true, 'B');
-    $resultado_importe += $venta_importe;
 
     $pdf->SetFont('Arial', '', 8);
     $pdf->chkSaltaPag([130, 10]);
@@ -1280,13 +1451,11 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(130, $pdf->GetY());
     $pdf->Row(array('(-) COSTO DE MATERIA PRIMA', MyString::formatoNumero($compra_fruta_importe + $existencia_ant_importe - $existencia_importe, 2, '', false)), true, 'B');
-    $resultado_importe -= $compra_fruta_importe + $existencia_ant_importe - $existencia_importe;
 
     $pdf->chkSaltaPag([130, 10]);
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(130, $pdf->GetY());
     $pdf->Row(array('(-) COSTO DE PRODUCCION', MyString::formatoNumero($produccion_importe, 2, '', false)), true, 'B');
-    $resultado_importe -= $produccion_importe;
 
     $pdf->SetFont('Arial', '', 8);
     $pdf->chkSaltaPag([130, 10]);
@@ -1302,7 +1471,10 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(130, $pdf->GetY());
     $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
-    $resultado_importe -= $costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe;
+    $pdf->chkSaltaPag([130, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(130, $pdf->GetY());
+    $pdf->Row(array('(+) INDUSTRIAL', MyString::formatoNumero($industrial_importe, 2, '', false)), true, 'B');
 
     $pdf->chkSaltaPag([130, 10]);
     $pdf->SetFont('Arial', 'B', 9);

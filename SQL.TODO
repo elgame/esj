@@ -1,10 +1,44 @@
-incluir ordenes de flete de las facturas, no incluir las bonificaciones
+titulo Reporte de ordenes del dia,
+en existencia empacada las que esta en 0 que no salgan, Produccion cambiar a Costo de produccion,
+Calibre produccion en ventas, en ventas el limon industrial que salga en otro apartado abajo,
+en los totales poner titulo Estado de resultado la parte de kg alinearlos a la izq, cambiar DIFERENCIA DE KGS por industrial
+en fletes poner el total de la orden de flete cada una con folio, proveedor,
+
+Poner apartado industrial que salga la diferencia de kg de la formula y le puedan poner precio de venta, importe.
+En total de importes agregar  (+) industrial
 
  ☐ Poder repetir lotes en produccion de limon agregando una fecha de corte de limon
    -- lap|san|pcc
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
  ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
+   -- pcc
+     CREATE TABLE otros.existencias_limon_industrial
+      (
+          id_calibre integer NOT NULL,
+          id_unidad integer NOT NULL,
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          costo double precision NOT NULL DEFAULT 0,
+          kilos double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL DEFAULT 0,
+          id_area integer NOT NULL DEFAULT 2,
+          CONSTRAINT existencias_limon_industrial_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja, id_area),
+          CONSTRAINT existencias_limon_industrial_id_area_fkey FOREIGN KEY (id_area)
+              REFERENCES public.areas (id_area) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT existencias_limon_industrial_id_calibre_fkey FOREIGN KEY (id_calibre)
+              REFERENCES public.calibres (id_calibre) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+              NOT VALID,
+          CONSTRAINT existencias_limon_industrial_id_unidad_fkey FOREIGN KEY (id_unidad)
+              REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.existencias_limon_industrial OWNER to programa;
    -- pcc|san|lap
      ALTER TABLE otros.paletas_salidas_productos ADD COLUMN id_calibre integer;
      ALTER TABLE otros.paletas_salidas_productos ADD CONSTRAINT paletas_salidas_productos_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
