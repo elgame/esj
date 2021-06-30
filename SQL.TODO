@@ -12,7 +12,7 @@ En total de importes agregar  (+) industrial
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
  ✔ Modificar la caja de existencia de limon @done (21-06-09 10:26)
-   -- pcc
+   -- pcc|san|lap
      CREATE TABLE otros.existencias_limon_industrial
       (
           id_calibre integer NOT NULL,
@@ -39,7 +39,6 @@ En total de importes agregar  (+) industrial
               ON DELETE CASCADE
       ) TABLESPACE pg_default;
       ALTER TABLE otros.existencias_limon_industrial OWNER to programa;
-   -- pcc|san|lap
      ALTER TABLE otros.paletas_salidas_productos ADD COLUMN id_calibre integer;
      ALTER TABLE otros.paletas_salidas_productos ADD CONSTRAINT paletas_salidas_productos_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     ALTER TABLE otros.existencias_limon_existencia_piso DROP CONSTRAINT existencias_limon_existencia_piso_pkey;
@@ -50,7 +49,6 @@ En total de importes agregar  (+) industrial
     ALTER TABLE otros.existencias_limon_existencia_reproceso ADD CONSTRAINT existencias_limon_existencia_reproceso_pkey PRIMARY KEY (id);
     ALTER TABLE otros.existencias_limon_existencia_piso ADD COLUMN id_calibre integer DEFAULT 135;
     ALTER TABLE otros.existencias_limon_existencia_piso ADD CONSTRAINT existencias_limon_existencia_piso_id_calibre_fkey FOREIGN KEY (id_calibre) REFERENCES public.calibres (id_calibre) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-   -- pcc|lap|san
     ALTER TABLE otros.existencias_limon_existencia ADD COLUMN id_area integer NOT NULL DEFAULT 2;
     ALTER TABLE otros.existencias_limon_existencia DROP CONSTRAINT existencias_limon_existencia_pkey;
     ALTER TABLE otros.existencias_limon_existencia ADD CONSTRAINT existencias_limon_existencia_pkey PRIMARY KEY (id_calibre, id_unidad, fecha, no_caja, id_area);
