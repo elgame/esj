@@ -3,7 +3,7 @@
 })(function ($, window) {
   $(function () {
     submitForm();
-    $('#codigo').focus();
+    setTimeout(() => $('#codigo').focus(), 350);
   });
 
   let timeout = null;

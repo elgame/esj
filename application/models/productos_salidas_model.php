@@ -528,7 +528,8 @@ class productos_salidas_model extends CI_Model {
               cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
               ccr.nombre AS rancho_n, ccc.nombre AS centro_c,
               cs.id_area, cs.id_activo, Coalesce(rs.cargas) AS receta_cargas, rs.id_bascula,
-              cs.tipo, cs.id_empresa_ap, ea.nombre_fiscal AS empresa_ap, cs.id_proyecto
+              r.folio AS folio_receta, cs.tipo, cs.id_empresa_ap, ea.nombre_fiscal AS empresa_ap,
+              cs.id_proyecto
               {$sql_field}
         FROM compras_salidas AS cs
           INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
@@ -538,6 +539,7 @@ class productos_salidas_model extends CI_Model {
           LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
           LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
           LEFT JOIN otros.recetas_salidas rs ON cs.id_salida = rs.id_salida
+          LEFT JOIN otros.recetas AS r ON r.id_recetas = rs.id_recetas
           LEFT JOIN empresas AS ea ON ea.id_empresa = cs.id_empresa_ap
           {$sql_join}
         WHERE cs.id_salida = {$idSalida}");
@@ -1365,12 +1367,15 @@ class productos_salidas_model extends CI_Model {
         }
 
         $y += 1;
-        $nombre = str_split(substr($prod->producto, 0, 60), 15);
+        $nombre = str_split(substr($prod->producto, 0, 58), 15);
         foreach ($nombre as $key1 => $value) {
           $y += 2.5;
           $pdf->Text(25, $y, trim($value));
         }
 
+        if (!empty($orden['info'][0]->folio_receta)) {
+          $pdf->Text(25, 19, "R: {$orden['info'][0]->folio_receta}");
+        }
         $pdf->Text(25, 22, "F: {$orden['info'][0]->folio}|E: {$i}");
       }
     }

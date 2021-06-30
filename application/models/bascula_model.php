@@ -677,56 +677,63 @@ class bascula_model extends CI_Model {
    * Imprime el ticket
    * @return pdf
    */
-  public function imprimir_ticket($id)
+  public function imprimir_ticket($idb)
   {
     $this->load->library('mypdf_ticket');
-
-    $data = $this->getBasculaInfo($id);
-    // Abonos
-    $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto, bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
-      FROM bascula_pagos bp
-        INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
-        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
-        LEFT JOIN usuarios u ON u.id = bp.usuario_creo
-      WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
-    // Bitacora
-    $_GET['boletaId'] = $id;
-    $data['info'][0]->bitacora = $this->bitacora(true, " AND (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) <> ''");
-
-    //Actualiza el control de impresiones, se le suma 1
-    //al valor de la BD para la siguiente impresion
-    $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false);
-    if ($data['info'][0]->no_impresiones == 0) {
-      $this->db->set('fecha_imp_orig', "'".date("Y-m-d H:i:s")."'", false);
-    }
-    $this->db->update('bascula');
-
-    foreach ($data['cajas'] as $key => $value)
-    {
-      if ($data['info'][0]->id_bonificacion != NULL)
-        $data['cajas'][$key]->calidad = 'BONIF.';
-    }
+    $ids = explode(',', $idb);
 
     $pdf = new mypdf_ticket();
-    $pdf->titulo1 = $data['info'][0]->empresa;
-    if($data['info'][0]->id_empresa != 2)
-      $pdf->reg_fed = '';
-    $pdf->SetFont('Arial','',8);
-    $pdf->AddPage();
+    foreach ($ids as $key => $id) {
+      $_GET['id'] = $id;
+      $data = $this->getBasculaInfo($id);
+      // Abonos
+      $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto, bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
+        FROM bascula_pagos bp
+          INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
+          INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
+          LEFT JOIN usuarios u ON u.id = bp.usuario_creo
+        WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
+      // Bitacora
+      $_GET['boletaId'] = $id;
+      $data['info'][0]->bitacora = $this->bitacora(true, " AND (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) <> ''");
 
-    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+      //Actualiza el control de impresiones, se le suma 1
+      //al valor de la BD para la siguiente impresion
+      $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false);
+      if ($data['info'][0]->no_impresiones == 0) {
+        $this->db->set('fecha_imp_orig', "'".date("Y-m-d H:i:s")."'", false);
+      }
+      $this->db->update('bascula');
 
-    $pdf->header_entrar = true;
-    $pdf->SetWidths(array(63));
-    $pdf->SetAligns(array('R'));
-    $pdf->Row(array('Pag 1'), false, false);
-    $pdf->SetY($pdf->GetY()+10);
-    // $pdf->Row(array('---------------------------------------------------------'), false, false);
-    $pdf->SetY($pdf->GetY()+10);
-    $pdf->AddPage();
-    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
-    $pdf->SetAligns(array('R'));
-    $pdf->Row(array('Pag 2'), false, false);
+      foreach ($data['cajas'] as $key => $value)
+      {
+        if ($data['info'][0]->id_bonificacion != NULL)
+          $data['cajas'][$key]->calidad = 'BONIF.';
+      }
+
+
+      $pdf->titulo1 = $data['info'][0]->empresa;
+      if($data['info'][0]->id_empresa != 2)
+        $pdf->reg_fed = '';
+      $pdf->SetFont('Arial','',8);
+      $pdf->AddPage();
+
+      $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+
+      $pdf->header_entrar = true;
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('R'));
+      $pdf->Row(array('Pag 1'), false, false);
+      // $pdf->SetY($pdf->GetY()+10);
+      // $pdf->Row(array('---------------------------------------------------------'), false, false);
+      // $pdf->SetY($pdf->GetY()+10);
+      if (count($ids) === 1) {
+        $pdf->AddPage();
+        $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+        $pdf->SetAligns(array('R'));
+        $pdf->Row(array('Pag 2'), false, false);
+      }
+    }
 
     // $pdf->AutoPrint(true);
     $pdf->Output();
