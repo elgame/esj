@@ -242,6 +242,7 @@ class existencias_limon_model extends CI_Model {
     {
       $info['costo_ventas'] = $costo_ventas->result();
     }
+
     // costo ventas fletes
     if (count($info['ventas']) > 0) {
       $raidss = $faidss = [];
@@ -258,7 +259,7 @@ class existencias_limon_model extends CI_Model {
         }
       }
       $ridss = 'f:'.implode('\||f:', $raidss).'\|';
-      $fidss = 'f:'.implode('\||t:', $faidss).'\|';
+      $fidss = 't:'.implode('\||t:', $faidss).'\|';
       $costo_ventas_fletes = $this->db->query(
         "SELECT co.id_orden, p.nombre_fiscal AS proveedor, co.folio, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
           Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total
