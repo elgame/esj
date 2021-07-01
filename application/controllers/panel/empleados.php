@@ -207,8 +207,8 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_checador($user->no_checador) || $user->no_checador == '') {
-        if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
+      if ($this->validano_checador($user->no_checador) || $user->no_checador == '' || true) {
+        if ($this->validano_empleado($user->no_empleado, $user->id_empresa) || true)
         {
     			$this->load->model('usuarios_model');
     			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
