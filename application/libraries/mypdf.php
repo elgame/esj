@@ -260,6 +260,10 @@ class MYpdf extends FPDF {
           elseif($bordes===true)
             $this->Rect($x,$y,$w,$h);
           else {
+            if ($header===true) {
+              $this->Rect($x,$y,$w,$h,'F');
+            }
+
             if ($bordes === 'B') {
               $this->Line($x,$y+$h,$x+$w,$y+$h);
             }
@@ -291,7 +295,7 @@ class MYpdf extends FPDF {
         $nb=0;
         for($i=0;$i<count($data);$i++)
             $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
-            $h= $h==NULL? $this->FontSize*$nb+3: $h;
+            $h= $h==NULL? (isset($this->fontz[$i]) ? $this->font_size+$this->fontz[$i] : $this->FontSize)*$nb+3: $h;
             if($header)
                 $h += 2;
             $this->CheckPageBreak($h);

@@ -1097,7 +1097,7 @@ class bodega_guadalajara_model extends CI_Model {
       $pdf->Row(array($n->nomenclatura.' '.$n->nombre), false, false, null, 1, 1);
     }
   }
-  public function printCaja($fecha, $noCajas)
+  public function printCaja($fecha, $noCajas, $returnT = false)
   {
     $this->load->model('bodega_catalogo_model');
 
@@ -1732,62 +1732,96 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetX(80);
     $pdf->Row(array('DIFERENCIA', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
 
+    $estadoResult = [
+      'ventas'           => $totalVentas,
+      'exis.ant'         => $totalExisAnt,
+      'compras'          => $totalIngresos,
+      'exis.actual'      => $totalExisD,
+      'devscompra'       => $totalPrestamos,
+      'costodevta'       => ($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos),
+      'gastos'           => $totalGastos,
+      'utilidad'         => $totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos,
+      'bultosvendidos'   => $bultosVentas,
+      'utilidadporbulto' => ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1),
+      'clientes'         => $totalSal+$saldoVentas,
+    ];
     if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
-      $pdf->SetAligns(array('C'));
-      $pdf->SetWidths(array(75));
-      $pdf->SetXY(80, $pdf->GetY()+10);
-      $pdf->Row(array('IMPORTES'), false, false);
+      $this->printEstadoResultado($pdf, $estadoResult);
+      // $pdf->SetFillColor(240, 240, 240);
+      // $pdf->SetAligns(array('C'));
+      // $pdf->SetWidths(array(75));
+      // $pdf->SetXY(80, $pdf->GetY()+10);
+      // $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
 
-      $pdf->SetAligns(array('R', 'R'));
-      $pdf->SetWidths(array(50, 25));
-      $pdf->SetX(80);
-      $pdf->Row(array('VENTAS:', MyString::formatoNumero( $totalVentas , 2, '$', false)), false, false);
-      $pdf->SetXY(80, $pdf->GetY()+5);
-      $pdf->Row(array('(+) EXIS. ANT', MyString::formatoNumero( $totalExisAnt , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(+) COMPRAS', MyString::formatoNumero( $totalIngresos , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(-) EXIS. ACTUAL', MyString::formatoNumero( $totalExisD , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(-) DEV S/COMPRA', MyString::formatoNumero( $totalPrestamos , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(=) COSTO DE VTA', MyString::formatoNumero( ($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos) , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(-) GASTOS', MyString::formatoNumero( $totalGastos , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('(=) UTILIDAD', MyString::formatoNumero( $totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('BULTOS VENDIDOS', MyString::formatoNumero( $bultosVentas , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1) , 2, '$', false)), false, false);
-      $pdf->SetX(80);
-      $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), false, false);
+      // $pdf->SetAligns(array('R', 'R'));
+      // $pdf->SetWidths(array(50, 25));
+      // $pdf->SetX(80);
+      // $pdf->Row(array('VENTAS:', MyString::formatoNumero( $totalVentas , 2, '$', false)), true, 'B');
+      // $pdf->SetFont('Arial', '', 7);
+      // $pdf->SetXY(80, $pdf->GetY()+1);
+      // $pdf->Row(array('(+) EXIS. ANT', MyString::formatoNumero( $totalExisAnt , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(+) COMPRAS', MyString::formatoNumero( $totalIngresos , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(-) EXIS. ACTUAL', MyString::formatoNumero( $totalExisD , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(-) DEV S/COMPRA', MyString::formatoNumero( $totalPrestamos , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(=) COSTO DE VTA', MyString::formatoNumero( ($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos) , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(-) GASTOS', MyString::formatoNumero( $totalGastos , 2, '$', false)), true, 'B');
+      // $pdf->SetFont('Arial', 'B', 7);
+      // $pdf->SetX(80);
+      // $pdf->Row(array('(=) UTILIDAD', MyString::formatoNumero( $totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('BULTOS VENDIDOS', MyString::formatoNumero( $bultosVentas , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1) , 2, '$', false)), true, 'B');
+      // $pdf->SetX(80);
+      // $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), true, 'B');
     }
 
-    // $pdf->SetFont('Arial', 'B', 6);
-    // $pdf->SetXY(168, $pdf->GetY() - 32);
-    // $pdf->SetAligns(array('R', 'R'));
-    // $pdf->SetWidths(array(25, 19));
-    // $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    if ($returnT) {
+      return $estadoResult;
+    } else {
+      $pdf->Output('CAJA_CHICA.pdf', 'I');
+    }
+  }
 
-    // $pdf->SetX(168);
-    // $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
-    // $pdf->SetX(168);
-    // $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletas, 2, '$', false)), false, false);
-    // $pdf->SetX(168);
-    // $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
-    // $pdf->SetX(168);
-    // $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
+  public function printEstadoResultado(&$pdf, $totales, $x=80)
+  {
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(75));
+    $pdf->SetXY($x, $pdf->GetY()+10);
+    $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
 
-    // if(count($codigoAreas) > 0){
-    //   $pdf->SetFont('Arial', '', 6);
-    //   $pdf->SetXY(6, $pdf->GetY()+7);
-    //   $pdf->SetWidths(array(205));
-    //   $pdf->SetAligns('L');
-    //   $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
-    // }
-
-    $pdf->Output('CAJA_CHICA.pdf', 'I');
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(50, 25));
+    $pdf->SetX($x);
+    $pdf->Row(array('VENTAS:', MyString::formatoNumero( $totales['ventas'] , 2, '$', false)), true, 'B');
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetXY($x, $pdf->GetY()+1);
+    $pdf->Row(array('(+) EXIS. ANT', MyString::formatoNumero( $totales['exis.ant'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('(+) COMPRAS', MyString::formatoNumero( $totales['compras'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('(-) EXIS. ACTUAL', MyString::formatoNumero( $totales['exis.actual'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('(-) DEV S/COMPRA', MyString::formatoNumero( $totales['devscompra'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('(=) COSTO DE VTA', MyString::formatoNumero( $totales['costodevta'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('(-) GASTOS', MyString::formatoNumero( $totales['gastos'] , 2, '$', false)), true, 'B');
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX($x);
+    $pdf->Row(array('(=) UTILIDAD', MyString::formatoNumero( $totales['utilidad'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('BULTOS VENDIDOS', MyString::formatoNumero( $totales['bultosvendidos'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( $totales['utilidadporbulto'] , 2, '$', false)), true, 'B');
+    $pdf->SetX($x);
+    $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totales['clientes'] , 2, '$', false)), true, 'B');
   }
 
   public function nomenclaturas()

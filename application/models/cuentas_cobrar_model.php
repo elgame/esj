@@ -214,6 +214,14 @@ class cuentas_cobrar_model extends privilegios_model{
       MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
 
+    if ($this->input->get('did_empresa') == 11 && $this->input->get('ffecha1') == $this->input->get('ffecha2')) { // ESJ BODEGA
+      $this->load->model('bodega_guadalajara_model');
+      $estadoResult = $this->bodega_guadalajara_model->printCaja($this->input->get('ffecha1'), 1, true);
+
+      $pdf->SetTextColor(0,0,0);
+      $this->bodega_guadalajara_model->printEstadoResultado($pdf, $estadoResult, 10);
+    }
+
     $pdf->Output('cuentas_x_cobrar.pdf', 'I');
   }
 
