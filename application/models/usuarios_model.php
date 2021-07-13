@@ -23,7 +23,7 @@ class Usuarios_model extends privilegios_model {
 				$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 		}
 
-		$sql = "WHERE user_nomina = '{$tipo}'";
+		$sql = "WHERE u.tipo = 'admin' AND user_nomina = '{$tipo}'";
     $sql .= " AND u.de_rancho = '{$de_rancho}'"; //filtro para los de rancho
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')

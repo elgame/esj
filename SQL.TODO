@@ -1,13 +1,17 @@
-titulo Reporte de ordenes del dia,
-en existencia empacada las que esta en 0 que no salgan, Produccion cambiar a Costo de produccion,
-Calibre produccion en ventas, en ventas el limon industrial que salga en otro apartado abajo,
-en los totales poner titulo Estado de resultado la parte de kg alinearlos a la izq, cambiar DIFERENCIA DE KGS por industrial
-en fletes poner el total de la orden de flete cada una con folio, proveedor,
 
-Poner apartado industrial que salga la diferencia de kg de la formula y le puedan poner precio de venta, importe.
-En total de importes agregar  (+) industrial
+ ☐ Quitar trabajadores de limon
+   UPDATE public.usuarios SET tipo='usuario', status='f' WHERE user_nomina = 't' and de_rancho = 'l';
+ ✔ Cambios reporte de limon @done (21-07-13 13:40)
+  titulo Reporte de ordenes del dia,
+  en existencia empacada las que esta en 0 que no salgan, Produccion cambiar a Costo de produccion,
+  Calibre produccion en ventas, en ventas el limon industrial que salga en otro apartado abajo,
+  en los totales poner titulo Estado de resultado la parte de kg alinearlos a la izq, cambiar DIFERENCIA DE KGS por industrial
+  en fletes poner el total de la orden de flete cada una con folio, proveedor,
 
- ☐ Poder repetir lotes en produccion de limon agregando una fecha de corte de limon
+  Poner apartado industrial que salga la diferencia de kg de la formula y le puedan poner precio de venta, importe.
+  En total de importes agregar  (+) industrial
+
+ ✔ Poder repetir lotes en produccion de limon agregando una fecha de corte de limon @done (21-07-13 13:39)
    -- lap|san|pcc
     ALTER TABLE public.rastria_rendimiento ADD COLUMN fecha_lote date NOT NULL DEFAULT now();
     update rastria_rendimiento set fecha_lote = fecha;
