@@ -1,11 +1,9 @@
-titulo Reporte de ordenes del dia,
-en existencia empacada las que esta en 0 que no salgan, Produccion cambiar a Costo de produccion,
-Calibre produccion en ventas, en ventas el limon industrial que salga en otro apartado abajo,
-en los totales poner titulo Estado de resultado la parte de kg alinearlos a la izq, cambiar DIFERENCIA DE KGS por industrial
-en fletes poner el total de la orden de flete cada una con folio, proveedor,
-
-Poner apartado industrial que salga la diferencia de kg de la formula y le puedan poner precio de venta, importe.
-En total de importes agregar  (+) industrial
+ ☐ Bodega gdl acomodar el diseño y poner estado de resultado en lugar de importes
+ ☐ En cuentas por cobrar de ESJ Bodega si ponen un dia que salga el estado de resultados de la bodega de ese dia
+ ☐ Caja 4
+  Poner apartado que diga efectivo bodega gdl
+  Nombre, Concepto y Cantidad, casilla de recivido
+  poner privilegio para que solo pueda registrar bales
 
  ☐ Poder repetir lotes en produccion de limon agregando una fecha de corte de limon
    -- lap|san|pcc
