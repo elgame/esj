@@ -34,6 +34,10 @@
     onChanceImporteDeudores();
     autocompleteDeudoresLive();
 
+    btnAddEfcbodega();
+    btnDelEfcbodega();
+    onChanceImporteEfcbodega();
+
     autocompleteCategorias();
     autocompleteCategoriasLive();
 
@@ -1160,6 +1164,89 @@
         }
       });
     });
+  };
+
+  var btnAddEfcbodega = function () {
+    $('#btn-add-efcbodega').on('click', function(event) {
+      agregarEfcbodega();
+    });
+  };
+
+  var agregarEfcbodega = function () {
+    var $table = $('#table-efcbodega').find('tbody .row-total'),
+        fecha = $('#fecha_caja').val(),
+        tr =  '<tr>'+
+                '<td>'+fecha+'</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_nombre[]" class="span12 efcbodega_nombre" required>'+
+                  '<input type="hidden" name="efcbodega_id[]" class="span12 efcbodega_id">'+
+                  '<input type="hidden" name="efcbodega_del[]" value="" class="efcbodega_del">'+
+                  '<input type="hidden" name="efcbodega_fecha_recibido[]" value="" class="efcbodega_fecha_recibido">'+
+                '</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_concepto[]" class="span12 efcbodega_concepto" required>'+
+                '</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_monto[]" class="span12 vpositive efcbodega_monto" required>'+
+                '</td>'+
+                '<td>'+
+                  '<input type="checkbox" name="efcbodega_crecibido[]" value="si" class="efcbodega_crecibido">'+
+                  '<input type="hidden" name="efcbodega_recibido[]" value="f" class="efcbodega_recibido">'+
+                '</td>'+
+                '<td><button type="button" class="btn btn-danger btn-del-efcbodega" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
+              '</tr>';
+    $(tr).insertBefore($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var btnDelEfcbodega = function () {
+    $('#table-efcbodega').on('click', '.btn-del-efcbodega', function(event) {
+      var $tr = $(this).parents('tr'),
+          $efcbodega_id = $tr.find('.efcbodega_id'),
+          $efcbodega_del = $tr.find('.efcbodega_del'),
+          total = 0;
+
+      if ($efcbodega_id.val() != '') {
+        $efcbodega_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
+      calculaTotalEfcbodega();
+    });
+  };
+
+  var onChanceImporteEfcbodega = function () {
+    $('#table-efcbodega').on('keyup change', '.efcbodega_monto', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent(),
+          total = 0,
+          monto = (parseFloat($this.val())||0);
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8 || monto > 0) {
+        calculaTotalEfcbodega();
+      }
+    });
+
+    $('#table-efcbodega').on('change', '.efcbodega_crecibido', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent();
+
+      $tr.find('.efcbodega_recibido').val(($this.is(':checked')? 't': 'f'));
+    });
+  };
+
+  var calculaTotalEfcbodega = function () {
+    var total = 0;
+
+    $('#table-efcbodega .efcbodega_monto').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+
+    $('input#total-efcbodega').val(total.toFixed(2));
   };
 
   var btnAddTraspaso = function () {

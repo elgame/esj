@@ -4,6 +4,28 @@
   Poner apartado que diga efectivo bodega gdl
   Nombre, Concepto y Cantidad, casilla de recivido
   poner privilegio para que solo pueda registrar bales
+  -- lap|san
+  CREATE TABLE public.cajachica_bodega_gdl
+    (
+        id_bodega bigserial NOT NULL,
+        id_usuario bigint,
+        fecha date NOT NULL,
+        no_caja integer NOT NULL DEFAULT 1,
+        nombre character varying(150) COLLATE pg_catalog."default" NOT NULL,
+        concepto character varying(250) COLLATE pg_catalog."default" NOT NULL,
+        monto double precision NOT NULL DEFAULT (0)::double precision,
+        no_impresiones integer NOT NULL DEFAULT 0,
+        fecha_creacion timestamp without time zone DEFAULT now(),
+        status BOOLEAN NOT NULL DEFAULT false,
+        fecha_recibido date,
+        CONSTRAINT cajachica_bodega_gdl_pkey PRIMARY KEY (id_bodega),
+        CONSTRAINT cajachica_bodega_gdl_id_usuario_fkey FOREIGN KEY (id_usuario)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+    ) TABLESPACE pg_default;
+    ALTER TABLE public.cajachica_bodega_gdl OWNER to programa;
+  INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Solo Bodega Gdl',464,false,'caja_chica/bodega_gdl/','add',false);
 
  ☐ Quitar trabajadores de limon
    UPDATE public.usuarios SET tipo='usuario', status='f' WHERE user_nomina = 't' and de_rancho = 'l';

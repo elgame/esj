@@ -43,6 +43,7 @@
 
       <?php
         $readonly = '';
+        $only_bodega_gdl = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/bodega_gdl/');
         $show = true;
         $display = '';
         $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
@@ -130,6 +131,8 @@
                 <div class="span12">
 
                     <!-- Ingresos por Reposicion-->
+                    <?php $totalIngresos = 0; ?>
+                    <?php if (!$only_bodega_gdl): ?>
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
@@ -160,7 +163,7 @@
                             <?php
                               $modificar_ingresos = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_ingresos/');
                               $mod_ing_readonly = !$modificar_ingresos && $readonly == ''? ' readonly': '';
-                              $totalIngresos = 0;
+
                               if (isset($_POST['ingreso_concepto'])) {
                                 foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
                                     $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
@@ -244,10 +247,12 @@
                         </table>
                       </div>
                     </div>
+                    <?php endif ?>
                     <!--/ Ingresos por Reposicion-->
 
                     <!-- Ingresos Clientes-->
                     <?php $totalIngresosRemisiones = 0; ?>
+                    <?php if (!$only_bodega_gdl): ?>
                     <div class="row-fluid">
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                       <div class="span12" style="margin-top: 1px;">
@@ -375,11 +380,12 @@
                         </table>
                       </div>
                     </div>
+                    <?php endif ?>
                     <!--/ Ingresos Clientes-->
 
                     <?php
                     $totalTraspasos = 0;
-                    if ($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4'): ?>
+                    if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4') && !$only_bodega_gdl): ?>
                     <!-- Traspasos -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
@@ -919,6 +925,8 @@
               <!-- /Gastos x comprobar -->
 
               <!-- Gastos -->
+              <?php $totalGastos = 0; ?>
+              <?php if (!$only_bodega_gdl): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -953,7 +961,7 @@
                                 <?php
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
-                                  $totalGastos = 0;
+
                                   if (count($caja['gastos']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
@@ -1078,6 +1086,7 @@
                   </div>
                 </div>
               </div>
+              <?php endif ?>
               <!-- /Gastos -->
 
               <!-- Reposición de gastos -->
@@ -1255,6 +1264,8 @@
               <!-- /Reposición de gastos -->
 
               <!-- Deudores -->
+              <?php $totalDeudores = 0; ?>
+              <?php if (!$only_bodega_gdl): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -1288,7 +1299,7 @@
                                 <?php
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
-                                  $totalDeudores = 0;
+
                                   if (count($caja['deudores']) == 0 && isset($_POST['deudor_nombre']) && count($_POST['deudor_nombre']) > 0) {
                                     foreach ($_POST['deudor_nombre'] as $key => $concepto) {
                                       $totalDeudores += floatval($_POST['deudor_importe'][$key]); ?>
@@ -1410,11 +1421,12 @@
                   </div>
                 </div>
               </div>
+              <?php endif ?>
               <!-- /Deudores -->
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4')) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4') && !$only_bodega_gdl) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1500,6 +1512,81 @@
                 </div>
               </div>
               <!-- /Acreedores -->
+              <?php } ?>
+
+              <?php
+              $totalEfcbodega = 0;
+              if (($_GET['fno_caja'] == '4')) { ?>
+              <!-- Efectivo Bodega Gdl -->
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-efcbodega">
+                              <thead>
+                                <tr>
+                                  <th colspan="6">
+                                    EFECTIVO BODEGA GDL
+                                    <button type="button" class="btn btn-success" id="btn-add-efcbodega" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                                  </th>
+                                </tr>
+                                <tr>
+                                  <th>FECHA</th>
+                                  <th>NOMBRE</th>
+                                  <th>CONCEPTO</th>
+                                  <th>MONTO</th>
+                                  <th>RECIBIDO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                if (count($caja['efcbodega']) > 0) {
+                                  foreach ($caja['efcbodega'] as $bodega) {
+                                    $totalEfcbodega += floatval($bodega->monto);
+                                  ?>
+                                  <tr>
+                                    <td><?php echo $bodega->fecha ?></td>
+                                    <td>
+                                      <input type="text" name="efcbodega_nombre[]" value="<?php echo $bodega->nombre ?>" class="span12 efcbodega_nombre" required>
+                                      <input type="hidden" name="efcbodega_id[]" value="<?php echo $bodega->id_bodega ?>" class="span12 efcbodega_id">
+                                      <input type="hidden" name="efcbodega_del[]" value="" class="efcbodega_del">
+                                      <input type="hidden" name="efcbodega_fecha_recibido[]" value="<?php echo $bodega->fecha_recibido ?>" class="efcbodega_fecha_recibido">
+                                    </td>
+                                    <td>
+                                      <input type="text" name="efcbodega_concepto[]" value="<?php echo $bodega->concepto ?>" class="span12 efcbodega_concepto" required>
+                                    </td>
+                                    <td>
+                                      <input type="text" name="efcbodega_monto[]" value="<?php echo $bodega->monto ?>" class="span12 vpositive efcbodega_monto" required>
+                                    </td>
+                                    <td>
+                                      <input type="checkbox" name="efcbodega_crecibido[]" value="si" <?php echo ($bodega->status == 't'? 'checked': '') ?> class="efcbodega_crecibido">
+                                      <input type="hidden" name="efcbodega_recibido[]" value="<?php echo $bodega->status ?>" class="efcbodega_recibido">
+                                    </td>
+                                    <td><button type="button" class="btn btn-danger btn-del-efcbodega" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  </tr>
+                                <?php }
+                                } ?>
+                                <tr class="row-total">
+                                  <td colspan="2"></td>
+                                  <td style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td><input type="text" value="<?php echo $totalEfcbodega ?>" class="input-small vpositive" id="total-efcbodega" style="text-align: right;" readonly></td>
+                                  <td colspan="2"></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Efectivo Bodega Gdl -->
               <?php } ?>
 
               <!-- Tabulacion -->

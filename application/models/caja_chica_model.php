@@ -25,6 +25,7 @@ class caja_chica_model extends CI_Model {
       'deudores'                 => array(),
       'acreedores'               => array(),
       'categorias'               => array(),
+      'efcbodega'                => array(),
       'deudores_prest_dia'       => 0,
       'deudores_abonos_dia'      => 0,
       'acreedor_prest_dia'       => 0,
@@ -416,6 +417,21 @@ class caja_chica_model extends CI_Model {
       if (isset($acreedores->abonos)) {
         $info['acreedor_abonos_dia'] = $acreedores->abonos;
       }
+    }
+
+    // efcbodega
+    $efcbodega = $this->db->query(
+      "SELECT cb.id_bodega, cb.id_usuario, cb.fecha, cb.no_caja, cb.nombre,
+        cb.concepto, cb.monto, cb.no_impresiones, cb.fecha_creacion, cb.status,
+        cb.fecha_recibido
+      FROM cajachica_bodega_gdl cb
+      WHERE cb.no_caja = {$noCaja} AND cb.fecha <= '{$fecha}' AND
+        (cb.status = 'f' OR (cb.status = 't' AND cb.fecha_recibido = '{$fecha}'))"
+    );
+
+    if ($efcbodega && $efcbodega->num_rows() > 0 && $noCaja == '4')
+    {
+      $info['efcbodega'] = $efcbodega->result();
     }
 
     // gastos por comprobar
@@ -1459,6 +1475,71 @@ class caja_chica_model extends CI_Model {
           $this->bitacora_model->_insert('cajachica_deudores', $gastooidd,
                         array(':accion'    => 'deudores', ':seccion' => 'caja chica',
                               ':folio'     => "Concepto: {$nombre} | Monto: {$data['deudor_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
+    }
+
+    // Efectivo Bodega
+    if (isset($data['efcbodega_nombre']))
+    {
+      // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $efcbodega_udt = $efcbodega = array();
+
+      // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_deudores
+      //   WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+      //   ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['efcbodega_nombre'] as $key => $nombre)
+      {
+        $nombre = mb_strtoupper($nombre, 'UTF-8');
+        if (isset($data['efcbodega_del'][$key]) && $data['efcbodega_del'][$key] == 'true' &&
+          isset($data['efcbodega_id'][$key]) && floatval($data['efcbodega_id'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['efcbodega_id'][$key]);
+
+          $this->db->delete('cajachica_bodega_gdl', "id_bodega = ".$data['efcbodega_id'][$key]);
+        } elseif (isset($data['efcbodega_id'][$key]) && floatval($data['efcbodega_id'][$key]) > 0) {
+          $efcbodega_udt = array(
+            'nombre'          => $nombre,
+            'concepto'        => $data['efcbodega_concepto'][$key],
+            'monto'           => $data['efcbodega_monto'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'status'          => $data['efcbodega_recibido'][$key],
+            'fecha_recibido'  => ($data['efcbodega_recibido'][$key] == 't' && empty($data['efcbodega_fecha_recibido'][$key])? $data['fecha_caja_chica']: (empty($data['efcbodega_fecha_recibido'][$key])? NULL: $data['efcbodega_fecha_recibido'][$key])),
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_bodega_gdl', $data['efcbodega_id'][$key], $efcbodega_udt,
+                          array(':accion'       => 'bodega_gdl', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_bodega',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_bodega_gdl', $efcbodega_udt, "id_bodega = ".$data['efcbodega_id'][$key]);
+        } else {
+          // $data_folio->folio += 1;
+          $efcbodega = array(
+            'nombre'          => $nombre,
+            'concepto'        => $data['efcbodega_concepto'][$key],
+            'monto'           => $data['efcbodega_monto'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'status'          => $data['efcbodega_recibido'][$key],
+            'fecha_recibido'  => ($data['efcbodega_recibido'][$key] == 't' && empty($data['efcbodega_fecha_recibido'][$key])? $data['fecha_caja_chica']: (empty($data['efcbodega_fecha_recibido'][$key])? NULL: $data['efcbodega_fecha_recibido'][$key])),
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'fecha'           => $data['fecha_caja_chica'],
+          );
+          $this->db->insert('cajachica_bodega_gdl', $efcbodega);
+          $gastooidd = $this->db->insert_id('cajachica_bodega_gdl_id_bodega_seq');
+          // $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_bodega_gdl', $gastooidd,
+                        array(':accion'    => 'bodega_gdl', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$nombre} | Monto: {$data['efcbodega_monto'][$key]}",
                               // ':id_empresa' => $datosFactura['id_empresa'],
                               ':empresa'   => ''));
         }
@@ -3101,6 +3182,75 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
+    }
+
+
+    // Efectivo Bodega Gdl
+    $totalEfcbodega = 0;
+    if (($noCajas == 4) && count($caja['efcbodega']) > 0) {
+      // $pag_aux2 = $pdf->page;
+      // $pdf->page = $pag_aux;
+      // $pdf->SetY($pag_yaux);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(185, 20));
+      $pdf->Row(array('EFECTIVO BODEGA GDL', ''), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(18, 57, 80, 30, 20));
+      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'MONTO', 'RECIBIDO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'C'));
+      $pdf->SetWidths(array(18, 57, 80, 30, 20));
+
+      $codigoAreas = array();
+      foreach ($caja['efcbodega'] as $key => $deudor)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(18, 57, 80, 30, 20));
+          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'MONTO', 'RECIBIDO'), true, true);
+        }
+
+        $totalEfcbodega += floatval($deudor->monto);
+
+        $pdf->SetAligns(array('C', 'C', 'C', 'R', 'C'));
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $deudor->fecha,
+          $deudor->nombre,
+          $deudor->concepto,
+          MyString::formatoNumero($deudor->monto, 2, '$', false),
+          ($deudor->status == 't'? 'Si': 'No'),
+        ), false, true);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetFont('Arial', 'B', 6.4);
+      $pdf->SetX(6);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetWidths(array(155, 30, 20));
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->Row(array('',
+        'TOTAL: '.MyString::formatoNumero($totalEfcbodega, 2, '$', false),
+        ''
+      ), true, true);
     }
 
     // Boletas pendientes x recuperar
