@@ -86,7 +86,8 @@ class compras_ordenes_model extends CI_Model {
                   (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden) -
                   (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden AND id_compra IS NULL)
                 ) as prod_sincompras,
-                ca.nombre AS almacen
+                ca.nombre AS almacen,
+                clig.compras
         FROM compras_ordenes AS co
           {$sql_fil_prod}
           INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -95,6 +96,12 @@ class compras_ordenes_model extends CI_Model {
           INNER JOIN usuarios AS u ON u.id = co.id_empleado
           LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
           LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
+          LEFT JOIN (
+            SELECT cf.id_orden, STRING_AGG((Date(c.fecha)::text || ' / ' || c.serie || c.folio::text), '<br>') AS compras
+            FROM compras_facturas cf
+              INNER JOIN compras c ON c.id_compra = cf.id_compra
+            GROUP BY cf.id_orden
+          ) clig ON clig.id_orden = co.id_orden
         WHERE 1 = 1  {$sql}
         ORDER BY (co.fecha_creacion, co.folio) DESC
         ", $params, true);

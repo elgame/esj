@@ -1,4 +1,6 @@
 
+ ☐ Crear reporte de ieps como la imagen de alondra
+ ☐ Poner en el listado de ordenes de compra la factura ligada, y en compras las ordenes
  ✔ En ligar compras y gastos (crear compra), poner fecha de carga de poliza y en polizas tomar esa fecha, en ver compras poner fecha para que se edite @done (21-07-28 09:59)
    -- pcc|lap|san
    ALTER TABLE public.compras ADD COLUMN fecha_poliza timestamp without time zone;
