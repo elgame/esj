@@ -376,14 +376,15 @@ class cuentas_pagar_model extends privilegios_model{
 				f.id_compra,
 				f.serie,
 				f.folio,
-				Date(f.fecha) AS fecha,
+        Date(f.fecha) AS fecha,
+				Date(f.fecha_factura) AS fecha_factura,
 				COALESCE(f.total, 0) AS cargo,
 				COALESCE(f.importe_iva, 0) AS iva,
 				COALESCE(ac.abono, 0) AS abono,
 				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
+				Date(f.fecha_factura + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha_factura)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago,
@@ -927,9 +928,9 @@ class cuentas_pagar_model extends privilegios_model{
 
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
-    $widths = array(17, 26, 47, 50, 28, 28, 28, 16, 17, 13);
-    $header = array('Fecha', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D Trans');
+    $aligns = array('C', 'C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+    $widths = array(17, 17, 26, 45, 47, 24, 24, 24, 16, 17, 13);
+    $header = array('Fecha F', 'Fecha', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D Trans');
 
     $total_cargo = 0;
     $total_abono = 0;
@@ -973,7 +974,7 @@ class cuentas_pagar_model extends privilegios_model{
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array('', '', $res['anterior']->concepto, '',
+        $pdf->Row(array('', '', '', $res['anterior']->concepto, '',
           MyString::formatoNumero($res['anterior']->total, 2, '$', false),
           MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
           MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
@@ -990,7 +991,7 @@ class cuentas_pagar_model extends privilegios_model{
           $pdf->SetTextColor(0,0,0);
           $pdf->SetFillColor(220,220,220);
           $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-          $pdf->SetWidths(array(140, 28, 28, 28));
+          $pdf->SetWidths(array(152, 24, 24, 24));
           $pdf->Row(array('Totales:',
               MyString::formatoNumero($total_cargo_p, 2, '$', false),
               MyString::formatoNumero($total_abono_p, 2, '$', false),
@@ -1010,7 +1011,8 @@ class cuentas_pagar_model extends privilegios_model{
         $totales_x_tipo['nacional'] += $item->cargo;
       }
 
-      $datos = array($item->fecha,
+      $datos = array($item->fecha_factura,
+                  $item->fecha,
                   $item->serie.$item->folio,
                   $item->ordenes,
                   $item->proveedor,
@@ -1040,7 +1042,7 @@ class cuentas_pagar_model extends privilegios_model{
     $pdf->SetTextColor(0,0,0);
     $pdf->SetFillColor(220,220,220);
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(140, 28, 28, 28));
+    $pdf->SetWidths(array(152, 24, 24, 24));
     $pdf->Row(array('Totales:',
         MyString::formatoNumero($total_cargo_p, 2, '$', false),
         MyString::formatoNumero($total_abono_p, 2, '$', false),
@@ -1051,7 +1053,7 @@ class cuentas_pagar_model extends privilegios_model{
     $pdf->SetTextColor(0,0,0);
     $pdf->SetFillColor(160,160,160);
     $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(140, 28, 28, 28));
+    $pdf->SetWidths(array(152, 24, 24, 24));
     $pdf->Row(array('Totales:',
         MyString::formatoNumero($total_cargo, 2, '$', false),
         MyString::formatoNumero($total_abono, 2, '$', false),
@@ -1089,7 +1091,7 @@ class cuentas_pagar_model extends privilegios_model{
       $res['anterior']->cargo = $res['anterior']->total;
       $res['anterior']->abono = $res['anterior']->abonos;
     }
-    $res['anterior']->fecha = $res['anterior']->serie = $res['anterior']->folio = '';
+    $res['anterior']->fecha = $res['anterior']->fecha_factura = $res['anterior']->serie = $res['anterior']->folio = '';
     $res['anterior']->concepto = $res['anterior']->estado = $res['anterior']->fecha_vencimiento = '';
     $res['anterior']->proveedor = '';
     $res['anterior']->dias_transc = '';
@@ -1109,8 +1111,9 @@ class cuentas_pagar_model extends privilegios_model{
 
     $row +=3;
     $xls->excelContent($worksheet, $row, $data_fac, array(
-        'head' => array('Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
+        'head' => array('Fecha F.', 'Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
         'conte' => array(
+            array('name' => 'fecha_factura', 'format' => 'format4', 'sum' => -1),
             array('name' => 'fecha', 'format' => 'format4', 'sum' => -1),
             array('name' => 'serie', 'format' => 'format4', 'sum' => -1),
             array('name' => 'folio', 'format' => 'format4', 'sum' => -1),
@@ -1814,9 +1817,9 @@ class cuentas_pagar_model extends privilegios_model{
           $sql_field_cantidad = ", (SELECT Sum(cp.cantidad) FROM compras_facturas AS cf
                                     INNER JOIN compras_productos AS cp ON cp.id_orden = cf.id_orden
                                     WHERE cf.id_compra = f.id_compra) AS cantidad_productos";
-        $facturas = $this->db->query("SELECT id_compra, Date(fecha) AS fecha, serie, folio,
+        $facturas = $this->db->query("SELECT id_compra, Date(fecha) AS fecha, Date(fecha) AS fecha_factura, serie, folio,
             (CASE tipo_documento WHEN 'fa' THEN 'FACTURA' ELSE 'REMISION' END)::text AS concepto, subtotal, importe_iva, total,
-            Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
+            Date(fecha_factura + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
           FROM compras as f
           WHERE id_proveedor = {$proveedor->id_proveedor}
             AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
@@ -2349,14 +2352,15 @@ class cuentas_pagar_model extends privilegios_model{
       f.serie,
       f.folio,
       Date(f.fecha) AS fecha,
+      Date(f.fecha_factura) AS fecha_factura,
       p.nombre_fiscal AS proveedor,
       COALESCE(f.total, 0) AS cargo,
       COALESCE(f.importe_iva, 0) AS iva,
       COALESCE(ac.abono, 0) AS abono,
       (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
       (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-      Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-      (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
+      Date(f.fecha_factura + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+      (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha_factura)) AS dias_transc,
       ('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
       'f'::text as tipo, f.status,
       COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago

@@ -1,10 +1,58 @@
 
  ☐ Crear reporte de ieps como la imagen de alondra
- ☐ Poner en el listado de ordenes de compra la factura ligada, y en compras las ordenes
+   SELECT d.*, cp.id_producto, cp.descripcion, (cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad, cp.precio_unitario, cp.importe, cp.iva, cp.ieps,
+        cp.porcentaje_ieps, pu.id_unidad, pu.abreviatura, pu.nombre as unidad
+      FROM (
+        SELECT c.id_compra, c.total, round(Sum(ca.total)::decimal, 2) abonos,
+          round((c.total - round(Sum(ca.total)::decimal, 2))::decimal, 2) saldo, cad.fecha,
+          p.id_proveedor, p.nombre_fiscal AS proveedor, p.rfc AS rfc_prov
+        FROM compras c
+          INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+          INNER JOIN (
+            SELECT id_compra, Sum(total) AS total
+            FROM (
+              SELECT id_nc AS id_compra, total
+              FROM compras
+              WHERE status <> 'ca' AND id_nc IS NOT NULL
+              UNION
+              SELECT id_compra, total
+              FROM compras_abonos
+            ) ab
+            GROUP BY id_compra
+          ) ca ON c.id_compra = ca.id_compra
+          INNER JOIN (
+            SELECT distinct on(id_compra) id_compra, fecha
+            FROM (
+              SELECT id_nc AS id_compra, total, Date(fecha) AS fecha
+              FROM compras
+              WHERE status <> 'ca' AND id_nc IS NOT NULL
+              UNION
+              SELECT id_compra, total, Date(fecha) AS fecha
+              FROM compras_abonos
+            ) ab
+            WHERE fecha BETWEEN '2021-01-01' AND '2021-07-30'
+            ORDER BY id_compra, fecha DESC
+          ) cad ON cad.id_compra = c.id_compra
+        WHERE --c.id_empleado = 20 AND
+          c.status <> 'ca' AND c.id_nc IS NULL
+        GROUP BY c.id_compra, cad.fecha, p.id_proveedor
+        HAVING round((c.total - round(Sum(ca.total)::decimal, 2))::decimal, 2) = 0
+      ) d
+        INNER JOIN compras_productos cp ON cp.id_compra = d.id_compra
+        INNER JOIN productos AS pr ON pr.id_producto = cp.id_producto
+        INNER JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
+        INNER JOIN productos_familias AS pf ON pf.id_familia = pr.id_familia
+        LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
+      WHERE pf.tipo = 'p' AND cp.ieps > 0 AND d.fecha BETWEEN '2021-01-01' AND '2021-07-30'
+ ✔ Poner en el listado de ordenes de compra la factura ligada, y en compras las ordenes @done (21-07-28 12:46)
  ✔ En ligar compras y gastos (crear compra), poner fecha de carga de poliza y en polizas tomar esa fecha, en ver compras poner fecha para que se edite @done (21-07-28 09:59)
    -- pcc|lap|san
    ALTER TABLE public.compras ADD COLUMN fecha_poliza timestamp without time zone;
    UPDATE public.compras SET fecha_poliza=fecha;
+   -- lap|san
+   ALTER TABLE public.compras DROP COLUMN fecha_poliza;
+   ALTER TABLE public.compras ADD COLUMN fecha_factura timestamp without time zone;
+   UPDATE public.compras SET fecha_factura=fecha;
  ✔ Bodega gdl acomodar el diseño y poner estado de resultado en lugar de importes @done (21-07-14 08:08)
  ✔ En cuentas por cobrar de ESJ Bodega si ponen un dia que salga el estado de resultados de la bodega de ese dia @done (21-07-14 08:08)
  ☐ Caja 4

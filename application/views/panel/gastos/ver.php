@@ -130,9 +130,9 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="fecha_poliza">Fecha Poliza</label>
+                    <label class="control-label" for="fecha_factura">Fecha Factura</label>
                     <div class="controls">
-                      <input type="datetime-local" name="fecha_poliza" class="span9" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', str_replace(' ', 'T', substr($gasto['info']->fecha_poliza, 0, 16))); ?>">
+                      <input type="datetime-local" name="fecha_factura" class="span9" id="fecha_factura" value="<?php echo set_value('fecha_factura', str_replace(' ', 'T', substr($gasto['info']->fecha_factura, 0, 16))); ?>">
                     </div>
                   </div>
 

@@ -98,7 +98,7 @@
                     <div class="span4">
                       <div class="control-group">
                         <div class="controls span9">
-                          Fecha Poliza <input type="datetime-local" name="fecha_poliza" class="span12" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', str_replace(' ', 'T', substr($compra['info']->fecha_poliza, 0, 16))); ?>">
+                          Fecha Factura <input type="datetime-local" name="fecha_factura" class="span12" id="fecha_factura" value="<?php echo set_value('fecha_factura', str_replace(' ', 'T', substr($compra['info']->fecha_factura, 0, 16))); ?>">
                         </div>
                       </div>
                     </div>

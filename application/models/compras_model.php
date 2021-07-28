@@ -292,10 +292,10 @@ class compras_model extends privilegios_model{
       }
     }
 
-    $compra['fecha']        = $this->input->post('fecha');
-    $compra['fecha_poliza'] = $this->input->post('fecha_poliza');
-    $compra['serie']        = $this->input->post('serie');
-    $compra['folio']        = $this->input->post('folio');
+    $compra['fecha']         = $this->input->post('fecha'); // fecha de poliza y cuentas pagar
+    $compra['fecha_factura'] = $this->input->post('fecha_factura'); // fecha real de la factura
+    $compra['serie']         = $this->input->post('serie');
+    $compra['folio']         = $this->input->post('folio');
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
