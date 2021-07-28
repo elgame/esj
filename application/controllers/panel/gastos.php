@@ -503,6 +503,9 @@ class gastos extends MY_Controller {
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
+      array('field' => 'fecha_poliza',
+            'label' => 'Fecha Poliza',
+            'rules' => 'required'),
 
       array('field' => 'condicionPago',
             'label' => 'Condicion de Pago',
@@ -645,6 +648,9 @@ class gastos extends MY_Controller {
       array('field' => 'folio',
             'label' => 'Folio',
             'rules' => 'required|numeric|callback_serie_folio'),
+      array('field' => 'fecha_poliza',
+            'label' => 'Fecha Poliza',
+            'rules' => 'required'),
     );
 
     $this->form_validation->set_rules($rules);

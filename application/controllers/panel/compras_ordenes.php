@@ -1031,6 +1031,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
+      array('field' => 'fecha_poliza',
+            'label' => 'Fecha Poliza',
+            'rules' => 'required'),
 
       array('field' => 'condicionPago',
             'label' => 'Condicion de Pago',

@@ -1159,7 +1159,7 @@ class polizas_model extends CI_Model {
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
     {
-      $sql_fecha1 = " AND Date(f.fecha) = '{$fecha}'";
+      $sql_fecha1 = " AND Date(f.fecha_poliza) = '{$fecha}'";
       $query = $this->db->query(
         "SELECT id_compra
          FROM compras AS f

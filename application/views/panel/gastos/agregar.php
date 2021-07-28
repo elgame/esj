@@ -103,6 +103,13 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fecha_poliza">Fecha Poliza</label>
+                  <div class="controls">
+                    <input type="datetime-local" name="fecha_poliza" class="span9" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', $fecha); ?>">
+                  </div>
+                </div>
+
                 <div class="control-group" style="">
                   <label class="control-label" for="condicionPago">Condición de Pago</label>
                   <div class="controls">

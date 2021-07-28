@@ -130,6 +130,13 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="fecha_poliza">Fecha Poliza</label>
+                    <div class="controls">
+                      <input type="datetime-local" name="fecha_poliza" class="span9" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', str_replace(' ', 'T', substr($gasto['info']->fecha_poliza, 0, 16))); ?>">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="condicionPago">Condición de Pago</label>
                     <div class="controls">
                       <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|dcuenta" readonly>

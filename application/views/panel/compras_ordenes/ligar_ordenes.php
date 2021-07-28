@@ -129,6 +129,14 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="span3">
+                    <div class="control-group">
+                      <div class="controls span11">
+                        Fecha Poliza<input type="datetime-local" name="fecha_poliza" class="span12" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', $fecha); ?>">
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="row-fluid" id="group_pago_contado" style="display: none;">
                   <div class="span3">

@@ -95,6 +95,14 @@
                       </div>
                     </div>
 
+                    <div class="span4">
+                      <div class="control-group">
+                        <div class="controls span9">
+                          Fecha Poliza <input type="datetime-local" name="fecha_poliza" class="span12" id="fecha_poliza" value="<?php echo set_value('fecha_poliza', str_replace(' ', 'T', substr($compra['info']->fecha_poliza, 0, 16))); ?>">
+                        </div>
+                      </div>
+                    </div>
+
                     <?php //if ( ! $compra['info']->xml){ ?>
                     <div class="span4">
                       <div class="control-group">
@@ -105,9 +113,6 @@
                           <br><br>
                           UUID: <input type="text" name="uuid" value="<?php echo $compra['info']->uuid; ?>" id="buscarUuid"><br>
                           No Certificado: <input type="text" name="noCertificado" value="<?php echo $compra['info']->no_certificado; ?>" id="buscarNoCertificado">
-
-                          <br><br><input type="hidden" name="aux" value="1">
-                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                         </div>
                       </div>
                     </div>
@@ -121,6 +126,14 @@
                         </div>
                       </div> -->
                     <?php //} ?>
+                    <div class="span4">
+                      <div class="control-group">
+                        <div class="controls span9">
+                          <input type="hidden" name="aux" value="1">
+                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="row-fluid">  <!-- Box Productos -->

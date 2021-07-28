@@ -24,6 +24,7 @@ class gastos_model extends privilegios_model{
       'plazo_credito'   => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
       'tipo_documento'  => $data['tipo_documento'],
       'fecha'           => str_replace('T', ' ', $data['fecha']),
+      'fecha_poliza'    => str_replace('T', ' ', $data['fecha_poliza']),
       'subtotal'        => $data['subtotal'],
       'importe_iva'     => $data['iva'],
       'total'           => $data['total'],
@@ -198,6 +199,7 @@ class gastos_model extends privilegios_model{
       'retencion_isr' => MyString::float($this->input->post('ret_isr')),
       'total'         => MyString::float($this->input->post('total')),
       'fecha'         => $this->input->post('fecha'),
+      'fecha_poliza'  => $this->input->post('fecha_poliza'),
     );
 
     // Realiza el upload del XML.

@@ -310,6 +310,9 @@ class compras extends MY_Controller {
       array('field' => 'uuid',
             'label' => 'UUID',
             'rules' => 'callback_uuid_check'),
+      array('field' => 'fecha_poliza',
+            'label' => 'Fecha Poliza',
+            'rules' => 'required'),
     );
 
     $this->form_validation->set_rules($rules);
