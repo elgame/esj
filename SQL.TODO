@@ -1,6 +1,6 @@
 
  ✔ En ligar compras y gastos (crear compra), poner fecha de carga de poliza y en polizas tomar esa fecha, en ver compras poner fecha para que se edite @done (21-07-28 09:59)
-   -- pcc
+   -- pcc|lap|san
    ALTER TABLE public.compras ADD COLUMN fecha_poliza timestamp without time zone;
    UPDATE public.compras SET fecha_poliza=fecha;
  ✔ Bodega gdl acomodar el diseño y poner estado de resultado en lugar de importes @done (21-07-14 08:08)
