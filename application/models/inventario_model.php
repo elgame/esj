@@ -1765,7 +1765,7 @@ class inventario_model extends privilegios_model{
               GROUP BY id_orden
             ) AS cor ON cor.id_orden = co.id_orden
           WHERE c.status <> 'ca' AND c.tipo = 'c' AND cp.id_producto = {$idsproveedores} {$sql} AND
-            Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            Date(co.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
         ) AS cp ON p.id_producto = cp.id_producto
         INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
       WHERE p.id_producto = {$idsproveedores}
