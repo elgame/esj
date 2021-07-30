@@ -70,11 +70,18 @@ class compras_model extends privilegios_model{
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
                 co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
-                co.tipo, co.id_nc, co.observaciones, co.total, co.uuid
+                co.tipo, co.id_nc, co.observaciones, co.total, co.uuid,
+                ligord.ordenes
         FROM compras AS co
-        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
-        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-        INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
+          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
+          INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          LEFT JOIN (
+            SELECT cf.id_compra, STRING_AGG((Date(co.fecha_creacion)::text || ' / ' || co.folio::text), '<br>') AS ordenes
+            FROM compras_facturas cf
+              INNER JOIN compras_ordenes co ON co.id_orden = cf.id_orden
+            GROUP BY cf.id_compra
+          ) ligord ON ligord.id_compra = co.id_compra
         WHERE 1 = 1 {$sql}
         ORDER BY (co.fecha, co.folio) DESC
         ", $params, true);
@@ -285,10 +292,10 @@ class compras_model extends privilegios_model{
       }
     }
 
-    $compra['fecha']        = $this->input->post('fecha');
-    $compra['fecha_poliza'] = $this->input->post('fecha_poliza');
-    $compra['serie']        = $this->input->post('serie');
-    $compra['folio']        = $this->input->post('folio');
+    $compra['fecha']         = $this->input->post('fecha'); // fecha de poliza y cuentas pagar
+    $compra['fecha_factura'] = $this->input->post('fecha_factura'); // fecha real de la factura
+    $compra['serie']         = $this->input->post('serie');
+    $compra['folio']         = $this->input->post('folio');
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')

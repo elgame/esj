@@ -92,6 +92,7 @@
               <thead>
                 <tr>
                   <th style="width:15px;"></th>
+                  <th>Fecha F.</th>
                   <th>Fecha</th>
 									<th>Serie</th>
 									<th>Folio</th>
@@ -106,6 +107,7 @@
               </thead>
               <tbody>
             		<tr>
+                  <td></td>
                   <td></td>
 									<td></td>
 									<td></td>
@@ -147,6 +149,7 @@
                         data-folio="<?php echo $cuenta->serie.$cuenta->folio; ?>">
                   <?php } ?>
                   </td>
+                  <td><?php echo $cuenta->fecha_factura; ?></td>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->serie; ?></td>
 									<td>
@@ -167,7 +170,7 @@
 						<?php }
 						} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
-									<td colspan="4" class="a-r">Totales:</td>
+									<td colspan="5" class="a-r">Totales:</td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_cargo, 2, "$", false); ?></td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_abono, 2, "$", false); ?></td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_saldo, 2, "$", false); ?></td>

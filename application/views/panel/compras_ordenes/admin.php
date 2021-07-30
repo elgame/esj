@@ -95,6 +95,7 @@
                   <th>Almacén</th>
                   <th>Autorizada</th>
                   <th>Estado</th>
+                  <th>Compras</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -136,6 +137,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td style="font-size: 11px;"><?php echo $orden->compras; ?></td>
                   <td class="center">
                     <?php
 

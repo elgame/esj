@@ -23,8 +23,8 @@ class gastos_model extends privilegios_model{
       'condicion_pago'  => $data['condicionPago'],
       'plazo_credito'   => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
       'tipo_documento'  => $data['tipo_documento'],
-      'fecha'           => str_replace('T', ' ', $data['fecha']),
-      'fecha_poliza'    => str_replace('T', ' ', $data['fecha_poliza']),
+      'fecha'           => str_replace('T', ' ', $data['fecha']), // fecha de la poliza y cuentas pagar
+      'fecha_factura'   => str_replace('T', ' ', $data['fecha_factura']), // fecha real de la factura
       'subtotal'        => $data['subtotal'],
       'importe_iva'     => $data['iva'],
       'total'           => $data['total'],
@@ -198,8 +198,8 @@ class gastos_model extends privilegios_model{
       'retencion_iva' => MyString::float($this->input->post('ret_iva')),
       'retencion_isr' => MyString::float($this->input->post('ret_isr')),
       'total'         => MyString::float($this->input->post('total')),
-      'fecha'         => $this->input->post('fecha'),
-      'fecha_poliza'  => $this->input->post('fecha_poliza'),
+      'fecha'         => $this->input->post('fecha'), // fecha de la poliza y cuentas pagar
+      'fecha_factura' => $this->input->post('fecha_factura'), // fecha real de la factura
     );
 
     // Realiza el upload del XML.

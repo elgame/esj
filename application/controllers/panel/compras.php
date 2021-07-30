@@ -310,8 +310,8 @@ class compras extends MY_Controller {
       array('field' => 'uuid',
             'label' => 'UUID',
             'rules' => 'callback_uuid_check'),
-      array('field' => 'fecha_poliza',
-            'label' => 'Fecha Poliza',
+      array('field' => 'fecha_factura',
+            'label' => 'Fecha Factura',
             'rules' => 'required'),
     );
 
