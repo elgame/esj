@@ -1728,7 +1728,7 @@ class inventario_model extends privilegios_model{
       FROM
         productos AS p LEFT JOIN (
           SELECT cp.id_producto, c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, co.id_orden,
-            Date(co.fecha_autorizacion) AS fechao, co.folio AS folioo,
+            Date(co.fecha_aceptacion) AS fechao, co.folio AS folioo,
             cp.cantidad, cp.importe, cp.impuestos, cp.total
           FROM compras AS c
             -- INNER JOIN compras_productos AS cp ON c.id_compra = cp.id_compra
