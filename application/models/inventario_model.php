@@ -1488,7 +1488,7 @@ class inventario_model extends privilegios_model{
                 GROUP BY cp.id_producto
               ) coc ON coc.id_producto = cp.id_producto
             WHERE co.status = 'f' AND cp.id_producto IS NOT NULL {$sql} AND
-              Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+              Date(co.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             GROUP BY cp.id_producto
           ) AS cp ON p.id_producto = cp.id_producto
           {$idsproveedores}
