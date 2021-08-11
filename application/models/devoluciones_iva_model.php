@@ -618,4 +618,226 @@ class devoluciones_iva_model extends privilegios_model{
 
     echo $html;
   }
+
+  /**
+   * Reporte de ieps
+   *
+   * @return
+   */
+  public function getRptIepsData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if(is_array($this->input->get('ids_proveedores')))
+    {
+      $sql .= " AND p.id_proveedor IN(".implode(',', $this->input->get('ids_proveedores')).")";
+    }
+
+    $sql_fecha = "'{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    $facturas = $this->db->query(
+      "SELECT d.*, cp.id_producto, cp.descripcion, (cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
+        cp.precio_unitario, cp.importe, cp.iva, cp.ieps, cp.porcentaje_ieps, pu.id_unidad, pu.abreviatura,
+        pu.nombre as unidad
+      FROM (
+          SELECT c.id_compra, c.total, round(Sum(ca.total)::decimal, 2) abonos,
+            round((c.total - round(Sum(ca.total)::decimal, 2))::decimal, 2) saldo, cad.fecha,
+            p.id_proveedor, p.nombre_fiscal AS proveedor, p.rfc AS rfc_prov
+          FROM compras c
+            INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+            INNER JOIN (
+              SELECT id_compra, Sum(total) AS total
+              FROM (
+                SELECT id_nc AS id_compra, total
+                FROM compras
+                WHERE status <> 'ca' AND id_nc IS NOT NULL
+                UNION
+                SELECT id_compra, total
+                FROM compras_abonos
+              ) ab
+              GROUP BY id_compra
+            ) ca ON c.id_compra = ca.id_compra
+            INNER JOIN (
+              SELECT distinct on(id_compra) id_compra, fecha
+              FROM (
+                SELECT id_nc AS id_compra, total, Date(fecha) AS fecha
+                FROM compras
+                WHERE status <> 'ca' AND id_nc IS NOT NULL
+                UNION
+                SELECT id_compra, total, Date(fecha) AS fecha
+                FROM compras_abonos
+              ) ab
+              WHERE fecha BETWEEN {$sql_fecha}
+              ORDER BY id_compra, fecha DESC
+            ) cad ON cad.id_compra = c.id_compra
+          WHERE c.status <> 'ca' AND c.id_nc IS NULL {$sql}
+          GROUP BY c.id_compra, cad.fecha, p.id_proveedor
+          HAVING round((c.total - round(Sum(ca.total)::decimal, 2))::decimal, 2) = 0
+        ) d
+        INNER JOIN compras_productos cp ON cp.id_compra = d.id_compra
+        INNER JOIN productos AS pr ON pr.id_producto = cp.id_producto
+        INNER JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
+        INNER JOIN productos_familias AS pf ON pf.id_familia = pr.id_familia
+        LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
+      WHERE pf.tipo = 'p' AND cp.ieps > 0 AND d.fecha BETWEEN {$sql_fecha}
+      ORDER BY cp.porcentaje_ieps ASC
+      ");
+    $response = $facturas->result();
+
+    return $response;
+  }
+  public function getRptIepsXls($show = false)
+  {
+    if (!$show) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=rpt_ieps.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getRptIepsData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de IEPS';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="11" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="11" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="11" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="11"></td>
+        </tr>
+
+        ';
+
+    $porcentaje_ieps = '';
+    $total_subtotal = $total_iva = $total_total = $total_ieps = 0;
+    $subtotal = $iva = $total = $ieps = $ret_iva = 0;
+    foreach($res as $key => $item){
+      if ($porcentaje_ieps != $item->porcentaje_ieps) {
+        if ($key > 0) {
+          $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="7"></td>
+            <td style="border:1px solid #000;">'.$subtotal.'</td>
+            <td style="border:1px solid #000;">'.$iva.'</td>
+            <td style="border:1px solid #000;">'.$ieps.'</td>
+            <td style="border:1px solid #000;">'.$total.'</td>
+          </tr>
+          <tr>
+            <td colspan="11"></td>
+          </tr>';
+        }
+
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha de Pago</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Proveedor</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Categoría</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Subtotal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IVA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IEPS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+        </tr>';
+
+        $subtotal = $iva = $total = $ieps = 0;
+        $porcentaje_ieps = $item->porcentaje_ieps;
+      }
+
+      $categoria = '';
+      if ($item->porcentaje_ieps == '6') {
+        $categoria = '4';
+      } elseif ($item->porcentaje_ieps == '7') {
+        $categoria = '3';
+      } elseif ($item->porcentaje_ieps == '9') {
+        $categoria = '1, 2';
+      }
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->proveedor.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->rfc_prov.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$categoria.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descripcion.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->cantidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->unidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->importe.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->iva.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->ieps.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($item->importe+$item->iva+$item->ieps).'</td>
+        </tr>';
+
+      $subtotal += $item->importe;
+      $iva      += $item->iva;
+      $total    += ($item->importe+$item->iva+$item->ieps);
+      $ieps     += $item->ieps;
+
+      $total_subtotal += $item->importe;
+      $total_iva      += $item->iva;
+      $total_total    += ($item->importe+$item->iva+$item->ieps);
+      $total_ieps     += $item->ieps;
+
+
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="7"></td>
+          <td style="border:1px solid #000;">'.$subtotal.'</td>
+          <td style="border:1px solid #000;">'.$iva.'</td>
+          <td style="border:1px solid #000;">'.$ieps.'</td>
+          <td style="border:1px solid #000;">'.$total.'</td>
+        </tr>
+        <tr>
+          <td colspan="14"></td>
+        </tr>
+
+        <tr style="font-weight:bold">
+          <td colspan="7"></td>
+          <td style="border:1px solid #000;">'.$total_subtotal.'</td>
+          <td style="border:1px solid #000;">'.$total_iva.'</td>
+          <td style="border:1px solid #000;">'.$total_ieps.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+        </tr>
+        <tr>
+          <td colspan="14"></td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
