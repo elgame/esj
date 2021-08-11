@@ -1,4 +1,15 @@
 
+ ☐ Acomodar reporte de limon, que muestre la existencia anterior
+   -- lap|san
+   CREATE TABLE otros.existencias_limon
+    (
+        fecha date NOT NULL,
+        no_caja integer NOT NULL,
+        id_area integer NOT NULL,
+        CONSTRAINT existencias_limon_pkey PRIMARY KEY (fecha, no_caja, id_area)
+    ) TABLESPACE pg_default;
+    ALTER TABLE otros.existencias_limon OWNER to programa;
+   INSERT INTO otros.existencias_limon (fecha, no_caja, id_area) SELECT distinct On(fecha) fecha, no_caja, id_area FROM otros.existencias_limon_existencia
  ☐ Crear reporte de ieps como la imagen de alondra
    SELECT d.*, cp.id_producto, cp.descripcion, (cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad, cp.precio_unitario, cp.importe, cp.iva, cp.ieps,
         cp.porcentaje_ieps, pu.id_unidad, pu.abreviatura, pu.nombre as unidad

@@ -312,7 +312,7 @@ class existencias_limon_model extends CI_Model {
 
     $fecha_anterior = $this->db->query(
       "SELECT Date(fecha) AS fecha
-      FROM otros.existencias_limon_existencia
+      FROM otros.existencias_limon
       WHERE Date(fecha) < '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}
       ORDER BY fecha DESC
       LIMIT 1"
@@ -472,6 +472,14 @@ class existencias_limon_model extends CI_Model {
 
   public function guardar($data)
   {
+    // Dia guardado
+    $count_save = $this->db->query("SELECT Count(*) AS num
+      FROM otros.existencias_limon
+      WHERE fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}")->row();
+    if ($count_save->num == 0) {
+      $this->db->insert('otros.existencias_limon', ['fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja'], 'id_area' => $data['farea']]);
+    }
+
     // Existencia de piso
     $this->db->delete('otros.existencias_limon_existencia_piso', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
     $existencias_piso = [];
