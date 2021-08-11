@@ -10,7 +10,7 @@
     ) TABLESPACE pg_default;
     ALTER TABLE otros.existencias_limon OWNER to programa;
    INSERT INTO otros.existencias_limon (fecha, no_caja, id_area) SELECT distinct On(fecha) fecha, no_caja, id_area FROM otros.existencias_limon_existencia
- ☐ Crear reporte de ieps como la imagen de alondra
+ ✔ Crear reporte de ieps como la imagen de alondra @done (21-08-11 16:06)
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de IEPS',501,true,'devoluciones_iva/rpt_ieps/','print',true);
 
