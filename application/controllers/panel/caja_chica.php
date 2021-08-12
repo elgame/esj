@@ -21,6 +21,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/print_vale_ipr/',
     'caja_chica/print_vale_tras/',
     'caja_chica/print_vale_deudor/',
+    'caja_chica/print_vale_bod_gdl/',
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
@@ -1039,6 +1040,17 @@ class caja_chica extends MY_Controller {
       $this->caja_chica_model->printValeDeudor($_GET['id'], $_GET['noCaja']);
     else{
       $params['url'] = 'panel/caja_chica/print_vale_deudor/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_bod_gdl()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeBodGdl($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_bod_gdl/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }

@@ -1556,6 +1556,8 @@
                                       <input type="hidden" name="efcbodega_id[]" value="<?php echo $bodega->id_bodega ?>" class="span12 efcbodega_id">
                                       <input type="hidden" name="efcbodega_del[]" value="" class="efcbodega_del">
                                       <input type="hidden" name="efcbodega_fecha_recibido[]" value="<?php echo $bodega->fecha_recibido ?>" class="efcbodega_fecha_recibido">
+                                      <a href="<?php echo base_url('panel/caja_chica/print_vale_bod_gdl/?id='.$bodega->id_bodega.'&noCaja='.$bodega->no_caja)?>" target="_blank" title="Imprimir vale Bodega Gdl">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
                                     <td>
                                       <input type="text" name="efcbodega_concepto[]" value="<?php echo $bodega->concepto ?>" class="span12 efcbodega_concepto" required>

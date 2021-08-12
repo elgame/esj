@@ -5128,7 +5128,6 @@ class caja_chica_model extends CI_Model {
     $pdf->Output('vale_deudor.pdf', 'I');
   }
 
-
   public function getCajaByCode($codigo)
   {
     $no_caja = '';
@@ -5149,6 +5148,97 @@ class caja_chica_model extends CI_Model {
     )->row();
 
     return (!empty($caja)? $caja: 'Otros');
+  }
+
+
+  public function getDataValeBodGdl($id_bodega, $noCaja)
+  {
+    $bdg = $this->db->query(
+      "SELECT bg.id_bodega, bg.id_usuario, bg.fecha, bg.no_caja, bg.nombre, bg.concepto,
+        bg.monto, bg.no_impresiones, bg.fecha_creacion, bg.status, bg.fecha_recibido,
+        c.nombre AS caja, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM cajachica_bodega_gdl bg
+        INNER JOIN cajachicas c ON c.no_caja = bg.no_caja::character varying
+        INNER JOIN usuarios u ON u.id = bg.id_usuario
+      WHERE bg.id_bodega = {$id_bodega}"
+    )->row();
+
+    return $bdg;
+  }
+
+  public function printValeBodGdl($id_bodega, $noCaja)
+  {
+    $bdg = $this->getDataValeBodGdl($id_bodega, $noCaja);
+
+    // echo "<pre>";
+    //   var_dump($bdg);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array('BODEGA GDL'), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$bdg->id_bodega), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array($bdg->caja), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Se entrega: '.$bdg->nombre), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($bdg->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($bdg->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($bdg->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($bdg->no_impresiones==0? 'ORIGINAL': 'COPIA '.$bdg->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($bdg->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $bdg->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($bdg->fecha_creacion)), false, false);
+
+    $this->db->update('cajachica_bodega_gdl', ['no_impresiones' => $bdg->no_impresiones+1],
+        "id_bodega = '{$id_bodega}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_bod_gdl.pdf', 'I');
   }
 
   public function getCajasChicas()

@@ -1,6 +1,6 @@
 
  ✔ Acomodar reporte de limon, que muestre la existencia anterior @done (21-08-11 13:04)
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE otros.existencias_limon
     (
         fecha date NOT NULL,
@@ -11,7 +11,7 @@
     ALTER TABLE otros.existencias_limon OWNER to programa;
    INSERT INTO otros.existencias_limon (fecha, no_caja, id_area) SELECT distinct On(fecha) fecha, no_caja, id_area FROM otros.existencias_limon_existencia
  ✔ Crear reporte de ieps como la imagen de alondra @done (21-08-11 16:06)
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de IEPS',501,true,'devoluciones_iva/rpt_ieps/','print',true);
 
  ✔ Poner en el listado de ordenes de compra la factura ligada, y en compras las ordenes @done (21-07-28 12:46)
@@ -19,7 +19,7 @@
    -- pcc|lap|san
    ALTER TABLE public.compras ADD COLUMN fecha_poliza timestamp without time zone;
    UPDATE public.compras SET fecha_poliza=fecha;
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE public.compras DROP COLUMN fecha_poliza;
    ALTER TABLE public.compras ADD COLUMN fecha_factura timestamp without time zone;
    UPDATE public.compras SET fecha_factura=fecha;
@@ -29,7 +29,7 @@
   Poner apartado que diga efectivo bodega gdl
   Nombre, Concepto y Cantidad, casilla de recivido
   poner privilegio para que solo pueda registrar bales
-  -- lap|san
+  -- lap|san|pcc
   CREATE TABLE public.cajachica_bodega_gdl
     (
         id_bodega bigserial NOT NULL,
