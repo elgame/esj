@@ -3073,7 +3073,7 @@ class compras_ordenes_model extends CI_Model {
     if ($id_producto > 0 && $id_codigo > 0) {
       $query = $this->db->query("SELECT Date(fecha_aceptacion) AS fecha
                                  FROM compras_productos
-                                 WHERE id_producto = {$id_producto} AND {$campo} = {$id_codigo}")->row();
+                                 WHERE status = 'a' AND id_producto = {$id_producto} AND {$campo} = {$id_codigo}")->row();
     }
     return isset($query->fecha)? $query->fecha: '';
    }
@@ -3087,7 +3087,7 @@ class compras_ordenes_model extends CI_Model {
       $query = $this->db->query("SELECT cp.*, co.fecha_creacion
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
-        WHERE cp.id_producto = {$id_producto} {$sql}
+        WHERE cp.status = 'a' AND cp.id_producto = {$id_producto} {$sql}
         ORDER BY co.fecha_aceptacion DESC
         LIMIT 1")->row();
     }
