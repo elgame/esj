@@ -421,7 +421,7 @@
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
                                   $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
                                   $totalDescuentoMaterial = isset($e->otros_datos->totalDescuentoMaterial)? $e->otros_datos->totalDescuentoMaterial: 0;
-                                } elseif (isset($e->otros_datos)) {
+                                } elseif (isset($e->otros_datos) && (isset($e->otros_datos->totalPrestamosEf) || isset($e->otros_datos->totalDescuentoMaterial))) {
                                   $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
                                   $totalDescuentoMaterial = isset($e->otros_datos->totalDescuentoMaterial)? $e->otros_datos->totalDescuentoMaterial: 0;
                                 } else {
