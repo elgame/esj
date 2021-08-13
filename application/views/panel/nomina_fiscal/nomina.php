@@ -126,7 +126,7 @@
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
-                      <th colspan="7" style="background-color: #EEEEBC;"></th>
+                      <th colspan="9" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
                       <th style="position: absolute;z-index: 100;margin-top: -10px;">No. <?php echo count($empleados); ?></th>
@@ -167,6 +167,7 @@
                       <th style="background-color: #EEBCBC;">DESC OTRO</th>
                       <th style="background-color: #EEBCBC;">DESC COCINA</th>
                       <th style="background-color: #EEBCBC;">DESC PREST EF</th>
+                      <th style="background-color: #EEBCBC;">DESC MATERI</th>
                       <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
@@ -196,6 +197,7 @@
                       $totalDescuentoOtros = 0;
                       $totalDescuentoCocina = 0;
                       $ttotalPrestamosEmpleadoEf = 0;
+                      $ttotalDescuentoMaterial = 0;
                       $totalIsrs = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
@@ -413,16 +415,21 @@
                           <?php
                                 $totalPrestamosEmpleado = 0;
                                 $totalPrestamosEmpleadoEf = 0;
+                                $totalDescuentoMaterial = 0;
                                 if (floatval($e->nomina_fiscal_prestamos) != 'false')
                                 {
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
                                   $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
+                                  $totalDescuentoMaterial = isset($e->otros_datos->totalDescuentoMaterial)? $e->otros_datos->totalDescuentoMaterial: 0;
                                 } elseif (isset($e->otros_datos->totalPrestamosEf)) {
                                   $totalPrestamosEmpleadoEf = $e->otros_datos->totalPrestamosEf;
+                                  $totalDescuentoMaterial = $e->otros_datos->totalDescuentoMaterial;
                                 } else {
                                   foreach ($e->prestamos as $key => $prestamo) {
                                     if ($prestamo['tipo'] == 'ef' || $prestamo['tipo'] == 'efd') {
                                       $totalPrestamosEmpleadoEf += $prestamo['pago_semana_descontar'];
+                                    } elseif ($prestamo['tipo'] == 'mt') {
+                                      $totalDescuentoMaterial += $prestamo['pago_semana_descontar'];
                                     } else {
                                       $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
                                     }
@@ -479,6 +486,7 @@
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_cocina[]" value="<?php echo $e->descuento_cocina ?>" class="span12 vpositive descuento-cocina" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_prestamoef[]" value="<?php echo $totalPrestamosEmpleadoEf ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_materiales[]" value="<?php echo $totalDescuentoMaterial ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php
 
@@ -494,7 +502,8 @@
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros -
                                                   $e->descuento_cocina -
-                                                  $totalPrestamosEmpleadoEf;
+                                                  $totalPrestamosEmpleadoEf -
+                                                  $totalDescuentoMaterial;
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo MyString::formatoNumero($totalComplementoEmpleado) ?></span>
@@ -523,6 +532,7 @@
                       $totalDescuentoOtros       += $e->descuento_otros;
                       $totalDescuentoCocina      += $e->descuento_cocina;
                       $ttotalPrestamosEmpleadoEf += $totalPrestamosEmpleadoEf;
+                      $ttotalDescuentoMaterial   += $totalDescuentoMaterial;
                       $totalIsrs                 += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
                       $totalDeducciones          += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
                       $totalTransferencias       += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
@@ -561,6 +571,7 @@
                       <td id="totales-descuento-otros" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoOtros) ?></td>
                       <td id="totales-descuento-cocina" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoCocina) ?></td>
                       <td id="totales-descuento-presef" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($ttotalPrestamosEmpleadoEf) ?></td>
+                      <td id="totales-descuento-materi" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($ttotalDescuentoMaterial) ?></td>
                       <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>
