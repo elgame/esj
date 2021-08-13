@@ -28,7 +28,8 @@ class recetas_model extends CI_Model {
     if($this->input->get('fbuscar') != '')
     {
       $sqlfolio = is_numeric($this->input->get('fbuscar'))? "f.folio = '".$this->input->get('fbuscar')."' OR r.folio = '".$this->input->get('fbuscar')."' OR ": '';
-      $sql .= " AND ({$sqlfolio} f.nombre LIKE '%".$this->input->get('fbuscar')."%')";
+      $sql .= " AND ({$sqlfolio} f.nombre LIKE '%".$this->input->get('fbuscar')."%' OR
+         r.folio_hoja LIKE '".$this->input->get('fbuscar')."')";
     }
 
     if($this->input->get('ftipo') != '')
@@ -54,7 +55,7 @@ class recetas_model extends CI_Model {
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
           f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
-          r.total_importe, r.paso, r.fecha_aplicacion
+          r.total_importe, r.paso, r.fecha_aplicacion, r.folio_hoja
         FROM otros.recetas r
           INNER JOIN areas a ON a.id_area = r.id_area
           LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula

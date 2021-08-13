@@ -80,6 +80,7 @@
                   <th>F. Aplicación</th>
                   <th>Cultivo</th>
                   <th>Folio</th>
+                  <th>Folio Corona</th>
                   <th>Formula</th>
                   <th>Tipo</th>
                   <th>Estado</th>
@@ -94,6 +95,7 @@
                   <td><?php echo $receta->fecha_aplicacion; ?></td>
                   <td><?php echo $receta->area; ?></td>
                   <td><?php echo $receta->folio; ?></td>
+                  <td><?php echo $receta->folio_hoja; ?></td>
                   <td><?php echo $receta->nombre; ?></td>
                   <td><?php echo $receta->tipo; ?></td>
                   <td><?php
