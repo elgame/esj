@@ -24,6 +24,8 @@ class facturacion extends MY_Controller {
     'facturacion/rnotas_cred_xls/',
     'facturacion/prodfact2_pdf/',
     'facturacion/prodfact2_xls/',
+    'facturacion/ventasAcumulado_pdf/',
+    'facturacion/ventasAcumulado_xls/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -2320,6 +2322,37 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion2_model');
     $this->facturacion2_model->prodfact2_xls();
+  }
+
+  public function ventasAcumulado()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/admin.js'),
+      array('panel/facturacion/rep_productos_facturados.js'),
+    ));
+
+    $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte de ventas acumulado');
+
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/facturacion/rpt_ventas_acumulado',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function ventasAcumulado_pdf()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->ventasAcumulado_pdf();
+  }
+  public function ventasAcumulado_xls()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->ventasAcumulado_xls();
   }
 
   public function rventasc()

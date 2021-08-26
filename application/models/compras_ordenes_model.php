@@ -1948,6 +1948,12 @@ class compras_ordenes_model extends CI_Model {
       if($pdf->logo != '')
         $pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), 6, 5, 50);
 
+      $pdf->SetFont('helvetica','B', 10);
+      $pdf->SetXY(6, $pdf->GetY()-5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array($orden['info'][0]->empresa), false, false);
+
       $pdf->SetXY(150, $pdf->GetY());
       $pdf->SetFillColor(200,200,200);
       $pdf->SetFont('helvetica','B', 10);

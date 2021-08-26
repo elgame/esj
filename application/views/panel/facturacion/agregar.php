@@ -26,6 +26,7 @@
           <ul class="nav nav-tabs" id="myTab">
             <li class="active"><a href="#tabFactura">Factura</a></li>
             <li><a href="#tabComercioExterior">Comercio Exterior</a></li>
+            <li><a href="#tabCartaPorte">Carta Porte</a></li>
           </ul>
 
           <div id="myTabContent" class="tab-content">
@@ -1684,6 +1685,244 @@
                       </div>
                     </div>
                   </div><!--/Mercancias -->
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="tabCartaPorte">
+              <div class="row-fluid">
+                <div class="span12 mquit">
+                  <div class="alert alert-block">
+                    <h4 class="alert-heading"> COMPLEMENTO DE CARTA PORTE</h4>
+                    <!-- <span class="help-inline">Este complemento será utilizado por los contribuyentes que exporten mercancías en definitiva con la clave de pedimento “A1”, de conformidad con la regla 2.7.1.22. de la Resolución Miscelánea Fiscal vigente, en relación con las Reglas Generales de Comercio Exterior 3.1.35. y 3.1.36., también vigentes; y servirá para incorporar la información del tipo de operación, datos de identificación fiscal del emisor, receptor o destinatario de la mercancía y la descripción de las mercancías exportadas.</span> -->
+                  </div>
+                  <div class="row-fluid">
+
+                    <!-- Datos Carta Porte -->
+                    <div class="span6">
+                      <div class="control-group">
+                        <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
+                        <div class="controls">
+                          <?php
+                            $cpobj = isset($cpobj) ? json_decode($cpobj->extras) : '';
+                            $transpInternac = isset($cpobj->transpInternac) ? $cpobj->transpInternac : ''; ?>
+                          <select name="cp[transpInternac]" class="span12 sikey" id="cp_transpInternac" data-next="cp_entradaSalidaMerc">
+                            <option value=""></option>
+                            <option value="Sí" <?php echo set_select('cp[transpInternac]', 'Sí', $transpInternac === 'Sí' ? true : false); ?>>Sí</option>
+                            <option value="No" <?php echo set_select('cp[transpInternac]', 'No', $transpInternac === 'No' ? true : false); ?>>No</option>
+                          </select>
+                        </div>
+                      </div><!--/control-group -->
+                      <div class="control-group">
+                        <label class="control-label" for="cp_entradaSalidaMerc">Entrada / Salida de Mercancía <i class="icon-question-sign helpover" data-title="Tipo Operacion: Atributo requerido que indica el tipo de operación de comercio exterior que se realiza, puede ser importación o exportación, A = exportación de servicios. 2 = exportación."></i></label>
+                        <div class="controls">
+                          <?php
+                            $entradaSalidaMerc = isset($cpobj->entradaSalidaMerc) ? $cpobj->entradaSalidaMerc : ''; ?>
+                          <select name="cp[entradaSalidaMerc]" class="span12 sikey" id="cp_entradaSalidaMerc" data-next="cp_viaEntradaSalida">
+                            <option value=""></option>
+                            <option value="Entrada" <?php echo set_select('cp[entradaSalidaMerc]', 'Entrada', $entradaSalidaMerc === 'Entrada' ? true : false); ?>>Entrada</option>
+                            <option value="Salida" <?php echo set_select('cp[entradaSalidaMerc]', 'Salida', $entradaSalidaMerc === 'Salida' ? true : false); ?>>Salida</option>
+                          </select>
+                        </div>
+                      </div><!--/control-group -->
+                    </div>
+
+                    <!-- Datos Carta Porte -->
+                    <div class="span6">
+                      <div class="control-group">
+                        <label class="control-label" for="cp_viaEntradaSalida">Via de Entrada / Salida <i class="icon-question-sign helpover" data-title=""></i></label>
+                        <div class="controls">
+                          <?php $viaEntradaSalida = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
+                          <select name="cp[viaEntradaSalida]" class="span12 sikey" id="cp_viaEntradaSalida" data-next="cp_totalDistRec">
+                            <option value="" <?php echo set_select('cp[viaEntradaSalida]', '', $viaEntradaSalida === '' ? true : false); ?>></option>
+                            <option value="01" <?php echo set_select('cp[viaEntradaSalida]', '01', $viaEntradaSalida === '01' ? true : false); ?>>01 - Autotransporte Federal</option>
+                            <option value="02" <?php echo set_select('cp[viaEntradaSalida]', '02', $viaEntradaSalida === '02' ? true : false); ?>>02 - Transporte Marítimo</option>
+                            <option value="03" <?php echo set_select('cp[viaEntradaSalida]', '03', $viaEntradaSalida === '03' ? true : false); ?>>03 - Transporte Aéreo</option>
+                            <option value="04" <?php echo set_select('cp[viaEntradaSalida]', '04', $viaEntradaSalida === '04' ? true : false); ?>>04 - Transporte Ferroviario</option>
+                            <option value="05" <?php echo set_select('cp[viaEntradaSalida]', '05', $viaEntradaSalida === '05' ? true : false); ?>>05 - Ducto</option>
+                          </select>
+                        </div>
+                      </div><!--/control-group -->
+                      <div class="control-group">
+                        <label class="control-label" for="cp_totalDistRec">Total Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
+                        <div class="controls">
+                          <?php $totalDistRec = isset($cpobj->totalDistRec) ? $cpobj->totalDistRec : ''; ?>
+                          <input type="number" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_ubicaciones_tipoEstacion">
+                        </div>
+                      </div><!--/control-group -->
+                    </div>
+                  </div><!--/row-fluid -->
+
+                  <!-- Ubicaciones -->
+                  <div class="row-fluid">
+                    <div class="box span12">
+                      <div class="box-header well">
+                        <h2><i class="icon-align-justify"></i><span class="break"></span>Ubicaciones</h2>
+                        <div class="box-icon">
+                          <a href="javascript:void(0);" class="btn-add" id="btn-add-CpUbicaciones" data-rel="tooltip" data-title="Agregar Ubicaciones"><i class="icon-plus"></i></a>
+                        </div>
+                      </div>
+                      <div class="box-content" style="padding: 0;">
+
+                        <div class="row-fluid">
+                          <div class="span4">
+                            <div class="control-group">
+                              <label class="control-label" for="cp_ubicaciones_tipoEstacion" style="width: 115px;">Tipo Estación <i class="icon-question-sign helpover" data-title=""></i></label>
+                              <div class="controls" style="margin-left: 133px;">
+                                <?php $tipoEstacion = isset($ubic->tipoEstacion) ? $ubic->tipoEstacion : ''; ?>
+                                <select name="cp[tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
+                                  <option value="" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '', $tipoEstacion === '' ? true : false); ?>></option>
+                                  <option value="01" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '01', $tipoEstacion === '01' ? true : false); ?>>01 - Origen Nacional</option>
+                                  <option value="02" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '02', $tipoEstacion === '02' ? true : false); ?>>02 - Intermedia</option>
+                                  <option value="03" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '03', $tipoEstacion === '03' ? true : false); ?>>03 - Destino Final Nacional</option>
+                                </select>
+                              </div>
+                            </div><!--/control-group -->
+                          </div>
+
+                          <div class="span5">
+                            <div class="control-group">
+                              <label class="control-label" for="cp_ubicaciones_distanciaRecorrida" style="width: 80px;">Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
+                              <div class="controls" style="margin-left: 83px;">
+                                <?php $distanciaRecorrida = isset($ubic->distanciaRecorrida) ? $ubic->distanciaRecorrida : ''; ?>
+                                <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="<?php echo set_value('cp[ubicaciones][][distanciaRecorrida]', $distanciaRecorrida); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
+                              </div>
+                            </div><!--/control-group -->
+                          </div>
+                        </div>
+
+                        <table class="table table-striped" id="table-cpOrigen">
+                          <thead>
+                            <tr>
+                              <th>ID Origen <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>RFC Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Nombre Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
+                              <th>Fecha y Hora de Salida <i class="icon-question-sign helpover" data-title=""></i></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][idOrigen]" value="<?php echo set_value('cp[ubicaciones][][origen][idOrigen]', isset($ubic->origen->idOrigen) ? $ubic->origen->idOrigen : ''); ?>" id="cp_ubic_orgen_idOrigen" minlength="1" maxlength="100" class="span12 sikey" data-next="cp_ubic_orgen_rfcRemitente"></td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][rfcRemitente]" value="<?php echo set_value('cp[ubicaciones][][origen][rfcRemitente]', isset($ubic->origen->rfcRemitente) ? $ubic->origen->rfcRemitente : ''); ?>" id="cp_ubic_orgen_rfcRemitente" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_orgen_nombreRemitente"></td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreRemitente]" value="<?php echo set_value('cp[ubicaciones][][origen][nombreRemitente]', isset($ubic->origen->nombreRemitente) ? $ubic->origen->nombreRemitente : ''); ?>" id="cp_ubic_orgen_nombreRemitente" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_orgen_numRegIdTrib"></td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones][][origen][numRegIdTrib]', isset($ubic->origen->numRegIdTrib) ? $ubic->origen->numRegIdTrib : ''); ?>" id="cp_ubic_orgen_numRegIdTrib" minlength="1" maxlength="250" class="span12 sikey" data-next="cp_ubic_orgen_residenciaFiscal"></td>
+                              <td class="center">
+                                <input type="text" name="cp[ubicaciones][][origen][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones][][origen][residenciaFiscal_text]', isset($ubic->origen->residenciaFiscal_text) ? $ubic->origen->residenciaFiscal_text : ''); ?>" id="cp_ubic_orgen_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_orgen_numEstacion">
+                                <input type="hidden" name="cp[ubicaciones][][origen][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones][][origen][residenciaFiscal]', isset($ubic->origen->residenciaFiscal) ? $ubic->origen->residenciaFiscal : ''); ?>" id="cp_ubic_orgen_residenciaFiscal" maxlength="40" class="span12 sikey">
+                              </td>
+                              <td class="center">
+                                <input type="text" name="cp[ubicaciones][][origen][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones][][origen][numEstacion_text]', isset($ubic->origen->numEstacion_text) ? $ubic->origen->numEstacion_text : ''); ?>" id="cp_ubic_orgen_numEstacion_text" maxlength="60" class="span12 sikey" data-next="cp_ubic_orgen_nombreEstacion">
+                                <input type="hidden" name="cp[ubicaciones][][origen][numEstacion]" value="<?php echo set_value('cp[ubicaciones][][origen][numEstacion]', isset($ubic->origen->numEstacion) ? $ubic->origen->numEstacion : ''); ?>" id="cp_ubic_orgen_numEstacion" maxlength="60" class="span12 sikey">
+                              </td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones][][origen][nombreEstacion]', isset($ubic->origen->nombreEstacion) ? $ubic->origen->nombreEstacion : ''); ?>" id="cp_ubic_orgen_nombreEstacion" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_orgen_navegacionTrafico"></td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][navegacionTrafico]" value="<?php echo set_value('cp[ubicaciones][][origen][navegacionTrafico]', isset($ubic->origen->navegacionTrafico) ? $ubic->origen->navegacionTrafico : ''); ?>" id="cp_ubic_orgen_navegacionTrafico" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_orgen_fechaHoraSalida"></td>
+                              <td class="center"><input type="text" name="cp[ubicaciones][][origen][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones][][origen][fechaHoraSalida]', isset($ubic->origen->fechaHoraSalida) ? $ubic->origen->fechaHoraSalida : ''); ?>" id="cp_ubic_orgen_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-striped" id="table-cpDestino">
+                          <thead>
+                            <tr>
+                              <th>Calle <i class="icon-question-sign helpover" data-title="Calle: Atributo requerido sirve para precisar la calle en que está ubicado el domicilio del destinatario de la mercancía."></i></th>
+                              <th>No. Exterior <i class="icon-question-sign helpover" data-title="No. Exterior: Atributo opcional sirve para expresar el número exterior en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                              <th>No. Interior <i class="icon-question-sign helpover" data-title="No. Interior: Campo opcional sirve para expresar información adicional para especificar la ubicación cuando calle y número exterior no resulten suficientes para determinar la ubicación precisa del inmuebleAtributo opcional sirve para expresar el número interior, en caso de existir, en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                              <th>Referencia <i class="icon-question-sign helpover" data-title="Referencia: Atributo opcional para expresar una referencia geográfica adicional que permita una más fácil o precisa ubicación del domicilio del destinatario de la mercancía, por ejemplo las coordenadas GPS."></i></th>
+                              <th>Pais <i class="icon-question-sign helpover" data-title="Pais: Atributo requerido que sirve para precisar el país donde  se encuentra ubicado el destinatario de la mercancía."></i></th>
+                              <th>Estado <i class="icon-question-sign helpover" data-title="Estado: Atributo requerido para señalar el estado, entidad, región, comunidad u otra figura análoga en donde  se encuentra ubicado el  domicilio del destinatario de la mercancía."></i></th>
+                              <th>Municipio <i class="icon-question-sign helpover" data-title="Municipio: Atributo opcional que sirve para precisar el municipio, delegación, condado u otro análogo en donde se encuentra ubicado el destinatario de la mercancía."></i></th>
+                              <th>Localidad <i class="icon-question-sign helpover" data-title="Localidad: Atributo opcional que sirve para precisar la ciudad, población, distrito u otro análogo en donde se ubica el domicilio del  destinatario de la mercancía."></i></th>
+                              <th>Codigo Postal <i class="icon-question-sign helpover" data-title="Codigo Postal: Atributo requerido que sirve para asentar el código postal (PO, BOX) en donde se encuentra ubicado el domicilio del destinatario de la mercancía."></i></th>
+                              <th>Colonia <i class="icon-question-sign helpover" data-title="Colonia: Atributo opcional sirve para expresar la colonia o dato análogo en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][calle]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][calle]', isset($com_ex->destinatario) ? $com_ex->destinatario->calle : ''); ?>" id="cce_destinatario_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cce_destinatario_dom_numeroExterior"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroExterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroExterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_exterior : ''); ?>" id="cce_destinatario_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_numeroInterior"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroInterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroInterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_interior : ''); ?>" id="cce_destinatario_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_referencia"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][referencia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][referencia]', isset($com_ex->destinatario) ? $com_ex->destinatario->referencia : ''); ?>" id="cce_destinatario_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cce_destinatario_dom_pais"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][pais]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][pais]', isset($com_ex->destinatario) ? $com_ex->destinatario->pais : ''); ?>" id="cce_destinatario_dom_pais" maxlength="40" class="span12 sikey" data-next="cce_destinatario_dom_estado"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][estado]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][estado]', isset($com_ex->destinatario) ? $com_ex->destinatario->estado : ''); ?>" id="cce_destinatario_dom_estado" maxlength="60" class="span12 sikey" data-next="cce_destinatario_dom_municipio"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][municipio]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][municipio]', isset($com_ex->destinatario) ? $com_ex->destinatario->municipio : ''); ?>" id="cce_destinatario_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_localidad"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][localidad]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][codigoPostal]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][codigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][colonia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
+                              <!-- <td>
+                                <select name="comercioExterior[Destinatario][Domicilio][Estado]" id="cce_destinatario_dom_estado" class="span12 sikey" data-next="cce_destinatario_dom_pais">
+                                  <option value=""></option>
+                                  @foreach ($entidadesiso->toArray() as $clave => $entidad)
+                                    <option value="{{ $clave }}" {{ Input::old('comercioExterior')['Destinatario']['Domicilio']['Estado'] == $clave ? 'selected' : '' }}>{{ $entidad['nombre'] }} - {{ $entidad['pais'] }}</option>
+                                  @endforeach
+                                </select>
+                              </td>
+                              <td>
+                                <select name="comercioExterior[Destinatario][Domicilio][Pais]" id="cce_destinatario_dom_pais" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal">
+                                  <option value=""></option>
+                                  @foreach ($paises->toArray() as $clave => $pais)
+                                    <option value="{{ $clave }}" {{ $clave == Input::old('comercioExterior')['Destinatario']['Domicilio']['Pais'] ? 'selected' : '' }}>{{ $pais }}</option>
+                                  @endforeach
+                                </select>
+                              </td> -->
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-striped" id="table-cpDomicilio">
+                          <thead>
+                            <tr>
+                              <th>Calle <i class="icon-question-sign helpover" data-title="Calle: Atributo requerido sirve para precisar la calle en que está ubicado el domicilio del destinatario de la mercancía."></i></th>
+                              <th>No. Exterior <i class="icon-question-sign helpover" data-title="No. Exterior: Atributo opcional sirve para expresar el número exterior en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                              <th>No. Interior <i class="icon-question-sign helpover" data-title="No. Interior: Campo opcional sirve para expresar información adicional para especificar la ubicación cuando calle y número exterior no resulten suficientes para determinar la ubicación precisa del inmuebleAtributo opcional sirve para expresar el número interior, en caso de existir, en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                              <th>Referencia <i class="icon-question-sign helpover" data-title="Referencia: Atributo opcional para expresar una referencia geográfica adicional que permita una más fácil o precisa ubicación del domicilio del destinatario de la mercancía, por ejemplo las coordenadas GPS."></i></th>
+                              <th>Pais <i class="icon-question-sign helpover" data-title="Pais: Atributo requerido que sirve para precisar el país donde  se encuentra ubicado el destinatario de la mercancía."></i></th>
+                              <th>Estado <i class="icon-question-sign helpover" data-title="Estado: Atributo requerido para señalar el estado, entidad, región, comunidad u otra figura análoga en donde  se encuentra ubicado el  domicilio del destinatario de la mercancía."></i></th>
+                              <th>Municipio <i class="icon-question-sign helpover" data-title="Municipio: Atributo opcional que sirve para precisar el municipio, delegación, condado u otro análogo en donde se encuentra ubicado el destinatario de la mercancía."></i></th>
+                              <th>Localidad <i class="icon-question-sign helpover" data-title="Localidad: Atributo opcional que sirve para precisar la ciudad, población, distrito u otro análogo en donde se ubica el domicilio del  destinatario de la mercancía."></i></th>
+                              <th>Codigo Postal <i class="icon-question-sign helpover" data-title="Codigo Postal: Atributo requerido que sirve para asentar el código postal (PO, BOX) en donde se encuentra ubicado el domicilio del destinatario de la mercancía."></i></th>
+                              <th>Colonia <i class="icon-question-sign helpover" data-title="Colonia: Atributo opcional sirve para expresar la colonia o dato análogo en donde se ubica el domicilio del destinatario de la mercancía."></i></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][calle]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][calle]', isset($com_ex->destinatario) ? $com_ex->destinatario->calle : ''); ?>" id="cce_destinatario_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cce_destinatario_dom_numeroExterior"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroExterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroExterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_exterior : ''); ?>" id="cce_destinatario_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_numeroInterior"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroInterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroInterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_interior : ''); ?>" id="cce_destinatario_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_referencia"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][referencia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][referencia]', isset($com_ex->destinatario) ? $com_ex->destinatario->referencia : ''); ?>" id="cce_destinatario_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cce_destinatario_dom_pais"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][pais]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][pais]', isset($com_ex->destinatario) ? $com_ex->destinatario->pais : ''); ?>" id="cce_destinatario_dom_pais" maxlength="40" class="span12 sikey" data-next="cce_destinatario_dom_estado"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][estado]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][estado]', isset($com_ex->destinatario) ? $com_ex->destinatario->estado : ''); ?>" id="cce_destinatario_dom_estado" maxlength="60" class="span12 sikey" data-next="cce_destinatario_dom_municipio"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][municipio]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][municipio]', isset($com_ex->destinatario) ? $com_ex->destinatario->municipio : ''); ?>" id="cce_destinatario_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_localidad"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][localidad]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][codigoPostal]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][codigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                              <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][colonia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
+                              <!-- <td>
+                                <select name="comercioExterior[Destinatario][Domicilio][Estado]" id="cce_destinatario_dom_estado" class="span12 sikey" data-next="cce_destinatario_dom_pais">
+                                  <option value=""></option>
+                                  @foreach ($entidadesiso->toArray() as $clave => $entidad)
+                                    <option value="{{ $clave }}" {{ Input::old('comercioExterior')['Destinatario']['Domicilio']['Estado'] == $clave ? 'selected' : '' }}>{{ $entidad['nombre'] }} - {{ $entidad['pais'] }}</option>
+                                  @endforeach
+                                </select>
+                              </td>
+                              <td>
+                                <select name="comercioExterior[Destinatario][Domicilio][Pais]" id="cce_destinatario_dom_pais" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal">
+                                  <option value=""></option>
+                                  @foreach ($paises->toArray() as $clave => $pais)
+                                    <option value="{{ $clave }}" {{ $clave == Input::old('comercioExterior')['Destinatario']['Domicilio']['Pais'] ? 'selected' : '' }}>{{ $pais }}</option>
+                                  @endforeach
+                                </select>
+                              </td> -->
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div><!--/Ubicaciones -->
+
                 </div>
               </div>
             </div>
