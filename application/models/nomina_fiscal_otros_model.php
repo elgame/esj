@@ -1433,7 +1433,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
           }
 
           if (isset($p->otros_datos->totalDescuentoMaterial) && $p->otros_datos->totalDescuentoMaterial > 0) {
-            echo "\"\"  \"\"  {$p->fecha_final} {$p->id_empleado} \"{$p->empleado}\"  \"M{$p->anio}{$p->semana}\"  \"Descuento Materiales, Año {$p->anio}, Sem {$p->semana}\" {$p->otros_datos->totalDescuentoMaterial} 0.00  {$p->otros_datos->totalDescuentoMaterial} \"\"  2\n";
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"M{$p->anio}{$p->semana}\"	\"Descuento Materiales, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalDescuentoMaterial}	0.00	{$p->otros_datos->totalDescuentoMaterial}	\"\"	2\n";
           }
         }
 
