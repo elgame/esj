@@ -28,6 +28,16 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dempresa">Tipo Reporte</label>
+                  <div class="controls">
+                    <select name="dtipoReporte" id="dtipoReporte">
+                      <option value="piezas">Por unidades</option>
+                      <option value="importe">Por Importes</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dproducto">Producto</label>
                   <!-- <div class="controls">
                     <input type="text" name="dproducto" class="input-xlarge search-query" id="dproducto" value="<?php echo set_value_get('dproducto'); ?>" size="73">
@@ -56,7 +66,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dtipo">Tipo:</label>
                   <div class="controls">
-                    <select name="dtipo">
+                    <select name="dtipo" id="dtipo">
                       <option value="f">Remisiones</option>
                       <option value="t">Facturas</option>
                       <option value="">Remisiones y facturas</option>

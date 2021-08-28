@@ -516,7 +516,8 @@ class facturacion2_model extends privilegios_model{
       elseif (!empty($_GET['ffecha2']))
           $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
-      $tipo = 'piezas';
+      $tipo = (!empty($_GET['dtipoReporte'])? $_GET['dtipoReporte']: 'piezas');
+      $tipoSim = ($tipo=='piezas'? '': '$');
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -560,10 +561,10 @@ class facturacion2_model extends privilegios_model{
 
         $datos = array($venta['cliente']);
         foreach ($venta['productos'] as $key1 => $prod) {
-          $datos[] = MyString::formatoNumero($prod[$tipo], 2, '', false);
+          $datos[] = MyString::formatoNumero($prod[$tipo], 2, $tipoSim, false);
           $totalesp[$key1] += $prod[$tipo];
         }
-        $datos[] = MyString::formatoNumero($venta["total_{$tipo}"], 2, '', false);
+        $datos[] = MyString::formatoNumero($venta["total_{$tipo}"], 2, $tipoSim, false);
 
         $totalesp['end'] += floatval($venta["total_{$tipo}"]);
 
@@ -579,7 +580,9 @@ class facturacion2_model extends privilegios_model{
       $pdf->SetFont('Arial','B',8);
       $pdf->SetTextColor(0,0,0);
       foreach ($totalesp as $key => $value) {
-        $totalesp[$key] = MyString::formatoNumero($value, 2, '', false);
+        if ($key > 0) {
+          $totalesp[$key] = MyString::formatoNumero($value, 2, $tipoSim, false);
+        }
       }
       $pdf->Row(array_values($totalesp), true);
 
@@ -590,17 +593,17 @@ class facturacion2_model extends privilegios_model{
   public function ventasAcumulado_xls()
   {
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=productos_facturados.xls");
+    header("Content-Disposition: attachment; filename=Reporte_ventas_acumuladas.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $facturas = $this->getRPF2();
+    $ventas = $this->ventasAcumuladoData();
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = "Reporte Productos Facturados";
+    $titulo2 = "Reporte Ventas Acumuladas";
     $titulo3 = "";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
         $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
@@ -608,6 +611,9 @@ class facturacion2_model extends privilegios_model{
         $titulo3 .= "Del ".$_GET['ffecha1'];
     elseif (!empty($_GET['ffecha2']))
         $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $tipo = (!empty($_GET['dtipoReporte'])? $_GET['dtipoReporte']: 'piezas');
+    $tipoSim = ($tipo=='piezas'? '': '$');
 
     $html = '<table>
       <tbody>
@@ -623,60 +629,41 @@ class facturacion2_model extends privilegios_model{
         <tr>
           <td colspan="6"></td>
         </tr>
-        <tr style="font-weight:bold">
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Serie/Folio</td>
-          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
-          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
-        </tr>';
-    $total_importe = $total_cantidad = 0;
-    $total_importet = $total_cantidadt = 0;
-    foreach ($facturas as $key => $produc)
-    {
-      $total_importe = $total_cantidad = 0;
+        <tr style="font-weight:bold">';
 
-      $html .= '<tr>
-            <td colspan="6" style="font-size:14px;border:1px solid #000;">'.$produc['producto']->nombre.'</td>
-          </tr>';
-      foreach ($produc['listado'] as $key2 => $value)
-      {
-        $html .= '<tr>
-            <td style="width:150px;border:1px solid #000;">'.$value->fecha.'</td>
-            <td style="width:100px;border:1px solid #000;">'.$value->serie.$value->folio.'</td>
-            <td style="width:400px;border:1px solid #000;">'.$value->cliente.'</td>
-            <td style="width:100px;border:1px solid #000;">'.$value->cantidad.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$value->precio_unitario.'</td>
-            <td style="width:150px;border:1px solid #000;">'.$value->importe.'</td>
-          </tr>';
-          $total_importe += $value->importe;
-          $total_cantidad += $value->cantidad;
-          $total_importet += $value->importe;
-          $total_cantidadt += $value->cantidad;
-      }
-      $html .= '
-        <tr style="font-weight:bold">
-          <td colspan="3">TOTAL</td>
-          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
-          <td style="border:1px solid #000;">'.($total_cantidad == 0 ? 0 : $total_importe/$total_cantidad).'</td>
-          <td style="border:1px solid #000;">'.$total_importe.'</td>
-        </tr>
-        <tr>
-          <td colspan="6"></td>
-        </tr>
-        <tr>
-          <td colspan="6"></td>
+    $totalesp = ['TOTALES'];
+    $html .= '<td style="width:150px;border:1px solid #000;background-color: #cccccc;">CLIENTE</td>';
+    foreach (array_values($ventas)[0]['productos'] as $key => $value) {
+      $html .= '<td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$value['producto'].'</td>';
+      $totalesp[$key] = 0;
+    }
+    $html .= '<td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.strtoupper("Total {$tipo}").'</td>
         </tr>';
+    $totalesp['end'] = 0;
+
+    $cantidadt = 0;
+    $importet = 0;
+
+    foreach($ventas as $key => $venta)
+    {
+      $html .= '<tr>';
+
+      $html .= '<td style="width:150px;border:1px solid #000;">'.$venta['cliente'].'</td>';
+      foreach ($venta['productos'] as $key1 => $prod) {
+        $html .= '<td style="width:150px;border:1px solid #000;">'.$prod[$tipo].'</td>';
+        $totalesp[$key1] += $prod[$tipo];
+      }
+      $html .= '<td style="width:150px;border:1px solid #000;">'.$venta["total_{$tipo}"].'</td>';
+
+      $totalesp['end'] += floatval($venta["total_{$tipo}"]);
     }
 
     $html .= '
-        <tr style="font-weight:bold">
-          <td colspan="3">TOTALES</td>
-          <td style="border:1px solid #000;">'.$total_cantidadt.'</td>
-          <td style="border:1px solid #000;">'.($total_cantidadt == 0 ? 0 : $total_importet/$total_cantidadt).'</td>
-          <td style="border:1px solid #000;">'.$total_importet.'</td>
-        </tr>
+        <tr style="font-weight:bold">';
+        foreach ($totalesp as $key => $value) {
+          $html .= '<td style="border:1px solid #000;">'.$value.'</td>';
+        }
+    $html .= '</tr>
       </tbody>
     </table>';
 
