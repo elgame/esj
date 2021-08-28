@@ -490,9 +490,9 @@ class facturacion2_model extends privilegios_model{
       }
 
       $ventas = $this->ventasAcumuladoData();
-      echo "<pre>";
-      var_dump($ventas);
-      echo "</pre>";exit;
+      // echo "<pre>";
+      // var_dump($ventas);
+      // echo "</pre>";exit;
 
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -506,7 +506,7 @@ class facturacion2_model extends privilegios_model{
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-      $pdf->titulo2 = "Reporte Productos Facturados";
+      $pdf->titulo2 = "Reporte Ventas Acumuladas";
 
       // $pdf->titulo3 = "{$_GET['dproducto']} \n";
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
@@ -516,107 +516,74 @@ class facturacion2_model extends privilegios_model{
       elseif (!empty($_GET['ffecha2']))
           $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
+      $tipo = 'piezas';
+
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
       $pdf->SetY(30);
-      $aligns = array('C', 'C', 'L', 'L', 'R','R', 'R');
-      $widths = array(18, 17, 90, 22, 12, 20, 25);
-      $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Poliza', 'Cantidad', 'Precio', 'Importe');
 
-      $cantidad = 0;
-      $importe = 0;
+
+      $aligns = array('L');
+      $widths = array(60);
+      $totalesp = ['TOTALES'];
+      $header = array('CLIENTE');
+      foreach (array_values($ventas)[0]['productos'] as $key => $value) {
+        $aligns[] = 'R';
+        $widths[] = 25;
+        $header[] = $value['producto'];
+        $totalesp[$key] = 0;
+      }
+      $aligns[] = 'R';
+      $widths[] = 25;
+      $header[] = strtoupper("Total {$tipo}");
+      $totalesp['end'] = 0;
+
       $cantidadt = 0;
       $importet = 0;
-      $promedio = 0;
 
-      foreach($facturas as $key => $product)
+      foreach($ventas as $key => $venta)
       {
-        $cantidad = 0;
-        $importe = 0;
         if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
         {
             $pdf->AddPage();
 
-            $pdf->SetFont('Arial','B',8);
-            $pdf->SetTextColor(255,255,255);
-            $pdf->SetFillColor(160,160,160);
+            $pdf->SetFont('Arial','B',7);
+            $pdf->SetTextColor(0,0,0);
+            $pdf->SetFillColor(200,200,200);
             $pdf->SetX(6);
             $pdf->SetAligns($aligns);
             $pdf->SetWidths($widths);
             $pdf->Row($header, true);
         }
-        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFont('Arial','', 7);
         $pdf->SetTextColor(0,0,0);
-        $pdf->SetX(6);
-        $pdf->SetAligns(array('L'));
-        $pdf->SetWidths(array(180));
-        $pdf->Row(array($product['producto']->nombre), false, false);
 
-        foreach ($product['listado'] as $key2 => $item)
-        {
-          $band_head = false;
-          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-          {
-              $pdf->AddPage();
-
-              $pdf->SetFont('Arial','B',8);
-              $pdf->SetTextColor(255,255,255);
-              $pdf->SetFillColor(160,160,160);
-              $pdf->SetX(6);
-              $pdf->SetAligns($aligns);
-              $pdf->SetWidths($widths);
-              $pdf->Row($header, true);
-          }
-
-          $pdf->SetFont('Arial','',8);
-          $pdf->SetTextColor(0,0,0);
-
-          $datos = array(
-            $item->fecha,
-            $item->serie.'-'.$item->folio,
-            $item->cliente,
-            $item->poliza,
-            $item->cantidad,
-            MyString::formatoNumero($item->precio_unitario, 2, '$', false),
-            MyString::formatoNumero($item->importe, 2, '$', false)
-          );
-
-          $cantidad += floatval($item->cantidad);
-          $importe  += floatval($item->importe);
-
-          $cantidadt += floatval($item->cantidad);
-          $importet  += floatval($item->importe);
-
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($datos, false);
+        $datos = array($venta['cliente']);
+        foreach ($venta['productos'] as $key1 => $prod) {
+          $datos[] = MyString::formatoNumero($prod[$tipo], 2, '', false);
+          $totalesp[$key1] += $prod[$tipo];
         }
+        $datos[] = MyString::formatoNumero($venta["total_{$tipo}"], 2, '', false);
+
+        $totalesp['end'] += floatval($venta["total_{$tipo}"]);
 
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
-        $pdf->Row(array('', '', '', '',
-            $cantidad,
-            $cantidad == 0 ? 0 : MyString::formatoNumero($importe/$cantidad, 2, '$', false),
-            MyString::formatoNumero($importe, 2, '$', false) ), true);
+        $pdf->Row($datos, false);
       }
 
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-
       $pdf->SetFont('Arial','B',8);
-      $pdf->SetTextColor(255,255,255);
-      $pdf->Row(array('', '', '', '',
-          $cantidadt,
-          $cantidadt == 0 ? 0 : MyString::formatoNumero($importet/$cantidadt, 2, '$', false),
-          MyString::formatoNumero($importet, 2, '$', false) ), true);
+      $pdf->SetTextColor(0,0,0);
+      foreach ($totalesp as $key => $value) {
+        $totalesp[$key] = MyString::formatoNumero($value, 2, '', false);
+      }
+      $pdf->Row(array_values($totalesp), true);
 
-      $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
+      $pdf->Output('Reporte_ventas_acumuladas.pdf', 'I');
     // }
   }
 

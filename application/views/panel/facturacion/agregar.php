@@ -1698,7 +1698,7 @@
                   </div>
                   <div class="row-fluid">
 
-                    <!-- Datos Carta Porte -->
+                    <!-- Datos Carta Porte
                     <div class="span6">
                       <div class="control-group">
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
@@ -1712,7 +1712,7 @@
                             <option value="No" <?php echo set_select('cp[transpInternac]', 'No', $transpInternac === 'No' ? true : false); ?>>No</option>
                           </select>
                         </div>
-                      </div><!--/control-group -->
+                      </div>
                       <div class="control-group">
                         <label class="control-label" for="cp_entradaSalidaMerc">Entrada / Salida de Mercancía <i class="icon-question-sign helpover" data-title="Tipo Operacion: Atributo requerido que indica el tipo de operación de comercio exterior que se realiza, puede ser importación o exportación, A = exportación de servicios. 2 = exportación."></i></label>
                         <div class="controls">
@@ -1724,10 +1724,9 @@
                             <option value="Salida" <?php echo set_select('cp[entradaSalidaMerc]', 'Salida', $entradaSalidaMerc === 'Salida' ? true : false); ?>>Salida</option>
                           </select>
                         </div>
-                      </div><!--/control-group -->
+                      </div>
                     </div>
 
-                    <!-- Datos Carta Porte -->
                     <div class="span6">
                       <div class="control-group">
                         <label class="control-label" for="cp_viaEntradaSalida">Via de Entrada / Salida <i class="icon-question-sign helpover" data-title=""></i></label>
@@ -1742,18 +1741,20 @@
                             <option value="05" <?php echo set_select('cp[viaEntradaSalida]', '05', $viaEntradaSalida === '05' ? true : false); ?>>05 - Ducto</option>
                           </select>
                         </div>
-                      </div><!--/control-group -->
+                      </div>
                       <div class="control-group">
                         <label class="control-label" for="cp_totalDistRec">Total Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php $totalDistRec = isset($cpobj->totalDistRec) ? $cpobj->totalDistRec : ''; ?>
                           <input type="number" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_ubicaciones_tipoEstacion">
                         </div>
-                      </div><!--/control-group -->
+                      </div>
                     </div>
-                  </div><!--/row-fluid -->
+                    !-- Datos Carta Porte -->
+                  </div>
+                  <!--/row-fluid -->
 
-                  <!-- Ubicaciones -->
+                  <!-- Ubicaciones
                   <div class="row-fluid">
                     <div class="box span12">
                       <div class="box-header well">
@@ -1777,7 +1778,7 @@
                                   <option value="03" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '03', $tipoEstacion === '03' ? true : false); ?>>03 - Destino Final Nacional</option>
                                 </select>
                               </div>
-                            </div><!--/control-group -->
+                            </div>
                           </div>
 
                           <div class="span5">
@@ -1787,7 +1788,7 @@
                                 <?php $distanciaRecorrida = isset($ubic->distanciaRecorrida) ? $ubic->distanciaRecorrida : ''; ?>
                                 <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="<?php echo set_value('cp[ubicaciones][][distanciaRecorrida]', $distanciaRecorrida); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
                               </div>
-                            </div><!--/control-group -->
+                            </div>
                           </div>
                         </div>
 
@@ -1853,22 +1854,6 @@
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][localidad]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][codigoPostal]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][codigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][colonia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
-                              <!-- <td>
-                                <select name="comercioExterior[Destinatario][Domicilio][Estado]" id="cce_destinatario_dom_estado" class="span12 sikey" data-next="cce_destinatario_dom_pais">
-                                  <option value=""></option>
-                                  @foreach ($entidadesiso->toArray() as $clave => $entidad)
-                                    <option value="{{ $clave }}" {{ Input::old('comercioExterior')['Destinatario']['Domicilio']['Estado'] == $clave ? 'selected' : '' }}>{{ $entidad['nombre'] }} - {{ $entidad['pais'] }}</option>
-                                  @endforeach
-                                </select>
-                              </td>
-                              <td>
-                                <select name="comercioExterior[Destinatario][Domicilio][Pais]" id="cce_destinatario_dom_pais" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal">
-                                  <option value=""></option>
-                                  @foreach ($paises->toArray() as $clave => $pais)
-                                    <option value="{{ $clave }}" {{ $clave == Input::old('comercioExterior')['Destinatario']['Domicilio']['Pais'] ? 'selected' : '' }}>{{ $pais }}</option>
-                                  @endforeach
-                                </select>
-                              </td> -->
                             </tr>
                           </tbody>
                         </table>
@@ -1900,28 +1885,13 @@
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][localidad]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][codigoPostal]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][codigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
                               <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][colonia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
-                              <!-- <td>
-                                <select name="comercioExterior[Destinatario][Domicilio][Estado]" id="cce_destinatario_dom_estado" class="span12 sikey" data-next="cce_destinatario_dom_pais">
-                                  <option value=""></option>
-                                  @foreach ($entidadesiso->toArray() as $clave => $entidad)
-                                    <option value="{{ $clave }}" {{ Input::old('comercioExterior')['Destinatario']['Domicilio']['Estado'] == $clave ? 'selected' : '' }}>{{ $entidad['nombre'] }} - {{ $entidad['pais'] }}</option>
-                                  @endforeach
-                                </select>
-                              </td>
-                              <td>
-                                <select name="comercioExterior[Destinatario][Domicilio][Pais]" id="cce_destinatario_dom_pais" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal">
-                                  <option value=""></option>
-                                  @foreach ($paises->toArray() as $clave => $pais)
-                                    <option value="{{ $clave }}" {{ $clave == Input::old('comercioExterior')['Destinatario']['Domicilio']['Pais'] ? 'selected' : '' }}>{{ $pais }}</option>
-                                  @endforeach
-                                </select>
-                              </td> -->
                             </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
-                  </div><!--/Ubicaciones -->
+                  </div>
+                  !--/Ubicaciones -->
 
                 </div>
               </div>

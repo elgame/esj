@@ -1,8 +1,8 @@
 
  ☐ Reporte de acumulado de ventas como la hoja (reporte productos facturados base)
-   -- lap
+   -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Ventas Acumulado',362,true,'facturacion/ventasAcumulado/','print',true);
- ☐ Revisar la poliza de nomina de las fotos sale de mas ese monto
+ ✔ Revisar la poliza de nomina de las fotos sale de mas ese monto @done (21-08-27 20:12)
  ☐ HILARIO ALCARAZ REYES no le quitaron la cuenta en semana 26 y se transfirio de mamita y plasticos, el es de empaque
  ✔ Poner nombre de la empresa en vales de gasolina de ordenes de compra maria jose @done (21-08-25 16:20)
  ✔ Acomodar reporte de limon, que muestre la existencia anterior @done (21-08-11 13:04)
