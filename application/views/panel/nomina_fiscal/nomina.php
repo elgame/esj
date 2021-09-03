@@ -124,7 +124,7 @@
                       <th style="width: 202px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
                       <th colspan="4"></th>
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="7" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                       <th colspan="9" style="background-color: #EEEEBC;"></th>
                     </tr>
@@ -153,6 +153,7 @@
                       <th style="background-color: #EEBCBC;">IMSS</th>
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
                       <th style="background-color: #EEBCBC;">FA</th>
+                      <th style="background-color: #EEBCBC;">PA</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
@@ -191,6 +192,7 @@
                       $totalPercepciones = 0; // total de todas las percepciones.
                       $totalInfonavit = 0;
                       $totalFondoAhorro = 0;
+                      $totalPensionAlimenticia = 0;
                       $totalImss = 0;
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
@@ -225,6 +227,7 @@
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
                                             $e->nomina->deducciones['imss']['total'] +
                                             $e->nomina->deducciones['rcv']['total'] +
+                                            (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) +
                                             $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
@@ -446,6 +449,10 @@
                           <input type="hidden" name="fondo_ahorro[]" value="<?php echo $e->esta_asegurado=='f'?0:$e->fondo_ahorro ?>" class="span12 fondo_ahorro">
                         </td>
                         <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="pension_alimenticia-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0)) ?></span>
+                          <input type="hidden" name="pension_alimenticia[]" value="<?php echo $e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) ?>" class="span12 pension_alimenticia">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="isr-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrEmpleado ?>" class="span12 isr">
                           <input type="hidden" name="isrAnual[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrAnualEmpleado ?>" class="span12 isrAnual">
@@ -503,7 +510,8 @@
                                                   $e->descuento_otros -
                                                   $e->descuento_cocina -
                                                   $totalPrestamosEmpleadoEf -
-                                                  $totalDescuentoMaterial;
+                                                  $totalDescuentoMaterial -
+                                                  (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0);
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo MyString::formatoNumero($totalComplementoEmpleado) ?></span>

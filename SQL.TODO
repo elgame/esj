@@ -1,4 +1,9 @@
 
+ ☐ Reporte de rotación de personal
+ ☐ Poner en nomina descuento pension alimenticia
+   -- pcc
+   ALTER TABLE public.usuarios ADD COLUMN p_alimenticia integer DEFAULT 0;
+
  ✔ Reporte de acumulado de ventas como la hoja (reporte productos facturados base) @done (21-08-28 12:12)
    -- lap|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Ventas Acumulado',362,true,'facturacion/ventasAcumulado/','print',true);

@@ -478,6 +478,9 @@ class empleados extends MY_Controller {
 							array('field' => 'festa_asegurado',
 										'label' => 'Asegurado',
 										'rules' => ''),
+              array('field' => 'dp_alimenticia',
+                    'label' => 'Pensión alimenticia',
+                    'rules' => ''),
 
 							array('field' => 'dcuenta_banco',
 										'label' => 'Banco',

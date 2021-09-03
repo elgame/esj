@@ -345,6 +345,11 @@ class nomina
       $this->empleado->nomina->subtotal        += floatval($otroPago['total']);
     }
 
+
+    if ((isset($this->empleado->p_alimenticia) && $this->empleado->p_alimenticia > 0) ||
+        isset($this->empleado->otros_datos->dePensionAlimenticia)) {
+      $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
+    }
     // Totales Deducciones
     foreach ($this->empleado->nomina->deducciones as $keyp => $deducc) {
       if ($deducc['TipoDeduccion'] == '002') //  || $deducc['TipoDeduccion'] == '101'
@@ -1189,6 +1194,32 @@ class nomina
       'ImporteExcento' => round($otros, 2),
       'total'          => round($otros, 2) + 0,
       'ApiKey'         => 'de_otros_',
+    );
+  }
+
+  /**
+   * Deduccion otros - 007
+   *
+   * @return array
+   */
+  public function dPencionAlimenticia()
+  {
+    $otros = 0; //floatval($this->empleado->descuento_playeras);
+
+    if ($this->empleado->nomina_guardada == 'f') {
+      $otros = floatval(($this->empleado->p_alimenticia / 100) * $this->empleado->nomina->TotalPercepciones);
+    } elseif (isset($this->empleado->otros_datos->dePensionAlimenticia)) {
+      $otros = floatval($this->empleado->otros_datos->dePensionAlimenticia);
+    }
+
+    return array(
+      'TipoDeduccion' => '007',
+      'Clave'          => $this->clavesPatron['otros'],
+      'Concepto'       => 'Pensión alimenticia',
+      'ImporteGravado' => 0,
+      'ImporteExcento' => round($otros, 2),
+      'total'          => round($otros, 2) + 0,
+      'ApiKey'         => 'de_pencion_alimenticia_',
     );
   }
 

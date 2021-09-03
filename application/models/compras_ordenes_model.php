@@ -676,7 +676,7 @@ class compras_ordenes_model extends CI_Model {
       'retencion_iva'       => $_POST['totalRetencion'],
       'retencion_isr'       => $_POST['totalRetencionIsr'],
       'total'               => $_POST['totalOrden'],
-      'concepto'            => (isset($ids_comprass->descripcion)? substr($ids_comprass->descripcion, 0, 190): 'Concepto'),
+      'concepto'            => (isset($ids_comprass->descripcion)? mb_substr($ids_comprass->descripcion, 0, 190, 'UTF-8'): 'Concepto'),
       'observaciones'       => (isset($ids_comprass->descripcion)? $ids_comprass->descripcion: ''),
       'isgasto'             => 'f',
       'status'              => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',

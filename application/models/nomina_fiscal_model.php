@@ -254,6 +254,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.salario_diario_real,
                 corona.monto_corona,
                 u.infonavit,
+                u.p_alimenticia,
                 u.fondo_ahorro,
                 u.regimen_contratacion,
                 'COL' AS estado,
@@ -954,6 +955,13 @@ class nomina_fiscal_model extends CI_Model {
           if (isset($empleadoNomina[0]->calculo_anual)) {
             $otros_datos['calculoAnual'] = $empleadoNomina[0]->calculo_anual;
           }
+
+          if (isset($empleadoNomina[0]->nomina->deducciones['pencion_alimenticia']['total']) &&
+              isset($empleadoNomina[0]->p_alimenticia) && $empleadoNomina[0]->p_alimenticia > 0) {
+            $otros_datos['dePensionAlimenticia'] = $empleadoNomina[0]->nomina->deducciones['pencion_alimenticia']['total'];
+            $otros_datos['pAlimenticia'] = $empleadoNomina[0]->p_alimenticia;
+          }
+
 
           $nominasEmpleados[] = array(
             'id_empleado'               => $empleadoId,

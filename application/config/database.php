@@ -48,7 +48,7 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = 'sanjorge.duckdns.org'; // sanjorge.duckdns.org
+$db['default']['hostname'] = 'localhost'; // sanjorge.duckdns.org
 $db['default']['username'] = 'programa'; //
 $db['default']['password'] = 'sophia_indie'; //
 $db['default']['database'] = 'sanjorge'; //

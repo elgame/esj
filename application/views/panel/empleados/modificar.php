@@ -436,6 +436,13 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dp_alimenticia">Pensión alimenticia %</label>
+                    <div class="controls">
+                      <input type="text" name="dp_alimenticia" id="dp_alimenticia" class="span12 vpositive" value="<?php echo isset($data['info'][0]->p_alimenticia)? $data['info'][0]->p_alimenticia:''; ?>" max="100" placeholder="% Pension alimenticia">
+                    </div>
+                  </div>
+
                   <input type="hidden" name="duser_nomina" value="t">
 
                 </div> <!--/span-->
