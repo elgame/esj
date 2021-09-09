@@ -1,11 +1,11 @@
 
  ☐ Reporte de rotación de personal
  ☐ Poner en nomina descuento pension alimenticia
-   -- pcc
+   -- pcc|san
    ALTER TABLE public.usuarios ADD COLUMN p_alimenticia integer DEFAULT 0;
 
  ✔ Reporte de acumulado de ventas como la hoja (reporte productos facturados base) @done (21-08-28 12:12)
-   -- lap|pcc
+   -- lap|pcc|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Ventas Acumulado',362,true,'facturacion/ventasAcumulado/','print',true);
  ✔ Revisar la poliza de nomina de las fotos sale de mas ese monto @done (21-08-27 20:12)
  ☐ HILARIO ALCARAZ REYES no le quitaron la cuenta en semana 26 y se transfirio de mamita y plasticos, el es de empaque
