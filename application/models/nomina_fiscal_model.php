@@ -3728,18 +3728,18 @@ class nomina_fiscal_model extends CI_Model {
             }
           }
 
-          // if ($empleado->descuento_playeras > 0)
-          // {
-          //   $pdf->SetXY(108, $pdf->GetY());
-          //   $pdf->SetAligns(array('L', 'L', 'R'));
-          //   $pdf->SetWidths(array(15, 62, 25));
-          //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
-          //   if($pdf->GetY() >= $pdf->limiteY)
-          //   {
-          //     $pdf->AddPage();
-          //     $y = $pdf->GetY();
-          //   }
-          // }
+          if (isset($empleado->otros_datos->dePensionAlimenticia) && $empleado->otros_datos->dePensionAlimenticia > 0)
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array('', 'Pensión Alimenticia', MyString::formatoNumero($empleado->otros_datos->dePensionAlimenticia, 2, '$', false)), false, 0, null, 1, 1);
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y = $pdf->GetY();
+            }
+          }
 
           if ($empleado->nomina_fiscal_isr > 0)
           {
@@ -7600,18 +7600,18 @@ class nomina_fiscal_model extends CI_Model {
           }
         }
 
-        // if ($empleado->descuento_playeras > 0)
-        // {
-        //   $pdf->SetXY(108, $pdf->GetY());
-        //   $pdf->SetAligns(array('L', 'L', 'R'));
-        //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
-        //   if($pdf->GetY() >= $pdf->limiteY)
-        //   {
-        //     $pdf->AddPage();
-        //     $y = $pdf->GetY();
-        //   }
-        // }
+        if (isset($empleado->otros_datos->dePensionAlimenticia) && $empleado->otros_datos->dePensionAlimenticia > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Pensión Alimenticia', MyString::formatoNumero($empleado->otros_datos->dePensionAlimenticia, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
 
         if ($empleado->nomina_fiscal_isr > 0)
         {
