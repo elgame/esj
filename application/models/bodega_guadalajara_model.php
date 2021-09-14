@@ -67,6 +67,10 @@ class bodega_guadalajara_model extends CI_Model {
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
+      if ( GastosProductos::searchGastosProductos($value->id_clasificacion) )
+      {
+        unset($info['remisiones'][$key]);
+      }
     }
 
     // sumamos o restamos los prestamos de ese dia
