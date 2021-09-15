@@ -246,6 +246,8 @@ class Usuarios_model extends privilegios_model {
         array('evento' => 'Cambio de Salario Diario', 'campo' => 'salario_diario', 'valor_nuevo' => $data['salario_diario']),
         array('evento' => 'Cambio de Salario Diario Real', 'campo' => 'salario_diario_real', 'valor_nuevo' => $data['salario_diario_real']),
         array('evento' => 'Cambio de Empresa', 'campo' => 'id_empresa', 'valor_nuevo' => $data['id_empresa']),
+        array('evento' => 'Fecha de salida', 'campo' => 'fecha_salida', 'valor_nuevo' => $data['fecha_salida'], 'date' => true),
+        array('evento' => 'Fecha de entrada', 'campo' => 'fecha_entrada', 'valor_nuevo' => $data['fecha_entrada'], 'date' => true),
       );
 
       $this->usuario_historial_model->make($camposHistorial);
@@ -364,7 +366,7 @@ class Usuarios_model extends privilegios_model {
     $this->load->model('usuario_historial_model');
     $this->usuario_historial_model->setIdUsuario($id_usuario);
 
-    $evento = array('evento' => 'Activado del listado de empleados', 'valor_anterior' => null, 'valor_nuevo' => null);
+    $evento = array('evento' => 'Activado del listado de empleados', 'campo' => 'fecha_entrada', 'valor_nuevo' => $fechaEntrada, 'date' => true);
     $historial = $this->usuario_historial_model->buildEvent($evento);
     $this->usuario_historial_model->guardaHistorial(array($historial));
 

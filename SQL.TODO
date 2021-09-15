@@ -1,6 +1,9 @@
 
  ☐ Reporte de rotación de personal
- ☐ Poner en nomina descuento pension alimenticia
+     usuarios_historial => 'Finiquito' - Despidos ; 'Activado del listado de empleados', 'Fecha de entrada' - Reactivaciones
+   -- pcc
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Rotación de Personal',184,true,'nomina_fiscal/rpt_rotacion_personal/','print',true);
+ ✔ Poner en nomina descuento pension alimenticia @done (21-09-13 20:32)
    -- pcc|san
    ALTER TABLE public.usuarios ADD COLUMN p_alimenticia integer DEFAULT 0;
 
