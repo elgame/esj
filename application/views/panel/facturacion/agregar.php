@@ -1698,7 +1698,6 @@
                   </div>
                   <div class="row-fluid">
 
-                    <!-- Datos Carta Porte
                     <div class="span6">
                       <div class="control-group">
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
@@ -1750,11 +1749,10 @@
                         </div>
                       </div>
                     </div>
-                    !-- Datos Carta Porte -->
+                    <!-- !-- Datos Carta Porte -->
                   </div>
-                  <!--/row-fluid -->
 
-                  <!-- Ubicaciones
+                  <!-- Ubicaciones -->
                   <div class="row-fluid">
                     <div class="box span12">
                       <div class="box-header well">
@@ -1891,7 +1889,7 @@
                       </div>
                     </div>
                   </div>
-                  !--/Ubicaciones -->
+                  <!-- !--/Ubicaciones -->
 
                 </div>
               </div>
