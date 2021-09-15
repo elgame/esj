@@ -737,10 +737,10 @@ class Ventas_model extends privilegios_model{
       if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $did_unidad = (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL);
-        $dunidad_c = NULL;
+        $dunidad_c = 1;
         if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
           $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
-          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: 1;
         }
 
         // Para descontar del inventario de productos de produccion
@@ -786,8 +786,8 @@ class Ventas_model extends privilegios_model{
           'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
-          'id_calidad'            => (isset($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
-          'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calidad'            => (!empty($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
+          'id_tamanio'            => (!empty($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
         );
