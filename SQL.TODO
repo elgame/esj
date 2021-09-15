@@ -4,7 +4,7 @@
    -- pcc
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Rotación de Personal',184,true,'nomina_fiscal/rpt_rotacion_personal/','print',true);
  ✔ Poner en nomina descuento pension alimenticia @done (21-09-13 20:32)
-   -- pcc|san
+   -- pcc|san|lap
    ALTER TABLE public.usuarios ADD COLUMN p_alimenticia integer DEFAULT 0;
 
  ✔ Reporte de acumulado de ventas como la hoja (reporte productos facturados base) @done (21-08-28 12:12)
