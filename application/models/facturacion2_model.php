@@ -504,7 +504,7 @@ class facturacion2_model extends privilegios_model{
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf = new MYpdf('P', 'mm', 'Letter');
       $pdf->show_head = true;
 
       if ($empresa['info']->logo !== '')
