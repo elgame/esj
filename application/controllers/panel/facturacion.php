@@ -161,6 +161,9 @@ class facturacion extends MY_Controller {
     if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/agregar/') == false && !isset($_GET['id_nr']))
       redirect(base_url('panel/home?msg=1'));
 
+    $this->carabiner->css(array(
+        array('panel/frm_cartaPorte.css'),
+    ));
     $this->carabiner->js(array(
         array('bootstrap/bootstrap-tab.js'),
         array('bootstrap/bootstrap-tooltip.js'),
@@ -170,6 +173,7 @@ class facturacion extends MY_Controller {
         array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
+        array('panel/facturacion/frm_cartaPorte.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
