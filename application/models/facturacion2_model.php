@@ -388,6 +388,8 @@ class facturacion2_model extends privilegios_model{
 
     if (is_array($this->input->get('ids_productos'))) {
       $sql .= " AND fp.id_clasificacion in(".implode(', ', $this->input->get('ids_productos')).")";
+    } else {
+      $sql .= " AND 1 = 2 ";
     }
 
     //Filtro de fecha.
@@ -490,6 +492,9 @@ class facturacion2_model extends privilegios_model{
       }
 
       $ventas = $this->ventasAcumuladoData();
+      if (count($ventas) == 0) {
+        return false;
+      }
       // echo "<pre>";
       // var_dump($ventas);
       // echo "</pre>";exit;
