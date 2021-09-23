@@ -660,6 +660,12 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaNPAlimen($basic=true){
+    $sql = '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NPAlimen'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
 
   public function getTipoISRCompras($observaciones)
   {
@@ -1927,7 +1933,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
               f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
               f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
-              0 AS indemnizaciones, 'no' AS tipo, f.uuid
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid, f.otros_datos
           FROM nomina_fiscal AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1939,7 +1945,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
             f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
             f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
-            f.indemnizaciones, 'fi' AS tipo, f.uuid
+            f.indemnizaciones, 'fi' AS tipo, f.uuid, '' AS otros_datos
           FROM finiquito AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1951,7 +1957,7 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, 0 AS sueldo_semanal,
             0 AS vacaciones, 0 AS prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, 0 AS subsidio, 0 AS imss, 0 AS infonavit,
             f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
-            0 AS indemnizaciones, 'ag' AS tipo, f.uuid
+            0 AS indemnizaciones, 'ag' AS tipo, f.uuid, '' AS otros_datos
           FROM nomina_aguinaldo AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -2188,6 +2194,22 @@ class polizas_model extends CI_Model {
                           $this->setEspacios("ISR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
           $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if (!empty($value->otros_datos) && $value->tipo == 'no') {
+          $otros_datos = json_decode($value->otros_datos);
+
+          if (isset($otros_datos->dePensionAlimenticia) && $otros_datos->dePensionAlimenticia > 0) {
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNPAlimen(),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                            $this->setEspacios( $this->numero($otros_datos->dePensionAlimenticia) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("PensionAlimenticia Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
+          }
         }
         foreach ($prestamos->where('id', '=', $value->id_empleado) as $keyp => $prestamo)
         {
