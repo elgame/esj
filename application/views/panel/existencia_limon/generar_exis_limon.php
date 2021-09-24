@@ -895,7 +895,7 @@
                     <!--/ Ventas industrial -->
 
                     <!-- INDUSTRIAL -->
-                    <?php $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos; ?>
+                    <?php $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos; ?>
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-industrial">
