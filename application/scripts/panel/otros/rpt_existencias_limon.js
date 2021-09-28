@@ -9,6 +9,7 @@
     existencia();
     existenciaPiso();
     existenciaReProceso();
+    compraFruta();
     descuentoVentas();
     comisionTerceros();
     industrial();
@@ -235,6 +236,92 @@
     $('#exisReproCantidad').text(cantidadt);
     $('#exisReproKilos').text(kilost);
     $('#exisReproImporte').text(importet);
+  };
+
+
+  const compraFruta = () => {
+    $('#table-compra-fruta-comp').on('focus', 'input.frutaCompra_calibre:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('.frutaCompra_id_calibre').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('.frutaCompra_id_calibre').val('');
+        }
+      });
+    });
+
+    $('#btnAddFrutaCom').click(function(event) {
+      const unidades = JSON.parse($('#unidades').val());
+      htmlUnidad = '';
+      $.each(unidades, function(index, val) {
+         htmlUnidad += '<option value="' + val.id_unidad + '" data-cantidad="' + val.cantidad + '">' + val.nombre + '</option>';
+      });
+
+      html =
+        '<tr>'+
+          '<td>'+
+            '<input type="text" name="frutaCompra_calibre[]" value="" class="span12 frutaCompra_calibre" required>'+
+            '<input type="hidden" name="frutaCompra_id_calibre[]" value="" class="span12 frutaCompra_id_calibre" required>'+
+          '</td>'+
+          '<td>'+
+            '<select name="frutaCompra_id_unidad[]" class="span12 frutaCompra_id_unidad" required>'+
+            htmlUnidad+
+            '</select>'+
+          '</td>'+
+          '<td><input type="text" name="frutaCompra_cantidad[]" value="" class="span12 vpositive frutaCompra_cantidad" required></td>'+
+          '<td><input type="text" name="frutaCompra_kilos[]" value="" class="span12 vpositive frutaCompra_kilos" readonly></td>'+
+          '<td><input type="text" name="frutaCompra_costo[]" value="" class="span12 vpositive frutaCompra_costo" required></td>'+
+          '<td><input type="text" name="frutaCompra_importe[]" value="" class="span12 vpositive frutaCompra_importe" readonly></td>'+
+          '<td style="width: 30px;">'+
+            '<button type="button" class="btn btn-danger frutaCompra_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+          '</td>'+
+        '</tr>';
+      $(html).insertBefore($('#table-compra-fruta-comp tbody tr.footer'));
+      $("#table-compra-fruta-comp tbody .vpositive").numeric({ negative: false }); //Numero positivo
+    });
+
+    $('#table-compra-fruta-comp').on('click', '.frutaCompra_del', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.remove();
+
+      calculaTotalCompraFruta();
+    });
+
+    $('#table-compra-fruta-comp').on('keyup', '.frutaCompra_cantidad, .frutaCompra_costo', function(event) {
+      let $tr = $(this).parents('tr');
+      let cantidad = parseFloat($tr.find('.frutaCompra_cantidad').val())||0;
+      let costo = parseFloat($tr.find('.frutaCompra_costo').val())||0;
+      let unidad = parseFloat($tr.find('.frutaCompra_id_unidad option:selected').attr('data-cantidad'))||0;
+
+      $tr.find('.frutaCompra_kilos').val(cantidad*unidad);
+      $tr.find('.frutaCompra_importe').val(cantidad*costo);
+
+      calculaTotalCompraFruta();
+    });
+  };
+  const calculaTotalCompraFruta = () => {
+    cantidadt = kilost = importet = 0;
+    $("#table-compra-fruta-comp tbody tr:not(.footer)").each(function(index, el) {
+      cantidadt += parseFloat($(el).find('.frutaCompra_cantidad').val())||0;
+      kilost += parseFloat($(el).find('.frutaCompra_kilos').val())||0;
+      importet += parseFloat($(el).find('.frutaCompra_importe').val())||0;
+    });
+    $('#frutaCompraCantidad').text(cantidadt);
+    $('#frutaCompraKilos').text(kilost);
+    $('#frutaCompraImporte').text(importet);
   };
 
   const descuentoVentas = () => {

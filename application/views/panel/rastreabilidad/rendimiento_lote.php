@@ -181,6 +181,7 @@
                         <input type="hidden" id="frd" value="<?php echo $c->rendimiento ?>" class="span12 vpositive">
                       </td>
                       <td>
+                        <input type="checkbox" id="ffrutaCom" <?php echo ($c->fruta_com == 't'? 'checked': '') ?> data-rel="tooltip" title="Es fruta comprada?"> |
                         <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
                         <button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>
                       </td>
@@ -235,6 +236,7 @@
                       <input type="hidden" id="frd" value="0" class="span12 vpositive">
                     </td>
                     <td>
+                      <input type="checkbox" id="ffrutaCom" data-rel="tooltip" title="Es fruta comprada?"> |
                       <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
                       <button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>
                     </td>

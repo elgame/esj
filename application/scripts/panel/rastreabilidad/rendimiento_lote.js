@@ -525,6 +525,7 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
+    postData.fruta_com        = ($tr.find('#ffrutaCom').is(':checked')? 't': 'f');
 
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
@@ -589,6 +590,7 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
+    postData.fruta_com        = ($tr.find('#ffrutaCom').is(':checked')? 't': 'f');
 
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
@@ -754,6 +756,7 @@
                   '<input type="hidden" id="frd" value="0" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
+                  '<input type="checkbox" id="ffrutaCom" data-rel="tooltip" title="Es fruta comprada?"> | '+
                   '<button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>' +
                   '<button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>' +
                 '</td>' +

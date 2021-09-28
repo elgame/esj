@@ -44,6 +44,7 @@ class rastreabilidad_model extends CI_Model {
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
+      'fruta_com'        => $_POST['fruta_com'],
     );
 
     $passess = false;
@@ -130,6 +131,7 @@ class rastreabilidad_model extends CI_Model {
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
+      'fruta_com'        => $_POST['fruta_com'],
     );
 
     $passess = false;
@@ -139,7 +141,7 @@ class rastreabilidad_model extends CI_Model {
     if( ! $this->existeRendimiento($dataval, 'edit'))
     {
       // Actualiza los datos de la clasificacion
-      $this->db->update('rastria_rendimiento_clasif',$data, array(
+      $this->db->update('rastria_rendimiento_clasif', $data, array(
         'id_rendimiento'   => $_POST['id_rendimiento'],
         'id_clasificacion' => $_POST['id_clasificacion_old'],
         'id_unidad'        => $_POST['id_unidad_old'],
@@ -506,7 +508,7 @@ class rastreabilidad_model extends CI_Model {
 
         $sql = $this->db->query(
           "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.kilos, rrc.linea1, rrc.linea2,
-                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion,
+                  rrc.total, rrc.rendimiento, rrc.fruta_com, cl.nombre as clasificacion,
                   u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre,
                   e.id_etiqueta, e.nombre AS etiqueta, cas.id_calibre AS id_size, cas.nombre AS size
           FROM rastria_rendimiento_clasif AS rrc
