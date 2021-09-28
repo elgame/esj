@@ -314,3 +314,13 @@
 		z-index: 1000;
 	}
 }
+
+/*Modales*/
+.modal.modal50 {
+  width: 50%;
+  left: 40%;
+}
+.modal.modal80 {
+  width: 80%;
+  left: 25%;
+}

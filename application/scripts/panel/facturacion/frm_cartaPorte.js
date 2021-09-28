@@ -1,5 +1,6 @@
 $(function(){
   eventAddCpUbicaciones();
+  eventAddCpCantidadTransporta();
 });
 
 function eventAddCpUbicaciones() {
@@ -146,5 +147,34 @@ function eventAddCpUbicaciones() {
     </div>`;
 
     $('#boxUbicaciones').append(htmll);
+  });
+}
+
+
+function eventAddCpCantidadTransporta() {
+  $('#btn-add-cantidadTransporta').click(function(event) {
+    let htmll = `<tr>
+      <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value=""></td>
+      <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value=""></td>
+      <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value=""></td>
+      <td>
+        <select class="mcpsat_cantidadTransporta_cvesTransporte">
+          <option></option>
+          <option value="01">01 - Autotransporte Federal</option>
+          <option value="02">02 - Transporte Marítimo</option>
+          <option value="03">03 - Transporte Aéreo</option>
+          <option value="04">04 - Transporte Ferroviario</option>
+          <option value="05">05 - Ducto</option>
+        </select>
+      </td>
+      <td><i class="icon-ban-circle delete"></i></td>
+    </tr>`;
+
+    $('#table-mcpsat_cantidadTransporta tbody').append(htmll);
+  });
+
+  $('#table-mcpsat_cantidadTransporta tbody').on('click', 'i.delete', function(){
+    const $tr = $(this).parent().parent();
+    $tr.remove();
   });
 }
