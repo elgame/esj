@@ -18,6 +18,7 @@
           <div class="box-header well" data-original-title>
             <h2><i class="icon-bar-chart"></i> Rendimiento por Lote</h2>
             <div class="box-icon">
+              <a href="<?php echo base_url('panel/rastreabilidad/rpt_lotes_pdf/?fecha='.$fecha); ?>" class="btn btn-round btn-danger" title="Imprimir reporte de lotes" target="_BLANK"><i class="icon-print"></i></a>
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
