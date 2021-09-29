@@ -871,6 +871,11 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetWidths(array(204));
     $pdf->Row(array('FECHA ' . $fecha), false, false);
 
+    $pdf->SetXY(6, $pdf->GetY());
+    $fechaTime = new DateTime($fecha);
+    // Obtiene la semana [01 - 52/53] y el dia de la semana [1 - 7]
+    $pdf->Row(array('SEMANA ' . $fechaTime->format("W")), false, false);
+
     $pdf->auxy = $pdf->GetY();
     $page_aux = $pdf->page;
 
@@ -1660,7 +1665,7 @@ class existencias_limon_model extends CI_Model {
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->Row(array('(+) KGS PROCESADOS', MyString::formatoNumero($existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos, 2, '', false)), true, 'B');
+    $pdf->Row(array('(=) KGS PROCESADOS', MyString::formatoNumero($existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos, 2, '', false)), true, 'B');
 
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
