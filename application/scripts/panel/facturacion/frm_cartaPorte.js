@@ -1,4 +1,6 @@
 $(function(){
+  autocompletesCP();
+
   eventAddCpUbicaciones();
   eventAddCpCantidadTransporta();
 });
@@ -150,7 +152,6 @@ function eventAddCpUbicaciones() {
   });
 }
 
-
 function eventAddCpCantidadTransporta() {
   $('#btn-add-cantidadTransporta').click(function(event) {
     let htmll = `<tr>
@@ -177,4 +178,198 @@ function eventAddCpCantidadTransporta() {
     const $tr = $(this).parent().parent();
     $tr.remove();
   });
+}
+
+function autocompletesCP(){
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_origen_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $ivalor = $this.parent().find('#cp_ubic_origen_residenciaFiscal');
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $ivalor.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $ivalor.val('');
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_destino_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $ivalor = $this.parent().find('#cp_ubic_destino_residenciaFiscal');
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $ivalor.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $ivalor.val('');
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_pais:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_estado:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $pais_obj = $this.parent().find('#cp_ubic_dom_pais');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cestados',
+          dataType: "json",
+          data: {
+            'c_pais': $pais_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_municipio:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $estado_obj = $this.parent().find('#cp_ubic_dom_estado');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cmunicipios',
+          dataType: "json",
+          data: {
+            'c_estado': $estado_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_localidad:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $estado_obj = $this.parent().parent().find('#cp_ubic_dom_estado');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/clocalidades',
+          dataType: "json",
+          data: {
+            'c_estado': $estado_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_colonia:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $cp_obj = $this.parent().parent().find('#cp_ubic_dom_codigopostal');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/ccolonias',
+          dataType: "json",
+          data: {
+            'c_cp': $cp_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
 }
