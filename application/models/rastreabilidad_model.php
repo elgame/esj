@@ -1857,6 +1857,7 @@ class rastreabilidad_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('L', 'mm', 'Letter');
       $pdf->show_head = true;
+      $pdf->titulo2 = "Rendimiento por Lote del {$fecha}";
 
       $pdf->AliasNbPages();
       $pdf->SetFont('helvetica','', 8);
