@@ -225,7 +225,7 @@ class rastreabilidad extends MY_Controller {
     if (isset($_GET['fecha']{0}))
     {
       $this->load->model('rastreabilidad_model');
-      $this->rastreabilidad_model->rpt_lotes_pdf($_GET['fecha']);
+      $this->rastreabilidad_model->rpt_lotes_pdf($_GET['fecha'], $_GET['areaid']);
     }
     else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
   }

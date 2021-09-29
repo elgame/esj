@@ -1851,7 +1851,7 @@ class rastreabilidad_model extends CI_Model {
     *
     * @return void
     */
-   public function rpt_lotes_pdf($fecha)
+   public function rpt_lotes_pdf($fecha, $areaId)
    {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
@@ -1874,7 +1874,7 @@ class rastreabilidad_model extends CI_Model {
           LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre
           LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
           LEFT JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
-        WHERE rr.fecha = '{$fecha}'
+        WHERE rr.fecha = '{$fecha}' AND rr.id_area = {$areaId}
         ORDER BY (rr.lote, rrc.id_rendimiento, cl.nombre, u.nombre, ca.nombre, e.nombre) ASC");
       if($query->num_rows() > 0) {
         $lotes = $query->result();
