@@ -1,5 +1,34 @@
 
  ✔ Poner en la poliza de nomina la cuenta de descuento de pension alimenticia Cta 21112000 @done (21-09-23 15:29)
+ ☐ Reporte de limon, Agregar un cuadro Devolucion de fruta igual que la de compra de fruta empacada
+   -- pcc
+      CREATE TABLE otros.existencias_limon_devolucion_fruta (
+            id bigserial NOT NULL,
+            id_unidad integer NOT NULL,
+            id_area integer NOT NULL DEFAULT 2,
+            id_calibre integer,
+            fecha date NOT NULL,
+            no_caja integer NOT NULL DEFAULT 1,
+            costo double precision NOT NULL DEFAULT 0,
+            kilos double precision NOT NULL DEFAULT 0,
+            cantidad double precision NOT NULL DEFAULT 0,
+            importe double precision NOT NULL DEFAULT 0,
+            CONSTRAINT existencias_limon_devolucion_fruta_pkey PRIMARY KEY (id),
+            CONSTRAINT existencias_limon_devolucion_fruta_id_area_fkey FOREIGN KEY (id_area)
+                REFERENCES public.areas (id_area) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            CONSTRAINT existencias_limon_devolucion_fruta_id_calibre_fkey FOREIGN KEY (id_calibre)
+                REFERENCES public.calibres (id_calibre) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            CONSTRAINT existencias_limon_devolucion_fruta_id_unidad_fkey FOREIGN KEY (id_unidad)
+                REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        ) TABLESPACE pg_default;
+      ALTER TABLE otros.existencias_limon_devolucion_fruta OWNER to programa;
+      COMMENT ON TABLE otros.existencias_limon_devolucion_fruta IS 'Cuando regresan fruta de una venta';
  ✔ En reporte de costo de limon hacer los cambios que tryana comenta en el what @done (21-09-23 22:54)
    -- pcc|san
      ALTER TABLE public.rastria_rendimiento_clasif ADD COLUMN fruta_com boolean DEFAULT false;

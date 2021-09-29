@@ -104,6 +104,7 @@ class existencias_limon_model extends CI_Model {
       'existencia_piso'       => [],
       'existencia_reproceso'  => [],
       'compra_fruta_empacada' => [],
+      'devolucion_fruta'      => [],
       'costo_ventas'          => [],
       'costo_ventas_fletes'   => [],
       'comision_terceros'     => [],
@@ -229,6 +230,24 @@ class existencias_limon_model extends CI_Model {
     if ($compra_fruta_empacada->num_rows() > 0)
     {
       $info['compra_fruta_empacada'] = $compra_fruta_empacada->result();
+    }
+
+    // Devolucion fruta
+    $id_calibree = ($id_area == 2? 135: 135); // A granel
+    $devolucion_fruta = $this->db->query(
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_devolucion_fruta ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($devolucion_fruta->num_rows() > 0)
+    {
+      $info['devolucion_fruta'] = $devolucion_fruta->result();
     }
 
     // Existencia reproceso
@@ -486,6 +505,27 @@ class existencias_limon_model extends CI_Model {
         $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
+    foreach ($info['devolucion_fruta'] as $key => $item) {
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
+      } else {
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
+      }
+    }
 
 
     $existencia_data = $this->db->query(
@@ -568,7 +608,7 @@ class existencias_limon_model extends CI_Model {
       }
     }
 
-    // Compra de piso empacada
+    // Compra de fruta empacada
     $this->db->delete('otros.existencias_limon_compra_fruta', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
     $compra_fruta_empacada = [];
     if (!empty($data['frutaCompra_id_unidad'])) {
@@ -589,6 +629,30 @@ class existencias_limon_model extends CI_Model {
       if (count($compra_fruta_empacada) > 0)
       {
         $this->db->insert_batch('otros.existencias_limon_compra_fruta', $compra_fruta_empacada);
+      }
+    }
+
+    // Devolucion de fruta
+    $this->db->delete('otros.existencias_limon_devolucion_fruta', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    $devolucion_fruta = [];
+    if (!empty($data['devFruta_id_unidad'])) {
+      foreach ($data['devFruta_id_unidad'] as $key => $id_cat)
+      {
+        $devolucion_fruta[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['devFruta_id_calibre'][$key],
+          'id_unidad'  => $data['devFruta_id_unidad'][$key],
+          'costo'      => $data['devFruta_costo'][$key],
+          'kilos'      => $data['devFruta_kilos'][$key],
+          'cantidad'   => $data['devFruta_cantidad'][$key],
+          'importe'    => $data['devFruta_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+        );
+      }
+      if (count($devolucion_fruta) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_devolucion_fruta', $devolucion_fruta);
       }
     }
 
@@ -1095,6 +1159,60 @@ class existencias_limon_model extends CI_Model {
       MyString::formatoNumero($frutaCompra_importe, 2, '', false),
     ), false, 'B');
 
+    // Devolucion de fruta
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('DEVOLUCIÓN DE FRUTA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $devFruta_kilos = $devFruta_cantidad = $devFruta_importe = 0;
+    foreach ($caja['devolucion_fruta'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $devFruta_kilos    += floatval($existencia->kilos);
+      $devFruta_cantidad += floatval($existencia->cantidad);
+      $devFruta_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($devFruta_kilos, 2, '', false),
+      MyString::formatoNumero($devFruta_cantidad, 2, '', false),
+      MyString::formatoNumero(($devFruta_importe/($devFruta_cantidad==0? 1: $devFruta_cantidad)), 2, '', false),
+      MyString::formatoNumero($devFruta_importe, 2, '', false),
+    ), false, 'B');
+
     // COMPARA DE LIMON
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -1514,8 +1632,8 @@ class existencias_limon_model extends CI_Model {
 
 
     // TOTALES
-    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
-    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos;
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
@@ -1548,6 +1666,11 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->Row(array('(+) KGS COMPRADOS EMPACADOS', MyString::formatoNumero($frutaCompra_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_kilos, 2, '', false)), true, 'B');
 
     ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
     $pdf->SetFont('Arial', 'B', 9);
@@ -1595,6 +1718,11 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 9);
     $pdf->SetXY(120, $pdf->GetY());
     $pdf->Row(array('(-) COMPRA DE FRUTA EMPACADA', MyString::formatoNumero($frutaCompra_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_importe, 2, '', false)), true, 'B');
 
     $pdf->SetFont('Arial', '', 8);
     $pdf->chkSaltaPag([120, 10]);
