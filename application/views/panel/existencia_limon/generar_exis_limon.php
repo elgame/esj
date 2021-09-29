@@ -507,6 +507,100 @@
                     </div>
                     <!--/ Compra de fruta empacada -->
 
+                    <!-- Devolución de fruta -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-devolucion-fruta">
+                          <thead>
+                            <tr>
+                              <th colspan="6">DEVOLUCIÓN DE FRUTA</th>
+                              <th>
+                                <button type="button" class="btn btn-success" id="btnAddDevFruta"><i class="icon-plus"></i></button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>CALIBRE</th>
+                              <th>UNIDAD</th>
+                              <th>CANTIDAD</th>
+                              <th>KILOS</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $devFruta_kilos = $devFruta_cantidad = $devFruta_importe = 0;
+                            if (isset($_POST['devFruta_id_unidad'])) {
+                              foreach ($_POST['devFruta_id_unidad'] as $keyp => $existencia) {
+                                $devFruta_kilos    += floatval($_POST['devFruta_kilos'][$keyp]);
+                                $devFruta_cantidad += floatval($_POST['devFruta_cantidad'][$keyp]);
+                                $devFruta_importe  += floatval($_POST['devFruta_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="devFruta_calibre[]" value="<?php echo $_POST['devFruta_calibre'][$keyp] ?>" class="span12 devFruta_calibre" required>
+                                  <input type="hidden" name="devFruta_id_calibre[]" value="<?php echo $_POST['devFruta_id_calibre'][$keyp] ?>" class="span12 devFruta_id_calibre" required>
+                                </td>
+                                <td>
+                                  <select name="devFruta_id_unidad[]" class="span12 devFruta_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $_POST['devFruta_id_unidad'][$keyp]? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="devFruta_cantidad[]" value="<?php echo $_POST['devFruta_cantidad'][$keyp] ?>" class="span12 vpositive devFruta_cantidad" required></td>
+                                <td><input type="text" name="devFruta_kilos[]" value="<?php echo $_POST['devFruta_kilos'][$keyp] ?>" class="span12 vpositive devFruta_kilos" readonly></td>
+                                <td><input type="text" name="devFruta_costo[]" value="<?php echo $_POST['devFruta_costo'][$keyp] ?>" class="span12 vpositive devFruta_costo" required></td>
+                                <td><input type="text" name="devFruta_importe[]" value="<?php echo $_POST['devFruta_importe'][$keyp] ?>" class="span12 vpositive devFruta_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger devFruta_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['devolucion_fruta'] as $existencia) {
+                                $devFruta_kilos    += floatval($existencia->kilos);
+                                $devFruta_cantidad += floatval($existencia->cantidad);
+                                $devFruta_importe  += floatval($existencia->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="devFruta_calibre[]" value="<?php echo $existencia->calibre ?>" class="span12 devFruta_calibre" required>
+                                  <input type="hidden" name="devFruta_id_calibre[]" value="<?php echo $existencia->id_calibre ?>" class="span12 devFruta_id_calibre" required>
+                                </td>
+                                <td>
+                                  <select name="devFruta_id_unidad[]" class="span12 devFruta_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $existencia->id_unidad? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="devFruta_cantidad[]" value="<?php echo $existencia->cantidad ?>" class="span12 vpositive devFruta_cantidad" required></td>
+                                <td><input type="text" name="devFruta_kilos[]" value="<?php echo $existencia->kilos ?>" class="span12 vpositive devFruta_kilos" readonly></td>
+                                <td><input type="text" name="devFruta_costo[]" value="<?php echo $existencia->costo ?>" class="span12 vpositive devFruta_costo" required></td>
+                                <td><input type="text" name="devFruta_importe[]" value="<?php echo $existencia->importe ?>" class="span12 vpositive devFruta_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger devFruta_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th id="devFrutaCantidad"><?php echo $devFruta_cantidad ?></th>
+                              <th id="devFrutaKilos"><?php echo $devFruta_kilos ?></th>
+                              <th colspan="2"></th>
+                              <th id="devFrutaImporte"><?php echo $devFruta_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Devolución de fruta -->
+
                     <!-- Compra de fruta -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">

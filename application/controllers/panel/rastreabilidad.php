@@ -25,6 +25,7 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_get_lotes/',
     'rastreabilidad/rrl_pdf/',
     'rastreabilidad/rrl_xls/',
+    'rastreabilidad/rpt_lotes_pdf/',
 
     'rastreabilidad/siguiente_lote/',
   );
@@ -215,6 +216,16 @@ class rastreabilidad extends MY_Controller {
     {
       $this->load->model('rastreabilidad_model');
       $this->rastreabilidad_model->rpl_pdf($_GET['glote']);
+    }
+    else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
+  }
+
+  public function rpt_lotes_pdf()
+  {
+    if (isset($_GET['fecha']{0}))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rpt_lotes_pdf($_GET['fecha']);
     }
     else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
   }
