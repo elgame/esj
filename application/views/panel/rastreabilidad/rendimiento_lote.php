@@ -69,7 +69,7 @@
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $dia_semana ?></span></td>
 
                         <td style="text-align: center;">
-                          <input type="date" name="gfechaLote" value="<?php echo set_value_get('gfechaLote', $fecha_lote); ?>" id="gfechaLote" class="span8"
+                          <input type="date" name="gfechaLote" value="<?php echo $fecha_lote; ?>" id="gfechaLote" class="span8"
                             style="margin: -7px auto 0 auto; text-align: center;" maxlength="10">
                         </td>
 
