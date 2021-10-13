@@ -372,4 +372,280 @@ function autocompletesCP(){
     });
   });
 
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_origen_numEstacion:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $nEstacionTxt = $this.parent().parent().find('#cp_ubic_origen_numEstacion_text'),
+    $nomEstacionTxt = $this.parent().parent().find('#cp_ubic_origen_nombreEstacion');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cnumEstacion',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.item.clave_identificacion);
+          $nEstacionTxt.val(ui.item.value);
+          $nomEstacionTxt.val(ui.item.item.descripcion);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $nEstacionTxt.val('');
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_destino_numEstacion:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $nEstacionTxt = $this.parent().parent().find('#cp_ubic_destino_numEstacion_text'),
+    $nomEstacionTxt = $this.parent().parent().find('#cp_ubic_destino_nombreEstacion');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cnumEstacion',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.item.clave_identificacion);
+          $nEstacionTxt.val(ui.item.value);
+          $nomEstacionTxt.val(ui.item.item.descripcion);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $nEstacionTxt.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_bienesTransp_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $bienesTransp = $this.parent().parent().find('#mcpsat_bienesTransp');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos33/claveProdServ',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $bienesTransp.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $bienesTransp.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_claveSTCC_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $claveSTCC = $this.parent().parent().find('#mcpsat_claveSTCC');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cclaveStcc',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $claveSTCC.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $claveSTCC.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_claveUnidad_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $claveUnidad = $this.parent().parent().find('#mcpsat_claveUnidad');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos33/claveUnidad',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $claveUnidad.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $claveUnidad.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_cveMaterialPeligroso_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $claveMatPel = $this.parent().parent().find('#mcpsat_cveMaterialPeligroso');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cclaveMatPeligro',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $claveMatPel.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $claveMatPel.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_fraccionArancelaria_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $fracArance = $this.parent().parent().find('#mcpsat_fraccionArancelaria');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/fraccionArancelaria',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.item.descripcion);
+          $fracArance.val(ui.item.value);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $fracArance.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_detalleMercancia_unidadPeso_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $unidadPeso = $this.parent().parent().find('#mcpsat_detalleMercancia_unidadPeso');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cunidadPeso',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $unidadPeso.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $unidadPeso.val('');
+      }
+    });
+  });
+
 }
