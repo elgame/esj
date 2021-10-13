@@ -649,7 +649,7 @@ class devoluciones_iva_model extends privilegios_model{
     $sql_fecha = "'{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     $facturas = $this->db->query(
-      "SELECT d.*, cp.id_producto, cp.descripcion, (cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
+      "SELECT d.*, cp.id_producto, cp.descripcion, cp.cantidad, --(cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
         cp.precio_unitario, cp.importe, cp.iva, cp.ieps, cp.porcentaje_ieps, pu.id_unidad, pu.abreviatura,
         pu.nombre as unidad
       FROM (
