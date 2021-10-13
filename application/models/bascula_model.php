@@ -4323,6 +4323,7 @@ class bascula_model extends CI_Model {
       $file = $this->upload->data();
       $boletasData = [];
       $val_resumenok = [];
+      $foliosLink = [];
 
       $handle = fopen($file['full_path'], "r");
       if ($handle) {
@@ -4407,9 +4408,9 @@ class bascula_model extends CI_Model {
         if (count($val_resumen) > 0) {
           return ['error' => '503', 'resumen' => $val_resumen];
         } else {
-          // Se guardan todas las recetas
+          // Se guardan todas las boletas
           foreach ($boletasData as $key => $boleta) {
-            $this->saveBoletaData($boleta);
+            $foliosLink[] = $this->saveBoletaData($boleta);
           }
         }
 
@@ -4417,7 +4418,7 @@ class bascula_model extends CI_Model {
         return array('error' => '502');
       }
 
-      return array('error' => '500', 'resumenok' => $val_resumenok);
+      return array('error' => '500', 'resumenok' => $val_resumenok, 'print' => 'http://192.168.1.30/sanjorge/panel/bascula/imprimir/?id='.implode(',', $foliosLink));
     }
   }
 
@@ -4432,6 +4433,7 @@ class bascula_model extends CI_Model {
       $value['id_bascula'] = $idb;
       $this->db->insert('bascula_compra', $value);
     }
+    return $idb;
   }
 
   private function validaBoletasIntangibles(&$boleta, &$val_resumen)
