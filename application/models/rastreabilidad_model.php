@@ -1951,13 +1951,13 @@ class rastreabilidad_model extends CI_Model {
       $pdf->SetFont('Arial','B', 6);
       $pdf->SetX(6);
       $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
-      $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
+      $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD'), FALSE, FALSE);
 
       $pdf->SetFont('Arial','', 7);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
 
       $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
       foreach ($caja['existencia'] as $existencia) {
@@ -1981,8 +1981,8 @@ class rastreabilidad_model extends CI_Model {
             $existencia->unidad,
             MyString::formatoNumero($existencia->kilos, 2, '', false),
             MyString::formatoNumero($existencia->cantidad, 2, '', false),
-            MyString::formatoNumero($existencia->costo, 2, '', false),
-            MyString::formatoNumero($existencia->importe, 2, '', false),
+            // MyString::formatoNumero($existencia->costo, 2, '', false),
+            // MyString::formatoNumero($existencia->importe, 2, '', false),
           ), false, 'B');
         }
       }
