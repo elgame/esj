@@ -544,7 +544,11 @@ class existencias_limon_model extends CI_Model {
     $info['existencia'] = $existencia;
 
 
-    $info['guardado'] = isset($existencia_data[0])? true: false;
+    // Dia guardado
+    $count_save = $this->db->query("SELECT Count(*) AS num
+      FROM otros.existencias_limon
+      WHERE fecha = '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}")->row();
+    $info['guardado'] = $count_save->num > 0? true: false;
 
 
     return $info;
