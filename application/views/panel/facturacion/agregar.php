@@ -1968,16 +1968,59 @@
                         <table class="table table-hover table-condensed" id="table-mercanciass">
                           <thead>
                             <tr>
-                              <th>ddd</th>
-                              <th>ddd</th>
-                              <th>ddd</th>
+                              <th>BIENES</th>
+                              <th>DESCRIPCIÓN</th>
+                              <th>CANTIDAD</th>
+                              <th>CLAVE UNIDAD</th>
+                              <th>PESO EN KG</th>
+                              <th>Opc</th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td>dd</td>
-                              <td>dd</td>
-                              <td>dd</td>
+                            <tr class="cp-mercans" data-row="0">
+                              <td>
+                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp]" value="" class="cpMercans-bienesTransp">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp_text]" value="" class="cpMercans-bienesTransp_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC]" value="" class="cpMercans-claveSTCC">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC_text]" value="" class="cpMercans-claveSTCC_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][descripcion]" value="" class="cpMercans-descripcion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidad]" value="" class="cpMercans-cantidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad]" value="" class="cpMercans-claveUnidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad_text]" value="" class="cpMercans-claveUnidad_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][unidad]" value="" class="cpMercans-unidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][dimensiones]" value="" class="cpMercans-dimensiones">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][materialPeligroso]" value="" class="cpMercans-materialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso]" value="" class="cpMercans-cveMaterialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso_text]" value="" class="cpMercans-cveMaterialPeligroso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][embalaje]" value="" class="cpMercans-embalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][descripEmbalaje]" value="" class="cpMercans-descripEmbalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][pesoEnKg]" value="" class="cpMercans-pesoEnKg">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][valorMercancia]" value="" class="cpMercans-valorMercancia">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][moneda]" value="" class="cpMercans-moneda">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria]" value="" class="cpMercans-fraccionArancelaria">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria_text]" value="" class="cpMercans-fraccionArancelaria_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][uuidComercioExt]" value="" class="cpMercans-uuidComercioExt">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cantidad]" value="" class="cpMercans-cantTrans-cantidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idOrigen]" value="" class="cpMercans-cantTrans-idOrigen">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idDestino]" value="" class="cpMercans-cantTrans-idDestino">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cvesTransporte]" value="" class="cpMercans-cantTrans-cvesTransporte">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso]" value="" class="cpMercans-detaMerca-unidadPeso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso_text]" value="" class="cpMercans-detaMerca-unidadPeso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoBruto]" value="" class="cpMercans-detaMerca-pesoBruto">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoNeto]" value="" class="cpMercans-detaMerca-pesoNeto">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoTara]" value="" class="cpMercans-detaMerca-pesoTara">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][numPiezas]" value="" class="cpMercans-detaMerca-numPiezas">
+                              </td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td style="width: 20px;">
+                                <button class="btn btn-cp-editMercancia">Editar</button>
+                                <button class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+                              </td>
                             </tr>
                           </tbody>
                         </table>
@@ -2018,16 +2061,16 @@
           </label>
         </div>
         <div class="span4">
-          <label class="control-label" for="mcpsat_descripcion_text">Descripcion
-            <input type="text" id="mcpsat_descripcion_text" class="span12" value="">
+          <label class="control-label" for="mcpsat_descripcion">Descripcion
+            <input type="text" id="mcpsat_descripcion" class="span12" value="">
           </label>
         </div>
       </div>
 
       <div class="row-fluid">
         <div class="span4">
-          <label class="control-label" for="mcpsat_cantidad_text">Cantidad
-            <input type="number" id="mcpsat_cantidad_text" class="span12" value="">
+          <label class="control-label" for="mcpsat_cantidad">Cantidad
+            <input type="number" id="mcpsat_cantidad" class="span12" value="">
           </label>
         </div>
         <div class="span4">
@@ -2253,6 +2296,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="btn-add-CpProductoModal">Agregar</button>
     </div>
   </div>
 

@@ -756,7 +756,9 @@ var autocompleteFraccionArancelaria = function () {
         var $empresa =  $(this),
         $tr = $empresa.parent().parent();
 
-        $empresa.val(ui.item.id).css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $empresa.val(ui.item.id).css("background-color", "#A1F57A");
+        }, 300);
         $tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]').prop('selected', true);
         console.log($tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]'), $tr);
       }

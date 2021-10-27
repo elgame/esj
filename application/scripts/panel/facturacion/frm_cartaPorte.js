@@ -3,6 +3,7 @@ $(function(){
 
   eventAddCpUbicaciones();
   eventAddCpCantidadTransporta();
+  eventAddCpProductoModal();
 });
 
 function eventAddCpUbicaciones() {
@@ -177,6 +178,66 @@ function eventAddCpCantidadTransporta() {
   $('#table-mcpsat_cantidadTransporta tbody').on('click', 'i.delete', function(){
     const $tr = $(this).parent().parent();
     $tr.remove();
+  });
+}
+
+function eventAddCpProductoModal() {
+  var cpnumrowsmercans = 0;
+  $("#btn-add-CpProductoModal").click(function(event) {
+    cpnumrowsmercans++;
+
+    let cantidadTransporta = '', trrm = undefined;
+    $("#table-mcpsat_cantidadTransporta tbody tr").each(function(index, el) {
+      cantidadTransporta += `
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][cantidad]" value="${$('.mcpsat_cantidadTransporta_cantidad', el).val()}" class="cpMercans-cantTrans-cantidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
+    });
+    let htmlrow = `
+      <tr class="cp-mercans" data-row="${cpnumrowsmercans}">
+        <td>
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][bienesTransp]" value="${$('#mcpsat_bienesTransp').val()}" class="cpMercans-bienesTransp">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][bienesTransp_text]" value="${$('#mcpsat_bienesTransp_text').val()}" class="cpMercans-bienesTransp_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][claveSTCC]" value="${$('#mcpsat_claveSTCC').val()}" class="cpMercans-claveSTCC">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][claveSTCC_text]" value="${$('#mcpsat_claveSTCC_text').val()}" class="cpMercans-claveSTCC_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][descripcion]" value="${$('#mcpsat_descripcion').val()}" class="cpMercans-descripcion">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidad]" value="${$('#mcpsat_cantidad').val()}" class="cpMercans-cantidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][claveUnidad]" value="${$('#mcpsat_claveUnidad').val()}" class="cpMercans-claveUnidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][claveUnidad_text]" value="${$('#mcpsat_claveUnidad_text').val()}" class="cpMercans-claveUnidad_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][unidad]" value="${$('#mcpsat_unidad').val()}" class="cpMercans-unidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][dimensiones]" value="${$('#mcpsat_dimensiones').val()}" class="cpMercans-dimensiones">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][materialPeligroso]" value="${$('#mcpsat_materialPeligroso').val()}" class="cpMercans-materialPeligroso">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cveMaterialPeligroso]" value="${$('#mcpsat_cveMaterialPeligroso').val()}" class="cpMercans-cveMaterialPeligroso">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cveMaterialPeligroso_text]" value="${$('#mcpsat_cveMaterialPeligroso_text').val()}" class="cpMercans-cveMaterialPeligroso_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][embalaje]" value="${$('#mcpsat_embalaje').val()}" class="cpMercans-embalaje">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][descripEmbalaje]" value="${$('#mcpsat_descripEmbalaje').val()}" class="cpMercans-descripEmbalaje">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][pesoEnKg]" value="${$('#mcpsat_pesoEnKg').val()}" class="cpMercans-pesoEnKg">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][valorMercancia]" value="${$('#mcpsat_valorMercancia').val()}" class="cpMercans-valorMercancia">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][moneda]" value="${$('#mcpsat_moneda').val()}" class="cpMercans-moneda">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][fraccionArancelaria]" value="${$('#mcpsat_fraccionArancelaria').val()}" class="cpMercans-fraccionArancelaria">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][fraccionArancelaria_text]" value="${$('#mcpsat_fraccionArancelaria_text').val()}" class="cpMercans-fraccionArancelaria_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][uuidComercioExt]" value="${$('#mcpsat_uuidComercioExt').val()}" class="cpMercans-uuidComercioExt">
+
+          ${cantidadTransporta}
+
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][unidadPeso]" value="${$('#mcpsat_detalleMercancia_unidadPeso').val()}" class="cpMercans-detaMerca-unidadPeso">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][unidadPeso_text]" value="${$('#mcpsat_detalleMercancia_unidadPeso_text').val()}" class="cpMercans-detaMerca-unidadPeso_text">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][pesoBruto]" value="${$('#mcpsat_detalleMercancia_pesoBruto').val()}" class="cpMercans-detaMerca-pesoBruto">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][pesoNeto]" value="${$('#mcpsat_detalleMercancia_pesoNeto').val()}" class="cpMercans-detaMerca-pesoNeto">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][pesoTara]" value="${$('#mcpsat_detalleMercancia_pesoTara').val()}" class="cpMercans-detaMerca-pesoTara">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][numPiezas]" value="${$('#mcpsat_detalleMercancia_numPiezas').val()}" class="cpMercans-detaMerca-numPiezas">
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="width: 20px;">
+          <button class="btn btn-cp-editMercancia">Editar</button>
+          <button class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+        </td>
+      </tr>`;
+    $("#table-mercanciass tbody").append(htmlrow);
   });
 }
 
@@ -644,6 +705,40 @@ function autocompletesCP(){
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
         $unidadPeso.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_fraccionArancelaria_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $facccionAran = $this.parent().parent().find('#mcpsat_fraccionArancelaria');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/fraccionArancelaria',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.label);
+          $facccionAran.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $facccionAran.val('');
       }
     });
   });
