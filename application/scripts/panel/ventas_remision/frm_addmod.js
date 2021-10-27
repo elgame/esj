@@ -382,6 +382,22 @@ $(function(){
       $td.find('.certificado').val('0');
     }
   });
+
+  // CALCULA TOTALES DE LA TABLA DE GASTOS
+  $('#table_prod2').on('keyup', '#prod_dcantidad, #prod_dpreciou, #dieps', function(e) {
+    var key = e.which,
+        $this = $(this),
+        $tr = $this.parents('tr');
+
+    if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+      calculaTotalProducto($tr);
+    }
+  }).on('change', '#prod_dcantidad, #prod_dpreciou, #dieps, #diva, #dreten_iva', function(e) {
+    var $this = $(this),
+        $tr = $this.parents('tr');
+
+    calculaTotalProducto($tr);
+  });
 });
 
 var EventOnChangeMoneda = function () {

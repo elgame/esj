@@ -420,6 +420,9 @@ class bascula extends MY_Controller {
       if (isset($res_mdl['resumenok']) && count($res_mdl['resumenok']) > 0) {
         $params['resumenok'] = $res_mdl['resumenok'];
       }
+      if (isset($res_mdl['print'])) {
+        $params['print'] = $res_mdl['print'];
+      }
     }
 
     if(isset($_GET['msg']{0}))

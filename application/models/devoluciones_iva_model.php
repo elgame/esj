@@ -649,7 +649,7 @@ class devoluciones_iva_model extends privilegios_model{
     $sql_fecha = "'{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     $facturas = $this->db->query(
-      "SELECT d.*, cp.id_producto, cp.descripcion, (cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
+      "SELECT d.*, cp.id_producto, cp.descripcion, cp.cantidad, --(cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
         cp.precio_unitario, cp.importe, cp.iva, cp.ieps, cp.porcentaje_ieps, pu.id_unidad, pu.abreviatura,
         pu.nombre as unidad
       FROM (
@@ -788,6 +788,264 @@ class devoluciones_iva_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$item->fecha.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->proveedor.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->rfc_prov.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$categoria.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descripcion.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->cantidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->unidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->importe.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->iva.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->ieps.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($item->importe+$item->iva+$item->ieps).'</td>
+        </tr>';
+
+      $subtotal += $item->importe;
+      $iva      += $item->iva;
+      $total    += ($item->importe+$item->iva+$item->ieps);
+      $ieps     += $item->ieps;
+
+      $total_subtotal += $item->importe;
+      $total_iva      += $item->iva;
+      $total_total    += ($item->importe+$item->iva+$item->ieps);
+      $total_ieps     += $item->ieps;
+
+
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="7"></td>
+          <td style="border:1px solid #000;">'.$subtotal.'</td>
+          <td style="border:1px solid #000;">'.$iva.'</td>
+          <td style="border:1px solid #000;">'.$ieps.'</td>
+          <td style="border:1px solid #000;">'.$total.'</td>
+        </tr>
+        <tr>
+          <td colspan="14"></td>
+        </tr>
+
+        <tr style="font-weight:bold">
+          <td colspan="7"></td>
+          <td style="border:1px solid #000;">'.$total_subtotal.'</td>
+          <td style="border:1px solid #000;">'.$total_iva.'</td>
+          <td style="border:1px solid #000;">'.$total_ieps.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+        </tr>
+        <tr>
+          <td colspan="14"></td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+
+  /**
+   * Reporte de ieps ventas
+   *
+   * @return
+   */
+  public function getRptIepsVentasData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if(is_array($this->input->get('ids_clientes')))
+    {
+      $sql .= " AND p.id_proveedor IN(".implode(',', $this->input->get('ids_clientes')).")";
+    }
+
+    $sql_fecha = "'{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+    $sql_fecha2 = "'{$_GET['ffecha2']}'";
+
+    $facturas = $this->db->query(
+      "SELECT d.*, cp.id_clasificacion, cp.descripcion, cp.cantidad, --(cp.cantidad * Coalesce(pp.cantidad, 1)) AS cantidad,
+        cp.precio_unitario, cp.importe, cp.iva, cp.ieps, cp.porcentaje_ieps, pu.id_unidad, pu.nombre AS abreviatura,
+        pu.nombre as unidad
+      FROM (
+          SELECT
+            f.id_factura,
+            f.serie,
+            f.folio,
+            Date(f.fecha) AS fecha,
+            COALESCE(f.total, 0) AS total,
+            COALESCE(ac.abono, 0) AS abonos,
+            (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(15,2) AS saldo,
+            acf.fecha AS fecha_pago,
+            c.id_cliente, c.nombre_fiscal AS cliente, c.rfc AS rfc_cliente
+          FROM
+            facturacion AS f
+            INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+            INNER JOIN (
+              SELECT id_factura, Sum(abono) AS abono
+              FROM (
+                (
+                  SELECT
+                  id_factura,
+                  Sum(total) AS abono
+                  FROM
+                  facturacion_abonos as fa
+                  GROUP BY id_factura
+                )
+                UNION
+                (
+                  SELECT
+                  id_nc AS id_factura,
+                  Sum(total) AS abono
+                  FROM
+                  facturacion
+                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+                  GROUP BY id_nc
+                )
+              ) AS ffs
+              GROUP BY id_factura
+            ) AS ac ON f.id_factura = ac.id_factura
+            INNER JOIN (
+              SELECT distinct on(id_factura) id_factura, fecha
+              FROM (
+                (
+                  SELECT
+                  id_factura, Date(fecha) AS fecha
+                  FROM
+                  facturacion_abonos as fa
+                )
+                UNION
+                (
+                  SELECT
+                  id_nc AS id_factura, Date(fecha) AS fecha
+                  FROM
+                  facturacion
+                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+                )
+              ) AS fff
+              WHERE fecha <= {$sql_fecha2}
+              ORDER BY id_factura, fecha DESC
+            ) AS acf ON f.id_factura = acf.id_factura
+            -- LEFT JOIN (
+            --   SELECT id_remision, id_factura, status
+            --   FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+            -- ) fh ON f.id_factura = fh.id_remision
+          WHERE f.id_abono_factura IS NULL
+            AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+            AND (Date(f.fecha) BETWEEN {$sql_fecha})
+            AND f.is_factura = 't'
+            AND (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(15,2) <= 0
+             {$sql}
+            -- AND COALESCE(fh.id_remision, 0) = 0
+          ORDER BY fecha ASC, serie ASC, folio ASC
+        ) d
+        INNER JOIN facturacion_productos cp ON cp.id_factura = d.id_factura
+        INNER JOIN clasificaciones AS pr ON pr.id_clasificacion = cp.id_clasificacion
+        INNER JOIN unidades AS pu ON pu.id_unidad = pr.id_unidad
+      WHERE cp.ieps > 0 AND d.fecha BETWEEN {$sql_fecha}
+        ORDER BY cp.porcentaje_ieps ASC
+      ");
+    $response = $facturas->result();
+
+    return $response;
+  }
+  public function getRptIepsVentasXls($show = false)
+  {
+    if (!$show) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=rpt_ieps_ventas.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getRptIepsVentasData();
+    // echo "<pre>";
+    // var_dump($res);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de IEPS Ventas';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="11" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="11" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="11" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="11"></td>
+        </tr>
+
+        ';
+
+    $porcentaje_ieps = '';
+    $total_subtotal = $total_iva = $total_total = $total_ieps = 0;
+    $subtotal = $iva = $total = $ieps = $ret_iva = 0;
+    foreach($res as $key => $item){
+      if ($porcentaje_ieps != $item->porcentaje_ieps) {
+        if ($key > 0) {
+          $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="7"></td>
+            <td style="border:1px solid #000;">'.$subtotal.'</td>
+            <td style="border:1px solid #000;">'.$iva.'</td>
+            <td style="border:1px solid #000;">'.$ieps.'</td>
+            <td style="border:1px solid #000;">'.$total.'</td>
+          </tr>
+          <tr>
+            <td colspan="11"></td>
+          </tr>';
+        }
+
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha de Pago</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Categoría</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Subtotal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IVA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IEPS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+        </tr>';
+
+        $subtotal = $iva = $total = $ieps = 0;
+        $porcentaje_ieps = $item->porcentaje_ieps;
+      }
+
+      $categoria = '';
+      if ($item->porcentaje_ieps == '6') {
+        $categoria = '4';
+      } elseif ($item->porcentaje_ieps == '7') {
+        $categoria = '3';
+      } elseif ($item->porcentaje_ieps == '9') {
+        $categoria = '1, 2';
+      }
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$item->fecha_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->cliente.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->rfc_cliente.'</td>
           <td style="width:150px;border:1px solid #000;">'.$categoria.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->descripcion.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->cantidad.'</td>

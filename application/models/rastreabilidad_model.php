@@ -1931,6 +1931,62 @@ class rastreabilidad_model extends CI_Model {
       }
       $query->free_result();
 
+
+      // Reporte de limon
+      $this->load->model('existencias_limon_model');
+      $caja = $this->existencias_limon_model->get($fecha, 1, $areaId);
+
+      if (count($pdf->pages) == 0) {
+        $pdf->AddPage();
+      }
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(240, 240, 240);
+
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      $pdf->Row(array('EXISTENCIA EMPACADA'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
+      $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD'), FALSE, FALSE);
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
+
+      $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
+      foreach ($caja['existencia'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existencia_kilos    += floatval($existencia->kilos);
+        $existencia_cantidad += floatval($existencia->cantidad);
+        $existencia_importe  += floatval($existencia->importe);
+
+        if ($existencia->cantidad != 0 ) {
+          $pdf->SetX(6);
+          $pdf->Row(array(
+            $existencia->calibre,
+            $existencia->clasificacion,
+            $existencia->unidad,
+            MyString::formatoNumero($existencia->kilos, 2, '', false),
+            MyString::formatoNumero($existencia->cantidad, 2, '', false),
+            // MyString::formatoNumero($existencia->costo, 2, '', false),
+            // MyString::formatoNumero($existencia->importe, 2, '', false),
+          ), false, 'B');
+        }
+      }
+
       $pdf->Output('rendimiento_lote_'.$fecha.'.pdf', 'I');
    }
 

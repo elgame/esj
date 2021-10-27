@@ -398,7 +398,8 @@ class cuentas_pagar_model extends privilegios_model{
 						(
 							SELECT
 								id_compra,
-								Sum(total) AS abono
+								Sum(total) AS abono,
+                'a' AS tipo
 							FROM
 								compras_abonos as fa
 							WHERE Date(fecha) <= '{$fecha2}'
@@ -408,7 +409,8 @@ class cuentas_pagar_model extends privilegios_model{
 						(
 							SELECT
 								id_nc AS id_compra,
-								Sum(total) AS abonos
+								Sum(total) AS abonos,
+                'nc' AS tipo
 							FROM
 								compras
 							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL

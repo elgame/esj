@@ -60,6 +60,12 @@
               </ul>
             </div>
           <?php endif ?>
+
+          <?php if (isset($print)): ?>
+            <div class="alert alert-info">
+              <p><a href="<?php echo $print ?>"><?php echo $print ?></a></p>
+            </div>
+          <?php endif ?>
         </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success" id="btn-impirtar">Guardar</button>
