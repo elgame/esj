@@ -1,4 +1,5 @@
 
+ ☐ Agregar en los productos de almacen para ligarlos con las clasificaciones de facturacion y cuando facture agroinsumo cree una orden de compra con los productos facturados
  ✔ En reporte de ieps (devoluciones_iva/rpt_ieps) poner el mismo reporte sacando los datos de las facturas, @done (21-10-27 14:30)
    en ese mismo reporte pero de compras cuando son productos con presentacion multiplica de nuevo la cantidad de la precentacion
    -- lap|san
