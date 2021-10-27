@@ -380,58 +380,58 @@ class cuentas_cobrar_model extends privilegios_model{
     /*** Facturas y ventas en el rango de fechas ***/
     $res = $this->db->query(
       "SELECT
-      f.id_factura,
-      f.serie,
-      f.folio,
-      Date(f.fecha) AS fecha,
-      COALESCE(f.total, 0) AS cargo,
-      COALESCE(f.importe_iva, 0) AS iva,
-      COALESCE(ac.abono, 0) AS abono,
-      (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
-      (CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
-      (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-      Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-      (Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
-      ( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
-      'f' as tipo, c.nombre_fiscal AS cliente
+        f.id_factura,
+        f.serie,
+        f.folio,
+        Date(f.fecha) AS fecha,
+        COALESCE(f.total, 0) AS cargo,
+        COALESCE(f.importe_iva, 0) AS iva,
+        COALESCE(ac.abono, 0) AS abono,
+        (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+        (CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
+        (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
+        Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+        (Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
+        ( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
+        'f' as tipo, c.nombre_fiscal AS cliente
       FROM
-      facturacion AS f
-      LEFT JOIN (
-        SELECT id_factura, Sum(abono) AS abono
-        FROM (
-          (
-            SELECT
-            id_factura,
-            Sum(total) AS abono
-            FROM
-            facturacion_abonos as fa
-            WHERE Date(fecha) <= '{$fecha2}'
-            GROUP BY id_factura
-          )
-          UNION
-          (
-            SELECT
-            id_nc AS id_factura,
-            Sum(total) AS abono
-            FROM
-            facturacion
-            WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
-            {$sqlp3}
-            AND Date(fecha) <= '{$fecha2}'
-            GROUP BY id_nc
-          )
-        ) AS ffs
-        GROUP BY id_factura
-      ) AS ac ON f.id_factura = ac.id_factura {$sql}
-      LEFT JOIN (SELECT id_remision, id_factura, status
-        FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-      ) fh ON f.id_factura = fh.id_remision
-      LEFT JOIN clientes c ON c.id_cliente = f.id_cliente
-    WHERE f.id_abono_factura IS NULL
-      {$sqlp1}
-      AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
-      AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-      AND COALESCE(fh.id_remision, 0) = 0 {$sql}
+        facturacion AS f
+        LEFT JOIN (
+          SELECT id_factura, Sum(abono) AS abono
+          FROM (
+            (
+              SELECT
+              id_factura,
+              Sum(total) AS abono
+              FROM
+              facturacion_abonos as fa
+              WHERE Date(fecha) <= '{$fecha2}'
+              GROUP BY id_factura
+            )
+            UNION
+            (
+              SELECT
+              id_nc AS id_factura,
+              Sum(total) AS abono
+              FROM
+              facturacion
+              WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
+              {$sqlp3}
+              AND Date(fecha) <= '{$fecha2}'
+              GROUP BY id_nc
+            )
+          ) AS ffs
+          GROUP BY id_factura
+        ) AS ac ON f.id_factura = ac.id_factura {$sql}
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+        LEFT JOIN clientes c ON c.id_cliente = f.id_cliente
+      WHERE f.id_abono_factura IS NULL
+        {$sqlp1}
+        AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
+        AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+        AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
       ORDER BY fecha ASC, serie ASC, folio ASC
     ");
