@@ -336,10 +336,14 @@ class mypdf_ticket extends FPDF {
       $this->Row(array('CREADO:' ), false, false);
       $this->SetY($this->GetY() - 3.5);
       $this->SetFounts(array($this->fount_num, $this->fount_txt), array(0, 0));
-      if ($data->no_impresiones == 0) {
-        $this->Row(array(MyString::fechaATexto(date("Y-m-d"), '/c').' '.date("H:i:s"), $txt_impresion), false, false, 4);
+      if ($data->intangible == 't') {
+        $this->Row(array(MyString::fechaATexto(substr($data->fecha_bruto, 0, 10), '/c').' '.substr($data->fecha_bruto, -11, -3), 'ORIGINAL'), false, false, 4);
       } else {
-        $this->Row(array(MyString::fechaATexto(substr($data->fecha_imp_orig, 0, 10), '/c').' '.substr($data->fecha_imp_orig, -11, -3), 'ORIGINAL'), false, false, 4);
+        if ($data->no_impresiones == 0) {
+          $this->Row(array(MyString::fechaATexto(date("Y-m-d"), '/c').' '.date("H:i:s"), $txt_impresion), false, false, 4);
+        } else {
+          $this->Row(array(MyString::fechaATexto(substr($data->fecha_imp_orig, 0, 10), '/c').' '.substr($data->fecha_imp_orig, -11, -3), 'ORIGINAL'), false, false, 4);
+        }
       }
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetFounts(array($this->fount_txt), array(-1));
