@@ -111,7 +111,7 @@ class clientes_model extends CI_Model {
 		}
 
 		$this->db->insert('clientes', $data);
-		$id_cliente = $this->db->insert_id('clientes', 'id_cliente');
+		$id_cliente = $this->db->insert_id('clientes_id_cliente_seq');
 		$this->addDocumentos($id_cliente);
     $this->addCuentas($id_cliente);
 

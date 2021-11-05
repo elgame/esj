@@ -70,7 +70,7 @@ $(function(){
   });
 
   $("#dempresa").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/?all=1',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

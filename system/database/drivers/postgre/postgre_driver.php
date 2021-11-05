@@ -552,6 +552,7 @@ class CI_DB_postgre_driver extends CI_DB {
 	 */
 	function _insert($table, $keys, $values)
 	{
+    log_message('error', "INSERT INTO ".$table." (".implode(', ', $keys).") VALUES (".implode(', ', $values).")");
 		return "INSERT INTO ".$table." (".implode(', ', $keys).") VALUES (".implode(', ', $values).")";
 	}
 

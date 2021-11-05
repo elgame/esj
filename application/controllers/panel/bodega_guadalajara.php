@@ -20,6 +20,8 @@ class bodega_guadalajara extends MY_Controller {
     'bodega_guadalajara/rpt_ingresos_xls/',
     'bodega_guadalajara/rpt_estado_res_pdf/',
     'bodega_guadalajara/rpt_estado_res_xls/',
+    'bodega_guadalajara/agregar_abono_deudor/',
+    'bodega_guadalajara/quitar_abono_deudor/',
   );
 
   public function _remap($method)
@@ -513,6 +515,117 @@ class bodega_guadalajara extends MY_Controller {
   {
     $this->load->model('bodega_guadalajara_model');
     echo json_encode($this->bodega_guadalajara_model->ajaxCategorias());
+  }
+
+
+  public function agregar_abono_deudor() {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('bodega_guadalajara_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Agregar abonos');
+
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
+    {
+      $params['id'] = $_GET['id'];
+      $params['fecha'] = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto'] = $_GET['monto'];
+
+      if (isset($_POST['btnGuardarAbono'])) {
+        $_POST = array_merge($_POST, $_GET);
+      }
+
+      $this->configAddAbonoDeudor();
+      if($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $respons = $this->bodega_guadalajara_model->addAbonoDeudor($_POST);
+
+        $params['closeModal'] = true;
+        $params['frm_errors'] = $this->showMsgs(4);
+      }
+
+      $params['deudor'] = $this->bodega_guadalajara_model->getInfoDeudor($params['id']);
+
+    }else
+      $_GET['msg'] = 1;
+
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/bodega_guadalajara/agregar_abonos_deudor', $params);
+  }
+
+  public function quitar_abono_deudor() {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('bodega_guadalajara_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Agregar abonos');
+
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
+    {
+      $params['id']      = $_GET['id'];
+      $params['fecha']   = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto']   = $_GET['monto'];
+
+      $this->db->delete('otros.bodega_deudores_pagos', ["id_deudor" => $_GET['id'], "fecha_creacion" => $_GET['fecha_creacion']]);
+      $this->agregar_abono_deudor();
+    } else
+      $_GET['msg'] = 1;
+  }
+
+  public function configAddAbonoDeudor()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'dmonto',
+            'label' => 'Monto',
+            'rules' => 'required|numeric'),
+      array('field' => 'id',
+            'label' => 'Id deuda',
+            'rules' => 'required|numeric'),
+      array('field' => 'fecha',
+            'label' => 'Fecha pago',
+            'rules' => 'required'),
+      array('field' => 'no_caja',
+            'label' => 'No Caja',
+            'rules' => 'required|numeric'),
+      array('field' => 'monto',
+            'label' => 'Deuda',
+            'rules' => 'required|numeric'),
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
 

@@ -2233,25 +2233,28 @@ class facturacion_model extends privilegios_model{
      */
     public function getFacEmpresasAjax()
     {
-        $sql = '';
+        $sql = "rfc != '' AND
+                calle != '' AND
+                no_exterior != '' AND
+                colonia != '' AND
+                localidad != '' AND
+                municipio != '' AND
+                estado != '' AND
+                regimen_fiscal != '' AND
+                cer_org != '' AND
+                cer != '' AND
+                key_path != '' AND
+                pass != '' AND
+                cfdi_version != '' AND";
+        if ($this->input->get('all') == 1) {
+          $sql = '';
+        }
         $res = $this->db->query("
             SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
                   e.no_exterior, e.no_interior, e.rfc
             FROM empresas AS e
             WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
-                  rfc != '' AND
-                  calle != '' AND
-                  no_exterior != '' AND
-                  colonia != '' AND
-                  localidad != '' AND
-                  municipio != '' AND
-                  estado != '' AND
-                  regimen_fiscal != '' AND
-                  cer_org != '' AND
-                  cer != '' AND
-                  key_path != '' AND
-                  pass != '' AND
-                  cfdi_version != '' AND
+                  {$sql}
                   status = true
             ORDER BY nombre_fiscal ASC
             LIMIT 20");

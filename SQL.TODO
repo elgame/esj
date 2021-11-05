@@ -1,4 +1,46 @@
 
+ ☐ Tienen que agregar la empresa y en caja chica una categoría
+   CREATE TABLE otros.bodega_deudores
+      (
+          id_deudor bigserial NOT NULL,
+          fecha date NOT NULL,
+          nombre character varying(150) COLLATE pg_catalog."default" NOT NULL,
+          concepto character varying(250) COLLATE pg_catalog."default" NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          no_caja integer NOT NULL DEFAULT 1,
+          no_impresiones integer NOT NULL DEFAULT 0,
+          id_usuario bigint,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          tipo character varying(30) COLLATE pg_catalog."default" NOT NULL DEFAULT 'prestamo'::character varying,
+          folio bigint,
+          CONSTRAINT bodega_deudores_pkey PRIMARY KEY (id_deudor),
+          CONSTRAINT bodega_deudores_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.bodega_deudores OWNER to programa;
+      COMMENT ON COLUMN otros.bodega_deudores.tipo IS 'prestamo: prestamos a pagar, otros: compras a empresas efectivo';
+    CREATE TABLE otros.bodega_deudores_pagos
+        (
+            id_deudor bigint NOT NULL,
+            fecha_creacion timestamp without time zone NOT NULL DEFAULT now(),
+            fecha date NOT NULL,
+            monto double precision NOT NULL DEFAULT (0)::double precision,
+            no_caja integer NOT NULL DEFAULT 1,
+            id_usuario bigint,
+            CONSTRAINT bodega_deudores_pagos_pkey PRIMARY KEY (id_deudor, fecha_creacion),
+            CONSTRAINT bodega_deudores_pagos_id_deudor_fkey FOREIGN KEY (id_deudor)
+                REFERENCES otros.bodega_deudores (id_deudor) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            CONSTRAINT bodega_deudores_pagos_id_usuario_fkey FOREIGN KEY (id_usuario)
+                REFERENCES public.usuarios (id) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        ) TABLESPACE pg_default;
+        ALTER TABLE otros.bodega_deudores_pagos OWNER to programa;
+
  ✔ Continueacion de recetas, control de saldo @done (19-11-05 13:29) pct|pcc|lap|san
      ALTER TABLE otros.recetas_productos ADD COLUMN aplicacion_total_saldo double precision NOT NULL DEFAULT 0;
      ALTER TABLE otros.recetas ADD COLUMN paso character varying(3) NOT NULL DEFAULT 'p'::character varying;
