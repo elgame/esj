@@ -231,7 +231,8 @@ class rastreabilidad_pallets extends MY_Controller {
     $this->load->model('rastreabilidad_pallets_model');
     $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
                 $this->input->get('id'), $this->input->get('idunidad'),
-                $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
+                $this->input->get('idcalibre'), $this->input->get('idetiqueta'),
+                $this->input->get('id_area'));
 
     echo json_encode($params);
   }

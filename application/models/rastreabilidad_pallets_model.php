@@ -199,21 +199,29 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	 * @param  [type] $id_clasificacion [description]
  	 * @return [type]                   [description]
  	 */
- 	public function getRendimientoLibre($id_clasificacion, $idunidad, $idcalibre, $idetiqueta){
+ 	public function getRendimientoLibre($id_clasificacion, $idunidad, $idcalibre, $idetiqueta, $idarea=null){
 		$sql = $idunidad!=''? ' AND rcl.id_unidad = '.$idunidad: '';
 		$sql .= $idcalibre!=''? ' AND rcl.id_calibre = '.$idcalibre: '';
-		$sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
+    $sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
+		if($idarea){
+      // $idss = [$idarea];
+      // if (isset($this->config->item('clasif_joins')[$idarea])) {
+      //   $idss[] = $this->config->item('clasif_joins')[$idarea];
+      // }
+      // $sql .= " AND rr.id_area in(".implode(',', $idss).")";
+      $sql .= " AND rr.id_area = {$idarea}";
+    }
  		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
- 										rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
- 										rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
- 		                           FROM rastria_rendimiento AS rr
-									INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
-									LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
-									LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
-									LEFT JOIN etiquetas AS e ON rcl.id_etiqueta = e.id_etiqueta
-									LEFT JOIN calibres AS sz ON rcl.id_size = sz.id_calibre
- 		                           WHERE rcl.id_clasificacion = {$id_clasificacion} {$sql}
- 		                           ORDER BY fecha DESC, lote ASC, unidad ASC");
+        rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
+        rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
+      FROM rastria_rendimiento AS rr
+        INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
+        LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
+        LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
+        LEFT JOIN etiquetas AS e ON rcl.id_etiqueta = e.id_etiqueta
+        LEFT JOIN calibres AS sz ON rcl.id_size = sz.id_calibre
+      WHERE rcl.id_clasificacion = {$id_clasificacion} {$sql}
+      ORDER BY fecha DESC, lote ASC, unidad ASC");
  		$response = array('rendimientos' => array());
 		if($result->num_rows() > 0)
 			$response['rendimientos'] = $result->result();

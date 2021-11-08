@@ -1030,6 +1030,103 @@
                     </div>
                     <!--/ INDUSTRIAL -->
 
+                    <!-- Gastos -->
+                    <?php $totalGastos = 0; ?>
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="2">GASTOS GENERALES
+                                          <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                        </th>
+                                        <th colspan="2">IMPORTE</th>
+                                      </tr>
+                                      <tr>
+                                        <!-- <th>COD AREA</th> -->
+                                        <th>NOMBRE</th>
+                                        <th>CONCEPTO</th>
+                                        <th>CARGO</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                        $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
+                                        $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
+
+                                        if (count($caja['gastos']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
+                                          foreach ($_POST['gasto_concepto'] as $key => $concepto) {
+                                            $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
+                                              <tr>
+                                                <!-- <td style=""> -->
+                                                  <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
+                                                  <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
+                                                  <!-- <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto"> -->
+                                                  <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
+                                                  <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
+                                                  <!-- <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i> -->
+                                                <!-- </td> -->
+                                                <td style="">
+                                                  <input type="text" name="gasto_nombre[]" value="<?php echo $_POST['gasto_nombre'][$key] ?>" class="span12 gasto-nombre" >
+                                                </td>
+                                                <td style="">
+                                                  <input type="text" name="gasto_concepto[]" value="<?php echo $_POST['gasto_concepto'][$key] ?>" class="span12 gasto-concepto" >
+                                                </td>
+                                                <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe"></td>
+                                                <td style="">
+                                                  <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                                </td>
+                                              </tr>
+                                      <?php }} else {
+                                        foreach ($caja['gastos'] as $gasto) {
+                                          $totalGastos += floatval($gasto->monto);
+                                        ?>
+                                        <tr>
+                                          <!-- <td style=""> -->
+                                            <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
+                                            <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
+                                            <!-- <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto"> -->
+                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
+                                            <input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12">
+                                            <!-- <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                            <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                              <i class="ico icon-print" style="cursor:pointer"></i></a> -->
+                                          <!-- </td> -->
+                                          <td style="">
+                                            <input type="text" name="gasto_nombre[]" value="<?php echo $gasto->nombre ?>" class="span12 gasto-nombre">
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="gasto_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto">
+                                          </td>
+                                          <td style=""><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe"></td>
+                                          <td style="">
+                                            <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                          </td>
+                                        </tr>
+                                      <?php }} ?>
+                                      <tr class="row-total">
+                                        <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                        <td></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Gastos -->
+
                 </div>
               </div>
             </div>
@@ -1043,6 +1140,126 @@
 
   <div class="clear"></div>
 
+  <!-- Modal -->
+  <div id="modalCatalogos" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalCatalogosLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalCatalogosLavel">Catálogos</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+        <div class="span6">
+          <input type="hidden" id="accion_catalogos" value="true">
+          <input type="hidden" id="accion_catalogos_tipo" value="gasto">
+          <div class="control-group">
+            <label class="control-label" for="dempresa">Empresa</label>
+            <div class="controls">
+              <input type="text" name="dempresa" class="span11" id="dempresa" value="" size="">
+              <input type="hidden" name="did_empresa" id="did_empresa" value="">
+              <input type="hidden" name="did_categoria" id="did_categoria" value="">
+            </div>
+          </div>
+
+          <div class="control-group" id="cultivosGrup">
+            <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
+              </div>
+              <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+          <div class="control-group" id="ranchosGrup">
+            <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
+              </div>
+              <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+        </div>
+
+        <div class="span6">
+          <div class="control-group" id="centrosCostosGrup">
+            <label class="control-label" for="centroCosto">Centro de costo </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+              </div>
+              <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId') ?>">
+            </div>
+          </div><!--/control-group -->
+
+          <div class="control-group" id="activosGrup">
+            <label class="control-label" for="activos">Activos </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
+              </div>
+              <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
+            </div>
+          </div><!--/control-group -->
+        </div>
+
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalCatalogosSel">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalAreas" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalAreasLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+
+        <div>
+
+      <?php foreach ($areas as $key => $value)
+      { ?>
+          <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
+            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
+                id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
+              <thead>
+                <tr>
+                  <th style="width:10px;"></th>
+                  <th>Codigo</th>
+                  <th><?php echo $value->nombre ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr class="areaClick" data-id="" data-sig="">
+                  <td><input type="radio" name="modalRadioSel" value="" data-uniform="false"></td>
+                  <td>9</td>
+                  <td>EMPAQUE</td>
+                </tr> -->
+              </tbody>
+            </table>
+          </div>
+      <?php
+      } ?>
+
+        </div>
+
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalAreasSel">Seleccionar</button>
+    </div>
+  </div>
 
   <!-- Bloque de alertas -->
   <?php if(isset($frm_errors)){

@@ -1,5 +1,57 @@
 
  ☐ Agregar en los productos de almacen para ligarlos con las clasificaciones de facturacion y cuando facture agroinsumo cree una orden de compra con los productos facturados
+    CREATE TABLE otros.existencias_limon_gastos
+        (
+            id_gasto bigserial NOT NULL,
+            concepto character varying(500) COLLATE pg_catalog."default" NOT NULL,
+            monto double precision NOT NULL DEFAULT (0)::double precision,
+            fecha date NOT NULL,
+            folio character varying(40) COLLATE pg_catalog."default" NOT NULL DEFAULT NULL::character varying,
+            no_caja integer NOT NULL DEFAULT 1,
+            id_area bigint,
+            id_cat_codigos bigint,
+            reposicion boolean NOT NULL DEFAULT false,
+            no_impresiones integer NOT NULL DEFAULT 0,
+            id_usuario bigint,
+            fecha_creacion timestamp without time zone DEFAULT now(),
+            folio_sig bigint,
+            status boolean NOT NULL DEFAULT true,
+            nombre character varying(130) COLLATE pg_catalog."default",
+            fecha_cancelado date,
+            folio_ant bigint,
+
+            id_compra bigint,
+            id_areac integer,
+            id_rancho bigint,
+            id_centro_costo bigint,
+            id_activo bigint,
+            tipo character varying(5) COLLATE pg_catalog."default" NOT NULL DEFAULT 'g'::character varying,
+            fecha_compro_gasto date,
+            monto_ini double precision DEFAULT 0,
+            CONSTRAINT existencias_limon_gastos_pkey PRIMARY KEY (id_gasto),
+            CONSTRAINT existencias_limon_gastos_id_areac_fkey FOREIGN KEY (id_area)
+                REFERENCES public.areas (id_area) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE SET NULL,
+            CONSTRAINT existencias_limon_gastos_id_cat_codigos_fkey FOREIGN KEY (id_cat_codigos)
+                REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE SET NULL,
+            CONSTRAINT existencias_limon_gastos_id_usuario_fkey FOREIGN KEY (id_usuario)
+                REFERENCES public.usuarios (id) MATCH SIMPLE
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        ) TABLESPACE pg_default;
+        ALTER TABLE otros.existencias_limon_gastos OWNER to programa;
+        COMMENT ON COLUMN otros.existencias_limon_gastos.id_areac
+            IS 'Area de bascula = Cultivos';
+        COMMENT ON COLUMN otros.existencias_limon_gastos.id_rancho
+            IS 'Areas de aplicacion = ranchos, lineas, etc';
+        COMMENT ON COLUMN otros.existencias_limon_gastos.tipo
+            IS 'g:gastos, gc: gastos por comprobar, rg: reposicion de gastos, pre: pregastos';
+        COMMENT ON COLUMN otros.existencias_limon_gastos.id_compra
+            IS 'id del gasto ligado, este tipo de gasto (de caja) no se tomaria en cuenta para los reportes';
+
  ✔ En reporte de ieps (devoluciones_iva/rpt_ieps) poner el mismo reporte sacando los datos de las facturas, @done (21-10-27 14:30)
    en ese mismo reporte pero de compras cuando son productos con presentacion multiplica de nuevo la cantidad de la precentacion
    -- lap|san

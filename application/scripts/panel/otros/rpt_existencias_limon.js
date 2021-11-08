@@ -15,6 +15,10 @@
     comisionTerceros();
     industrial();
 
+    btnAddGasto();
+    btnDelGasto();
+    onChanceImporteGastos();
+
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
   });
@@ -536,6 +540,122 @@
     });
     $('#indusKilos').text(cantidadt);
     $('#indusImporte').text(importet);
+  };
+
+
+  var btnAddGasto = function () {
+    $('#btn-add-gasto').on('click', function(event) {
+      agregarGasto();
+    });
+  };
+
+  var agregarGasto = function () {
+    var tabla_gastos = '#table-gastos';
+    var prefix_gastos = '';
+    var area = $('#area').val();
+    var areaId = $('#areaId').val();
+
+    var $table = $(tabla_gastos).find('tbody .row-total'),
+        tr =  '<tr>' +
+                (prefix_gastos!='' && prefix_gastos!='pre_'? '<td></td>': '')+
+                // '<td style="">'+
+                  '<input type="hidden" name="gasto_'+prefix_gastos+'id_gasto[]" value="" id="gasto_id_gasto">'+
+                  '<input type="hidden" name="gasto_'+prefix_gastos+'del[]" value="" id="gasto_del">'+
+                //   '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto">'+
+                  '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12">'+
+                  '<input type="hidden" name="'+prefix_gastos+'codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
+                //   '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
+                // '</td>'+
+                '<td style="">' +
+                  '<input type="text" name="gasto_'+prefix_gastos+'nombre[]" value="" class="span12 gasto-nombre">' +
+                '</td>' +
+                '<td style="">' +
+                  '<input type="text" name="gasto_'+prefix_gastos+'concepto[]" value="" class="span12 gasto-concepto">' +
+                '</td>' +
+                '<td style=""><input type="text" name="gasto_'+prefix_gastos+'importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
+                '<td style="width: 30px;">'+
+                  '<button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+                  '<button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>'+
+                '</td>' +
+              '</tr>';
+
+    $(tr).insertBefore($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var btnDelGasto = function () {
+    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos, #table-pregastos').on('click', '.btn-del-gasto', function(event) {
+      var $tr = $(this).parents('tr'),
+          id = $tr.find('.gasto-cargo-id').val(),
+          $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
+          $gasto_id_gasto = $tr.find('#gasto_id_gasto'),
+          $gasto_del = $tr.find('#gasto_del'),
+          total = 0;
+
+      if ($gasto_id_gasto.val() != '') {
+        $gasto_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
+      $('input[value="'+id+'"]').each(function(index, el) {
+        var $parent = $(this).parents('tr');
+        total += parseFloat($parent.find('.gasto-importe').val() || 0);
+      });
+
+      $totalRepo.val(total.toFixed(2));
+
+      calculaTotalGastos();
+      calculaCorte();
+    });
+
+    $('#table-gastos').on('change', '.gasto-reposicion', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.find('.gasto-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
+      console.log($tr.find('.gasto-reposicionhid').val());
+    });
+
+    $('#table-reposicionGastos').on('change', '.reposiciong-reposicion', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.find('.reposiciong-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
+      console.log($tr.find('.reposiciong-reposicionhid').val());
+    });
+  };
+
+  var onChanceImporteGastos = function () {
+    $('#table-gastos').on('keyup', '.gasto-importe', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent(),
+          total = 0;
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+
+        var id = $tr.find('.gasto-cargo-id').val(),
+            $totalRepo = $('#repo-'+id).find('.reposicion-importe');
+
+        $('input[value="'+id+'"]').each(function(index, el) {
+          var $parent = $(this).parents('tr');
+
+          total += parseFloat($parent.find('.gasto-importe').val() || 0);
+        });
+
+        $totalRepo.val(total.toFixed(2));
+
+        calculaTotalGastos();
+      }
+    });
+  };
+
+  var calculaTotalGastos = function () {
+    var total = 0;
+    $('#table-gastos .gasto-importe').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+
+    $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
+    $('input#ttotal-gastos').val(total.toFixed(2));
   };
 
 });

@@ -398,7 +398,8 @@ var addpallets = (function($){
       id: fid_clasificacion.val(),
       idunidad: fidunidad.val(),
       idcalibre: fidcalibre.val(),
-      idetiqueta: fidetiqueta.val()
+      idetiqueta: fidetiqueta.val(),
+      id_area: $("#parea").val()
     }
     $.getJSON(base_url+"panel/rastreabilidad_pallets/ajax_get_rendimientos", datavar, function(resp){
       var html = '', idrow;
