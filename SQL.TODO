@@ -1,5 +1,6 @@
 
  ☐ Agregar en los productos de almacen para ligarlos con las clasificaciones de facturacion y cuando facture agroinsumo cree una orden de compra con los productos facturados
+    -- pcc|san
     CREATE TABLE otros.existencias_limon_gastos
         (
             id_gasto bigserial NOT NULL,

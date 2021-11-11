@@ -224,6 +224,11 @@ class clasificaciones_model extends CI_Model {
       $con_inventario = true;
     }
 
+    $conArea = true;
+    if ($this->input->get('sinArea') == true) {
+      $conArea = false;
+    }
+
     $this->load->model('produccion_model');
 		$response = array();
 		if($res->num_rows() > 0){
@@ -236,8 +241,8 @@ class clasificaciones_model extends CI_Model {
         }
 				$response[] = array(
 						'id'    => $itm->id_clasificacion,
-						'label' => "{$itm->nombre} - {$itm->area}",
-						'value' => "{$itm->nombre} - {$itm->area}",
+						'label' => "{$itm->nombre}".($conArea? " - {$itm->area}": ""),
+						'value' => "{$itm->nombre}".($conArea? " - {$itm->area}": ""),
 						'item'  => $itm,
 				);
 			}
