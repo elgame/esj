@@ -382,10 +382,11 @@
                                   <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamos">
                                     <thead>
                                       <tr>
-                                        <th colspan="5">PRESTAMOS Y DEVOLUCIONES <button type="button" class="btn btn-success" id="btn-add-prestamos" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                        <th colspan="6">PRESTAMOS Y DEVOLUCIONES <button type="button" class="btn btn-success" id="btn-add-prestamos" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
                                         <th colspan="3">IMPORTE</th>
                                       </tr>
                                       <tr>
+                                        <th>EMPRESA</th>
                                         <th>CONCEPTO</th>
                                         <th>CLASIF.</th>
                                         <th>UNIDAD</th>
@@ -408,6 +409,10 @@
                                             $totalPrestamosBultos += floatval($_POST['prestamo_cantidad'][$key]);
                                           ?>
                                               <tr>
+                                                <td style="width: 100px;">
+                                                  <input type="text" name="prestamo_empresa[]" value="<?php echo $_POST['prestamo_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                                  <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $_POST['prestamo_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
+                                                </td>
                                                 <td style="width: 120px;">
                                                   <input type="text" name="prestamo_concepto[]" value="<?php echo $_POST['prestamo_concepto'][$key] ?>" class="span12" <?php echo $readonly ?>>
                                                 </td>
@@ -449,6 +454,10 @@
                                           $totalPrestamosBultos += floatval($prestamo->cantidad);
                                         ?>
                                           <tr>
+                                            <td style="width: 100px;">
+                                              <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->empresa ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                              <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $prestamo->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
+                                            </td>
                                             <td style="width: 120px;">
                                               <input type="text" name="prestamo_concepto[]" value="<?php echo $prestamo->concepto ?>" class="span12" <?php echo $readonly ?>>
                                             </td>
@@ -483,7 +492,7 @@
                                           </tr>
                                       <?php }} ?>
                                       <tr class="row-total">
-                                        <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td colspan="4" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                         <td colspan="1"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero($totalPrestamosBultos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-bultos" style="text-align: right;" readonly></td>
                                         <td colspan="1"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero(($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1)) , 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-precio" style="text-align: right;" readonly></td>
                                         <td colspan="3"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly>
@@ -515,7 +524,7 @@
                                   <table class="table table-striped table-bordered table-hover table-condensed" id="table-boletas">
                                     <thead>
                                       <tr>
-                                        <th colspan="4">VENTAS DEL DIA</th>
+                                        <th colspan="5">VENTAS DEL DIA</th>
                                         <th colspan="2">IMPORTE</th>
                                         <th colspan="3"><?php echo $_GET['ffecha'] ?>
                                           <?php echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
@@ -526,6 +535,7 @@
                                         </th>
                                       </tr>
                                       <tr>
+                                        <th>EMPRESA</th>
                                         <th>REM No.</th>
                                         <th>CLIENTE</th>
                                         <th>CLASIF.</th>
@@ -547,6 +557,7 @@
                                               $saldoVentas += floatval($venta->saldo);
                                             ?>
                                               <tr>
+                                                <td style="width: 50px;"><?php echo $venta->categoria ?></td>
                                                 <td style="width: 50px;"><?php echo $venta->serie.$venta->folio ?></td>
                                                 <td style="width: 120px;"><?php echo $venta->cliente ?>
                                                   <input type="hidden" name="venta_id_factura[]" value="<?php echo $venta->id_factura ?>">
@@ -564,7 +575,7 @@
                                     </tbody>
                                     <tbody>
                                       <tr>
-                                        <td colspan="3"><input type="hidden" value="<?php echo $totalVentas ?>" id="total-boletas"></td>
+                                        <td colspan="4"><input type="hidden" value="<?php echo $totalVentas ?>" id="total-boletas"></td>
                                         <td><?php echo MyString::formatoNumero($bultosVentas, 2, '') ?></td>
                                         <td><?php echo MyString::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '') ?></td>
                                         <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalVentas, 2, '$') ?></td>

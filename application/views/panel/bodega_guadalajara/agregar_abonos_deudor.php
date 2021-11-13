@@ -42,7 +42,7 @@
         </div>
         <div class="box-content">
 
-          <form class="form-horizontal" action="<?php echo base_url('panel/caja_chica/agregar_abono_deudor?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
+          <form class="form-horizontal" action="<?php echo base_url('panel/bodega_guadalajara/agregar_abono_deudor?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
 
             <div class="row-fluid">
               <div class="span12">
@@ -89,7 +89,7 @@
                     <td><?php echo MyString::formatoNumero($abono->monto, 2, '$') ?></td>
                     <td>
                       <?php if ($this->input->get('fecha') === $abono->fecha): ?>
-                      <a href="<?php echo base_url('panel/caja_chica/quitar_abono_deudor?'.MyString::getVarsLink(array('fecha_creacion'))."&fecha_creacion={$abono->fecha_creacion}"); ?>">Quitar</a>
+                      <a href="<?php echo base_url('panel/bodega_guadalajara/quitar_abono_deudor?'.MyString::getVarsLink(array('fecha_creacion'))."&fecha_creacion={$abono->fecha_creacion}"); ?>">Quitar</a>
                       <?php endif ?>
                     </td>
                   </tr>
@@ -129,9 +129,8 @@
   <?php if ($closeModal) { ?>
     <script>
     $(function(){
-      setInterval(function() {
+      setTimeout(function() {
         window.parent.$('#supermodal').modal('hide');
-        console.log('test', window.parent.location.href);
         window.parent.location.href = window.parent.location.href;
       }, 1000);
     });

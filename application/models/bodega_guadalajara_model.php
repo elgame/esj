@@ -367,6 +367,7 @@ class bodega_guadalajara_model extends CI_Model {
         $prestamos[] = array(
           'fecha'            => $data['fecha_caja_chica'],
           'row'              => $key,
+          'id_categoria'     => (!empty($data['prestamo_empresa_id'][$key])? $data['prestamo_empresa_id'][$key]: NULL),
           'id_unidad'        => $data['prestamo_umedida'][$key],
           'id_clasificacion' => $data['prestamo_id_prod'][$key],
           'descripcion'      => $data['prestamo_descripcion'][$key],
@@ -707,13 +708,15 @@ class bodega_guadalajara_model extends CI_Model {
     $ventas = $this->db->query(
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
         fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
-        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*fp.cantidad) AS kilos
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*fp.cantidad) AS kilos,
+        cc.id_categoria, cc.abreviatura as categoria
       FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
         INNER JOIN empresas e ON e.id_empresa = f.id_empresa
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+        LEFT JOIN cajachica_categorias as cc ON cc.id_categoria = fp.id_categoria
       WHERE f.status <> 'ca' AND f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
         AND Date(f.fecha) = '{$fecha}'
       ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC
@@ -824,10 +827,12 @@ class bodega_guadalajara_model extends CI_Model {
     $prestamos = $this->db->query(
       "SELECT DATE(bp.fecha) as fecha, bp.descripcion, bp.cantidad, bp.precio_unitario, bp.importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*bp.cantidad) AS kilos,
-        bp.concepto, bp.tipo, 0 AS id_factura, 'PP' AS serie, '' AS folio, 'Pago prestamo' AS nombre_fiscal
+        bp.concepto, bp.tipo, 0 AS id_factura, 'PP' AS serie, '' AS folio, 'Pago prestamo' AS nombre_fiscal,
+        cc.id_categoria, cc.abreviatura as empresa
       FROM otros.bodega_prestamos bp
         INNER JOIN unidades u ON u.id_unidad = bp.id_unidad
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = bp.id_clasificacion
+        LEFT JOIN cajachica_categorias cc ON cc.id_categoria = bp.id_categoria
       WHERE Date(bp.fecha) = '{$fecha}'
       ORDER BY (bp.fecha, bp.descripcion) ASC"
     )->result();
@@ -1514,17 +1519,16 @@ class bodega_guadalajara_model extends CI_Model {
       $bultosIngresosProv += floatval($remision->cantidad);
       $kilosIngresosProv += floatval($remision->kilos);
     }
-    if ($keyrm > 0) {
-      $pdf->SetFont('Arial', 'B', 7);
-      $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(22, 19, 18, 18, 27));
-      $pdf->SetX(106);
-      $pdf->Row(array('SUMAS: ',
-        MyString::formatoNumero($kilosIngresosProv, 2, '', false),
-        MyString::formatoNumero($bultosIngresosProv, 2, '', false),
-        MyString::formatoNumero($totalIngresosProv/($bultosIngresosProv>0?$bultosIngresosProv:1), 2, '', false),
-        MyString::formatoNumero($totalIngresosProv, 2, '', false)), false, false);
-    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(22, 19, 18, 18, 27));
+    $pdf->SetX(106);
+    $pdf->Row(array('SUMAS: ',
+      MyString::formatoNumero($kilosIngresosProv, 2, '', false),
+      MyString::formatoNumero($bultosIngresosProv, 2, '', false),
+      MyString::formatoNumero($totalIngresosProv/($bultosIngresosProv>0?$bultosIngresosProv:1), 2, '', false),
+      MyString::formatoNumero($totalIngresosProv, 2, '', false)), false, false);
+    // total gral
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(22, 19, 18, 18, 27));

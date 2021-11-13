@@ -341,6 +341,8 @@
                         if (isset($borrador) && ! isset($_POST['prod_did_prod']) && (isset($_GET['id_nr']) ||  isset($_GET['id_vd'])) )
                         {
                           foreach ($borrador['productos'] as $key => $p) {
+                            $_POST['prod_dcategoria'][$key]         = $p->categoria;
+                            $_POST['prod_dcategoria_id'][$key]      = $p->id_categoria;
                             $_POST['prod_dcalidad'][$key]           = $p->areas_calidad;
                             $_POST['prod_did_calidad'][$key]        = $p->id_calidad;
                             $_POST['prod_dtamanio'][$key]           = $p->areas_tamanio;
@@ -383,6 +385,11 @@
                                       <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu ventasmore">
+                                      <li class="clearfix">
+                                        <label class="pull-left">Categoría:</label> <input type="text" name="prod_dcategoria[]" value="<?php echo $_POST['prod_dcategoria'][$k]?>" id="prod_dcategoria" class="span9 gasto-cargo pull-right">
+                                        <input type="hidden" name="prod_dcategoria_id[]" value="<?php echo $_POST['prod_dcategoria_id'][$k]?>" id="prod_dcategoria_id" class="span12 gasto-cargo-id">
+                                      </li>
+                                      <li class="divider"></li>
                                       <li class="clearfix">
                                         <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="<?php echo $_POST['prod_dcalidad'][$k]?>" id="prod_dcalidad" class="span9 pull-right">
                                         <input type="hidden" name="prod_did_calidad[]" value="<?php echo $_POST['prod_did_calidad'][$k]?>" id="prod_did_calidad" class="span12">
@@ -468,6 +475,11 @@
                           <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu ventasmore">
+                          <li class="clearfix">
+                            <label class="pull-left">Categoría:</label> <input type="text" name="prod_dcategoria[]" value="" id="prod_dcategoria" class="span9 gasto-cargo pull-right">
+                            <input type="hidden" name="prod_dcategoria_id[]" value="" id="prod_dcategoria_id" class="span12 gasto-cargo-id">
+                          </li>
+                          <li class="divider"></li>
                           <li class="clearfix">
                             <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="" id="prod_dcalidad" class="span9 pull-right">
                             <input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span12">

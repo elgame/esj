@@ -119,6 +119,8 @@ $(function(){
 
   autocompleteClaveUnidadLive();
 
+  autocompleteCategoriasLive();
+
   if ($('#did_empresa').val() !== '') {
     loadSerieFolio($('#did_empresa').val());
   }
@@ -662,6 +664,11 @@ function addProducto(unidades, prod) {
                       '<span class="caret"></span>' +
                     '</button>' +
                     '<ul class="dropdown-menu ventasmore">' +
+                      '<li class="clearfix">'+
+                        '<label class="pull-left">Categoría:</label> <input type="text" name="prod_dcategoria[]" value="" id="prod_dcategoria" class="span9 gasto-cargo pull-right">'+
+                        '<input type="hidden" name="prod_dcategoria_id[]" value="" id="prod_dcategoria_id" class="span12 gasto-cargo-id">'+
+                      '</li>'+
+                      '<li class="divider"></li>'+
                       '<li class="clearfix">' +
                         '<label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="'+prod_dcalidad+'" id="prod_dcalidad" class="span9 pull-right jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                         '<input type="hidden" name="prod_did_calidad[]" value="'+prod_did_calidad+'" id="prod_did_calidad" class="span12">' +
@@ -1065,6 +1072,25 @@ function autocompleteClaveUnidadLive () {
     });
   });
 }
+
+var autocompleteCategoriasLive = function () {
+  $('body').on('focus', '.gasto-cargo:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/caja_chica/ajax_get_categorias/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $(this).parents('tr').find(".gasto-cargo-id").val(ui.item.id);
+        $(this).css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $(this).parents('tr').find(".gasto-cargo-id").val("");
+        $(this).val("").css("background-color", "#FFD9B3");
+      }
+    });
+  });
+};
 
 function valida_agregar ($tr) {
   // $tr.find("#prod_did_prod").val() === '' ||

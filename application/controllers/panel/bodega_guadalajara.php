@@ -565,7 +565,6 @@ class bodega_guadalajara extends MY_Controller {
     }else
       $_GET['msg'] = 1;
 
-
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

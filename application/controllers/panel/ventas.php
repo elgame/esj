@@ -552,6 +552,9 @@ class ventas extends MY_Controller {
       $rules[] = array('field'   => 'prod_did_prod[]',
                       'label'   => 'prod_did_prod',
                       'rules'   => '');
+      $rules[] = array('field'   => 'prod_dcategoria_id[]',
+                      'label'   => 'Categoría',
+                      'rules'   => '');
       $rules[] = array('field'   => 'prod_did_calidad[]',
                       'label'   => 'prod_did_calidad',
                       'rules'   => '');
@@ -562,11 +565,14 @@ class ventas extends MY_Controller {
       $rules[] = array('field'   => 'prod_did_prod[]',
                     'label'   => 'prod_did_prod',
                     'rules'   => 'required');
+      $rules[] = array('field'   => 'prod_dcategoria_id[]',
+                      'label'   => 'Categoría',
+                      'rules'   => 'required');
       $rules[] = array('field'   => 'prod_did_calidad[]',
-                      'label'   => 'prod_did_calidad',
+                      'label'   => 'Calidad',
                       'rules'   => 'required');
       $rules[] = array('field'   => 'prod_did_tamanio[]',
-                      'label'   => 'prod_did_tamanio',
+                      'label'   => 'Tamaño',
                       'rules'   => 'required');
     }
 

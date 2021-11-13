@@ -123,12 +123,14 @@ class Ventas_model extends privilegios_model{
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
-                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext')
+                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
+                cc.id_categoria, cc.abreviatura as categoria')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
         ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
         ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
+        ->join('cajachica_categorias as cc', 'cc.id_categoria = fp.id_categoria', 'left')
         ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
         ->get();
 
@@ -437,6 +439,7 @@ class Ventas_model extends privilegios_model{
           'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
+          'id_categoria'          => ($_POST['prod_dcategoria_id'][$key] !== ''? $_POST['prod_dcategoria_id'][$key]: NULL),
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
@@ -786,6 +789,7 @@ class Ventas_model extends privilegios_model{
           'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
+          'id_categoria'          => ($_POST['prod_dcategoria_id'][$key] !== ''? $_POST['prod_dcategoria_id'][$key]: NULL),
           'id_calidad'            => (!empty($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => (!empty($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
