@@ -1061,6 +1061,11 @@ function autocompleteClasifi () {
       $tr.find('#diva').val(ui.item.item.iva).trigger('change');
 
       loadModalSegCert(ui.item.item.id_clasificacion);
+
+      setTimeout(function(){
+        let parts = $this.val().split(' - ');
+        $this.val((parts.length > 1? parts[0]: $this.val()));
+      }, 300);
     }
   }).keydown(function(event){
       if(event.which == 8 || event == 46){
@@ -1091,6 +1096,11 @@ function autocompleteClasifiLive () {
         $tr.find('#diva').val(ui.item.item.iva).trigger('change');
 
         loadModalSegCert(ui.item.item.id_clasificacion);
+
+        setTimeout(function(){
+          let parts = $this.val().split(' - ');
+          $this.val((parts.length > 1? parts[0]: $this.val()));
+        }, 300);
       }
     }).keydown(function(event){
       if(event.which == 8 || event == 46) {
