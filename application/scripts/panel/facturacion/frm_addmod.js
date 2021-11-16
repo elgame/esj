@@ -1354,7 +1354,19 @@ function autocompleteClasifi () {
 function autocompleteClasifiLive () {
   $('#table_prod').on('focus', 'input#prod_ddescripcion:not(.ui-autocomplete-input)', function(event) {
     $(this).autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+      // source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        params.sinArea = true;
+        $.ajax({
+          url: base_url + 'panel/facturacion/ajax_get_clasificaciones/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
