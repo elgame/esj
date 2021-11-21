@@ -665,7 +665,7 @@ function addProducto(unidades, prod) {
                     '</button>' +
                     '<ul class="dropdown-menu ventasmore">' +
                       '<li class="clearfix">'+
-                        '<label class="pull-left">Categoría:</label> <input type="text" name="prod_dcategoria[]" value="" id="prod_dcategoria" class="span9 gasto-cargo pull-right">'+
+                        '<label class="pull-left">Categoría:</label> <input type="text" name="prod_dcategoria[]" value="" id="prod_dcategoria" class="span9 gasto-cargo pull-right jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">'+
                         '<input type="hidden" name="prod_dcategoria_id[]" value="" id="prod_dcategoria_id" class="span12 gasto-cargo-id">'+
                       '</li>'+
                       '<li class="divider"></li>'+

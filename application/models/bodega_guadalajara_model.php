@@ -12,6 +12,7 @@ class bodega_guadalajara_model extends CI_Model {
       'prestamos'         => $this->bodega_guadalajara_model->getPrestamos($fecha),
       'existencia_ant'    => array(),
       'existencia_dia'    => array(),
+      'existencia_dia_empresas' => array(),
       'denominaciones'    => array(),
       'gastos'            => array(),
       'traspasos'         => array(),
@@ -45,7 +46,8 @@ class bodega_guadalajara_model extends CI_Model {
       "SELECT be.id_factura, COALESCE(e.nombre_fiscal, 'Pago prestamo') AS nombre_fiscal, DATE(f.fecha) as fecha,
         COALESCE(f.serie, 'PP') AS serie, COALESCE(f.folio, 0) AS folio, total, COALESCE(c.nombre_fiscal, '') as cliente,
         be.descripcion, be.cantidad, be.precio_unitario, be.importe, u.nombre AS unidad, cl.id_clasificacion,
-        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*be.cantidad) AS kilos
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*be.cantidad) AS kilos,
+        Coalesce(be.id_categoria, 0) AS id_categoria
       FROM otros.bodega_existencia be
         INNER JOIN unidades u ON u.id_unidad = be.id_unidad
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = be.id_clasificacion
@@ -60,7 +62,7 @@ class bodega_guadalajara_model extends CI_Model {
     foreach ($info['existencia_ant'] as $key => $value) {
       if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
-        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_categoria.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
     }
 
@@ -68,7 +70,7 @@ class bodega_guadalajara_model extends CI_Model {
     foreach ($info['remisiones'] as $key => $value) {
       if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) )
       {
-        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_categoria.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
       // if ( GastosProductos::searchGastosProductos($value->id_clasificacion) )
       // {
@@ -83,13 +85,13 @@ class bodega_guadalajara_model extends CI_Model {
     foreach ($info['prestamos'] as $key => $value) {
       if ( !GastosProductos::searchGastosProductos($value->id_clasificacion) AND $value->tipo == 'false')
       {
-        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_categoria.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
     }
     foreach ($info['prestamos'] as $key => $value) {
       if ($value->tipo == 'true' || $value->tipo == 'dev')
       {
-        $keys = preg_grep( '/^[0-9]+-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
+        $keys = preg_grep( '/^[0-9]+-'.$value->id_categoria.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
         $cantidad = $value->cantidad;
         $kilos    = $value->kilos;
         foreach ($keys as $k) {
@@ -120,7 +122,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // restamos las ventas del dia
     foreach ($info['ventas'] as $key => $value) {
-      $keys = preg_grep( '/^[0-9]+-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
+      $keys = preg_grep( '/^[0-9]+-'.$value->id_categoria.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
       $cantidad = $value->cantidad;
       $kilos    = $value->kilos;
       foreach ($keys as $k) {
@@ -145,6 +147,11 @@ class bodega_guadalajara_model extends CI_Model {
         $info['existencia_dia'][$key]->kilos    = $kilos*-1;
         $info['existencia_dia'][$key]->importe  = $info['existencia_dia'][$key]->cantidad*$info['existencia_dia'][$key]->precio_unitario;
       }
+    }
+
+    // Existencia del dia por empresa
+    foreach ($info['existencia_dia'] as $key => $value) {
+      $info['existencia_dia_empresas']["{$value->id_categoria}-".(isset($value->categoria)? $value->categoria: $value->empresa)][] = $value;
     }
 
     // denominaciones
@@ -439,16 +446,17 @@ class bodega_guadalajara_model extends CI_Model {
       $key = 0;
       foreach ($caja['existencia_dia'] as $exk => $exist) {
         $existencia_dia[] = array(
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_factura'      => $exist->id_factura,
-          'no_caja'         => $data['fno_caja'],
-          'row'             => $key,
-          'id_unidad'       => $exist->id_unidad,
-          'descripcion'     => $exist->descripcion,
-          'cantidad'        => $exist->cantidad,
-          'precio_unitario' => $exist->precio_unitario,
-          'importe'         => $exist->importe,
-          'id_clasificacion'=> $exist->id_clasificacion,
+          'fecha'            => $data['fecha_caja_chica'],
+          'id_factura'       => $exist->id_factura,
+          'no_caja'          => $data['fno_caja'],
+          'row'              => $key,
+          'id_unidad'        => $exist->id_unidad,
+          'descripcion'      => $exist->descripcion,
+          'cantidad'         => $exist->cantidad,
+          'precio_unitario'  => $exist->precio_unitario,
+          'importe'          => $exist->importe,
+          'id_clasificacion' => $exist->id_clasificacion,
+          'id_categoria'     => $exist->id_categoria,
         );
         ++$key;
       }
@@ -656,13 +664,15 @@ class bodega_guadalajara_model extends CI_Model {
     $remisiones = $this->db->query(
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
         fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
-        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*fp.cantidad) AS kilos
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*fp.cantidad) AS kilos,
+        Coalesce(cc.id_categoria, 0) AS id_categoria, cc.abreviatura as categoria
       FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
         INNER JOIN empresas e ON e.id_empresa = f.id_empresa
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+        LEFT JOIN cajachica_categorias cc ON cc.id_categoria = fp.id_categoria
       WHERE f.status <> 'ca' AND f.is_factura = 'f' AND f.serie = 'R' AND c.nombre_fiscal = 'BODEGA DE GUADALAJARA'
         AND Date(f.fecha + interval '1 day') = '{$fecha}' AND f.folio <> 4487
       ORDER BY (e.nombre_fiscal, f.fecha, f.serie, f.folio, fp.descripcion) ASC"
@@ -709,7 +719,7 @@ class bodega_guadalajara_model extends CI_Model {
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
         fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*fp.cantidad) AS kilos,
-        cc.id_categoria, cc.abreviatura as categoria
+        Coalesce(cc.id_categoria, 0) AS id_categoria, cc.abreviatura as categoria
       FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
         INNER JOIN empresas e ON e.id_empresa = f.id_empresa
@@ -828,7 +838,7 @@ class bodega_guadalajara_model extends CI_Model {
       "SELECT DATE(bp.fecha) as fecha, bp.descripcion, bp.cantidad, bp.precio_unitario, bp.importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, (u.cantidad*bp.cantidad) AS kilos,
         bp.concepto, bp.tipo, 0 AS id_factura, 'PP' AS serie, '' AS folio, 'Pago prestamo' AS nombre_fiscal,
-        cc.id_categoria, cc.abreviatura as empresa
+        Coalesce(cc.id_categoria, 0) AS id_categoria, cc.abreviatura as empresa
       FROM otros.bodega_prestamos bp
         INNER JOIN unidades u ON u.id_unidad = bp.id_unidad
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = bp.id_clasificacion
@@ -1667,9 +1677,9 @@ class bodega_guadalajara_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6.5);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R', 'L'));
-    $pdf->SetWidths(array(60, 30, 23, 23, 23, 23, 23));
-    $pdf->Row(array('CONCEPTO', 'CLASIF', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE', 'TIPO'), false, 'B');
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R', 'L'));
+    $pdf->SetWidths(array(37, 50, 25, 20, 20, 20, 20, 13));
+    $pdf->Row(array('EMPRESA', 'CONCEPTO', 'CLASIF', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE', 'TIPO'), false, 'B');
     $pdf->SetFont('Arial','', 6);
 
     $totalPrestamos = $totalPrestamosRestas = $totalPrestamosBultos = $totalPrestamosKilos = 0;
@@ -1682,6 +1692,7 @@ class bodega_guadalajara_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $prestamo->empresa,
         $prestamo->concepto,
         $prestamo->codigo,
         MyString::formatoNumero($prestamo->kilos, 2, '', false),
@@ -1854,6 +1865,73 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetWidths(array(50, 30));
     $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, false);
 
+    // Deudores
+    $totalDeudores = 0;
+    // $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+3);
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(185, 20));
+    $pdf->Row(array('DEUDORES', ''), false, false);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 15, 53, 52, 23, 23, 23));
+    $pdf->Row(array('FOLIO', 'FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, 'B');
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(15, 15, 53, 52, 23, 23, 23));
+
+    $codigoAreas = array();
+    foreach ($caja['deudores'] as $key => $deudor)
+    {
+      if ($pdf->GetY() >= $pdf->limiteY)
+      {
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+        // // nomenclatura
+        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+        $pdf->SetFont('Helvetica','B', 7);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C'));
+        $pdf->SetWidths(array(15, 15, 53, 52, 23, 23, 23));
+        $pdf->Row(array('FOLIO', 'FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), false, 'B');
+      }
+
+      $totalDeudores += floatval($deudor->saldo);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'L', 'C', 'L', 'L', 'R', 'R', 'R'));
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $deudor->folio,
+        $deudor->fecha,
+        $deudor->nombre,
+        $deudor->concepto,
+        MyString::formatoNumero($deudor->monto, 2, '$', false),
+        MyString::formatoNumero($deudor->abonos, 2, '$', false),
+        MyString::formatoNumero($deudor->saldo, 2, '$', false)
+      ), false, 'B');
+
+      // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+      //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+    }
+
+    $pdf->SetFont('Arial', 'B', 6.5);
+    $pdf->SetX(6);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetWidths(array(105, 50, 50));
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+    $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
+      'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
+      'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), false, 'B');
+
+
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetTextColor(0, 0, 0);
@@ -1895,6 +1973,7 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetAligns(array('C', 'R'));
     $pdf->SetWidths(array(32, 25));
     $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
+    $caja['totalEfectivoCorte'] = $totalEfectivo;
 
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetXY(80, $auxy);
@@ -1917,9 +1996,11 @@ class bodega_guadalajara_model extends CI_Model {
 
     $pdf->SetXY(80, $pdf->GetY()+10);
     $pdf->Row(array('SALDO AL CORTE', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
+    $caja['saldoAlCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos);
 
     $pdf->SetX(80);
     $pdf->Row(array('DIFERENCIA', MyString::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
+    $caja['diferenciaCorte'] = ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo;
 
     $estadoResult = [
       'ventas'           => $totalVentas,
@@ -1970,8 +2051,85 @@ class bodega_guadalajara_model extends CI_Model {
       // $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), true, 'B');
     }
 
+    // EXISTENCIA DEL DIA POR EMPRESA
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(140));
+    $pdf->Row(array('EXISTENCIA DEL DIA POR EMPRESA'), false, false);
+
+    foreach ($caja['existencia_dia_empresas'] as $key => $exis_diae) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(140));
+      $pdf->Row(array(explode('-', $key)[1]), false, false);
+
+      $pdf->SetFont('Arial','B', 6.5);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(67, 20, 13, 22, 19, 18, 18, 27));
+      $pdf->Row(array('PROVEEDOR', 'REM No.', 'FECHA', 'CLASIF.', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE'), false, 'B');
+      $pdf->SetFont('Arial','', 6);
+
+      $bultosExisD = $totalExisD = $kilosExisD = 0; $aux = 0;
+      foreach ($exis_diae as $exis_dia) {
+        if ($aux != $exis_dia->id_factura) {
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(67, 20, 13, 22, 19, 18, 18, 27));
+          $pdf->SetX(6);
+          $pdf->Row(array(
+            $exis_dia->nombre_fiscal,
+            $exis_dia->serie.$exis_dia->folio,
+            MyString::fechaAT($exis_dia->fecha),
+            $exis_dia->codigo,
+            MyString::formatoNumero($exis_dia->kilos, 2, '', false),
+            MyString::formatoNumero($exis_dia->cantidad, 2, '', false),
+            MyString::formatoNumero($exis_dia->precio_unitario, 2, '', false),
+            MyString::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
+          $aux = $exis_dia->id_factura;
+        } else {
+          $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(22, 19, 18, 18, 27));
+          $pdf->SetX(106);
+          $pdf->Row(array(
+            $exis_dia->codigo,
+            MyString::formatoNumero($exis_dia->kilos, 2, '', false),
+            MyString::formatoNumero($exis_dia->cantidad, 2, '', false),
+            MyString::formatoNumero($exis_dia->precio_unitario, 2, '', false),
+            MyString::formatoNumero($exis_dia->importe, 2, '', false)), false, 'B');
+        }
+        $totalExisD += floatval($exis_dia->importe);
+        $bultosExisD += floatval($exis_dia->cantidad);
+        $kilosExisD += floatval($exis_dia->kilos);
+      }
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(22, 19, 18, 18, 27));
+      $pdf->SetX(106);
+      $pdf->Row(array('SUMAS: ',
+        MyString::formatoNumero($kilosExisD, 2, '', false),
+        MyString::formatoNumero($bultosExisD, 2, '', false),
+        MyString::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '', false),
+        MyString::formatoNumero($totalExisD, 2, '', false)), false, false);
+
+      // $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetXY(135, $pdf->GetY()+3);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(50, 25));
+
+      // if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
+      //   $pdf->Row(array('COSTO DE VENTA DEL DIA:', MyString::formatoNumero( $caja['costo_venta'] , 2, '$', false)), false, false);
+      // }
+    }
+
+
     if ($returnT) {
-      return $estadoResult;
+      $caja['estadoResult'] = $estadoResult;
+      return $caja;
     } else {
       $pdf->Output('CAJA_CHICA.pdf', 'I');
     }
@@ -1998,19 +2156,148 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->Row(array('(-) EXIS. ACTUAL', MyString::formatoNumero( $totales['exis.actual'] , 2, '$', false)), true, 'B');
     $pdf->SetX($x);
     $pdf->Row(array('(-) DEV S/COMPRA', MyString::formatoNumero( $totales['devscompra'] , 2, '$', false)), true, 'B');
+    $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX($x);
     $pdf->Row(array('(=) COSTO DE VTA', MyString::formatoNumero( $totales['costodevta'] , 2, '$', false)), true, 'B');
+    $pdf->SetFont('Arial', '', 7);
     $pdf->SetX($x);
     $pdf->Row(array('(-) GASTOS', MyString::formatoNumero( $totales['gastos'] , 2, '$', false)), true, 'B');
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX($x);
     $pdf->Row(array('(=) UTILIDAD', MyString::formatoNumero( $totales['utilidad'] , 2, '$', false)), true, 'B');
+    $pdf->SetFont('Arial', '', 7);
     $pdf->SetX($x);
     $pdf->Row(array('BULTOS VENDIDOS', MyString::formatoNumero( $totales['bultosvendidos'] , 2, '$', false)), true, 'B');
     $pdf->SetX($x);
     $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( $totales['utilidadporbulto'] , 2, '$', false)), true, 'B');
     $pdf->SetX($x);
     $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totales['clientes'] , 2, '$', false)), true, 'B');
+  }
+
+  public function printGastosDiaArea(&$pdf, $caja, $x=80, $y=80)
+  {
+    $gastos = [];
+    $total = 0;
+    foreach ($caja['gastos'] as $key => $value) {
+      if (!isset($gastos[$value->id_area])) {
+        $gastos[$value->id_area] = $value;
+      } else {
+        $gastos[$value->id_area]->monto += $value->monto;
+        $gastos[$value->id_area]->concepto .= ", {$value->concepto}";
+      }
+    }
+
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(120));
+    $pdf->SetXY($x, $y+10);
+    $pdf->Row(array('GASTOS DEL DIA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetX($x);
+    $pdf->SetAligns(array('L', 'R', 'L'));
+    $pdf->SetWidths(array(50, 20, 50));
+    $pdf->Row(array('C COSTO', 'IMPORTE', 'CONCEPTO'), false, 'B');
+    $pdf->SetFont('Arial','', 6);
+    foreach ($gastos as $key => $gasto) {
+      $pdf->SetX($x);
+      $pdf->Row(array(
+        "{$gasto->codigo_fin} {$gasto->nombre_codigo}",
+        MyString::formatoNumero($gasto->monto, 2, '', false),
+        $gasto->concepto
+      ), false, 'B');
+      $total += $gasto->monto;
+    }
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetX($x);
+    $pdf->Row(array(
+      'SUMA',
+      MyString::formatoNumero($total, 2, '', false),
+      ''
+    ), false, 'B');
+  }
+
+  public function printIngresosDia(&$pdf, $caja, $x=80)
+  {
+    $ingresos = [];
+    $ingresos['CLIENTES'] = 0;
+    foreach ($caja['cts_cobrar'] as $key => $value) {
+      $ingresos['CLIENTES'] += $value->abonos_hoy;
+    }
+    $ingresos['OTROS INGRESOS'] = 0;
+    foreach ($caja['ingresos'] as $key => $value) {
+      $ingresos['OTROS INGRESOS'] += $value->monto;
+    }
+    $ingresos['VENTAS'] = $caja['estadoResult']['ventas'];
+
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(120));
+    $pdf->CheckPageBreak(15, $pdf->limiteY);
+    $pdf->SetXY($x, $pdf->GetY()+20);
+    $pdf->Row(array('INGRESOS DEL DIA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->CheckPageBreak(15, $pdf->limiteY);
+    $pdf->SetX($x);
+    $pdf->SetAligns(array('L', 'R', 'L'));
+    $pdf->SetWidths(array(50, 20, 50));
+    $pdf->Row(array('TIPO', 'IMPORTE', 'CONCEPTO'), false, 'B');
+    $pdf->SetFont('Arial','', 6);
+    $total = 0;
+    foreach ($ingresos as $key => $ingreso) {
+      $pdf->CheckPageBreak(10, $pdf->limiteY);
+
+      $pdf->SetX($x);
+      $pdf->Row(array(
+        "{$key}",
+        MyString::formatoNumero($ingreso, 2, '', false),
+        ''
+      ), false, 'B');
+
+      $total += $ingreso;
+    }
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetX($x);
+    $pdf->Row(array(
+      'SUMA',
+      MyString::formatoNumero($total, 2, '', false),
+      ''
+    ), false, 'B');
+  }
+
+  public function printCorteCaja(&$pdf, $caja, $x=80)
+  {
+    $ingresos = [];
+    $ingresos['TOTAL EFECTIVO'] = $caja['totalEfectivoCorte'];
+    $ingresos['SALDO AL CORTE'] = $caja['saldoAlCorte'];
+    $ingresos['DIFERENCIA'] = $caja['diferenciaCorte'];
+
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(120));
+    $pdf->CheckPageBreak(15, $pdf->limiteY);
+    $pdf->SetXY($x, $pdf->GetY());
+    $pdf->Row(array('CORTE DE CAJA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6.5);
+    $pdf->SetAligns(array('L', 'R', 'L'));
+    $pdf->SetWidths(array(50, 20, 50));
+    $total = 0;
+    foreach ($ingresos as $key => $ingreso) {
+      $pdf->CheckPageBreak(10, $pdf->limiteY);
+
+      $pdf->SetX($x);
+      $pdf->Row(array(
+        "{$key}",
+        MyString::formatoNumero($ingreso, 2, '', false),
+        ''
+      ), false, 'B');
+
+      $total += $ingreso;
+    }
   }
 
   public function nomenclaturas()

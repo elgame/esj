@@ -4,7 +4,7 @@ $(function(){
       $ul = $group.find('.dropdown-menu.ventasmore');
     if ($ul.css('display') == 'none') {
       $ul.show();
-      $group.find('#prod_dcalidad').focus();
+      $group.find('#prod_dcategoria').focus();
     } else {
       $ul.hide();
     }

@@ -216,10 +216,16 @@ class cuentas_cobrar_model extends privilegios_model{
 
     if ($this->input->get('did_empresa') == 11 && $this->input->get('ffecha1') == $this->input->get('ffecha2')) { // ESJ BODEGA
       $this->load->model('bodega_guadalajara_model');
-      $estadoResult = $this->bodega_guadalajara_model->printCaja($this->input->get('ffecha1'), 1, true);
+      $caja = $this->bodega_guadalajara_model->printCaja($this->input->get('ffecha1'), 1, true);
 
       $pdf->SetTextColor(0,0,0);
-      $this->bodega_guadalajara_model->printEstadoResultado($pdf, $estadoResult, 10);
+      $auxp = $pdf->page;
+      $auxy = $pdf->GetY();
+      $this->bodega_guadalajara_model->printEstadoResultado($pdf, $caja['estadoResult'], 10);
+      $pdf->page = $auxp;
+      $this->bodega_guadalajara_model->printGastosDiaArea($pdf, $caja, 90, $auxy);
+      $this->bodega_guadalajara_model->printIngresosDia($pdf, $caja, 90);
+      $this->bodega_guadalajara_model->printCorteCaja($pdf, $caja, 90);
     }
 
     $pdf->Output('cuentas_x_cobrar.pdf', 'I');
