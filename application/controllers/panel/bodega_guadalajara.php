@@ -10,10 +10,14 @@ class bodega_guadalajara extends MY_Controller {
     'bodega_guadalajara/guardar/',
     'bodega_guadalajara/saveTotales/',
     'bodega_guadalajara/ajax_get_categorias/',
+    'bodega_guadalajara/ajax_save_rastreo/',
+    'bodega_guadalajara/ajax_del_rastreo/',
     'bodega_guadalajara/cerrar_caja/',
     'bodega_guadalajara/print_caja/',
     'bodega_guadalajara/print_vale/',
     'bodega_guadalajara/print_vale_ipr/',
+    'bodega_guadalajara/print_vale_deudor/',
+    'bodega_guadalajara/print_vale_rastreo/',
     'bodega_guadalajara/rpt_gastos_pdf/',
     'bodega_guadalajara/rpt_gastos_xls/',
     'bodega_guadalajara/rpt_ingresos_pdf/',
@@ -517,6 +521,18 @@ class bodega_guadalajara extends MY_Controller {
     echo json_encode($this->bodega_guadalajara_model->ajaxCategorias());
   }
 
+  public function ajax_save_rastreo()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    echo json_encode($this->bodega_guadalajara_model->ajaxSaveRastreo($_GET));
+  }
+
+  public function ajax_del_rastreo()
+  {
+    $this->db->delete('otros.bodega_rastreo_efectivo', "id_rastreo = ".$_GET['id']);
+    echo true;
+  }
+
 
   public function agregar_abono_deudor() {
     $this->carabiner->js(array(
@@ -799,6 +815,28 @@ class bodega_guadalajara extends MY_Controller {
       $this->bodega_guadalajara_model->printValeIngresos($_GET['id_ingresos'], $_GET['noCaja']);
     else{
       $params['url'] = 'panel/bodega_guadalajara/print_vale_ipr/?id_ingresos='.$_GET['id_ingresos'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_deudor()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    if($this->input->get('p') == 'true')
+      $this->bodega_guadalajara_model->printValeDeudor($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/bodega_guadalajara/print_vale_deudor/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_rastreo()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    if($this->input->get('p') == 'true')
+      $this->bodega_guadalajara_model->printValeRastreo($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/bodega_guadalajara/print_vale_rastreo/?id='.$_GET['id_rastreo'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }

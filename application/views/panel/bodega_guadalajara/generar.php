@@ -1113,6 +1113,71 @@
                 </div>
               </div>
               <!--/Tabulacion -->
+
+              <!-- Rastreo de efectivo -->
+              <div class="row-fluid">
+                <div class="span12" style="margin-top: 1px;">
+                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-rastreo-efetivo">
+                    <thead>
+                      <tr>
+                        <th colspan="4">RASTREO DE EFECTIVO
+                          <button type="button" class="btn btn-success" id="btn-add-rastreo-efetivo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
+                        </th>
+                        <th colspan="2">IMPORTE</th>
+                      </tr>
+                      <tr>
+                        <th>FOLIO</th>
+                        <th>FECHA</th>
+                        <th>NOMBRE</th>
+                        <th>NOTA</th>
+                        <th>IMPORTE</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                        if (isset($_POST['rastreo_id_rastreo'])) {
+                          foreach ($_POST['rastreo_id_rastreo'] as $key => $concepto) {
+                      ?>
+                            <tr>
+                              <td style="width: 100px;">
+                                <input type="hidden" name="rastreo_id_rastreo[]" value="<?php echo $_POST['rastreo_id_rastreo'] ?>" id="rastreo_id_rastreo">
+                                <input type="hidden" name="rastreo_del[]" value="" id="rastreo_del">
+                              </td>
+                              <td style="width: 100px;"><input type="date" name="rastreo_fecha[]" value="<?php echo $_POST['rastreo_fecha'] ?>" class="rastreo_fecha span12" maxlength="100" placeholder="fecha"></td>
+                              <td style="width: 300px;"><input type="text" name="rastreo_nombre[]" value="<?php echo $_POST['rastreo_nombre'] ?>" class="rastreo_nombre span12" maxlength="100" placeholder="Nombre"></td>
+                              <td style="width: 300px;"><input type="text" name="rastreo_nota[]" value="<?php echo $_POST['rastreo_nota'] ?>" class="rastreo_nota span12" maxlength="100" placeholder="Nota"></td>
+                              <td style="width: 100px;"><input type="text" name="rastreo_monto[]" value="<?php echo $_POST['rastreo_monto'] ?>" class="rastreo_monto vpositive input-small" placeholder="Monto" required></td>
+                              <td style="width: 30px;">
+                                <button type="button" class="btn btn-success btn-save-rastreo" style="padding: 2px 7px 2px;"><i class="icon-plus"></i></button>
+                                <button type="button" class="btn btn-danger btn-del-rastreo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                              </td>
+                            </tr>
+                      <?php }} else {
+                            foreach ($caja['rastreo_efectivo'] as $rastreo) {
+                              ?>
+                              <tr>
+                                <td style="width: 100px;">
+                                  <input type="hidden" name="rastreo_id_rastreo[]" value="<?php echo $rastreo->id_rastreo ?>" id="rastreo_id_rastreo">
+                                  <input type="hidden" name="rastreo_del[]" value="" id="rastreo_del">
+                                  <a href="<?php echo base_url('panel/bodega_guadalajara/print_vale_rastreo/?id_rastreo='.$rastreo->id_rastreo.'&noCaja='.$rastreo->no_caja)?>" target="_blank" title="Imprimir Rastreo Efectivo">
+                                    <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $rastreo->id_rastreo ?></a>
+                                </td>
+                                <td style="width: 100px;"><input type="date" name="rastreo_fecha[]" value="<?php echo $rastreo->fecha_rastreo ?>" class="rastreo_fecha span12" maxlength="100" placeholder="fecha" <?php echo $readonly ?>></td>
+                                <td style="width: 300px;"><input type="text" name="rastreo_nombre[]" value="<?php echo $rastreo->nombre ?>" class="rastreo_nombre span12" maxlength="100" placeholder="Nombre" <?php echo $readonly ?>></td>
+                                <td style="width: 300px;"><input type="text" name="rastreo_nota[]" value="<?php echo $rastreo->nota ?>" class="rastreo_nota span12" maxlength="100" placeholder="Nota" <?php echo $readonly ?>></td>
+                                <td style="width: 100px;"><input type="text" name="rastreo_monto[]" value="<?php echo $rastreo->monto ?>" class="rastreo_monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-success btn-save-rastreo" style="padding: 2px 7px 2px;"><i class="icon-plus"></i></button>
+                                  <button type="button" class="btn btn-danger btn-del-rastreo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                      <?php }} ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!--/ Ingresos por Reposicion-->
             </div>
           </div>
           <!-- /Ingresos por Reposicion -->

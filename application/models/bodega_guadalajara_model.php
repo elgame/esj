@@ -25,6 +25,7 @@ class bodega_guadalajara_model extends CI_Model {
       'deudores'          => array(),
       'deudores_prest_dia' => 0,
       'deudores_abonos_dia' => 0,
+      'rastreo_efectivo'  => array(),
     );
 
     $ingresos = $this->db->query(
@@ -311,6 +312,18 @@ class bodega_guadalajara_model extends CI_Model {
           $categoria->importe += floatval($gasto->monto);
         }
       }
+    }
+
+    $rastreo_efectivo = $this->db->query(
+      "SELECT ci.*
+       FROM otros.bodega_rastreo_efectivo ci
+       WHERE ci.fecha = '{$fecha}' AND ci.no_caja = {$noCaja}
+       ORDER BY ci.id_rastreo ASC"
+    );
+
+    if ($rastreo_efectivo->num_rows() > 0)
+    {
+      $info['rastreo_efectivo'] = $rastreo_efectivo->result();
     }
 
     return $info;
@@ -1130,6 +1143,30 @@ class bodega_guadalajara_model extends CI_Model {
 
     return $response;
   }
+
+  public function ajaxSaveRastreo($data)
+  {
+    $rastria = array(
+      'no_caja'       => $data['fno_caja'],
+      'fecha'         => $data['fecha_caja'],
+      'nombre'        => $data['rastreo_nombre'],
+      'nota'          => $data['rastreo_nota'],
+      'monto'         => $data['rastreo_monto'],
+      'fecha_rastreo' => $data['rastreo_fecha'],
+      'id_usuario'    => $this->session->userdata('id_usuario'),
+    );
+
+    if (!empty($data['rastreo_id_rastreo'])) {
+      $this->db->update('otros.bodega_rastreo_efectivo', $rastria, "id_rastreo = {$data['rastreo_id_rastreo']}");
+      $rastria['id_rastreo'] = $data['rastreo_id_rastreo'];
+    } else {
+      $this->db->insert('otros.bodega_rastreo_efectivo', $rastria);
+      $rastria['id_rastreo'] = $this->db->insert_id('otros.bodega_rastreo_efectivo_id_rastreo_seq');
+    }
+
+    return $rastria;
+  }
+
 
 
   /**
@@ -2419,6 +2456,195 @@ class bodega_guadalajara_model extends CI_Model {
 
     // $pdf->AutoPrint(true);
     $pdf->Output('vale_gastos.pdf', 'I');
+  }
+
+  public function getDataValeDeudor($id_deudor, $noCaja)
+  {
+    $deudor = $this->db->query(
+      "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+        (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio,
+        'Bodega Gdl' AS caja, cd.fecha_creacion, cd.no_impresiones,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM otros.bodega_deudores cd
+        LEFT JOIN (
+          SELECT id_deudor, Sum(monto) AS abonos
+          FROM otros.bodega_deudores_pagos
+          WHERE id_deudor = {$id_deudor}
+          GROUP BY id_deudor
+        ) ab ON cd.id_deudor = ab.id_deudor
+        LEFT JOIN usuarios u ON u.id = cd.id_usuario
+      WHERE cd.id_deudor = {$id_deudor}"
+    )->row();
+
+    return $deudor;
+  }
+  public function printValeDeudor($id_deudor, $noCaja)
+  {
+    $deudor = $this->getDataValeDeudor($id_deudor, $noCaja);
+    // $caja_destino = $this->getCajaByCode($deudor->tipo);
+
+    // echo "<pre>";
+    //   var_dump($deudor, $caja_destino);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array(strtoupper($deudor->tipo)), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$deudor->folio), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('De: '.$deudor->caja), false, false);
+    $pdf->SetX(0);
+    // $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('     '.$deudor->nombre), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($deudor->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($deudor->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($deudor->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($deudor->no_impresiones==0? 'ORIGINAL': 'COPIA '.$deudor->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($deudor->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $deudor->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($deudor->fecha_creacion)), false, false);
+
+    $this->db->update('otros.bodega_deudores', ['no_impresiones' => $deudor->no_impresiones+1],
+        "id_deudor = '{$id_deudor}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_deudor.pdf', 'I');
+  }
+
+  public function getDataValeRastreo($id_rastreo, $noCaja)
+  {
+    $deudor = $this->db->query(
+      "SELECT cd.id_rastreo, cd.fecha, cd.nombre, cd.nota, cd.monto, cd.fecha_rastreo,
+        'Bodega Gdl' AS caja, cd.fecha_creacion, cd.no_impresiones,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM otros.bodega_rastreo_efectivo cd
+        LEFT JOIN usuarios u ON u.id = cd.id_usuario
+      WHERE cd.id_rastreo = {$id_rastreo} AND cd.no_caja = {$noCaja}"
+    )->row();
+
+    return $deudor;
+  }
+  public function printValeRastreo($id_rastreo, $noCaja)
+  {
+    $deudor = $this->getDataValeRastreo($id_rastreo, $noCaja);
+    // $caja_destino = $this->getCajaByCode($deudor->tipo);
+
+    // echo "<pre>";
+    //   var_dump($deudor, $caja_destino);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array('PRESTAMO'), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$deudor->id_rastreo), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('De: '.$deudor->caja), false, false);
+    $pdf->SetX(0);
+    // $pdf->Row(array('A: '.(isset($caja_destino->nombre)? $caja_destino->nombre: $caja_destino)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Fecha Rastreo: '.$deudor->fecha_rastreo), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($deudor->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($deudor->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($deudor->nota), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($deudor->no_impresiones==0? 'ORIGINAL': 'COPIA '.$deudor->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(42, 21));
+    $pdf->Row(array('RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array($deudor->nombre, MyString::fechaAT($deudor->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    // $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $deudor->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($deudor->fecha_creacion)), false, false);
+
+    $this->db->update('otros.bodega_rastreo_efectivo', ['no_impresiones' => $deudor->no_impresiones+1],
+        "id_rastreo = '{$id_rastreo}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_deudor.pdf', 'I');
   }
 
   public function getDataValeIngresos($id_ingresos, $noCaja)

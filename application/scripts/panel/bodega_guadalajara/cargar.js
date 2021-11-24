@@ -41,6 +41,10 @@
     onChanceImporteGastos();
     onChanceImporteTraspaso();
 
+    btnAddRastreoEfectivo();
+    btnSaveRastreoEfectivo();
+    btnDelRastreoEfectivo();
+
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
     // cargaMovimientos();
@@ -1077,4 +1081,94 @@
       });
     });
   };
+
+
+  var btnAddRastreoEfectivo = function () {
+    $('#btn-add-rastreo-efetivo').on('click', function(event) {
+      agregarRastreoEfectivo();
+    });
+  };
+
+  var btnDelRastreoEfectivo = function () {
+    $('#table-rastreo-efetivo').on('click', '.btn-del-rastreo', function(event) {
+      let $tr = $(this).parents('tr');
+      if ($tr.find('#rastreo_id_rastreo').val() != '') {
+        let params = {
+          id: $tr.find('#rastreo_id_rastreo').val()
+        };
+        $.ajax({
+            url: base_url + 'panel/bodega_guadalajara/ajax_del_rastreo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              $tr.remove();
+            }
+        });
+      } else {
+        $tr.remove();
+      }
+    });
+  };
+
+  var btnSaveRastreoEfectivo = function () {
+    $('#table-rastreo-efetivo').on('click', '.btn-save-rastreo', function(event) {
+      let $tr = $(this).parents('tr');
+      let params = {
+        fecha_caja: $('#fecha_caja').val(),
+        fno_caja: $('#fno_caja').val(),
+        rastreo_id_rastreo: $tr.find('#rastreo_id_rastreo').val(),
+        rastreo_fecha: $tr.find('.rastreo_fecha').val(),
+        rastreo_nombre: $tr.find('.rastreo_nombre').val(),
+        rastreo_nota: $tr.find('.rastreo_nota').val(),
+        rastreo_monto: $tr.find('.rastreo_monto').val(),
+      };
+      if(params.rastreo_fecha != '' && params.rastreo_nombre != '' && params.rastreo_monto != ''){
+        $.ajax({
+            url: base_url + 'panel/bodega_guadalajara/ajax_save_rastreo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              $tr.find('#rastreo_id_rastreo').val(data.id_rastreo);
+              if(params.rastreo_id_rastreo == ''){
+                $(`<a href="${base_url}panel/bodega_guadalajara/print_vale_rastreo/?id_rastreo=${data.id_rastreo}&noCaja=${params.fno_caja}" target="_blank" title="Imprimir Rastreo Efectivo">
+                   <i class="ico icon-print" style="cursor:pointer"></i> ${data.id_rastreo}</a>`).insertAfter($tr.find('#rastreo_del'));
+              }
+            }
+        });
+      } else {
+        alert("Los campos son requeridos");
+      }
+    });
+  };
+
+  var agregarRastreoEfectivo = function (movimiento) {
+
+    var poliza = '', concepto = '', id = '', abono = '0';
+    if (movimiento) {
+      poliza   = movimiento.poliza;
+      concepto = movimiento.proveedor;
+      id       = movimiento.id;
+      abono    = movimiento.total;
+    }
+
+    var $table = $('#table-rastreo-efetivo').find('tbody'),
+        tr = `<tr>
+                <td style="width: 100px;">
+                  <input type="hidden" name="rastreo_id_rastreo[]" value="" id="rastreo_id_rastreo">
+                  <input type="hidden" name="rastreo_del[]" value="" id="rastreo_del">
+                </td>
+                <td style="width: 100px;"><input type="date" name="rastreo_fecha[]" value="" class="rastreo_fecha span12" maxlength="100" placeholder="fecha"></td>
+                <td style="width: 300px;"><input type="text" name="rastreo_nombre[]" value="" class="rastreo_nombre span12" maxlength="100" placeholder="Nombre"></td>
+                <td style="width: 300px;"><input type="text" name="rastreo_nota[]" value="" class="rastreo_nota span12" maxlength="100" placeholder="Nota"></td>
+                <td style="width: 100px;"><input type="text" name="rastreo_monto[]" value="" class="rastreo_monto vpositive input-small" placeholder="Monto" required></td>
+                <td style="width: 30px;">
+                  <button type="button" class="btn btn-success btn-save-rastreo" style="padding: 2px 7px 2px;"><i class="icon-plus"></i></button>
+                  <button type="button" class="btn btn-danger btn-del-rastreo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                </td>
+              </tr>`;
+
+    $(tr).appendTo($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
 });
