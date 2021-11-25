@@ -4577,13 +4577,14 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
-          cg.tipo, cg.id_compra
+          cg.tipo, cg.id_compra, (c.serie || c.folio::text) AS folio_compra
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
          LEFT JOIN usuarios AS u ON u.id = cg.id_usuario
+         LEFT JOIN compras AS c ON c.id_compra = cg.id_compra
        WHERE cg.id_gasto = '{$id_gasto}'
        ORDER BY cg.id_gasto ASC"
     )->row();
@@ -4621,14 +4622,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
-    $tituloo = 'GASTO POR COMPROBAR';
-    if ($gastos->tipo == 'g')
-      $tituloo = 'GASTOS GENERALES';
-    elseif ($gastos->tipo == 'rg')
-      $tituloo = 'REPOSICION DE GASTOS';
-    elseif ($gastos->tipo == 'pre')
-      $tituloo = 'PRE GASTOS';
-    $pdf->Row(array($tituloo), false, false);
+    $pdf->Row(array(($gastos->tipo=='g'? 'VALE DE GASTO EN CAJA': 'GASTO POR COMPROBAR')), false, false);
 
     $pdf->SetAligns(array('L'));
     // $pdf->SetWidths(array(63));
@@ -4680,6 +4674,11 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('Creado:', MyString::fechaAT($gastos->fecha_creacion)), false, false);
+
+    if (!empty($gastos->folio_compra)) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('Folio Compra:', $gastos->folio_compra), false, false);
+    }
 
     // $pdf->SetAligns(array('L'));
     // $pdf->SetWidths(array(63));
