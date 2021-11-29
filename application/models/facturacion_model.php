@@ -1481,6 +1481,8 @@ class facturacion_model extends privilegios_model{
 
     public function descargarMasiva($id_empresa, $fecha1, $fecha2)
     {
+      $fecha1 = substr($fecha2, 0, 10);
+      $fecha2 = substr($fecha2, 0, 10);
       $res = $this->db
         ->select("f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal")
         ->from('facturacion as f')
