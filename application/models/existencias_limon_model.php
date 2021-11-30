@@ -99,6 +99,7 @@ class existencias_limon_model extends CI_Model {
       'ventas_industrial'     => array(),
       'compra_fruta'          => array(),
       'produccion'            => array(),
+      'gastos'                => array(),
       'existencia_anterior'   => [],
       'existencia'            => [],
       'existencia_piso'       => [],
@@ -543,6 +544,8 @@ class existencias_limon_model extends CI_Model {
     }
     $info['existencia'] = $existencia;
 
+    // gastos
+    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja);
 
     // Dia guardado
     $count_save = $this->db->query("SELECT Count(*) AS num
@@ -556,6 +559,8 @@ class existencias_limon_model extends CI_Model {
 
   public function guardar($data)
   {
+    $anio = date("Y");
+
     // Dia guardado
     $count_save = $this->db->query("SELECT Count(*) AS num
       FROM otros.existencias_limon
@@ -821,7 +826,88 @@ class existencias_limon_model extends CI_Model {
       $this->db->insert_batch('otros.existencias_limon_industrial', $industrial_inst);
     }
 
+    // Gastos
+    if (isset($data['gasto_concepto']))
+    {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM otros.existencias_limon_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['gasto_concepto'] as $key => $gasto)
+      {
+        if (isset($data['gasto_del'][$key]) && $data['gasto_del'][$key] == 'true' &&
+          isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
+
+          // $this->db->delete('otros.existencias_limon_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            // 'folio'           => $data['gasto_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['gasto_nombre'][$key],
+            'monto'           => $data['gasto_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            'id_area'         => $data['farea'],
+            $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+          );
+
+          $this->db->update('otros.existencias_limon_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'                => $data_folio->folio,
+            'folio'                    => $data_folio->folio, //$data['gasto_folio'][$key],
+            'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_nombre'][$key],
+            'monto'                    => $data['gasto_importe'][$key],
+            'fecha'                    => $data['fecha_caja_chica'],
+            'no_caja'                  => $data['fno_caja'],
+            'id_area'                  => $data['farea'],
+            $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_usuario'               => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('otros.existencias_limon_gastos', $gastos);
+          $gastooidd = $this->db->insert_id('otros.existencias_limon_gastos_id_gasto_seq');
+          $gastos_ids['adds'][] = $gastooidd;
+        }
+      }
+
+      // if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+      //   $this->enviarEmail($gastos_ids);
+      //   // $this->db->insert_batch('otros.existencias_limon_gastos', $gastos);
+      // }
+    }
+
     return true;
+  }
+
+  public function getCajaGastos($fecha, $noCaja)
+  {
+    $sql = '';
+    $sql .= " AND cg.fecha = '{$fecha}'";
+
+    $response = [];
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.nombre,
+          cg.folio, ca.id_cat_codigos, ca.nombre AS cat_codigos, ca.codigo AS codigo_fin,
+          ar.id_area, ar.nombre AS area
+       FROM otros.existencias_limon_gastos cg
+         LEFT JOIN otros.cat_codigos AS ca ON ca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_area
+       WHERE cg.no_caja = {$noCaja} {$sql}
+       ORDER BY cg.id_gasto ASC"
+    );
+
+    if ($gastos->num_rows() > 0)
+    {
+      $response = $gastos->result();
+    }
+
+    return $response;
   }
 
 
@@ -1638,6 +1724,52 @@ class existencias_limon_model extends CI_Model {
         MyString::formatoNumero($caja['industrial']->importe, 2, '', false),
       ), false, 'B');
     }
+
+    // GASTOS GENERALES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('GASTOS GENERALES'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C'));
+    $pdf->SetWidths(array(80, 95, 30));
+    $pdf->Row(array('NOMBRE', 'CONCEPTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(80, 95, 30));
+
+    $totalGastos = 0;
+    foreach ($caja['gastos'] as $gasto) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalGastos  += floatval($gasto->monto);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $gasto->nombre,
+        $gasto->concepto,
+        MyString::formatoNumero($gasto->monto, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($totalGastos, 2, '', false),
+    ), false, 'B');
 
 
     // TOTALES

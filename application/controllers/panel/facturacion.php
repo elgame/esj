@@ -38,6 +38,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_remove_remision_fact/',
 
     'facturacion/xml/',
+    'facturacion/descarga_masiva/',
     'facturacion/nomina/',
 
     'facturacion/getRemisiones/'
@@ -459,6 +460,16 @@ class facturacion extends MY_Controller {
     {
       $this->load->model('facturacion_model');
       $this->facturacion_model->descargarZip($_GET['id']);
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  public function descarga_masiva()
+  {
+    if (isset($_GET['id_empresa']{0}) && isset($_GET['fecha1']{0}) && isset($_GET['fecha2']{0}))
+    {
+      $this->load->model('facturacion_model');
+      $this->facturacion_model->descargarMasiva($_GET['id_empresa'], $_GET['fecha1'], $_GET['fecha2']);
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }

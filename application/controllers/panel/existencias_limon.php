@@ -70,12 +70,13 @@ class existencias_limon extends MY_Controller {
       array('general/msgbox.js'),
       array('general/util.js'),
       array('panel/otros/rpt_existencias_limon.js'),
-      // array('panel/caja_chica/areas_requisicion.js'),
+      array('panel/caja_chica/areas_requisicion.js'),
     ));
 
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
     $this->load->model('existencias_limon_model');
+    $this->load->model('compras_areas_model');
 
     $this->configGuardaCajaChica();
     if ($this->form_validation->run() == FALSE)
@@ -104,6 +105,8 @@ class existencias_limon extends MY_Controller {
       ->get()->result();
 
     $params['caja'] = $this->existencias_limon_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'), $area );
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     $params['priv_saldar_prestamo'] = $this->usuarios_model->tienePrivilegioDe('', 'existencias_limon/saldar_prestamos/');
 

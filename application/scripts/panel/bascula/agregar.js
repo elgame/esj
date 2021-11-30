@@ -602,6 +602,9 @@ $(function(){
       calculaKilosNeto();
       calculaTotales();
     }
+  }).change(function(e) {
+    calculaKilosNeto();
+    calculaTotales();
   }).focusin(function(){
     if (this.setSelectionRange)
     {

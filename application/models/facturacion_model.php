@@ -1479,6 +1479,57 @@ class facturacion_model extends privilegios_model{
         unlink(APPPATH.'media/documentos.zip');
     }
 
+    public function descargarMasiva($id_empresa, $fecha1, $fecha2)
+    {
+      $fecha1 = substr($fecha1, 0, 10);
+      $fecha2 = substr($fecha2, 0, 10);
+
+      $res = $this->db->query("SELECT f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal
+         FROM facturacion as f
+          INNER JOIN clientes as c ON f.id_cliente = c.id_cliente
+         WHERE f.id_empresa = {$id_empresa} AND
+         Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'")->result();
+
+      $num_files = 0;
+      if ($res && count($res) > 0) {
+        $zip = new ZipArchive;
+        if ($zip->open(APPPATH.'media/facturas_masivas.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+        {
+          foreach ($res as $key => $value) {
+            $cliente = MyString::quitAcentos(strtoupper($value->nombre_fiscal));
+            $fecha   = explode('-', $value->fecha);
+            $ano     = $fecha[0];
+            $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
+            $serie   = $value->serie !== '' ? $value->serie.'-' : '';
+            $folio   = $value->folio;
+
+            $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+            // Scanea el directorio para obtener los archivos.
+            $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+            foreach ($archivos as $archivo){
+              $zip->addFile($pathDocs.$archivo, $archivo);
+              ++$num_files;
+            }
+          }
+          $zip->close();
+        } else {
+          exit('Error al intentar crear el ZIP.');
+        }
+      }
+
+      if ($num_files > 0) {
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=facturas_masivas.zip');
+        readfile(APPPATH.'media/facturas_masivas.zip');
+        unlink(APPPATH.'media/facturas_masivas.zip');
+      } else {
+        echo "No hay archivos";
+      }
+
+    }
+
    /**
     * Envia el email al ciente con todos los documentos que tiene asignados.
     *
