@@ -1508,12 +1508,14 @@ class facturacion_model extends privilegios_model{
 
             $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
-            // Scanea el directorio para obtener los archivos.
-            $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+            if (file_exists($pathDocs)) {
+              // Scanea el directorio para obtener los archivos.
+              $archivos = array_diff(scandir($pathDocs), array('..', '.'));
 
-            foreach ($archivos as $archivo){
-              $zip->addFile($pathDocs.$archivo, $archivo);
-              ++$num_files;
+              foreach ($archivos as $archivo){
+                $zip->addFile($pathDocs.$archivo, $archivo);
+                ++$num_files;
+              }
             }
           }
           $zip->close();
