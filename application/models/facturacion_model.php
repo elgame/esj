@@ -1488,7 +1488,10 @@ class facturacion_model extends privilegios_model{
          FROM facturacion as f
           INNER JOIN clientes as c ON f.id_cliente = c.id_cliente
          WHERE f.id_empresa = {$id_empresa} AND
-         Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'")->result();
+           Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}' AND
+           id_nc IS NULL AND id_abono_factura IS NULL AND
+           is_factura = 't'
+         ")->result();
 
       $num_files = 0;
       if ($res && count($res) > 0) {
