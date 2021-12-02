@@ -1509,15 +1509,15 @@ class caja_chica_model extends CI_Model {
             'fecha_recibido'  => ($data['efcbodega_recibido'][$key] == 't' && empty($data['efcbodega_fecha_recibido'][$key])? $data['fecha_caja_chica']: (empty($data['efcbodega_fecha_recibido'][$key])? NULL: $data['efcbodega_fecha_recibido'][$key])),
           );
 
-          // Bitacora
-          $id_bitacora = $this->bitacora_model->_update('cajachica_bodega_gdl', $data['efcbodega_id'][$key], $efcbodega_udt,
-                          array(':accion'       => 'bodega_gdl', ':seccion' => 'caja chica',
-                                ':folio'        => '',
-                                // ':id_empresa'   => $datosFactura['id_empresa'],
-                                ':empresa'      => '', // .$this->input->post('dempresa')
-                                ':id'           => 'id_bodega',
-                                ':titulo'       => $nombresCajas[$data['fno_caja']])
-                        );
+          // // Bitacora
+          // $id_bitacora = $this->bitacora_model->_update('cajachica_bodega_gdl', $data['efcbodega_id'][$key], $efcbodega_udt,
+          //                 array(':accion'       => 'bodega_gdl', ':seccion' => 'caja chica',
+          //                       ':folio'        => '',
+          //                       // ':id_empresa'   => $datosFactura['id_empresa'],
+          //                       ':empresa'      => '', // .$this->input->post('dempresa')
+          //                       ':id'           => 'id_bodega',
+          //                       ':titulo'       => $nombresCajas[$data['fno_caja']])
+          //               );
 
           $this->db->update('cajachica_bodega_gdl', $efcbodega_udt, "id_bodega = ".$data['efcbodega_id'][$key]);
         } else {
@@ -1536,12 +1536,12 @@ class caja_chica_model extends CI_Model {
           $gastooidd = $this->db->insert_id('cajachica_bodega_gdl_id_bodega_seq');
           // $gastos_ids['adds'][] = $gastooidd;
 
-          // Bitacora
-          $this->bitacora_model->_insert('cajachica_bodega_gdl', $gastooidd,
-                        array(':accion'    => 'bodega_gdl', ':seccion' => 'caja chica',
-                              ':folio'     => "Concepto: {$nombre} | Monto: {$data['efcbodega_monto'][$key]}",
-                              // ':id_empresa' => $datosFactura['id_empresa'],
-                              ':empresa'   => ''));
+          // // Bitacora
+          // $this->bitacora_model->_insert('cajachica_bodega_gdl', $gastooidd,
+          //               array(':accion'    => 'bodega_gdl', ':seccion' => 'caja chica',
+          //                     ':folio'     => "Concepto: {$nombre} | Monto: {$data['efcbodega_monto'][$key]}",
+          //                     // ':id_empresa' => $datosFactura['id_empresa'],
+          //                     ':empresa'   => ''));
         }
       }
     }
