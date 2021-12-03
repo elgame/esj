@@ -1488,7 +1488,10 @@ class facturacion_model extends privilegios_model{
          FROM facturacion as f
           INNER JOIN clientes as c ON f.id_cliente = c.id_cliente
          WHERE f.id_empresa = {$id_empresa} AND
-         Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'")->result();
+           Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}' AND
+           id_nc IS NULL AND id_abono_factura IS NULL AND
+           is_factura = 't'
+         ")->result();
 
       $num_files = 0;
       if ($res && count($res) > 0) {
@@ -1505,12 +1508,14 @@ class facturacion_model extends privilegios_model{
 
             $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
-            // Scanea el directorio para obtener los archivos.
-            $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+            if (file_exists($pathDocs)) {
+              // Scanea el directorio para obtener los archivos.
+              $archivos = array_diff(scandir($pathDocs), array('..', '.'));
 
-            foreach ($archivos as $archivo){
-              $zip->addFile($pathDocs.$archivo, $archivo);
-              ++$num_files;
+              foreach ($archivos as $archivo){
+                $zip->addFile($pathDocs.$archivo, $archivo);
+                ++$num_files;
+              }
             }
           }
           $zip->close();
