@@ -2819,7 +2819,7 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
@@ -2842,7 +2842,7 @@ class caja_chica_model extends CI_Model {
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, // $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
@@ -2905,7 +2905,7 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
-          $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
@@ -2923,7 +2923,7 @@ class caja_chica_model extends CI_Model {
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, // $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
@@ -2962,7 +2962,7 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
       $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-      $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+      $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
@@ -2984,7 +2984,7 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
@@ -3006,7 +3006,7 @@ class caja_chica_model extends CI_Model {
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, //$gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
