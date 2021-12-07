@@ -1969,6 +1969,12 @@
                                 <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria_text]" value="" class="cpMercans-fraccionArancelaria_text">
                                 <input type="hidden" name="cp[mercancias][mercancias][0][uuidComercioExt]" value="" class="cpMercans-uuidComercioExt">
 
+                                <input type="hidden" name="cp[mercancias][mercancias][0][pedimentos][0][pedimento]" value="" class="cpMercans-pedimentos-pedimento">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][numeroGuiaIdentificacion]" value="" class="cpMercans-guia-numeroGuiaIdentificacion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][descripGuiaIdentificacion]" value="" class="cpMercans-guia-descripGuiaIdentificacion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][pesoGuiaIdentificacion]" value="" class="cpMercans-guia-pesoGuiaIdentificacion">
+
                                 <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cantidad]" value="" class="cpMercans-cantTrans-cantidad">
                                 <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idOrigen]" value="" class="cpMercans-cantTrans-idOrigen">
                                 <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idDestino]" value="" class="cpMercans-cantTrans-idDestino">
@@ -1986,8 +1992,8 @@
                               <td></td>
                               <td></td>
                               <td style="width: 20px;">
-                                <button class="btn btn-cp-editMercancia">Editar</button>
-                                <button class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+                                <button type="button" class="btn btn-cp-editMercancia">Editar</button>
+                                <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
                               </td>
                             </tr>
                           </tbody>
@@ -2187,6 +2193,52 @@
           </label>
         </div>
       </div>
+
+      <fieldset>
+        <legend>Pedimentos
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-pedimentos" data-rel="tooltip" data-title="Agregar pedimentos"><i class="icon-plus"></i></a>
+        </legend>
+
+        <table class="table table-hover table-condensed" id="table-mcpsat_pedimentos">
+          <thead>
+            <tr>
+              <th>PEDIMENTO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" class="mcpsat_pedimentos_pedimento" value="" placeholder="52 45 4214 4213546"></td>
+              <td><i class="icon-ban-circle delete"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <fieldset>
+        <legend>Guias de Identificacion
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-guias" data-rel="tooltip" data-title="Agregar Guias de Identificacion"><i class="icon-plus"></i></a>
+        </legend>
+
+        <table class="table table-hover table-condensed" id="table-mcpsat_guias">
+          <thead>
+            <tr>
+              <th>NUMERO GUIA</th>
+              <th>DESCRIPCION</th>
+              <th>PESO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
+              <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
+              <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
+              <td><i class="icon-ban-circle delete"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
 
       <fieldset>
         <legend>Cantidad Transporta

@@ -3,115 +3,76 @@ $(function(){
 
   eventAddCpUbicaciones();
   eventAddCpCantidadTransporta();
+  eventAddCpPedimentos();
+  eventAddCpGuiaIdentificacion();
   eventAddCpProductoModal();
 });
 
 function eventAddCpUbicaciones() {
   $('#btn-add-CpUbicaciones').click(function(event) {
     let htmll = `<div class="ubicacionn">
-      <div class="row-fluid">
-        <div class="span4">
-          <div class="control-group">
-            <label class="control-label" for="cp_ubicaciones_tipoEstacion" style="width: 115px;">Tipo Estación <i class="icon-question-sign helpover" data-title=""></i></label>
-            <div class="controls" style="margin-left: 133px;">
+      <table class="table table-striped table-cpOrigen">
+        <thead>
+          <tr>
+            <th>Tipo Ubicacion <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>ID Ubicacion <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>RFC <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Nombre <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="center">
+              <select name="cp[ubicaciones][][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
+                <option value=""></option>
+                <option value="Origen">Origen</option>
+                <option value="Destino">Destino</option>
+              </select>
+            </td>
+            <td class="center"><input type="text" name="cp[ubicaciones][][idUbicacion]" value="" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][][rfcRemitenteDestinatario]" value="" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][][nombreRemitenteDestinatario]" value="" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][][numRegIdTrib]" value="" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
+            <td class="center">
+              <input type="text" name="cp[ubicaciones][][residenciaFiscal_text]" value="" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
+              <input type="hidden" name="cp[ubicaciones][][residenciaFiscal]" value="" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
+            </td>
+          </tr>
+          <tr>
+            <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Fecha y Hora de Salida <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Tipo Estación <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></th>
+          </tr>
+          <tr>
+            <td class="center">
+              <input type="text" name="cp[ubicaciones][][numEstacion]" value="" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
+              <input type="hidden" name="cp[ubicaciones][][numEstacion_text]" value="" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
+            </td>
+            <td class="center"><input type="text" name="cp[ubicaciones][][nombreEstacion]" value="" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
+            <td class="center">
+              <select name="cp[ubicaciones][][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
+                <option value=""></option>
+                <option value="Altura">Altura</option>
+                <option value="Cabotaje">Cabotaje</option>
+              </select>
+            </td>
+            <td class="center"><input type="datetime-local" name="cp[ubicaciones][][fechaHoraSalida]" value="" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+            <td class="center">
               <select name="cp[ubicaciones][][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
                 <option value=""></option>
                 <option value="01">01 - Origen Nacional</option>
                 <option value="02">02 - Intermedia</option>
                 <option value="03">03 - Destino Final Nacional</option>
               </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="span5">
-          <div class="control-group">
-            <label class="control-label" for="cp_ubicaciones_distanciaRecorrida" style="width: 80px;">Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
-            <div class="controls" style="margin-left: 83px;">
+            </td>
+            <td class="center">
               <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <table class="table table-striped table-cpOrigen">
-        <thead>
-          <tr>
-            <th>ID Origen <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>RFC Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Nombre Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Fecha y Hora de Salida <i class="icon-question-sign helpover" data-title=""></i></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="center"><input type="text" name="cp[ubicaciones][][origen][idOrigen]" value="" id="cp_ubic_origen_idOrigen" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_origen_rfcRemitente"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][origen][rfcRemitente]" value="" id="cp_ubic_origen_rfcRemitente" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_origen_nombreRemitente"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreRemitente]" value="" id="cp_ubic_origen_nombreRemitente" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_origen_numRegIdTrib"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][origen][numRegIdTrib]" value="" id="cp_ubic_origen_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_origen_residenciaFiscal"></td>
-            <td class="center">
-              <input type="text" name="cp[ubicaciones][][origen][residenciaFiscal_text]" value="" id="cp_ubic_origen_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_origen_numEstacion">
-              <input type="hidden" name="cp[ubicaciones][][origen][residenciaFiscal]" value="" id="cp_ubic_origen_residenciaFiscal" maxlength="40" class="span12 sikey">
             </td>
-            <td class="center">
-              <input type="text" name="cp[ubicaciones][][origen][numEstacion_text]" value="" id="cp_ubic_origen_numEstacion_text" maxlength="60" class="span12 sikey" data-next="cp_ubic_origen_nombreEstacion">
-              <input type="hidden" name="cp[ubicaciones][][origen][numEstacion]" value="" id="cp_ubic_origen_numEstacion" maxlength="60" class="span12 sikey">
-            </td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreEstacion]" value="" id="cp_ubic_origen_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_origen_navegacionTrafico"></td>
-            <td class="center">
-              <select name="cp[ubicaciones][][origen][navegacionTrafico]" id="cp_ubic_origen_navegacionTrafico">
-                <option value=""></option>
-                <option value="Altura">Altura</option>
-                <option value="Cabotaje">>Cabotaje</option>
-              </select>
-            </td>
-            <td class="center"><input type="datetime-local" name="cp[ubicaciones][][origen][fechaHoraSalida]" value="" id="cp_ubic_origen_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table class="table table-striped table-cpDestino">
-        <thead>
-          <tr>
-            <th>ID Destino <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>RFC Destinatario <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Nombre Destinatario <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Fecha y Hora de Llegada <i class="icon-question-sign helpover" data-title=""></i></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="center"><input type="text" name="cp[ubicaciones][][destino][idDestino]" value="" id="cp_ubic_destino_idDestino" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_destino_rfcDestinatario"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][destino][rfcDestinatario]" value="" id="cp_ubic_destino_rfcDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_destino_nombreDestinatario"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][destino][nombreDestinatario]" value="" id="cp_ubic_destino_nombreDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_destino_numRegIdTrib"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][destino][numRegIdTrib]" value="" id="cp_ubic_destino_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_destino_residenciaFiscal_text"></td>
-            <td class="center">
-              <input type="text" name="cp[ubicaciones][][destino][residenciaFiscal_text]" value="" id="cp_ubic_destino_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_destino_numEstacion_text">
-              <input type="hidden" name="cp[ubicaciones][][destino][residenciaFiscal]" value="" id="cp_ubic_destino_residenciaFiscal" maxlength="40" class="span12 sikey">
-            </td>
-            <td class="center">
-              <input type="text" name="cp[ubicaciones][][destino][numEstacion_text]" value="" id="cp_ubic_destino_numEstacion_text" maxlength="60" class="span12 sikey" data-next="cp_ubic_destino_nombreEstacion">
-              <input type="hidden" name="cp[ubicaciones][][destino][numEstacion]" value="" id="cp_ubic_destino_numEstacion" maxlength="60" class="span12 sikey">
-            </td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][destino][nombreEstacion]" value="" id="cp_ubic_destino_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_destino_navegacionTrafico"></td>
-            <td class="center">
-              <select name="cp[ubicaciones][][destino][navegacionTrafico]" id="cp_ubic_destino_navegacionTrafico" data-next="cp_ubic_destino_fechaHoraProgLlegada">
-                <option value=""></option>
-                <option value="Altura">Altura</option>
-                <option value="Cabotaje">Cabotaje</option>
-              </select>
-            </td>
-            <td class="center"><input type="datetime-local" name="cp[ubicaciones][][origen][fechaHoraProgLlegada]" value="" id="cp_ubic_destino_fechaHoraProgLlegada" class="span12 sikey" minlength="1" maxlength="12" data-next=""></td>
           </tr>
         </tbody>
       </table>
@@ -146,6 +107,7 @@ function eventAddCpUbicaciones() {
           </tr>
         </tbody>
       </table>
+
       <hr class="div">
     </div>`;
 
@@ -181,22 +143,66 @@ function eventAddCpCantidadTransporta() {
   });
 }
 
+function eventAddCpPedimentos() {
+  $('#btn-add-cp-pedimentos').click(function(event) {
+    let htmll = `<tr>
+      <td><input type="number" class="mcpsat_pedimentos_pedimento" value="" placeholder="52 45 4214 4213546"></td>
+      <td><i class="icon-ban-circle delete"></i></td>
+    </tr>`;
+
+    $('#table-mcpsat_pedimentos tbody').append(htmll);
+  });
+
+  $('#table-mcpsat_pedimentos tbody').on('click', 'i.delete', function(){
+    const $tr = $(this).parent().parent();
+    $tr.remove();
+  });
+}
+
+function eventAddCpGuiaIdentificacion() {
+  $('#btn-add-cp-guias').click(function(event) {
+    let htmll = `<tr>
+      <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
+      <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
+      <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
+      <td><i class="icon-ban-circle delete"></i></td>
+    </tr>`;
+
+    $('#table-mcpsat_guias tbody').append(htmll);
+  });
+
+  $('#table-mcpsat_guias tbody').on('click', 'i.delete', function(){
+    const $tr = $(this).parent().parent();
+    $tr.remove();
+  });
+}
+
 function eventAddCpProductoModal() {
   var cpnumrowsmercans = 0;
   $("#btn-add-CpProductoModal").click(function(event) {
-    cpnumrowsmercans++;
 
-    let cantidadTransporta = '', trrm = undefined;
+    let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
+    $("#table-mcpsat_pedimentos tbody tr").each(function(index, el) {
+      pedimentos += `
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][pedimentos][${index}][pedimento]" value="${$('.mcpsat_pedimentos_pedimento', el).val()}" class="cpMercans-pedimentos-pedimento">`;
+    });
+    $("#table-mcpsat_guias tbody tr").each(function(index, el) {
+      guias += `
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][numeroGuiaIdentificacion]" value="${$('.mcpsat_guia_numeroGuiaIdentificacion', el).val()}" class="cpMercans-guia-numeroGuiaIdentificacion">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][descripGuiaIdentificacion]" value="${$('.mcpsat_guia_descripGuiaIdentificacion', el).val()}" class="cpMercans-guia-descripGuiaIdentificacion">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][pesoGuiaIdentificacion]" value="${$('.mcpsat_guia_pesoGuiaIdentificacion', el).val()}" class="cpMercans-guia-pesoGuiaIdentificacion">`;
+    });
     $("#table-mcpsat_cantidadTransporta tbody tr").each(function(index, el) {
       cantidadTransporta += `
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][cantidad]" value="${$('.mcpsat_cantidadTransporta_cantidad', el).val()}" class="cpMercans-cantTrans-cantidad">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][0][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cantidad]" value="${$('.mcpsat_cantidadTransporta_cantidad', el).val()}" class="cpMercans-cantTrans-cantidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
     });
     let htmlrow = `
       <tr class="cp-mercans" data-row="${cpnumrowsmercans}">
         <td>
+          ${$('#mcpsat_bienesTransp_text').val()}
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][bienesTransp]" value="${$('#mcpsat_bienesTransp').val()}" class="cpMercans-bienesTransp">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][bienesTransp_text]" value="${$('#mcpsat_bienesTransp_text').val()}" class="cpMercans-bienesTransp_text">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][claveSTCC]" value="${$('#mcpsat_claveSTCC').val()}" class="cpMercans-claveSTCC">
@@ -219,6 +225,8 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][fraccionArancelaria_text]" value="${$('#mcpsat_fraccionArancelaria_text').val()}" class="cpMercans-fraccionArancelaria_text">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][uuidComercioExt]" value="${$('#mcpsat_uuidComercioExt').val()}" class="cpMercans-uuidComercioExt">
 
+          ${pedimentos}
+          ${guias}
           ${cantidadTransporta}
 
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][unidadPeso]" value="${$('#mcpsat_detalleMercancia_unidadPeso').val()}" class="cpMercans-detaMerca-unidadPeso">
@@ -228,16 +236,54 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][pesoTara]" value="${$('#mcpsat_detalleMercancia_pesoTara').val()}" class="cpMercans-detaMerca-pesoTara">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][detalleMercancia][numPiezas]" value="${$('#mcpsat_detalleMercancia_numPiezas').val()}" class="cpMercans-detaMerca-numPiezas">
         </td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>${$('#mcpsat_descripcion').val()}</td>
+        <td>${$('#mcpsat_cantidad').val()}</td>
+        <td>${$('#mcpsat_claveUnidad_text').val()}</td>
+        <td>${$('#mcpsat_pesoEnKg').val()}</td>
         <td style="width: 20px;">
-          <button class="btn btn-cp-editMercancia">Editar</button>
-          <button class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+          <button type="button" class="btn btn-cp-editMercancia">Editar</button>
+          <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
         </td>
       </tr>`;
     $("#table-mercanciass tbody").append(htmlrow);
+
+    cpnumrowsmercans++;
+
+    $('#modal-cpsat-mercancia').modal('hide');
+  });
+
+  $("#table-mercanciass").on('click', '.btn-cp-removeMercancia', function(){
+    $(this).parent().parent().remove();
+  });
+
+  $("#table-mercanciass").on('click', '.btn-cp-editMercancia', function(){
+    let $tr = $(this).parent().parent();
+    let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
+
+    $tr.find(".cpMercans-pedimentos-pedimento").each(function(index, el) {
+      pedimentos += `<tr>
+          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${$(el).val()}" placeholder="52 45 4214 4213546"></td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
+    });
+    $("#table-mcpsat_guias tbody tr").each(function(index, el) {
+      guias += `<tr>
+          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
+          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
+          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][numeroGuiaIdentificacion]" value="${$('.mcpsat_guia_numeroGuiaIdentificacion', el).val()}" class="cpMercans-guia-numeroGuiaIdentificacion">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][descripGuiaIdentificacion]" value="${$('.mcpsat_guia_descripGuiaIdentificacion', el).val()}" class="cpMercans-guia-descripGuiaIdentificacion">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][pesoGuiaIdentificacion]" value="${$('.mcpsat_guia_pesoGuiaIdentificacion', el).val()}" class="cpMercans-guia-pesoGuiaIdentificacion">`;
+    });
+    $("#table-mcpsat_cantidadTransporta tbody tr").each(function(index, el) {
+      cantidadTransporta += `
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cantidad]" value="${$('.mcpsat_cantidadTransporta_cantidad', el).val()}" class="cpMercans-cantTrans-cantidad">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
+          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
+    });
   });
 }
 
@@ -701,6 +747,40 @@ function autocompletesCP(){
   $('#modal-cpsat-mercancia').on('focus', 'input#mcpsat_detalleMercancia_unidadPeso_text:not(.ui-autocomplete-input)', function(event) {
     const $this = $(this),
     $unidadPeso = $this.parent().parent().find('#mcpsat_detalleMercancia_unidadPeso');
+
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cunidadPeso',
+          dataType: "json",
+          data: {
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $unidadPeso.val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $unidadPeso.val('');
+      }
+    });
+  });
+
+  $('#boxMercancias').on('focus', 'input#cp_mercancias_unidadPeso_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $unidadPeso = $this.parent().parent().find('#cp_mercancias_unidadPeso');
 
     $this.autocomplete({
       source: function( request, response ) {
