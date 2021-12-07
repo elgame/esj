@@ -242,9 +242,32 @@ function eventAddCpProductoModal() {
 }
 
 function autocompletesCP(){
-  $('#boxUbicaciones').on('focus', 'input#cp_ubic_origen_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
+  $('#tabCartaPorte').on('focus', 'input#cp_paisOrigenDestino_text:not(.ui-autocomplete-input)', function(event) {
     const $this = $(this),
-    $ivalor = $this.parent().find('#cp_ubic_origen_residenciaFiscal');
+    $ivalor = $this.parent().find('#cp_paisOrigenDestino');
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $this.val(ui.item.value);
+          $ivalor.val(ui.item.id);
+          $this.parent().find('.cp_paisOrigenDestino').text(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+        $ivalor.val('');
+      }
+    });
+  });
+
+  $('#boxUbicaciones').on('focus', 'input#cp_ubic_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this),
+    $ivalor = $this.parent().find('#cp_ubic_residenciaFiscal');
     $this.autocomplete({
       source: base_url + 'panel/catalogos/cpaises',
       minLength: 1,
@@ -264,27 +287,27 @@ function autocompletesCP(){
     });
   });
 
-  $('#boxUbicaciones').on('focus', 'input#cp_ubic_destino_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
-    const $this = $(this),
-    $ivalor = $this.parent().find('#cp_ubic_destino_residenciaFiscal');
-    $this.autocomplete({
-      source: base_url + 'panel/catalogos/cpaises',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        $this.css("background-color", "#A1F57A");
-        setTimeout(function(){
-          $this.val(ui.item.value);
-          $ivalor.val(ui.item.id);
-        }, 100);
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $this.css("background-color", "#FFD071");
-        $ivalor.val('');
-      }
-    });
-  });
+  // $('#boxUbicaciones').on('focus', 'input#cp_ubic_destino_residenciaFiscal_text:not(.ui-autocomplete-input)', function(event) {
+  //   const $this = $(this),
+  //   $ivalor = $this.parent().find('#cp_ubic_destino_residenciaFiscal');
+  //   $this.autocomplete({
+  //     source: base_url + 'panel/catalogos/cpaises',
+  //     minLength: 1,
+  //     selectFirst: true,
+  //     select: function( event, ui ) {
+  //       $this.css("background-color", "#A1F57A");
+  //       setTimeout(function(){
+  //         $this.val(ui.item.value);
+  //         $ivalor.val(ui.item.id);
+  //       }, 100);
+  //     }
+  //   }).on("keydown", function(event) {
+  //     if(event.which == 8 || event.which == 46) {
+  //       $this.css("background-color", "#FFD071");
+  //       $ivalor.val('');
+  //     }
+  //   });
+  // });
 
   $('#boxUbicaciones').on('focus', 'input#cp_ubic_dom_pais:not(.ui-autocomplete-input)', function(event) {
     const $this = $(this);

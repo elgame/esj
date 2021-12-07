@@ -1717,11 +1717,20 @@
                         <div class="controls">
                           <?php
                             $entradaSalidaMerc = isset($cpobj->entradaSalidaMerc) ? $cpobj->entradaSalidaMerc : ''; ?>
-                          <select name="cp[entradaSalidaMerc]" class="span12 sikey" id="cp_entradaSalidaMerc" data-next="cp_viaEntradaSalida">
+                          <select name="cp[entradaSalidaMerc]" class="span12 sikey" id="cp_entradaSalidaMerc" data-next="cp_paisOrigenDestino_text">
                             <option value=""></option>
                             <option value="Entrada" <?php echo set_select('cp[entradaSalidaMerc]', 'Entrada', $entradaSalidaMerc === 'Entrada' ? true : false); ?>>Entrada</option>
                             <option value="Salida" <?php echo set_select('cp[entradaSalidaMerc]', 'Salida', $entradaSalidaMerc === 'Salida' ? true : false); ?>>Salida</option>
                           </select>
+                        </div>
+                      </div>
+
+                      <div class="control-group">
+                        <label class="control-label" for="cp_paisOrigenDestino_text">País:</label>
+                        <div class="controls">
+                          <input type="text" name="cp[paisOrigenDestino_text]" id="cp_paisOrigenDestino_text" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino_text]', isset($cpobj->paisOrigenDestino_text) ? $cpobj->paisOrigenDestino_text : ''); ?>" maxlength="60" autocomplete="nope" data-next="cp_viaEntradaSalida">
+                          <input type="hidden" name="cp[paisOrigenDestino]" id="cp_paisOrigenDestino" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino]', isset($cpobj->paisOrigenDestino) ? $cpobj->paisOrigenDestino : ''); ?>" maxlength="60" autocomplete="nope">
+                          <span class="cp_paisOrigenDestino help-block nomarg" style="color:#bd362f"></span>
                         </div>
                       </div>
                     </div>
@@ -1745,7 +1754,7 @@
                         <label class="control-label" for="cp_totalDistRec">Total Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php $totalDistRec = isset($cpobj->totalDistRec) ? $cpobj->totalDistRec : ''; ?>
-                          <input type="number" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_ubicaciones_tipoEstacion">
+                          <input type="number" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_origenDestino_pais">
                         </div>
                       </div>
                     </div>
@@ -1764,11 +1773,60 @@
                       <div class="box-content" style="padding: 0;" id="boxUbicaciones">
 
                         <div class="ubicacionn">
-                          <div class="row-fluid">
-                            <div class="span4">
-                              <div class="control-group">
-                                <label class="control-label" for="cp_ubicaciones_tipoEstacion" style="width: 115px;">Tipo Estación <i class="icon-question-sign helpover" data-title=""></i></label>
-                                <div class="controls" style="margin-left: 133px;">
+                          <table class="table table-striped table-cpOrigen">
+                            <thead>
+                              <tr>
+                                <th>Tipo Ubicacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>ID Ubicacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>RFC <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Nombre <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td class="center">
+                                  <?php $tipoUbicacion = isset($ubic->tipoUbicacion) ? $ubic->tipoUbicacion : ''; ?>
+                                  <select name="cp[ubicaciones][][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
+                                    <option value="" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', '', $tipoUbicacion === '' ? true : false); ?>></option>
+                                    <option value="Origen" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', 'Origen', $tipoUbicacion === 'Origen' ? true : false); ?>>Origen</option>
+                                    <option value="Destino" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', 'Destino', $tipoUbicacion === 'Destino' ? true : false); ?>>Destino</option>
+                                  </select>
+                                </td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][][idUbicacion]" value="<?php echo set_value('cp[ubicaciones][][idUbicacion]', isset($ubic->idUbicacion) ? $ubic->idUbicacion : ''); ?>" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][][rfcRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones][][rfcRemitenteDestinatario]', isset($ubic->rfcRemitenteDestinatario) ? $ubic->rfcRemitenteDestinatario : ''); ?>" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][][nombreRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones][][nombreRemitenteDestinatario]', isset($ubic->nombreRemitenteDestinatario) ? $ubic->nombreRemitenteDestinatario : ''); ?>" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones][][numRegIdTrib]', isset($ubic->numRegIdTrib) ? $ubic->numRegIdTrib : ''); ?>" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
+                                <td class="center">
+                                  <input type="text" name="cp[ubicaciones][][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones][][residenciaFiscal_text]', isset($ubic->residenciaFiscal_text) ? $ubic->residenciaFiscal_text : ''); ?>" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
+                                  <input type="hidden" name="cp[ubicaciones][][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones][][residenciaFiscal]', isset($ubic->residenciaFiscal) ? $ubic->residenciaFiscal : ''); ?>" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
+                                </td>
+                              </tr>
+                              <tr>
+                                <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Fecha y Hora de Salida <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Tipo Estación <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></th>
+                              </tr>
+                              <tr>
+                                <td class="center">
+                                  <input type="text" name="cp[ubicaciones][][numEstacion]" value="<?php echo set_value('cp[ubicaciones][][numEstacion]', isset($ubic->numEstacion) ? $ubic->numEstacion : ''); ?>" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
+                                  <input type="hidden" name="cp[ubicaciones][][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones][][numEstacion_text]', isset($ubic->numEstacion_text) ? $ubic->numEstacion_text : ''); ?>" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
+                                </td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones][][nombreEstacion]', isset($ubic->nombreEstacion) ? $ubic->nombreEstacion : ''); ?>" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
+                                <td class="center">
+                                  <?php $navegacionTrafico = isset($ubic->navegacionTrafico) ? $ubic->navegacionTrafico : ''; ?>
+                                  <select name="cp[ubicaciones][][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
+                                    <option value="" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', '', $navegacionTrafico === '' ? true : false); ?>></option>
+                                    <option value="Altura" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', 'Altura', $navegacionTrafico === 'Altura' ? true : false); ?>>Altura</option>
+                                    <option value="Cabotaje" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false); ?>>Cabotaje</option>
+                                  </select>
+                                </td>
+                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones][][fechaHoraSalida]', isset($ubic->fechaHoraSalida) ? $ubic->fechaHoraSalida : ''); ?>" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                                <td class="center">
                                   <?php $tipoEstacion = isset($ubic->tipoEstacion) ? $ubic->tipoEstacion : ''; ?>
                                   <select name="cp[ubicaciones][][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
                                     <option value="" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '', $tipoEstacion === '' ? true : false); ?>></option>
@@ -1776,101 +1834,11 @@
                                     <option value="02" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '02', $tipoEstacion === '02' ? true : false); ?>>02 - Intermedia</option>
                                     <option value="03" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '03', $tipoEstacion === '03' ? true : false); ?>>03 - Destino Final Nacional</option>
                                   </select>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div class="span5">
-                              <div class="control-group">
-                                <label class="control-label" for="cp_ubicaciones_distanciaRecorrida" style="width: 80px;">Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
-                                <div class="controls" style="margin-left: 83px;">
+                                </td>
+                                <td class="center">
                                   <?php $distanciaRecorrida = isset($ubic->distanciaRecorrida) ? $ubic->distanciaRecorrida : ''; ?>
                                   <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="<?php echo set_value('cp[ubicaciones][][distanciaRecorrida]', $distanciaRecorrida); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <table class="table table-striped table-cpOrigen">
-                            <thead>
-                              <tr>
-                                <th>ID Origen <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>RFC Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Nombre Remitente <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Fecha y Hora de Salida <i class="icon-question-sign helpover" data-title=""></i></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][origen][idOrigen]" value="<?php echo set_value('cp[ubicaciones][][origen][idOrigen]', isset($ubic->origen->idOrigen) ? $ubic->origen->idOrigen : ''); ?>" id="cp_ubic_origen_idOrigen" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_origen_rfcRemitente"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][origen][rfcRemitente]" value="<?php echo set_value('cp[ubicaciones][][origen][rfcRemitente]', isset($ubic->origen->rfcRemitente) ? $ubic->origen->rfcRemitente : ''); ?>" id="cp_ubic_origen_rfcRemitente" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_origen_nombreRemitente"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreRemitente]" value="<?php echo set_value('cp[ubicaciones][][origen][nombreRemitente]', isset($ubic->origen->nombreRemitente) ? $ubic->origen->nombreRemitente : ''); ?>" id="cp_ubic_origen_nombreRemitente" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_origen_numRegIdTrib"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][origen][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones][][origen][numRegIdTrib]', isset($ubic->origen->numRegIdTrib) ? $ubic->origen->numRegIdTrib : ''); ?>" id="cp_ubic_origen_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_origen_residenciaFiscal"></td>
-                                <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][origen][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones][][origen][residenciaFiscal_text]', isset($ubic->origen->residenciaFiscal_text) ? $ubic->origen->residenciaFiscal_text : ''); ?>" id="cp_ubic_origen_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_origen_numEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][origen][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones][][origen][residenciaFiscal]', isset($ubic->origen->residenciaFiscal) ? $ubic->origen->residenciaFiscal : ''); ?>" id="cp_ubic_origen_residenciaFiscal" maxlength="40" class="span12 sikey">
                                 </td>
-                                <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][origen][numEstacion]" value="<?php echo set_value('cp[ubicaciones][][origen][numEstacion]', isset($ubic->origen->numEstacion) ? $ubic->origen->numEstacion : ''); ?>" id="cp_ubic_origen_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_origen_nombreEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][origen][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones][][origen][numEstacion_text]', isset($ubic->origen->numEstacion_text) ? $ubic->origen->numEstacion_text : ''); ?>" id="cp_ubic_origen_numEstacion_text" maxlength="60" class="span12 sikey">
-                                </td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][origen][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones][][origen][nombreEstacion]', isset($ubic->origen->nombreEstacion) ? $ubic->origen->nombreEstacion : ''); ?>" id="cp_ubic_origen_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_origen_navegacionTrafico"></td>
-                                <td class="center">
-                                  <?php $navegacionTrafico = isset($ubic->origen->navegacionTrafico) ? $ubic->origen->navegacionTrafico : ''; ?>
-                                  <select name="cp[ubicaciones][][origen][navegacionTrafico]" id="cp_ubic_origen_navegacionTrafico">
-                                    <option value="" <?php echo set_select('cp[ubicaciones][][origen][navegacionTrafico]', '', $navegacionTrafico === '' ? true : false); ?>></option>
-                                    <option value="Altura" <?php echo set_select('cp[ubicaciones][][origen][navegacionTrafico]', 'Altura', $navegacionTrafico === 'Altura' ? true : false); ?>>Altura</option>
-                                    <option value="Cabotaje" <?php echo set_select('cp[ubicaciones][][origen][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false); ?>>Cabotaje</option>
-                                  </select>
-                                </td>
-                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][][origen][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones][][origen][fechaHoraSalida]', isset($ubic->origen->fechaHoraSalida) ? $ubic->origen->fechaHoraSalida : ''); ?>" id="cp_ubic_origen_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
-                              </tr>
-                            </tbody>
-                          </table>
-
-                          <table class="table table-striped table-cpDestino">
-                            <thead>
-                              <tr>
-                                <th>ID Destino <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>RFC Destinatario <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Nombre Destinatario <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Num Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Nombre Estacion <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Navegacion Trafico <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Fecha y Hora de Llegada <i class="icon-question-sign helpover" data-title=""></i></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][destino][idDestino]" value="<?php echo set_value('cp[ubicaciones][][destino][idDestino]', isset($ubic->destino->idDestino) ? $ubic->destino->idDestino : ''); ?>" id="cp_ubic_destino_idDestino" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_destino_rfcDestinatario"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][destino][rfcDestinatario]" value="<?php echo set_value('cp[ubicaciones][][destino][rfcDestinatario]', isset($ubic->destino->rfcDestinatario) ? $ubic->destino->rfcDestinatario : ''); ?>" id="cp_ubic_destino_rfcDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_destino_nombreDestinatario"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][destino][nombreDestinatario]" value="<?php echo set_value('cp[ubicaciones][][destino][nombreDestinatario]', isset($ubic->destino->nombreDestinatario) ? $ubic->destino->nombreDestinatario : ''); ?>" id="cp_ubic_destino_nombreDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_destino_numRegIdTrib"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][destino][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones][][destino][numRegIdTrib]', isset($ubic->destino->numRegIdTrib) ? $ubic->destino->numRegIdTrib : ''); ?>" id="cp_ubic_destino_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_destino_residenciaFiscal_text"></td>
-                                <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][destino][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones][][destino][residenciaFiscal_text]', isset($ubic->destino->residenciaFiscal_text) ? $ubic->destino->residenciaFiscal_text : ''); ?>" id="cp_ubic_destino_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_destino_numEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][destino][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones][][destino][residenciaFiscal]', isset($ubic->destino->residenciaFiscal) ? $ubic->destino->residenciaFiscal : ''); ?>" id="cp_ubic_destino_residenciaFiscal" maxlength="40" class="span12 sikey">
-                                </td>
-                                <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][destino][numEstacion]" value="<?php echo set_value('cp[ubicaciones][][destino][numEstacion]', isset($ubic->destino->numEstacion) ? $ubic->destino->numEstacion : ''); ?>" id="cp_ubic_destino_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_destino_nombreEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][destino][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones][][destino][numEstacion_text]', isset($ubic->destino->numEstacion_text) ? $ubic->destino->numEstacion_text : ''); ?>" id="cp_ubic_destino_numEstacion_text" maxlength="60" class="span12 sikey">
-                                </td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][destino][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones][][destino][nombreEstacion]', isset($ubic->destino->nombreEstacion) ? $ubic->destino->nombreEstacion : ''); ?>" id="cp_ubic_destino_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_destino_navegacionTrafico"></td>
-                                <td class="center">
-                                  <?php $navegacionTrafico = isset($ubic->destino->navegacionTrafico) ? $ubic->destino->navegacionTrafico : ''; ?>
-                                  <select name="cp[ubicaciones][][destino][navegacionTrafico]" id="cp_ubic_destino_navegacionTrafico" data-next="cp_ubic_destino_fechaHoraProgLlegada">
-                                    <option value="" <?php echo set_select('cp[ubicaciones][][destino][navegacionTrafico]', '', $navegacionTrafico === '' ? true : false); ?>></option>
-                                    <option value="Altura" <?php echo set_select('cp[ubicaciones][][destino][navegacionTrafico]', 'Altura', $navegacionTrafico === 'Altura' ? true : false); ?>>Altura</option>
-                                    <option value="Cabotaje" <?php echo set_select('cp[ubicaciones][][destino][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false); ?>>Cabotaje</option>
-                                  </select>
-                                </td>
-                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][][origen][fechaHoraProgLlegada]" value="<?php echo set_value('cp[ubicaciones][][origen][fechaHoraProgLlegada]', isset($ubic->destino->fechaHoraProgLlegada) ? $ubic->destino->fechaHoraProgLlegada : ''); ?>" id="cp_ubic_destino_fechaHoraProgLlegada" class="span12 sikey" minlength="1" maxlength="12" data-next=""></td>
                               </tr>
                             </tbody>
                           </table>
