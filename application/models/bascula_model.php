@@ -2877,7 +2877,7 @@ class bascula_model extends CI_Model {
     $query = $this->db->query(
       "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
               bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
-              bspe.folio, bspe.estiba, c.nombre AS calidad, r.nombre AS rancho,
+              bspe.folio, bspe.estiba, c.id_calidad, c.nombre AS calidad, r.nombre AS rancho,
               cc.nombre AS centro_costo, bspe.cantidad, bspec.num, (bspe.cantidad/bspec.num) AS cc_cantidad,
               ((bspe.cantidad/bspec.num) * bsp.kg_pieza) AS cc_kilos
       FROM bascula b
@@ -2893,27 +2893,32 @@ class bascula_model extends CI_Model {
       "
     );
 
-    // $query = $this->db->query(
-    //   "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha, bsp.folio,
-    //     r.id_rancho, r.nombre AS rancho, bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
-    //     esti.estibas
-    //   FROM bascula b
-    //     INNER JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
-    //     INNER JOIN (
-    //       SELECT id_salida_pina, max(estiba) AS estibas
-    //       FROM otros.bascula_salida_pina_estibas
-    //       GROUP BY id_salida_pina
-    //     ) AS esti ON esti.id_salida_pina = bsp.id
-    //     INNER JOIN otros.ranchos r ON r.id_rancho = bsp.id_rancho
-    //   WHERE 1 = 1 {$sql}
-    //   ORDER BY bascula ASC, folio ASC
-    //   "
-    // );
 
+    $aux = 0;
     $response = array();
     if ($query->num_rows() > 0)
     {
       $response = $query->result();
+
+      foreach ($response as $key => $value) {
+        if ($aux != $value->id_bascula) {
+          $products = $this->db->query(
+            "SELECT id_calidad, precio
+            FROM bascula_compra
+            WHERE id_bascula = {$value->id_bascula}
+            ORDER BY id_calidad ASC
+            ")->result();
+          $precios = [];
+          foreach ($products as $keyp => $prod) {
+            $precios[$prod->id_calidad] = $prod->precio;
+          }
+
+          $aux = $value->id_bascula;
+        }
+
+        $value->precio = isset($precios[$value->id_calidad])? $precios[$value->id_calidad]: 0;
+        $value->importe = $value->precio * $value->cc_kilos;
+      }
     }
 
     return $response;
@@ -2934,7 +2939,7 @@ class bascula_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
 
     if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
     {
@@ -2954,9 +2959,9 @@ class bascula_model extends CI_Model {
     $pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'L', 'L', 'R', 'R');
-    $widths = array(17, 18, 18, 33, 15, 15, 27, 30, 18, 13);
-    $header = array('FECHA', 'BOLETA', 'ENTRADA', 'RANCHO', 'KILOS', 'PIEZAS', 'CALIDAD', 'MELGA', 'KG/PIEZA', 'ESTIBA');
+    $aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'L', 'L', 'R', 'R', 'R', 'R');
+    $widths = array(17, 18, 18, 33, 15, 15, 35, 30, 18, 13, 18, 18);
+    $header = array('FECHA', 'BOLETA', 'ENTRADA', 'RANCHO', 'KILOS', 'PIEZAS', 'CALIDAD', 'MELGA', 'KG/PIEZA', 'ESTIBA', 'PRECIO', 'IMPORTE');
 
     $total_kg    = 0;
     $total_piezas  = 0;
@@ -3001,7 +3006,9 @@ class bascula_model extends CI_Model {
         $valuerp->calidad,
         $valuerp->centro_costo,
         ($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): ''),
-        $valuerp->estiba
+        $valuerp->estiba,
+        MyString::formatoNumero($valuerp->precio, 2, '', false),
+        MyString::formatoNumero($valuerp->importe, 2, '', false)
       );
 
       $pdf->SetY($pdf->GetY()-2);
