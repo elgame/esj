@@ -2643,6 +2643,11 @@ class facturacion_model extends privilegios_model{
         $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
       }
 
+      if ($this->input->get('dserie') != '')
+      {
+        $sql .= " AND f.serie = '".$this->input->get('dserie')."'";
+      }
+
       if ($this->input->get('dtipo') != '')
       {
         $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
