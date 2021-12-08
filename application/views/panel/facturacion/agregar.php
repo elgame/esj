@@ -1945,7 +1945,7 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr class="cp-mercans" data-row="0">
+                            <tr class="cp-mercans" id="cp-mercanss0">
                               <td>
                                 <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp]" value="" class="cpMercans-bienesTransp">
                                 <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp_text]" value="" class="cpMercans-bienesTransp_text">
@@ -2002,6 +2002,241 @@
                     </div>
                   </div>
                   <!-- !--/Mercancias -->
+
+                  <!-- Autotransporte -->
+                  <div class="row-fluid">
+                    <div class="box span12">
+                      <div class="box-header well">
+                        <h2><i class="icon-align-justify"></i><span class="break"></span>Autotransporte</h2>
+                        <div class="box-icon">
+                        </div>
+                      </div>
+                      <div class="box-content" style="padding: 0;" id="boxAutotransporte">
+                        <div class="span6">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_permSCT">Permiso SCT <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <?php $permSCT = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
+                              <select name="cp[mercancias][autotransporte][permSCT]" class="span12 sikey" id="cp_mercancias_autotransporte_permSCT" data-next="cp_mercancias_autotransporte_numPermisoSCT">
+                                <option value="" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', '', $permSCT === '' ? true : false); ?>></option>
+                                <option value="TPAF01" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>TPAF01 - Autotransporte Federal de carga general.</option>
+                                <option value="TPAF02" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF02', $permSCT === 'TPAF02' ? true : false); ?>>TPAF02 - Transporte privado de carga.</option>
+                                <option value="TPAF03" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF03', $permSCT === 'TPAF03' ? true : false); ?>>TPAF03 - Autotransporte Federal de Carga Especializada de materiales y residuos peligrosos.</option>
+                                <option value="TPAF04" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF04', $permSCT === 'TPAF04' ? true : false); ?>>TPAF04 - Transporte de automóviles sin rodar en vehículo tipo góndola.</option>
+                                <option value="TPAF05" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF05', $permSCT === 'TPAF05' ? true : false); ?>>TPAF05 - Transporte de carga de gran peso y/o volumen de hasta 90 toneladas.</option>
+                                <option value="TPAF06" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF06', $permSCT === 'TPAF06' ? true : false); ?>>TPAF06 - Transporte de carga especializada de gran peso y/o volumen de más 90 toneladas.</option>
+                                <option value="TPAF07" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF07', $permSCT === 'TPAF07' ? true : false); ?>>TPAF07 - Transporte Privado de materiales y residuos peligrosos.</option>
+                                <option value="TPAF08" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF08', $permSCT === 'TPAF08' ? true : false); ?>>TPAF08 - Autotransporte internacional de carga de largo recorrido.</option>
+                                <option value="TPAF09" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF09', $permSCT === 'TPAF09' ? true : false); ?>>TPAF09 - Autotransporte internacional de carga especializada de materiales y residuos peligrosos de largo recorrido.</option>
+                                <option value="TPAF10" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF10', $permSCT === 'TPAF10' ? true : false); ?>>TPAF10 - Autotransporte Federal de Carga General cuyo ámbito de aplicación comprende la franja fronteriza con Estados Unidos.</option>
+                                <option value="TPAF11" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF11', $permSCT === 'TPAF11' ? true : false); ?>>TPAF11 - Autotransporte Federal de Carga Especializada cuyo ámbito de aplicación comprende la franja fronteriza con Estados Unidos.</option>
+                                <option value="TPAF12" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF12', $permSCT === 'TPAF12' ? true : false); ?>>TPAF12 - Servicio auxiliar de arrastre en las vías generales de comunicación.</option>
+                                <option value="TPAF13" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF13', $permSCT === 'TPAF13' ? true : false); ?>>TPAF13 - Servicio auxiliar de servicios de arrastre, arrastre y salvamento, y depósito de vehículos en las vías generales de comunicación.</option>
+                                <option value="TPAF14" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF14', $permSCT === 'TPAF14' ? true : false); ?>>TPAF14 - Servicio de paquetería y mensajería en las vías generales de comunicación.</option>
+                                <option value="TPAF15" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF15', $permSCT === 'TPAF15' ? true : false); ?>>TPAF15 - Transporte especial para el tránsito de grúas industriales con peso máximo de 90 toneladas.</option>
+                                <option value="TPAF16" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF16', $permSCT === 'TPAF16' ? true : false); ?>>TPAF16 - Servicio federal para empresas arrendadoras servicio público federal.</option>
+                                <option value="TPAF17" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF17', $permSCT === 'TPAF17' ? true : false); ?>>TPAF17 - Empresas trasladistas de vehículos nuevos.</option>
+                                <option value="TPAF18" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF18', $permSCT === 'TPAF18' ? true : false); ?>>TPAF18 - Empresas fabricantes o distribuidoras de vehículos nuevos.</option>
+                                <option value="TPAF19" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF19', $permSCT === 'TPAF19' ? true : false); ?>>TPAF19 - Autorización expresa para circular en los caminos y puentes de jurisdicción federal con configuraciones de tractocamión doblemente articulado.</option>
+                                <option value="TPTM01" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPTM01', $permSCT === 'TPTM01' ? true : false); ?>>TPTM01 - Permiso temporal para navegación de cabotaje</option>
+                                <option value="TPTA01" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPTA01', $permSCT === 'TPTA01' ? true : false); ?>>TPTA01 - Concesión y/o autorización para el servicio regular nacional y/o internacional para empresas mexicanas</option>
+                                <option value="TPTA02" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPTA02', $permSCT === 'TPTA02' ? true : false); ?>>TPTA02 - Permiso para el servicio aéreo regular de empresas extranjeras</option>
+                                <option value="TPTA03" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPTA03', $permSCT === 'TPTA03' ? true : false); ?>>TPTA03 - Permiso para el servicio nacional e internacional no regular de fletamento</option>
+                                <option value="TPTA04" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPTA04', $permSCT === 'TPTA04' ? true : false); ?>>TPTA04 - Permiso para el servicio nacional e internacional no regular de taxi aéreo</option>
+                                <option value="TPXX00" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPXX00', $permSCT === 'TPXX00' ? true : false); ?>>TPXX00</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="span6">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_numPermisoSCT">Num del Permiso SCT </label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][numPermisoSCT]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][numPermisoSCT]', isset($ubic->mercancias->unidadPeso_text) ? $ubic->mercancias->unidadPeso_text : ''); ?>"
+                                id="cp_mercancias_autotransporte_numPermisoSCT" maxlength="50" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_configVehicular">
+                            </div>
+                          </div>
+                        </div>
+
+                        <h4>Identificacion Vehicular</h4>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_ident_configVehicular">Configuración Vehicular <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <?php $permSCT = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
+                              <select name="cp[mercancias][autotransporte][identificacionVehicular][configVehicular]" class="span12 sikey" id="cp_mercancias_autotransporte_ident_configVehicular" data-next="cp_mercancias_autotransporte_ident_placaVM">
+                                <option value="" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', '', $permSCT === '' ? true : false); ?>></option>
+                                <option value="C2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2</option>
+                                <option value="C3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3</option>
+                                <option value="C2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2R2</option>
+                                <option value="C3R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3R2</option>
+                                <option value="C2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2R3</option>
+                                <option value="C3R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3R3</option>
+                                <option value="T2S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1</option>
+                                <option value="T2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2</option>
+                                <option value="T2S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S3</option>
+                                <option value="T3S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1</option>
+                                <option value="T3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2</option>
+                                <option value="T3S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S3</option>
+                                <option value="T2S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1R2</option>
+                                <option value="T2S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2R2</option>
+                                <option value="T2S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1R3</option>
+                                <option value="T3S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1R2</option>
+                                <option value="T3S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1R3</option>
+                                <option value="T3S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R2</option>
+                                <option value="T3S2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R3</option>
+                                <option value="T3S2R4" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R4</option>
+                                <option value="T2S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2S2</option>
+                                <option value="T3S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2S2</option>
+                                <option value="T3S3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S3S2</option>
+                                <option value="OTROEV" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEV</option>
+                                <option value="OTROEGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEGP</option>
+                                <option value="OTROSG" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROSG</option>
+                                <option value="VL" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>VL</option>
+                                <option value="OTROEVGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEVGP</option>
+                                <option value="GPLUTA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTA</option>
+                                <option value="GPLUTB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTB</option>
+                                <option value="GPLUTC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTC</option>
+                                <option value="GPLUTD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTD</option>
+                                <option value="GPLATA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATA</option>
+                                <option value="GPLATB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATB</option>
+                                <option value="GPLATC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATC</option>
+                                <option value="GPLATD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATD</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_ident_placaVM">Placa vehicular del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][placaVM]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][placaVM]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_ident_placaVM" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_anioModeloVM">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span3">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_ident_anioModeloVM">Año del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][anioModeloVM]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][anioModeloVM]', isset($ubic->mercancias->cargoPorTasacion) ? $ubic->destino->cargoPorTasacion : ''); ?>"
+                                id="cp_mercancias_autotransporte_ident_anioModeloVM" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraRespCivil">
+                            </div>
+                          </div>
+                        </div>
+
+                        <h4 style="clear: both;">Seguros</h4>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraRespCivil">Nombre Aseguradora Civil <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraRespCivil]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraRespCivil]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_aseguraRespCivil" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaRespCivil">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaRespCivil">No Poliza Civil <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][polizaRespCivil]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaRespCivil]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_polizaRespCivil" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4" style="clear: both;">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente">Nombre Aseguradora Med Ambiente <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraMedAmbiente]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraMedAmbiente]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaMedAmbiente">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaMedAmbiente">No Poliza Med Ambiente <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][polizaMedAmbiente]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaMedAmbiente]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_polizaMedAmbiente" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraCarga">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4" style="clear: both;">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraCarga">Nombre Aseguradora Carga <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraCarga]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraCarga]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_aseguraCarga" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaCarga">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaCarga">No Poliza Carga <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][polizaCarga]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaCarga]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_polizaCarga" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_primaSeguro">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="span4" style="clear: both;">
+                          <div class="control-group">
+                            <label class="control-label" for="cp_mercancias_autotransporte_seguro_primaSeguro">Prima Seguro <i class="icon-question-sign helpover" data-title=""></i></label>
+                            <div class="controls">
+                              <input type="text" name="cp[mercancias][autotransporte][seguros][primaSeguro]"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][primaSeguro]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                id="cp_mercancias_autotransporte_seguro_primaSeguro" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_anioModeloVM">
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style="clear: both;"></div>
+                        <a class="btn-add pull-right" id="btn-add-CpRemolques" data-title="Agregar Remolque" style="cursor: pointer;font-size: 1.1em; margin-right: 10px;"><i class="icon-plus"></i></a>
+                        <table class="table table-hover table-condensed" id="table-remolequess">
+                          <thead>
+                            <tr>
+                              <th>TIPO</th>
+                              <th>PLACA</th>
+                              <th>Opc</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="cp-mercans" data-row="0">
+                              <td>
+                                <input type="text" name="cp[mercancias][autotransporte][remolques][0][subTipoRem]" value="" class="cpMercans-autotrans_primaSeguro">cp_mercancias_autotransporte_seguro_primaSeguro
+                              </td>
+                              <td><input type="hidden" name="cp[mercancias][autotransporte][remolques][0][placa]" value="" class="cpMercans-detaMerca-numPiezas"></td>
+                              <td style="width: 20px;">
+                                <button type="button" class="btn btn-cp-editMercancia">Editar</button>
+                                <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <!--/Autotransporte -->
 
                 </div>
               </div>
@@ -2316,7 +2551,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-      <button class="btn btn-primary" id="btn-add-CpProductoModal">Agregar</button>
+      <button class="btn btn-primary" id="btn-add-CpProductoModal">Guardar</button>
     </div>
   </div>
 

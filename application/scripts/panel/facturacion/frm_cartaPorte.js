@@ -182,15 +182,29 @@ function eventAddCpProductoModal() {
   $("#btn-add-CpProductoModal").click(function(event) {
 
     let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
+    let objson = {
+      datos: {},
+      pedimentos: [],
+      guias: [],
+      cantidadTransporta: [],
+      detalleMercancia: {}
+    };
+
     $("#table-mcpsat_pedimentos tbody tr").each(function(index, el) {
       pedimentos += `
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][pedimentos][${index}][pedimento]" value="${$('.mcpsat_pedimentos_pedimento', el).val()}" class="cpMercans-pedimentos-pedimento">`;
+      objson.pedimentos.push({pedimento: $('.mcpsat_pedimentos_pedimento', el).val()});
     });
     $("#table-mcpsat_guias tbody tr").each(function(index, el) {
       guias += `
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][numeroGuiaIdentificacion]" value="${$('.mcpsat_guia_numeroGuiaIdentificacion', el).val()}" class="cpMercans-guia-numeroGuiaIdentificacion">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][descripGuiaIdentificacion]" value="${$('.mcpsat_guia_descripGuiaIdentificacion', el).val()}" class="cpMercans-guia-descripGuiaIdentificacion">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][pesoGuiaIdentificacion]" value="${$('.mcpsat_guia_pesoGuiaIdentificacion', el).val()}" class="cpMercans-guia-pesoGuiaIdentificacion">`;
+      objson.guias.push({
+        numeroGuiaIdentificacion: $('.mcpsat_guia_numeroGuiaIdentificacion', el).val(),
+        descripGuiaIdentificacion: $('.mcpsat_guia_descripGuiaIdentificacion', el).val(),
+        pesoGuiaIdentificacion: $('.mcpsat_guia_pesoGuiaIdentificacion', el).val(),
+      });
     });
     $("#table-mcpsat_cantidadTransporta tbody tr").each(function(index, el) {
       cantidadTransporta += `
@@ -198,9 +212,48 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
+      objson.cantidadTransporta.push({
+        cantidad: $('.mcpsat_cantidadTransporta_cantidad', el).val(),
+        idOrigen: $('.mcpsat_cantidadTransporta_idOrigen', el).val(),
+        idDestino: $('.mcpsat_cantidadTransporta_idDestino', el).val(),
+        cvesTransporte: $('.mcpsat_cantidadTransporta_cvesTransporte', el).val(),
+      });
     });
+
+    objson.datos = {
+      bienesTransp: $('#mcpsat_bienesTransp').val(),
+      bienesTransp_text: $('#mcpsat_bienesTransp_text').val(),
+      claveSTCC: $('#mcpsat_claveSTCC').val(),
+      claveSTCC_text: $('#mcpsat_claveSTCC_text').val(),
+      descripcion: $('#mcpsat_descripcion').val(),
+      cantidad: $('#mcpsat_cantidad').val(),
+      claveUnidad: $('#mcpsat_claveUnidad').val(),
+      claveUnidad_text: $('#mcpsat_claveUnidad_text').val(),
+      unidad: $('#mcpsat_unidad').val(),
+      dimensiones: $('#mcpsat_dimensiones').val(),
+      materialPeligroso: $('#mcpsat_materialPeligroso').val(),
+      cveMaterialPeligroso: $('#mcpsat_cveMaterialPeligroso').val(),
+      cveMaterialPeligroso_text: $('#mcpsat_cveMaterialPeligroso_text').val(),
+      embalaje: $('#mcpsat_embalaje').val(),
+      descripEmbalaje: $('#mcpsat_descripEmbalaje').val(),
+      pesoEnKg: $('#mcpsat_pesoEnKg').val(),
+      valorMercancia: $('#mcpsat_valorMercancia').val(),
+      moneda: $('#mcpsat_moneda').val(),
+      fraccionArancelaria: $('#mcpsat_fraccionArancelaria').val(),
+      fraccionArancelaria_text: $('#mcpsat_fraccionArancelaria_text').val(),
+      uuidComercioExt: $('#mcpsat_uuidComercioExt').val(),
+    };
+    objson.detalleMercancia = {
+      unidadPeso: $('#mcpsat_detalleMercancia_unidadPeso').val(),
+      unidadPeso_text: $('#mcpsat_detalleMercancia_unidadPeso_text').val(),
+      pesoBruto: $('#mcpsat_detalleMercancia_pesoBruto').val(),
+      pesoNeto: $('#mcpsat_detalleMercancia_pesoNeto').val(),
+      pesoTara: $('#mcpsat_detalleMercancia_pesoTara').val(),
+      numPiezas: $('#mcpsat_detalleMercancia_numPiezas').val(),
+    };
+
     let htmlrow = `
-      <tr class="cp-mercans" data-row="${cpnumrowsmercans}">
+      <tr class="cp-mercans" id="cp-mercans${cpnumrowsmercans}">
         <td>
           ${$('#mcpsat_bienesTransp_text').val()}
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][bienesTransp]" value="${$('#mcpsat_bienesTransp').val()}" class="cpMercans-bienesTransp">
@@ -241,13 +294,27 @@ function eventAddCpProductoModal() {
         <td>${$('#mcpsat_claveUnidad_text').val()}</td>
         <td>${$('#mcpsat_pesoEnKg').val()}</td>
         <td style="width: 20px;">
-          <button type="button" class="btn btn-cp-editMercancia">Editar</button>
+          <button type="button" class="btn btn-cp-editMercancia" data-json="${encodeURIComponent(JSON.stringify(objson))}">Editar</button>
           <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
         </td>
       </tr>`;
     $("#table-mercanciass tbody").append(htmlrow);
+    if($('#btn-add-CpProductoModal').data('edit')){ // elimina el tr
+      $('#'+$('#btn-add-CpProductoModal').data('edit')).remove();
+    }
 
     cpnumrowsmercans++;
+
+    for (const property in objson.datos) {
+      $(`#mcpsat_${property}`).val('');
+    }
+    for (const property in objson.detalleMercancia) {
+      $(`#mcpsat_detalleMercancia_${property}`).val('');
+    }
+    $("#table-mcpsat_pedimentos tbody").html('');
+    $("#table-mcpsat_guias tbody").html('');
+    $("#table-mcpsat_cantidadTransporta tbody").html('');
+    $('#btn-add-CpProductoModal').removeAttr('edit');
 
     $('#modal-cpsat-mercancia').modal('hide');
   });
@@ -256,34 +323,59 @@ function eventAddCpProductoModal() {
     $(this).parent().parent().remove();
   });
 
+  // Editar
   $("#table-mercanciass").on('click', '.btn-cp-editMercancia', function(){
     let $tr = $(this).parent().parent();
     let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
 
-    $tr.find(".cpMercans-pedimentos-pedimento").each(function(index, el) {
+    let objson = JSON.parse(decodeURIComponent($(this).attr('data-json')));
+
+    objson.pedimentos.forEach(function(el) {
       pedimentos += `<tr>
-          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${$(el).val()}" placeholder="52 45 4214 4213546"></td>
+          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${el.pedimento}" placeholder="52 45 4214 4213546"></td>
           <td><i class="icon-ban-circle delete"></i></td>
         </tr>`;
     });
-    $("#table-mcpsat_guias tbody tr").each(function(index, el) {
+    objson.guias.forEach(function(el) {
       guias += `<tr>
-          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
-          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
-          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
+          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
+          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>
+          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value="${el.pesoGuiaIdentificacion}"></td>
           <td><i class="icon-ban-circle delete"></i></td>
-        </tr>
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][numeroGuiaIdentificacion]" value="${$('.mcpsat_guia_numeroGuiaIdentificacion', el).val()}" class="cpMercans-guia-numeroGuiaIdentificacion">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][descripGuiaIdentificacion]" value="${$('.mcpsat_guia_descripGuiaIdentificacion', el).val()}" class="cpMercans-guia-descripGuiaIdentificacion">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][pesoGuiaIdentificacion]" value="${$('.mcpsat_guia_pesoGuiaIdentificacion', el).val()}" class="cpMercans-guia-pesoGuiaIdentificacion">`;
+        </tr>`;
     });
-    $("#table-mcpsat_cantidadTransporta tbody tr").each(function(index, el) {
-      cantidadTransporta += `
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cantidad]" value="${$('.mcpsat_cantidadTransporta_cantidad', el).val()}" class="cpMercans-cantTrans-cantidad">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idOrigen]" value="${$('.mcpsat_cantidadTransporta_idOrigen', el).val()}" class="cpMercans-cantTrans-idOrigen">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][idDestino]" value="${$('.mcpsat_cantidadTransporta_idDestino', el).val()}" class="cpMercans-cantTrans-idDestino">
-          <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][cantidadTransporta][${index}][cvesTransporte]" value="${$('.mcpsat_cantidadTransporta_cvesTransporte', el).val()}" class="cpMercans-cantTrans-cvesTransporte">`;
+    objson.cantidadTransporta.forEach(function(el) {
+      cantidadTransporta += `<tr>
+          <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value="${el.cantidad}"></td>
+          <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value="${el.idOrigen}"></td>
+          <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value="${el.idDestino}"></td>
+          <td>
+            <select class="mcpsat_cantidadTransporta_cvesTransporte">
+              <option></option>
+              <option value="01" ${(el.cvesTransporte == '01'? 'selected': '')}>01 - Autotransporte Federal</option>
+              <option value="02" ${(el.cvesTransporte == '02'? 'selected': '')}>02 - Transporte Marítimo</option>
+              <option value="03" ${(el.cvesTransporte == '03'? 'selected': '')}>03 - Transporte Aéreo</option>
+              <option value="04" ${(el.cvesTransporte == '04'? 'selected': '')}>04 - Transporte Ferroviario</option>
+              <option value="05" ${(el.cvesTransporte == '05'? 'selected': '')}>05 - Ducto</option>
+            </select>
+          </td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
     });
+
+    for (const property in objson.datos) {
+      $(`#mcpsat_${property}`).val(objson.datos[property]);
+    }
+    for (const property in objson.detalleMercancia) {
+      $(`#mcpsat_detalleMercancia_${property}`).val(objson.detalleMercancia[property]);
+    }
+
+    $("#table-mcpsat_pedimentos tbody").html(pedimentos);
+    $("#table-mcpsat_guias tbody").html(guias);
+    $("#table-mcpsat_cantidadTransporta tbody").html(cantidadTransporta);
+
+    $('#modal-cpsat-mercancia').modal('show');
+    $('#btn-add-CpProductoModal').data('edit', $tr.attr('id'));
   });
 }
 
