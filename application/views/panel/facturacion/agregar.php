@@ -2223,12 +2223,44 @@
                           <tbody>
                             <tr class="cp-mercans" data-row="0">
                               <td>
-                                <input type="text" name="cp[mercancias][autotransporte][remolques][0][subTipoRem]" value="" class="cpMercans-autotrans_primaSeguro">cp_mercancias_autotransporte_seguro_primaSeguro
+                                <select name="cp[mercancias][autotransporte][remolques][0][subTipoRem]" class="cpMercans-autotrans_rem_subTipoRem">
+                                  <option value="CTR001">CTR001 - Caballete</option>
+                                  <option value="CTR002">CTR002 - Caja</option>
+                                  <option value="CTR003">CTR003 - Caja Abierta</option>
+                                  <option value="CTR004">CTR004 - Caja Cerrada</option>
+                                  <option value="CTR005">CTR005 - Caja De Recolección Con Cargador Frontal</option>
+                                  <option value="CTR006">CTR006 - Caja Refrigerada</option>
+                                  <option value="CTR007">CTR007 - Caja Seca</option>
+                                  <option value="CTR008">CTR008 - Caja Transferencia</option>
+                                  <option value="CTR009">CTR009 - Cama Baja o Cuello Ganso</option>
+                                  <option value="CTR010">CTR010 - Chasis Portacontenedor</option>
+                                  <option value="CTR011">CTR011 - Convencional De Chasis</option>
+                                  <option value="CTR012">CTR012 - Equipo Especial</option>
+                                  <option value="CTR013">CTR013 - Estacas</option>
+                                  <option value="CTR014">CTR014 - Góndola Madrina</option>
+                                  <option value="CTR015">CTR015 - Grúa Industrial</option>
+                                  <option value="CTR016">CTR016 - Grúa</option>
+                                  <option value="CTR017">CTR017 - Integral</option>
+                                  <option value="CTR018">CTR018 - Jaula</option>
+                                  <option value="CTR019">CTR019 - Media Redila</option>
+                                  <option value="CTR020">CTR020 - Pallet o Celdillas</option>
+                                  <option value="CTR021">CTR021 - Plataforma</option>
+                                  <option value="CTR022">CTR022 - Plataforma Con Grúa</option>
+                                  <option value="CTR023">CTR023 - Plataforma Encortinada</option>
+                                  <option value="CTR024">CTR024 - Redilas</option>
+                                  <option value="CTR025">CTR025 - Refrigerador</option>
+                                  <option value="CTR026">CTR026 - Revolvedora</option>
+                                  <option value="CTR027">CTR027 - Semicaja</option>
+                                  <option value="CTR028">CTR028 - Tanque</option>
+                                  <option value="CTR029">CTR029 - Tolva</option>
+                                  <option value="CTR030">CTR030 - Tractor</option>
+                                  <option value="CTR031">CTR031 - Volteo</option>
+                                  <option value="CTR032">CTR032 - Volteo Desmontable</option>
+                                </select>
                               </td>
-                              <td><input type="hidden" name="cp[mercancias][autotransporte][remolques][0][placa]" value="" class="cpMercans-detaMerca-numPiezas"></td>
+                              <td><input type="text" name="cp[mercancias][autotransporte][remolques][0][placa]" value="" class="cpMercans-autotrans_rem_placa"></td>
                               <td style="width: 20px;">
-                                <button type="button" class="btn btn-cp-editMercancia">Editar</button>
-                                <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+                                <button type="button" class="btn btn-danger delete">Quitar</button>
                               </td>
                             </tr>
                           </tbody>
@@ -2237,6 +2269,86 @@
                     </div>
                   </div>
                   <!--/Autotransporte -->
+
+                  <!-- Figura Transporte -->
+                  <div class="row-fluid">
+                    <div class="box span12">
+                      <div class="box-header well">
+                        <h2><i class="icon-align-justify"></i><span class="break"></span>Figura Transporte</h2>
+                        <div class="box-icon">
+                          <a href="#modal-cpsat-FiguraTrans" class="btn-add" id="btn-add-CpFiguraTrans" data-rel="tooltip" data-title="Agregar Figura" data-toggle="modal"><i class="icon-plus"></i></a>
+                        </div>
+                      </div>
+                      <div class="box-content" style="padding: 0;" id="boxFiguraTrans">
+                        <table class="table table-hover table-condensed" id="table-FiguraTrans">
+                          <thead>
+                            <tr>
+                              <th>BIENES</th>
+                              <th>DESCRIPCIÓN</th>
+                              <th>CANTIDAD</th>
+                              <th>CLAVE UNIDAD</th>
+                              <th>PESO EN KG</th>
+                              <th>Opc</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="cp-figura" id="cp-figuras0">
+                              <td>
+                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp]" value="" class="cpMercans-bienesTransp">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp_text]" value="" class="cpMercans-bienesTransp_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC]" value="" class="cpMercans-claveSTCC">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC_text]" value="" class="cpMercans-claveSTCC_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][descripcion]" value="" class="cpMercans-descripcion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidad]" value="" class="cpMercans-cantidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad]" value="" class="cpMercans-claveUnidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad_text]" value="" class="cpMercans-claveUnidad_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][unidad]" value="" class="cpMercans-unidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][dimensiones]" value="" class="cpMercans-dimensiones">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][materialPeligroso]" value="" class="cpMercans-materialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso]" value="" class="cpMercans-cveMaterialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso_text]" value="" class="cpMercans-cveMaterialPeligroso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][embalaje]" value="" class="cpMercans-embalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][descripEmbalaje]" value="" class="cpMercans-descripEmbalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][pesoEnKg]" value="" class="cpMercans-pesoEnKg">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][valorMercancia]" value="" class="cpMercans-valorMercancia">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][moneda]" value="" class="cpMercans-moneda">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria]" value="" class="cpMercans-fraccionArancelaria">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria_text]" value="" class="cpMercans-fraccionArancelaria_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][uuidComercioExt]" value="" class="cpMercans-uuidComercioExt">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][pedimentos][0][pedimento]" value="" class="cpMercans-pedimentos-pedimento">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][numeroGuiaIdentificacion]" value="" class="cpMercans-guia-numeroGuiaIdentificacion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][descripGuiaIdentificacion]" value="" class="cpMercans-guia-descripGuiaIdentificacion">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][pesoGuiaIdentificacion]" value="" class="cpMercans-guia-pesoGuiaIdentificacion">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cantidad]" value="" class="cpMercans-cantTrans-cantidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idOrigen]" value="" class="cpMercans-cantTrans-idOrigen">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idDestino]" value="" class="cpMercans-cantTrans-idDestino">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cvesTransporte]" value="" class="cpMercans-cantTrans-cvesTransporte">
+
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso]" value="" class="cpMercans-detaMerca-unidadPeso">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso_text]" value="" class="cpMercans-detaMerca-unidadPeso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoBruto]" value="" class="cpMercans-detaMerca-pesoBruto">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoNeto]" value="" class="cpMercans-detaMerca-pesoNeto">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoTara]" value="" class="cpMercans-detaMerca-pesoTara">
+                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][numPiezas]" value="" class="cpMercans-detaMerca-numPiezas">
+                              </td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td style="width: 20px;">
+                                <button type="button" class="btn btn-cp-editFiguraTrans">Editar</button>
+                                <button type="button" class="btn btn-danger btn-cp-removeFiguraTrans">Quitar</button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- !--/Figura Transporte -->
 
                 </div>
               </div>
@@ -2252,6 +2364,311 @@
 
   <!-- Modal CartaPorteSat Mercancias -->
   <div id="modal-cpsat-mercancia" class="modal modal80 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
+    <div class="modal-header">
+      <h3 id="myModalLabelProd">Mercancía</h3>
+    </div>
+    <div class="modal-body center">
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_bienesTransp_text">Bienes Transportados
+            <input type="text" id="mcpsat_bienesTransp_text" class="span12" value="">
+            <input type="hidden" id="mcpsat_bienesTransp" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_claveSTCC_text">Clave STCC
+            <input type="text" id="mcpsat_claveSTCC_text" class="span12" value="">
+            <input type="hidden" id="mcpsat_claveSTCC" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_descripcion">Descripcion
+            <input type="text" id="mcpsat_descripcion" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_cantidad">Cantidad
+            <input type="number" id="mcpsat_cantidad" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_claveUnidad_text">Clave Unidad
+            <input type="text" id="mcpsat_claveUnidad_text" class="span12" value="">
+            <input type="hidden" id="mcpsat_claveUnidad" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_unidad">Unidad
+            <input type="text" id="mcpsat_unidad" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_dimensiones">Dimensiones
+            <input type="text" id="mcpsat_dimensiones" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_materialPeligroso">Material Peligroso
+            <select id="mcpsat_materialPeligroso" class="span12">
+              <option value=""></option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+            </select>
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_cveMaterialPeligroso_text">Clave Material Peligroso
+            <input type="text" id="mcpsat_cveMaterialPeligroso_text" class="span12" value="">
+            <input type="hidden" id="mcpsat_cveMaterialPeligroso" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_embalaje">Embalaje
+            <select id="mcpsat_embalaje" class="span12">
+              <option value=""></option>
+              <option value="1A1">1A1 - Bidones (Tambores) de Acero 1 de tapa no desmontable</option>
+              <option value="1A2">1A2 - Bidones (Tambores) de Acero 1 de tapa desmontable</option>
+              <option value="1B1">1B1 - Bidones (Tambores) de Aluminio de tapa no desmontable</option>
+              <option value="1B2">1B2 - Bidones (Tambores) de Aluminio de tapa desmontable</option>
+              <option value="1D">1D - Bidones (Tambores) de Madera contrachapada</option>
+              <option value="1G">1G - Bidones (Tambores) de Cartón</option>
+              <option value="1H1">1H1 - Bidones (Tambores) de Plástico de tapa no desmontable</option>
+              <option value="1H2">1H2 - Bidones (Tambores) de Plástico de tapa desmontable</option>
+              <option value="1N1">1N1 - Bidones (Tambores) de Metal que no sea acero ni aluminio de tapa no desmontable</option>
+              <option value="1N2">1N2 - Bidones (Tambores) de Metal que no sea acero ni aluminio de tapa desmontable</option>
+              <option value="3A1">3A1 - Jerricanes (Porrones) de Acero de tapa no desmontable</option>
+              <option value="3A2">3A2 - Jerricanes (Porrones) de Acero de tapa desmontable</option>
+              <option value="3B1">3B1 - Jerricanes (Porrones) de Aluminio de tapa no desmontable</option>
+              <option value="3B2">3B2 - Jerricanes (Porrones) de Aluminio de tapa desmontable</option>
+              <option value="3H1">3H1 - Jerricanes (Porrones) de Plástico de tapa no desmontable</option>
+              <option value="3H2">3H2 - Jerricanes (Porrones) de Plástico de tapa desmontable</option>
+              <option value="4A">4A - Cajas de Acero</option>
+              <option value="4B">4B - Cajas de Aluminio</option>
+              <option value="4C1">4C1 - Cajas de Madera natural ordinaria</option>
+              <option value="4C2">4C2 - Cajas de Madera natural de paredes a prueba de polvos (estancas a los pulverulentos)</option>
+              <option value="4D">4D - Cajas de Madera contrachapada</option>
+              <option value="4F">4F - Cajas de Madera reconstituida</option>
+              <option value="4G">4G - Cajas de Cartón</option>
+              <option value="4H1">4H1 - Cajas de Plástico Expandido</option>
+              <option value="4H2">4H2 - Cajas de Plástico Rígido</option>
+              <option value="5H1">5H1 - Sacos (Bolsas) de Tejido de plástico sin forro ni revestimientos interiores</option>
+              <option value="5H2">5H2 - Sacos (Bolsas) de Tejido de plástico a prueba de polvos (estancos a los pulverulentos)</option>
+              <option value="5H3">5H3 - Sacos (Bolsas) de Tejido de plástico resistente al agua</option>
+              <option value="5H4">5H4 - Sacos (Bolsas) de Película de plástico</option>
+              <option value="5L1">5L1 - Sacos (Bolsas) de Tela sin forro ni revestimientos interiores</option>
+              <option value="5L2">5L2 - Sacos (Bolsas) de Tela a prueba de polvos (estancos a los pulverulentos)</option>
+              <option value="5L3">5L3 - Sacos (Bolsas) de Tela resistentes al agua</option>
+              <option value="5M1">5M1 - Sacos (Bolsas) de Papel de varias hojas</option>
+              <option value="5M2">5M2 - Sacos (Bolsas) de Papel de varias hojas, resistentes al agua</option>
+              <option value="6HA1">6HA1 - Envases y embalajes compuestos de Recipiente de plástico, con bidón (tambor) de acero</option>
+              <option value="6HA2">6HA2 - Envases y embalajes compuestos de Recipiente de plástico, con una jaula o caja de acero</option>
+              <option value="6HB1">6HB1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) exterior de aluminio</option>
+              <option value="6HB2">6HB2 - Envases y embalajes compuestos de Recipiente de plástico, con una jaula o caja de aluminio</option>
+              <option value="6HC">6HC - Envases y embalajes compuestos de Recipiente de plástico, con una caja de madera</option>
+              <option value="6HD1">6HD1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de madera contrachapada</option>
+              <option value="6HD2">6HD2 - Envases y embalajes compuestos de Recipiente de plástico, con una caja de madera contrachapada</option>
+              <option value="6HG1">6HG1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de cartón</option>
+              <option value="6HG2">6HG2 - Envases y embalajes compuestos de Recipiente de plástico, con una caja de cartón</option>
+              <option value="6HH1">6HH1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de plástico</option>
+              <option value="6HH2">6HH2 - Envases y embalajes compuestos de Recipiente de plástico, con caja de plástico rígido</option>
+              <option value="6PA1">6PA1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) de acero</option>
+              <option value="6PA2">6PA2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una jaula o una caja de acero</option>
+              <option value="6PB1">6PB1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) exterior de aluminio</option>
+              <option value="6PB2">6PB2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una jaula o una caja de aluminio</option>
+              <option value="6PC">6PC - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una caja de madera</option>
+              <option value="6PD1">6PD1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con bidón (tambor) de madera contrachapada</option>
+              <option value="6PD2">6PD2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con canasta de mimbre</option>
+              <option value="6PG1">6PG1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) de cartón</option>
+              <option value="6PG2">6PG2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una caja de cartón</option>
+              <option value="6PH1">6PH1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un envase y embalaje de plástico expandido</option>
+              <option value="6PH2">6PH2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un envase y embalaje de plástico rígido</option>
+              <option value="7H1">7H1 - Bultos de Plástico</option>
+              <option value="7L1">7L1 - Bultos de Tela</option>
+              <option value="Z01">Z01 - No aplica</option>
+            </select>
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_descripEmbalaje">Descripción Embalaje
+            <input type="text" id="mcpsat_descripEmbalaje" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_pesoEnKg">Peso en Kg
+            <input type="text" id="mcpsat_pesoEnKg" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_valorMercancia">Valor Mercancía
+            <input type="text" id="mcpsat_valorMercancia" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_moneda">Moneda
+            <select id="mcpsat_moneda" class="span12">
+              <option value=""></option>
+              <option value="MXN">Peso Mexicano</option>
+              <option value="USD">Dolar americano</option>
+              <option value="EUR">Euro</option>
+            </select>
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="mcpsat_fraccionArancelaria_text">Fracción Arancelaria
+            <input type="text" id="mcpsat_fraccionArancelaria_text" class="span12" value="">
+            <input type="hidden" id="mcpsat_fraccionArancelaria" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <div class="row-fluid">
+        <div class="span4">
+          <label class="control-label" for="mcpsat_uuidComercioExt">UUID Comercio Ext
+            <input type="text" id="mcpsat_uuidComercioExt" class="span12" value="">
+          </label>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Pedimentos
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-pedimentos" data-rel="tooltip" data-title="Agregar pedimentos"><i class="icon-plus"></i></a>
+        </legend>
+
+        <table class="table table-hover table-condensed" id="table-mcpsat_pedimentos">
+          <thead>
+            <tr>
+              <th>PEDIMENTO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" class="mcpsat_pedimentos_pedimento" value="" placeholder="52 45 4214 4213546"></td>
+              <td><i class="icon-ban-circle delete"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <fieldset>
+        <legend>Guias de Identificacion
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-guias" data-rel="tooltip" data-title="Agregar Guias de Identificacion"><i class="icon-plus"></i></a>
+        </legend>
+
+        <table class="table table-hover table-condensed" id="table-mcpsat_guias">
+          <thead>
+            <tr>
+              <th>NUMERO GUIA</th>
+              <th>DESCRIPCION</th>
+              <th>PESO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
+              <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
+              <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
+              <td><i class="icon-ban-circle delete"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <fieldset>
+        <legend>Cantidad Transporta
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cantidadTransporta" data-rel="tooltip" data-title="Agregar cantidad Transporta"><i class="icon-plus"></i></a>
+        </legend>
+
+        <table class="table table-hover table-condensed" id="table-mcpsat_cantidadTransporta">
+          <thead>
+            <tr>
+              <th>CANTIDAD</th>
+              <th>ID ORIGEN</th>
+              <th>ID DESTINO</th>
+              <th>CVES TRANSPORTE</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value=""></td>
+              <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value=""></td>
+              <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value=""></td>
+              <td>
+                <select class="mcpsat_cantidadTransporta_cvesTransporte">
+                  <option></option>
+                  <option value="01">01 - Autotransporte Federal</option>
+                  <option value="02">02 - Transporte Marítimo</option>
+                  <option value="03">03 - Transporte Aéreo</option>
+                  <option value="04">04 - Transporte Ferroviario</option>
+                  <option value="05">05 - Ducto</option>
+                </select>
+              </td>
+              <td><i class="icon-ban-circle delete"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+
+      <fieldset>
+        <legend>Detalle Mercancia</legend>
+
+        <div class="row-fluid">
+          <div class="span4">
+            <label class="control-label" for="mcpsat_detalleMercancia_unidadPeso_text">Unidad Peso
+              <input type="text" id="mcpsat_detalleMercancia_unidadPeso_text" class="span12" value="">
+              <input type="hidden" id="mcpsat_detalleMercancia_unidadPeso" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="mcpsat_detalleMercancia_pesoBruto">Peso Bruto
+              <input type="number" id="mcpsat_detalleMercancia_pesoBruto" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="mcpsat_detalleMercancia_pesoNeto">Peso Neto
+              <input type="number" id="mcpsat_detalleMercancia_pesoNeto" class="span12" value="">
+            </label>
+          </div>
+        </div>
+
+        <div class="row-fluid">
+          <div class="span4">
+            <label class="control-label" for="mcpsat_detalleMercancia_pesoTara">Peso Tara
+              <input type="number" id="mcpsat_detalleMercancia_pesoTara" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="mcpsat_detalleMercancia_numPiezas">Num Piezas
+              <input type="number" id="mcpsat_detalleMercancia_numPiezas" class="span12" value="">
+            </label>
+          </div>
+        </div>
+
+      </fieldset>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="btn-add-CpProductoModal">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Modal CartaPorteSat Figuras Trans -->
+  <div id="modal-cpsat-FiguraTrans" class="modal modal80 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
     <div class="modal-header">
       <h3 id="myModalLabelProd">Mercancía</h3>
     </div>

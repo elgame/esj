@@ -6,6 +6,7 @@ $(function(){
   eventAddCpPedimentos();
   eventAddCpGuiaIdentificacion();
   eventAddCpProductoModal();
+  eventAddCpAutotransporteRemolques();
 });
 
 function eventAddCpUbicaciones() {
@@ -376,6 +377,63 @@ function eventAddCpProductoModal() {
 
     $('#modal-cpsat-mercancia').modal('show');
     $('#btn-add-CpProductoModal').data('edit', $tr.attr('id'));
+  });
+}
+
+function eventAddCpAutotransporteRemolques() {
+  var cpnumrowsremolques = 0;
+  $('#btn-add-CpRemolques').click(function(event) {
+    let htmll = `<tr class="cp-mercans" data-row="${cpnumrowsremolques}">
+      <td>
+        <select name="cp[mercancias][autotransporte][remolques][${cpnumrowsremolques}][subTipoRem]" class="cpMercans-autotrans_rem_subTipoRem">
+          <option value="CTR001">CTR001 - Caballete</option>
+          <option value="CTR002">CTR002 - Caja</option>
+          <option value="CTR003">CTR003 - Caja Abierta</option>
+          <option value="CTR004">CTR004 - Caja Cerrada</option>
+          <option value="CTR005">CTR005 - Caja De Recolección Con Cargador Frontal</option>
+          <option value="CTR006">CTR006 - Caja Refrigerada</option>
+          <option value="CTR007">CTR007 - Caja Seca</option>
+          <option value="CTR008">CTR008 - Caja Transferencia</option>
+          <option value="CTR009">CTR009 - Cama Baja o Cuello Ganso</option>
+          <option value="CTR010">CTR010 - Chasis Portacontenedor</option>
+          <option value="CTR011">CTR011 - Convencional De Chasis</option>
+          <option value="CTR012">CTR012 - Equipo Especial</option>
+          <option value="CTR013">CTR013 - Estacas</option>
+          <option value="CTR014">CTR014 - Góndola Madrina</option>
+          <option value="CTR015">CTR015 - Grúa Industrial</option>
+          <option value="CTR016">CTR016 - Grúa</option>
+          <option value="CTR017">CTR017 - Integral</option>
+          <option value="CTR018">CTR018 - Jaula</option>
+          <option value="CTR019">CTR019 - Media Redila</option>
+          <option value="CTR020">CTR020 - Pallet o Celdillas</option>
+          <option value="CTR021">CTR021 - Plataforma</option>
+          <option value="CTR022">CTR022 - Plataforma Con Grúa</option>
+          <option value="CTR023">CTR023 - Plataforma Encortinada</option>
+          <option value="CTR024">CTR024 - Redilas</option>
+          <option value="CTR025">CTR025 - Refrigerador</option>
+          <option value="CTR026">CTR026 - Revolvedora</option>
+          <option value="CTR027">CTR027 - Semicaja</option>
+          <option value="CTR028">CTR028 - Tanque</option>
+          <option value="CTR029">CTR029 - Tolva</option>
+          <option value="CTR030">CTR030 - Tractor</option>
+          <option value="CTR031">CTR031 - Volteo</option>
+          <option value="CTR032">CTR032 - Volteo Desmontable</option>
+        </select>
+      </td>
+      <td><input type="text" name="cp[mercancias][autotransporte][remolques][${cpnumrowsremolques}][placa]" value="" class="cpMercans-autotrans_rem_placa"></td>
+      <td style="width: 20px;">
+        <button type="button" class="btn btn-danger delete">Quitar</button>
+      </td>
+    </tr>`;
+
+    $('#table-remolequess tbody').append(htmll);
+
+    cpnumrowsremolques++;
+  });
+
+  $('#table-remolequess tbody').on('click', 'button.delete', function(){
+    const $tr = $(this).parent().parent();
+    $tr.remove();
   });
 }
 
