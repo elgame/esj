@@ -1,4 +1,8 @@
 
+ ✔ Nomina infonacot @done (21-12-15 16:08)
+   -- pcc
+   ALTER TABLE public.usuarios ADD COLUMN fonacot integer DEFAULT 0;
+
  ☐ Agregar en los productos de almacen para ligarlos con las clasificaciones de facturacion y cuando facture agroinsumo cree una orden de compra con los productos facturados
     -- pcc|san
     CREATE TABLE otros.existencias_limon_gastos

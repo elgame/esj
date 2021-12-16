@@ -481,6 +481,9 @@ class empleados extends MY_Controller {
               array('field' => 'dp_alimenticia',
                     'label' => 'Pensión alimenticia',
                     'rules' => ''),
+              array('field' => 'dinfonacot',
+                    'label' => 'Infonacot',
+                    'rules' => ''),
 
 							array('field' => 'dcuenta_banco',
 										'label' => 'Banco',

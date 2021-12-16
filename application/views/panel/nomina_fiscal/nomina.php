@@ -124,7 +124,7 @@
                       <th style="width: 202px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
                       <th colspan="4"></th>
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="7" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="8" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                       <th colspan="9" style="background-color: #EEEEBC;"></th>
                     </tr>
@@ -154,6 +154,7 @@
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
                       <th style="background-color: #EEBCBC;">FA</th>
                       <th style="background-color: #EEBCBC;">PA</th>
+                      <th style="background-color: #EEBCBC;">Fonacot</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
@@ -193,6 +194,7 @@
                       $totalInfonavit = 0;
                       $totalFondoAhorro = 0;
                       $totalPensionAlimenticia = 0;
+                      $totalFonacot = 0;
                       $totalImss = 0;
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
@@ -228,6 +230,7 @@
                                             $e->nomina->deducciones['imss']['total'] +
                                             $e->nomina->deducciones['rcv']['total'] +
                                             (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) +
+                                            (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0) +
                                             $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
@@ -453,6 +456,10 @@
                           <input type="hidden" name="pension_alimenticia[]" value="<?php echo $e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) ?>" class="span12 pension_alimenticia">
                         </td>
                         <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="fonacot-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0)) ?></span>
+                          <input type="hidden" name="fonacot[]" value="<?php echo $e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0) ?>" class="span12 fonacot">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="isr-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrEmpleado ?>" class="span12 isr">
                           <input type="hidden" name="isrAnual[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrAnualEmpleado ?>" class="span12 isrAnual">
@@ -511,7 +518,8 @@
                                                   $e->descuento_cocina -
                                                   $totalPrestamosEmpleadoEf -
                                                   $totalDescuentoMaterial -
-                                                  (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0);
+                                                  (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) -
+                                                  (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0);
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo MyString::formatoNumero($totalComplementoEmpleado) ?></span>
@@ -535,6 +543,7 @@
                       $totalInfonavit            += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
                       $totalFondoAhorro          += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
                       $totalPensionAlimenticia   += (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0);
+                      $totalFonacot              += (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0);
                       $totalImss                 += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
                       $totalPrestamos            += $totalPrestamosEmpleado;
                       $totalDescuentoPlayeras    += $e->descuento_playeras;
@@ -571,6 +580,7 @@
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPrestamos) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalFondoAhorro) ?></td>
                       <td id="totales-pension-aliment" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPensionAlimenticia) ?></td>
+                      <td id="totales-fonacot" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalFonacot) ?></td>
                       <td id="totales-isrs" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalIsrs) ?></td>
                       <td id="totales-deducciones" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDeducciones) ?></td>
                       <td id="totales-transferencias" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalTransferencias) ?></td>

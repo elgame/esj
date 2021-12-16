@@ -614,8 +614,8 @@ class caja_chica_model extends CI_Model {
 
   public function getCajaGastosTransporte($fecha, $noCaja, $all)
   {
-    if (!$all) {
       return $this->getCajaGastos($fecha, $noCaja, $all);
+    if (!$all) {
     }
 
     $sql = '';
@@ -2948,7 +2948,7 @@ class caja_chica_model extends CI_Model {
 
     // Reposición de gastos
     $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 5) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2988,7 +2988,7 @@ class caja_chica_model extends CI_Model {
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status2 == 't') {
+        if (!isset($gasto->status2) || $gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
           }
@@ -3009,10 +3009,10 @@ class caja_chica_model extends CI_Model {
           $gasto->codigo_fin, //$gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
+          (!isset($gasto->status2) || $gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
           MyString::formatoNumero(
-            ($gasto->status2 == 't'? $gasto->monto: 0),
+            (!isset($gasto->status2) || $gasto->status2 == 't'? $gasto->monto: 0),
             2, '', false)
         ), false, true, $colortxt);
 
