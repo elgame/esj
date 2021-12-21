@@ -470,6 +470,175 @@ function eventAddCpPartesTransporte() {
   });
 }
 
+function eventAddCpProductoModal() {
+  var cpnumrowsmercans = 0;
+  $("#btn-add-CpTiposFigura").click(function(event) {
+
+    let cantidadTransporta = '', trrm = undefined, guias = '', partesTransporte = '';
+    let objson = {
+      datos: {},
+      partesTransporte: [],
+      domicilio: {}
+    };
+
+    $("#table-ftcpsat_partesTrans tbody tr").each(function(index, el) {
+      partesTransporte += `
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][partesTransporte][${index}][parteTransporte]" value="${$('.ftcpsat_parteTransporte', el).val()}" class="cpFigTransParteTransporte">`;
+      objson.partesTransporte.push({parteTransporte: $('.ftcpsat_parteTransporte', el).val()});
+    });
+
+    objson.datos = {
+      tipoFigura: $('#ftcpsat_tipoFigura').val(),
+      rfcFigura: $('#ftcpsat_rfcFigura').val(),
+      numLicencia: $('#ftcpsat_numLicencia').val(),
+      nombreFigura: $('#ftcpsat_nombreFigura').val(),
+      numRegIdTribFigura: $('#ftcpsat_numRegIdTribFigura').val(),
+      residenciaFiscalFigura: $('#ftcpsat_residenciaFiscalFigura').val(),
+      residenciaFiscalFigura_text: $('#ftcpsat_residenciaFiscalFigura_text').val(),
+    };
+    objson.domicilio = {
+      calle: $('#ftcpsat_domi_calle').val(),
+      numeroExterior: $('#ftcpsat_domi_numeroExterior').val(),
+      numeroInterior: $('#ftcpsat_domi_numeroInterior').val(),
+      pais: $('#ftcpsat_domi_pais').val(),
+      pais_text: $('#ftcpsat_domi_pais_text').val(),
+      estado: $('#ftcpsat_domi_estado').val(),
+      estado_text: $('#ftcpsat_domi_estado_text').val(),
+      municipio: $('#ftcpsat_domi_municipio').val(),
+      municipio_text: $('#ftcpsat_domi_municipio_text').val(),
+      localidad: $('#ftcpsat_domi_localidad').val(),
+      localidad_text: $('#ftcpsat_domi_localidad_text').val(),
+      codigoPostal: $('#ftcpsat_domi_codigoPostal').val(),
+      colonia: $('#ftcpsat_domi_colonia').val(),
+      colonia_text: $('#ftcpsat_domi_colonia_text').val(),
+      referencia: $('#ftcpsat_domi_referencia').val(),
+    };
+
+    let htmlrow = `
+      <tr class="cp-figTrans" id="cp-figTrans${cpnumrowsmercans}">
+        <td>
+          ${$('#mcpsat_bienesTransp_text').val()}
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][bienesTransp]" value="${$('#mcpsat_bienesTransp').val()}" class="cpMercans-bienesTransp">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][bienesTransp_text]" value="${$('#mcpsat_bienesTransp_text').val()}" class="cpMercans-bienesTransp_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveSTCC]" value="${$('#mcpsat_claveSTCC').val()}" class="cpMercans-claveSTCC">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveSTCC_text]" value="${$('#mcpsat_claveSTCC_text').val()}" class="cpMercans-claveSTCC_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][descripcion]" value="${$('#mcpsat_descripcion').val()}" class="cpMercans-descripcion">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cantidad]" value="${$('#mcpsat_cantidad').val()}" class="cpMercans-cantidad">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveUnidad]" value="${$('#mcpsat_claveUnidad').val()}" class="cpMercans-claveUnidad">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveUnidad_text]" value="${$('#mcpsat_claveUnidad_text').val()}" class="cpMercans-claveUnidad_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][unidad]" value="${$('#mcpsat_unidad').val()}" class="cpMercans-unidad">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][dimensiones]" value="${$('#mcpsat_dimensiones').val()}" class="cpMercans-dimensiones">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][materialPeligroso]" value="${$('#mcpsat_materialPeligroso').val()}" class="cpMercans-materialPeligroso">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cveMaterialPeligroso]" value="${$('#mcpsat_cveMaterialPeligroso').val()}" class="cpMercans-cveMaterialPeligroso">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cveMaterialPeligroso_text]" value="${$('#mcpsat_cveMaterialPeligroso_text').val()}" class="cpMercans-cveMaterialPeligroso_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][embalaje]" value="${$('#mcpsat_embalaje').val()}" class="cpMercans-embalaje">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][descripEmbalaje]" value="${$('#mcpsat_descripEmbalaje').val()}" class="cpMercans-descripEmbalaje">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][pesoEnKg]" value="${$('#mcpsat_pesoEnKg').val()}" class="cpMercans-pesoEnKg">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][valorMercancia]" value="${$('#mcpsat_valorMercancia').val()}" class="cpMercans-valorMercancia">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][moneda]" value="${$('#mcpsat_moneda').val()}" class="cpMercans-moneda">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][fraccionArancelaria]" value="${$('#mcpsat_fraccionArancelaria').val()}" class="cpMercans-fraccionArancelaria">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][fraccionArancelaria_text]" value="${$('#mcpsat_fraccionArancelaria_text').val()}" class="cpMercans-fraccionArancelaria_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][uuidComercioExt]" value="${$('#mcpsat_uuidComercioExt').val()}" class="cpMercans-uuidComercioExt">
+
+          ${partesTransporte}
+
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][unidadPeso]" value="${$('#mcpsat_detalleMercancia_unidadPeso').val()}" class="cpMercans-detaMerca-unidadPeso">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][unidadPeso_text]" value="${$('#mcpsat_detalleMercancia_unidadPeso_text').val()}" class="cpMercans-detaMerca-unidadPeso_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoBruto]" value="${$('#mcpsat_detalleMercancia_pesoBruto').val()}" class="cpMercans-detaMerca-pesoBruto">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoNeto]" value="${$('#mcpsat_detalleMercancia_pesoNeto').val()}" class="cpMercans-detaMerca-pesoNeto">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoTara]" value="${$('#mcpsat_detalleMercancia_pesoTara').val()}" class="cpMercans-detaMerca-pesoTara">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][numPiezas]" value="${$('#mcpsat_detalleMercancia_numPiezas').val()}" class="cpMercans-detaMerca-numPiezas">
+        </td>
+        <td>${$('#mcpsat_descripcion').val()}</td>
+        <td>${$('#mcpsat_cantidad').val()}</td>
+        <td>${$('#mcpsat_claveUnidad_text').val()}</td>
+        <td>${$('#mcpsat_pesoEnKg').val()}</td>
+        <td style="width: 20px;">
+          <button type="button" class="btn btn-cp-editMercancia" data-json="${encodeURIComponent(JSON.stringify(objson))}">Editar</button>
+          <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+        </td>
+      </tr>`;
+    $("#table-mercanciass tbody").append(htmlrow);
+    if($('#btn-add-CpProductoModal').data('edit')){ // elimina el tr
+      $('#'+$('#btn-add-CpProductoModal').data('edit')).remove();
+    }
+
+    cpnumrowsmercans++;
+
+    for (const property in objson.datos) {
+      $(`#mcpsat_${property}`).val('');
+    }
+    for (const property in objson.detalleMercancia) {
+      $(`#mcpsat_detalleMercancia_${property}`).val('');
+    }
+    $("#table-mcpsat_pedimentos tbody").html('');
+    $("#table-mcpsat_guias tbody").html('');
+    $("#table-mcpsat_cantidadTransporta tbody").html('');
+    $('#btn-add-CpProductoModal').removeAttr('edit');
+
+    $('#modal-cpsat-mercancia').modal('hide');
+  });
+
+  $("#table-mercanciass").on('click', '.btn-cp-removeMercancia', function(){
+    $(this).parent().parent().remove();
+  });
+
+  // Editar
+  $("#table-mercanciass").on('click', '.btn-cp-editMercancia', function(){
+    let $tr = $(this).parent().parent();
+    let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
+
+    let objson = JSON.parse(decodeURIComponent($(this).attr('data-json')));
+
+    objson.pedimentos.forEach(function(el) {
+      pedimentos += `<tr>
+          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${el.pedimento}" placeholder="52 45 4214 4213546"></td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
+    });
+    objson.guias.forEach(function(el) {
+      guias += `<tr>
+          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
+          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>
+          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value="${el.pesoGuiaIdentificacion}"></td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
+    });
+    objson.cantidadTransporta.forEach(function(el) {
+      cantidadTransporta += `<tr>
+          <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value="${el.cantidad}"></td>
+          <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value="${el.idOrigen}"></td>
+          <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value="${el.idDestino}"></td>
+          <td>
+            <select class="mcpsat_cantidadTransporta_cvesTransporte">
+              <option></option>
+              <option value="01" ${(el.cvesTransporte == '01'? 'selected': '')}>01 - Autotransporte Federal</option>
+              <option value="02" ${(el.cvesTransporte == '02'? 'selected': '')}>02 - Transporte Marítimo</option>
+              <option value="03" ${(el.cvesTransporte == '03'? 'selected': '')}>03 - Transporte Aéreo</option>
+              <option value="04" ${(el.cvesTransporte == '04'? 'selected': '')}>04 - Transporte Ferroviario</option>
+              <option value="05" ${(el.cvesTransporte == '05'? 'selected': '')}>05 - Ducto</option>
+            </select>
+          </td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
+    });
+
+    for (const property in objson.datos) {
+      $(`#mcpsat_${property}`).val(objson.datos[property]);
+    }
+    for (const property in objson.detalleMercancia) {
+      $(`#mcpsat_detalleMercancia_${property}`).val(objson.detalleMercancia[property]);
+    }
+
+    $("#table-mcpsat_pedimentos tbody").html(pedimentos);
+    $("#table-mcpsat_guias tbody").html(guias);
+    $("#table-mcpsat_cantidadTransporta tbody").html(cantidadTransporta);
+
+    $('#modal-cpsat-mercancia').modal('show');
+    $('#btn-add-CpProductoModal').data('edit', $tr.attr('id'));
+  });
+}
+
 function autocompletesCP(){
   $('#tabCartaPorte').on('focus', 'input#cp_paisOrigenDestino_text:not(.ui-autocomplete-input)', function(event) {
     const $this = $(this),
@@ -1038,6 +1207,151 @@ function autocompletesCP(){
       select: function( event, ui ) {
         $this.css("background-color", "#A1F57A");
           $('#ftcpsat_residenciaFiscalFigura').val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_domi_pais_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+          $('#ftcpsat_domi_pais').val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_domi_estado_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $pais_obj = $this.parent().find('#ftcpsat_domi_pais');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cestados',
+          dataType: "json",
+          data: {
+            'c_pais': $pais_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $('#ftcpsat_domi_estado').val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_domi_municipio_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $estado_obj = $this.parent().find('#ftcpsat_domi_estado');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/cmunicipios',
+          dataType: "json",
+          data: {
+            'c_estado': $estado_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $('#ftcpsat_domi_municipio').val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_domi_localidad_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $estado_obj = $this.parent().parent().find('#ftcpsat_domi_estado');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/clocalidades',
+          dataType: "json",
+          data: {
+            'c_estado': $estado_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $('#ftcpsat_domi_localidad').val(ui.item.id);
+        }, 100);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_domi_colonia_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $cp_obj = $this.parent().parent().find('#ftcpsat_domi_codigoPostal');
+    $this.autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: base_url + 'panel/catalogos/ccolonias',
+          dataType: "json",
+          data: {
+            'c_cp': $cp_obj.val(),
+            'term': request.term,
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $('#ftcpsat_domi_colonia').val(ui.item.id);
+        }, 100);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
