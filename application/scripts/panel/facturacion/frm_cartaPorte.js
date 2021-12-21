@@ -7,6 +7,7 @@ $(function(){
   eventAddCpGuiaIdentificacion();
   eventAddCpProductoModal();
   eventAddCpAutotransporteRemolques();
+  eventAddCpPartesTransporte();
 });
 
 function eventAddCpUbicaciones() {
@@ -432,6 +433,38 @@ function eventAddCpAutotransporteRemolques() {
   });
 
   $('#table-remolequess tbody').on('click', 'button.delete', function(){
+    const $tr = $(this).parent().parent();
+    $tr.remove();
+  });
+}
+
+function eventAddCpPartesTransporte() {
+  $('#btn-add-cp-partesTrans').click(function(event) {
+    let htmll = `<tr>
+      <td>
+        <select class="ftcpsat_parteTransporte">
+          <option></option>
+          <option value="PT01">PT01</option>
+          <option value="PT02">PT02</option>
+          <option value="PT03">PT03</option>
+          <option value="PT04">PT04</option>
+          <option value="PT05">PT05</option>
+          <option value="PT06">PT06</option>
+          <option value="PT07">PT07</option>
+          <option value="PT08">PT08</option>
+          <option value="PT09">PT09</option>
+          <option value="PT10">PT10</option>
+          <option value="PT11">PT11</option>
+          <option value="PT12">PT12</option>
+        </select>
+      </td>
+      <td><i class="icon-ban-circle delete"></i></td>
+    </tr>`;
+
+    $('#table-ftcpsat_partesTrans tbody').append(htmll);
+  });
+
+  $('#table-ftcpsat_partesTrans tbody').on('click', 'i.delete', function(){
     const $tr = $(this).parent().parent();
     $tr.remove();
   });
@@ -992,6 +1025,23 @@ function autocompletesCP(){
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
         $facccionAran.val('');
+      }
+    });
+  });
+
+  $('#modal-cpsat-FiguraTrans').on('focus', 'input#ftcpsat_residenciaFiscalFigura_text:not(.ui-autocomplete-input)', function(event) {
+    const $this = $(this);
+    $this.autocomplete({
+      source: base_url + 'panel/catalogos/cpaises',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $this.css("background-color", "#A1F57A");
+          $('#ftcpsat_residenciaFiscalFigura').val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FFD071");
       }
     });
   });

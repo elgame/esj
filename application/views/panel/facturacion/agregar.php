@@ -2670,256 +2670,81 @@
   <!-- Modal CartaPorteSat Figuras Trans -->
   <div id="modal-cpsat-FiguraTrans" class="modal modal80 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
     <div class="modal-header">
-      <h3 id="myModalLabelProd">Mercancía</h3>
+      <h3 id="myModalLabelProd">Figura Transporte</h3>
     </div>
     <div class="modal-body center">
       <div class="row-fluid">
         <div class="span4">
-          <label class="control-label" for="mcpsat_bienesTransp_text">Bienes Transportados
-            <input type="text" id="mcpsat_bienesTransp_text" class="span12" value="">
-            <input type="hidden" id="mcpsat_bienesTransp" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_claveSTCC_text">Clave STCC
-            <input type="text" id="mcpsat_claveSTCC_text" class="span12" value="">
-            <input type="hidden" id="mcpsat_claveSTCC" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_descripcion">Descripcion
-            <input type="text" id="mcpsat_descripcion" class="span12" value="">
-          </label>
-        </div>
-      </div>
-
-      <div class="row-fluid">
-        <div class="span4">
-          <label class="control-label" for="mcpsat_cantidad">Cantidad
-            <input type="number" id="mcpsat_cantidad" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_claveUnidad_text">Clave Unidad
-            <input type="text" id="mcpsat_claveUnidad_text" class="span12" value="">
-            <input type="hidden" id="mcpsat_claveUnidad" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_unidad">Unidad
-            <input type="text" id="mcpsat_unidad" class="span12" value="">
-          </label>
-        </div>
-      </div>
-
-      <div class="row-fluid">
-        <div class="span4">
-          <label class="control-label" for="mcpsat_dimensiones">Dimensiones
-            <input type="text" id="mcpsat_dimensiones" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_materialPeligroso">Material Peligroso
-            <select id="mcpsat_materialPeligroso" class="span12">
-              <option value=""></option>
-              <option value="Sí">Sí</option>
-              <option value="No">No</option>
+          <label class="control-label" for="ftcpsat_tipoFigura">Tipo Figura
+            <select class="ftcpsat_tipoFigura">
+              <option></option>
+              <option value="01">01 - Operador</option>
+              <option value="02">02 - Propietario</option>
+              <option value="03">03 - Arrendatario</option>
+              <option value="04">04 - Notificado</option>
             </select>
           </label>
         </div>
         <div class="span4">
-          <label class="control-label" for="mcpsat_cveMaterialPeligroso_text">Clave Material Peligroso
-            <input type="text" id="mcpsat_cveMaterialPeligroso_text" class="span12" value="">
-            <input type="hidden" id="mcpsat_cveMaterialPeligroso" class="span12" value="">
+          <label class="control-label" for="ftcpsat_rfcFigura">RFC
+            <input type="text" id="ftcpsat_rfcFigura" class="span12" value="">
+          </label>
+        </div>
+        <div class="span4">
+          <label class="control-label" for="ftcpsat_numLicencia">Num Licencia
+            <input type="text" id="ftcpsat_numLicencia" class="span12" value="">
           </label>
         </div>
       </div>
 
       <div class="row-fluid">
         <div class="span4">
-          <label class="control-label" for="mcpsat_embalaje">Embalaje
-            <select id="mcpsat_embalaje" class="span12">
-              <option value=""></option>
-              <option value="1A1">1A1 - Bidones (Tambores) de Acero 1 de tapa no desmontable</option>
-              <option value="1A2">1A2 - Bidones (Tambores) de Acero 1 de tapa desmontable</option>
-              <option value="1B1">1B1 - Bidones (Tambores) de Aluminio de tapa no desmontable</option>
-              <option value="1B2">1B2 - Bidones (Tambores) de Aluminio de tapa desmontable</option>
-              <option value="1D">1D - Bidones (Tambores) de Madera contrachapada</option>
-              <option value="1G">1G - Bidones (Tambores) de Cartón</option>
-              <option value="1H1">1H1 - Bidones (Tambores) de Plástico de tapa no desmontable</option>
-              <option value="1H2">1H2 - Bidones (Tambores) de Plástico de tapa desmontable</option>
-              <option value="1N1">1N1 - Bidones (Tambores) de Metal que no sea acero ni aluminio de tapa no desmontable</option>
-              <option value="1N2">1N2 - Bidones (Tambores) de Metal que no sea acero ni aluminio de tapa desmontable</option>
-              <option value="3A1">3A1 - Jerricanes (Porrones) de Acero de tapa no desmontable</option>
-              <option value="3A2">3A2 - Jerricanes (Porrones) de Acero de tapa desmontable</option>
-              <option value="3B1">3B1 - Jerricanes (Porrones) de Aluminio de tapa no desmontable</option>
-              <option value="3B2">3B2 - Jerricanes (Porrones) de Aluminio de tapa desmontable</option>
-              <option value="3H1">3H1 - Jerricanes (Porrones) de Plástico de tapa no desmontable</option>
-              <option value="3H2">3H2 - Jerricanes (Porrones) de Plástico de tapa desmontable</option>
-              <option value="4A">4A - Cajas de Acero</option>
-              <option value="4B">4B - Cajas de Aluminio</option>
-              <option value="4C1">4C1 - Cajas de Madera natural ordinaria</option>
-              <option value="4C2">4C2 - Cajas de Madera natural de paredes a prueba de polvos (estancas a los pulverulentos)</option>
-              <option value="4D">4D - Cajas de Madera contrachapada</option>
-              <option value="4F">4F - Cajas de Madera reconstituida</option>
-              <option value="4G">4G - Cajas de Cartón</option>
-              <option value="4H1">4H1 - Cajas de Plástico Expandido</option>
-              <option value="4H2">4H2 - Cajas de Plástico Rígido</option>
-              <option value="5H1">5H1 - Sacos (Bolsas) de Tejido de plástico sin forro ni revestimientos interiores</option>
-              <option value="5H2">5H2 - Sacos (Bolsas) de Tejido de plástico a prueba de polvos (estancos a los pulverulentos)</option>
-              <option value="5H3">5H3 - Sacos (Bolsas) de Tejido de plástico resistente al agua</option>
-              <option value="5H4">5H4 - Sacos (Bolsas) de Película de plástico</option>
-              <option value="5L1">5L1 - Sacos (Bolsas) de Tela sin forro ni revestimientos interiores</option>
-              <option value="5L2">5L2 - Sacos (Bolsas) de Tela a prueba de polvos (estancos a los pulverulentos)</option>
-              <option value="5L3">5L3 - Sacos (Bolsas) de Tela resistentes al agua</option>
-              <option value="5M1">5M1 - Sacos (Bolsas) de Papel de varias hojas</option>
-              <option value="5M2">5M2 - Sacos (Bolsas) de Papel de varias hojas, resistentes al agua</option>
-              <option value="6HA1">6HA1 - Envases y embalajes compuestos de Recipiente de plástico, con bidón (tambor) de acero</option>
-              <option value="6HA2">6HA2 - Envases y embalajes compuestos de Recipiente de plástico, con una jaula o caja de acero</option>
-              <option value="6HB1">6HB1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) exterior de aluminio</option>
-              <option value="6HB2">6HB2 - Envases y embalajes compuestos de Recipiente de plástico, con una jaula o caja de aluminio</option>
-              <option value="6HC">6HC - Envases y embalajes compuestos de Recipiente de plástico, con una caja de madera</option>
-              <option value="6HD1">6HD1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de madera contrachapada</option>
-              <option value="6HD2">6HD2 - Envases y embalajes compuestos de Recipiente de plástico, con una caja de madera contrachapada</option>
-              <option value="6HG1">6HG1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de cartón</option>
-              <option value="6HG2">6HG2 - Envases y embalajes compuestos de Recipiente de plástico, con una caja de cartón</option>
-              <option value="6HH1">6HH1 - Envases y embalajes compuestos de Recipiente de plástico, con un bidón (tambor) de plástico</option>
-              <option value="6HH2">6HH2 - Envases y embalajes compuestos de Recipiente de plástico, con caja de plástico rígido</option>
-              <option value="6PA1">6PA1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) de acero</option>
-              <option value="6PA2">6PA2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una jaula o una caja de acero</option>
-              <option value="6PB1">6PB1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) exterior de aluminio</option>
-              <option value="6PB2">6PB2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una jaula o una caja de aluminio</option>
-              <option value="6PC">6PC - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una caja de madera</option>
-              <option value="6PD1">6PD1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con bidón (tambor) de madera contrachapada</option>
-              <option value="6PD2">6PD2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con canasta de mimbre</option>
-              <option value="6PG1">6PG1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un bidón (tambor) de cartón</option>
-              <option value="6PG2">6PG2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con una caja de cartón</option>
-              <option value="6PH1">6PH1 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un envase y embalaje de plástico expandido</option>
-              <option value="6PH2">6PH2 - Envases y embalajes compuestos de Recipiente de vidrio, porcelana o de gres, con un envase y embalaje de plástico rígido</option>
-              <option value="7H1">7H1 - Bultos de Plástico</option>
-              <option value="7L1">7L1 - Bultos de Tela</option>
-              <option value="Z01">Z01 - No aplica</option>
-            </select>
+          <label class="control-label" for="ftcpsat_nombreFigura">Nombre
+            <input type="text" id="ftcpsat_nombreFigura" class="span12" value="">
           </label>
         </div>
         <div class="span4">
-          <label class="control-label" for="mcpsat_descripEmbalaje">Descripción Embalaje
-            <input type="text" id="mcpsat_descripEmbalaje" class="span12" value="">
+          <label class="control-label" for="ftcpsat_numRegIdTribFigura">Num Reg Id Trib
+            <input type="text" id="ftcpsat_numRegIdTribFigura" class="span12" value="">
           </label>
         </div>
         <div class="span4">
-          <label class="control-label" for="mcpsat_pesoEnKg">Peso en Kg
-            <input type="text" id="mcpsat_pesoEnKg" class="span12" value="">
-          </label>
-        </div>
-      </div>
-
-      <div class="row-fluid">
-        <div class="span4">
-          <label class="control-label" for="mcpsat_valorMercancia">Valor Mercancía
-            <input type="text" id="mcpsat_valorMercancia" class="span12" value="">
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_moneda">Moneda
-            <select id="mcpsat_moneda" class="span12">
-              <option value=""></option>
-              <option value="MXN">Peso Mexicano</option>
-              <option value="USD">Dolar americano</option>
-              <option value="EUR">Euro</option>
-            </select>
-          </label>
-        </div>
-        <div class="span4">
-          <label class="control-label" for="mcpsat_fraccionArancelaria_text">Fracción Arancelaria
-            <input type="text" id="mcpsat_fraccionArancelaria_text" class="span12" value="">
-            <input type="hidden" id="mcpsat_fraccionArancelaria" class="span12" value="">
-          </label>
-        </div>
-      </div>
-
-      <div class="row-fluid">
-        <div class="span4">
-          <label class="control-label" for="mcpsat_uuidComercioExt">UUID Comercio Ext
-            <input type="text" id="mcpsat_uuidComercioExt" class="span12" value="">
+          <label class="control-label" for="ftcpsat_residenciaFiscalFigura_text">Residencia Fiscal
+            <input type="text" id="ftcpsat_residenciaFiscalFigura_text" class="span12 sikey" value="" maxlength="60" autocomplete="nope">
+            <input type="hidden" id="ftcpsat_residenciaFiscalFigura" class="span12">
           </label>
         </div>
       </div>
 
       <fieldset>
-        <legend>Pedimentos
-          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-pedimentos" data-rel="tooltip" data-title="Agregar pedimentos"><i class="icon-plus"></i></a>
+        <legend>Partes Transporte
+          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-partesTrans" data-rel="tooltip" data-title="Agregar Partes Transporte"><i class="icon-plus"></i></a>
         </legend>
 
-        <table class="table table-hover table-condensed" id="table-mcpsat_pedimentos">
+        <table class="table table-hover table-condensed" id="table-ftcpsat_partesTrans">
           <thead>
             <tr>
-              <th>PEDIMENTO</th>
+              <th>PARTE</th>
               <th>ACCIONES</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><input type="number" class="mcpsat_pedimentos_pedimento" value="" placeholder="52 45 4214 4213546"></td>
-              <td><i class="icon-ban-circle delete"></i></td>
-            </tr>
-          </tbody>
-        </table>
-      </fieldset>
-
-      <fieldset>
-        <legend>Guias de Identificacion
-          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cp-guias" data-rel="tooltip" data-title="Agregar Guias de Identificacion"><i class="icon-plus"></i></a>
-        </legend>
-
-        <table class="table table-hover table-condensed" id="table-mcpsat_guias">
-          <thead>
-            <tr>
-              <th>NUMERO GUIA</th>
-              <th>DESCRIPCION</th>
-              <th>PESO</th>
-              <th>ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value=""></td>
-              <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value=""></td>
-              <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value=""></td>
-              <td><i class="icon-ban-circle delete"></i></td>
-            </tr>
-          </tbody>
-        </table>
-      </fieldset>
-
-      <fieldset>
-        <legend>Cantidad Transporta
-          <a href="javascript:void(0);" class="btn-add pull-right" id="btn-add-cantidadTransporta" data-rel="tooltip" data-title="Agregar cantidad Transporta"><i class="icon-plus"></i></a>
-        </legend>
-
-        <table class="table table-hover table-condensed" id="table-mcpsat_cantidadTransporta">
-          <thead>
-            <tr>
-              <th>CANTIDAD</th>
-              <th>ID ORIGEN</th>
-              <th>ID DESTINO</th>
-              <th>CVES TRANSPORTE</th>
-              <th>ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value=""></td>
-              <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value=""></td>
-              <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value=""></td>
               <td>
-                <select class="mcpsat_cantidadTransporta_cvesTransporte">
+                <select class="ftcpsat_parteTransporte">
                   <option></option>
-                  <option value="01">01 - Autotransporte Federal</option>
-                  <option value="02">02 - Transporte Marítimo</option>
-                  <option value="03">03 - Transporte Aéreo</option>
-                  <option value="04">04 - Transporte Ferroviario</option>
-                  <option value="05">05 - Ducto</option>
+                  <option value="PT01">PT01</option>
+                  <option value="PT02">PT02</option>
+                  <option value="PT03">PT03</option>
+                  <option value="PT04">PT04</option>
+                  <option value="PT05">PT05</option>
+                  <option value="PT06">PT06</option>
+                  <option value="PT07">PT07</option>
+                  <option value="PT08">PT08</option>
+                  <option value="PT09">PT09</option>
+                  <option value="PT10">PT10</option>
+                  <option value="PT11">PT11</option>
+                  <option value="PT12">PT12</option>
                 </select>
               </td>
               <td><i class="icon-ban-circle delete"></i></td>
@@ -2927,6 +2752,7 @@
           </tbody>
         </table>
       </fieldset>
+
 
       <fieldset>
         <legend>Detalle Mercancia</legend>
@@ -2968,7 +2794,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-      <button class="btn btn-primary" id="btn-add-CpProductoModal">Guardar</button>
+      <button class="btn btn-primary" id="btn-add-CpTiposFigura">Guardar</button>
     </div>
   </div>
 
