@@ -2755,23 +2755,62 @@
 
 
       <fieldset>
-        <legend>Detalle Mercancia</legend>
+        <legend>Domicilio</legend>
 
         <div class="row-fluid">
           <div class="span4">
-            <label class="control-label" for="mcpsat_detalleMercancia_unidadPeso_text">Unidad Peso
-              <input type="text" id="mcpsat_detalleMercancia_unidadPeso_text" class="span12" value="">
-              <input type="hidden" id="mcpsat_detalleMercancia_unidadPeso" class="span12" value="">
+            <label class="control-label" for="ftcpsat_domi_calle">Calle
+              <input type="number" id="ftcpsat_domi_calle" class="span12" value="">
             </label>
           </div>
           <div class="span4">
-            <label class="control-label" for="mcpsat_detalleMercancia_pesoBruto">Peso Bruto
-              <input type="number" id="mcpsat_detalleMercancia_pesoBruto" class="span12" value="">
+            <label class="control-label" for="ftcpsat_domi_numeroExterior">Numero Exterior
+              <input type="number" id="ftcpsat_domi_numeroExterior" class="span12" value="">
             </label>
           </div>
           <div class="span4">
-            <label class="control-label" for="mcpsat_detalleMercancia_pesoNeto">Peso Neto
-              <input type="number" id="mcpsat_detalleMercancia_pesoNeto" class="span12" value="">
+            <label class="control-label" for="ftcpsat_domi_numeroInterior">Numero Interior
+              <input type="number" id="ftcpsat_domi_numeroInterior" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_pais_text">País
+              <input type="text" id="ftcpsat_domi_pais_text" class="span12" value="">
+              <input type="hidden" id="ftcpsat_domi_pais" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_estado_text">Estado
+              <input type="text" id="ftcpsat_domi_estado_text" class="span12" value="">
+              <input type="hidden" id="ftcpsat_domi_estado" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_municipio_text">Municipio
+              <input type="text" id="ftcpsat_domi_municipio_text" class="span12" value="">
+              <input type="hidden" id="ftcpsat_domi_municipio" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_localidad_text">Localidad
+              <input type="text" id="ftcpsat_domi_localidad_text" class="span12" value="">
+              <input type="hidden" id="ftcpsat_domi_localidad" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_codigoPostal">Código Postal
+              <input type="number" id="ftcpsat_domi_codigoPostal" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_colonia_text">Colonia
+              <input type="text" id="ftcpsat_domi_colonia_text" class="span12" value="">
+              <input type="hidden" id="ftcpsat_domi_colonia" class="span12" value="">
+            </label>
+          </div>
+          <div class="span4">
+            <label class="control-label" for="ftcpsat_domi_referencia">Referencia
+              <input type="number" id="ftcpsat_domi_referencia" class="span12" value="">
             </label>
           </div>
         </div>
