@@ -1054,6 +1054,7 @@
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Prestamo</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 80px;">'+

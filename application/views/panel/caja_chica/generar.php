@@ -1313,6 +1313,7 @@
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                               <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                               <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                              <option value="caja_prestamo" <?php echo $_POST['deudor_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Prestamo</option>
                                             </select>
                                           </td>
                                           <td style="width: 80px;">

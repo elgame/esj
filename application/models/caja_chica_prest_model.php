@@ -91,17 +91,23 @@ class caja_chica_prest_model extends CI_Model {
   public function get($fecha, $noCaja, $all = false)
   {
     $info = array(
-      'saldo_inicial'    => 0,
-      'fondos_caja'      => array(),
-      'prestamos_lp'     => array(),
-      'prestamos'        => array(),
-      'prestamos_dia'    => array(),
-      'pagos'            => array(),
-      'denominaciones'   => array(),
-      'categorias'       => array(),
-      'saldos_empleados' => array(),
-      'traspasos'        => 0,
-      'saldo_prest_fijo' => 0,
+      'saldo_inicial'       => 0,
+      'fondos_caja'         => array(),
+      'prestamos_lp'        => array(),
+      'prestamos'           => array(),
+      'prestamos_dia'       => array(),
+      'pagos'               => array(),
+      'denominaciones'      => array(),
+      'categorias'          => array(),
+      'saldos_empleados'    => array(),
+      'traspasos'           => 0,
+      'saldo_prest_fijo'    => 0,
+      'deudores'            => array(),
+      'acreedores'          => array(),
+      'deudores_prest_dia'  => 0,
+      'deudores_abonos_dia' => 0,
+      'acreedor_prest_dia'  => 0,
+      'acreedor_abonos_dia' => 0,
     );
 
     // Obtiene el saldo incial.
@@ -353,6 +359,90 @@ class caja_chica_prest_model extends CI_Model {
     $traspasos = $this->getTraspasos($fecha, 'caja_prestamo', true, (!$all? " AND bt.status = 't'": ''));
     $info['traspasos'] = $traspasos;
 
+    if (true) {
+      $noCajaDeudor = $noCaja+100;
+      // deudores
+      $deudores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura,
+          cd.no_caja
+        FROM cajachica_deudores cd
+          LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja = {$noCajaDeudor} AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja = {$noCajaDeudor} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($deudores && $deudores->num_rows() > 0)
+      {
+        $info['deudores'] = $deudores->result();
+        $info['deudores_prest_dia'] = 0;
+        foreach ($info['deudores'] as $key => $value) {
+          $info['deudores'][$key]->mismo_dia = 'readonly';
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['deudores_prest_dia'] += $value->monto;
+            $info['deudores'][$key]->mismo_dia = '';
+          }
+        }
+
+      }
+
+      $info['deudores_abonos_dia'] = 0;
+      $deudores = $this->db->query(
+        "SELECT Sum(monto) AS abonos FROM cajachica_deudores_pagos
+        WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
+      )->row();
+      if (isset($deudores->abonos)) {
+        if (!($noCaja == '4' && $fecha == '2019-04-08')) {
+          $info['deudores_abonos_dia'] = $deudores->abonos;
+        }
+      }
+    }
+
+    if (true) {
+      $ddNoCaja = '1, 2, 3, 4, 5';
+      $ddTipo = 'caja_prestamo';
+
+      // acreedores
+      $acreedores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura
+        FROM cajachica_deudores cd
+          LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja in({$ddNoCaja}) AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.tipo = '{$ddTipo}' AND fecha <= '{$fecha}'
+          AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($acreedores && $acreedores->num_rows() > 0)
+      {
+        $info['acreedores'] = $acreedores->result();
+        $info['acreedor_prest_dia'] = 0;
+        foreach ($info['acreedores'] as $key => $value) {
+          $info['acreedores'][$key]->mismo_dia = false;
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['acreedor_prest_dia'] += $value->monto;
+            $info['acreedores'][$key]->mismo_dia = true;
+          }
+        }
+      }
+
+      $info['acreedor_abonos_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(ab.monto) AS abonos FROM cajachica_deudores cd
+          INNER JOIN cajachica_deudores_pagos ab ON cd.id_deudor = ab.id_deudor
+        WHERE ab.no_caja in({$ddNoCaja}) AND cd.tipo = '{$ddTipo}' AND ab.fecha = '{$fecha}'"
+      )->row();
+      if (isset($acreedores->abonos)) {
+        $info['acreedor_abonos_dia'] = $acreedores->abonos;
+      }
+    }
+
     // denominaciones
     $denominaciones = $this->db->query(
       "SELECT *
@@ -466,6 +556,9 @@ class caja_chica_prest_model extends CI_Model {
 
   public function guardar($data)
   {
+    $fpartes = explode('-', $data['fecha_caja_chica']);
+    $anio = $fpartes[0]; // date('Y');
+
     $fondoc = array();
     $fondoc_updt = array();
 
@@ -552,49 +645,118 @@ class caja_chica_prest_model extends CI_Model {
     $pagos_updt = array();
 
     // pagos
-    foreach ($data['pago_importe'] as $key => $ingreso)
-    {
-      if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
-        isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
-        // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
+    if (isset($data['pago_importe'])) {
+      foreach ($data['pago_importe'] as $key => $ingreso)
+      {
+        if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
+          isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
 
-        $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
-      } elseif ($data['pago_id'][$key] > 0) {
-        $pagos_updt = array(
-          // 'id_pago' => $data['pago_id'][$key],
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
-        $this->db->update('otros.cajaprestamo_pagos', $pagos_updt, "id_pago = ".$data['pago_id'][$key]);
-      } else {
-        $pagos[] = array(
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
+          $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
+        } elseif ($data['pago_id'][$key] > 0) {
+          $pagos_updt = array(
+            // 'id_pago' => $data['pago_id'][$key],
+            'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
+            'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
+            'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
+            'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
+            'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
+            'id_categoria'    => $data['pago_empresa_id'][$key],
+            'concepto'        => $data['pago_concepto'][$key],
+            'monto'           => $data['pago_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'id_nomenclatura' => $data['pago_nomenclatura'][$key],
+            'no_caja'         => $data['fno_caja'],
+          );
+          $this->db->update('otros.cajaprestamo_pagos', $pagos_updt, "id_pago = ".$data['pago_id'][$key]);
+        } else {
+          $pagos[] = array(
+            'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
+            'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
+            'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
+            'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
+            'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
+            'id_categoria'    => $data['pago_empresa_id'][$key],
+            'concepto'        => $data['pago_concepto'][$key],
+            'monto'           => $data['pago_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'id_nomenclatura' => $data['pago_nomenclatura'][$key],
+            'no_caja'         => $data['fno_caja'],
+          );
+        }
       }
     }
 
     if (count($pagos) > 0)
     {
       $this->db->insert_batch('otros.cajaprestamo_pagos', $pagos);
+    }
+
+    // Deudores
+    if (isset($data['deudor_nombre']))
+    {
+      // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $deudor_udt = $deudor = array();
+      $noCajaDeudor = $data['fno_caja'] + 100;
+
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_deudores
+        WHERE folio IS NOT NULL AND no_caja = {$noCajaDeudor} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['deudor_nombre'] as $key => $nombre)
+      {
+        $nombre = mb_strtoupper($nombre, 'UTF-8');
+        if (isset($data['deudor_del'][$key]) && $data['deudor_del'][$key] == 'true' &&
+          isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['deudor_id_deudor'][$key]);
+
+          $this->db->delete('cajachica_deudores', "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } elseif (isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          $deudor_udt = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
+            'nombre'          => $nombre,
+            'concepto'        => $data['deudor_concepto'][$key],
+            'id_nomenclatura' => $data['deudor_nomenclatura'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $noCajaDeudor,
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_deudores', $data['deudor_id_deudor'][$key], $deudor_udt,
+                          array(':accion'       => 'deudores', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_deudor',
+                                ':titulo'       => $nombresCajas[$noCajaDeudor])
+                        );
+
+          $this->db->update('cajachica_deudores', $deudor_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $deudor = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
+            'tipo'            => $data['deudor_tipo'][$key],
+            'nombre'          => $nombre,
+            'id_nomenclatura' => $data['deudor_nomenclatura'][$key],
+            'concepto'        => $data['deudor_concepto'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $noCajaDeudor,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'folio'           => $data_folio->folio,
+          );
+          $this->db->insert('cajachica_deudores', $deudor);
+          $gastooidd = $this->db->insert_id('cajachica_deudores_id_deudor_seq');
+          // $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_deudores', $gastooidd,
+                        array(':accion'    => 'deudores', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$nombre} | Monto: {$data['deudor_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
     }
 
     // Denominaciones
