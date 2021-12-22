@@ -6,6 +6,17 @@
             <form action="<?php echo base_url('panel/inventario/cproductosOrden_pdf/'); ?>" method="GET" class="form-search comprasxproductos" id="form" target="frame_reporte">
               <div class="form-actions form-filters">
 
+                <div class="control-group span12">
+                  <label class="control-label" for="tipo_fecha">Tipo fecha</label>
+                  <div class="controls">
+                    <select name="tipo_fecha" id="tipo_fecha" class="span12">
+                      <option value="co.fecha_aceptacion">Fecha Orden</option>
+                      <option value="c.fecha">Fecha Contpaq</option>
+                      <option value="c.fecha_factura">Fecha Factura</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="control-group span6">
                   <label class="control-label" for="ffecha1">Del</label>
                   <div class="controls">

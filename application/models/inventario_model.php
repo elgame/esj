@@ -1396,6 +1396,10 @@ class inventario_model extends privilegios_model{
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
     $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
     $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $tipoFecha = $this->input->get('tipo_fecha')? $this->input->get('tipo_fecha'): 'co.fecha_aceptacion';
+    echo "<pre>";
+    var_dump($tipoFecha);
+    echo "</pre>";exit;
 
     $this->load->model('empresas_model');
     $client_default = $this->empresas_model->getDefaultEmpresa();
@@ -1488,7 +1492,7 @@ class inventario_model extends privilegios_model{
                 GROUP BY cp.id_producto
               ) coc ON coc.id_producto = cp.id_producto
             WHERE co.status = 'f' AND cp.id_producto IS NOT NULL {$sql} AND
-              Date(co.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+              Date({$tipoFecha}) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             GROUP BY cp.id_producto
           ) AS cp ON p.id_producto = cp.id_producto
           {$idsproveedores}
