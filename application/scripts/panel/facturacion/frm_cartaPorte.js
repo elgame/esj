@@ -471,7 +471,7 @@ function eventAddCpPartesTransporte() {
 }
 
 function eventAddCpProductoModal() {
-  var cpnumrowsmercans = 0;
+  var cpnumrowfiguratrans = 0;
   $("#btn-add-CpTiposFigura").click(function(event) {
 
     let cantidadTransporta = '', trrm = undefined, guias = '', partesTransporte = '';
@@ -483,7 +483,7 @@ function eventAddCpProductoModal() {
 
     $("#table-ftcpsat_partesTrans tbody tr").each(function(index, el) {
       partesTransporte += `
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][partesTransporte][${index}][parteTransporte]" value="${$('.ftcpsat_parteTransporte', el).val()}" class="cpFigTransParteTransporte">`;
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][partesTransporte][${index}][parteTransporte]" value="${$('.ftcpsat_parteTransporte', el).val()}" class="cpFigTransParteTransporte">`;
       objson.partesTransporte.push({parteTransporte: $('.ftcpsat_parteTransporte', el).val()});
     });
 
@@ -515,39 +515,34 @@ function eventAddCpProductoModal() {
     };
 
     let htmlrow = `
-      <tr class="cp-figTrans" id="cp-figTrans${cpnumrowsmercans}">
+      <tr class="cp-figTrans" id="cp-figTrans${cpnumrowfiguratrans}">
         <td>
-          ${$('#mcpsat_bienesTransp_text').val()}
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][bienesTransp]" value="${$('#mcpsat_bienesTransp').val()}" class="cpMercans-bienesTransp">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][bienesTransp_text]" value="${$('#mcpsat_bienesTransp_text').val()}" class="cpMercans-bienesTransp_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveSTCC]" value="${$('#mcpsat_claveSTCC').val()}" class="cpMercans-claveSTCC">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveSTCC_text]" value="${$('#mcpsat_claveSTCC_text').val()}" class="cpMercans-claveSTCC_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][descripcion]" value="${$('#mcpsat_descripcion').val()}" class="cpMercans-descripcion">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cantidad]" value="${$('#mcpsat_cantidad').val()}" class="cpMercans-cantidad">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveUnidad]" value="${$('#mcpsat_claveUnidad').val()}" class="cpMercans-claveUnidad">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][claveUnidad_text]" value="${$('#mcpsat_claveUnidad_text').val()}" class="cpMercans-claveUnidad_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][unidad]" value="${$('#mcpsat_unidad').val()}" class="cpMercans-unidad">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][dimensiones]" value="${$('#mcpsat_dimensiones').val()}" class="cpMercans-dimensiones">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][materialPeligroso]" value="${$('#mcpsat_materialPeligroso').val()}" class="cpMercans-materialPeligroso">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cveMaterialPeligroso]" value="${$('#mcpsat_cveMaterialPeligroso').val()}" class="cpMercans-cveMaterialPeligroso">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][cveMaterialPeligroso_text]" value="${$('#mcpsat_cveMaterialPeligroso_text').val()}" class="cpMercans-cveMaterialPeligroso_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][embalaje]" value="${$('#mcpsat_embalaje').val()}" class="cpMercans-embalaje">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][descripEmbalaje]" value="${$('#mcpsat_descripEmbalaje').val()}" class="cpMercans-descripEmbalaje">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][pesoEnKg]" value="${$('#mcpsat_pesoEnKg').val()}" class="cpMercans-pesoEnKg">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][valorMercancia]" value="${$('#mcpsat_valorMercancia').val()}" class="cpMercans-valorMercancia">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][moneda]" value="${$('#mcpsat_moneda').val()}" class="cpMercans-moneda">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][fraccionArancelaria]" value="${$('#mcpsat_fraccionArancelaria').val()}" class="cpMercans-fraccionArancelaria">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][fraccionArancelaria_text]" value="${$('#mcpsat_fraccionArancelaria_text').val()}" class="cpMercans-fraccionArancelaria_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][uuidComercioExt]" value="${$('#mcpsat_uuidComercioExt').val()}" class="cpMercans-uuidComercioExt">
+          ${objson.datos.tipoFigura}
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][tipoFigura]" value="${objson.datos.tipoFigura}" class="cpFigTransTipoFigura">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][rfcFigura]" value="${objson.datos.rfcFigura}" class="cpFigTransRfcFigura">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][numLicencia]" value="${objson.datos.numLicencia}" class="cpFigTransNumLicencia">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][nombreFigura]" value="${objson.datos.nombreFigura}" class="cpFigTransNombreFigura">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][numRegIdTribFigura]" value="${objson.datos.numRegIdTribFigura}" class="cpFigTransNumRegIdTribFigura">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][residenciaFiscalFigura]" value="${objson.datos.residenciaFiscalFigura}" class="cpFigTransResidenciaFiscalFigura">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][residenciaFiscalFigura_text]" value="${objson.datos.residenciaFiscalFigura_text}" class="cpFigTransResidenciaFiscalFigura_text">
 
           ${partesTransporte}
 
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][unidadPeso]" value="${$('#mcpsat_detalleMercancia_unidadPeso').val()}" class="cpMercans-detaMerca-unidadPeso">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][unidadPeso_text]" value="${$('#mcpsat_detalleMercancia_unidadPeso_text').val()}" class="cpMercans-detaMerca-unidadPeso_text">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoBruto]" value="${$('#mcpsat_detalleMercancia_pesoBruto').val()}" class="cpMercans-detaMerca-pesoBruto">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoNeto]" value="${$('#mcpsat_detalleMercancia_pesoNeto').val()}" class="cpMercans-detaMerca-pesoNeto">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][pesoTara]" value="${$('#mcpsat_detalleMercancia_pesoTara').val()}" class="cpMercans-detaMerca-pesoTara">
-          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowsmercans}][detalleMercancia][numPiezas]" value="${$('#mcpsat_detalleMercancia_numPiezas').val()}" class="cpMercans-detaMerca-numPiezas">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][calle]" value="${objson.domicilio.calle}" class="cpFigTransDomCalle">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][numeroExterior]" value="${objson.domicilio.numeroExterior}" class="cpFigTransDomNumeroExterior">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][numeroInterior]" value="${objson.domicilio.numeroInterior}" class="cpFigTransDomNumeroInterior">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][pais]" value="${objson.domicilio.pais}" class="cpFigTransDomPais">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][pais_text]" value="${objson.domicilio.pais_text}" class="cpFigTransDomPais_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][estado]" value="${objson.domicilio.estado}" class="cpFigTransDomEstado">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][estado_text]" value="${objson.domicilio.estado_text}" class="cpFigTransDomEstado_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][municipio]" value="${objson.domicilio.municipio}" class="cpFigTransDomMunicipio">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][municipio_text]" value="${objson.domicilio.municipio_text}" class="cpFigTransDomMunicipio_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][localidad]" value="${objson.domicilio.localidad}" class="cpFigTransDomLocalidad">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][localidad_text]" value="${objson.domicilio.localidad_text}" class="cpFigTransDomLocalidad_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][codigoPostal]" value="${objson.domicilio.codigoPostal}" class="cpFigTransDomCodigoPostal">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][colonia]" value="${objson.domicilio.colonia}" class="cpFigTransDomColonia">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][colonia_text]" value="${objson.domicilio.colonia_text}" class="cpFigTransDomColonia_text">
+          <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][referencia]" value="${objson.domicilio.referencia}" class="cpFigTransDomReferencia">
         </td>
         <td>${$('#mcpsat_descripcion').val()}</td>
         <td>${$('#mcpsat_cantidad').val()}</td>
@@ -563,7 +558,7 @@ function eventAddCpProductoModal() {
       $('#'+$('#btn-add-CpProductoModal').data('edit')).remove();
     }
 
-    cpnumrowsmercans++;
+    cpnumrowfiguratrans++;
 
     for (const property in objson.datos) {
       $(`#mcpsat_${property}`).val('');
