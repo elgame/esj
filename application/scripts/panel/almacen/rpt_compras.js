@@ -9,6 +9,7 @@ $(function(){
         dcon_mov: $("#dcon_mov:checked").val(),
         area: $("#area").val(),
         areaId: $("#areaId").val(),
+        tipo_fecha: $("#tipo_fecha").val(),
 
         familias: [],
         ids_productos: [],
