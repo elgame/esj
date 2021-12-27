@@ -1397,9 +1397,6 @@ class inventario_model extends privilegios_model{
     $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
     $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
     $tipoFecha = $this->input->get('tipo_fecha')? $this->input->get('tipo_fecha'): 'co.fecha_aceptacion';
-    echo "<pre>";
-    var_dump($tipoFecha);
-    echo "</pre>";exit;
 
     $this->load->model('empresas_model');
     $client_default = $this->empresas_model->getDefaultEmpresa();
