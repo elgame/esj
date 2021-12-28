@@ -2283,56 +2283,42 @@
                         <table class="table table-hover table-condensed" id="table-FiguraTrans">
                           <thead>
                             <tr>
-                              <th>BIENES</th>
-                              <th>DESCRIPCIÓN</th>
-                              <th>CANTIDAD</th>
-                              <th>CLAVE UNIDAD</th>
-                              <th>PESO EN KG</th>
+                              <th>TIPO FIGURA</th>
+                              <th>RFC FIGURA</th>
+                              <th>NOMBRE FIGURA</th>
+                              <th>NUM LICENCIA</th>
+                              <th>DOMICILIO</th>
                               <th>Opc</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr class="cp-figura" id="cp-figuras0">
                               <td>
-                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp]" value="" class="cpMercans-bienesTransp">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp_text]" value="" class="cpMercans-bienesTransp_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC]" value="" class="cpMercans-claveSTCC">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC_text]" value="" class="cpMercans-claveSTCC_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][descripcion]" value="" class="cpMercans-descripcion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidad]" value="" class="cpMercans-cantidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad]" value="" class="cpMercans-claveUnidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad_text]" value="" class="cpMercans-claveUnidad_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][unidad]" value="" class="cpMercans-unidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][dimensiones]" value="" class="cpMercans-dimensiones">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][materialPeligroso]" value="" class="cpMercans-materialPeligroso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso]" value="" class="cpMercans-cveMaterialPeligroso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso_text]" value="" class="cpMercans-cveMaterialPeligroso_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][embalaje]" value="" class="cpMercans-embalaje">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][descripEmbalaje]" value="" class="cpMercans-descripEmbalaje">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][pesoEnKg]" value="" class="cpMercans-pesoEnKg">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][valorMercancia]" value="" class="cpMercans-valorMercancia">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][moneda]" value="" class="cpMercans-moneda">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria]" value="" class="cpMercans-fraccionArancelaria">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria_text]" value="" class="cpMercans-fraccionArancelaria_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][uuidComercioExt]" value="" class="cpMercans-uuidComercioExt">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][tipoFigura]" value="" class="cpFigTransTipoFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][rfcFigura]" value="" class="cpFigTransRfcFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][numLicencia]" value="" class="cpFigTransNumLicencia">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][nombreFigura]" value="" class="cpFigTransNombreFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][numRegIdTribFigura]" value="" class="cpFigTransNumRegIdTribFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][residenciaFiscalFigura]" value="" class="cpFigTransResidenciaFiscalFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][residenciaFiscalFigura_text]" value="" class="cpFigTransResidenciaFiscalFigura_text">
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][pedimentos][0][pedimento]" value="" class="cpMercans-pedimentos-pedimento">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][partesTransporte][0][parteTransporte]" value="" class="cpFigTransParteTransporte">
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][numeroGuiaIdentificacion]" value="" class="cpMercans-guia-numeroGuiaIdentificacion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][descripGuiaIdentificacion]" value="" class="cpMercans-guia-descripGuiaIdentificacion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][pesoGuiaIdentificacion]" value="" class="cpMercans-guia-pesoGuiaIdentificacion">
-
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cantidad]" value="" class="cpMercans-cantTrans-cantidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idOrigen]" value="" class="cpMercans-cantTrans-idOrigen">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idDestino]" value="" class="cpMercans-cantTrans-idDestino">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cvesTransporte]" value="" class="cpMercans-cantTrans-cvesTransporte">
-
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso]" value="" class="cpMercans-detaMerca-unidadPeso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso_text]" value="" class="cpMercans-detaMerca-unidadPeso_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoBruto]" value="" class="cpMercans-detaMerca-pesoBruto">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoNeto]" value="" class="cpMercans-detaMerca-pesoNeto">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoTara]" value="" class="cpMercans-detaMerca-pesoTara">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][numPiezas]" value="" class="cpMercans-detaMerca-numPiezas">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][calle]" value="" class="cpFigTransDomCalle">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][numeroExterior]" value="" class="cpFigTransDomNumeroExterior">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][numeroInterior]" value="" class="cpFigTransDomNumeroInterior">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][pais]" value="" class="cpFigTransDomPais">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][pais_text]" value="" class="cpFigTransDomPais_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][estado]" value="" class="cpFigTransDomEstado">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][estado_text]" value="" class="cpFigTransDomEstado_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][municipio]" value="" class="cpFigTransDomMunicipio">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][municipio_text]" value="" class="cpFigTransDomMunicipio_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][localidad]" value="" class="cpFigTransDomLocalidad">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][localidad_text]" value="" class="cpFigTransDomLocalidad_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][codigoPostal]" value="" class="cpFigTransDomCodigoPostal">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][colonia]" value="" class="cpFigTransDomColonia">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][colonia_text]" value="" class="cpFigTransDomColonia_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][referencia]" value="" class="cpFigTransDomReferencia">
                               </td>
                               <td></td>
                               <td></td>
@@ -2760,17 +2746,17 @@
         <div class="row-fluid">
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_calle">Calle
-              <input type="number" id="ftcpsat_domi_calle" class="span12" value="">
+              <input type="text" id="ftcpsat_domi_calle" class="span12" value="">
             </label>
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_numeroExterior">Numero Exterior
-              <input type="number" id="ftcpsat_domi_numeroExterior" class="span12" value="">
+              <input type="text" id="ftcpsat_domi_numeroExterior" class="span12" value="">
             </label>
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_numeroInterior">Numero Interior
-              <input type="number" id="ftcpsat_domi_numeroInterior" class="span12" value="">
+              <input type="text" id="ftcpsat_domi_numeroInterior" class="span12" value="">
             </label>
           </div>
         </div>
@@ -2803,7 +2789,7 @@
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_codigoPostal">Código Postal
-              <input type="number" id="ftcpsat_domi_codigoPostal" class="span12" value="">
+              <input type="text" id="ftcpsat_domi_codigoPostal" class="span12" value="">
             </label>
           </div>
           <div class="span4">
@@ -2817,7 +2803,7 @@
         <div class="row-fluid">
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_referencia">Referencia
-              <input type="number" id="ftcpsat_domi_referencia" class="span12" value="">
+              <input type="text" id="ftcpsat_domi_referencia" class="span12" value="">
             </label>
           </div>
         </div>

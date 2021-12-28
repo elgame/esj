@@ -544,93 +544,79 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][colonia_text]" value="${objson.domicilio.colonia_text}" class="cpFigTransDomColonia_text">
           <input type="hidden" name="cp[figuraTransporte][tiposFigura][${cpnumrowfiguratrans}][domicilio][referencia]" value="${objson.domicilio.referencia}" class="cpFigTransDomReferencia">
         </td>
-        <td>${$('#mcpsat_descripcion').val()}</td>
-        <td>${$('#mcpsat_cantidad').val()}</td>
-        <td>${$('#mcpsat_claveUnidad_text').val()}</td>
-        <td>${$('#mcpsat_pesoEnKg').val()}</td>
+        <td>${objson.datos.rfcFigura}</td>
+        <td>${objson.datos.nombreFigura}</td>
+        <td>${objson.datos.numLicencia}</td>
+        <td>${objson.domicilio.calle} ${objson.domicilio.numeroExterior}</td>
         <td style="width: 20px;">
-          <button type="button" class="btn btn-cp-editMercancia" data-json="${encodeURIComponent(JSON.stringify(objson))}">Editar</button>
-          <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
+          <button type="button" class="btn btn-cp-editFiguraTrans" data-json="${encodeURIComponent(JSON.stringify(objson))}">Editar</button>
+          <button type="button" class="btn btn-danger btn-cp-removeFiguraTrans">Quitar</button>
         </td>
       </tr>`;
-    $("#table-mercanciass tbody").append(htmlrow);
-    if($('#btn-add-CpProductoModal').data('edit')){ // elimina el tr
-      $('#'+$('#btn-add-CpProductoModal').data('edit')).remove();
+    $("#table-FiguraTrans tbody").append(htmlrow);
+    if($('#btn-add-CpTiposFigura').data('edit')){ // elimina el tr
+      $('#'+$('#btn-add-CpTiposFigura').data('edit')).remove();
     }
 
     cpnumrowfiguratrans++;
 
     for (const property in objson.datos) {
-      $(`#mcpsat_${property}`).val('');
+      $(`#ftcpsat_${property}`).val('');
     }
-    for (const property in objson.detalleMercancia) {
-      $(`#mcpsat_detalleMercancia_${property}`).val('');
+    for (const property in objson.domicilio) {
+      $(`#ftcpsat_domi_${property}`).val('');
     }
-    $("#table-mcpsat_pedimentos tbody").html('');
-    $("#table-mcpsat_guias tbody").html('');
-    $("#table-mcpsat_cantidadTransporta tbody").html('');
-    $('#btn-add-CpProductoModal').removeAttr('edit');
+    $("#table-ftcpsat_partesTrans tbody").html('');
+    $('#btn-add-CpTiposFigura').removeAttr('edit');
 
-    $('#modal-cpsat-mercancia').modal('hide');
+    $('#modal-cpsat-FiguraTrans').modal('hide');
   });
 
-  $("#table-mercanciass").on('click', '.btn-cp-removeMercancia', function(){
+  $("#table-FiguraTrans").on('click', '.btn-cp-removeFiguraTrans', function(){
     $(this).parent().parent().remove();
   });
 
   // Editar
-  $("#table-mercanciass").on('click', '.btn-cp-editMercancia', function(){
+  $("#table-FiguraTrans").on('click', '.btn-cp-editFiguraTrans', function(){
     let $tr = $(this).parent().parent();
-    let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
+    let partesTransporte = '', trrm = undefined, guias = '', pedimentos = '';
 
     let objson = JSON.parse(decodeURIComponent($(this).attr('data-json')));
 
-    objson.pedimentos.forEach(function(el) {
-      pedimentos += `<tr>
-          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${el.pedimento}" placeholder="52 45 4214 4213546"></td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
-    });
-    objson.guias.forEach(function(el) {
-      guias += `<tr>
-          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
-          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>
-          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value="${el.pesoGuiaIdentificacion}"></td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
-    });
-    objson.cantidadTransporta.forEach(function(el) {
-      cantidadTransporta += `<tr>
-          <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value="${el.cantidad}"></td>
-          <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value="${el.idOrigen}"></td>
-          <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value="${el.idDestino}"></td>
-          <td>
-            <select class="mcpsat_cantidadTransporta_cvesTransporte">
-              <option></option>
-              <option value="01" ${(el.cvesTransporte == '01'? 'selected': '')}>01 - Autotransporte Federal</option>
-              <option value="02" ${(el.cvesTransporte == '02'? 'selected': '')}>02 - Transporte Marítimo</option>
-              <option value="03" ${(el.cvesTransporte == '03'? 'selected': '')}>03 - Transporte Aéreo</option>
-              <option value="04" ${(el.cvesTransporte == '04'? 'selected': '')}>04 - Transporte Ferroviario</option>
-              <option value="05" ${(el.cvesTransporte == '05'? 'selected': '')}>05 - Ducto</option>
-            </select>
-          </td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
+    objson.partesTransporte.forEach(function(el) {
+      partesTransporte += `<tr>
+        <td>
+          <select class="ftcpsat_parteTransporte">
+            <option></option>
+            <option value="PT01" ${(el.parteTransporte == 'PT01'? 'selected': '')}>PT01</option>
+            <option value="PT02" ${(el.parteTransporte == 'PT02'? 'selected': '')}>PT02</option>
+            <option value="PT03" ${(el.parteTransporte == 'PT03'? 'selected': '')}>PT03</option>
+            <option value="PT04" ${(el.parteTransporte == 'PT04'? 'selected': '')}>PT04</option>
+            <option value="PT05" ${(el.parteTransporte == 'PT05'? 'selected': '')}>PT05</option>
+            <option value="PT06" ${(el.parteTransporte == 'PT06'? 'selected': '')}>PT06</option>
+            <option value="PT07" ${(el.parteTransporte == 'PT07'? 'selected': '')}>PT07</option>
+            <option value="PT08" ${(el.parteTransporte == 'PT08'? 'selected': '')}>PT08</option>
+            <option value="PT09" ${(el.parteTransporte == 'PT09'? 'selected': '')}>PT09</option>
+            <option value="PT10" ${(el.parteTransporte == 'PT10'? 'selected': '')}>PT10</option>
+            <option value="PT11" ${(el.parteTransporte == 'PT11'? 'selected': '')}>PT11</option>
+            <option value="PT12" ${(el.parteTransporte == 'PT12'? 'selected': '')}>PT12</option>
+          </select>
+        </td>
+        <td><i class="icon-ban-circle delete"></i></td>
+      </tr>`;
     });
 
     for (const property in objson.datos) {
-      $(`#mcpsat_${property}`).val(objson.datos[property]);
+      $(`#ftcpsat_${property}`).val(objson.datos[property]);
     }
-    for (const property in objson.detalleMercancia) {
-      $(`#mcpsat_detalleMercancia_${property}`).val(objson.detalleMercancia[property]);
+    for (const property in objson.domicilio) {
+      $(`#ftcpsat_domi_${property}`).val(objson.domicilio[property]);
     }
 
-    $("#table-mcpsat_pedimentos tbody").html(pedimentos);
-    $("#table-mcpsat_guias tbody").html(guias);
-    $("#table-mcpsat_cantidadTransporta tbody").html(cantidadTransporta);
+    $("#table-ftcpsat_partesTrans tbody").html(partesTransporte);
 
-    $('#modal-cpsat-mercancia').modal('show');
-    $('#btn-add-CpProductoModal').data('edit', $tr.attr('id'));
+    $('#modal-cpsat-FiguraTrans').modal('show');
+    $('#btn-add-CpTiposFigura').data('edit', $tr.attr('id'));
   });
 }
 
