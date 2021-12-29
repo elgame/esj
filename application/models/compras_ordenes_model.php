@@ -3094,7 +3094,8 @@ class compras_ordenes_model extends CI_Model {
       $query = $this->db->query("SELECT cp.*, co.fecha_creacion
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
-        WHERE cp.status = 'a' AND cp.id_producto = {$id_producto} {$sql}
+        WHERE cp.status = 'a' AND cp.id_producto = {$id_producto}
+          AND co.id_proveedor <> 1104 {$sql}
         ORDER BY co.fecha_aceptacion DESC
         LIMIT 1")->row();
     }
