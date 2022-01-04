@@ -2196,7 +2196,7 @@ class bascula extends MY_Controller {
   public function ajax_check_limite_proveedor()
   {
     $this->load->model('bascula_model');
-    echo $this->bascula_model->checkLimiteProveedor($_GET['idp']);
+    echo json_encode($this->bascula_model->checkLimiteProveedor($_GET['idp']));
   }
 
   /*

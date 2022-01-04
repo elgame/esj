@@ -854,10 +854,13 @@ class bascula_model extends CI_Model {
     $this->load->model('proveedores_facturacion_model');
 
     $info = $this->proveedores_facturacion_model->getLimiteProveedores($idProveedor, date('Y'));
+    $response = [
+      'status' => (floatval($total[0]->total) >= (floatval($info['limite'])-50000)),
+      'total' => floatval($total[0]->total),
+      'limite' => floatval($info['limite'])
+    ];
 
-    if (floatval($total[0]->total) > floatval($info['limite'])) return true;
-
-    else return false;
+    return $response;
   }
 
   public function getMovimientos()

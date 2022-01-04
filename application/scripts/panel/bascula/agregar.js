@@ -243,10 +243,15 @@ $(function(){
 
       if ($('#ptipo').find('option:selected').val() === 'en')
       {
-        $.get(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
-
-          if (data === '1') {
-            noty({"text": 'El limite de facturacion del proveedor seleccionado ya esta superado. ', "layout":"topRight", "type": 'error'});
+        $.getJSON(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
+          if (data.status) {
+            var msgg = '';
+            if(data.total >= 900000){
+              msgg = 'El limite ('+data.limite+') de facturación del proveedor seleccionado ya esta superado.';
+            } else if(data.total >= 850000){
+              msgg = 'El limite de facturación del proveedor esta por vencer, restan '+(data.limite - data.total);
+            }
+            noty({"text": msgg, "layout":"topRight", "type": 'error'});
           }
 
         });
