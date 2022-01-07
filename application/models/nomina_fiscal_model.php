@@ -12542,13 +12542,15 @@ class nomina_fiscal_model extends CI_Model {
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $query->rfc,
-        'rfcRec' => $query->rfc_rec,
-        'uuids'  => $query->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $query->total_neto,
-        'sello'  => $query->sello,
+        'rfc'              => $query->rfc,
+        'rfcRec'           => $query->rfc_rec,
+        'uuids'            => $query->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $query->total_neto,
+        'sello'            => $query->sello,
+        'motivo'           => '02',
+        'folioSustitucion' => '',
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.
