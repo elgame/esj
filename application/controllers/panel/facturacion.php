@@ -433,10 +433,10 @@ class facturacion extends MY_Controller {
    */
   public function cancelar()
   {
-    if (isset($_GET['id']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['motivo']{0}) && isset($_GET['folioSustitucion']))
     {
       $this->load->model('facturacion_model');
-      $response = $this->facturacion_model->cancelaFactura($_GET['id']);
+      $response = $this->facturacion_model->cancelaFactura($_GET['id'], $_GET);
 
       if(isset($_GET['sec']) && $_GET['sec'] == 'pp')
         redirect(base_url("panel/facturacion/pago_parcialidad/?&msg={$response['msg']}"));
