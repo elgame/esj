@@ -71,7 +71,7 @@ img.center, span.center{
   padding: 0 !important;
 }
 
-@media (min-width:961px),  { /* smartphones, iPhone, portrait 480x320 phones */
+@media (max-width: 767px),  { /* smartphones, iPhone, portrait 480x320 phones */
   .modal.modal-w50{
     top: 65%;
     left: 50%;
