@@ -2531,7 +2531,7 @@ class caja_chica_model extends CI_Model {
     // ingresos Remisiones
     $pdf->SetTextColor(0, 0, 0);
     $totalRemisiones = 0;
-    if ($noCajas == 4 && count($caja['remisiones']) > 0) {
+    if (($noCajas == 4 || $noCajas == 2) && count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 7);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetFillColor(230, 230, 230);

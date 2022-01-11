@@ -257,7 +257,7 @@
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
-                          <?php if ($_GET['fno_caja'] == '4'): ?>
+                          <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2'): ?>
                           <thead>
                             <tr>
                               <th colspan="7">INGRESOS CLIENTES
