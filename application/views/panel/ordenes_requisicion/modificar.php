@@ -50,6 +50,20 @@
                 </div>
               </div><!--/control-group -->
 
+              <div class="control-group sucursales" style="display: none;">
+                <label class="control-label" for="sucursalId">Sucursal </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <select name="sucursalId" class="span11" id="sucursalId" data-selected="<?php echo $orden['info'][0]->id_sucursal ?>">
+                      <option></option>
+                      <?php foreach ($sucursales as $key => $sucur) { ?>
+                        <option value="<?php echo $sucur->id_sucursal ?>" selected="selected" <?php echo set_select('sucursalId', $sucur->id_departamento); ?>><?php echo $depa->nombre_fiscal ?></option>
+                      <?php } ?>
+                    </select>
+                  </div>
+                </div>
+              </div><!--/control-group -->
+
               <div class="control-group">
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">

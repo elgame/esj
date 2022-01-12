@@ -19,6 +19,7 @@
     if ($('.editando').length == 0) {
       getProyectos();
     }
+    getSucursales();
 
     eventOtros();
 
@@ -247,6 +248,7 @@
         $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
         getProyectos();
+        getSucursales();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -254,6 +256,7 @@
         $("#empresaId").val('');
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
         getProyectos();
+        getSucursales();
       }
     });
 
@@ -1800,6 +1803,39 @@
       });
     } else {
       $('#proyecto').html(hhtml);
+    }
+  };
+
+  var getSucursales = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
     }
   };
 

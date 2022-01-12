@@ -118,6 +118,17 @@
                 </div>
               </div><!--/control-group -->
 
+              <?php if (!empty($orden['info'][0]->id_sucursal)): ?>
+              <div class="control-group">
+                <label class="control-label" for="empresa">Sucursal </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <?php echo $orden['info'][0]->sucursal ?>
+                  </div>
+                </div>
+              </div><!--/control-group -->
+              <?php endif ?>
+
               <div class="control-group">
                 <label class="control-label" for="proveedor">Proveedor</label>
                 <div class="controls">

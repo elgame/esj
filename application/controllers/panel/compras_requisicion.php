@@ -174,12 +174,7 @@ class compras_requisicion extends MY_Controller {
 
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    // $this->db
-    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-    //   ->from("empresas AS e")
-    //   ->where("e.predeterminado", "t")
-    //   ->get()
-    //   ->row();
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa_default']->id_empresa);
 
     if (isset($_GET['idf']) && $_GET['idf'] !== '')
     {
@@ -279,6 +274,8 @@ class compras_requisicion extends MY_Controller {
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
 
     $_GET['did_empresa'] = $params['orden']['info'][0]->id_empresa;
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['orden']['info'][0]->id_empresa);
+
     $this->load->model('proyectos_model');
     // $params['proyectos'] = $this->proyectos_model->getProyectosAjax();
 
@@ -547,6 +544,9 @@ class compras_requisicion extends MY_Controller {
             'rules' => 'required'),
       array('field' => 'empresa',
             'label' => '',
+            'rules' => ''),
+      array('field' => 'sucursalId',
+            'label' => 'Sucursal',
             'rules' => ''),
       array('field' => 'id_almacen',
             'label' => 'Almacen',
