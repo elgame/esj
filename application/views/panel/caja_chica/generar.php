@@ -281,7 +281,7 @@
                           <?php endif ?>
                           <tbody>
                             <?php
-                            if ($_GET['fno_caja'] == '4') {
+                            if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2') {
                               if (isset($_POST['remision_concepto'])) {
                                 foreach ($_POST['remision_concepto'] as $key => $concepto) {
                                   // $totalIngresosRemisiones += floatval($_POST['otros_monto'][$key]);

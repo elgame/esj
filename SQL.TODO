@@ -1,5 +1,6 @@
 
  ☐ Sucursales empresas y ordenes de compra
+   -- lap|san
    CREATE TABLE public.empresas_sucursales
       (
           id_sucursal serial NOT NULL,

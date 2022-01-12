@@ -217,7 +217,7 @@
                 '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
               '</td>' +
             '</tr>';
-
+            console.log($table);
       $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
     } else {
@@ -284,19 +284,26 @@
             idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
             fecha: $this.attr('data-fecha')
           });
+          console.log({
+            id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
+            total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
+            concepto: $this.attr('data-concepto'),
+            idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
+            fecha: $this.attr('data-fecha')
+          });
 
-          html += '<tr>' +
-                    '<td>' +
-                      '<input type="text" name="remision_concepto[]" value="" class="remision-concepto span12" maxlength="500" placeholder="Observacion" required>' +
-                      '<input type="hidden" name="remision_id[]" value="'+$this.attr('data-id')+'" class="remision-id span12" required>' +
-                    '</td>' +
-                    '<td><input type="text" name="remision_numero[]" value="'+$this.attr('data-folio')+'" class="remision-numero vpositive input-small" placeholder="#" readonly style="width: 45px;"></td>' +
-                    '<td><input type="text" name="remision_importe[]" value="'+$this.attr('data-total')+'" class="remision-importe vpositive input-small" placeholder="Importe" required style="width: 55px;text-align: right;"></td>' +
-                    '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
-                  '</tr>';
+          // html += '<tr>' +
+          //           '<td>' +
+          //             '<input type="text" name="remision_concepto[]" value="" class="remision-concepto span12" maxlength="500" placeholder="Observacion" required>' +
+          //             '<input type="hidden" name="remision_id[]" value="'+$this.attr('data-id')+'" class="remision-id span12" required>' +
+          //           '</td>' +
+          //           '<td><input type="text" name="remision_numero[]" value="'+$this.attr('data-folio')+'" class="remision-numero vpositive input-small" placeholder="#" readonly style="width: 45px;"></td>' +
+          //           '<td><input type="text" name="remision_importe[]" value="'+$this.attr('data-total')+'" class="remision-importe vpositive input-small" placeholder="Importe" required style="width: 55px;text-align: right;"></td>' +
+          //           '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+          //         '</tr>';
         });
 
-        $(html).appendTo($table);
+        // $(html).appendTo($table);
         calculaTotalRemisiones();
 
         $('#modal-remisiones').modal('hide');
