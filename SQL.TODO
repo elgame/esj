@@ -34,6 +34,11 @@
       REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
       ON UPDATE CASCADE
       ON DELETE CASCADE;
+   ALTER TABLE public.cajachica_gastos ADD COLUMN id_sucursal integer;
+   ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+      REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+      ON UPDATE CASCADE
+      ON DELETE CASCADE;
 
  ✔ Nomina infonacot @done (21-12-15 16:08)
    -- pcc|san|lap

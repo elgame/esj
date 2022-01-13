@@ -638,6 +638,7 @@
                                             <input type="hidden" name="pre_activos[]" value="<?php echo $_POST['pre_activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="pre_activoId[]" value="<?php echo $_POST['pre_activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="pre_empresaId[]" value="<?php echo $_POST['pre_empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="pre_sucursalId[]" value="<?php echo $_POST['pre_sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="gasto_pre_empresa[]" value="<?php echo $_POST['gasto_pre_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -690,6 +691,7 @@
                                       <input type="hidden" name="pre_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="pre_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="pre_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="pre_sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -808,6 +810,7 @@
                                             <input type="hidden" name="comprobar_activos[]" value="<?php echo $_POST['comprobar_activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="comprobar_activoId[]" value="<?php echo $_POST['comprobar_activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $_POST['comprobar_empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="comprobar_sucursalId[]" value="<?php echo $_POST['comprobar_sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="gasto_comprobar_empresa[]" value="<?php echo $_POST['gasto_comprobar_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -865,6 +868,7 @@
                                       <input type="hidden" name="comprobar_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="comprobar_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="comprobar_sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir Gasto comprobar">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -982,6 +986,7 @@
                                             <input type="hidden" name="activos[]" value="<?php echo $_POST['activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="sucursalId[]" value="<?php echo $_POST['sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="gasto_empresa[]" value="<?php echo $_POST['gasto_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -1034,6 +1039,7 @@
                                       <input type="hidden" name="activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -1149,6 +1155,7 @@
                                             <input type="hidden" name="reposicionGasto_activos[]" value="<?php echo $_POST['activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="reposicionGasto_activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="reposicionGasto_empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="reposicionGasto_sucursalId[]" value="<?php echo $_POST['sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="reposicionGasto_empresa[]" value="<?php echo $_POST['reposicionGasto_empresa'][$key] ?>" class="span12 reposiciong-cargo" required <?php echo $readonly ?>>
@@ -1205,6 +1212,7 @@
                                       <input type="hidden" name="reposicionGasto_activos[]" value="<?php echo $reposiciong->activo ?>" class="activos span12">
                                       <input type="hidden" name="reposicionGasto_activoId[]" value="<?php echo $reposiciong->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="reposicionGasto_empresaId[]" value="<?php echo $reposiciong->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="reposicionGasto_sucursalId[]" value="<?php echo $reposiciong->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$reposiciong->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -2012,6 +2020,17 @@
             </div>
           </div>
 
+          <div class="control-group sucursales" style="display: none;">
+            <label class="control-label" for="sucursalId">Sucursal </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <select name="sucursalId" class="span11" id="sucursalId" data-selected="">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+          </div><!--/control-group -->
+
           <div class="control-group" id="cultivosGrup">
             <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
             <div class="controls">
@@ -2021,6 +2040,10 @@
               <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
             </div>
           </div><!--/control-group -->
+
+        </div>
+
+        <div class="span6">
 
           <div class="control-group" id="ranchosGrup">
             <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
@@ -2032,9 +2055,6 @@
             </div>
           </div><!--/control-group -->
 
-        </div>
-
-        <div class="span6">
           <div class="control-group" id="centrosCostosGrup">
             <label class="control-label" for="centroCosto">Centro de costo </label>
             <div class="controls">

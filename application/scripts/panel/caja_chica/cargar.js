@@ -444,6 +444,7 @@
     var dempresa = $('#dempresa').val();
     var did_categoria = $('#did_categoria').val();
     var empresaId = $('#did_empresa').val();
+    var sucursalId = $('#sucursalId').val();
 
     if (areaId != '' && ranchoId != '' && centroCostoId != '' && empresaId != '') {
       var $table = $(tabla_gastos).find('tbody .row-total'),
@@ -465,6 +466,7 @@
                     '<input type="hidden" name="'+prefix_gastos+'activos[]" value="'+ activos +'" class="activos span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'activoId[]" value="'+ activoId +'" class="activoId span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'empresaId[]" value="'+ empresaId +'" class="empresaId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'sucursalId[]" value="'+ sucursalId +'" class="sucursalId span12">'+
                   '</td>'+
                   '<td style="">' +
                     '<input type="text" name="gasto_'+prefix_gastos+'empresa[]" value="'+ dempresa +'" class="span12 gasto-cargo" readonly>' +
@@ -557,6 +559,7 @@
       $trGastoCat.find('.activoId').val($('#activoId').val());
       $trGastoCat.find('.gasto-cargo').val($('#dempresa').val());
       $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
+      $trGastoCat.find('.sucursalId').val(($('#sucursalId').val()!=''? $('#sucursalId').val(): ''));
       $('#modalCatalogos').modal('hide');
     }
   };
@@ -751,6 +754,8 @@
           $('#ranchoId').val('');
           $('#activos').val('');
           $('#activoId').val('');
+
+          getSucursales(ui.item.item.id_empresa);
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -1038,6 +1043,39 @@
         noty({"text": 'Seleccione al menos un movimiento.', "layout":"topRight", "type": 'error'});
       }
     });
+  };
+
+  var getSucursales = function (did_empresa) {
+    var params = {
+      did_empresa: did_empresa
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
+    }
   };
 
   var btnAddDeudor = function () {
