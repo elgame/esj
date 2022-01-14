@@ -211,7 +211,7 @@
                       // if ($fact->status !== 'cancelada')
                       // {
                         echo '<a class="btn btn-danger" href="'.base_url('panel/cuentas_cobrar/cancelar_com_pago/?id='.$fact->id).'"
-                          onclick="msb.confirm(\'Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>\', \'Facturas\', this); return false;" title="Cancelar">
+                          onclick="msb.confirmCancel(\'Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>\', \'Cancelar Complementos de Pago\', this, callCancelFactura); return false;" title="Cancelar">
                         <i class="icon-ban-circle icon-white"></i> <span class="hidden-tablet">Cancelar</span></a>';
                       // }
 

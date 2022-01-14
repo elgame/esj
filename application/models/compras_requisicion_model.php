@@ -102,6 +102,7 @@ class compras_requisicion_model extends CI_Model {
     $folio = $this->folio($_POST['tipoOrden']);
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
+      'id_sucursal'     => (is_numeric($_POST['sucursalId'])? $_POST['sucursalId']: NULL),
       // 'id_proveedor' => $_POST['proveedorId'],
       'id_departamento' => (is_numeric($_POST['departamento'])? $_POST['departamento']: NULL),
       'id_empleado'     => $this->session->userdata('id_usuario'),
@@ -641,6 +642,7 @@ class compras_requisicion_model extends CI_Model {
         $dataOrdenCats = null;
         $dataOrden = array(
           'id_empresa'          => $data->id_empresa,
+          'id_sucursal'         => (!empty($data->id_sucursal)? $data->id_sucursal: NULL),
           'id_proveedor'        => $value['id_proveedor'],
           'id_departamento'     => $data->id_departamento,
           'id_empleado'         => $data->id_empleado,
@@ -1021,6 +1023,7 @@ class compras_requisicion_model extends CI_Model {
     $query = $this->db->query(
       "SELECT co.id_requisicion,
               co.id_empresa, e.nombre_fiscal AS empresa,
+              co.id_sucursal, es.nombre_fiscal AS sucursal,
               e.logo,
               co.id_departamento, cd.nombre AS departamento,
               co.id_empleado, u.nombre AS empleado,
@@ -1049,6 +1052,7 @@ class compras_requisicion_model extends CI_Model {
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
        LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
+       LEFT JOIN empresas_sucursales es ON es.id_sucursal = co.id_sucursal
       WHERE co.id_requisicion = {$idOrden}");
 
     $data = array();

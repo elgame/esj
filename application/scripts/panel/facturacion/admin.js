@@ -71,3 +71,9 @@
   };
 
 });
+
+function callCancelFactura(obj, dataa) {
+  console.log('callCancelFactura', obj.href, dataa);
+  let u = new URLSearchParams(dataa).toString();
+  window.location = obj.href+'&'+u;
+}

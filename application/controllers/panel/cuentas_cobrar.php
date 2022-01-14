@@ -444,12 +444,12 @@ class cuentas_cobrar extends MY_Controller {
 
   public function cancelar_com_pago()
   {
-    if(isset($_GET['id']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['motivo']{0}) && isset($_GET['folioSustitucion']))
     {
       $this->load->model('banco_cuentas_model');
       $this->load->model('cuentas_cobrar_pago_model');
 
-      $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
+      $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id'], $_GET);
 
       // if (isset($pago->id))
       //   redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=101'));

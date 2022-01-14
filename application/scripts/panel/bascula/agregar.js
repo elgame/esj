@@ -243,13 +243,22 @@ $(function(){
 
       if ($('#ptipo').find('option:selected').val() === 'en')
       {
-        $.get(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
-
-          if (data === '1') {
-            noty({"text": 'El limite de facturacion del proveedor seleccionado ya esta superado. ', "layout":"topRight", "type": 'error'});
+        $.getJSON(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
+          if (data.status) {
+            var msgg = '';
+            if(data.total >= 900000){
+              msgg = 'El limite ('+data.limite+') de facturación del proveedor seleccionado ya esta superado.';
+            } else if(data.total >= 850000){
+              msgg = 'El limite de facturación del proveedor esta por vencer, restan '+(data.limite - data.total);
+            }
+            noty({"text": msgg, "layout":"topRight", "type": 'error'});
           }
 
         });
+
+        if(ui.item.item.ret_isr == 't'){
+          $('#pisrPorcent').val(1.25); // Asigna el % de retención
+        }
       }
     }
   }).keydown(function(e){
@@ -998,11 +1007,14 @@ var calculaTotales = function (trIndex, kilosNeto) {
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
+      $pisr         = $('#pisr'),
+      $pisrPorcent  = $('#pisrPorcent'),
       $area         = $('#parea'),
 
       kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
       totalCajas = 0,
       totalCajasP = 0,
+      isrTotal    = 0,
       total      = 0,
 
       trIndex = trIndex || 0;
@@ -1061,8 +1073,10 @@ var calculaTotales = function (trIndex, kilosNeto) {
       total +=  parseFloat($(this).val());
   });
 
+  isrTotal = (total * (parseFloat($pisrPorcent.val())||0) / 100).toFixed(2);
   $ptotal_cajas.val(totalCajas);
-  $ptotal.val(total.toFixed(2));
+  $pisr.val(isrTotal);
+  $ptotal.val((total - isrTotal).toFixed(2));
 };
 
 function setLoteBoleta(){

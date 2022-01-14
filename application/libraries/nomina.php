@@ -350,6 +350,12 @@ class nomina
         isset($this->empleado->otros_datos->dePensionAlimenticia)) {
       $this->empleado->nomina->deducciones['pencion_alimenticia'] = $this->dPencionAlimenticia();
     }
+
+    if ((isset($this->empleado->fonacot) && $this->empleado->fonacot > 0) ||
+        isset($this->empleado->otros_datos->deInfonacot)) {
+      $this->empleado->nomina->deducciones['infonacot'] = $this->dInfonacot();
+    }
+
     // Totales Deducciones
     foreach ($this->empleado->nomina->deducciones as $keyp => $deducc) {
       if ($deducc['TipoDeduccion'] == '002') //  || $deducc['TipoDeduccion'] == '101'
@@ -1220,6 +1226,32 @@ class nomina
       'ImporteExcento' => round($otros, 2),
       'total'          => round($otros, 2) + 0,
       'ApiKey'         => 'de_pencion_alimenticia_',
+    );
+  }
+
+  /**
+   * Deduccion infonacot - 011
+   *
+   * @return array
+   */
+  public function dInfonacot()
+  {
+    $otros = 0; //floatval($this->empleado->descuento_playeras);
+
+    if ($this->empleado->nomina_guardada == 'f') {
+      $otros = floatval($this->empleado->fonacot);
+    } elseif (isset($this->empleado->otros_datos->deInfonacot)) {
+      $otros = floatval($this->empleado->otros_datos->deInfonacot);
+    }
+
+    return array(
+      'TipoDeduccion' => '011',
+      'Clave'          => $this->clavesPatron['otros'],
+      'Concepto'       => 'Pago de abonos INFONACOT',
+      'ImporteGravado' => 0,
+      'ImporteExcento' => round($otros, 2),
+      'total'          => round($otros, 2) + 0,
+      'ApiKey'         => 'de_infonacot_',
     );
   }
 

@@ -1308,7 +1308,7 @@ class facturacion_model extends privilegios_model{
    *
    * @return array
 	 */
-	public function cancelaFactura($idFactura)
+	public function cancelaFactura($idFactura, $datos)
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
@@ -1325,13 +1325,15 @@ class facturacion_model extends privilegios_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $factura['info']->empresa->rfc,
-        'rfcRec' => $factura['info']->cliente->rfc,
-        'uuids'  => $factura['info']->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $factura['info']->total,
-        'sello'  => $factura['info']->sello,
+        'rfc'              => $factura['info']->empresa->rfc,
+        'rfcRec'           => $factura['info']->cliente->rfc,
+        'uuids'            => $factura['info']->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $factura['info']->total,
+        'sello'            => $factura['info']->sello,
+        'motivo'           => $datos['motivo'],
+        'folioSustitucion' => $datos['folioSustitucion'],
       );
 
       // Lama el metodo cancelar para que realiza la peticion al webservice.
@@ -2643,6 +2645,11 @@ class facturacion_model extends privilegios_model{
         $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
       }
 
+      if ($this->input->get('dserie') != '')
+      {
+        $sql .= " AND f.serie = '".$this->input->get('dserie')."'";
+      }
+
       if ($this->input->get('dtipo') != '')
       {
         $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
@@ -2681,15 +2688,14 @@ class facturacion_model extends privilegios_model{
         foreach ($productos as $key => $prod)
         {
           if ($prod->id_clasificacion != $auxp) {
-            if ($key > 0) {
+            if(count($lista) > 0){
               $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
             }
 
+            $prodcto = ['id_clasificacion' => $prod->id_clasificacion, 'nombre' => $prod->nombre];
+
             $auxp = $prod->id_clasificacion;
             $lista = [];
-          } else {
-            $prodcto['nombre'] = $prod->nombre;
-            $prodcto['id_clasificacion'] = $prod->id_clasificacion;
           }
 
           $lista[] = $prod;

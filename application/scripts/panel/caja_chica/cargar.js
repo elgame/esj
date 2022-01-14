@@ -217,7 +217,7 @@
                 '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
               '</td>' +
             '</tr>';
-
+            console.log($table);
       $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
     } else {
@@ -278,6 +278,13 @@
           $this = $(this);
 
           agregarRemisiones({
+            id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
+            total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
+            concepto: $this.attr('data-concepto'),
+            idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
+            fecha: $this.attr('data-fecha')
+          });
+          console.log({
             id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
             total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
             concepto: $this.attr('data-concepto'),
@@ -437,6 +444,7 @@
     var dempresa = $('#dempresa').val();
     var did_categoria = $('#did_categoria').val();
     var empresaId = $('#did_empresa').val();
+    var sucursalId = $('#sucursalId').val();
 
     if (areaId != '' && ranchoId != '' && centroCostoId != '' && empresaId != '') {
       var $table = $(tabla_gastos).find('tbody .row-total'),
@@ -458,6 +466,7 @@
                     '<input type="hidden" name="'+prefix_gastos+'activos[]" value="'+ activos +'" class="activos span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'activoId[]" value="'+ activoId +'" class="activoId span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'empresaId[]" value="'+ empresaId +'" class="empresaId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'sucursalId[]" value="'+ sucursalId +'" class="sucursalId span12">'+
                   '</td>'+
                   '<td style="">' +
                     '<input type="text" name="gasto_'+prefix_gastos+'empresa[]" value="'+ dempresa +'" class="span12 gasto-cargo" readonly>' +
@@ -550,6 +559,7 @@
       $trGastoCat.find('.activoId').val($('#activoId').val());
       $trGastoCat.find('.gasto-cargo').val($('#dempresa').val());
       $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
+      $trGastoCat.find('.sucursalId').val(($('#sucursalId').val()!=''? $('#sucursalId').val(): ''));
       $('#modalCatalogos').modal('hide');
     }
   };
@@ -744,6 +754,8 @@
           $('#ranchoId').val('');
           $('#activos').val('');
           $('#activoId').val('');
+
+          getSucursales(ui.item.item.id_empresa);
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -1033,6 +1045,39 @@
     });
   };
 
+  var getSucursales = function (did_empresa) {
+    var params = {
+      did_empresa: did_empresa
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
+    }
+  };
+
   var btnAddDeudor = function () {
     $('#btn-add-deudor').on('click', function(event) {
       agregarDeudor();
@@ -1054,6 +1099,7 @@
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Prestamo</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 80px;">'+

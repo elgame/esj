@@ -42,13 +42,13 @@ class proveedores_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
 		$query = BDUtil::pagination(
-				"SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
-							p.telefono, p.estado, p.tipo_proveedor, p.status, e.id_empresa, e.nombre_fiscal AS empresa
-				FROM proveedores p
-				INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
-				".$sql."
-				ORDER BY p.nombre_fiscal ASC
-				", $params, true);
+			"SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
+						p.telefono, p.estado, p.tipo_proveedor, p.status, e.id_empresa, e.nombre_fiscal AS empresa
+			FROM proveedores p
+			  INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
+			".$sql."
+			ORDER BY p.nombre_fiscal ASC
+			", $params, true);
 		$res = $this->db->query($query['query']);
 
 		$response = array(
@@ -129,8 +129,9 @@ class proveedores_model extends CI_Model {
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
 						'condicion_pago' => $this->input->post('condicionPago'),
 						'dias_credito'   => intval($this->input->post('plazoCredito')),
-						'id_empresa'     => $this->input->post('did_empresa'),
-						);
+            'id_empresa'     => $this->input->post('did_empresa'),
+						'ret_isr'        => $this->input->post('retIsrBascula')? true: false,
+					);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
 		}
@@ -220,7 +221,9 @@ class proveedores_model extends CI_Model {
 						'condicion_pago' => $this->input->post('condicionPago'),
 						'dias_credito'   => intval($this->input->post('plazoCredito')),
 						'id_empresa'     => $this->input->post('did_empresa'),
-						);
+            'ret_isr'        => $this->input->post('retIsrBascula')=='si'? 't': 'f',
+					);
+
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
 
@@ -277,37 +280,37 @@ class proveedores_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getProveedorInfo($id_proveedor=FALSE, $basic_info=FALSE)
-	{
-		$id_proveedor = $id_proveedor ? $id_proveedor : (isset($_GET['id'])? $_GET['id']: 0) ;
+  public function getProveedorInfo($id_proveedor=FALSE, $basic_info=FALSE)
+  {
+    $id_proveedor = $id_proveedor ? $id_proveedor : (isset($_GET['id'])? $_GET['id']: 0) ;
 
-		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-							estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
-                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal, condicion_pago, dias_credito, id_empresa" )
-												->from("proveedores")
-												->where("id_proveedor", $id_proveedor)
-												->get();
-		$data['info'] = array();
+    $sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
+          estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
+          cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal, condicion_pago, dias_credito, id_empresa, ret_isr" )
+      ->from("proveedores")
+      ->where("id_proveedor", $id_proveedor)
+      ->get();
+    $data['info'] = array();
 
-		if ($sql_res->num_rows() > 0)
-		{
-			$data['info']	= $sql_res->row();
+    if ($sql_res->num_rows() > 0)
+    {
+      $data['info'] = $sql_res->row();
 
-			if ($basic_info == False) {
-				$this->load->model('empresas_model');
-				$data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+      if ($basic_info == False) {
+        $this->load->model('empresas_model');
+        $data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
 
         $data['info']->centros_costos = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
           FROM otros.proveedores_centros_costo pc
             INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = pc.id_centro_costo
           WHERE pc.id_proveedor = {$id_proveedor}")->result();
-			}
-		}
-		$sql_res->free_result();
+      }
+    }
+    $sql_res->free_result();
 
 
-		return $data;
-	}
+    return $data;
+  }
 
 	/**
 	 * Obtiene el listado de proveedores para usar ajax
@@ -326,10 +329,12 @@ class proveedores_model extends CI_Model {
       $lbl = true;
 
 		$res = $this->db->query("
-				SELECT p.id_proveedor, p.nombre_fiscal, p.rfc, p.calle, p.no_exterior, p.no_interior, p.colonia, p.municipio, p.estado, p.cp, p.telefono,
-					p.condicion_pago, p.dias_credito, e.nombre_fiscal AS empresa
-				FROM proveedores p LEFT JOIN empresas e ON e.id_empresa = p.id_empresa
-				WHERE p.status = 'ac' ".$sql."
+				SELECT p.id_proveedor, p.nombre_fiscal, p.rfc, p.calle, p.no_exterior,
+          p.no_interior, p.colonia, p.municipio, p.estado, p.cp, p.telefono,
+					p.condicion_pago, p.dias_credito, e.nombre_fiscal AS empresa, p.ret_isr
+				FROM proveedores p
+          LEFT JOIN empresas e ON e.id_empresa = p.id_empresa
+				WHERE p.status = 'ac' {$sql}
 				ORDER BY p.nombre_fiscal ASC
 				LIMIT 20");
 

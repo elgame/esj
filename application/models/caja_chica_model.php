@@ -570,7 +570,7 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
-          cg.nombre, cg.status, cg.folio_sig, cg.folio_ant,
+          cg.nombre, cg.status, cg.folio_sig, cg.folio_ant, cg.id_sucursal,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
           {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
           (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < cg.fecha_cancelado)) AS show_back_cortes
@@ -614,8 +614,8 @@ class caja_chica_model extends CI_Model {
 
   public function getCajaGastosTransporte($fecha, $noCaja, $all)
   {
-    if (!$all) {
       return $this->getCajaGastos($fecha, $noCaja, $all);
+    if (!$all) {
     }
 
     $sql = '';
@@ -1005,6 +1005,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['sucursalId'][$key])? $data['sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
             // 'folio'           => $data['gasto_folio'][$key],
             'concepto'        => $gasto,
@@ -1037,6 +1038,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['sucursalId'][$key])? $data['sucursalId'][$key]: NULL),
             'id_nomenclatura'          => $data['gasto_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_folio'][$key],
             'concepto'                 => $gasto,
@@ -1093,6 +1095,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['gasto_pre_id_gasto'][$key]) && floatval($data['gasto_pre_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_pre_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['pre_sucursalId'][$key])? $data['pre_sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['gasto_pre_nomenclatura'][$key],
             // 'folio'           => $data['gasto_pre_folio'][$key],
             'concepto'        => $gasto,
@@ -1101,7 +1104,7 @@ class caja_chica_model extends CI_Model {
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
-            $data['codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            $data['pre_codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_pre_reposicion'][$key]=='t'? 't': 'f'),
             'id_areac'        => (!empty($data['pre_areaId'][$key])? $data['pre_areaId'][$key]: NULL),
             'id_rancho'       => (!empty($data['pre_ranchoId'][$key])? $data['pre_ranchoId'][$key]: NULL),
@@ -1125,6 +1128,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_pre_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['pre_sucursalId'][$key])? $data['pre_sucursalId'][$key]: NULL),
             'id_nomenclatura'          => $data['gasto_pre_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_pre_folio'][$key],
             'concepto'                 => $gasto,
@@ -1185,6 +1189,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['comprobar_sucursalId'][$key])? $data['comprobar_sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['gasto_comprobar_nomenclatura'][$key],
             // 'folio'           => $data['gasto_comprobar_folio'][$key],
             'concepto'        => $gasto,
@@ -1218,6 +1223,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_comprobar_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['comprobar_sucursalId'][$key])? $data['comprobar_sucursalId'][$key]: NULL),
             'id_nomenclatura'          => $data['gasto_comprobar_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_folio'][$key],
             'concepto'                 => $gasto,
@@ -1286,6 +1292,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['reposicionGasto_id_gasto'][$key]) && floatval($data['reposicionGasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['reposicionGasto_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['reposicionGasto_sucursalId'][$key])? $data['reposicionGasto_sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['reposicionGasto_nomenclatura'][$key],
             // 'folio'           => $data['gasto_comprobar_folio'][$key],
             'concepto'        => $gasto,
@@ -1900,6 +1907,7 @@ class caja_chica_model extends CI_Model {
         $gastos = array(
           'folio_sig'       => $data_folio_rem->folio,
           'id_categoria'    => $data['id_empresa'],
+          'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
           'id_nomenclatura' => $data_gasto->id_nomenclatura,
           'folio'           => $remm['folio'],
           'concepto'        => $remm['proveedor'],
@@ -1954,6 +1962,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'       => $data_folio_rem->folio,
             'id_categoria'    => $gastoo['idempresa'],
+            'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
             'id_nomenclatura' => $data_gasto->id_nomenclatura,
             'folio'           => $gastoo['folio'],
             'concepto'        => $gastoo['proveedor'],
@@ -1976,6 +1985,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'       => $data_folio->folio,
             'id_categoria'    => $gastoo['idempresa'],
+            'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
             'id_nomenclatura' => $data_gasto->id_nomenclatura,
             'folio'           => $gastoo['folio'],
             'concepto'        => $gastoo['proveedor'],
@@ -2531,7 +2541,7 @@ class caja_chica_model extends CI_Model {
     // ingresos Remisiones
     $pdf->SetTextColor(0, 0, 0);
     $totalRemisiones = 0;
-    if ($noCajas == 4 && count($caja['remisiones']) > 0) {
+    if (($noCajas == 4 || $noCajas == 2) && count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 7);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetFillColor(230, 230, 230);
@@ -2948,7 +2958,7 @@ class caja_chica_model extends CI_Model {
 
     // Reposición de gastos
     $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 5) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2988,7 +2998,7 @@ class caja_chica_model extends CI_Model {
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status2 == 't') {
+        if (!isset($gasto->status2) || $gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
           }
@@ -3009,10 +3019,10 @@ class caja_chica_model extends CI_Model {
           $gasto->codigo_fin, //$gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
+          (!isset($gasto->status2) || $gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
           MyString::formatoNumero(
-            ($gasto->status2 == 't'? $gasto->monto: 0),
+            (!isset($gasto->status2) || $gasto->status2 == 't'? $gasto->monto: 0),
             2, '', false)
         ), false, true, $colortxt);
 

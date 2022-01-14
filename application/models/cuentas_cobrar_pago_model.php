@@ -256,7 +256,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $result;
   }
 
-  public function cancelaFactura($id_compago)
+  public function cancelaFactura($id_compago, $datos)
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
@@ -273,13 +273,15 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $factura->cfdi_ext->emisor->rfc,
-        'rfcRec' => $factura->cfdi_ext->receptor->rfc,
-        'uuids'  => $factura->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $factura->cfdi_ext->total,
-        'sello'  => $factura->sello,
+        'rfc'              => $factura->cfdi_ext->emisor->rfc,
+        'rfcRec'           => $factura->cfdi_ext->receptor->rfc,
+        'uuids'            => $factura->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $factura->cfdi_ext->total,
+        'sello'            => $factura->sello,
+        'motivo'           => $datos['motivo'],
+        'folioSustitucion' => $datos['folioSustitucion'],
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.

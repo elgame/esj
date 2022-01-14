@@ -255,6 +255,7 @@ class nomina_fiscal_model extends CI_Model {
                 corona.monto_corona,
                 u.infonavit,
                 u.p_alimenticia,
+                u.fonacot,
                 u.fondo_ahorro,
                 u.regimen_contratacion,
                 'COL' AS estado,
@@ -960,6 +961,12 @@ class nomina_fiscal_model extends CI_Model {
               isset($empleadoNomina[0]->p_alimenticia) && $empleadoNomina[0]->p_alimenticia > 0) {
             $otros_datos['dePensionAlimenticia'] = $empleadoNomina[0]->nomina->deducciones['pencion_alimenticia']['total'];
             $otros_datos['pAlimenticia'] = $empleadoNomina[0]->p_alimenticia;
+          }
+
+          if (isset($empleadoNomina[0]->nomina->deducciones['infonacot']['total']) &&
+              isset($empleadoNomina[0]->fonacot) && $empleadoNomina[0]->fonacot > 0) {
+            $otros_datos['deInfonacot'] = $empleadoNomina[0]->nomina->deducciones['infonacot']['total'];
+            $otros_datos['fonacot'] = $empleadoNomina[0]->fonacot;
           }
 
 
@@ -3734,6 +3741,19 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
             $pdf->Row(array('', 'Pensión Alimenticia', MyString::formatoNumero($empleado->otros_datos->dePensionAlimenticia, 2, '$', false)), false, 0, null, 1, 1);
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y = $pdf->GetY();
+            }
+          }
+
+          if (isset($empleado->otros_datos->deInfonacot) && $empleado->otros_datos->deInfonacot > 0)
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array('', 'INFONACOT', MyString::formatoNumero($empleado->otros_datos->deInfonacot, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -7613,6 +7633,19 @@ class nomina_fiscal_model extends CI_Model {
           }
         }
 
+        if (isset($empleado->otros_datos->deInfonacot) && $empleado->otros_datos->deInfonacot > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'INFONACOT', MyString::formatoNumero($empleado->otros_datos->deInfonacot, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
         if ($empleado->nomina_fiscal_isr > 0)
         {
           $pdf->SetXY(108, $pdf->GetY());
@@ -8208,6 +8241,19 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
         $pdf->Row(array('', 'Pensión Alimenticia', MyString::formatoNumero($empleado->otros_datos->dePensionAlimenticia, 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
+
+      if (isset($empleado->otros_datos->deInfonacot) && $empleado->otros_datos->deInfonacot > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'INFONACOT', MyString::formatoNumero($empleado->otros_datos->deInfonacot, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -12496,13 +12542,15 @@ class nomina_fiscal_model extends CI_Model {
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $query->rfc,
-        'rfcRec' => $query->rfc_rec,
-        'uuids'  => $query->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $query->total_neto,
-        'sello'  => $query->sello,
+        'rfc'              => $query->rfc,
+        'rfcRec'           => $query->rfc_rec,
+        'uuids'            => $query->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $query->total_neto,
+        'sello'            => $query->sello,
+        'motivo'           => '02',
+        'folioSustitucion' => '',
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.

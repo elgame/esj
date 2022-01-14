@@ -437,10 +437,10 @@ class facturacion extends MY_Controller {
    */
   public function cancelar()
   {
-    if (isset($_GET['id']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['motivo']{0}) && isset($_GET['folioSustitucion']))
     {
       $this->load->model('facturacion_model');
-      $response = $this->facturacion_model->cancelaFactura($_GET['id']);
+      $response = $this->facturacion_model->cancelaFactura($_GET['id'], $_GET);
 
       if(isset($_GET['sec']) && $_GET['sec'] == 'pp')
         redirect(base_url("panel/facturacion/pago_parcialidad/?&msg={$response['msg']}"));
@@ -2285,12 +2285,14 @@ class facturacion extends MY_Controller {
     ));
 
     $this->load->model('empresas_model');
+    $this->load->model('facturacion_model');
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
+    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r');
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);

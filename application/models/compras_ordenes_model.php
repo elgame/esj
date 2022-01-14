@@ -833,6 +833,7 @@ class compras_ordenes_model extends CI_Model {
     $query = $this->db->query(
       "SELECT co.id_orden,
               co.id_empresa, e.nombre_fiscal AS empresa,
+              co.id_sucursal, es.nombre_fiscal AS sucursal,
               e.logo,
               co.id_proveedor, p.nombre_fiscal AS proveedor,
               co.id_departamento, cd.nombre AS departamento,
@@ -868,6 +869,7 @@ class compras_ordenes_model extends CI_Model {
          LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
          LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
          LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
+         LEFT JOIN empresas_sucursales es ON es.id_sucursal = co.id_sucursal
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -2038,6 +2040,9 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetAligns(array('L'));
       $pdf->SetWidths(array(150));
       $pdf->Row(array($orden['info'][0]->empresa), false, false);
+      if(!empty($orden['info'][0]->sucursal)){
+        $pdf->Row(array($orden['info'][0]->sucursal), false, false);
+      }
 
       $pdf->SetFont('helvetica','B', 8);
       $pdf->SetAligns(array('L', 'L', 'L'));
@@ -2208,7 +2213,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetWidths($widths2);
           $pdf->Row([
             MyString::formatoNumero((isset($ultcompra->precio_unitario)? $ultcompra->precio_unitario: ''), 2, '$', false),
-            substr((isset($ultcompra->fecha_aceptacion)? $ultcompra->fecha_aceptacion: ''), 0, 10)
+            substr((isset($ultcompra->fecha_creacion)? $ultcompra->fecha_creacion: ''), 0, 10)
           ], false);
 
           $pdf->SetY($pdf->GetY()-5.8);
@@ -2831,6 +2836,10 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, -1);
     $pdf->Row(array($orden['info'][0]->empresa), false, false);
+    if(!empty($orden['info'][0]->sucursal)){
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array($orden['info'][0]->sucursal), false, false);
+    }
 
     $pdf->SetFont('helvetica','B', 8);
     $pdf->SetXY(0, $pdf->GetY()-2);
@@ -3094,7 +3103,8 @@ class compras_ordenes_model extends CI_Model {
       $query = $this->db->query("SELECT cp.*, co.fecha_creacion
         FROM compras_productos cp
           INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
-        WHERE cp.status = 'a' AND cp.id_producto = {$id_producto} {$sql}
+        WHERE cp.status = 'a' AND cp.id_producto = {$id_producto}
+          AND co.id_proveedor <> 1104 {$sql}
         ORDER BY co.fecha_aceptacion DESC
         LIMIT 1")->row();
     }

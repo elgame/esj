@@ -339,6 +339,9 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'plazoCredito',
 					'label'	=> 'Plazo de Crédito',
 					'rules'	=> 'max_length[3]'),
+      array('field' => 'plazoCredito',
+          'label' => 'Retención de ISR Bascula',
+          'rules' => ''),
 
       array('field' => 'centros_costos[]',
           'label' => 'Centros de costo',

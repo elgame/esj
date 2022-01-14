@@ -67,6 +67,7 @@ class caja_chica_prest extends MY_Controller {
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
       array('general/msgbox.js'),
+      array('general/supermodal.js'),
       array('general/util.js'),
       array('panel/caja_chica/cargar_prestamos.js'),
       // array('panel/caja_chica/areas_requisicion.js'),

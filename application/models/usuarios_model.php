@@ -138,6 +138,7 @@ class Usuarios_model extends privilegios_model {
             'tipo_jornada'  => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
             'riesgo_puesto' => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
             'p_alimenticia' => trim($this->input->post('dp_alimenticia'))? $this->input->post('dp_alimenticia'): 0,
+            'fonacot' => trim($this->input->post('dinfonacot'))? $this->input->post('dinfonacot'): 0,
 
             'fecha_contrato' => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
@@ -225,6 +226,7 @@ class Usuarios_model extends privilegios_model {
             'tipo_jornada'         => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
             'riesgo_puesto'        => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
             'p_alimenticia'        => trim($this->input->post('dp_alimenticia'))? $this->input->post('dp_alimenticia'): 0,
+            'fonacot'              => trim($this->input->post('dinfonacot'))? $this->input->post('dinfonacot'): 0,
 
             'fecha_contrato'       => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
@@ -302,7 +304,7 @@ class Usuarios_model extends privilegios_model {
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
             u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato,
-            u.no_proveedor_banorte, u.p_alimenticia" )
+            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")

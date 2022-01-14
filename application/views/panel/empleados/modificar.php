@@ -443,6 +443,13 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dinfonacot">Infonacot x sem</label>
+                    <div class="controls">
+                      <input type="text" name="dinfonacot" id="dinfonacot" class="span12 vpositive" value="<?php echo isset($data['info'][0]->fonacot)? $data['info'][0]->fonacot:''; ?>" max="100" placeholder="">
+                    </div>
+                  </div>
+
                   <input type="hidden" name="duser_nomina" value="t">
 
                 </div> <!--/span-->

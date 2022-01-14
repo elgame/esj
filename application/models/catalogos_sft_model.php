@@ -864,6 +864,14 @@ class catalogos_sft_model extends CI_Model{
       $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('did_empresa')."";
     }
 
+    if ($this->input->get('sucursalId') != '') {
+      $sql_caja .= " AND cg.id_sucursal = ".$this->input->get('sucursalId')."";
+      $sql_compras .= " AND co.id_sucursal = ".$this->input->get('sucursalId')."";
+      // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('sucursalId')."";
+      // $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('sucursalId')."";
+      // $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('sucursalId')."";
+    }
+
     $sql2 = $sql;
 
     // vehiculos
@@ -884,7 +892,8 @@ class catalogos_sft_model extends CI_Model{
               UNION
               SELECT Sum(cg.monto) importe
               FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-              WHERE cg.id_cat_codigos In({$ids_hijos}) {$sql_caja}
+              WHERE cg.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
+                AND cg.tipo <> 'pre' {$sql_caja}
               UNION
               SELECT Sum(ndl.importe) importe
               FROM nomina_trabajos_dia_labores ndl
@@ -926,7 +935,8 @@ class catalogos_sft_model extends CI_Model{
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
                   INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-                WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_caja}
+                WHERE ca.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
+                  AND cg.tipo <> 'pre' {$sql_caja}
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
@@ -962,7 +972,8 @@ class catalogos_sft_model extends CI_Model{
     $combustible = $this->getDataCodigosCuentas();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $empresa = $this->empresas_model->getInfoEmpresa(($this->input->get('did_empresa')? $this->input->get('did_empresa'): 2));
+    $sucursal = $this->empresas_model->infoSucursal(intval($this->input->get('sucursalId')));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -975,7 +986,7 @@ class catalogos_sft_model extends CI_Model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Reporte de Gastos";
 
-    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    $pdf->titulo3 = ($sucursal? $sucursal->nombre_fiscal."\n": ''); //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
         $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))

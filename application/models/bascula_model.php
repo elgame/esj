@@ -185,13 +185,15 @@ class bascula_model extends CI_Model {
       }
 
       $data2 = array(
-        'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
-        'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
-        'obcervaciones' => $this->input->post('pobcervaciones'),
-        'rancho'        => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
-        'tabla'         => mb_strtoupper($this->input->post('ptabla'), 'UTF-8'),
-        'certificado'   => isset($_POST['certificado']) ? 't' : 'f',
-        'tipo' => $this->input->post('ptipo')
+        'importe'         => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
+        'ret_isr'         => empty($_POST['pisr']) ? 0 : $_POST['pisr'],
+        'ret_isr_porcent' => floatval($this->input->post('pisrPorcent')),
+        'total_cajas'     => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
+        'obcervaciones'   => $this->input->post('pobcervaciones'),
+        'rancho'          => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
+        'tabla'           => mb_strtoupper($this->input->post('ptabla'), 'UTF-8'),
+        'certificado'     => isset($_POST['certificado']) ? 't' : 'f',
+        'tipo'            => $this->input->post('ptipo')
       );
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
@@ -687,7 +689,8 @@ class bascula_model extends CI_Model {
       $_GET['id'] = $id;
       $data = $this->getBasculaInfo($id);
       // Abonos
-      $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto, bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
+      $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto,
+          bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
         FROM bascula_pagos bp
           INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
           INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
@@ -854,10 +857,13 @@ class bascula_model extends CI_Model {
     $this->load->model('proveedores_facturacion_model');
 
     $info = $this->proveedores_facturacion_model->getLimiteProveedores($idProveedor, date('Y'));
+    $response = [
+      'status' => (floatval($total[0]->total) >= (floatval($info['limite'])-50000)),
+      'total' => floatval($total[0]->total),
+      'limite' => floatval($info['limite'])
+    ];
 
-    if (floatval($total[0]->total) > floatval($info['limite'])) return true;
-
-    else return false;
+    return $response;
   }
 
   public function getMovimientos()

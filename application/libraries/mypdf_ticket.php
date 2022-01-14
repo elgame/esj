@@ -136,13 +136,15 @@ class mypdf_ticket extends FPDF {
         $this->SetWidths(array(11, 20, 14, 18));
         $this->SetAligns(array('L', 'R', 'R', 'R'));
         $this->SetFounts(array($this->fount_num, $this->fount_num, $this->fount_txt, $this->fount_num), array(1, 1, 0, 1));
-        $this->Row(array($total_pzas, $total_kilos, 'SubTotal', MyString::formatoNumero($data->importe, 2, '', false)), false, false, 4);
+        $this->Row(array($total_pzas, $total_kilos, 'SubTotal', MyString::formatoNumero($data->importe+$data->ret_isr, 2, '', false)), false, false, 4);
 
         $this->SetX(31);
         $this->SetWidths(array(14, 18));
         $this->SetAligns(array('R', 'R'));
         $this->SetFounts(array($this->fount_txt, $this->fount_num), array(0, 1));
         $this->Row(array('IVA', MyString::formatoNumero(0, 2, '', false)), false, false, 4);
+        $this->SetX(31);
+        $this->Row(array("ISR", MyString::formatoNumero($data->ret_isr, 2, '', false)), false, false, 4);
         $this->SetX(31);
         $this->Row(array('Total', MyString::formatoNumero($data->importe, 2, '', false)), false, false, 4);
 

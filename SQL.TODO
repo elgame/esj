@@ -1,4 +1,55 @@
 
+ ✔ Proveedores retencion bascula @done (22-01-13 21:23)
+   -- pcc|san
+   ALTER TABLE public.proveedores ADD COLUMN ret_isr boolean DEFAULT false;
+   ALTER TABLE public.bascula ADD COLUMN ret_isr double precision DEFAULT 0;
+   ALTER TABLE public.bascula ADD COLUMN ret_isr_porcent double precision DEFAULT 0;
+
+ ☐ Sucursales empresas y ordenes de compra
+   -- lap|san|pcc
+   CREATE TABLE public.empresas_sucursales
+      (
+          id_sucursal serial NOT NULL,
+          id_empresa integer NOT NULL,
+          nombre_fiscal character varying(140) COLLATE pg_catalog."default" NOT NULL,
+          calle character varying(60) COLLATE pg_catalog."default",
+          no_exterior character varying(8) COLLATE pg_catalog."default",
+          no_interior character varying(8) COLLATE pg_catalog."default",
+          colonia character varying(60) COLLATE pg_catalog."default",
+          localidad character varying(60) COLLATE pg_catalog."default",
+          municipio character varying(60) COLLATE pg_catalog."default",
+          estado character varying(60) COLLATE pg_catalog."default",
+          pais character varying(60) COLLATE pg_catalog."default" DEFAULT 'MEXICO'::character varying,
+          cp character varying(12) COLLATE pg_catalog."default",
+          status boolean NOT NULL DEFAULT true,
+          CONSTRAINT empresas_sucursales_pkey PRIMARY KEY (id_sucursal),
+          CONSTRAINT empresas_sucursales_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE public.empresas_sucursales OWNER to programa;
+   INSERT INTO public.empresas_sucursales(id_empresa, nombre_fiscal) VALUES (12, 'Tecoman'),(12, 'Guadalajara');
+   ALTER TABLE public.compras_requisicion ADD COLUMN id_sucursal integer;
+   ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+      REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+      ON UPDATE CASCADE
+      ON DELETE CASCADE;
+   ALTER TABLE public.compras_ordenes ADD COLUMN id_sucursal integer;
+   ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+      REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+      ON UPDATE CASCADE
+      ON DELETE CASCADE;
+   ALTER TABLE public.cajachica_gastos ADD COLUMN id_sucursal integer;
+   ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_sucursal_fkey FOREIGN KEY (id_sucursal)
+      REFERENCES public.empresas_sucursales (id_sucursal) MATCH SIMPLE
+      ON UPDATE CASCADE
+      ON DELETE CASCADE;
+
+ ✔ Nomina infonacot @done (21-12-15 16:08)
+   -- pcc|san|lap
+   ALTER TABLE public.usuarios ADD COLUMN fonacot integer DEFAULT 0;
+
  ☐ Agregar en los productos de almacen para ligarlos con las clasificaciones de facturacion y cuando facture agroinsumo cree una orden de compra con los productos facturados
     -- pcc|san
     CREATE TABLE otros.existencias_limon_gastos

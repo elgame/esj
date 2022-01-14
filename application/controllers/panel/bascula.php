@@ -358,6 +358,9 @@ class bascula extends MY_Controller {
         $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
         $params['intangible'] = $info['info'][0]->intangible === 't' ? '1' : '0';
 
+        $_POST['pisr'] = $info['info'][0]->ret_isr;
+        $_POST['pisrPorcent'] = $info['info'][0]->ret_isr_porcent;
+
         $params['fotos'] = $info['bascula_fotos'];
       }
       else
@@ -1648,6 +1651,12 @@ class bascula extends MY_Controller {
       array('field' => 'ptotal',
             'label' => '',
             'rules' => ''),
+      array('field' => 'pisr',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'pisrPorcent',
+            'label' => '',
+            'rules' => ''),
       array('field' => 'pobcervaciones',
             'label' => 'Observaciones',
             'rules' => 'max_length[254]'),
@@ -2196,7 +2205,7 @@ class bascula extends MY_Controller {
   public function ajax_check_limite_proveedor()
   {
     $this->load->model('bascula_model');
-    echo $this->bascula_model->checkLimiteProveedor($_GET['idp']);
+    echo json_encode($this->bascula_model->checkLimiteProveedor($_GET['idp']));
   }
 
   /*

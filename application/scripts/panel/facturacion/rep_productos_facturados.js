@@ -5,13 +5,14 @@
     autocompleteProductos();
     autocompleteCalidadLive();
     autocompleteTamanioLive();
+    autocompleteEmpresa();
 
     $('#form').on('submit', function(event) {
       var linkDownXls = $("#linkDownXls"),
           url = {
             ffecha1: $("#ffecha1").val(),
             ffecha2: $("#ffecha2").val(),
-            dempresa: $("#dempresa").val(),
+            dempresa: $("#dempresar").val(),
             did_empresa: $("#did_empresa").val(),
             dcliente: $("#dcliente").val(),
             fid_cliente: $("#fid_cliente").val(),
@@ -77,13 +78,16 @@
 
   function autocompleteEmpresa () {
     // Autocomplete Empresas
-    $("#dempresa").autocomplete({
+    $("#dempresar").autocomplete({
       source: base_url + 'panel/empresas/ajax_get_empresas/',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
         $("#did_empresa").val(ui.item.id);
-        $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+        $("#dempresar").val(ui.item.label).css({'background-color': '#99FF99'});
+        tipo = $('#dtipo').val() == 't'? 'f': ($('#dtipo').val() == 'f'? 'r': '');
+        console.log($('#dtipo').val(), tipo);
+        loadSerieFolio(ui.item.id, true, tipo);
       }
     }).keydown(function(e){
       if (e.which === 8) {
@@ -91,6 +95,39 @@
         $('#did_empresa').val('');
       }
     });
+  }
+
+  function loadSerieFolio (ide, forceLoad, tipo = 'f') {
+    var objselect = $('#dserie');
+    $.getJSON(base_url+'panel/facturacion/get_series/?tipof='+tipo+'&ide='+ide,
+      function(res){
+        if(res.data) {
+          var html_option = '<option value="void"></option>',
+              selected = '', serieSelected = 'void',
+              loadDefault = false;
+
+          for (var i in res.data){
+            selected = '';
+            if ($('#serie-selected').val() !== 'void') {
+              if (res.data[i].serie === $('#serie-selected').val()) {
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            } else {
+              if (res.data[i].serie === '') {
+                loadDefault = true;
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            }
+
+            html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+          }
+          objselect.html(html_option);
+        } else {
+          noty({"text":'No hay series', "layout":"topRight", "type": 'error'});
+        }
+      });
   }
 
   function autocompleteCalidadLive () {

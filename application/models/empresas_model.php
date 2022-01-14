@@ -100,6 +100,20 @@ class empresas_model extends CI_Model{
       	return false;
 	}
 
+  public function getSucursales($id_empresa){
+    $this->db->select("*")->from("empresas_sucursales");
+    $this->db->where("id_empresa", $id_empresa);
+    $params = $this->db->get()->result();
+    return $params;
+  }
+
+  public function infoSucursal($id_sucursal){
+    $this->db->select("*")->from("empresas_sucursales");
+    $this->db->where("id_sucursal", $id_sucursal);
+    $params = $this->db->get()->row();
+    return $params;
+  }
+
 	/**
 	 * Agrega la informacion de una sucursal de una empresa, o la info de una empresa
 	 * sin sucursales
