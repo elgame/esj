@@ -1,6 +1,12 @@
 
+ ✔ Proveedores retencion bascula @done (22-01-13 21:23)
+   -- pcc|san
+   ALTER TABLE public.proveedores ADD COLUMN ret_isr boolean DEFAULT false;
+   ALTER TABLE public.bascula ADD COLUMN ret_isr double precision DEFAULT 0;
+   ALTER TABLE public.bascula ADD COLUMN ret_isr_porcent double precision DEFAULT 0;
+
  ☐ Sucursales empresas y ordenes de compra
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE public.empresas_sucursales
       (
           id_sucursal serial NOT NULL,
