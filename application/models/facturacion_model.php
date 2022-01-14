@@ -2688,15 +2688,14 @@ class facturacion_model extends privilegios_model{
         foreach ($productos as $key => $prod)
         {
           if ($prod->id_clasificacion != $auxp) {
-            if ($key > 0) {
+            if(count($lista) > 0){
               $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
             }
 
+            $prodcto = ['id_clasificacion' => $prod->id_clasificacion, 'nombre' => $prod->nombre];
+
             $auxp = $prod->id_clasificacion;
             $lista = [];
-          } else {
-            $prodcto['nombre'] = $prod->nombre;
-            $prodcto['id_clasificacion'] = $prod->id_clasificacion;
           }
 
           $lista[] = $prod;
