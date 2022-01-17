@@ -650,6 +650,11 @@ class facturacion_model extends privilegios_model{
       'tipoDeComprobante' => $tipoDeComprobante,
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
+    if (!empty($_POST['cp']['ubicaciones']) ||
+        !empty($_POST['cp']['mercancias']) ||
+        !empty($_POST['cp']['figuraTransporte']) ) {
+      $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
+    }
 
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
@@ -1764,6 +1769,11 @@ class facturacion_model extends privilegios_model{
         'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
         'usoCfdi'           => $this->input->post('duso_cfdi'),
       ];
+      if (!empty($_POST['cp']['ubicaciones']) ||
+          !empty($_POST['cp']['mercancias']) ||
+          !empty($_POST['cp']['figuraTransporte']) ) {
+        $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
+      }
 
       $datosFactura = array(
         'id_cliente'          => $this->input->post('did_cliente'),

@@ -1307,14 +1307,14 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_no_interior">No interior:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][numeroInterior]" id="cce_emisor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroInterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroInterior : ''); ?>" maxlength="50" autocomplete="nope" data-next="cce_emisor_pais">
+                            <input type="text" name="comercioExterior[emisor][domicilio][numeroInterior]" id="cce_emisor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroInterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroInterior : ''); ?>" maxlength="50" autocomplete="off" data-next="cce_emisor_pais">
                           </div>
                         </div>
 
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_pais">País:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][pais]" id="cce_emisor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][pais]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_emisor_estado">
+                            <input type="text" name="comercioExterior[emisor][domicilio][pais]" id="cce_emisor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][pais]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="off" data-next="cce_emisor_estado">
                             <span class="cce_emisor_pais help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1322,7 +1322,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_estado">Estado:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][estado]" id="cce_emisor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][estado]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_municipio">
+                            <input type="text" name="comercioExterior[emisor][domicilio][estado]" id="cce_emisor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][estado]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="off" data-next="cce_emisor_municipio">
                             <span class="cce_emisor_estado help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1330,7 +1330,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_municipio">Municipio / Delegación:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][municipio]" id="cce_emisor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][municipio]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->municipio : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_localidad">
+                            <input type="text" name="comercioExterior[emisor][domicilio][municipio]" id="cce_emisor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][municipio]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->municipio : ''); ?>" maxlength="45" autocomplete="off" data-next="cce_emisor_localidad">
                             <span class="cce_emisor_municipio help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1338,7 +1338,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_localidad">Localidad:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][localidad]" id="cce_emisor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][localidad]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->localidad : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_cp">
+                            <input type="text" name="comercioExterior[emisor][domicilio][localidad]" id="cce_emisor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][localidad]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->localidad : ''); ?>" maxlength="45" autocomplete="off" data-next="cce_emisor_cp">
                             <span class="cce_emisor_localidad help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1346,7 +1346,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_cp">CP:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][codigoPostal]" id="cce_emisor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][codigoPostal]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->codigoPostal : ''); ?>" maxlength="10" autocomplete="nope" data-next="cce_emisor_colonia">
+                            <input type="text" name="comercioExterior[emisor][domicilio][codigoPostal]" id="cce_emisor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][codigoPostal]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->codigoPostal : ''); ?>" maxlength="10" autocomplete="off" data-next="cce_emisor_colonia">
                             <span class="cce_emisor_cp help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1354,7 +1354,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_colonia">Colonia:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][colonia]" id="cce_emisor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][colonia]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->colonia : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_receptor_num_reg_id_trib">
+                            <input type="text" name="comercioExterior[emisor][domicilio][colonia]" id="cce_emisor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][colonia]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->colonia : ''); ?>" maxlength="60" autocomplete="off" data-next="cce_receptor_num_reg_id_trib">
                             <span class="cce_emisor_colonia help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1403,7 +1403,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_receptor_pais">País:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[receptor][domicilio][pais]" id="cce_receptor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][pais]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_receptor_estado">
+                            <input type="text" name="comercioExterior[receptor][domicilio][pais]" id="cce_receptor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][pais]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="off" data-next="cce_receptor_estado">
                             <span class="cce_receptor_pais help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1411,7 +1411,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_receptor_estado">Estado:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[receptor][domicilio][estado]" id="cce_receptor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][estado]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_receptor_municipio">
+                            <input type="text" name="comercioExterior[receptor][domicilio][estado]" id="cce_receptor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][estado]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="off" data-next="cce_receptor_municipio">
                             <span class="cce_receptor_estado help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1703,7 +1703,11 @@
                         <label class="control-label" for="cp_transpInternac">Transporte Internacional <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php
-                            $cpobj = isset($cpobj) ? json_decode($cpobj->extras) : '';
+                          $cfdi_ext = empty($borrador['info']->cfdi_ext)? null: json_decode($borrador['info']->cfdi_ext);
+                            // echo "<pre>";
+                            //   var_dump($cfdi_ext);
+                            // echo "</pre>";exit;
+                            $cpobj = isset($cfdi_ext->cartaPorteSat) ? $cfdi_ext->cartaPorteSat : '';
                             $transpInternac = isset($cpobj->transpInternac) ? $cpobj->transpInternac : ''; ?>
                           <select name="cp[transpInternac]" class="span12 sikey" id="cp_transpInternac" data-next="cp_entradaSalidaMerc">
                             <option value=""></option>
@@ -1728,8 +1732,8 @@
                       <div class="control-group">
                         <label class="control-label" for="cp_paisOrigenDestino_text">País:</label>
                         <div class="controls">
-                          <input type="text" name="cp[paisOrigenDestino_text]" id="cp_paisOrigenDestino_text" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino_text]', isset($cpobj->paisOrigenDestino_text) ? $cpobj->paisOrigenDestino_text : ''); ?>" maxlength="60" autocomplete="nope" data-next="cp_viaEntradaSalida">
-                          <input type="hidden" name="cp[paisOrigenDestino]" id="cp_paisOrigenDestino" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino]', isset($cpobj->paisOrigenDestino) ? $cpobj->paisOrigenDestino : ''); ?>" maxlength="60" autocomplete="nope">
+                          <input type="text" name="cp[paisOrigenDestino_text]" id="cp_paisOrigenDestino_text" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino_text]', isset($cpobj->paisOrigenDestino_text) ? $cpobj->paisOrigenDestino_text : ''); ?>" maxlength="60" autocomplete="off" data-next="cp_viaEntradaSalida">
+                          <input type="hidden" name="cp[paisOrigenDestino]" id="cp_paisOrigenDestino" class="span12 sikey" value="<?php echo set_value('cp[paisOrigenDestino]', isset($cpobj->paisOrigenDestino) ? $cpobj->paisOrigenDestino : ''); ?>" maxlength="60" autocomplete="off">
                           <span class="cp_paisOrigenDestino help-block nomarg" style="color:#bd362f"></span>
                         </div>
                       </div>
@@ -1781,26 +1785,30 @@
                                 <th>RFC <i class="icon-question-sign helpover" data-title=""></i></th>
                                 <th>Nombre <i class="icon-question-sign helpover" data-title=""></i></th>
                                 <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i>
+                                  <button type="button" class="btn btn-danger btn-cp-removeUbicacion">Quitar</button>
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
+                              <?php if (isset($cpobj->ubicaciones) && count($cpobj->ubicaciones) > 0): ?>
+                              <?php foreach ($cpobj->ubicaciones as $key => $ubic): ?>
                               <tr>
                                 <td class="center">
                                   <?php $tipoUbicacion = isset($ubic->tipoUbicacion) ? $ubic->tipoUbicacion : ''; ?>
-                                  <select name="cp[ubicaciones][][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
-                                    <option value="" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', '', $tipoUbicacion === '' ? true : false); ?>></option>
-                                    <option value="Origen" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', 'Origen', $tipoUbicacion === 'Origen' ? true : false); ?>>Origen</option>
-                                    <option value="Destino" <?php echo set_select('cp[ubicaciones][][tipoUbicacion]', 'Destino', $tipoUbicacion === 'Destino' ? true : false); ?>>Destino</option>
+                                  <select name="cp[ubicaciones][<?php echo $key ?>][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
+                                    <option value="" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoUbicacion]', '', $tipoUbicacion === '' ? true : false); ?>></option>
+                                    <option value="Origen" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoUbicacion]', 'Origen', $tipoUbicacion === 'Origen' ? true : false); ?>>Origen</option>
+                                    <option value="Destino" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoUbicacion]', 'Destino', $tipoUbicacion === 'Destino' ? true : false); ?>>Destino</option>
                                   </select>
                                 </td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][idUbicacion]" value="<?php echo set_value('cp[ubicaciones][][idUbicacion]', isset($ubic->idUbicacion) ? $ubic->idUbicacion : ''); ?>" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][rfcRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones][][rfcRemitenteDestinatario]', isset($ubic->rfcRemitenteDestinatario) ? $ubic->rfcRemitenteDestinatario : ''); ?>" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][nombreRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones][][nombreRemitenteDestinatario]', isset($ubic->nombreRemitenteDestinatario) ? $ubic->nombreRemitenteDestinatario : ''); ?>" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones][][numRegIdTrib]', isset($ubic->numRegIdTrib) ? $ubic->numRegIdTrib : ''); ?>" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][idUbicacion]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][idUbicacion]', isset($ubic->idUbicacion) ? $ubic->idUbicacion : ''); ?>" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][rfcRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][rfcRemitenteDestinatario]', isset($ubic->rfcRemitenteDestinatario) ? $ubic->rfcRemitenteDestinatario : ''); ?>" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][nombreRemitenteDestinatario]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][nombreRemitenteDestinatario]', isset($ubic->nombreRemitenteDestinatario) ? $ubic->nombreRemitenteDestinatario : ''); ?>" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][numRegIdTrib]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][numRegIdTrib]', isset($ubic->numRegIdTrib) ? $ubic->numRegIdTrib : ''); ?>" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
                                 <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones][][residenciaFiscal_text]', isset($ubic->residenciaFiscal_text) ? $ubic->residenciaFiscal_text : ''); ?>" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones][][residenciaFiscal]', isset($ubic->residenciaFiscal) ? $ubic->residenciaFiscal : ''); ?>" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
+                                  <input type="text" name="cp[ubicaciones][<?php echo $key ?>][residenciaFiscal_text]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][residenciaFiscal_text]', isset($ubic->residenciaFiscal_text) ? $ubic->residenciaFiscal_text : ''); ?>" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
+                                  <input type="hidden" name="cp[ubicaciones][<?php echo $key ?>][residenciaFiscal]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][residenciaFiscal]', isset($ubic->residenciaFiscal) ? $ubic->residenciaFiscal : ''); ?>" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
                                 </td>
                               </tr>
                               <tr>
@@ -1813,33 +1821,35 @@
                               </tr>
                               <tr>
                                 <td class="center">
-                                  <input type="text" name="cp[ubicaciones][][numEstacion]" value="<?php echo set_value('cp[ubicaciones][][numEstacion]', isset($ubic->numEstacion) ? $ubic->numEstacion : ''); ?>" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
-                                  <input type="hidden" name="cp[ubicaciones][][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones][][numEstacion_text]', isset($ubic->numEstacion_text) ? $ubic->numEstacion_text : ''); ?>" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
+                                  <input type="text" name="cp[ubicaciones][<?php echo $key ?>][numEstacion]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][numEstacion]', isset($ubic->numEstacion) ? $ubic->numEstacion : ''); ?>" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
+                                  <input type="hidden" name="cp[ubicaciones][<?php echo $key ?>][numEstacion_text]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][numEstacion_text]', isset($ubic->numEstacion_text) ? $ubic->numEstacion_text : ''); ?>" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
                                 </td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones][][nombreEstacion]', isset($ubic->nombreEstacion) ? $ubic->nombreEstacion : ''); ?>" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][nombreEstacion]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][nombreEstacion]', isset($ubic->nombreEstacion) ? $ubic->nombreEstacion : ''); ?>" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
                                 <td class="center">
                                   <?php $navegacionTrafico = isset($ubic->navegacionTrafico) ? $ubic->navegacionTrafico : ''; ?>
-                                  <select name="cp[ubicaciones][][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
-                                    <option value="" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', '', $navegacionTrafico === '' ? true : false); ?>></option>
-                                    <option value="Altura" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', 'Altura', $navegacionTrafico === 'Altura' ? true : false); ?>>Altura</option>
-                                    <option value="Cabotaje" <?php echo set_select('cp[ubicaciones][][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false); ?>>Cabotaje</option>
+                                  <select name="cp[ubicaciones][<?php echo $key ?>][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
+                                    <option value="" <?php echo set_select('cp[ubicaciones]['.$key.'][navegacionTrafico]', '', $navegacionTrafico === '' ? true : false); ?>></option>
+                                    <option value="Altura" <?php echo set_select('cp[ubicaciones]['.$key.'][navegacionTrafico]', 'Altura', $navegacionTrafico === 'Altura' ? true : false); ?>>Altura</option>
+                                    <option value="Cabotaje" <?php echo set_select('cp[ubicaciones]['.$key.'][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false); ?>>Cabotaje</option>
                                   </select>
                                 </td>
-                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones][][fechaHoraSalida]', isset($ubic->fechaHoraSalida) ? $ubic->fechaHoraSalida : ''); ?>" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][<?php echo $key ?>][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][fechaHoraSalida]', isset($ubic->fechaHoraSalida) ? $ubic->fechaHoraSalida : ''); ?>" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
                                 <td class="center">
                                   <?php $tipoEstacion = isset($ubic->tipoEstacion) ? $ubic->tipoEstacion : ''; ?>
-                                  <select name="cp[ubicaciones][][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
-                                    <option value="" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '', $tipoEstacion === '' ? true : false); ?>></option>
-                                    <option value="01" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '01', $tipoEstacion === '01' ? true : false); ?>>01 - Origen Nacional</option>
-                                    <option value="02" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '02', $tipoEstacion === '02' ? true : false); ?>>02 - Intermedia</option>
-                                    <option value="03" <?php echo set_select('cp[ubicaciones][][tipoEstacion]', '03', $tipoEstacion === '03' ? true : false); ?>>03 - Destino Final Nacional</option>
+                                  <select name="cp[ubicaciones][<?php echo $key ?>][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
+                                    <option value="" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoEstacion]', '', $tipoEstacion === '' ? true : false); ?>></option>
+                                    <option value="01" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoEstacion]', '01', $tipoEstacion === '01' ? true : false); ?>>01 - Origen Nacional</option>
+                                    <option value="02" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoEstacion]', '02', $tipoEstacion === '02' ? true : false); ?>>02 - Intermedia</option>
+                                    <option value="03" <?php echo set_select('cp[ubicaciones]['.$key.'][tipoEstacion]', '03', $tipoEstacion === '03' ? true : false); ?>>03 - Destino Final Nacional</option>
                                   </select>
                                 </td>
                                 <td class="center">
                                   <?php $distanciaRecorrida = isset($ubic->distanciaRecorrida) ? $ubic->distanciaRecorrida : ''; ?>
-                                  <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="<?php echo set_value('cp[ubicaciones][][distanciaRecorrida]', $distanciaRecorrida); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
+                                  <input type="text" name="cp[ubicaciones][<?php echo $key ?>][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="<?php echo set_value('cp[ubicaciones]['.$key.'][distanciaRecorrida]', $distanciaRecorrida); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
                                 </td>
                               </tr>
+                              <?php endforeach ?>
+                              <?php endif ?>
                             </tbody>
                           </table>
 
@@ -1860,16 +1870,16 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][calle]" value="<?php echo set_value('cp[ubicaciones][][domicilio][calle]', isset($ubic->domicilio->calle) ? $ubic->domicilio->calle : ''); ?>" id="cp_ubic_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cp_ubic_dom_numeroExterior"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][numeroExterior]" value="<?php echo set_value('cp[ubicaciones][][domicilio][numeroExterior]', isset($ubic->domicilio->numero_exterior) ? $ubic->domicilio->numero_exterior : ''); ?>" id="cp_ubic_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_numeroInterior"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][numeroInterior]" value="<?php echo set_value('cp[ubicaciones][][domicilio][numeroInterior]', isset($ubic->domicilio->numero_interior) ? $ubic->domicilio->numero_interior : ''); ?>" id="cp_ubic_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_referencia"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][referencia]" value="<?php echo set_value('cp[ubicaciones][][domicilio][referencia]', isset($ubic->domicilio->referencia) ? $ubic->domicilio->referencia : ''); ?>" id="cp_ubic_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cp_ubic_dom_pais"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][pais]" value="<?php echo set_value('cp[ubicaciones][][domicilio][pais]', isset($ubic->domicilio->pais) ? $ubic->domicilio->pais : ''); ?>" id="cp_ubic_dom_pais" maxlength="40" class="span12 sikey" data-next="cp_ubic_dom_estado"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][estado]" value="<?php echo set_value('cp[ubicaciones][][domicilio][estado]', isset($ubic->domicilio->estado) ? $ubic->domicilio->estado : ''); ?>" id="cp_ubic_dom_estado" maxlength="60" class="span12 sikey" data-next="cp_ubic_dom_municipio"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][municipio]" value="<?php echo set_value('cp[ubicaciones][][domicilio][municipio]', isset($ubic->domicilio->municipio) ? $ubic->domicilio->municipio : ''); ?>" id="cp_ubic_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_localidad"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][localidad]" value="<?php echo set_value('cp[ubicaciones][][domicilio][localidad]', isset($ubic->domicilio->localidad) ? $ubic->domicilio->localidad : ''); ?>" id="cp_ubic_dom_localidad" minlength="1" maxlength="12" class="span12 sikey" data-next="cp_ubic_dom_codigopostal"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][codigoPostal]" value="<?php echo set_value('cp[ubicaciones][][domicilio][codigoPostal]', isset($ubic->domicilio->codigo_postal) ? $ubic->domicilio->codigo_postal : ''); ?>" class="span12 sikey" id="cp_ubic_dom_codigopostal" minlength="1" maxlength="12" data-next="cp_ubic_dom_colonia"></td>
-                                <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][colonia]" value="<?php echo set_value('cp[ubicaciones][][domicilio][colonia]', isset($ubic->domicilio->colonia) ? $ubic->domicilio->colonia : ''); ?>" id="cp_ubic_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_calle"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][calle]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][calle]', isset($ubic->domicilio->calle) ? $ubic->domicilio->calle : ''); ?>" id="cp_ubic_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cp_ubic_dom_numeroExterior"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][numeroExterior]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][numeroExterior]', isset($ubic->domicilio->numero_exterior) ? $ubic->domicilio->numero_exterior : ''); ?>" id="cp_ubic_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_numeroInterior"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][numeroInterior]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][numeroInterior]', isset($ubic->domicilio->numero_interior) ? $ubic->domicilio->numero_interior : ''); ?>" id="cp_ubic_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_referencia"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][referencia]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][referencia]', isset($ubic->domicilio->referencia) ? $ubic->domicilio->referencia : ''); ?>" id="cp_ubic_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cp_ubic_dom_pais"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][pais]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][pais]', isset($ubic->domicilio->pais) ? $ubic->domicilio->pais : ''); ?>" id="cp_ubic_dom_pais" maxlength="40" class="span12 sikey" data-next="cp_ubic_dom_estado"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][estado]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][estado]', isset($ubic->domicilio->estado) ? $ubic->domicilio->estado : ''); ?>" id="cp_ubic_dom_estado" maxlength="60" class="span12 sikey" data-next="cp_ubic_dom_municipio"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][municipio]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][municipio]', isset($ubic->domicilio->municipio) ? $ubic->domicilio->municipio : ''); ?>" id="cp_ubic_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_localidad"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][localidad]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][localidad]', isset($ubic->domicilio->localidad) ? $ubic->domicilio->localidad : ''); ?>" id="cp_ubic_dom_localidad" minlength="1" maxlength="12" class="span12 sikey" data-next="cp_ubic_dom_codigopostal"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][codigoPostal]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][codigoPostal]', isset($ubic->domicilio->codigo_postal) ? $ubic->domicilio->codigo_postal : ''); ?>" class="span12 sikey" id="cp_ubic_dom_codigopostal" minlength="1" maxlength="12" data-next="cp_ubic_dom_colonia"></td>
+                                <td class="center"><input type="text" name="cp[ubicaciones][<?php echo $key ?>][domicilio][colonia]" value="<?php echo set_value('cp[ubicaciones]['.$key.'][domicilio][colonia]', isset($ubic->domicilio->colonia) ? $ubic->domicilio->colonia : ''); ?>" id="cp_ubic_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_calle"></td>
                               </tr>
                             </tbody>
                           </table>
@@ -1897,14 +1907,14 @@
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_pesoBrutoTotal">Peso Bruto Total <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <input type="number" name="cp[mercancias][pesoBrutoTotal]" value="<?php echo set_value('cp[mercancias][pesoBrutoTotal]', isset($ubic->mercancias->pesoBrutoTotal) ? $ubic->destino->pesoBrutoTotal : ''); ?>" id="cp_mercancias_pesoBrutoTotal" class="span12 sikey" data-next="cp_mercancias_unidadPeso_text">
+                              <input type="number" name="cp[mercancias][pesoBrutoTotal]" value="<?php echo set_value('cp[mercancias][pesoBrutoTotal]', isset($cpobj->mercancias->pesoBrutoTotal) ? $cpobj->mercancias->pesoBrutoTotal : ''); ?>" id="cp_mercancias_pesoBrutoTotal" class="span12 sikey" data-next="cp_mercancias_unidadPeso_text">
                             </div>
                           </div>
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_unidadPeso_text">Unidad Peso </label>
                             <div class="controls">
-                              <input type="text" name="cp[mercancias][unidadPeso_text]" value="<?php echo set_value('cp[mercancias][unidadPeso_text]', isset($ubic->mercancias->unidadPeso_text) ? $ubic->mercancias->unidadPeso_text : ''); ?>" id="cp_mercancias_unidadPeso_text" maxlength="40" class="span12 sikey" data-next="cp_mercancias_pesoNetoTotal">
-                              <input type="hidden" name="cp[mercancias][unidadPeso]" value="<?php echo set_value('cp[mercancias][unidadPeso]', isset($ubic->mercancias->unidadPeso) ? $ubic->mercancias->unidadPeso : ''); ?>" id="cp_mercancias_unidadPeso" maxlength="40" class="span12 sikey">
+                              <input type="text" name="cp[mercancias][unidadPeso_text]" value="<?php echo set_value('cp[mercancias][unidadPeso_text]', isset($cpobj->mercancias->unidadPeso_text) ? $cpobj->mercancias->unidadPeso_text : ''); ?>" id="cp_mercancias_unidadPeso_text" maxlength="40" class="span12 sikey" data-next="cp_mercancias_pesoNetoTotal">
+                              <input type="hidden" name="cp[mercancias][unidadPeso]" value="<?php echo set_value('cp[mercancias][unidadPeso]', isset($cpobj->mercancias->unidadPeso) ? $cpobj->mercancias->unidadPeso : ''); ?>" id="cp_mercancias_unidadPeso" maxlength="40" class="span12 sikey">
                             </div>
                           </div>
                         </div>
@@ -1913,13 +1923,13 @@
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_pesoNetoTotal">Peso Neto Total <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <input type="number" name="cp[mercancias][pesoNetoTotal]" value="<?php echo set_value('cp[mercancias][pesoNetoTotal]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>" id="cp_mercancias_pesoNetoTotal" class="span12 sikey" data-next="cp_mercancias_numTotalMercancias">
+                              <input type="number" name="cp[mercancias][pesoNetoTotal]" value="<?php echo set_value('cp[mercancias][pesoNetoTotal]', isset($cpobj->mercancias->pesoNetoTotal) ? $cpobj->mercancias->pesoNetoTotal : ''); ?>" id="cp_mercancias_pesoNetoTotal" class="span12 sikey" data-next="cp_mercancias_numTotalMercancias">
                             </div>
                           </div>
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_numTotalMercancias">Num Total Mercancias <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <input type="number" name="cp[mercancias][numTotalMercancias]" value="<?php echo set_value('cp[mercancias][numTotalMercancias]', isset($ubic->mercancias->numTotalMercancias) ? $ubic->destino->numTotalMercancias : ''); ?>" id="cp_mercancias_numTotalMercancias" class="span12 sikey" data-next="cp_mercancias_cargoPorTasacion">
+                              <input type="number" name="cp[mercancias][numTotalMercancias]" value="<?php echo set_value('cp[mercancias][numTotalMercancias]', isset($cpobj->mercancias->numTotalMercancias) ? $cpobj->mercancias->numTotalMercancias : ''); ?>" id="cp_mercancias_numTotalMercancias" class="span12 sikey" data-next="cp_mercancias_cargoPorTasacion">
                             </div>
                           </div>
                         </div>
@@ -1928,7 +1938,7 @@
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_cargoPorTasacion">Cargo Por Tasacion <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <input type="number" name="cp[mercancias][cargoPorTasacion]" value="<?php echo set_value('cp[mercancias][cargoPorTasacion]', isset($ubic->mercancias->cargoPorTasacion) ? $ubic->destino->cargoPorTasacion : ''); ?>" id="cp_mercancias_cargoPorTasacion" class="span12 sikey">
+                              <input type="number" name="cp[mercancias][cargoPorTasacion]" value="<?php echo set_value('cp[mercancias][cargoPorTasacion]', isset($cpobj->mercancias->cargoPorTasacion) ? $cpobj->mercancias->cargoPorTasacion : ''); ?>" id="cp_mercancias_cargoPorTasacion" class="span12 sikey">
                             </div>
                           </div>
                         </div>
@@ -1945,57 +1955,77 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr class="cp-mercans" id="cp-mercanss0">
+                            <?php if (isset($cpobj->mercancias->mercancias) && count($cpobj->mercancias->mercancias) > 0): ?>
+                            <?php foreach ($cpobj->mercancias->mercancias as $key => $merca): ?>
+                            <tr class="cp-mercans" id="cp-mercanss<?php echo $key ?>">
                               <td>
-                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp]" value="" class="cpMercans-bienesTransp">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][bienesTransp_text]" value="" class="cpMercans-bienesTransp_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC]" value="" class="cpMercans-claveSTCC">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveSTCC_text]" value="" class="cpMercans-claveSTCC_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][descripcion]" value="" class="cpMercans-descripcion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidad]" value="" class="cpMercans-cantidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad]" value="" class="cpMercans-claveUnidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][claveUnidad_text]" value="" class="cpMercans-claveUnidad_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][unidad]" value="" class="cpMercans-unidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][dimensiones]" value="" class="cpMercans-dimensiones">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][materialPeligroso]" value="" class="cpMercans-materialPeligroso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso]" value="" class="cpMercans-cveMaterialPeligroso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cveMaterialPeligroso_text]" value="" class="cpMercans-cveMaterialPeligroso_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][embalaje]" value="" class="cpMercans-embalaje">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][descripEmbalaje]" value="" class="cpMercans-descripEmbalaje">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][pesoEnKg]" value="" class="cpMercans-pesoEnKg">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][valorMercancia]" value="" class="cpMercans-valorMercancia">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][moneda]" value="" class="cpMercans-moneda">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria]" value="" class="cpMercans-fraccionArancelaria">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][fraccionArancelaria_text]" value="" class="cpMercans-fraccionArancelaria_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][uuidComercioExt]" value="" class="cpMercans-uuidComercioExt">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][bienesTransp]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][bienesTransp]', isset($merca->bienesTransp) ? $merca->bienesTransp : ''); ?>" class="cpMercans-bienesTransp">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][bienesTransp_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][bienesTransp_text]', isset($merca->bienesTransp_text) ? $merca->bienesTransp_text : ''); ?>" class="cpMercans-bienesTransp_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][claveSTCC]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][claveSTCC]', isset($merca->claveSTCC) ? $merca->claveSTCC : ''); ?>" class="cpMercans-claveSTCC">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][claveSTCC_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][claveSTCC_text]', isset($merca->claveSTCC_text) ? $merca->claveSTCC_text : ''); ?>" class="cpMercans-claveSTCC_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][descripcion]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][descripcion]', isset($merca->descripcion) ? $merca->descripcion : ''); ?>" class="cpMercans-descripcion">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cantidad]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cantidad]', isset($merca->cantidad) ? $merca->cantidad : ''); ?>" class="cpMercans-cantidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][claveUnidad]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][claveUnidad]', isset($merca->claveUnidad) ? $merca->claveUnidad : ''); ?>" class="cpMercans-claveUnidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][claveUnidad_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][claveUnidad_text]', isset($merca->claveUnidad_text) ? $merca->claveUnidad_text : ''); ?>" class="cpMercans-claveUnidad_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][unidad]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][unidad]', isset($merca->unidad) ? $merca->unidad : ''); ?>" class="cpMercans-unidad">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][dimensiones]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][dimensiones]', isset($merca->dimensiones) ? $merca->dimensiones : ''); ?>" class="cpMercans-dimensiones">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][materialPeligroso]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][materialPeligroso]', isset($merca->materialPeligroso) ? $merca->materialPeligroso : ''); ?>" class="cpMercans-materialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cveMaterialPeligroso]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cveMaterialPeligroso]', isset($merca->cveMaterialPeligroso) ? $merca->cveMaterialPeligroso : ''); ?>" class="cpMercans-cveMaterialPeligroso">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cveMaterialPeligroso_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cveMaterialPeligroso_text]', isset($merca->cveMaterialPeligroso_text) ? $merca->cveMaterialPeligroso_text : ''); ?>" class="cpMercans-cveMaterialPeligroso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][embalaje]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][embalaje]', isset($merca->embalaje) ? $merca->embalaje : ''); ?>" class="cpMercans-embalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][descripEmbalaje]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][descripEmbalaje]', isset($merca->descripEmbalaje) ? $merca->descripEmbalaje : ''); ?>" class="cpMercans-descripEmbalaje">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][pesoEnKg]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][pesoEnKg]', isset($merca->pesoEnKg) ? $merca->pesoEnKg : ''); ?>" class="cpMercans-pesoEnKg">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][valorMercancia]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][valorMercancia]', isset($merca->valorMercancia) ? $merca->valorMercancia : ''); ?>" class="cpMercans-valorMercancia">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][moneda]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][moneda]', isset($merca->moneda) ? $merca->moneda : ''); ?>" class="cpMercans-moneda">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][fraccionArancelaria]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][fraccionArancelaria]', isset($merca->fraccionArancelaria) ? $merca->fraccionArancelaria : ''); ?>" class="cpMercans-fraccionArancelaria">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][fraccionArancelaria_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][fraccionArancelaria_text]', isset($merca->fraccionArancelaria_text) ? $merca->fraccionArancelaria_text : ''); ?>" class="cpMercans-fraccionArancelaria_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][uuidComercioExt]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][uuidComercioExt]', isset($merca->uuidComercioExt) ? $merca->uuidComercioExt : ''); ?>" class="cpMercans-uuidComercioExt">
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][pedimentos][0][pedimento]" value="" class="cpMercans-pedimentos-pedimento">
+                                <?php if (isset($merca->pedimentos)): ?>
+                                  <?php foreach ($merca->pedimentos as $key2 => $pedimento): ?>
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][pedimentos][<?php echo $key2 ?>][pedimento]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][pedimentos]['.$key2.'][pedimento]', isset($pedimento->pedimento) ? $pedimento->pedimento : ''); ?>" class="cpMercans-pedimentos-pedimento">
+                                  <?php endforeach ?>
+                                <?php endif ?>
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][numeroGuiaIdentificacion]" value="" class="cpMercans-guia-numeroGuiaIdentificacion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][descripGuiaIdentificacion]" value="" class="cpMercans-guia-descripGuiaIdentificacion">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][guiasIdentificacion][0][pesoGuiaIdentificacion]" value="" class="cpMercans-guia-pesoGuiaIdentificacion">
+                                <?php if (isset($merca->guiasIdentificacion)): ?>
+                                  <?php foreach ($merca->guiasIdentificacion as $key2 => $guia): ?>
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][guiasIdentificacion][<?php echo $key2 ?>][numeroGuiaIdentificacion]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][guiasIdentificacion]['.$key2.'][numeroGuiaIdentificacion]', isset($guia->numeroGuiaIdentificacion) ? $guia->numeroGuiaIdentificacion : ''); ?>" class="cpMercans-guia-numeroGuiaIdentificacion">
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][guiasIdentificacion][<?php echo $key2 ?>][descripGuiaIdentificacion]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][guiasIdentificacion]['.$key2.'][descripGuiaIdentificacion]', isset($guia->descripGuiaIdentificacion) ? $guia->descripGuiaIdentificacion : ''); ?>" class="cpMercans-guia-descripGuiaIdentificacion">
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][guiasIdentificacion][<?php echo $key2 ?>][pesoGuiaIdentificacion]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][guiasIdentificacion]['.$key2.'][pesoGuiaIdentificacion]', isset($guia->pesoGuiaIdentificacion) ? $guia->pesoGuiaIdentificacion : ''); ?>" class="cpMercans-guia-pesoGuiaIdentificacion">
+                                  <?php endforeach ?>
+                                <?php endif ?>
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cantidad]" value="" class="cpMercans-cantTrans-cantidad">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idOrigen]" value="" class="cpMercans-cantTrans-idOrigen">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][idDestino]" value="" class="cpMercans-cantTrans-idDestino">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][cantidadTransporta][0][cvesTransporte]" value="" class="cpMercans-cantTrans-cvesTransporte">
+                                <?php if (isset($merca->cantidadTransporta)): ?>
+                                  <?php foreach ($merca->cantidadTransporta as $key2 => $ctrans): ?>
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cantidadTransporta][<?php echo $key2 ?>][cantidad]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cantidadTransporta]['.$key2.'][cantidad]', isset($ctrans->cantidad) ? $ctrans->cantidad : ''); ?>" class="cpMercans-cantTrans-cantidad">
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cantidadTransporta][<?php echo $key2 ?>][idOrigen]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cantidadTransporta]['.$key2.'][idOrigen]', isset($ctrans->idOrigen) ? $ctrans->idOrigen : ''); ?>" class="cpMercans-cantTrans-idOrigen">
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cantidadTransporta][<?php echo $key2 ?>][idDestino]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cantidadTransporta]['.$key2.'][idDestino]', isset($ctrans->idDestino) ? $ctrans->idDestino : ''); ?>" class="cpMercans-cantTrans-idDestino">
+                                  <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][cantidadTransporta][<?php echo $key2 ?>][cvesTransporte]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][cantidadTransporta]['.$key2.'][cvesTransporte]', isset($ctrans->cvesTransporte) ? $ctrans->cvesTransporte : ''); ?>" class="cpMercans-cantTrans-cvesTransporte">
+                                  <?php endforeach ?>
+                                <?php endif ?>
 
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso]" value="" class="cpMercans-detaMerca-unidadPeso">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][unidadPeso_text]" value="" class="cpMercans-detaMerca-unidadPeso_text">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoBruto]" value="" class="cpMercans-detaMerca-pesoBruto">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoNeto]" value="" class="cpMercans-detaMerca-pesoNeto">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][pesoTara]" value="" class="cpMercans-detaMerca-pesoTara">
-                                <input type="hidden" name="cp[mercancias][mercancias][0][detalleMercancia][numPiezas]" value="" class="cpMercans-detaMerca-numPiezas">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][unidadPeso]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][unidadPeso]', isset($merca->detalleMercancia->unidadPeso) ? $merca->detalleMercancia->unidadPeso : ''); ?>" class="cpMercans-detaMerca-unidadPeso">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][unidadPeso_text]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][unidadPeso_text]', isset($merca->detalleMercancia->unidadPeso_text) ? $merca->detalleMercancia->unidadPeso_text : ''); ?>" class="cpMercans-detaMerca-unidadPeso_text">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][pesoBruto]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][pesoBruto]', isset($merca->detalleMercancia->pesoBruto) ? $merca->detalleMercancia->pesoBruto : ''); ?>" class="cpMercans-detaMerca-pesoBruto">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][pesoNeto]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][pesoNeto]', isset($merca->detalleMercancia->pesoNeto) ? $merca->detalleMercancia->pesoNeto : ''); ?>" class="cpMercans-detaMerca-pesoNeto">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][pesoTara]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][pesoTara]', isset($merca->detalleMercancia->pesoTara) ? $merca->detalleMercancia->pesoTara : ''); ?>" class="cpMercans-detaMerca-pesoTara">
+                                <input type="hidden" name="cp[mercancias][mercancias][<?php echo $key ?>][detalleMercancia][numPiezas]" value="<?php echo set_value('cp[mercancias][mercancias]['.$key.'][detalleMercancia][numPiezas]', isset($merca->detalleMercancia->numPiezas) ? $merca->detalleMercancia->numPiezas : ''); ?>" class="cpMercans-detaMerca-numPiezas">
                               </td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
+                              <td><?php echo (isset($merca->descripcion) ? $merca->descripcion : '') ?></td>
+                              <td><?php echo (isset($merca->cantidad) ? $merca->cantidad : '') ?></td>
+                              <td><?php echo (isset($merca->claveUnidad_text) ? $merca->claveUnidad_text : '') ?></td>
+                              <td><?php echo (isset($merca->pesoEnKg) ? $merca->pesoEnKg : '') ?></td>
                               <td style="width: 20px;">
-                                <button type="button" class="btn btn-cp-editMercancia">Editar</button>
+                                <?php
+                                  $merca->datos = clone $merca;
+                                  $jsonMerca = MyString::encodeURIComponent(json_encode($merca));
+                                ?>
+                                <button type="button" class="btn btn-cp-editMercancia" data-json="<?php echo $jsonMerca ?>">Editar</button>
                                 <button type="button" class="btn btn-danger btn-cp-removeMercancia">Quitar</button>
                               </td>
                             </tr>
+                            <?php endforeach ?>
+                            <?php endif ?>
                           </tbody>
                         </table>
                       </div>
@@ -2016,7 +2046,8 @@
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_autotransporte_permSCT">Permiso SCT <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <?php $permSCT = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
+                              <input type="hidden" name="cp[mercancias][autotransporte][show]" value="true" id="cp_mercancias_autotransporte_show">
+                              <?php $permSCT = isset($cpobj->mercancias->autotransporte->permSCT) ? $cpobj->mercancias->autotransporte->permSCT : ''; ?>
                               <select name="cp[mercancias][autotransporte][permSCT]" class="span12 sikey" id="cp_mercancias_autotransporte_permSCT" data-next="cp_mercancias_autotransporte_numPermisoSCT">
                                 <option value="" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', '', $permSCT === '' ? true : false); ?>></option>
                                 <option value="TPAF01" <?php echo set_select('cp[mercancias][autotransporte][permSCT]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>TPAF01 - Autotransporte Federal de carga general.</option>
@@ -2053,7 +2084,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_numPermisoSCT">Num del Permiso SCT </label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][numPermisoSCT]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][numPermisoSCT]', isset($ubic->mercancias->unidadPeso_text) ? $ubic->mercancias->unidadPeso_text : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][numPermisoSCT]', isset($cpobj->mercancias->autotransporte->numPermisoSCT) ? $cpobj->mercancias->autotransporte->numPermisoSCT : ''); ?>"
                                 id="cp_mercancias_autotransporte_numPermisoSCT" maxlength="50" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_configVehicular">
                             </div>
                           </div>
@@ -2065,45 +2096,45 @@
                           <div class="control-group">
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_configVehicular">Configuración Vehicular <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
-                              <?php $permSCT = isset($cpobj->viaEntradaSalida) ? $cpobj->viaEntradaSalida : ''; ?>
+                              <?php $configVehicular = isset($cpobj->mercancias->autotransporte->identificacionVehicular->configVehicular) ? $cpobj->mercancias->autotransporte->identificacionVehicular->configVehicular : ''; ?>
                               <select name="cp[mercancias][autotransporte][identificacionVehicular][configVehicular]" class="span12 sikey" id="cp_mercancias_autotransporte_ident_configVehicular" data-next="cp_mercancias_autotransporte_ident_placaVM">
-                                <option value="" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', '', $permSCT === '' ? true : false); ?>></option>
-                                <option value="C2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2</option>
-                                <option value="C3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3</option>
-                                <option value="C2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2R2</option>
-                                <option value="C3R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3R2</option>
-                                <option value="C2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C2R3</option>
-                                <option value="C3R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>C3R3</option>
-                                <option value="T2S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1</option>
-                                <option value="T2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2</option>
-                                <option value="T2S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S3</option>
-                                <option value="T3S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1</option>
-                                <option value="T3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2</option>
-                                <option value="T3S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S3</option>
-                                <option value="T2S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1R2</option>
-                                <option value="T2S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2R2</option>
-                                <option value="T2S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S1R3</option>
-                                <option value="T3S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1R2</option>
-                                <option value="T3S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S1R3</option>
-                                <option value="T3S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R2</option>
-                                <option value="T3S2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R3</option>
-                                <option value="T3S2R4" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2R4</option>
-                                <option value="T2S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T2S2S2</option>
-                                <option value="T3S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S2S2</option>
-                                <option value="T3S3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>T3S3S2</option>
-                                <option value="OTROEV" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEV</option>
-                                <option value="OTROEGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEGP</option>
-                                <option value="OTROSG" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROSG</option>
-                                <option value="VL" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>VL</option>
-                                <option value="OTROEVGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>OTROEVGP</option>
-                                <option value="GPLUTA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTA</option>
-                                <option value="GPLUTB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTB</option>
-                                <option value="GPLUTC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTC</option>
-                                <option value="GPLUTD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLUTD</option>
-                                <option value="GPLATA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATA</option>
-                                <option value="GPLATB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATB</option>
-                                <option value="GPLATC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATC</option>
-                                <option value="GPLATD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'TPAF01', $permSCT === 'TPAF01' ? true : false); ?>>GPLATD</option>
+                                <option value="" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', '', $configVehicular === '' ? true : false); ?>></option>
+                                <option value="C2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C2', $configVehicular === 'C2' ? true : false); ?>>C2</option>
+                                <option value="C3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C3', $configVehicular === 'C3' ? true : false); ?>>C3</option>
+                                <option value="C2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C2R2', $configVehicular === 'C2R2' ? true : false); ?>>C2R2</option>
+                                <option value="C3R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C3R2', $configVehicular === 'C3R2' ? true : false); ?>>C3R2</option>
+                                <option value="C2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C2R3', $configVehicular === 'C2R3' ? true : false); ?>>C2R3</option>
+                                <option value="C3R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'C3R3', $configVehicular === 'C3R3' ? true : false); ?>>C3R3</option>
+                                <option value="T2S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S1', $configVehicular === 'T2S1' ? true : false); ?>>T2S1</option>
+                                <option value="T2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S2', $configVehicular === 'T2S2' ? true : false); ?>>T2S2</option>
+                                <option value="T2S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S3', $configVehicular === 'T2S3' ? true : false); ?>>T2S3</option>
+                                <option value="T3S1" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S1', $configVehicular === 'T3S1' ? true : false); ?>>T3S1</option>
+                                <option value="T3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2', $configVehicular === 'T3S2' ? true : false); ?>>T3S2</option>
+                                <option value="T3S3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S3', $configVehicular === 'T3S3' ? true : false); ?>>T3S3</option>
+                                <option value="T2S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S1R2', $configVehicular === 'T2S1R2' ? true : false); ?>>T2S1R2</option>
+                                <option value="T2S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S2R2', $configVehicular === 'T2S2R2' ? true : false); ?>>T2S2R2</option>
+                                <option value="T2S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S1R3', $configVehicular === 'T2S1R3' ? true : false); ?>>T2S1R3</option>
+                                <option value="T3S1R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S1R2', $configVehicular === 'T3S1R2' ? true : false); ?>>T3S1R2</option>
+                                <option value="T3S1R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S1R3', $configVehicular === 'T3S1R3' ? true : false); ?>>T3S1R3</option>
+                                <option value="T3S2R2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2R2', $configVehicular === 'T3S2R2' ? true : false); ?>>T3S2R2</option>
+                                <option value="T3S2R3" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2R3', $configVehicular === 'T3S2R3' ? true : false); ?>>T3S2R3</option>
+                                <option value="T3S2R4" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2R4', $configVehicular === 'T3S2R4' ? true : false); ?>>T3S2R4</option>
+                                <option value="T2S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T2S2S2', $configVehicular === 'T2S2S2' ? true : false); ?>>T2S2S2</option>
+                                <option value="T3S2S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S2S2', $configVehicular === 'T3S2S2' ? true : false); ?>>T3S2S2</option>
+                                <option value="T3S3S2" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'T3S3S2', $configVehicular === 'T3S3S2' ? true : false); ?>>T3S3S2</option>
+                                <option value="OTROEV" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEV', $configVehicular === 'OTROEV' ? true : false); ?>>OTROEV</option>
+                                <option value="OTROEGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEGP', $configVehicular === 'OTROEGP' ? true : false); ?>>OTROEGP</option>
+                                <option value="OTROSG" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROSG', $configVehicular === 'OTROSG' ? true : false); ?>>OTROSG</option>
+                                <option value="VL" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'VL', $configVehicular === 'VL' ? true : false); ?>>VL</option>
+                                <option value="OTROEVGP" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'OTROEVGP', $configVehicular === 'OTROEVGP' ? true : false); ?>>OTROEVGP</option>
+                                <option value="GPLUTA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTA', $configVehicular === 'GPLUTA' ? true : false); ?>>GPLUTA</option>
+                                <option value="GPLUTB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTB', $configVehicular === 'GPLUTB' ? true : false); ?>>GPLUTB</option>
+                                <option value="GPLUTC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTC', $configVehicular === 'GPLUTC' ? true : false); ?>>GPLUTC</option>
+                                <option value="GPLUTD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLUTD', $configVehicular === 'GPLUTD' ? true : false); ?>>GPLUTD</option>
+                                <option value="GPLATA" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLATA', $configVehicular === 'GPLATA' ? true : false); ?>>GPLATA</option>
+                                <option value="GPLATB" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLATB', $configVehicular === 'GPLATB' ? true : false); ?>>GPLATB</option>
+                                <option value="GPLATC" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLATC', $configVehicular === 'GPLATC' ? true : false); ?>>GPLATC</option>
+                                <option value="GPLATD" <?php echo set_select('cp[mercancias][autotransporte][identificacionVehicular][configVehicular]', 'GPLATD', $configVehicular === 'GPLATD' ? true : false); ?>>GPLATD</option>
                               </select>
                             </div>
                           </div>
@@ -2114,7 +2145,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_placaVM">Placa vehicular del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][placaVM]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][placaVM]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][placaVM]', isset($cpobj->mercancias->autotransporte->identificacionVehicular->placaVM) ? $cpobj->mercancias->autotransporte->identificacionVehicular->placaVM : ''); ?>"
                                 id="cp_mercancias_autotransporte_ident_placaVM" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_anioModeloVM">
                             </div>
                           </div>
@@ -2125,7 +2156,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_ident_anioModeloVM">Año del autotransporte <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][identificacionVehicular][anioModeloVM]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][anioModeloVM]', isset($ubic->mercancias->cargoPorTasacion) ? $ubic->destino->cargoPorTasacion : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][identificacionVehicular][anioModeloVM]', isset($cpobj->mercancias->autotransporte->identificacionVehicular->anioModeloVM) ? $cpobj->mercancias->autotransporte->identificacionVehicular->anioModeloVM : ''); ?>"
                                 id="cp_mercancias_autotransporte_ident_anioModeloVM" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraRespCivil">
                             </div>
                           </div>
@@ -2138,7 +2169,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraRespCivil">Nombre Aseguradora Civil <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraRespCivil]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraRespCivil]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraRespCivil]', isset($cpobj->mercancias->autotransporte->seguros->aseguraRespCivil) ? $cpobj->mercancias->autotransporte->seguros->aseguraRespCivil : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_aseguraRespCivil" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaRespCivil">
                             </div>
                           </div>
@@ -2149,7 +2180,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaRespCivil">No Poliza Civil <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][polizaRespCivil]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaRespCivil]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaRespCivil]', isset($cpobj->mercancias->autotransporte->seguros->polizaRespCivil) ? $cpobj->mercancias->autotransporte->seguros->polizaRespCivil : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_polizaRespCivil" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente">
                             </div>
                           </div>
@@ -2160,7 +2191,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente">Nombre Aseguradora Med Ambiente <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraMedAmbiente]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraMedAmbiente]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraMedAmbiente]', isset($cpobj->mercancias->autotransporte->seguros->aseguraMedAmbiente) ? $cpobj->mercancias->autotransporte->seguros->aseguraMedAmbiente : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_aseguraMedAmbiente" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaMedAmbiente">
                             </div>
                           </div>
@@ -2171,7 +2202,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaMedAmbiente">No Poliza Med Ambiente <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][polizaMedAmbiente]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaMedAmbiente]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaMedAmbiente]', isset($cpobj->mercancias->autotransporte->seguros->polizaMedAmbiente) ? $cpobj->mercancias->autotransporte->seguros->polizaMedAmbiente : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_polizaMedAmbiente" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_aseguraCarga">
                             </div>
                           </div>
@@ -2182,7 +2213,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_aseguraCarga">Nombre Aseguradora Carga <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][aseguraCarga]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraCarga]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][aseguraCarga]', isset($cpobj->mercancias->autotransporte->seguros->aseguraCarga) ? $cpobj->mercancias->autotransporte->seguros->aseguraCarga : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_aseguraCarga" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_polizaCarga">
                             </div>
                           </div>
@@ -2193,7 +2224,7 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_polizaCarga">No Poliza Carga <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][polizaCarga]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaCarga]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][polizaCarga]', isset($cpobj->mercancias->autotransporte->seguros->polizaCarga) ? $cpobj->mercancias->autotransporte->seguros->polizaCarga : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_polizaCarga" class="span12 sikey" data-next="cp_mercancias_autotransporte_seguro_primaSeguro">
                             </div>
                           </div>
@@ -2204,13 +2235,14 @@
                             <label class="control-label" for="cp_mercancias_autotransporte_seguro_primaSeguro">Prima Seguro <i class="icon-question-sign helpover" data-title=""></i></label>
                             <div class="controls">
                               <input type="text" name="cp[mercancias][autotransporte][seguros][primaSeguro]"
-                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][primaSeguro]', isset($ubic->mercancias->pesoNetoTotal) ? $ubic->destino->pesoNetoTotal : ''); ?>"
+                                value="<?php echo set_value('cp[mercancias][autotransporte][seguros][primaSeguro]', isset($cpobj->mercancias->autotransporte->seguros->primaSeguro) ? $cpobj->mercancias->autotransporte->seguros->primaSeguro : ''); ?>"
                                 id="cp_mercancias_autotransporte_seguro_primaSeguro" class="span12 sikey" data-next="cp_mercancias_autotransporte_ident_anioModeloVM">
                             </div>
                           </div>
                         </div>
 
                         <div style="clear: both;"></div>
+                        <h4 style="clear: both;">Remolques</h4>
                         <a class="btn-add pull-right" id="btn-add-CpRemolques" data-title="Agregar Remolque" style="cursor: pointer;font-size: 1.1em; margin-right: 10px;"><i class="icon-plus"></i></a>
                         <table class="table table-hover table-condensed" id="table-remolequess">
                           <thead>
@@ -2221,48 +2253,53 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr class="cp-mercans" data-row="0">
+                            <?php if (isset($cpobj->mercancias->autotransporte->remolques) && count($cpobj->mercancias->autotransporte->remolques) > 0): ?>
+                            <?php foreach ($cpobj->mercancias->autotransporte->remolques as $key2 => $rem): ?>
+                            <tr class="cp-mercans-remolques" data-row="<?php echo $key2 ?>">
                               <td>
-                                <select name="cp[mercancias][autotransporte][remolques][0][subTipoRem]" class="cpMercans-autotrans_rem_subTipoRem">
-                                  <option value="CTR001">CTR001 - Caballete</option>
-                                  <option value="CTR002">CTR002 - Caja</option>
-                                  <option value="CTR003">CTR003 - Caja Abierta</option>
-                                  <option value="CTR004">CTR004 - Caja Cerrada</option>
-                                  <option value="CTR005">CTR005 - Caja De Recolección Con Cargador Frontal</option>
-                                  <option value="CTR006">CTR006 - Caja Refrigerada</option>
-                                  <option value="CTR007">CTR007 - Caja Seca</option>
-                                  <option value="CTR008">CTR008 - Caja Transferencia</option>
-                                  <option value="CTR009">CTR009 - Cama Baja o Cuello Ganso</option>
-                                  <option value="CTR010">CTR010 - Chasis Portacontenedor</option>
-                                  <option value="CTR011">CTR011 - Convencional De Chasis</option>
-                                  <option value="CTR012">CTR012 - Equipo Especial</option>
-                                  <option value="CTR013">CTR013 - Estacas</option>
-                                  <option value="CTR014">CTR014 - Góndola Madrina</option>
-                                  <option value="CTR015">CTR015 - Grúa Industrial</option>
-                                  <option value="CTR016">CTR016 - Grúa</option>
-                                  <option value="CTR017">CTR017 - Integral</option>
-                                  <option value="CTR018">CTR018 - Jaula</option>
-                                  <option value="CTR019">CTR019 - Media Redila</option>
-                                  <option value="CTR020">CTR020 - Pallet o Celdillas</option>
-                                  <option value="CTR021">CTR021 - Plataforma</option>
-                                  <option value="CTR022">CTR022 - Plataforma Con Grúa</option>
-                                  <option value="CTR023">CTR023 - Plataforma Encortinada</option>
-                                  <option value="CTR024">CTR024 - Redilas</option>
-                                  <option value="CTR025">CTR025 - Refrigerador</option>
-                                  <option value="CTR026">CTR026 - Revolvedora</option>
-                                  <option value="CTR027">CTR027 - Semicaja</option>
-                                  <option value="CTR028">CTR028 - Tanque</option>
-                                  <option value="CTR029">CTR029 - Tolva</option>
-                                  <option value="CTR030">CTR030 - Tractor</option>
-                                  <option value="CTR031">CTR031 - Volteo</option>
-                                  <option value="CTR032">CTR032 - Volteo Desmontable</option>
+                                <?php $subTipoRem = isset($rem->subTipoRem) ? $rem->subTipoRem : ''; ?>
+                                <select name="cp[mercancias][autotransporte][remolques][<?php echo $key2 ?>][subTipoRem]" class="cpMercans-autotrans_rem_subTipoRem">
+                                  <option value="CTR001" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR001', $subTipoRem === 'CTR001' ? true : false); ?>>CTR001 - Caballete</option>
+                                  <option value="CTR002" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR002', $subTipoRem === 'CTR002' ? true : false); ?>>CTR002 - Caja</option>
+                                  <option value="CTR003" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR003', $subTipoRem === 'CTR003' ? true : false); ?>>CTR003 - Caja Abierta</option>
+                                  <option value="CTR004" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR004', $subTipoRem === 'CTR004' ? true : false); ?>>CTR004 - Caja Cerrada</option>
+                                  <option value="CTR005" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR005', $subTipoRem === 'CTR005' ? true : false); ?>>CTR005 - Caja De Recolección Con Cargador Frontal</option>
+                                  <option value="CTR006" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR006', $subTipoRem === 'CTR006' ? true : false); ?>>CTR006 - Caja Refrigerada</option>
+                                  <option value="CTR007" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR007', $subTipoRem === 'CTR007' ? true : false); ?>>CTR007 - Caja Seca</option>
+                                  <option value="CTR008" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR008', $subTipoRem === 'CTR008' ? true : false); ?>>CTR008 - Caja Transferencia</option>
+                                  <option value="CTR009" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR009', $subTipoRem === 'CTR009' ? true : false); ?>>CTR009 - Cama Baja o Cuello Ganso</option>
+                                  <option value="CTR010" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR010', $subTipoRem === 'CTR010' ? true : false); ?>>CTR010 - Chasis Portacontenedor</option>
+                                  <option value="CTR011" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR011', $subTipoRem === 'CTR011' ? true : false); ?>>CTR011 - Convencional De Chasis</option>
+                                  <option value="CTR012" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR012', $subTipoRem === 'CTR012' ? true : false); ?>>CTR012 - Equipo Especial</option>
+                                  <option value="CTR013" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR013', $subTipoRem === 'CTR013' ? true : false); ?>>CTR013 - Estacas</option>
+                                  <option value="CTR014" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR014', $subTipoRem === 'CTR014' ? true : false); ?>>CTR014 - Góndola Madrina</option>
+                                  <option value="CTR015" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR015', $subTipoRem === 'CTR015' ? true : false); ?>>CTR015 - Grúa Industrial</option>
+                                  <option value="CTR016" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR016', $subTipoRem === 'CTR016' ? true : false); ?>>CTR016 - Grúa</option>
+                                  <option value="CTR017" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR017', $subTipoRem === 'CTR017' ? true : false); ?>>CTR017 - Integral</option>
+                                  <option value="CTR018" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR018', $subTipoRem === 'CTR018' ? true : false); ?>>CTR018 - Jaula</option>
+                                  <option value="CTR019" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR019', $subTipoRem === 'CTR019' ? true : false); ?>>CTR019 - Media Redila</option>
+                                  <option value="CTR020" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR020', $subTipoRem === 'CTR020' ? true : false); ?>>CTR020 - Pallet o Celdillas</option>
+                                  <option value="CTR021" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR021', $subTipoRem === 'CTR021' ? true : false); ?>>CTR021 - Plataforma</option>
+                                  <option value="CTR022" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR022', $subTipoRem === 'CTR022' ? true : false); ?>>CTR022 - Plataforma Con Grúa</option>
+                                  <option value="CTR023" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR023', $subTipoRem === 'CTR023' ? true : false); ?>>CTR023 - Plataforma Encortinada</option>
+                                  <option value="CTR024" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR024', $subTipoRem === 'CTR024' ? true : false); ?>>CTR024 - Redilas</option>
+                                  <option value="CTR025" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR025', $subTipoRem === 'CTR025' ? true : false); ?>>CTR025 - Refrigerador</option>
+                                  <option value="CTR026" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR026', $subTipoRem === 'CTR026' ? true : false); ?>>CTR026 - Revolvedora</option>
+                                  <option value="CTR027" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR027', $subTipoRem === 'CTR027' ? true : false); ?>>CTR027 - Semicaja</option>
+                                  <option value="CTR028" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR028', $subTipoRem === 'CTR028' ? true : false); ?>>CTR028 - Tanque</option>
+                                  <option value="CTR029" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR029', $subTipoRem === 'CTR029' ? true : false); ?>>CTR029 - Tolva</option>
+                                  <option value="CTR030" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR030', $subTipoRem === 'CTR030' ? true : false); ?>>CTR030 - Tractor</option>
+                                  <option value="CTR031" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR031', $subTipoRem === 'CTR031' ? true : false); ?>>CTR031 - Volteo</option>
+                                  <option value="CTR032" <?php echo set_select('cp[mercancias][autotransporte][remolques]['.$key2.'][subTipoRem]', 'CTR032', $subTipoRem === 'CTR032' ? true : false); ?>>CTR032 - Volteo Desmontable</option>
                                 </select>
                               </td>
-                              <td><input type="text" name="cp[mercancias][autotransporte][remolques][0][placa]" value="" class="cpMercans-autotrans_rem_placa"></td>
+                              <td><input type="text" name="cp[mercancias][autotransporte][remolques][<?php echo $key2 ?>][placa]" value="<?php echo set_value('cp[mercancias][autotransporte][remolques]['.$key2.'][placa]', isset($rem->placa) ? $rem->placa : ''); ?>" class="cpMercans-autotrans_rem_placa"></td>
                               <td style="width: 20px;">
                                 <button type="button" class="btn btn-danger delete">Quitar</button>
                               </td>
                             </tr>
+                            <?php endforeach ?>
+                            <?php endif ?>
                           </tbody>
                         </table>
                       </div>
@@ -2292,43 +2329,56 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr class="cp-figura" id="cp-figuras0">
+                            <?php if (isset($cpobj->figuraTransporte) && isset($cpobj->figuraTransporte->tiposFigura) && count($cpobj->figuraTransporte->tiposFigura) > 0): ?>
+                            <?php foreach ($cpobj->figuraTransporte->tiposFigura as $key => $figura): ?>
+                            <tr class="cp-figura" id="cp-figuras<?php echo $key ?>">
                               <td>
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][tipoFigura]" value="" class="cpFigTransTipoFigura">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][rfcFigura]" value="" class="cpFigTransRfcFigura">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][numLicencia]" value="" class="cpFigTransNumLicencia">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][nombreFigura]" value="" class="cpFigTransNombreFigura">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][numRegIdTribFigura]" value="" class="cpFigTransNumRegIdTribFigura">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][residenciaFiscalFigura]" value="" class="cpFigTransResidenciaFiscalFigura">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][residenciaFiscalFigura_text]" value="" class="cpFigTransResidenciaFiscalFigura_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][tipoFigura]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][tipoFigura]', isset($figura->tipoFigura) ? $figura->tipoFigura : ''); ?>" class="cpFigTransTipoFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][rfcFigura]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][rfcFigura]', isset($figura->rfcFigura) ? $figura->rfcFigura : ''); ?>" class="cpFigTransRfcFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][numLicencia]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][numLicencia]', isset($figura->numLicencia) ? $figura->numLicencia : ''); ?>" class="cpFigTransNumLicencia">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][nombreFigura]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][nombreFigura]', isset($figura->nombreFigura) ? $figura->nombreFigura : ''); ?>" class="cpFigTransNombreFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][numRegIdTribFigura]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][numRegIdTribFigura]', isset($figura->numRegIdTribFigura) ? $figura->numRegIdTribFigura : ''); ?>" class="cpFigTransNumRegIdTribFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][residenciaFiscalFigura]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][residenciaFiscalFigura]', isset($figura->residenciaFiscalFigura) ? $figura->residenciaFiscalFigura : ''); ?>" class="cpFigTransResidenciaFiscalFigura">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][residenciaFiscalFigura_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][residenciaFiscalFigura_text]', isset($figura->residenciaFiscalFigura_text) ? $figura->residenciaFiscalFigura_text : ''); ?>" class="cpFigTransResidenciaFiscalFigura_text">
 
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][partesTransporte][0][parteTransporte]" value="" class="cpFigTransParteTransporte">
+                                <?php if (isset($figura->partesTransporte) && count($figura->partesTransporte) > 0): ?>
+                                <?php foreach ($figura->partesTransporte as $key2 => $parte): ?>
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][partesTransporte][<?php echo $key2 ?>][parteTransporte]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][partesTransporte]['.$key2.'][parteTransporte]', isset($parte->parteTransporte) ? $parte->parteTransporte : ''); ?>" class="cpFigTransParteTransporte">
+                                <?php endforeach ?>
+                                <?php endif ?>
 
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][calle]" value="" class="cpFigTransDomCalle">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][numeroExterior]" value="" class="cpFigTransDomNumeroExterior">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][numeroInterior]" value="" class="cpFigTransDomNumeroInterior">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][pais]" value="" class="cpFigTransDomPais">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][pais_text]" value="" class="cpFigTransDomPais_text">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][estado]" value="" class="cpFigTransDomEstado">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][estado_text]" value="" class="cpFigTransDomEstado_text">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][municipio]" value="" class="cpFigTransDomMunicipio">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][municipio_text]" value="" class="cpFigTransDomMunicipio_text">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][localidad]" value="" class="cpFigTransDomLocalidad">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][localidad_text]" value="" class="cpFigTransDomLocalidad_text">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][codigoPostal]" value="" class="cpFigTransDomCodigoPostal">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][colonia]" value="" class="cpFigTransDomColonia">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][colonia_text]" value="" class="cpFigTransDomColonia_text">
-                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][0][domicilio][referencia]" value="" class="cpFigTransDomReferencia">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][calle]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][calle]', isset($figura->domicilio->calle) ? $figura->domicilio->calle : ''); ?>" class="cpFigTransDomCalle">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][numeroExterior]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][numeroExterior]', isset($figura->domicilio->numeroExterior) ? $figura->domicilio->numeroExterior : ''); ?>" class="cpFigTransDomNumeroExterior">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][numeroInterior]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][numeroInterior]', isset($figura->domicilio->numeroInterior) ? $figura->domicilio->numeroInterior : ''); ?>" class="cpFigTransDomNumeroInterior">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][pais]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][pais]', isset($figura->domicilio->pais) ? $figura->domicilio->pais : ''); ?>" class="cpFigTransDomPais">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][pais_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][pais_text]', isset($figura->domicilio->pais_text) ? $figura->domicilio->pais_text : ''); ?>" class="cpFigTransDomPais_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][estado]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][estado]', isset($figura->domicilio->estado) ? $figura->domicilio->estado : ''); ?>" class="cpFigTransDomEstado">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][estado_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][estado_text]', isset($figura->domicilio->estado_text) ? $figura->domicilio->estado_text : ''); ?>" class="cpFigTransDomEstado_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][municipio]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][municipio]', isset($figura->domicilio->municipio) ? $figura->domicilio->municipio : ''); ?>" class="cpFigTransDomMunicipio">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][municipio_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][municipio_text]', isset($figura->domicilio->municipio_text) ? $figura->domicilio->municipio_text : ''); ?>" class="cpFigTransDomMunicipio_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][localidad]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][localidad]', isset($figura->domicilio->localidad) ? $figura->domicilio->localidad : ''); ?>" class="cpFigTransDomLocalidad">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][localidad_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][localidad_text]', isset($figura->domicilio->localidad_text) ? $figura->domicilio->localidad_text : ''); ?>" class="cpFigTransDomLocalidad_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][codigoPostal]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][codigoPostal]', isset($figura->domicilio->codigoPostal) ? $figura->domicilio->codigoPostal : ''); ?>" class="cpFigTransDomCodigoPostal">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][colonia]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][colonia]', isset($figura->domicilio->colonia) ? $figura->domicilio->colonia : ''); ?>" class="cpFigTransDomColonia">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][colonia_text]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][colonia_text]', isset($figura->domicilio->colonia_text) ? $figura->domicilio->colonia_text : ''); ?>" class="cpFigTransDomColonia_text">
+                                <input type="hidden" name="cp[figuraTransporte][tiposFigura][<?php echo $key ?>][domicilio][referencia]" value="<?php echo set_value('cp[figuraTransporte][tiposFigura]['.$key.'][domicilio][referencia]', isset($figura->domicilio->referencia) ? $figura->domicilio->referencia : ''); ?>" class="cpFigTransDomReferencia">
+                                <?php echo (isset($figura->tipoFigura) ? $figura->tipoFigura : ''); ?>
                               </td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
+                              <td><?php echo (isset($figura->rfcFigura) ? $figura->rfcFigura : ''); ?></td>
+                              <td><?php echo (isset($figura->nombreFigura) ? $figura->nombreFigura : ''); ?></td>
+                              <td><?php echo (isset($figura->numLicencia) ? $figura->numLicencia : ''); ?></td>
+                              <td><?php echo (isset($figura->domicilio->calle) ? $figura->domicilio->calle : ''); ?></td>
                               <td style="width: 20px;">
-                                <button type="button" class="btn btn-cp-editFiguraTrans">Editar</button>
+                                <?php
+                                  $figura->datos = clone $figura;
+                                  $jsonfigura = MyString::encodeURIComponent(json_encode($figura));
+                                ?>
+                                <button type="button" class="btn btn-cp-editFiguraTrans" data-json="<?php echo $jsonfigura ?>">Editar</button>
                                 <button type="button" class="btn btn-danger btn-cp-removeFiguraTrans">Quitar</button>
                               </td>
                             </tr>
+                            <?php endforeach ?>
+                            <?php endif ?>
                           </tbody>
                         </table>
                       </div>
@@ -2654,7 +2704,7 @@
   </div>
 
   <!-- Modal CartaPorteSat Figuras Trans -->
-  <div id="modal-cpsat-FiguraTrans" class="modal modal80 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
+  <div id="modal-cpsat-FiguraTrans" class="modal modal50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
     <div class="modal-header">
       <h3 id="myModalLabelProd">Figura Transporte</h3>
     </div>
@@ -2696,7 +2746,7 @@
         </div>
         <div class="span4">
           <label class="control-label" for="ftcpsat_residenciaFiscalFigura_text">Residencia Fiscal
-            <input type="text" id="ftcpsat_residenciaFiscalFigura_text" class="span12 sikey" value="" maxlength="60" autocomplete="nope">
+            <input type="text" id="ftcpsat_residenciaFiscalFigura_text" class="span12 sikey" value="" maxlength="60" autocomplete="off">
             <input type="hidden" id="ftcpsat_residenciaFiscalFigura" class="span12">
           </label>
         </div>
@@ -2763,19 +2813,19 @@
         <div class="row-fluid">
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_pais_text">País
-              <input type="text" id="ftcpsat_domi_pais_text" class="span12" value="" autocomplete="nope">
+              <input type="text" id="ftcpsat_domi_pais_text" class="span12" value="" autocomplete="off">
               <input type="hidden" id="ftcpsat_domi_pais" class="span12" value="">
             </label>
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_estado_text">Estado
-              <input type="text" id="ftcpsat_domi_estado_text" class="span12" value="" autocomplete="nope">
+              <input type="text" id="ftcpsat_domi_estado_text" class="span12" value="" autocomplete="off">
               <input type="hidden" id="ftcpsat_domi_estado" class="span12" value="">
             </label>
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_municipio_text">Municipio
-              <input type="text" id="ftcpsat_domi_municipio_text" class="span12" value="" autocomplete="nope">
+              <input type="text" id="ftcpsat_domi_municipio_text" class="span12" value="" autocomplete="off">
               <input type="hidden" id="ftcpsat_domi_municipio" class="span12" value="">
             </label>
           </div>
@@ -2783,7 +2833,7 @@
         <div class="row-fluid">
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_localidad_text">Localidad
-              <input type="text" id="ftcpsat_domi_localidad_text" class="span12" value="" autocomplete="nope">
+              <input type="text" id="ftcpsat_domi_localidad_text" class="span12" value="" autocomplete="off">
               <input type="hidden" id="ftcpsat_domi_localidad" class="span12" value="">
             </label>
           </div>
@@ -2794,7 +2844,7 @@
           </div>
           <div class="span4">
             <label class="control-label" for="ftcpsat_domi_colonia_text">Colonia
-              <input type="text" id="ftcpsat_domi_colonia_text" class="span12" value="" autocomplete="nope">
+              <input type="text" id="ftcpsat_domi_colonia_text" class="span12" value="" autocomplete="off">
               <input type="hidden" id="ftcpsat_domi_colonia" class="span12" value="">
             </label>
           </div>

@@ -14,7 +14,7 @@ class cclave_mat_peligro_model extends CI_Model {
     $sql = " (lower(clave) LIKE '".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%' OR
         lower(nombre) LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%')";
 
-    $res = $this->db->query(" SELECT id, clave, nombre, clase, peligro
+    $res = $this->db->query("SELECT id, clave, nombre, clase, peligro
         FROM c_materiales_peligrosos
         WHERE {$sql}
         ORDER BY clave ASC

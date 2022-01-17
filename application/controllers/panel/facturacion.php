@@ -1233,11 +1233,11 @@ class facturacion extends MY_Controller {
   {
     $hoy = date('Y-m-d');
 
-    if (strtotime($hoy) > strtotime($date))
-    {
-      $this->form_validation->set_message('chk_cer_caduca', 'El certificado de la empresa caducó, actualize la información de la misma.');
-      return false;
-    }
+    // if (strtotime($hoy) > strtotime($date))
+    // {
+    //   $this->form_validation->set_message('chk_cer_caduca', 'El certificado de la empresa caducó, actualize la información de la misma.');
+    //   return false;
+    // }
 
     return true;
   }

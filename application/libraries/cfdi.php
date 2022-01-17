@@ -1067,6 +1067,12 @@ class cfdi{
         unset($datosApi['comercioExterior']['propietario']);
     }
 
+    if (!empty($_POST['cp']['ubicaciones']) ||
+        !empty($_POST['cp']['mercancias']) ||
+        !empty($_POST['cp']['figuraTransporte']) ) {
+      $datosApi['cartaPorteSat'] = $_POST['cp'];
+    }
+
     return $datosApi;
   }
 

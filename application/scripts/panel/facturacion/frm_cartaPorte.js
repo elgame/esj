@@ -8,9 +8,11 @@ $(function(){
   eventAddCpProductoModal();
   eventAddCpAutotransporteRemolques();
   eventAddCpPartesTransporte();
+  eventAddCpFigurasTransModal();
 });
 
 function eventAddCpUbicaciones() {
+  var cpnumrowubicaciones = $('.ubicacionn').length;
   $('#btn-add-CpUbicaciones').click(function(event) {
     let htmll = `<div class="ubicacionn">
       <table class="table table-striped table-cpOrigen">
@@ -21,25 +23,27 @@ function eventAddCpUbicaciones() {
             <th>RFC <i class="icon-question-sign helpover" data-title=""></i></th>
             <th>Nombre <i class="icon-question-sign helpover" data-title=""></i></th>
             <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
-            <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+            <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i>
+              <button type="button" class="btn btn-danger btn-cp-removeUbicacion">Quitar</button>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td class="center">
-              <select name="cp[ubicaciones][][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
+              <select name="cp[ubicaciones][${cpnumrowubicaciones}][tipoUbicacion]" id="cp_ubic_tipoUbicacion">
                 <option value=""></option>
                 <option value="Origen">Origen</option>
                 <option value="Destino">Destino</option>
               </select>
             </td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][idUbicacion]" value="" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][rfcRemitenteDestinatario]" value="" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][nombreRemitenteDestinatario]" value="" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][numRegIdTrib]" value="" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][idUbicacion]" value="" id="cp_ubic_idUbicacion" minlength="8" maxlength="8" class="span12 sikey" data-next="cp_ubic_rfcRemitenteDestinatario"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][rfcRemitenteDestinatario]" value="" id="cp_ubic_rfcRemitenteDestinatario" minlength="12" maxlength="13" class="span12 sikey" data-next="cp_ubic_nombreRemitenteDestinatario"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][nombreRemitenteDestinatario]" value="" id="cp_ubic_nombreRemitenteDestinatario" minlength="1" maxlength="254" class="span12 sikey" data-next="cp_ubic_numRegIdTrib"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][numRegIdTrib]" value="" id="cp_ubic_numRegIdTrib" minlength="6" maxlength="40" class="span12 sikey" data-next="cp_ubic_residenciaFiscal_text"></td>
             <td class="center">
-              <input type="text" name="cp[ubicaciones][][residenciaFiscal_text]" value="" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
-              <input type="hidden" name="cp[ubicaciones][][residenciaFiscal]" value="" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
+              <input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][residenciaFiscal_text]" value="" id="cp_ubic_residenciaFiscal_text" maxlength="40" class="span12 sikey" data-next="cp_ubic_numEstacion">
+              <input type="hidden" name="cp[ubicaciones][${cpnumrowubicaciones}][residenciaFiscal]" value="" id="cp_ubic_residenciaFiscal" maxlength="40" class="span12 sikey">
             </td>
           </tr>
           <tr>
@@ -52,20 +56,20 @@ function eventAddCpUbicaciones() {
           </tr>
           <tr>
             <td class="center">
-              <input type="text" name="cp[ubicaciones][][numEstacion]" value="" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
-              <input type="hidden" name="cp[ubicaciones][][numEstacion_text]" value="" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
+              <input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][numEstacion]" value="" id="cp_ubic_numEstacion" maxlength="60" class="span12 sikey" data-next="cp_ubic_nombreEstacion">
+              <input type="hidden" name="cp[ubicaciones][${cpnumrowubicaciones}][numEstacion_text]" value="" id="cp_ubic_numEstacion_text" maxlength="60" class="span12 sikey">
             </td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][nombreEstacion]" value="" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][nombreEstacion]" value="" id="cp_ubic_nombreEstacion" minlength="1" maxlength="50" class="span12 sikey" data-next="cp_ubic_navegacionTrafico"></td>
             <td class="center">
-              <select name="cp[ubicaciones][][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
+              <select name="cp[ubicaciones][${cpnumrowubicaciones}][navegacionTrafico]" id="cp_ubic_navegacionTrafico">
                 <option value=""></option>
                 <option value="Altura">Altura</option>
                 <option value="Cabotaje">Cabotaje</option>
               </select>
             </td>
-            <td class="center"><input type="datetime-local" name="cp[ubicaciones][][fechaHoraSalida]" value="" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+            <td class="center"><input type="datetime-local" name="cp[ubicaciones][${cpnumrowubicaciones}][fechaHoraSalida]" value="" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
             <td class="center">
-              <select name="cp[ubicaciones][][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
+              <select name="cp[ubicaciones][${cpnumrowubicaciones}][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
                 <option value=""></option>
                 <option value="01">01 - Origen Nacional</option>
                 <option value="02">02 - Intermedia</option>
@@ -73,7 +77,7 @@ function eventAddCpUbicaciones() {
               </select>
             </td>
             <td class="center">
-              <input type="text" name="cp[ubicaciones][][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
+              <input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][distanciaRecorrida]" class="span12 sikey" id="cp_ubicaciones_distanciaRecorrida" value="" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
             </td>
           </tr>
         </tbody>
@@ -96,16 +100,16 @@ function eventAddCpUbicaciones() {
         </thead>
         <tbody>
           <tr>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][calle]" value="" id="cp_ubic_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cp_ubic_dom_numeroExterior"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][numeroExterior]" value="" id="cp_ubic_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_numeroInterior"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][numeroInterior]" value="" id="cp_ubic_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_referencia"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][referencia]" value="" id="cp_ubic_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cp_ubic_dom_pais"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][pais]" value="" id="cp_ubic_dom_pais" maxlength="40" class="span12 sikey" data-next="cp_ubic_dom_estado"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][estado]" value="" id="cp_ubic_dom_estado" maxlength="60" class="span12 sikey" data-next="cp_ubic_dom_municipio"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][municipio]" value="" id="cp_ubic_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_localidad"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][localidad]" value="" id="cp_ubic_dom_localidad" minlength="1" maxlength="12" class="span12 sikey" data-next="cp_ubic_dom_codigopostal"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][codigoPostal]" value="" class="span12 sikey" id="cp_ubic_dom_codigopostal" minlength="1" maxlength="12" data-next="cp_ubic_dom_colonia"></td>
-            <td class="center"><input type="text" name="cp[ubicaciones][][domicilio][colonia]" value="" id="cp_ubic_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_calle"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][calle]" value="" id="cp_ubic_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cp_ubic_dom_numeroExterior"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][numeroExterior]" value="" id="cp_ubic_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_numeroInterior"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][numeroInterior]" value="" id="cp_ubic_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cp_ubic_dom_referencia"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][referencia]" value="" id="cp_ubic_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cp_ubic_dom_pais"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][pais]" value="" id="cp_ubic_dom_pais" maxlength="40" class="span12 sikey" data-next="cp_ubic_dom_estado"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][estado]" value="" id="cp_ubic_dom_estado" maxlength="60" class="span12 sikey" data-next="cp_ubic_dom_municipio"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][municipio]" value="" id="cp_ubic_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_localidad"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][localidad]" value="" id="cp_ubic_dom_localidad" minlength="1" maxlength="12" class="span12 sikey" data-next="cp_ubic_dom_codigopostal"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][codigoPostal]" value="" class="span12 sikey" id="cp_ubic_dom_codigopostal" minlength="1" maxlength="12" data-next="cp_ubic_dom_colonia"></td>
+            <td class="center"><input type="text" name="cp[ubicaciones][${cpnumrowubicaciones}][domicilio][colonia]" value="" id="cp_ubic_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cp_ubic_dom_calle"></td>
           </tr>
         </tbody>
       </table>
@@ -114,6 +118,13 @@ function eventAddCpUbicaciones() {
     </div>`;
 
     $('#boxUbicaciones').append(htmll);
+
+    cpnumrowubicaciones++;
+  });
+
+  $('#boxUbicaciones').on('click', '.btn-cp-removeUbicacion', function(){
+    const $tr = $(this).parent().parent().parent().parent().parent();
+    $tr.remove();
   });
 }
 
@@ -181,6 +192,7 @@ function eventAddCpGuiaIdentificacion() {
 
 function eventAddCpProductoModal() {
   var cpnumrowsmercans = 0;
+  console.log('dasdasd');
   $("#btn-add-CpProductoModal").click(function(event) {
 
     let cantidadTransporta = '', trrm = undefined, guias = '', pedimentos = '';
@@ -321,7 +333,9 @@ function eventAddCpProductoModal() {
     $('#modal-cpsat-mercancia').modal('hide');
   });
 
+  console.log('dasdasd');
   $("#table-mercanciass").on('click', '.btn-cp-removeMercancia', function(){
+    console.log('asdasdasd');
     $(this).parent().parent().remove();
   });
 
@@ -332,38 +346,44 @@ function eventAddCpProductoModal() {
 
     let objson = JSON.parse(decodeURIComponent($(this).attr('data-json')));
 
-    objson.pedimentos.forEach(function(el) {
-      pedimentos += `<tr>
-          <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${el.pedimento}" placeholder="52 45 4214 4213546"></td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
-    });
-    objson.guias.forEach(function(el) {
-      guias += `<tr>
-          <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
-          <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>
-          <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value="${el.pesoGuiaIdentificacion}"></td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
-    });
-    objson.cantidadTransporta.forEach(function(el) {
-      cantidadTransporta += `<tr>
-          <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value="${el.cantidad}"></td>
-          <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value="${el.idOrigen}"></td>
-          <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value="${el.idDestino}"></td>
-          <td>
-            <select class="mcpsat_cantidadTransporta_cvesTransporte">
-              <option></option>
-              <option value="01" ${(el.cvesTransporte == '01'? 'selected': '')}>01 - Autotransporte Federal</option>
-              <option value="02" ${(el.cvesTransporte == '02'? 'selected': '')}>02 - Transporte Marítimo</option>
-              <option value="03" ${(el.cvesTransporte == '03'? 'selected': '')}>03 - Transporte Aéreo</option>
-              <option value="04" ${(el.cvesTransporte == '04'? 'selected': '')}>04 - Transporte Ferroviario</option>
-              <option value="05" ${(el.cvesTransporte == '05'? 'selected': '')}>05 - Ducto</option>
-            </select>
-          </td>
-          <td><i class="icon-ban-circle delete"></i></td>
-        </tr>`;
-    });
+    if(objson.pedimentos && objson.pedimentos.length > 0){
+      objson.pedimentos.forEach(function(el) {
+        pedimentos += `<tr>
+            <td><input type="number" class="mcpsat_pedimentos_pedimento" value="${el.pedimento}" placeholder="52 45 4214 4213546"></td>
+            <td><i class="icon-ban-circle delete"></i></td>
+          </tr>`;
+      });
+    }
+    if(objson.guias && objson.guias.length > 0){
+      objson.guias.forEach(function(el) {
+        guias += `<tr>
+            <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
+            <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>
+            <td><input type="number" step="any" class="mcpsat_guia_pesoGuiaIdentificacion" value="${el.pesoGuiaIdentificacion}"></td>
+            <td><i class="icon-ban-circle delete"></i></td>
+          </tr>`;
+      });
+    }
+    if(objson.cantidadTransporta && objson.cantidadTransporta.length > 0){
+      objson.cantidadTransporta.forEach(function(el) {
+        cantidadTransporta += `<tr>
+            <td><input type="number" class="mcpsat_cantidadTransporta_cantidad" value="${el.cantidad}"></td>
+            <td><input type="text" class="mcpsat_cantidadTransporta_idOrigen" value="${el.idOrigen}"></td>
+            <td><input type="text" class="mcpsat_cantidadTransporta_idDestino" value="${el.idDestino}"></td>
+            <td>
+              <select class="mcpsat_cantidadTransporta_cvesTransporte">
+                <option></option>
+                <option value="01" ${(el.cvesTransporte == '01'? 'selected': '')}>01 - Autotransporte Federal</option>
+                <option value="02" ${(el.cvesTransporte == '02'? 'selected': '')}>02 - Transporte Marítimo</option>
+                <option value="03" ${(el.cvesTransporte == '03'? 'selected': '')}>03 - Transporte Aéreo</option>
+                <option value="04" ${(el.cvesTransporte == '04'? 'selected': '')}>04 - Transporte Ferroviario</option>
+                <option value="05" ${(el.cvesTransporte == '05'? 'selected': '')}>05 - Ducto</option>
+              </select>
+            </td>
+            <td><i class="icon-ban-circle delete"></i></td>
+          </tr>`;
+      });
+    }
 
     for (const property in objson.datos) {
       $(`#mcpsat_${property}`).val(objson.datos[property]);
@@ -382,7 +402,7 @@ function eventAddCpProductoModal() {
 }
 
 function eventAddCpAutotransporteRemolques() {
-  var cpnumrowsremolques = 0;
+  var cpnumrowsremolques = $('.cp-mercans-remolques').length;
   $('#btn-add-CpRemolques').click(function(event) {
     let htmll = `<tr class="cp-mercans" data-row="${cpnumrowsremolques}">
       <td>
@@ -470,8 +490,8 @@ function eventAddCpPartesTransporte() {
   });
 }
 
-function eventAddCpProductoModal() {
-  var cpnumrowfiguratrans = 0;
+function eventAddCpFigurasTransModal() {
+  var cpnumrowfiguratrans = $('.cp-figura').length;
   $("#btn-add-CpTiposFigura").click(function(event) {
 
     let cantidadTransporta = '', trrm = undefined, guias = '', partesTransporte = '';
@@ -583,28 +603,30 @@ function eventAddCpProductoModal() {
 
     let objson = JSON.parse(decodeURIComponent($(this).attr('data-json')));
 
-    objson.partesTransporte.forEach(function(el) {
-      partesTransporte += `<tr>
-        <td>
-          <select class="ftcpsat_parteTransporte">
-            <option></option>
-            <option value="PT01" ${(el.parteTransporte == 'PT01'? 'selected': '')}>PT01</option>
-            <option value="PT02" ${(el.parteTransporte == 'PT02'? 'selected': '')}>PT02</option>
-            <option value="PT03" ${(el.parteTransporte == 'PT03'? 'selected': '')}>PT03</option>
-            <option value="PT04" ${(el.parteTransporte == 'PT04'? 'selected': '')}>PT04</option>
-            <option value="PT05" ${(el.parteTransporte == 'PT05'? 'selected': '')}>PT05</option>
-            <option value="PT06" ${(el.parteTransporte == 'PT06'? 'selected': '')}>PT06</option>
-            <option value="PT07" ${(el.parteTransporte == 'PT07'? 'selected': '')}>PT07</option>
-            <option value="PT08" ${(el.parteTransporte == 'PT08'? 'selected': '')}>PT08</option>
-            <option value="PT09" ${(el.parteTransporte == 'PT09'? 'selected': '')}>PT09</option>
-            <option value="PT10" ${(el.parteTransporte == 'PT10'? 'selected': '')}>PT10</option>
-            <option value="PT11" ${(el.parteTransporte == 'PT11'? 'selected': '')}>PT11</option>
-            <option value="PT12" ${(el.parteTransporte == 'PT12'? 'selected': '')}>PT12</option>
-          </select>
-        </td>
-        <td><i class="icon-ban-circle delete"></i></td>
-      </tr>`;
-    });
+    if(objson.partesTransporte){
+      objson.partesTransporte.forEach(function(el) {
+        partesTransporte += `<tr>
+          <td>
+            <select class="ftcpsat_parteTransporte">
+              <option></option>
+              <option value="PT01" ${(el.parteTransporte == 'PT01'? 'selected': '')}>PT01</option>
+              <option value="PT02" ${(el.parteTransporte == 'PT02'? 'selected': '')}>PT02</option>
+              <option value="PT03" ${(el.parteTransporte == 'PT03'? 'selected': '')}>PT03</option>
+              <option value="PT04" ${(el.parteTransporte == 'PT04'? 'selected': '')}>PT04</option>
+              <option value="PT05" ${(el.parteTransporte == 'PT05'? 'selected': '')}>PT05</option>
+              <option value="PT06" ${(el.parteTransporte == 'PT06'? 'selected': '')}>PT06</option>
+              <option value="PT07" ${(el.parteTransporte == 'PT07'? 'selected': '')}>PT07</option>
+              <option value="PT08" ${(el.parteTransporte == 'PT08'? 'selected': '')}>PT08</option>
+              <option value="PT09" ${(el.parteTransporte == 'PT09'? 'selected': '')}>PT09</option>
+              <option value="PT10" ${(el.parteTransporte == 'PT10'? 'selected': '')}>PT10</option>
+              <option value="PT11" ${(el.parteTransporte == 'PT11'? 'selected': '')}>PT11</option>
+              <option value="PT12" ${(el.parteTransporte == 'PT12'? 'selected': '')}>PT12</option>
+            </select>
+          </td>
+          <td><i class="icon-ban-circle delete"></i></td>
+        </tr>`;
+      });
+    }
 
     for (const property in objson.datos) {
       $(`#ftcpsat_${property}`).val(objson.datos[property]);

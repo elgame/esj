@@ -115,6 +115,11 @@ class MyString {
     return true;
   }
 
+  public static function encodeURIComponent($str) {
+    $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+    return strtr(rawurlencode($str), $revert);
+  }
+
   /**
    * Limpia una cadena
    * @param $txt. Texto a ser limpiado
