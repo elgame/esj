@@ -83,7 +83,6 @@ class proveedores_model extends CI_Model {
 		$dcer       = '';
 		$cer_caduca = '';
 		$upload_res = UploadFiles::uploadFile('dcer_org');
-		var_dump($upload_res);
 		if($upload_res !== false && $upload_res !== 'ok'){
 			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados_pv/")) );
 			$dcer_org   = $upload_res[0];
@@ -130,7 +129,7 @@ class proveedores_model extends CI_Model {
 						'condicion_pago' => $this->input->post('condicionPago'),
 						'dias_credito'   => intval($this->input->post('plazoCredito')),
             'id_empresa'     => $this->input->post('did_empresa'),
-						'ret_isr'        => $this->input->post('retIsrBascula')? true: false,
+						'ret_isr'        => $this->input->post('retIsrBascula')? 't': 'f',
 					);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
