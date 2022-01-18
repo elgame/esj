@@ -298,7 +298,7 @@ class MYpdf extends FPDF {
     }
 
 
-    function Row2($data, $header=false, $bordes=true, $h=NULL, $colortxt=null){
+    function Row2($data, $header=false, $bordes=true, $h=NULL, $colortxt=null, $positionY=2){
         $nb=0;
         for($i=0;$i<count($data);$i++)
             $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
@@ -328,9 +328,9 @@ class MYpdf extends FPDF {
                 }
 
                 if($header)
-                    $this->SetXY($x,$y+3);
+                  $this->SetXY($x,$y+$positionY);
                 else
-                    $this->SetXY($x,$y+2);
+                  $this->SetXY($x,$y+$positionY);
 
                 if (isset($colortxt[$i])) {
                     $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);

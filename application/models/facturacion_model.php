@@ -5289,6 +5289,270 @@ class facturacion_model extends privilegios_model{
     }
 
 
+    ////////////////////////
+    //  Carta Porte Sat  //
+    ///////////////////////
+    if (isset($factura['info']->cfdi_ext->cartaPorteSat)) {
+      $cartaPorteSat = $factura['info']->cfdi_ext->cartaPorteSat;
+      $pdf->SetFillColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 11);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_cp', 'Carta Porte')} V2.0"
+      ), false, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','', 8);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(35, 73, 35, 73));
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_transpInternac', 'Transporte Internacional'), $cartaPorteSat->transpInternac,
+            $this->lang->line('factura_cp_viaEntradaSalida', 'Via de Entrada / Salida'), $cartaPorteSat->viaEntradaSalida
+          ), false, true, 2, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_entradaSalidaMerc', 'Entrada / Salida de Mercancía'), $cartaPorteSat->entradaSalidaMerc,
+            $this->lang->line('factura_cp_totalDistRec', 'Total Distancia Recorrida (Km)'), $cartaPorteSat->totalDistRec
+          ), false, true, 2, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_paisOrigenDestino_text', 'País'), "{$cartaPorteSat->paisOrigenDestino_text} ({$cartaPorteSat->paisOrigenDestino})",
+            '', ''
+          ), false, true, 2, null, 1);
+      $pdf->Output('dddd.pdf', 'I');
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_cp_cer_origen', 'Cer de origen'), $cartaPorteSat->certificado_origen,
+            $this->lang->line('factura_cp_tipo_cambio_usd', 'Tipo Cambio USD'), $cartaPorteSat->tipocambio_USD
+          ), false, true, 2, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_cp_cer_origen', '# cer de origen'), $cartaPorteSat->num_certificado_origen,
+            $this->lang->line('factura_cp_total_usd', 'Total USD'), $cartaPorteSat->total_USD
+          ), false, true, 2, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_cp_expt_confiable', '# Expt confiable'), $cartaPorteSat->numero_exportador_confiable,
+            '', ''
+          ), false, true, 2, null, 1);
+
+      if ($pdf->GetY()+10 >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->SetFont('helvetica','B', 10);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": '')
+      ), false, true, null, 2, 1);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->emisor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->emisor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->emisor->domicilio->numeroInterior,
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+
+      $this->load->model('clocalidad_model');
+      $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad, $ceExtras->emisor->domicilio->estado);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->emisor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->emisor->domicilio->codigoPostal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+
+      $this->load->model('cmunicipio_model');
+      $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio, $ceExtras->emisor->domicilio->estado);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_municipio', 'Municipio'), ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->emisor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->emisor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
+          ), false, true, null, 2, 1);
+
+      if ($ceExtras->propietario[0]->numRegIdTrib != '') {
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Row(array(
+          "Propietario "
+        ), false, true, null, 2, 1);
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+        $pdf->SetWidths(array(17, 64, 17, 118));
+        $pdf->SetX(0);
+        $pdf->Row(array(
+              $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $ceExtras->propietario[0]->numRegIdTrib,
+              $this->lang->line('factura_ce_nombre', 'Nombre'), $ceExtras->propietario[0]->residenciaFiscal,
+            ), false, true, null, 2, 1);
+      }
+
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": '')
+      ), false, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->receptor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->receptor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->receptor->domicilio->numeroInterior,
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->receptor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $ceExtras->receptor->domicilio->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->receptor->domicilio->codigoPostal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $ceExtras->receptor->domicilio->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->receptor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->receptor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
+          ), false, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "Destinatario"
+      ), false, true, null, 2, 1);
+
+
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 64, 17, 118));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $factura['ce']->destinatario->numregidtrib,
+            $this->lang->line('factura_ce_nombre', 'Nombre'), $factura['ce']->destinatario->nombre,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_calle', 'Calle'), $factura['ce']->destinatario->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $factura['ce']->destinatario->numero_exterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $factura['ce']->destinatario->numero_interior,
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $factura['ce']->destinatario->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $factura['ce']->destinatario->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $factura['ce']->destinatario->codigo_postal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $factura['ce']->destinatario->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $factura['ce']->destinatario->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $factura['ce']->destinatario->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), $factura['ce']->destinatario->referencia,
+          ), false, true, null, 2, 1);
+
+      $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
+      $aligns2 = array('C', 'C', 'L', 'C', 'R', 'R');
+      $aligns3 = array('L', 'L', 'L', 'L');
+      $widths = array(36, 36, 36, 36, 36, 36);
+      $widths3 = array(50, 50, 50, 50);
+      $header = array('No Ident', 'Frac Aran',
+        $this->lang->line('factura_ce_cantidad', 'Cantidad'),
+        $this->lang->line('factura_ce_unidad', 'Unidad'),
+        $this->lang->line('factura_ce_valor_unitario', 'Valor Unitario'),
+        $this->lang->line('factura_ce_valor_dolares', 'Valor Dolares'),
+      );
+      $pdf->setY($pdf->GetY() + 1);
+      $hay_prod_certificados = false;
+      foreach($factura['ce']->mercancias as $key => $item)
+      {
+        $band_head = false;
+
+        if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+        {
+          if($key > 0) $pdf->AddPage();
+
+          $pdf->SetFont('Arial', 'B', 8);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetFillColor(242, 242, 242);
+          $pdf->SetX(0);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true, true, null, 2, 1);
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetX(0);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+          $item->noidentificacion,
+          $item->fraccionar_ancelaria,
+          $item->cantidad_aduana,
+          $item->unidad_aduana,
+          MyString::formatoNumero($item->valor_unitario_aduana, 2, '$', false),
+          MyString::formatoNumero($item->valor_dolares, 2, '$', false),
+        ), false, true, null, 2, 1);
+
+        if (count($item->esp) > 0) {
+          foreach($item->esp as $key2 => $esp)
+          {
+            if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+            {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetTextColor(0,0,0);
+
+            $pdf->SetX(0);
+            $pdf->SetAligns($aligns3);
+            $pdf->SetWidths($widths3);
+            $pdf->Row(array(
+              $this->lang->line('factura_ce_marca', 'Marca').': '.$esp->marca,
+              $this->lang->line('factura_ce_modelo', 'Modelo').': '.$esp->modelo,
+              $this->lang->line('factura_ce_sub_modelo', 'Sub Modelo').': '.$esp->submodelo,
+              $this->lang->line('factura_ce_numero_serie', 'Numero Serie').': '.$esp->numeroserie,
+            ), false, true, null, 2, 1);
+          }
+        }
+      }
+    }
+
     ////////////////////
     // Timbrado Datos //
     ////////////////////
