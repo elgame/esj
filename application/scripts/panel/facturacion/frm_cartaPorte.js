@@ -199,7 +199,7 @@ function eventAddCpProductoModal() {
     let objson = {
       datos: {},
       pedimentos: [],
-      guias: [],
+      guiasIdentificacion: [],
       cantidadTransporta: [],
       detalleMercancia: {}
     };
@@ -214,7 +214,7 @@ function eventAddCpProductoModal() {
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][numeroGuiaIdentificacion]" value="${$('.mcpsat_guia_numeroGuiaIdentificacion', el).val()}" class="cpMercans-guia-numeroGuiaIdentificacion">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][descripGuiaIdentificacion]" value="${$('.mcpsat_guia_descripGuiaIdentificacion', el).val()}" class="cpMercans-guia-descripGuiaIdentificacion">
           <input type="hidden" name="cp[mercancias][mercancias][${cpnumrowsmercans}][guiasIdentificacion][${index}][pesoGuiaIdentificacion]" value="${$('.mcpsat_guia_pesoGuiaIdentificacion', el).val()}" class="cpMercans-guia-pesoGuiaIdentificacion">`;
-      objson.guias.push({
+      objson.guiasIdentificacion.push({
         numeroGuiaIdentificacion: $('.mcpsat_guia_numeroGuiaIdentificacion', el).val(),
         descripGuiaIdentificacion: $('.mcpsat_guia_descripGuiaIdentificacion', el).val(),
         pesoGuiaIdentificacion: $('.mcpsat_guia_pesoGuiaIdentificacion', el).val(),
@@ -354,8 +354,8 @@ function eventAddCpProductoModal() {
           </tr>`;
       });
     }
-    if(objson.guias && objson.guias.length > 0){
-      objson.guias.forEach(function(el) {
+    if(objson.guiasIdentificacion && objson.guiasIdentificacion.length > 0){
+      objson.guiasIdentificacion.forEach(function(el) {
         guias += `<tr>
             <td><input type="number" step="any" class="mcpsat_guia_numeroGuiaIdentificacion" value="${el.numeroGuiaIdentificacion}"></td>
             <td><input type="text" class="mcpsat_guia_descripGuiaIdentificacion" value="${el.descripGuiaIdentificacion}"></td>

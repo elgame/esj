@@ -277,6 +277,13 @@ class facturacion extends MY_Controller {
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
+    // Si no es un borrador carga los datos POST
+    if (empty($borrador['info']->cfdi_ext) && isset($_POST['cp'])) {
+      $params['cfdiExt'] = json_encode([
+        'cartaPorteSat' => $_POST['cp']
+      ]);
+    }
+
     // $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
     $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
