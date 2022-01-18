@@ -477,6 +477,9 @@ class gastos extends MY_Controller {
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+      array('field' => 'sucursalId',
+            'label' => 'Sucursal',
+            'rules' => ''),
 
       array('field' => 'proveedorId',
             'label' => 'Proveedor',

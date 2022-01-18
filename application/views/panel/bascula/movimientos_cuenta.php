@@ -165,6 +165,7 @@
                           <th>KILOS</th>
                           <th>PRECIO</th>
                           <th>IMPORTE</th>
+                          <th>RET ISR</th>
                           <th>TOTAL</th>
                           <th>TIPO PAGO</th>
                           <th>CONCEPTO</th>
@@ -208,6 +209,7 @@
                           <td><?php echo $mov->kilos ?></td>
                           <td><?php echo MyString::formatoNumero($mov->precio) ?></td>
                           <td><?php echo $mov->importe ?></td>
+                          <td><?php echo $mov->ret_isr ?></td>
                           <td>
                             <?php if ($mov->folio != $lastboleta) { ?>
                               <?php echo $mov->importe_todas ?>

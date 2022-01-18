@@ -44,7 +44,8 @@
       <?php
         $readonly = '';
         $only_bodega_gdl = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/bodega_gdl/');
-        $show = true;
+        $no_abrir_cortes = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/no_abrir_cortes/');
+        $show = !$no_abrir_cortes;
         $display = '';
         $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
         if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_caja/'))

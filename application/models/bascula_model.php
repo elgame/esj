@@ -952,6 +952,7 @@ class bascula_model extends CI_Model {
                Coalesce(bc.kilos, b.kilos_neto) AS kilos,
                COALESCE(bc.precio, bp.precio_unitario) AS precio,
                COALESCE(bc.importe, bp.importe) AS importe,
+               b.ret_isr,
                b.importe as importe_todas,
                b.tipo,
                pagos.tipo_pago,
