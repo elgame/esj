@@ -112,7 +112,8 @@
 							<td class="txt_right">KILOS</td>
 							<td class="txt_right">PRECIO</td>
 							<td class="txt_right">IMPORTE</td>
-							<td class="txt_right">TOTAL</td>
+							<td class="txt_right">RET ISR</td>
+              <td class="txt_right">TOTAL</td>
 							<td>TIPO PAGO</td>
 							<td>CONCEPTO</td>
               <td>RANCHO</td>
@@ -138,7 +139,8 @@
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->kilos, 2, ''); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->precio, 2, '', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->importe, 2, '', false); ?></td>
-							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($caja->ret_isr, 2, '', false); ?></td>
+              <td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
               <td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->rancho: ''; ?></td>

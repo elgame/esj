@@ -60,6 +60,17 @@
                     </div>
                   </div>
 
+                  <div class="control-group sucursales" style="display: none;">
+                    <label class="control-label" for="sucursalId">Sucursal </label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <select name="sucursalId" class="span11" id="sucursalId" data-selected="<?php echo $gasto['info']->id_sucursal ?>" disabled>
+                          <option></option>
+                        </select>
+                      </div>
+                    </div>
+                  </div><!--/control-group -->
+
                   <div class="control-group">
                     <label class="control-label" for="dserie">Proveedor</label>
                     <div class="controls">
