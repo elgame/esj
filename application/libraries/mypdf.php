@@ -241,7 +241,7 @@ class MYpdf extends FPDF {
       $this->links=$a;
     }
 
-    function SetFounts($a, $z=array(), $b=[]){
+    function SetFounts($a=null, $z=array(), $b=[]){
         $this->font=$a;
         $this->fontz=$z;
         $this->fontb=$b;

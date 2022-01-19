@@ -5311,39 +5311,26 @@ class facturacion_model extends privilegios_model{
 
       $pdf->SetFont('helvetica','', 8);
 
+      $pdf->SetFounts(null, [0, 0, 0, 0], ['B', '', 'B', '']);
+
       $pdf->SetXY(0, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(35, 73, 35, 73));
       $pdf->Row2(array(
             $this->lang->line('factura_cp_transpInternac', 'Transporte Internacional'), $cartaPorteSat->transpInternac,
             $this->lang->line('factura_cp_viaEntradaSalida', 'Via de Entrada / Salida'), $cartaPorteSat->viaEntradaSalida
-          ), false, true, 2, null, 1);
+          ), false, true, null, null, 1);
       $pdf->SetX(0);
       $pdf->Row2(array(
             $this->lang->line('factura_cp_entradaSalidaMerc', 'Entrada / Salida de Mercancía'), $cartaPorteSat->entradaSalidaMerc,
             $this->lang->line('factura_cp_totalDistRec', 'Total Distancia Recorrida (Km)'), $cartaPorteSat->totalDistRec
-          ), false, true, 2, null, 1);
+          ), false, true, null, null, 1);
       $pdf->SetX(0);
       $pdf->Row2(array(
             $this->lang->line('factura_cp_paisOrigenDestino_text', 'País'), "{$cartaPorteSat->paisOrigenDestino_text} ({$cartaPorteSat->paisOrigenDestino})",
             '', ''
-          ), false, true, 2, null, 1);
+          ), false, true, null, null, 1);
       $pdf->Output('dddd.pdf', 'I');
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_cp_cer_origen', 'Cer de origen'), $cartaPorteSat->certificado_origen,
-            $this->lang->line('factura_cp_tipo_cambio_usd', 'Tipo Cambio USD'), $cartaPorteSat->tipocambio_USD
-          ), false, true, 2, null, 1);
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_cp_cer_origen', '# cer de origen'), $cartaPorteSat->num_certificado_origen,
-            $this->lang->line('factura_cp_total_usd', 'Total USD'), $cartaPorteSat->total_USD
-          ), false, true, 2, null, 1);
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_cp_expt_confiable', '# Expt confiable'), $cartaPorteSat->numero_exportador_confiable,
-            '', ''
-          ), false, true, 2, null, 1);
 
       if ($pdf->GetY()+10 >= $pdf->limiteY) {
         $pdf->AddPage();
