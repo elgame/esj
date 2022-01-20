@@ -997,11 +997,12 @@ class bascula_model extends CI_Model {
 
       $movimientos = $query->result();
 
+      $lastFolio = 0;
       foreach ($movimientos as $key => $caja)
       {
-        $data['totales']['importe']     += floatval($caja->importe);
-        $data['totales']['ret_isr']     += floatval($caja->ret_isr);
-        $data['totales']['total']       += floatval($caja->importe);
+        $data['totales']['importe'] += floatval($caja->importe);
+        $data['totales']['ret_isr'] += ($caja->id_bascula != $lastFolio)? floatval($caja->ret_isr): 0;
+        $data['totales']['total']   += floatval($caja->importe);
         if(!is_numeric($caja->id_bonificacion))
         {
           $data['totales']['kilos']       += floatval($caja->kilos);
@@ -1029,6 +1030,8 @@ class bascula_model extends CI_Model {
         } else {
           $data['totalesClasif'][$caja->calidad] = floatval($caja->kilos);
         }
+
+        $lastFolio = $caja->id_bascula;
       }
 
 
@@ -3494,10 +3497,10 @@ class bascula_model extends CI_Model {
       //$pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-      $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 28, 30, 12);
+      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+      $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 17, 28, 30, 12);
       $header = array('',   'BOLETA', 'FECHA','CALIDAD',
-                      'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
+                      'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'RET ISR', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
 
       $lastFolio = 0;
       $total_bonificaciones = 0;
@@ -3529,6 +3532,7 @@ class bascula_model extends CI_Model {
                        MyString::formatoNumero($caja->kilos, 2, ''),
                        MyString::formatoNumero($caja->precio, 2, ''),
                        MyString::formatoNumero($caja->importe, 2, ''),
+                       ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->ret_isr, 2, '') : '',
                        ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '') : '',
                        ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
                        ($caja->id_bascula != $lastFolio) ? $caja->concepto: '',
@@ -3560,6 +3564,7 @@ class bascula_model extends CI_Model {
         $data['totales']['kilos'],
         $data['totales']['kilos'] != 0 ? MyString::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 3, '') : 0,
         MyString::formatoNumero($data['totales']['importe']),
+        MyString::formatoNumero($data['totales']['ret_isr']),
         MyString::formatoNumero($data['totales']['total']),
         '',''
       ), false, false);

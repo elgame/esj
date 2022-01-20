@@ -139,7 +139,7 @@
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->kilos, 2, ''); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->precio, 2, '', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($caja->importe, 2, '', false); ?></td>
-							<td class="txt_right"><?php echo MyString::formatoNumero($caja->ret_isr, 2, '', false); ?></td>
+              <td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->ret_isr, 2, '', false) : ''; ?></td>
               <td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
