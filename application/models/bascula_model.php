@@ -877,6 +877,7 @@ class bascula_model extends CI_Model {
 
     $data['totales'] = array(
         'importe'     => 0,
+        'ret_isr'     => 0,
         'pesada'      => 0,
         'total'       => 0,
         'pagados'     => 0,
@@ -999,6 +1000,7 @@ class bascula_model extends CI_Model {
       foreach ($movimientos as $key => $caja)
       {
         $data['totales']['importe']     += floatval($caja->importe);
+        $data['totales']['ret_isr']     += floatval($caja->ret_isr);
         $data['totales']['total']       += floatval($caja->importe);
         if(!is_numeric($caja->id_bonificacion))
         {

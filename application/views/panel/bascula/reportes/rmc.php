@@ -165,7 +165,8 @@
 							<td class="txt_right"><?php echo $data['totales']['cajas'] != 0 ? MyString::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false) : 0; ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['kilos'], 2, '', false); ?></td>
 							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? MyString::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
-							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
+              <td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['ret_isr'], 2, '$', false); ?></td>
 							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
 							<td></td>
 							<td></td>

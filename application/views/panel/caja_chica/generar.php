@@ -1730,7 +1730,7 @@
                               <tr>
                                 <td>EFECT. DEL CORTE:</td>
                                 <?php
-                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $totalGastos;
 
                                 $totalFondoCaja = false;
                                 ?>
