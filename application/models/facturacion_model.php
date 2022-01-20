@@ -5317,20 +5317,19 @@ class facturacion_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(35, 73, 35, 73));
       $pdf->Row2(array(
-            $this->lang->line('factura_cp_transpInternac', 'Transporte Internacional'), $cartaPorteSat->transpInternac,
-            $this->lang->line('factura_cp_viaEntradaSalida', 'Via de Entrada / Salida'), $cartaPorteSat->viaEntradaSalida
+            $this->lang->line('factura_cp_transpInternac', 'Transporte Internacional     '), (isset($cartaPorteSat->transpInternac)? $cartaPorteSat->transpInternac: ''),
+            $this->lang->line('factura_cp_viaEntradaSalida', 'Via de Entrada / Salida'), (isset($cartaPorteSat->viaEntradaSalida)? $cartaPorteSat->viaEntradaSalida: '')
           ), false, true, null, null, 1);
       $pdf->SetX(0);
       $pdf->Row2(array(
-            $this->lang->line('factura_cp_entradaSalidaMerc', 'Entrada / Salida de Mercancía'), $cartaPorteSat->entradaSalidaMerc,
-            $this->lang->line('factura_cp_totalDistRec', 'Total Distancia Recorrida (Km)'), $cartaPorteSat->totalDistRec
+            $this->lang->line('factura_cp_entradaSalidaMerc', 'Entrada / Salida de Mercancía'), (isset($cartaPorteSat->entradaSalidaMerc)? $cartaPorteSat->entradaSalidaMerc: ''),
+            $this->lang->line('factura_cp_totalDistRec', 'Total Distancia Recorrida (Km)'), (isset($cartaPorteSat->totalDistRec)? $cartaPorteSat->totalDistRec: '')
           ), false, true, null, null, 1);
       $pdf->SetX(0);
       $pdf->Row2(array(
-            $this->lang->line('factura_cp_paisOrigenDestino_text', 'País'), "{$cartaPorteSat->paisOrigenDestino_text} ({$cartaPorteSat->paisOrigenDestino})",
+            $this->lang->line('factura_cp_paisOrigenDestino_text', 'País'), (isset($cartaPorteSat->paisOrigenDestino_text)? $cartaPorteSat->paisOrigenDestino_text: '')." (".(isset($cartaPorteSat->paisOrigenDestino)? $cartaPorteSat->paisOrigenDestino: '').")",
             '', ''
           ), false, true, null, null, 1);
-      $pdf->Output('dddd.pdf', 'I');
 
       if ($pdf->GetY()+10 >= $pdf->limiteY) {
         $pdf->AddPage();
@@ -5339,40 +5338,83 @@ class facturacion_model extends privilegios_model{
       $pdf->SetWidths(array(216));
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 10);
-      $pdf->Row(array(
-        "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": '')
-      ), false, true, null, 2, 1);
-      $pdf->SetFont('helvetica','', 8);
-      $pdf->SetXY(0, $pdf->GetY() + 4);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->emisor->domicilio->calle,
-            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->emisor->domicilio->numeroExterior,
-            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->emisor->domicilio->numeroInterior,
-          ), false, true, null, 2, 1);
-      $pdf->SetX(0);
 
-      $this->load->model('clocalidad_model');
-      $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad, $ceExtras->emisor->domicilio->estado);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->emisor->domicilio->colonia,
-            $this->lang->line('factura_ce_localidad', 'Localidad'), ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
-            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->emisor->domicilio->codigoPostal,
-          ), false, true, null, 2, 1);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
-      $pdf->SetX(0);
+      if (isset($cartaPorteSat->ubicaciones) && count($cartaPorteSat->ubicaciones) > 0) {
+        $pdf->Row(array(
+          "{$this->lang->line('factura_cp_ubicaciones', 'Ubicaciones')} "
+        ), false, true, null, 2, 1);
 
-      $this->load->model('cmunicipio_model');
-      $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio, $ceExtras->emisor->domicilio->estado);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_municipio', 'Municipio'), ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
-            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->emisor->domicilio->estado,
-            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->emisor->domicilio->pais,
-            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
-          ), false, true, null, 2, 1);
+        foreach ($cartaPorteSat->ubicaciones as $key => $ubic) {
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY() + 4);
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_tipoUbicacion', 'Tipo Ubicación'), (isset($ubic->tipoUbicacion)? $ubic->tipoUbicacion: ''),
+                $this->lang->line('factura_cp_idUbicacion', 'ID Ubicación'), (isset($ubic->idUbicacion)? $ubic->idUbicacion: ''),
+                $this->lang->line('factura_cp_rfcRemitenteDestinatario', 'RFC'), (isset($ubic->rfcRemitenteDestinatario)? $ubic->rfcRemitenteDestinatario: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_nombreRemitenteDestinatario', 'Nombre'), (isset($ubic->nombreRemitenteDestinatario)? $ubic->nombreRemitenteDestinatario: ''),
+                $this->lang->line('factura_cp_numRegIdTrib', 'Num Reg Id Trib'), (isset($ubic->numRegIdTrib)? $ubic->numRegIdTrib: ''),
+                $this->lang->line('factura_cp_residenciaFiscal', 'Residencia Fiscal'), (isset($ubic->residenciaFiscal_text)? "{$ubic->residenciaFiscal_text} ($ubic->residenciaFiscal)": ''),
+              ), false, true, null, 2, 1);
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_numEstacion', 'Num Estación'), (isset($ubic->numEstacion)? $ubic->numEstacion: ''),
+                $this->lang->line('factura_cp_nombreEstacion', 'Nombre Estación'), (isset($ubic->nombreEstacion)? "{$ubic->numEstacion_text} ({$ubic->nombreEstacion})": ''),
+                $this->lang->line('factura_cp_navegacionTrafico', 'Navegación Trafico'), (isset($ubic->navegacionTrafico)? $ubic->navegacionTrafico: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_fechaHoraSalida', 'Fecha y Hora de Salida'), (isset($ubic->fechaHoraSalida)? $ubic->fechaHoraSalida: ''),
+                $this->lang->line('factura_cp_tipoEstacion', 'Tipo Estación'), (isset($ubic->tipoEstacion)? $ubic->tipoEstacion: ''),
+                $this->lang->line('factura_cp_distanciaRecorrida', 'Distancia Recorrida (Km)'), (isset($ubic->distanciaRecorrida)? $ubic->distanciaRecorrida: ''),
+              ), false, true, null, 2, 1);
+
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_calle', 'Calle'), (isset($ubic->domicilio->calle)? $ubic->domicilio->calle: ''),
+                $this->lang->line('factura_cp_ubic_no_exterior', 'No. Exterior'), (isset($ubic->domicilio->numeroExterior)? $ubic->domicilio->numeroExterior: ''),
+                $this->lang->line('factura_cp_ubic_no_interior', 'No. Interior'), (isset($ubic->domicilio->numeroInterior)? $ubic->domicilio->numeroInterior: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $this->load->model('clocalidad_model');
+          $localidad = $this->clocalidad_model->getLocalidadKey($ubic->domicilio->localidad, $ubic->domicilio->estado);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_colonia', 'Colonia'), (isset($ubic->domicilio->colonia)? $ubic->domicilio->colonia: ''),
+                $this->lang->line('factura_cp_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$ubic->domicilio->localidad})" : $ubic->domicilio->localidad),
+                $this->lang->line('factura_cp_ubic_codigo', 'Codigo Postal'), $ubic->domicilio->codigoPostal,
+              ), false, true, null, 2, 1);
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+          $pdf->SetX(0);
+          $this->load->model('cmunicipio_model');
+          $municipio = $this->cmunicipio_model->getMunicipioKey($ubic->domicilio->municipio, $ubic->domicilio->estado);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$ubic->domicilio->municipio})" : $ubic->domicilio->municipio),
+                $this->lang->line('factura_cp_ubic_estado', 'Estado'), $ubic->domicilio->estado,
+                $this->lang->line('factura_cp_ubic_pais', 'Pais'), $ubic->domicilio->pais,
+                $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), '',
+              ), false, true, null, 2, 1);
+        }
+      }
+      $pdf->Output('dddd.pdf', 'I');
 
       if ($ceExtras->propietario[0]->numRegIdTrib != '') {
         $pdf->SetFont('helvetica','B', 8);
