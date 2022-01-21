@@ -45,9 +45,13 @@
         $readonly = '';
         $only_bodega_gdl = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/bodega_gdl/');
         $no_abrir_cortes = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/no_abrir_cortes/');
-        $show = !$no_abrir_cortes;
+        $show = true;
         $display = '';
         $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
+
+        if (isset($caja['status']) && $caja['status'] === 'f') {
+          $show = !$no_abrir_cortes;
+        }
         if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_caja/'))
         {
           $readonly = 'readonly';
@@ -1681,7 +1685,7 @@
                                 <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
-                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores; ?>
+                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1']; ?>
                                 <td>TOTAL EFECTIVO:</td> <!-- lo que esta tabulado -->
                                 <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly>
                                   <input type="hidden" name="saldo_efetivo_tab_total" value="<?php echo $saldo_efetivo_tab_total ?>" class="input-small vpositive" id="saldo_efetivo_tab_total" style="text-align: right;" readonly></td>
@@ -1730,7 +1734,7 @@
                               <tr>
                                 <td>EFECT. DEL CORTE:</td>
                                 <?php
-                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
 
                                 $totalFondoCaja = false;
                                 ?>
