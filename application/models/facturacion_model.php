@@ -5394,7 +5394,7 @@ class facturacion_model extends privilegios_model{
               ), false, true, null, 2, 1);
           $pdf->SetX(0);
           $this->load->model('clocalidad_model');
-          $localidad = $this->clocalidad_model->getLocalidadKey($ubic->domicilio->localidad, $ubic->domicilio->estado);
+          $localidad = $this->clocalidad_model->getLocalidadKey((isset($ubic->domicilio->localidad)? $ubic->domicilio->localidad: ''), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''));
           $pdf->Row2(array(
                 $this->lang->line('factura_cp_ubic_colonia', 'Colonia'), (isset($ubic->domicilio->colonia)? $ubic->domicilio->colonia: ''),
                 $this->lang->line('factura_cp_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$ubic->domicilio->localidad})" : $ubic->domicilio->localidad),
@@ -5405,11 +5405,11 @@ class facturacion_model extends privilegios_model{
           $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
           $pdf->SetX(0);
           $this->load->model('cmunicipio_model');
-          $municipio = $this->cmunicipio_model->getMunicipioKey($ubic->domicilio->municipio, $ubic->domicilio->estado);
+          $municipio = $this->cmunicipio_model->getMunicipioKey((isset($ubic->domicilio->municipio)? $ubic->domicilio->municipio: ''), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''));
           $pdf->Row2(array(
                 $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$ubic->domicilio->municipio})" : $ubic->domicilio->municipio),
-                $this->lang->line('factura_cp_ubic_estado', 'Estado'), $ubic->domicilio->estado,
-                $this->lang->line('factura_cp_ubic_pais', 'Pais'), $ubic->domicilio->pais,
+                $this->lang->line('factura_cp_ubic_estado', 'Estado'), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''),
+                $this->lang->line('factura_cp_ubic_pais', 'Pais'), (isset($ubic->domicilio->pais)? $ubic->domicilio->pais: ''),
                 $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), '',
               ), false, true, null, 2, 1);
         }
