@@ -444,6 +444,7 @@ class caja_chica_model extends CI_Model {
 
     // gastos
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, $all);
+    $info['gastosAcumuladosCaja1'] = $this->getCajaGastos($fecha, $noCaja, $all, true, " AND cg.fecha >= '2022-01-01' AND cg.fecha <= '{$fecha}'");
 
     // reposición de gastos
     if ($noCaja == '2') {
@@ -527,7 +528,7 @@ class caja_chica_model extends CI_Model {
     return $response;
   }
 
-  public function getCajaGastos($fecha, $noCaja, $all)
+  public function getCajaGastos($fecha, $noCaja, $all, $suma = false, $sqle = '')
   {
     $sql = '';
     $sql_status2 = "(CASE WHEN cg.fecha_cancelado IS NULL THEN true
@@ -553,7 +554,7 @@ class caja_chica_model extends CI_Model {
       $fecha1 = $fecha[1];
     } else {
       $sql .= " AND cg.tipo = 'g'";
-      $sql .= " AND cg.fecha = '{$fecha}'";
+      $sql .= $suma? '': " AND cg.fecha = '{$fecha}'";
       $fecha1 = $fecha;
     }
 
@@ -590,10 +591,11 @@ class caja_chica_model extends CI_Model {
           WHERE fecha <= '{$fecha1}'
           GROUP BY id_gasto
          ) cga ON cga.id_gasto = cg.id_gasto
-       WHERE cg.no_caja = {$noCaja} {$sql}
+       WHERE cg.no_caja = {$noCaja} {$sql} {$sqle}
        ORDER BY cg.id_gasto ASC"
     );
 
+    $totalGastoss = 0;
     if ($gastos->num_rows() > 0)
     {
       $response = $gastos->result();
@@ -606,10 +608,18 @@ class caja_chica_model extends CI_Model {
           $value->saldo = $value->monto_ini - $value->abonos;
           $value->monto = $value->saldo;
         }
+
+        if ($value->status == 't') {
+          $totalGastoss += floatval($value->monto);
+        }
       }
     }
 
-    return $response;
+    if ($suma) {
+      return $totalGastoss;
+    } else {
+      return $response;
+    }
   }
 
   public function getCajaGastosTransporte($fecha, $noCaja, $all)
@@ -3516,7 +3526,7 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 1) {
       $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
       $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
-      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $totalGastos;
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
       $pdf->SetX(98);
       $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivoCorte , 2, '$', false)), false, false);
@@ -3566,7 +3576,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetX(153);
         $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
       }
-      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $totalGastos;
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $pdf->SetX(153);
       $pdf->Row(array('SALDO EFECTIVO', MyString::formatoNumero($saldoEfectivo, 2, '$', false)), false, false);
 
