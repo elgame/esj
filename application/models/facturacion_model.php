@@ -5307,7 +5307,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->Row(array(
         "{$this->lang->line('factura_cp', 'Carta Porte')} V2.0"
-      ), false, true, null, 2, 1);
+      ), true, true, null, 2, 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -5334,15 +5334,15 @@ class facturacion_model extends privilegios_model{
       if ($pdf->GetY()+10 >= $pdf->limiteY) {
         $pdf->AddPage();
       }
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(216));
-      $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->SetFont('helvetica','B', 10);
 
       if (isset($cartaPorteSat->ubicaciones) && count($cartaPorteSat->ubicaciones) > 0) {
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->SetFont('helvetica','B', 10);
         $pdf->Row(array(
           "{$this->lang->line('factura_cp_ubicaciones', 'Ubicaciones')} "
-        ), false, true, null, 2, 1);
+        ), true, true, null, 2, 1);
 
         foreach ($cartaPorteSat->ubicaciones as $key => $ubic) {
           if ($pdf->GetY()+10 >= $pdf->limiteY) {
@@ -5350,7 +5350,7 @@ class facturacion_model extends privilegios_model{
           }
 
           $pdf->SetFont('helvetica','', 8);
-          $pdf->SetXY(0, $pdf->GetY() + 4);
+          $pdf->SetXY(0, $pdf->GetY());
           $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
           $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
           $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
@@ -5410,176 +5410,509 @@ class facturacion_model extends privilegios_model{
                 $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$ubic->domicilio->municipio})" : $ubic->domicilio->municipio),
                 $this->lang->line('factura_cp_ubic_estado', 'Estado'), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''),
                 $this->lang->line('factura_cp_ubic_pais', 'Pais'), (isset($ubic->domicilio->pais)? $ubic->domicilio->pais: ''),
-                $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), '',
+                $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), (isset($ubic->domicilio->referencia)? $ubic->domicilio->referencia: ''),
               ), false, true, null, 2, 1);
         }
       }
-      $pdf->Output('dddd.pdf', 'I');
 
-      if ($ceExtras->propietario[0]->numRegIdTrib != '') {
-        $pdf->SetFont('helvetica','B', 8);
+      if (isset($cartaPorteSat->mercancias)) {
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
         $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->SetFont('helvetica','B', 10);
         $pdf->Row(array(
-          "Propietario "
-        ), false, true, null, 2, 1);
+          "{$this->lang->line('factura_cp_mercancias', 'Mercancías')} "
+        ), true, true, null, 2, 1);
 
         $pdf->SetFont('helvetica','', 8);
-        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
         $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-        $pdf->SetWidths(array(17, 64, 17, 118));
+        $pdf->SetWidths(array(37, 35, 37, 35, 37, 35));
         $pdf->SetX(0);
-        $pdf->Row(array(
-              $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $ceExtras->propietario[0]->numRegIdTrib,
-              $this->lang->line('factura_ce_nombre', 'Nombre'), $ceExtras->propietario[0]->residenciaFiscal,
-            ), false, true, null, 2, 1);
-      }
-
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(216));
-      $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Row(array(
-        "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": '')
-      ), false, true, null, 2, 1);
-
-      $pdf->SetFont('helvetica','', 8);
-      $pdf->SetXY(0, $pdf->GetY() + 4);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->receptor->domicilio->calle,
-            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->receptor->domicilio->numeroExterior,
-            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->receptor->domicilio->numeroInterior,
-          ), false, true, null, 2, 1);
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->receptor->domicilio->colonia,
-            $this->lang->line('factura_ce_localidad', 'Localidad'), $ceExtras->receptor->domicilio->localidad,
-            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->receptor->domicilio->codigoPostal,
-          ), false, true, null, 2, 1);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_municipio', 'Municipio'), $ceExtras->receptor->domicilio->municipio,
-            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->receptor->domicilio->estado,
-            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->receptor->domicilio->pais,
-            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
-          ), false, true, null, 2, 1);
-
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(216));
-      $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Row(array(
-        "Destinatario"
-      ), false, true, null, 2, 1);
-
-
-      $pdf->SetFont('helvetica','', 8);
-      $pdf->SetXY(0, $pdf->GetY() + 4);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(17, 64, 17, 118));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $factura['ce']->destinatario->numregidtrib,
-            $this->lang->line('factura_ce_nombre', 'Nombre'), $factura['ce']->destinatario->nombre,
-          ), false, true, null, 2, 1);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_calle', 'Calle'), $factura['ce']->destinatario->calle,
-            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $factura['ce']->destinatario->numero_exterior,
-            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $factura['ce']->destinatario->numero_interior,
-          ), false, true, null, 2, 1);
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_colonia', 'Colonia'), $factura['ce']->destinatario->colonia,
-            $this->lang->line('factura_ce_localidad', 'Localidad'), $factura['ce']->destinatario->localidad,
-            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $factura['ce']->destinatario->codigo_postal,
-          ), false, true, null, 2, 1);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
-      $pdf->SetX(0);
-      $pdf->Row(array(
-            $this->lang->line('factura_ce_municipio', 'Municipio'), $factura['ce']->destinatario->municipio,
-            $this->lang->line('factura_ce_estado', 'Estado'), $factura['ce']->destinatario->estado,
-            $this->lang->line('factura_ce_pais', 'Pais'), $factura['ce']->destinatario->pais,
-            $this->lang->line('factura_ce_referencia', 'Referencia'), $factura['ce']->destinatario->referencia,
-          ), false, true, null, 2, 1);
-
-      $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
-      $aligns2 = array('C', 'C', 'L', 'C', 'R', 'R');
-      $aligns3 = array('L', 'L', 'L', 'L');
-      $widths = array(36, 36, 36, 36, 36, 36);
-      $widths3 = array(50, 50, 50, 50);
-      $header = array('No Ident', 'Frac Aran',
-        $this->lang->line('factura_ce_cantidad', 'Cantidad'),
-        $this->lang->line('factura_ce_unidad', 'Unidad'),
-        $this->lang->line('factura_ce_valor_unitario', 'Valor Unitario'),
-        $this->lang->line('factura_ce_valor_dolares', 'Valor Dolares'),
-      );
-      $pdf->setY($pdf->GetY() + 1);
-      $hay_prod_certificados = false;
-      foreach($factura['ce']->mercancias as $key => $item)
-      {
-        $band_head = false;
-
-        if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
-        {
-          if($key > 0) $pdf->AddPage();
-
-          $pdf->SetFont('Arial', 'B', 8);
-          $pdf->SetTextColor(0, 0, 0);
-          $pdf->SetFillColor(242, 242, 242);
-          $pdf->SetX(0);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true, true, null, 2, 1);
+        $pdf->Row2(array(
+              $this->lang->line('factura_cp_merca_pesoBrutoTotal', 'Peso Bruto Total'), (isset($cartaPorteSat->mercancias->pesoBrutoTotal)? $cartaPorteSat->mercancias->pesoBrutoTotal: ''),
+              $this->lang->line('factura_cp_merca_pesoNetoTotal', 'Peso Neto Total'), (isset($cartaPorteSat->mercancias->pesoNetoTotal)? $cartaPorteSat->mercancias->pesoNetoTotal: ''),
+              $this->lang->line('factura_cp_merca_cargoPorTasacion', 'Cargo Por Tasacion'), (isset($cartaPorteSat->mercancias->cargoPorTasacion)? $cartaPorteSat->mercancias->cargoPorTasacion: ''),
+            ), false, true, null, null, 1);
+        $pdf->SetX(0);
+        $pdf->Row2(array(
+              $this->lang->line('factura_cp_merca_unidadPeso_text', 'Unidad Peso'), (isset($cartaPorteSat->mercancias->unidadPeso_text)? $cartaPorteSat->mercancias->unidadPeso_text: '').(isset($cartaPorteSat->mercancias->unidadPeso)? "({$cartaPorteSat->mercancias->unidadPeso})": ''),
+              $this->lang->line('factura_cp_merca_numTotalMercancias', 'Num Total Mercancías'), (isset($cartaPorteSat->mercancias->numTotalMercancias)? $cartaPorteSat->mercancias->numTotalMercancias: ''),
+              '', '',
+            ), false, true, null, null, 1);
+        if ($pdf->GetY()+10 >= $pdf->limiteY) {
+          $pdf->AddPage();
         }
 
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->SetTextColor(0,0,0);
+        if (isset($cartaPorteSat->mercancias->mercancias) && count($cartaPorteSat->mercancias->mercancias) > 0) {
+          foreach ($cartaPorteSat->mercancias->mercancias as $key => $merca) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_mercancias1', "Mercancía ".($key+1))} "
+            ), true, true, null, 2, 1);
 
-        $pdf->SetX(0);
-        $pdf->SetAligns($aligns2);
-        $pdf->SetWidths($widths);
-        $pdf->Row(array(
-          $item->noidentificacion,
-          $item->fraccionar_ancelaria,
-          $item->cantidad_aduana,
-          $item->unidad_aduana,
-          MyString::formatoNumero($item->valor_unitario_aduana, 2, '$', false),
-          MyString::formatoNumero($item->valor_dolares, 2, '$', false),
-        ), false, true, null, 2, 1);
-
-        if (count($item->esp) > 0) {
-          foreach($item->esp as $key2 => $esp)
-          {
-            if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-            {
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
               $pdf->AddPage();
             }
 
-            $pdf->SetFont('Arial', '', 8);
-            $pdf->SetTextColor(0,0,0);
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_bienesTransp', 'Bienes Transportados'), (isset($merca->bienesTransp_text)? $merca->bienesTransp_text: ''),
+                  $this->lang->line('factura_cp_merca_claveSTCC', 'Clave STCC'), (isset($merca->claveSTCC_text)? $merca->claveSTCC_text: ''),
+                  $this->lang->line('factura_cp_merca_rfcRemitenteDestinatario', 'Descripción'), (isset($merca->descripcion)? $merca->descripcion: ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_cantidad', 'Cantidad'), (isset($merca->cantidad)? $merca->cantidad: ''),
+                  $this->lang->line('factura_cp_merca_claveUnidad', 'Clave Unidad'), (isset($merca->claveUnidad_text)? $merca->claveUnidad_text: ''),
+                  $this->lang->line('factura_cp_merca_unidad', 'Unidad'), (isset($merca->unidad)? "{$merca->unidad}": ''),
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
 
             $pdf->SetX(0);
-            $pdf->SetAligns($aligns3);
-            $pdf->SetWidths($widths3);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_dimensiones', 'Dimensiones'), (isset($merca->dimensiones)? $merca->dimensiones: ''),
+                  $this->lang->line('factura_cp_merca_materialPeligroso', 'Material Peligroso'), (isset($merca->materialPeligroso)? $merca->materialPeligroso: ''),
+                  $this->lang->line('factura_cp_merca_cveMaterialPeligroso', 'Clave Material Peligroso'), (isset($merca->cveMaterialPeligroso_text)? "{$merca->cveMaterialPeligroso_text}": ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_embalaje', 'Embalaje'), (isset($merca->embalaje)? $merca->embalaje: ''),
+                  $this->lang->line('factura_cp_merca_descripEmbalaje', 'Descripción Embalaje'), (isset($merca->descripEmbalaje)? $merca->descripEmbalaje: ''),
+                  $this->lang->line('factura_cp_merca_pesoEnKg', 'Peso en Kg'), (isset($merca->pesoEnKg)? $merca->pesoEnKg: ''),
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_valorMercancia', 'Valor Mercancía'), (isset($merca->valorMercancia)? $merca->valorMercancia: ''),
+                  $this->lang->line('factura_cp_merca_moneda', 'Moneda'), (isset($merca->moneda)? $merca->moneda: ''),
+                  $this->lang->line('factura_cp_merca_fraccionArancelaria', 'Fracción Arancelaria'), (isset($merca->fraccionArancelaria_text)? "{$merca->fraccionArancelaria_text}": ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_uuidComercioExt', 'UUID Comercio Ext'), (isset($merca->uuidComercioExt)? $merca->uuidComercioExt: ''),
+                  '', '',
+                  '', '',
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            if (isset($merca->pedimentos) && count($merca->pedimentos) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_pedimentos', "Pedimentos")} "
+              ), true, true, null, 2, 1);
+
+              foreach ($merca->pedimentos as $keyp => $pedi) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetFont('helvetica','', 8);
+                $pdf->SetXY(0, $pdf->GetY());
+                $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+                $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+                $pdf->SetWidths(array(60, 156));
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                      $this->lang->line('factura_cp_merca_pedimento', "Pedimento ".($keyp+1)), (isset($pedi->pedimento)? $pedi->pedimento: ''),
+                    ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (isset($merca->guiasIdentificacion) && count($merca->guiasIdentificacion) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_guiasIdentificacion', "Guías de Identificación")} "
+              ), true, true, null, 2, 1);
+
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(60, 100, 56));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_numeroGuiaIdentificacion', "Numero Guía"),
+                  $this->lang->line('factura_cp_merca_descripGuiaIdentificacion', "Descripción"),
+                  $this->lang->line('factura_cp_merca_pesoGuiaIdentificacion', "Peso"),
+                ), true, true, 5, 2, 1);
+              foreach ($merca->guiasIdentificacion as $keyg => $guia) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                    (isset($guia->numeroGuiaIdentificacion)? $guia->numeroGuiaIdentificacion: ''),
+                    (isset($guia->descripGuiaIdentificacion)? $guia->descripGuiaIdentificacion: ''),
+                    (isset($guia->pesoGuiaIdentificacion)? $guia->pesoGuiaIdentificacion: ''),
+                  ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (isset($merca->cantidadTransporta) && count($merca->cantidadTransporta) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_cantidadTransporta', "Cantidad Transporta")} "
+              ), true, true, null, 2, 1);
+
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(54, 54, 54, 54));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_cantidad', "Cantidad"),
+                  $this->lang->line('factura_cp_merca_idOrigen', "Id Origen"),
+                  $this->lang->line('factura_cp_merca_idDestino', "Id Destino"),
+                  $this->lang->line('factura_cp_merca_cvesTransporte', "Cves Transporte"),
+                ), true, true, 5, 2, 1);
+              foreach ($merca->cantidadTransporta as $keyg => $cantTrans) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                    (isset($cantTrans->cantidad)? $cantTrans->cantidad: ''),
+                    (isset($cantTrans->idOrigen)? $cantTrans->idOrigen: ''),
+                    (isset($cantTrans->idDestino)? $cantTrans->idDestino: ''),
+                    (isset($cantTrans->cvesTransporte)? $cantTrans->cvesTransporte: ''),
+                  ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (!empty($merca->detalleMercancia)) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_detalleMercancia', "Detalle Mercancía")} "
+              ), true, true, null, 2, 1);
+
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_unidadPeso_text', 'Unidad Peso'), (isset($merca->detalleMercancia->unidadPeso_text)? $merca->detalleMercancia->unidadPeso_text: ''),
+                  $this->lang->line('factura_cp_merca_pesoBruto', 'Peso Bruto'), (isset($merca->detalleMercancia->pesoBruto)? $merca->detalleMercancia->pesoBruto: ''),
+                  $this->lang->line('factura_cp_merca_pesoNeto', 'Peso Neto'), (isset($merca->detalleMercancia->pesoNeto)? $merca->detalleMercancia->pesoNeto: ''),
+                ), false, true, null, 2, 1);
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_pesoTara', 'Peso Tara'), (isset($merca->detalleMercancia->pesoTara)? $merca->detalleMercancia->pesoTara: ''),
+                  $this->lang->line('factura_cp_merca_numPiezas', 'Num Piezas'), (isset($merca->detalleMercancia->numPiezas)? $merca->detalleMercancia->numPiezas: ''),
+                  '', '',
+                ), false, true, null, 2, 1);
+            }
+
+            // $pdf->SetX(0);
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_calle', 'Calle'), (isset($merca->domicilio->calle)? $merca->domicilio->calle: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_no_exterior', 'No. Exterior'), (isset($merca->domicilio->numeroExterior)? $merca->domicilio->numeroExterior: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_no_interior', 'No. Interior'), (isset($merca->domicilio->numeroInterior)? $merca->domicilio->numeroInterior: ''),
+            //     ), false, true, null, 2, 1);
+            // $pdf->SetX(0);
+            // $this->load->model('clocalidad_model');
+            // $localidad = $this->clocalidad_model->getLocalidadKey((isset($merca->domicilio->localidad)? $merca->domicilio->localidad: ''), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''));
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_colonia', 'Colonia'), (isset($merca->domicilio->colonia)? $merca->domicilio->colonia: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$merca->domicilio->localidad})" : $merca->domicilio->localidad),
+            //       $this->lang->line('factura_cp_merca_ubic_codigo', 'Codigo Postal'), $merca->domicilio->codigoPostal,
+            //     ), false, true, null, 2, 1);
+            // $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+            // $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+            // $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+            // $pdf->SetX(0);
+            // $this->load->model('cmunicipio_model');
+            // $municipio = $this->cmunicipio_model->getMunicipioKey((isset($merca->domicilio->municipio)? $merca->domicilio->municipio: ''), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''));
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$merca->domicilio->municipio})" : $merca->domicilio->municipio),
+            //       $this->lang->line('factura_cp_merca_ubic_estado', 'Estado'), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_pais', 'Pais'), (isset($merca->domicilio->pais)? $merca->domicilio->pais: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_referencia', 'Referencia'), (isset($merca->domicilio->referencia)? $merca->domicilio->referencia: ''),
+            //     ), false, true, null, 2, 1);
+          }
+        }
+
+        if (!empty($cartaPorteSat->mercancias->autotransporte)) {
+          $autrans = $cartaPorteSat->mercancias->autotransporte;
+
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(216));
+          $pdf->SetXY(0, $pdf->GetY()+1);
+          $pdf->SetFont('helvetica','B', 10);
+          $pdf->Row(array(
+            "{$this->lang->line('factura_cp_autotransporte', "Autotransporte")} "
+          ), true, true, null, 2, 1);
+
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY());
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(25, 75, 35, 75, 20, 36));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_permSCT', 'Permiso SCT'), (isset($autrans->permSCT)? $autrans->permSCT: ''),
+                $this->lang->line('factura_cp_auto_numPermisoSCT', 'Num del Permiso SCT'), (isset($autrans->numPermisoSCT)? $autrans->numPermisoSCT: ''),
+              ), false, true, 5, 2, 1);
+
+          if (!empty($autrans->identificacionVehicular)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
             $pdf->Row(array(
-              $this->lang->line('factura_ce_marca', 'Marca').': '.$esp->marca,
-              $this->lang->line('factura_ce_modelo', 'Modelo').': '.$esp->modelo,
-              $this->lang->line('factura_ce_sub_modelo', 'Sub Modelo').': '.$esp->submodelo,
-              $this->lang->line('factura_ce_numero_serie', 'Numero Serie').': '.$esp->numeroserie,
-            ), false, true, null, 2, 1);
+              "{$this->lang->line('factura_cp_auto_identificacionVehicular', "Identificación Vehicular")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(36, 36, 36, 36, 36, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_configVehicular', 'Configuracion Vehicular'), (isset($autrans->identificacionVehicular->configVehicular)? $autrans->identificacionVehicular->configVehicular: ''),
+                $this->lang->line('factura_cp_auto_placaVM', 'Placa vehicular del autotransporte'), (isset($autrans->identificacionVehicular->placaVM)? $autrans->identificacionVehicular->placaVM: ''),
+                $this->lang->line('factura_cp_auto_anioModeloVM', 'Año del autotransporte'), (isset($autrans->identificacionVehicular->anioModeloVM)? $autrans->identificacionVehicular->anioModeloVM: ''),
+              ), false, true, null, 2, 1);
+          }
+
+          if (!empty($autrans->seguros)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_auto_seguros', "Seguros")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(45, 75, 36, 60, 36, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraRespCivil', 'Aseguradora Civil'), (isset($autrans->seguros->aseguraRespCivil)? $autrans->seguros->aseguraRespCivil: ''),
+                $this->lang->line('factura_cp_auto_polizaRespCivil', 'No Poliza Civil'), (isset($autrans->seguros->polizaRespCivil)? $autrans->seguros->polizaRespCivil: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraMedAmbiente', 'Aseguradora Med Ambiente'), (isset($autrans->seguros->aseguraMedAmbiente)? $autrans->seguros->aseguraMedAmbiente: ''),
+                $this->lang->line('factura_cp_auto_polizaMedAmbiente', 'No Poliza Med Ambiente'), (isset($autrans->seguros->polizaMedAmbiente)? $autrans->seguros->polizaMedAmbiente: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraCarga', 'Aseguradora Carga'), (isset($autrans->seguros->aseguraCarga)? $autrans->seguros->aseguraCarga: ''),
+                $this->lang->line('factura_cp_auto_polizaCarga', 'No Poliza Carga'), (isset($autrans->seguros->polizaCarga)? $autrans->seguros->polizaCarga: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_primaSeguro', 'Prima Seguro'), (isset($autrans->seguros->primaSeguro)? $autrans->seguros->primaSeguro: ''),
+                '', '',
+              ), false, true, 5, 2, 1);
+          }
+
+          if (!empty($autrans->remolques) && count($autrans->remolques) > 0) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_auto_remolques', "Remolques")} "
+            ), true, true, null, 2, 1);
+
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(25, 83, 25, 83, 36, 36));
+            foreach ($autrans->remolques as $keyre => $remol) {
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_auto_subTipoRem', 'Tipo'), (isset($remol->subTipoRem)? $remol->subTipoRem: ''),
+                  $this->lang->line('factura_cp_auto_placa', 'Placa'), (isset($remol->placa)? $remol->placa: ''),
+                ), false, true, 5, 2, 1);
+            }
           }
         }
       }
+
+      if (!empty($cartaPorteSat->figuraTransporte) && isset($cartaPorteSat->figuraTransporte->tiposFigura)) {
+
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY()+1);
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->Row(array(
+          "{$this->lang->line('factura_cp_figuraTransporte', "Figuras Transporte")} "
+        ), true, true, null, 2, 1);
+
+        $figurass = ['01' => '01 - Operador', '02' => '02 - Propietario', '03' => '03 - Arrendatario', '04' => '04 - Notificado'];
+        foreach ($cartaPorteSat->figuraTransporte->tiposFigura as $keyfig => $figura) {
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY());
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(25, 50, 25, 40, 25, 51));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_figura_tipoFigura', 'Tipo Figura'), (isset($figura->tipoFigura)? $figurass[$figura->tipoFigura]: ''),
+                $this->lang->line('factura_cp_figura_rfcFigura', 'RFC'), (isset($figura->rfcFigura)? $figura->rfcFigura: ''),
+                $this->lang->line('factura_cp_figura_numLicencia', 'Num Licencia'), (isset($figura->numLicencia)? $figura->numLicencia: ''),
+              ), false, true, 5, 2, 1);
+
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_figura_nombreFigura', 'Nombre'), (isset($figura->nombreFigura)? $figura->nombreFigura: ''),
+                $this->lang->line('factura_cp_figura_numRegIdTribFigura', 'Num Reg Id Trib'), (isset($figura->numRegIdTribFigura)? $figura->numRegIdTribFigura: ''),
+                $this->lang->line('factura_cp_figura_residenciaFiscalFigura', 'Residencia Fiscal'), (isset($figura->residenciaFiscalFigura)? "{$figura->residenciaFiscalFigura_text} ({$figura->residenciaFiscalFigura})": ''),
+              ), false, true, null, 2, 1);
+
+          if (!empty($figura->partesTransporte) && count($figura->partesTransporte) > 0) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_figura_partesTransporte', "Partes Transporte")} "
+            ), true, true, null, 2, 1);
+
+            foreach ($figura->partesTransporte as $keypart => $parte) {
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(36, 180, 36, 36, 36, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_figura_parteTransporte', "Parte {$keypart}"), (isset($parte->parteTransporte)? $parte->parteTransporte: ''),
+                ), false, true, 5, 2, 1);
+            }
+          }
+
+          if (!empty($figura->domicilio)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_figura_domicilio', "Domicilio")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_calle', 'Calle'), (isset($figura->domicilio->calle)? $figura->domicilio->calle: ''),
+                  $this->lang->line('factura_cp_ubic_no_exterior', 'No. Exterior'), (isset($figura->domicilio->numeroExterior)? $figura->domicilio->numeroExterior: ''),
+                  $this->lang->line('factura_cp_ubic_no_interior', 'No. Interior'), (isset($figura->domicilio->numeroInterior)? $figura->domicilio->numeroInterior: ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $this->load->model('clocalidad_model');
+            $localidad = $this->clocalidad_model->getLocalidadKey((isset($figura->domicilio->localidad)? $figura->domicilio->localidad: ''), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''));
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_colonia', 'Colonia'), (isset($figura->domicilio->colonia)? $figura->domicilio->colonia: ''),
+                  $this->lang->line('factura_cp_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$figura->domicilio->localidad})" : $figura->domicilio->localidad),
+                  $this->lang->line('factura_cp_ubic_codigo', 'Codigo Postal'), $figura->domicilio->codigoPostal,
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+            $pdf->SetX(0);
+            $this->load->model('cmunicipio_model');
+            $municipio = $this->cmunicipio_model->getMunicipioKey((isset($figura->domicilio->municipio)? $figura->domicilio->municipio: ''), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''));
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$figura->domicilio->municipio})" : $figura->domicilio->municipio),
+                  $this->lang->line('factura_cp_ubic_estado', 'Estado'), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''),
+                  $this->lang->line('factura_cp_ubic_pais', 'Pais'), (isset($figura->domicilio->pais)? $figura->domicilio->pais: ''),
+                  $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), (isset($figura->domicilio->referencia)? $figura->domicilio->referencia: ''),
+                ), false, true, null, 2, 1);
+          }
+        }
+      }
+
     }
 
     ////////////////////
