@@ -1002,7 +1002,7 @@ class bascula_model extends CI_Model {
       {
         $data['totales']['importe'] += floatval($caja->importe);
         $data['totales']['ret_isr'] += ($caja->id_bascula != $lastFolio)? floatval($caja->ret_isr): 0;
-        $data['totales']['total']   += floatval($caja->importe);
+        $data['totales']['total']   += ($caja->id_bascula != $lastFolio)? floatval($caja->importe_todas): 0;
         if(!is_numeric($caja->id_bonificacion))
         {
           $data['totales']['kilos']       += floatval($caja->kilos);
