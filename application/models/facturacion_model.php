@@ -5912,7 +5912,6 @@ class facturacion_model extends privilegios_model{
           }
         }
       }
-
     }
 
     ////////////////////
