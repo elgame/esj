@@ -390,7 +390,7 @@
 
                     <?php
                     $totalTraspasos = 0;
-                    if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4') && !$only_bodega_gdl): ?>
+                    if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '6') && !$only_bodega_gdl): ?>
                     <!-- Traspasos -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
@@ -404,7 +404,7 @@
                                     <thead>
                                       <tr>
                                         <th colspan="2">TRASPASOS
-                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5')): ?>
+                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6')): ?>
                                           <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                           <?php endif ?>
                                         </th>
@@ -436,6 +436,7 @@
                                                 <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                                 <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                                 <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
+                                                <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
                                                 <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
                                                 <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
                                               </select>
@@ -758,7 +759,7 @@
               <!-- Gastos x comprobar -->
               <?php
               $totalGastosComprobarTot = $totalGastosComprobar = 0;
-              if ($_GET['fno_caja'] === '2' || $_GET['fno_caja'] === '5'): ?>
+              if ($_GET['fno_caja'] === '2' || $_GET['fno_caja'] === '5' || $_GET['fno_caja'] === '6'): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -1104,7 +1105,7 @@
               <?php
               $totalReposicionGastos = 0;
               $totalReposicionGastosAnt = 0;
-              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5'):
+              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6'):
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1440,7 +1441,7 @@
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4') && !$only_bodega_gdl) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '6') && !$only_bodega_gdl) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">

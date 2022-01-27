@@ -320,13 +320,13 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    // Tryana y sra vianey
-    if ($noCaja == '2' || $noCaja == '4') {
+    // Tryana y sra vianey, plasticos gdl
+    if ($noCaja == '2' || $noCaja == '4' || $noCaja == '6') {
       // saldo de clientes
       $info['saldo_clientes'] = $this->getCajaSaldosClientes($fecha, $noCaja);
     }
 
-    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4' || $noCaja == '5') {
+    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -367,18 +367,21 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
-      $ddNoCaja = '1, 4, 5';
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
+      $ddNoCaja = '1, 4, 5, 6';
       $ddTipo = 'caja_gastos';
       if ($noCaja == '1') {
-        $ddNoCaja = "2, 4, 5";
+        $ddNoCaja = "2, 4, 5, 6";
         $ddTipo = 'caja_limon';
       } elseif ($noCaja == '4') {
-        $ddNoCaja = "2, 1, 5";
+        $ddNoCaja = "2, 1, 5, 6";
         $ddTipo = 'caja_general';
       } elseif ($noCaja == '5') {
-        $ddNoCaja = "2, 1, 4";
+        $ddNoCaja = "2, 1, 4, 6";
         $ddTipo = 'caja_fletes';
+      } elseif ($noCaja == '6') {
+        $ddNoCaja = "1, 2, 4, 5";
+        $ddTipo = 'caja_plasticos';
       }
 
       // acreedores
@@ -435,7 +438,7 @@ class caja_chica_model extends CI_Model {
     }
 
     // gastos por comprobar
-    if ($noCaja == '2' || $noCaja == '5') {
+    if ($noCaja == '2' || $noCaja == '5' || $noCaja == '6') {
       $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
     }
 
@@ -447,7 +450,7 @@ class caja_chica_model extends CI_Model {
     $info['gastosAcumuladosCaja1'] = $this->getCajaGastos($fecha, $noCaja, $all, true, " AND cg.fecha >= '2022-01-01' AND cg.fecha <= '{$fecha}'");
 
     // reposición de gastos
-    if ($noCaja == '2') {
+    if ($noCaja == '2' || $noCaja == '6') {
       $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, $all);
     }
     // reposición de gastos caja de transporte
@@ -456,7 +459,7 @@ class caja_chica_model extends CI_Model {
     }
 
     // Traspasos
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
       if (count($traspasos) > 0)
       {
@@ -771,6 +774,8 @@ class caja_chica_model extends CI_Model {
       $tno_caja = 'caja_general';
     } elseif ($noCaja == 5) {
       $tno_caja = 'caja_fletes';
+    } elseif ($noCaja == 6) {
+      $tno_caja = 'caja_plasticos';
     }
 
     $traspaso = $this->db->query(
@@ -1366,6 +1371,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 4;
             } elseif ($data_traspp->tipo_caja == 'caja_fletes') {
               $tno_caja = 5;
+            } elseif ($data_traspp->tipo_caja == 'caja_plasticos') {
+              $tno_caja = 6;
             }
 
             if ($tno_caja > 0) {
@@ -1417,6 +1424,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 4;
             } elseif ($data['traspaso_tipo'][$key] == 'caja_fletes') {
               $tno_caja = 5;
+            } elseif ($data['traspaso_tipo'][$key] == 'caja_plasticos') {
+              $tno_caja = 6;
             }
 
             if ($tno_caja > 0) {
@@ -2426,6 +2435,9 @@ class caja_chica_model extends CI_Model {
     elseif ($noCajas == 5){
       $subtitulo = ' FLETES';
       $logo = '/images/transporte.png';
+    } elseif ($noCajas == 6){
+      $subtitulo = ' '; // PLASTICOS GDL
+      $logo = '/images/plasticos.png';
     }
 
     // echo "<pre>";
@@ -2665,7 +2677,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
@@ -2803,7 +2815,7 @@ class caja_chica_model extends CI_Model {
 
     // Gastos x comprobar
     $totalGastosComprobarTot = $totalGastosComprobar = 0;
-    if ($noCajas == 2 || $noCajas == 5) {
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2968,7 +2980,7 @@ class caja_chica_model extends CI_Model {
 
     // Reposición de gastos
     $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2 || $noCajas == 5) {
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -3136,7 +3148,7 @@ class caja_chica_model extends CI_Model {
 
     // Deudores
     $totalDeudores = 0;
-    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5) && count($caja['deudores']) > 0) {
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['deudores']) > 0) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -3694,6 +3706,9 @@ class caja_chica_model extends CI_Model {
     elseif ($noCajas == 5){
       $subtitulo = ' FLETES';
       $logo = '/images/transporte.png';
+    } elseif ($noCajas == 6){
+      $subtitulo = ' '; //PLASTICOS GDL
+      $logo = '/images/plasticos.png';
     }
 
 
@@ -3873,7 +3888,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')).'</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;"></td>
@@ -3962,7 +3977,7 @@ class caja_chica_model extends CI_Model {
 
     // Gastos x comprobar
     $totalGastosComprobarTot = $totalGastosComprobar = 0;
-    if ($noCajas == 2 || $noCajas == 5) {
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS POR COMPROBAR</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTES</td>
@@ -4072,7 +4087,7 @@ class caja_chica_model extends CI_Model {
 
     // Reposición de gastos
     $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2) {
+    if ($noCajas == 2 || $noCajas == 6) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">REPOSICION DE GASTOS</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
@@ -4184,7 +4199,7 @@ class caja_chica_model extends CI_Model {
 
     // Deudores
     $totalDeudores = 0;
-    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5) && count($caja['deudores']) > 0) {
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['deudores']) > 0) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">DEUDORES</td>
         </tr>';
@@ -5165,6 +5180,8 @@ class caja_chica_model extends CI_Model {
       $no_caja = 4;
     } elseif ($codigo == 'caja_fletes') {
       $no_caja = 5;
+    } elseif ($codigo == 'caja_plasticos') {
+      $no_caja = 6;
     }
 
     $caja = $this->db->query(
@@ -5298,6 +5315,10 @@ class caja_chica_model extends CI_Model {
       $sqlprs1 .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
+    if ($this->input->get('sucursalId') > 0) {
+      $sql .= " AND cg.id_sucursal = '".$this->input->get('sucursalId')."'";
+    }
+
     if ($this->input->get('fnomenclatura') != '') {
       $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
       $sqlprs1 .= " AND cn.id = ".$this->input->get('fnomenclatura');
@@ -5369,6 +5390,9 @@ class caja_chica_model extends CI_Model {
     $id_empresa = intval($this->input->get('did_empresa'));
     $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
     $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
+    if ($this->input->get('sucursalId') > 0) {
+      $sucursal = $this->empresas_model->infoSucursal($this->input->get('sucursalId'));
+    }
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -5381,6 +5405,7 @@ class caja_chica_model extends CI_Model {
 
     $pdf->titulo2 = 'Reporte de Gastos';
     $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= isset($sucursal)? $sucursal->nombre_fiscal: '';
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 

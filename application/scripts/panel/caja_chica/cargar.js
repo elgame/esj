@@ -1098,6 +1098,7 @@
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
+                    '<option value="caja_plasticos">Caja Plasticos Gdl</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
                     '<option value="caja_prestamo">Prestamo</option>'+
                   '</select>'+
@@ -1313,6 +1314,7 @@
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
+                    '<option value="caja_plasticos">Caja Plasticos Gdl</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
                     '<option value="caja_prestamo">Caja Préstamo</option>'+
                   '</select>'+

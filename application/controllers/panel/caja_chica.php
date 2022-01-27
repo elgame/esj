@@ -159,6 +159,27 @@ class caja_chica extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
+  public function caja6()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja6/', true);
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => $privilegio->nombre);
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index6',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
   public function cargar()
   {
     $this->carabiner->js(array(
