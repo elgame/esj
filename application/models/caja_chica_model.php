@@ -577,7 +577,8 @@ class caja_chica_model extends CI_Model {
           cg.nombre, cg.status, cg.folio_sig, cg.folio_ant, cg.id_sucursal,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
           {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
-          (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < cg.fecha_cancelado)) AS show_back_cortes
+          (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < cg.fecha_cancelado)) AS show_back_cortes,
+          cg.diferencia_comp_gasto
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -795,7 +796,7 @@ class caja_chica_model extends CI_Model {
   {
     $ingresos = array();
 
-    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes'];
+    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes', '6' => 'Caja Plasticos'];
     $fpartes = explode('-', $data['fecha_caja_chica']);
     $anio = $fpartes[0]; // date('Y');
 
@@ -1873,17 +1874,23 @@ class caja_chica_model extends CI_Model {
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
-    // $data_folio->folio += 1;
+    $diferencia_comp_gasto = 0;
     $datos_gasto_com = [
       // 'folio_sig' => $data_folio->folio,
       // 'fecha'  => $data['fecha_caja'],
       // 'tipo'  => 'g',
       'monto' => $data_gasto->monto - $data['importe'],
       'status' => 'f',
-      'concepto' => "GASTO COMPROBADO ({$data['importe']})"
+      'concepto' => "{$data_gasto->monto} (COMPROBADO {$data['importe']})"
     ];
     if ($data['importe'] >= $data['importe_old'] || $data['saldarMont'] == 'true') {
       $datos_gasto_com['fecha_cancelado'] = $data['fecha_caja'];
+
+      // Obtenemos la diferencia para la caja 2 de tryana
+      $diferencia_comp_gasto = $data['importe_old'] - $data['importe'];
+      $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
+      $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
+      $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
     }
     $this->db->update('cajachica_gastos', $datos_gasto_com, "id_gasto = ".$data['id_gasto']);
 
@@ -1943,6 +1950,7 @@ class caja_chica_model extends CI_Model {
           'id_centro_costo' => $data_gasto->id_centro_costo,
           'id_activo'       => $data_gasto->id_activo,
           'folio_ant'       => $data_gasto->folio_sig,
+          'diferencia_comp_gasto' => $diferencia_comp_gasto,
         );
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
@@ -1998,6 +2006,7 @@ class caja_chica_model extends CI_Model {
             'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: $data_gasto->id_centro_costo),
             'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: $data_gasto->id_activo),
             'folio_ant'       => $data_gasto->folio_sig,
+            'diferencia_comp_gasto' => $diferencia_comp_gasto,
           );
         } else {
           $data_folio->folio += 1;
@@ -2022,6 +2031,7 @@ class caja_chica_model extends CI_Model {
             'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: $data_gasto->id_activo),
             'tipo'            => 'rg',
             'folio_ant'       => $data_gasto->folio_sig,
+            'diferencia_comp_gasto' => $diferencia_comp_gasto,
           );
         }
 
@@ -2900,7 +2910,7 @@ class caja_chica_model extends CI_Model {
 
 
     // Gastos del Dia
-    $totalGastos = 0;
+    $totalGastos = $totalGastosCaja2 = 0;
     if (count($caja['gastos']) > 0) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
@@ -2943,6 +2953,12 @@ class caja_chica_model extends CI_Model {
         $colortxt = [[100, 100, 100]];
         if ($gasto->status2 == 't') {
           $totalGastos += floatval($gasto->monto);
+
+          if ($noCajas == 2) {
+            // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+            $totalGastosCaja2 += $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+          }
+
           $colortxt = [[0, 0, 0]];
         }
 
@@ -2974,12 +2990,17 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
-      $pdf->Row(array('', '', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
+      $arraytotales = array('', '', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false));
+      if ($noCajas == 2) {
+        $arraytotales[5] = 'TOTAL CON DIFERENCIA';
+        $arraytotales[6] = MyString::formatoNumero($totalGastosCaja2, 2, '$', false);
+      }
+      $pdf->Row($arraytotales, true, true);
     }
 
 
     // Reposición de gastos
-    $totalReposicionGastosAnt = $totalReposicionGastos = 0;
+    $totalReposicionGastosAnt = $totalReposicionGastosCaja2 = $totalReposicionGastos = 0;
     if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
@@ -3023,6 +3044,11 @@ class caja_chica_model extends CI_Model {
         if (!isset($gasto->status2) || $gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
+
+            if ($noCajas == 2) {
+              // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+              $totalReposicionGastosCaja2 += floatval($gasto->diferencia_comp_gasto);
+            }
           }
 
           $totalReposicionGastosAnt += floatval($gasto->monto);
@@ -3057,9 +3083,14 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '',
+      $arraytotales = array('', '', '', '', '', '',
         'TOTAL DIA', MyString::formatoNumero($totalReposicionGastos, 2, '$', false),
-        'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), true, true);
+        'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false));
+      if ($noCajas == 2) {
+        $arraytotales[3] = 'TOTAL DIA DIFERENCIA';
+        $arraytotales[4] = MyString::formatoNumero($totalReposicionGastosCaja2, 2, '$', false);
+      }
+      $pdf->Row($arraytotales, true, true);
     } else if ($noCajas == 5) { // caja de fletes
       $codigoAreas = array();
       $aux_emp = 0;
@@ -3547,6 +3578,12 @@ class caja_chica_model extends CI_Model {
         $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
           $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
           $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+
+        $totalFondoCaja = false;
+      } elseif ($noCajas == 2) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar + $totalGastosCaja2 + $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+          $totalTraspasos; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
         $totalFondoCaja = false;
       } else {

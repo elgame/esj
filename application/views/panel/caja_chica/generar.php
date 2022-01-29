@@ -935,7 +935,7 @@
               <!-- /Gastos x comprobar -->
 
               <!-- Gastos -->
-              <?php $totalGastos = 0; ?>
+              <?php $totalGastos = $totalGastosCaja2 = 0; ?>
               <?php if (!$only_bodega_gdl): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -974,7 +974,12 @@
 
                                   if (count($caja['gastos']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
-                                      $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
+                                      $totalGastos += floatval($_POST['gasto_importe'][$key]);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        $totalGastosCaja2 += floatval($_POST['gasto_importe'][$key]);
+                                      }
+                                ?>
                                         <tr>
                                           <td style="">
                                             <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
@@ -1027,6 +1032,11 @@
                                 <?php }} else {
                                   foreach ($caja['gastos'] as $gasto) {
                                     $totalGastos += floatval($gasto->monto);
+
+                                    if ($_GET['fno_caja'] == '2') {
+                                      // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                      $totalGastosCaja2 += $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+                                    }
                                   ?>
                                   <tr>
                                     <td style="">
@@ -1084,11 +1094,20 @@
                                     </td>
                                   </tr>
                                 <?php }} ?>
+
                                 <tr class="row-total">
+                                <?php if ($_GET['fno_caja'] == '2'): ?>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL CON DIFERENCIA</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalGastosCaja2 ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <?php else: ?>
                                   <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <?php endif ?>
                                   <td></td>
                                 </tr>
+
                               </tbody>
                             </table>
                           </div>
@@ -1103,9 +1122,10 @@
 
               <!-- Reposición de gastos -->
               <?php
-              $totalReposicionGastos = 0;
+              $totalReposicionGastos = $totalReposicionGastosCaja2 = 0;
               $totalReposicionGastosAnt = 0;
               if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6'):
+                $readonlyCaja2 = $_GET['fno_caja'] == '2'? ' readonly': '';
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1143,7 +1163,13 @@
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
                                   if (count($caja['reposicion_gastos']) == 0 && isset($_POST['reposicionGasto_concepto']) && count($_POST['reposicionGasto_concepto']) > 0) {
                                     foreach ($_POST['reposicionGasto_concepto'] as $key => $concepto) {
-                                      $totalReposicionGastos += floatval($_POST['reposicionGasto_importe'][$key]); ?>
+                                      $totalReposicionGastos += floatval($_POST['reposicionGasto_importe'][$key]);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                        $totalReposicionGastosCaja2 += floatval($_POST['reposicionGasto_importe'][$key]);
+                                      }
+                                ?>
                                         <tr>
                                           <td style="">
                                             <input type="hidden" name="reposicionGasto_id_gasto[]" value="" id="gasto_id_gasto">
@@ -1198,6 +1224,11 @@
                                   foreach ($caja['reposicion_gastos'] as $reposiciong) {
                                     if ($reposiciong->fecha == $fecha) {
                                       $totalReposicionGastos += floatval($reposiciong->monto);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                        $totalReposicionGastosCaja2 += floatval($reposiciong->diferencia_comp_gasto);
+                                      }
                                     }
                                     $totalReposicionGastosAnt += floatval($reposiciong->monto);
                                   ?>
@@ -1247,7 +1278,7 @@
                                       <input type="hidden" name="reposicionGasto_reposicion[]" value="<?php echo $reposiciong->reposicion ?>" class="reposiciong-reposicionhid">
                                       <input type="hidden" name="reposicionGasto_fechaComproGasto[]" value="<?php echo $reposiciong->fecha_compro_gasto ?>" class="reposiciong-fechaComproGasto">
                                     </td>
-                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
+                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC.$readonlyCaja2 ?>></td>
                                     <td style="">
                                       <?php if ($modificar_gasto): ?>
                                         <?php if (!$cajas_cerradas): ?>
@@ -1259,10 +1290,14 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                  <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastosAnt ?>" class="vpositive" id="ttotal-reposicionGastosAnt" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastosAnt ?>" class="vpositive" id="ttotal-reposicionGastosAnt" style="text-align: right;" readonly></td>
                                   <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
-                                  <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastos ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastos ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <?php if ($_GET['fno_caja'] == '2'): ?>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL DIA DIFERENCIA</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastosCaja2 ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <?php endif ?>
                                   <td></td>
                                 </tr>
                               </tbody>
@@ -1821,6 +1856,18 @@
                                 //    - $totalDeudores - $totalBoletasPagadas;
 
                                 //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
+                                } elseif ($_GET['fno_caja'] === '2') {
+                                  $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                    $totalGastosComprobar + $totalGastosCaja2 + $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+                                    $totalTraspasos; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
+
+                                  // echo "<pre>";
+                                  //   var_dump($caja['saldo_inicial'], $totalIngresos, $totalIngresosRemisiones, ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']),
+                                  //   $totalGastosComprobar, $totalGastosCaja2, $totalReposicionGastosCaja2, ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']),
+                                  //   $totalTraspasos);
+                                  // echo "</pre>";exit;
+
+                                  $totalFondoCaja = false;
                                 } else {
                                   $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
                                     $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] -

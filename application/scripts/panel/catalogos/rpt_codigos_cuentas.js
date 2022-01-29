@@ -105,6 +105,8 @@
       select: function( event, ui ) {
         $("#did_empresa").val(ui.item.id);
         $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+        getSucursales();
       }
     }).keydown(function(e){
       if (e.which === 8) {
