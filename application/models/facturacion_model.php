@@ -651,8 +651,11 @@ class facturacion_model extends privilegios_model{
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
     if (!empty($_POST['cp']['ubicaciones']) &&
-        !empty($_POST['cp']['mercancias']) &&
-        !empty($_POST['cp']['figuraTransporte']) ) {
+        !empty($_POST['cp']['mercancias']['mercancias']) &&
+        !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+        count($_POST['cp']['ubicaciones']) > 0 &&
+        count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+        count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
       $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
     }
 
@@ -1769,9 +1772,12 @@ class facturacion_model extends privilegios_model{
         'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
         'usoCfdi'           => $this->input->post('duso_cfdi'),
       ];
-      if (!empty($_POST['cp']['ubicaciones']) ||
-          !empty($_POST['cp']['mercancias']) ||
-          !empty($_POST['cp']['figuraTransporte']) ) {
+      if (!empty($_POST['cp']['ubicaciones']) &&
+          !empty($_POST['cp']['mercancias']['mercancias']) &&
+          !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+          count($_POST['cp']['ubicaciones']) > 0 &&
+          count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+          count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
         $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
       }
 
