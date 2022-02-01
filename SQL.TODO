@@ -1,6 +1,6 @@
 
  ☐ Caja 6 y 2
-   -- pcc
+   -- pcc|san
    INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES ('6','Caja Plasticos Gdl',50000);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja Plasticos Gdl',247,true,'caja_chica/caja6/','usd',true);
    ALTER TABLE public.cajachica_gastos ADD COLUMN diferencia_comp_gasto double precision DEFAULT 0;
@@ -12,7 +12,7 @@
    ALTER TABLE public.bascula ADD COLUMN ret_isr_porcent double precision DEFAULT 0;
 
  ☐ Sucursales empresas y ordenes de compra
-   -- lap|pcc
+   -- lap|pcc|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('No abrir cortes',247,false,'caja_chica/no_abrir_cortes/','add',false);
     ALTER TABLE public.compras ADD COLUMN id_sucursal integer;
     ALTER TABLE public.compras ADD CONSTRAINT compras_id_sucursal_fkey FOREIGN KEY (id_sucursal)
