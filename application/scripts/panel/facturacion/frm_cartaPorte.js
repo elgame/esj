@@ -67,7 +67,7 @@ function eventAddCpUbicaciones() {
                 <option value="Cabotaje">Cabotaje</option>
               </select>
             </td>
-            <td class="center"><input type="datetime-local" name="cp[ubicaciones][${cpnumrowubicaciones}][fechaHoraSalida]" value="" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+            <td class="center"><input type="datetime-local" name="cp[ubicaciones][${cpnumrowubicaciones}][fechaHoraSalidaLlegada]" value="" id="cp_ubic_fechaHoraSalidaLlegada" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
             <td class="center">
               <select name="cp[ubicaciones][${cpnumrowubicaciones}][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">
                 <option value=""></option>

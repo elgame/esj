@@ -1835,7 +1835,7 @@
                                     <option value="Cabotaje" <?php echo set_select('cp[ubicaciones]['.$count.'][navegacionTrafico]', 'Cabotaje', $navegacionTrafico === 'Cabotaje' ? true : false, $navegacionTrafico); ?>>Cabotaje</option>
                                   </select>
                                 </td>
-                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][<?php echo $count ?>][fechaHoraSalida]" value="<?php echo set_value('cp[ubicaciones]['.$count.'][fechaHoraSalida]', isset($ubic->fechaHoraSalida) ? $ubic->fechaHoraSalida : ''); ?>" id="cp_ubic_fechaHoraSalida" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                                <td class="center"><input type="datetime-local" name="cp[ubicaciones][<?php echo $count ?>][fechaHoraSalidaLlegada]" value="<?php echo set_value('cp[ubicaciones]['.$count.'][fechaHoraSalidaLlegada]', isset($ubic->fechaHoraSalidaLlegada) ? $ubic->fechaHoraSalidaLlegada : ''); ?>" id="cp_ubic_fechaHoraSalidaLlegada" class="span12 sikey" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
                                 <td class="center">
                                   <?php $tipoEstacion = isset($ubic->tipoEstacion) ? $ubic->tipoEstacion : ''; ?>
                                   <select name="cp[ubicaciones][<?php echo $count ?>][tipoEstacion]" class="span12 sikey" id="cp_tipoEstacion" data-next="cp_totalDistRec">

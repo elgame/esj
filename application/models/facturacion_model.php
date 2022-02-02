@@ -5383,7 +5383,7 @@ class facturacion_model extends privilegios_model{
               ), false, true, null, 2, 1);
           $pdf->SetX(0);
           $pdf->Row2(array(
-                $this->lang->line('factura_cp_fechaHoraSalida', 'Fecha y Hora de Salida'), (isset($ubic->fechaHoraSalida)? $ubic->fechaHoraSalida: ''),
+                $this->lang->line('factura_cp_fechaHoraSalidaLlegada', 'Fecha y Hora de Salida'), (isset($ubic->fechaHoraSalidaLlegada)? $ubic->fechaHoraSalidaLlegada: ''),
                 $this->lang->line('factura_cp_tipoEstacion', 'Tipo Estación'), (isset($ubic->tipoEstacion)? $ubic->tipoEstacion: ''),
                 $this->lang->line('factura_cp_distanciaRecorrida', 'Distancia Recorrida (Km)'), (isset($ubic->distanciaRecorrida)? $ubic->distanciaRecorrida: ''),
               ), false, true, null, 2, 1);
