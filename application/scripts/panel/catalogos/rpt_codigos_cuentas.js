@@ -15,6 +15,7 @@
           dmovimientos: $("#dmovimientos:checked").val(),
           dempresa: $("#dempresa").val(),
           did_empresa: $("#did_empresa").val(),
+          sucursalId: $("#sucursalId").val(),
           dareas: [],
         };
 

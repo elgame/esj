@@ -1545,11 +1545,13 @@ class recetas_model extends CI_Model {
         $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
         if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
-          $widths = array(10, 50, 14, 14, 14, 17, 15, 18);
-          $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $widths = array(10, 64, 14, 14, 17, 15, 18);
+          // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
-          $widths = array(10, 50, 14, 14, 14, 17);
-          $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $widths = array(10, 64, 14, 14, 17);
+          // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
         }
 
         $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
@@ -1567,7 +1569,7 @@ class recetas_model extends CI_Model {
           ];
         } else {
           $datos = [
-            '', '', 'Cargas',
+            '', 'Cargas',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
             MyString::formatoNumero($receta['info']->carga2, 2, '', false),
             ''
@@ -1601,7 +1603,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
+              // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
@@ -1612,7 +1614,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
+              // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
@@ -1638,7 +1640,7 @@ class recetas_model extends CI_Model {
           $pdf->Row([
             "{$tpercent}%",
             '',
-            MyString::formatoNumero($tcantidad, 2, '', false),
+            // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
             MyString::formatoNumero($tcarga2, 2, '', false),
             MyString::formatoNumero($ttaplicacion, 2, '', false),
@@ -1649,7 +1651,7 @@ class recetas_model extends CI_Model {
           $pdf->Row([
             "{$tpercent}%",
             '',
-            MyString::formatoNumero($tcantidad, 2, '', false),
+            // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
             MyString::formatoNumero($tcarga2, 2, '', false),
             MyString::formatoNumero($ttaplicacion, 2, '', false)
@@ -1667,7 +1669,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "",
               $receta['info']->extras->a_nombre,
-              MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              // MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
               '', '',
               MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false),
               '', ''
@@ -1676,7 +1678,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "",
               $receta['info']->extras->a_nombre,
-              MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              // MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
               '', '',
               MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false)
             );
