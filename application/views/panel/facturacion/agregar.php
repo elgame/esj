@@ -3020,7 +3020,7 @@
 ?>
 <script type="text/javascript" charset="UTF-8">
   $(document).ready(function(){
-    noty({"text":"<?php echo preg_replace("/\r|\n/", "", addslashes($frm_errors['msg'])); ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
+    noty({"text":"<?php echo preg_replace("/\r|\n/", "", addslashes($frm_errors['msg'])); ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>", "timeout": 10000});
   });
 </script>
 <?php }

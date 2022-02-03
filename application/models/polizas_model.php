@@ -333,6 +333,17 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIsrRetXPagarT($tasa=125, $basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXPagar{$tasa}'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIsrRetPagadoT($tasa=125, $basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetPagado{$tasa}'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+
   public function getCuentaNCGasto($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //sanjorge

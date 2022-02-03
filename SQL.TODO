@@ -1,5 +1,7 @@
 
- ☐ Caja 6 y 2
+ ☐ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar
+ ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
+ ✔ Caja 6 y 2 @done (22-02-02 18:49)
    -- pcc|san|lap
    INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES ('6','Caja Plasticos Gdl',50000);
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja Plasticos Gdl',247,true,'caja_chica/caja6/','usd',true);

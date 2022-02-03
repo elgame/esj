@@ -4563,7 +4563,7 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetFont('Arial','B', 70);
     $pdf->SetTextColor(160,160,160);
-    $pdf->RotatedText(65, 130, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 45);
+    $pdf->RotatedText(65, 100, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 45);
 
     $pdf->SetXY(0, 0);
     /////////////////////////////////////

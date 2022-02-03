@@ -2161,7 +2161,7 @@ class compras_ordenes_model extends CI_Model {
         $header[] = 'FOLIO';
       }
 
-      $subtotal = $iva = $total = $retencion = $ieps = 0;
+      $subtotal = $iva = $total = $retencion = $retIsr = $ieps = 0;
 
       $tipoCambio = 0;
       $codigoAreas = array();
@@ -2240,6 +2240,7 @@ class compras_ordenes_model extends CI_Model {
         $iva       += floatval($prod->iva/$tipoCambio);
         $total     += floatval($prod->total/$tipoCambio);
         $retencion += floatval($prod->retencion_iva/$tipoCambio);
+        $retIsr    += floatval($prod->retencion_isr/$tipoCambio);
         $ieps      += floatval($prod->ieps/$tipoCambio);
 
         if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
@@ -2265,6 +2266,11 @@ class compras_ordenes_model extends CI_Model {
       {
         $pdf->SetX(160);
         $pdf->Row(array('Ret. IVA', MyString::formatoNumero($retencion, 2, '$', false)), false, true);
+      }
+      if ($retIsr > 0)
+      {
+        $pdf->SetX(160);
+        $pdf->Row(array('Ret. ISR', MyString::formatoNumero($retIsr, 2, '$', false)), false, true);
       }
       $pdf->SetX(160);
       $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
@@ -2869,7 +2875,7 @@ class compras_ordenes_model extends CI_Model {
     // $widths = array(25, 35, 76, 18, 25, 25);
     // $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'F COMPRA', 'PRECIO', 'IMPORTE');
 
-    $subtotal = $iva = $total = $retencion = $ieps = 0;
+    $subtotal = $iva = $total = $retencion = $retIsr = $ieps = 0;
 
     $tipoCambio = 0;
     $codigoAreas = array();
@@ -2933,6 +2939,7 @@ class compras_ordenes_model extends CI_Model {
       $iva       += floatval($prod->iva/$tipoCambio);
       $total     += floatval($prod->total/$tipoCambio);
       $retencion += floatval($prod->retencion_iva/$tipoCambio);
+      $retIsr    += floatval($prod->retencion_isr/$tipoCambio);
       $ieps      += floatval($prod->ieps/$tipoCambio);
 
       if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas)){
@@ -2961,6 +2968,11 @@ class compras_ordenes_model extends CI_Model {
     {
       $pdf->SetXY(20, $pdf->GetY()-2);
       $pdf->Row(array('Ret. IVA', MyString::formatoNumero($retencion, 2, '$', false)), false, false);
+    }
+    if ($retIsr > 0)
+    {
+      $pdf->SetXY(20, $pdf->GetY()-2);
+      $pdf->Row(array('Ret. ISR', MyString::formatoNumero($retIsr, 2, '$', false)), false, false);
     }
     $pdf->SetXY(20, $pdf->GetY()-2);
     $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, false);
