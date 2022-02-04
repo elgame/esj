@@ -3572,7 +3572,7 @@ class caja_chica_model extends CI_Model {
       $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
       $pdf->SetX(98);
-      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivoCorte , 2, '$', false)), false, false);
+      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero(-1*$totalEfectivoCorte , 2, '$', false)), false, false);
     } else {
       if ($noCajas == 4) {
         $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
