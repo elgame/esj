@@ -1721,7 +1721,7 @@
                                 <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
-                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalEfectivo - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1']; ?>
+                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1']; ?>
                                 <td>TOTAL EFECTIVO:</td> <!-- lo que esta tabulado -->
                                 <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly>
                                   <input type="hidden" name="saldo_efetivo_tab_total" value="<?php echo $saldo_efetivo_tab_total ?>" class="input-small vpositive" id="saldo_efetivo_tab_total" style="text-align: right;" readonly></td>
