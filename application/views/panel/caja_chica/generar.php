@@ -1782,7 +1782,7 @@
                                 <td><input type="text" name="saldo_corte"
                                   value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                                 <input type="hidden" name="total_diferencia"
-                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                                  value="<?php echo -1*$totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                               </tr>
                               <?php if ($totalFondoCaja !== false): ?>
                               <tr>
