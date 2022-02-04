@@ -387,9 +387,11 @@
       saldo_efectivo = ((parseFloat($("#ffondo_caja").val())||0) - (parseFloat($("#ttotal-boletas_arecuperar_total").val())||0) -
               (parseFloat($("#ttotal-cheques_transito_total").val())||0) - (parseFloat($("#ttotal-efectivo_tab_total").val())||0) -
               (parseFloat($("#ttotal-deudores").val())||0) + (parseFloat($("#ttotal-acreedores").val())||0) -
-              (parseFloat($("#ttotal-gastos").val())||0)
+              (parseFloat($("#gastosAcumuladosCaja1").val())||0)
             ).toFixed(2);
+      $('#ttotal-corte').val(saldo_efectivo);
       $('#saldo_efetivo_tab_total').val(saldo_efectivo);
+      console.log('saldo_efetivo_tab_total', saldo_efectivo);
     }
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum((parseFloat(total) - totalCorte).toFixed(2)));

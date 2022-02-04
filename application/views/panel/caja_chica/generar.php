@@ -740,7 +740,7 @@
                                 <tr class="row-total">
                                   <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2">
-                                    <input type="text" value="<?php echo $totalPreGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly>
+                                    <input type="text" value="<?php echo $totalPreGastos ?>" class="vpositive" id="ttotal-pregastos" style="text-align: right;" readonly>
                                   </td>
                                   <td></td>
                                 </tr>
@@ -1098,7 +1098,7 @@
                                 <tr class="row-total">
                                 <?php if ($_GET['fno_caja'] == '2'): ?>
                                   <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL CON DIFERENCIA</td>
-                                  <td colspan="1"><input type="text" value="<?php echo $totalGastosCaja2 ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalGastosCaja2 ?>" class="vpositive" id="ttotal-gastos2" style="text-align: right;" readonly></td>
                                   <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                                 <?php else: ?>
@@ -1726,6 +1726,7 @@
                                 <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly>
                                   <input type="hidden" name="saldo_efetivo_tab_total" value="<?php echo $saldo_efetivo_tab_total ?>" class="input-small vpositive" id="saldo_efetivo_tab_total" style="text-align: right;" readonly></td>
                                   <input type="hidden" name="ffondo_caja" value="<?php echo $caja['fondo_caja'] ?>" class="input-small vpositive" id="ffondo_caja" style="text-align: right;" readonly></td>
+                                  <input type="hidden" name="gastosAcumuladosCaja1" value="<?php echo $caja['gastosAcumuladosCaja1'] ?>" class="input-small vpositive" id="gastosAcumuladosCaja1" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td colspan="2"><hr></td>
@@ -1761,6 +1762,10 @@
                               <tr>
                                 <td>PAGO TOTAL LIMON:</td>
                                 <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
+                                <td>PAGO TOTAL GASTOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="tttotal-gastos" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td>PAGO TOTAL PENDIENTE:</td>
@@ -1812,7 +1817,7 @@
                               </tr>
                               <tr>
                                 <td>PAGO TOTAL GASTOS:</td>
-                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="tttotal-gastos" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td>TOTAL GASTOS X COMP:</td>
