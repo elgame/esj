@@ -385,8 +385,10 @@
       totalCorte += parseFloat($('#ttotal-efectivo_tab_total').val());
 
       saldo_efectivo = ((parseFloat($("#ffondo_caja").val())||0) - (parseFloat($("#ttotal-boletas_arecuperar_total").val())||0) -
-              (parseFloat($("#ttotal-cheques_transito_total").val())||0) - (parseFloat($("#ttotal-deudores").val())||0) +
-              (parseFloat($("#ttotal-acreedores").val())||0) - (parseFloat($("#ttotal-gastos").val())||0) ).toFixed(2);
+              (parseFloat($("#ttotal-cheques_transito_total").val())||0) - (parseFloat($("#ttotal-efectivo_tab_total").val())||0) -
+              (parseFloat($("#ttotal-deudores").val())||0) + (parseFloat($("#ttotal-acreedores").val())||0) -
+              (parseFloat($("#ttotal-gastos").val())||0)
+            ).toFixed(2);
       $('#saldo_efetivo_tab_total').val(saldo_efectivo);
     }
 
