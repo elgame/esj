@@ -218,6 +218,10 @@
                             'btn_type' => 'btn-success')
                           );
                         }
+
+                        if ($fact->uuid == '') {
+                          echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
+                        }
                       } else {
                         echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
                       }
