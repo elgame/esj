@@ -1117,7 +1117,7 @@ class facturacion_model extends privilegios_model{
     // Timbrado de la factura.
     log_message('error', "Timbre");
     log_message('error', json_encode($datosApi));
-    $result = $this->timbrar($datosApi, $idFactura, false);
+    $result = $this->timbrar($datosApi, $idFactura);
     log_message('error', json_encode($result));
 
     if ($result['passes'])
