@@ -1,5 +1,7 @@
 
- ☐ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar
+ ☐ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar,
+   - poliza diario -> producto : poner el importe sin la retencion en el producto, en el acumulado del proveedor poner el importe menos la retención, la diferencia del importe de la retencion poner la cuenta
+   - poliza egreso ->
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ✔ Caja 6 y 2 @done (22-02-02 18:49)
    -- pcc|san|lap
