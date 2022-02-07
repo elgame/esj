@@ -2308,7 +2308,8 @@ class polizas_model extends CI_Model {
             Sum(b.total_cajas) AS cajas,
             Sum(b.importe) AS importe,
             (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
-            p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi
+            p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi,
+            Sum(b.ret_isr) AS ret_isr, Max(b.ret_isr_porcent) AS ret_isr_porcent
          FROM bascula b
          JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
                  FROM bascula_compra
@@ -2316,7 +2317,7 @@ class polizas_model extends CI_Model {
          LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor
         WHERE b.status = true
            {$sql}
-        GROUP BY p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi
+        GROUP BY p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi, b.ret_isr_porcent
         ORDER BY p.nombre_fiscal ASC
         "
       );
@@ -2327,7 +2328,9 @@ class polizas_model extends CI_Model {
 
       $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'), );
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
+                         );
 
       //Agregamos el header de la poliza
       $response['data'] .= $this->setEspacios('P',2).
@@ -2353,7 +2356,11 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
-        $total_proveedores += $value->importe;
+        $total_proveedores += $value->importe + $value->ret_isr;
+
+        if ($value->ret_isr_porcent == 1.25) {
+          $impuestos['isr_retenido125']['importe'] += $value->ret_isr;
+        }
       }
 
       //Colocamos el abono del total
@@ -2384,6 +2391,22 @@ class polizas_model extends CI_Model {
                         $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                         $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
                         $this->setEspacios('',4)."\r\n"; //segmento de negocio
+
+      //Colocamos los impuestos de la factura
+      foreach ($impuestos as $key => $impuesto) {
+        if ($impuestos[$key]['importe'] > 0)
+        {
+          $response['data'] .= $this->setEspacios('M',2).
+                        $this->setEspacios($impuesto['cuenta_cpi'],30).
+                        $this->setEspacios('PD'.$folio,10).
+                        $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                        $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                        $this->setEspacios('0',10).
+                        $this->setEspacios('0.0',20).
+                        $this->setEspacios($this->input->get('fconcepto')." {$value->ret_isr_porcent}%",100).
+                        $this->setEspacios('',4)."\r\n";
+        }
+      }
     }
 
     $response['folio'] = $folio;
@@ -2742,7 +2765,7 @@ class polizas_model extends CI_Model {
       "SELECT
         fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono,
         bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov,
-        bf.uuid
+        bf.uuid, Sum(f.ret_isr) AS ret_isr
       FROM bascula_pagos AS fa
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
         INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2767,7 +2790,10 @@ class polizas_model extends CI_Model {
         'iva_acreditar'  => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
         'iva_acreditado' => array('cuenta_cpi' => $this->getCuentaIvaAcreditado(), 'importe' => 0, 'tipo' => '0'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '0'),
+      );
 
       //Contenido de la Poliza
       foreach ($data as $key => $value)
@@ -2815,6 +2841,29 @@ class polizas_model extends CI_Model {
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->addLineUUID($value->uuid);
+
+        // impuestos
+        $ret_isr_porcent = round($value->ret_isr*100/($subtotal+$value->ret_isr), 2);
+        if ($ret_isr_porcent <= 1.26) {
+          $impuestos['isr_retenidoxpagar125']['importe'] = $value->ret_isr;
+          $impuestos['isr_retenidopagado125']['importe'] = $value->ret_isr;
+        }
+        //Colocamos los impuestos de la factura
+        foreach ($impuestos as $key => $impuesto) {
+          if ($impuestos[$key]['importe'] > 0)
+          {
+            $response['data'] .= $this->setEspacios('M',2).
+                          $this->setEspacios($impuesto['cuenta_cpi'],30).
+                          $this->setEspacios($value->ref_movimiento.'Fruta',10).
+                          $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                          $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                          $this->setEspacios('0',10).
+                          $this->setEspacios('0.0',20).
+                          $this->setEspacios($value->nombre_fiscal." {$ret_isr_porcent}%",100).
+                          $this->setEspacios('',4)."\r\n";
+          }
+        }
+
         // //Colocamos el Abono al Proveedor que realizo el pago
         // foreach ($data_frutas as $key => $value_fruta)
         // {
