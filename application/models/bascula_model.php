@@ -2408,7 +2408,7 @@ class bascula_model extends CI_Model {
    * @return [type] [description]
    */
   public function r_acumulados_data()
-   {
+  {
       $response = array('data' => array(), 'tipo' => 'Entrada');
       $sql = $sql2 = '';
 
@@ -2459,6 +2459,7 @@ class bascula_model extends CI_Model {
         "SELECT Sum(b.kilos_neto) AS kilos,
             Sum(b.total_cajas) AS cajas,
             Sum(b.importe) AS importe,
+            Sum(b.ret_isr) AS ret_isr,
             (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
             {$campo_id}
          FROM bascula b
@@ -3266,13 +3267,15 @@ class bascula_model extends CI_Model {
       //$pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
-      $widths = array(20, 75, 30, 25, 20, 35);
-      $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
+      $aligns = array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(15, 75, 18, 15, 12, 25, 18, 25);
+      $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'IMPORTE', 'RET', 'TOTAL');
 
       $total_kilos   = 0;
       $total_cajas   = 0;
       $total_importe = 0;
+      $total_ret     = 0;
+      $total_total   = 0;
 
       foreach($data['data'] as $key => $proveedor)
       {
@@ -3303,11 +3306,15 @@ class bascula_model extends CI_Model {
               MyString::formatoNumero($proveedor->kilos, 2, ''),
               MyString::formatoNumero($proveedor->cajas, 2, ''),
               MyString::formatoNumero($proveedor->precio, 2, '$', false),
-              MyString::formatoNumero($proveedor->importe, 2, '$', false)
+              MyString::formatoNumero($proveedor->importe+$proveedor->ret_isr, 2, '$', false),
+              MyString::formatoNumero($proveedor->ret_isr, 2, '$', false),
+              MyString::formatoNumero($proveedor->importe, 2, '$', false),
             ), false, false);
         $total_cajas   += $proveedor->cajas;
         $total_kilos   += $proveedor->kilos;
-        $total_importe += $proveedor->importe;
+        $total_importe += $proveedor->importe+$proveedor->ret_isr;
+        $total_ret     += $proveedor->ret_isr;
+        $total_total   += $proveedor->importe;
       }
 
       if($pdf->GetY() >= $pdf->limiteY)
@@ -3323,7 +3330,9 @@ class bascula_model extends CI_Model {
             MyString::formatoNumero($total_kilos, 2, ''),
             MyString::formatoNumero($total_cajas, 2, ''),
             MyString::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1), 2, '$', false),
-            MyString::formatoNumero($total_importe, 2, '$', false)
+            MyString::formatoNumero($total_importe, 2, '$', false),
+            MyString::formatoNumero($total_ret, 2, '$', false),
+            MyString::formatoNumero($total_total, 2, '$', false)
           ), false, false);
 
       //Total de pagadas no pagadas
@@ -3391,11 +3400,15 @@ class bascula_model extends CI_Model {
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CAJAS</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">P.P.</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RET</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL</td>
       </tr>';
     $total_kilos   = 0;
     $total_cajas   = 0;
     $total_importe = 0;
+    $total_ret     = 0;
+    $total_total   = 0;
 
     foreach($data['data'] as $key => $proveedor)
     {
@@ -3405,12 +3418,16 @@ class bascula_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;">'.$proveedor->kilos.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->cajas.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->precio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($proveedor->importe+$proveedor->ret_isr).'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->ret_isr.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->importe.'</td>
         </tr>';
 
       $total_cajas   += $proveedor->cajas;
       $total_kilos   += $proveedor->kilos;
-      $total_importe += $proveedor->importe;
+      $total_importe += $proveedor->importe+$proveedor->ret_isr;
+      $total_ret     += $proveedor->ret_isr;
+      $total_total   += $proveedor->importe;
 
     }
 
@@ -3421,6 +3438,8 @@ class bascula_model extends CI_Model {
           <td style="border:1px solid #000;">'.$total_cajas.'</td>
           <td style="border:1px solid #000;">'.($total_importe/($total_kilos>0? $total_kilos: 1)).'</td>
           <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_ret.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
         </tr>
         <tr>
           <td colspan="6"></td>

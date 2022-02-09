@@ -2329,7 +2329,7 @@ class polizas_model extends CI_Model {
       $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
                            'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-                           'isr_retenido125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
+                           'isr_retenido125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1', 'percent' => '1.25'),
                          );
 
       //Agregamos el header de la poliza
@@ -2382,15 +2382,15 @@ class polizas_model extends CI_Model {
                         $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                         $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
                         $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                        $this->setEspacios($cuenta_cpi2,30).  //cuenta contpaq
-                        $this->setEspacios('PD'.$folio,10).  //referencia movimiento
-                        $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
-                        $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
-                        $this->setEspacios('0',10).  //iddiario poner 0
-                        $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                        $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
-                        $this->setEspacios('',4)."\r\n"; //segmento de negocio
+      // $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+      //                   $this->setEspacios($cuenta_cpi2,30).  //cuenta contpaq
+      //                   $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+      //                   $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
+      //                   $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
+      //                   $this->setEspacios('0',10).  //iddiario poner 0
+      //                   $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+      //                   $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+      //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
 
       //Colocamos los impuestos de la factura
       foreach ($impuestos as $key => $impuesto) {
