@@ -258,6 +258,7 @@ $(function(){
 
         if(ui.item.item.ret_isr == 't'){
           $('#pisrPorcent').val(1.25); // Asigna el % de retención
+          calculaTotales();
         }
       }
     }
