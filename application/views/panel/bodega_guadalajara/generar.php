@@ -690,7 +690,7 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="5">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="6">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
                                 <tr>
@@ -698,6 +698,7 @@
                                   <th>EMPRESA</th>
                                   <th>NOM</th>
                                   <th>FOLIO</th>
+                                  <th>NOMBRE</th>
                                   <th>CONCEPTO</th>
                                   <th>CARGO</th>
                                   <th></th>
@@ -740,6 +741,9 @@
                                           </td>
                                           <td style="width: 40px;"><input type="text" name="gasto_folio[]" value="<?php echo $_POST['gasto_folio'][$key] ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td>
                                           <td style="">
+                                            <input type="text" name="gasto_nombre[]" value="<?php echo $_POST['gasto_nombre'][$key] ?>" class="span12 gasto-nombre" <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="">
                                             <input type="text" name="gasto_concepto[]" value="<?php echo $_POST['gasto_concepto'][$key] ?>" class="span12 gasto-concepto"  <?php echo $readonly ?>>
                                           </td>
                                           <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
@@ -781,6 +785,9 @@
                                       </select>
                                     </td>
                                     <td style="width: 40px;"><input type="text" name="gasto_folio[]" value="<?php echo $gasto->folio ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td>
+                                    <td style="">
+                                      <input type="text" name="gasto_nombre[]" value="<?php echo $gasto->nombre_gasto ?>" class="span12 gasto-nombre" <?php echo $readonly ?>>
+                                    </td>
                                     <td style="">
                                       <input type="text" name="gasto_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto" <?php echo $readonly ?>>
                                     </td>

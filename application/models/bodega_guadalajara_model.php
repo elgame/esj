@@ -532,6 +532,7 @@ class bodega_guadalajara_model extends CI_Model {
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
             'folio'           => $data['gasto_folio'][$key],
             'concepto'        => $gasto,
+            'nombre'          => $data['gasto_nombre'][$key],
             'monto'           => $data['gasto_importe'][$key],
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
@@ -549,6 +550,7 @@ class bodega_guadalajara_model extends CI_Model {
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
             'folio'           => $data['gasto_folio'][$key],
             'concepto'        => $gasto,
+            'nombre'          => $data['gasto_nombre'][$key],
             'monto'           => $data['gasto_importe'][$key],
             'fecha'           => $data['fecha_caja_chica'],
             'no_caja'         => $data['fno_caja'],
@@ -797,7 +799,8 @@ class bodega_guadalajara_model extends CI_Model {
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
           'id_area' AS campo, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
-          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo
+          ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
+          cg.nombre AS nombre_gasto
        FROM otros.bodega_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura

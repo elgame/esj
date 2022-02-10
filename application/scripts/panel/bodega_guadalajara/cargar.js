@@ -514,6 +514,9 @@
                   '</td>' +
                   '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
                   '<td style="">' +
+                    '<input type="text" name="gasto_nombre[]" value="" class="span12 gasto-nombre">' +
+                  '</td>' +
+                  '<td style="">' +
                     '<input type="text" name="gasto_concepto[]" value="" class="span12 gasto-concepto">' +
                   '</td>' +
                   '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
