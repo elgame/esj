@@ -1829,9 +1829,9 @@ class bodega_guadalajara_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6.5);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'L', 'R'));
-    $pdf->SetWidths(array(50, 30, 25, 18, 50, 30));
-    $pdf->Row(array('CENTRO COSTO', 'EMPRESA', 'NOM', 'No TICKET', 'CONCEPTO', 'IMPORTE'), false, 'B');
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'L', 'L', 'R'));
+    $pdf->SetWidths(array(30, 30, 15, 18, 40, 50, 20));
+    $pdf->Row(array('CENTRO COSTO', 'EMPRESA', 'NOM', 'No TICKET', 'NOMBRE', 'CONCEPTO', 'IMPORTE'), false, 'B');
     $pdf->SetFont('Arial','', 6);
 
     $codigoAreas = array();
@@ -1857,6 +1857,7 @@ class bodega_guadalajara_model extends CI_Model {
         $gasto->empresa,
         $nomenclaturas['n'.$gasto->nomenclatura]->nombre,
         $gasto->id_gasto,
+        $gasto->nombre_gasto,
         $gasto->concepto,
         MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))), false, 'B');
 
