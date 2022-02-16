@@ -1864,13 +1864,13 @@
                                 //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
                                 } elseif ($_GET['fno_caja'] === '2') {
                                   $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-                                    $totalGastosComprobar + $totalGastosCaja2 + $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+                                    $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
                                     $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
                                   // echo "<pre>";
                                   //   var_dump($caja['saldo_inicial'], $totalIngresos, $totalIngresosRemisiones, ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']),
                                   //   $totalGastosComprobar, $totalGastosCaja2, $totalReposicionGastosCaja2, ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']),
-                                  //   $totalTraspasos);
+                                  //   $totalTraspasos, $caja['gastos_comprobar_cancel']);
                                   // echo "</pre>";exit;
 
                                   $totalFondoCaja = false;
