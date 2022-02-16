@@ -915,8 +915,9 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td></td>
-                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td>CANCELADOS DIA</td>
+                                  <td><input type="text" value="<?php echo $caja['gastos_comprobar_cancel'] ?>" class="vpositive" id="ttotal-gastos-cancelados_dia" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobarTot ?>" class="vpositive" id="ttotal-gastos-comprobar" style="text-align: right;" readonly></td>
                                   <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobar ?>" class="vpositive" id="ttotal-gastos-comprobar-dia" style="text-align: right;" readonly></td>
@@ -1036,6 +1037,7 @@
                                     if ($_GET['fno_caja'] == '2') {
                                       // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
                                       $totalGastosCaja2 += $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+                                      echo $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto).'<br>';
                                     }
                                   ?>
                                   <tr>

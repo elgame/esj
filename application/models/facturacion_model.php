@@ -1208,8 +1208,15 @@ class facturacion_model extends privilegios_model{
       // Si es true $delFile entonces elimina todo lo relacionado con la factura.
       if ($delFiles)
       {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        if (empty($_GET['idb'])) {
+          $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+          $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        } else {
+          $dataTimbrado = array(
+            'status' => 'b',
+          );
+          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+        }
         // unlink($pathXML);
       }
 
@@ -1253,8 +1260,15 @@ class facturacion_model extends privilegios_model{
       // Si es true $delFile entonces elimina todo lo relacionado con la factura.
       if ($delFiles)
       {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        if (empty($_GET['idb'])) {
+          $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+          $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        } else {
+          $dataTimbrado = array(
+            'status' => 'b',
+          );
+          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+        }
         // unlink($pathXML);
       }
 

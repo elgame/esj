@@ -652,7 +652,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
     $pdf->Rect(6, 8, 100, 60, '');
     $pdf->SetXY(23, 38);
-    $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
+    if ($data['info']->id_area == 2) {
+      $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
+    }
 
     $pdf->Rect(106, 8, 100, 20, '');
     $pdf->SetXY(110, 13);

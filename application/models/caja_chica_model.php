@@ -440,6 +440,12 @@ class caja_chica_model extends CI_Model {
     // gastos por comprobar
     if ($noCaja == '2' || $noCaja == '5' || $noCaja == '6') {
       $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
+
+      $query = $this->db->query("SELECT Sum(monto) AS monto
+        FROM cajachica_gastos
+        WHERE no_caja = {$noCaja} AND status = 'f' AND monto_ini = 0
+          AND tipo = 'gc' AND fecha_cancelado = '{$fecha}'")->row();
+      $info['gastos_comprobar_cancel'] = $query->monto;
     }
 
     // Pregastos

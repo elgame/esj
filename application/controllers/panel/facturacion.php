@@ -279,6 +279,9 @@ class facturacion extends MY_Controller {
 
     // Si no es un borrador carga los datos POST
     if (empty($borrador['info']->cfdi_ext) && isset($_POST['cp'])) {
+      // echo "<pre>";
+      //   var_dump($_POST['cp']);
+      // echo "</pre>";exit;
       $params['cfdiExt'] = json_encode([
         'cartaPorteSat' => $_POST['cp']
       ]);
