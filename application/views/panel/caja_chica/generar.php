@@ -1037,7 +1037,6 @@
                                     if ($_GET['fno_caja'] == '2') {
                                       // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
                                       $totalGastosCaja2 += $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
-                                      echo $gasto->folio_ant > 0? floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto).'<br>';
                                     }
                                   ?>
                                   <tr>
@@ -1866,7 +1865,7 @@
                                 } elseif ($_GET['fno_caja'] === '2') {
                                   $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
                                     $totalGastosComprobar + $totalGastosCaja2 + $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
-                                    $totalTraspasos; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
+                                    $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
                                   // echo "<pre>";
                                   //   var_dump($caja['saldo_inicial'], $totalIngresos, $totalIngresosRemisiones, ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']),
