@@ -2909,7 +2909,7 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '',
+      $pdf->Row(array('', '', '', '', 'CANCELADOS DIA', MyString::formatoNumero($caja['gastos_comprobar_cancel'], 2, '$', false),
         'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false),
         'TOTAL', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), true, true);
     }
@@ -3587,9 +3587,9 @@ class caja_chica_model extends CI_Model {
 
         $totalFondoCaja = false;
       } elseif ($noCajas == 2) {
-        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
-          $totalGastosComprobar + $totalGastosCaja2 + $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
-          $totalTraspasos; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+          $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
         $totalFondoCaja = false;
       } else {
