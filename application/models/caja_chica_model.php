@@ -1893,7 +1893,7 @@ class caja_chica_model extends CI_Model {
       $datos_gasto_com['fecha_cancelado'] = $data['fecha_caja'];
 
       // Obtenemos la diferencia para la caja 2 de tryana
-      $diferencia_comp_gasto = $data['importe_old'] - $data['importe'];
+      $diferencia_comp_gasto = $data['fecha_caja'] == $data_gasto->fecha? -1*$data['importe']: ($data['importe_old'] - $data['importe']);
       $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
       $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
       $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);

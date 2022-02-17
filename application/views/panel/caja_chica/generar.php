@@ -1228,7 +1228,7 @@
 
                                       if ($_GET['fno_caja'] == '2') {
                                         // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
-                                        $totalReposicionGastosCaja2 += floatval($reposiciong->diferencia_comp_gasto);
+                                        $totalReposicionGastosCaja2 += -1*floatval($reposiciong->diferencia_comp_gasto);
                                       }
                                     }
                                     $totalReposicionGastosAnt += floatval($reposiciong->monto);
