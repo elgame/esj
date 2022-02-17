@@ -398,7 +398,7 @@
                                 $_POST['prod_dmedida'][$key]            = $p->unidad;
                                 $_POST['prod_dcantidad'][$key]          = $p->cantidad;
                                 $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
-                                $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva_real; //$p->porcentaje_iva;
+                                $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva_real? $p->porcentaje_iva_real: 0; //$p->porcentaje_iva;
                                 $_POST['prod_diva_total'][$key]         = $p->iva;
                                 $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                                 $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
@@ -496,10 +496,10 @@
                                     </td>
                                     <td>
                                         <select name="diva" id="diva" class="span12">
-                                          <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : ''; ?>>0%</option>
-                                          <option value="8" <?php echo $_POST['prod_diva_porcent'][$k] == 8 ? 'selected' : ''; ?>>8%</option>
-                                          <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
-                                          <option value="exento" <?php echo $_POST['prod_diva_porcent'][$k] == 'exento' ? 'selected' : ''; ?>>Exento</option>
+                                          <option value="0" <?php echo "{$_POST['prod_diva_porcent'][$k]}" == 0 ? 'selected' : ''; ?>>0%</option>
+                                          <option value="8" <?php echo "{$_POST['prod_diva_porcent'][$k]}" == 8 ? 'selected' : ''; ?>>8%</option>
+                                          <option value="16" <?php echo "{$_POST['prod_diva_porcent'][$k]}" == 16 ? 'selected' : ''; ?>>16%</option>
+                                          <option value="exento" <?php echo "{$_POST['prod_diva_porcent'][$k]}" == 'exento' ? 'selected' : ''; ?>>Exento</option>
                                         </select>
 
                                         <!-- <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php //echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total"> -->
