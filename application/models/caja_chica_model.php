@@ -1874,9 +1874,10 @@ class caja_chica_model extends CI_Model {
 
   public function ajaxRegGastosComprobar($data)
   {
-    // echo "<pre>";
-    // var_dump($data);
-    // echo "</pre>";exit;
+    if (empty($data['remisiones']) && empty($data['gastos'])) {
+      return ['result' => false];
+    }
+
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
@@ -1899,33 +1900,6 @@ class caja_chica_model extends CI_Model {
       $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
     }
     $this->db->update('cajachica_gastos', $datos_gasto_com, "id_gasto = ".$data['id_gasto']);
-
-    // cuando es diferente fecha regresa el dinero para registrar los gastos en el dia
-    // if ($data['fecha_caja'] != $data_gasto->fecha) {
-    //   $anio = date('Y');
-    //   $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
-    //     WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-    //     ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
-
-    //   $data_folio->folio += 1;
-    //   $ingresos = array(
-    //     'folio'           => $data_folio->folio,
-    //     'concepto'        => "DEVOLUCION DE GASTO POR COMPROBAR ({$data_gasto->folio_sig})",
-    //     'monto'           => $data['importe_old'],
-    //     'fecha'           => $data['fecha_caja'],
-    //     'otro'            => 'f',
-    //     'id_categoria'    => $data_gasto->id_categoria,
-    //     'id_nomenclatura' => 10, // ingresos x gastos
-    //     'poliza'          => null,
-    //     'id_movimiento'   => null,
-    //     'no_caja'         => $data['fno_caja'],
-    //     'banco'           => 'EFECTIVO',
-    //     'nombre'          => $data_gasto->nombre,
-    //     'id_usuario'      => $this->session->userdata('id_usuario'),
-    //   );
-
-    //   $this->db->insert('cajachica_ingresos', $ingresos);
-    // }
 
     // Agrega las remisiones (gastos del dia)
     $data_folio_rem = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos

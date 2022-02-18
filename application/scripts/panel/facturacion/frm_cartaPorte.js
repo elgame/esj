@@ -1226,11 +1226,12 @@ function autocompletesCP(){
       selectFirst: true,
       select: function( event, ui ) {
         $this.css("background-color", "#A1F57A");
-          $('#ftcpsat_domi_pais').val(ui.item.id);
+        $('#ftcpsat_domi_pais').val(ui.item.id);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
+        $('#ftcpsat_domi_pais').val('');
       }
     });
   });
@@ -1263,6 +1264,7 @@ function autocompletesCP(){
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
+        $('#ftcpsat_domi_estado').val('');
       }
     });
   });
@@ -1295,6 +1297,7 @@ function autocompletesCP(){
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
+        $('#ftcpsat_domi_municipio').val('');
       }
     });
   });
@@ -1327,6 +1330,7 @@ function autocompletesCP(){
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
+        $('#ftcpsat_domi_localidad').val('');
       }
     });
   });
@@ -1359,6 +1363,7 @@ function autocompletesCP(){
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $this.css("background-color", "#FFD071");
+        $('#ftcpsat_domi_colonia').val('');
       }
     });
   });
