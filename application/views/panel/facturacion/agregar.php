@@ -1759,7 +1759,7 @@
                         <label class="control-label" for="cp_totalDistRec">Total Distancia Recorrida (Km) <i class="icon-question-sign helpover" data-title=""></i></label>
                         <div class="controls">
                           <?php $totalDistRec = isset($cpobj->totalDistRec) ? $cpobj->totalDistRec : ''; ?>
-                          <input type="number" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_origenDestino_pais">
+                          <input type="number" step="any" name="cp[totalDistRec]" class="span12 sikey" id="cp_totalDistRec" value="<?php echo set_value('cp[totalDistRec]', $totalDistRec); ?>" placeholder="" data-next="cp_origenDestino_pais">
                         </div>
                       </div>
                     </div>
