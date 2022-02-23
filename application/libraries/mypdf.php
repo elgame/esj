@@ -7,6 +7,7 @@ class MYpdf extends FPDF {
   var $titulo3 = '';
   var $reg_fed = 'REG. ESJ97052763A0620061646';
   var $logo = '/images/logo.png';
+  var $excel = null;
 
   var $fount_txt = 'helvetica';
   var $fount_num = 'SciFly-Sans'; // SciFly-Sans
@@ -82,6 +83,10 @@ class MYpdf extends FPDF {
         $this->SetX(46);
         $this->MultiCell(141, 4, $this->titulo3, 0, 'C', false);
       }
+
+      $this->SetXY(194, $this->GetY()+1);
+      if($this->excel)
+        $this->Cell(16, 5, 'Excel', 0, 0, 'R', false, $this->excel);
 
       $this->SetFont('Arial','I',8);
       $this->SetXY(211, $y[1]);

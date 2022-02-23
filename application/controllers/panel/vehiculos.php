@@ -7,7 +7,8 @@ class vehiculos extends MY_Controller {
 	 * @var unknown_type
 	 */
 	private $excepcion_privilegio = array('vehiculos/ajax_get_vehiculos/',
-		'vehiculos/combustible_pdf/',
+    'vehiculos/combustible_pdf/',
+		'vehiculos/combustible_xls/',
     'vehiculos/combustible_general_pdf/');
 
 	public function _remap($method){
@@ -220,8 +221,11 @@ class vehiculos extends MY_Controller {
 	public function combustible_pdf(){
 		$this->load->model('vehiculos_model');
 		$this->vehiculos_model->getRCombustiblePdf();
-
 	}
+  public function combustible_xls(){
+    $this->load->model('vehiculos_model');
+    $this->vehiculos_model->getRCombustibleXls();
+  }
 
 
 

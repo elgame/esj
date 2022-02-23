@@ -45,20 +45,20 @@ $(function(){
     $("#total_pagar").text(util.darFormatoNum(suma));
   });
 
-  $("#cuenta_retiro").on('change', function(event) {
+  $("#cuenta_retiro, #fechaAplicacion").on('change', function(event) {
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
     bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
     bancomer = ($("#downloadBancomer").length > 0 ? $("#downloadBancomer").attr('href').split('&cuentaretiro') : ['']),
     aplicarPagos = ($("#aplicarPagos").length > 0 ? $("#aplicarPagos").attr('href').split('?cuentaretiro') : ['']),
     id_empresa = $("#did_empresa").val();
-    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
-    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
-    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
-    $("#downloadBancomer").attr('href', bancomer[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa).hide();
-    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#downloadBancomer").attr('href', bancomer[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&fecha="+$('#fechaAplicacion').val());
 
-    var $this = $(this);
+    var $this = $('#cuenta_retiro');
     if ($this.find('option:selected').attr('data-banco') === '2') { // banamex
       $("#downloadBanamex").show();
       $("#downloadInterban").show();

@@ -202,7 +202,7 @@ class banco_pagos_model extends CI_Model {
     foreach ($pagos as $key => $pago)
     {
       $total_pagar = $num_cargos = 0;
-      $_POST['dfecha']             = date("Y-m-d");
+      $_POST['dfecha']             = (isset($_GET['fecha'])? $_GET['fecha']: date("Y-m-d"));
       $_POST['dcuenta']            = $_GET['cuentaretiro'];
       $_POST['dreferencia']        = '';
       $_POST['dconcepto']          = $pago->nombre_fiscal;
@@ -440,7 +440,7 @@ class banco_pagos_model extends CI_Model {
       $total_pagar = $num_cargos = 0;
       $datos = array(
         'dcuenta' => $_GET['cuentaretiro'],
-        'dfecha' => date("Y-m-d"),
+        'dfecha' => (isset($_GET['fecha'])? $_GET['fecha']: date("Y-m-d")),
         'dreferencia' => '',
         'dconcepto' => 'PAGO LIQ. '.$this->getRangoPagoLiq($pago->pagos),
         'fmetodo_pago' => 'transferencia',
