@@ -1209,6 +1209,8 @@ class caja_chica_model extends CI_Model {
           $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica'], 'monto_ini' => 0],
             "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
+          // $infoGasto = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
+
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
             'id_sucursal'     => (!empty($data['comprobar_sucursalId'][$key])? $data['comprobar_sucursalId'][$key]: NULL),
@@ -1228,6 +1230,10 @@ class caja_chica_model extends CI_Model {
             'id_centro_costo' => (!empty($data['comprobar_centroCostoId'][$key])? $data['comprobar_centroCostoId'][$key]: NULL),
             'id_activo'       => (!empty($data['comprobar_activoId'][$key])? $data['comprobar_activoId'][$key]: NULL),
           );
+
+          // if ($infoGasto->fecha == $data['fecha_caja_chica']) {
+          //   $gastos_udt['monto_ini'] = $data['gasto_comprobar_importe'][$key];
+          // }
 
           // Bitacora
           $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_comprobar_id_gasto'][$key], $gastos_udt,
@@ -1895,6 +1901,12 @@ class caja_chica_model extends CI_Model {
 
       // Obtenemos la diferencia para la caja 2 de tryana
       $diferencia_comp_gasto = $data['fecha_caja'] == $data_gasto->fecha? -1*$data['importe']: ($data['importe_old'] - $data['importe']);
+      $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
+      $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
+      $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
+    } elseif($data['fecha_caja'] == $data_gasto->fecha) {
+      // Obtenemos la diferencia para la caja 2 de tryana
+      $diferencia_comp_gasto = -1*$data['importe'];
       $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
       $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
       $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
