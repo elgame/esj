@@ -370,7 +370,8 @@ class vehiculos_model extends CI_Model {
     $res = $this->db->query(
       "SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre,
         cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
-        (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, cv.unidad
+        (cvg.litros * cvg.precio) AS total1, c.id_empresa, c.folio, cv.unidad,
+        (SELECT Sum(importe) FROM compras_productos WHERE id_orden = c.id_orden) AS total
       FROM compras_ordenes AS c
         INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
         INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
