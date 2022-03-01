@@ -4053,7 +4053,8 @@ class caja_chica_model extends CI_Model {
       }
 
       $html .= '<tr style="font-weight:bold">
-          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">CANCELADOS DIA</td>
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['gastos_comprobar_cancel'], 2, '$', false).'</td>
           <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
           <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobar, 2, '$', false).'</td>
           <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
@@ -4064,7 +4065,7 @@ class caja_chica_model extends CI_Model {
 
 
     // Gastos del Dia
-    $totalGastos = 0;
+    $totalGastosCaja2 = $totalGastos = 0;
     if (count($caja['gastos']) > 0) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS GENERALES</td>
@@ -4092,6 +4093,11 @@ class caja_chica_model extends CI_Model {
           $colortxt = '#000000';
         }
 
+        if ($noCajas == 2) {
+          // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+          $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+        }
+
         $html .= '<tr style="color: '.$colortxt.';">
           <td style="border:1px solid #000;">'.(!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig.'</td>
           <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
@@ -4105,17 +4111,27 @@ class caja_chica_model extends CI_Model {
         </tr>';
       }
 
-      $html .= '<tr style="font-weight:bold">
-          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
-        </tr>
-        <tr><td> </td></tr>';
+      if ($noCajas == 2) {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL CON DIFERENCIA</td>
+            <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosCaja2, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      } else {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="4" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      }
     }
 
 
     // Reposición de gastos
-    $totalReposicionGastosAnt = $totalReposicionGastos = 0;
+    $totalReposicionGastosCaja2 = $totalReposicionGastosAnt = $totalReposicionGastos = 0;
     if ($noCajas == 2 || $noCajas == 6) {
       $html .= '<tr style="font-weight:bold">
           <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">REPOSICION DE GASTOS</td>
@@ -4142,6 +4158,11 @@ class caja_chica_model extends CI_Model {
         if ($gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
+
+            if ($noCajas == 2) {
+              // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+              $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+            }
           }
 
           $totalReposicionGastosAnt += floatval($gasto->monto);
@@ -4162,14 +4183,26 @@ class caja_chica_model extends CI_Model {
         </tr>';
       }
 
-      $html .= '<tr style="font-weight:bold">
-          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
-          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
-        </tr>
-        <tr><td> </td></tr>';
+      if ($noCajas == 2) {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA DIFERENCIA</td>
+            <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosCaja2, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      } else {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      }
 
     } else if ($noCajas == 5) { // caja de fletes
       $codigoAreas = array();
@@ -4423,6 +4456,12 @@ class caja_chica_model extends CI_Model {
         $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
           $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
           $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+
+        $totalFondoCaja = false;
+      } elseif ($noCajas == 2) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+          $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
         $totalFondoCaja = false;
       } else {
