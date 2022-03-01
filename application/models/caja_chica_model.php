@@ -3824,7 +3824,7 @@ class caja_chica_model extends CI_Model {
 
     // ingresos Remisiones
     $totalRemisiones = 0;
-    if ($noCajas == 4 && count($caja['remisiones']) > 0) {
+    if (($noCajas == 2 || $noCajas == 4) && count($caja['remisiones']) > 0) {
 
       $html .= '<tr style="font-weight:bold">
           <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">INGRESOS CLIENTES</td>
