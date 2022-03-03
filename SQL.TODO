@@ -1,8 +1,25 @@
 
+ ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
+ ☐ Nomina registros patronales
+   -- pcc
+   ALTER TABLE empresas ALTER COLUMN registro_patronal TYPE character varying(200);
+   ALTER TABLE public.usuarios ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
+   ALTER TABLE public.nomina_fiscal ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
+   UPDATE usuarios
+      SET registro_patronal = subquery.registro_patronal
+      FROM (SELECT id_empresa, registro_patronal
+            FROM empresas WHERE registro_patronal <> '') AS subquery
+      WHERE usuarios.id_empresa=subquery.id_empresa AND usuarios.user_nomina = 't';
+   UPDATE nomina_fiscal
+      SET registro_patronal = subquery.registro_patronal
+      FROM (SELECT id_empresa, registro_patronal
+            FROM empresas WHERE registro_patronal <> '') AS subquery
+      WHERE nomina_fiscal.id_empresa=subquery.id_empresa;
+   UPDATE nomina_fiscal SET registro_patronal = '' WHERE registro_patronal IS NULL;
+
  ✔ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar, @done (22-02-07 13:22)
    - poliza diario -> producto : poner el importe sin la retencion en el producto, en el acumulado del proveedor poner el importe menos la retención, la diferencia del importe de la retencion poner la cuenta
    - poliza egreso ->
- ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ✔ Caja 6 y 2 @done (22-02-02 18:49)
    -- pcc|san|lap
    INSERT INTO public.cajachicas(no_caja, nombre, presupuesto) VALUES ('6','Caja Plasticos Gdl',50000);

@@ -50,7 +50,29 @@ $(function(){
   });
 
   cuentas.init();
+
+  $('#btn_add_registrop').click(function(event) {
+    if($('#registro_patronal_add').val() != '') {
+      $('#list_registrosp').append('<li><span class="removeRegPatronal btn btn-danger">X</span> <span class="txtRegPatronal">' + $('#registro_patronal_add').val() + '</span></li>');
+      $('#registro_patronal_add').val('');
+
+      joinRegistrosPatronales();
+    }
+  });
+
+  $('#list_registrosp').on('click', '.removeRegPatronal', function(){
+    $(this).parent().remove();
+    joinRegistrosPatronales();
+  });
 });
+
+function joinRegistrosPatronales(){
+  let registros = [];
+  $('#list_registrosp .txtRegPatronal').each(function(index, el) {
+    registros.push($(el).text());
+  });
+  $('#dregistro_patronal').val(registros.join('|'));
+}
 
 // Autocomplete para los catalogos.
 var autocompleteCatalogos = function () {
@@ -234,7 +256,9 @@ var cuentas = (function($){
   var jumpIndex = 0;
 
   function init(){
-    $('#formcliente').keyJump();
+    if($('#formcliente').keyJump){
+      $('#formcliente').keyJump();
+    }
 
     // $("#tableCuentas").on('change', '.chk_banamex', onChangeBanamex);
     $("#tableCuentas").on('click', '.delProd', onClickDeleteCuenta);

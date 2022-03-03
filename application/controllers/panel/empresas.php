@@ -245,7 +245,7 @@ class empresas extends MY_Controller {
             'rules' => 'max_length[50]'),
         array('field' => 'dregistro_patronal',
             'label' => 'Régimen fiscal',
-            'rules' => 'max_length[20]'),
+            'rules' => 'max_length[200]'),
 
 				array('field'	=> 'dpass',
 						'label'	=> 'Clave',
