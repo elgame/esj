@@ -11,7 +11,7 @@ $(function(){
 		select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
-      cargaDepaPues();
+      cargaDepaPuesRegPat();
 		}
 	}).keydown(function(e){
 		if (e.which === 8) {
@@ -31,7 +31,7 @@ $(function(){
   changeEmpresa();
 });
 
-function cargaDepaPues () {
+function cargaDepaPuesRegPat () {
 	$.getJSON(base_url+'panel/empleados/ajax_get_depa_pues/', {'did_empresa': $("#did_empresa").val()},
 		function(data){
       var html = '', i;
@@ -44,6 +44,13 @@ function cargaDepaPues () {
       html = '';
       for (i in data.puestos) {
         html += '<option value="'+data.puestos[i].id_puesto+'">'+data.puestos[i].nombre+'</option>';
+      }
+      $('#fpuesto').html(html);
+
+      html = '';
+      html += '<option value=""></option>';
+      for (i in data.registros_patronales) {
+        html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
       }
       $('#fpuesto').html(html);
 	});

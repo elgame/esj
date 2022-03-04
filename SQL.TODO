@@ -1,7 +1,7 @@
 
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ☐ Nomina registros patronales
-   -- pcc
+   -- pcc|lap
    ALTER TABLE empresas ALTER COLUMN registro_patronal TYPE character varying(200);
    ALTER TABLE public.usuarios ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
    ALTER TABLE public.nomina_fiscal ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";

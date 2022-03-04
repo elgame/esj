@@ -109,6 +109,8 @@ class empleados extends MY_Controller {
     $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
     $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
 
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -168,6 +170,9 @@ class empleados extends MY_Controller {
       $params['tipo_regimens']  = $this->nomina_catalogos_model->tipo('rc');
       $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
       $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
+
+      $params['empresa'] = $this->empresas_model->getInfoEmpresa($params['data']['info'][0]->id_empresa, true)['info'];
+      $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -278,6 +283,10 @@ class empleados extends MY_Controller {
   	$this->load->model('usuarios_departamentos_model');
   	$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false)['puestos'];
   	$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($empresa->registro_patronal)? $empresa->registro_patronal: ''));
+
   	echo json_encode($params);
    }
 
@@ -508,6 +517,10 @@ class empleados extends MY_Controller {
               array('field' => 'fpuesto',
                     'label' => 'Puesto',
                     'rules' => ''),
+              array('field' => 'fregistro_patronal',
+                    'label' => 'Registro Patronal',
+                    'rules' => ''),
+
               array('field' => 'area',
                     'label' => 'Cultivo',
                     'rules' => ''),

@@ -113,6 +113,8 @@ class Usuarios_model extends privilegios_model {
 
 						'id_empresa'           => $this->input->post('did_empresa'),
             'id_puesto'            => $this->input->post('fpuesto'),
+            'registro_patronal'    => (strlen($this->input->post('fregistro_patronal'))>0? $this->input->post('fregistro_patronal'): NULL),
+
 						'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
 						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
@@ -202,6 +204,8 @@ class Usuarios_model extends privilegios_model {
 
 						'id_empresa'           => $this->input->post('did_empresa'),
 						'id_puesto'            => $this->input->post('fpuesto'),
+            'registro_patronal'    => (strlen($this->input->post('fregistro_patronal'))>0? $this->input->post('fregistro_patronal'): NULL),
+
             'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
             'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
@@ -304,7 +308,7 @@ class Usuarios_model extends privilegios_model {
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
             u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato,
-            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot" )
+            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot, u.registro_patronal" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")

@@ -259,6 +259,18 @@
 									  </div>
 									</div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dregistro_patronal">Registro patronal:</label>
+                    <div class="controls">
+                      <select name="fregistro_patronal" id="fregistro_patronal">
+                        <option></option>
+                        <?php foreach ($registros_patronales as $key => $regp): ?>
+                        <option value="<?php echo $regp ?>" <?php echo set_select('fregistro_patronal', $regp, false, $this->input->post('fregistro_patronal')); ?>><?php echo $regp ?></option>
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="cultivosGrup">
                     <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                     <div class="controls">
