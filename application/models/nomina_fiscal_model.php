@@ -55,6 +55,7 @@ class nomina_fiscal_model extends CI_Model {
       'empresaId'         => '',
       'puestoId'          => '',
       'dia_inicia_semana' => '4',
+      'regPatronal'       => '',
     ), $filtros);
 
     // Filtros
@@ -73,6 +74,9 @@ class nomina_fiscal_model extends CI_Model {
       // $sqlpt .= " AND u.id_empresa = {$filtros['empresaId']}";
       // $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_empresa = {$filtros['empresaId']}";
     }
+
+    $sql .= " AND u.registro_patronal = '{$filtros['regPatronal']}'";
+    $sqlg .= " AND nf.registro_patronal = '{$filtros['regPatronal']}'";
 
     if ($filtros['puestoId'] !== '')
     {
@@ -130,7 +134,9 @@ class nomina_fiscal_model extends CI_Model {
 
     // si la nomina esta guardada
     $nm_guardada = $this->db->query("SELECT Count(*) AS num FROM nomina_fiscal_guardadas
-                               WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana[$tipoNomina]} AND tipo = '{$nm_tipo}'")->row();
+                               WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND
+                                semana = {$semana[$tipoNomina]} AND tipo = '{$nm_tipo}' AND
+                                registro_patronal = '{$filtros['regPatronal']}'")->row();
 
     // Query para obtener los empleados de la semana de la nomina.
     if($nm_guardada->num > 0)
@@ -444,7 +450,10 @@ class nomina_fiscal_model extends CI_Model {
           ) np ON np.id_empleado = u.id
             -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
-            (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0
+            (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal
+              WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND
+                registro_patronal = '{$filtros['regPatronal']}' AND id_empleado = u.id
+            ) > 0
         GROUP BY u.id, up.nombre, nf.esta_asegurado, acum_sem.base_semana_ord_gravada, np.uuid
         ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC";
         //{$sqle_id}
@@ -814,6 +823,7 @@ class nomina_fiscal_model extends CI_Model {
         $configuraciones,
         array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
               'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+              'regPatronal' => isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '',
               'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
               ),
         $empleadoId,
@@ -975,6 +985,7 @@ class nomina_fiscal_model extends CI_Model {
             'id_empresa'                => $empresaId,
             'anio'                      => $fechasSemana['anio'],
             'semana'                    => $datos['numSemana'],
+            'registro_patronal'         => $datos['fregistro_patronal'],
             'fecha_inicio'              => $fechasSemana['fecha_inicio'],
             'fecha_final'               => $fechasSemana['fecha_final'],
             'dias_trabajados'           => $empleadoNomina[0]->dias_trabajados,
@@ -1084,59 +1095,60 @@ class nomina_fiscal_model extends CI_Model {
         $salarioDiarioReal = floatval($datos['salario_diario_real']);
 
         $nominasEmpleados[] = array(
-            'id_empleado' => $empleadoId,
-            'id_empresa' => $empresaId,
-            'anio' => $fechasSemana['anio'],
-            'semana' => $datos['numSemana'],
-            'fecha_inicio' => $fechasSemana['fecha_inicio'],
-            'fecha_final' => $fechasSemana['fecha_final'],
-            'dias_trabajados' => $empleadoNomina[0]->dias_trabajados-1,
-            'salario_diario' => $empleadoNomina[0]->salario_diario_real,
-            'salario_integral' => 0,
-            'subsidio' => 0,
-            'sueldo_semanal' => ($empleadoNomina[0]->salario_diario_real*($empleadoNomina[0]->dias_trabajados-1)),
-            'bonos' => $empleadoNomina[0]->bonos,
-            'otros' => $empleadoNomina[0]->otros,
-            'subsidio_pagado' => 0,
-            'vacaciones' => 0,
+            'id_empleado'               => $empleadoId,
+            'id_empresa'                => $empresaId,
+            'anio'                      => $fechasSemana['anio'],
+            'semana'                    => $datos['numSemana'],
+            'registro_patronal'         => $datos['fregistro_patronal'],
+            'fecha_inicio'              => $fechasSemana['fecha_inicio'],
+            'fecha_final'               => $fechasSemana['fecha_final'],
+            'dias_trabajados'           => $empleadoNomina[0]->dias_trabajados-1,
+            'salario_diario'            => $empleadoNomina[0]->salario_diario_real,
+            'salario_integral'          => 0,
+            'subsidio'                  => 0,
+            'sueldo_semanal'            => ($empleadoNomina[0]->salario_diario_real*($empleadoNomina[0]->dias_trabajados-1)),
+            'bonos'                     => $empleadoNomina[0]->bonos,
+            'otros'                     => $empleadoNomina[0]->otros,
+            'subsidio_pagado'           => 0,
+            'vacaciones'                => 0,
             'prima_vacacional_grabable' => 0,
-            'prima_vacacional_exento' => 0,
-            'prima_vacacional' => 0,
-            'aguinaldo_grabable' => 0,
-            'aguinaldo_exento' => 0,
-            'aguinaldo' => 0,
-            'total_percepcion' => 0,
-            'imss' => 0,
-            'vejez' => 0,
-            'isr' => 0,
-            'infonavit' => 0,
-            'subsidio_cobrado' => 0,
-            'prestamos' => $totalPrestamos,
-            'total_deduccion' => 0,
-            'total_neto' => 0,
-            'id_empleado_creador' => $this->session->userdata('id_usuario'),
-            'ptu_exento' => 0,
-            'ptu_grabable' => 0,
-            'ptu' => 0,
-            'id_puesto' => $empleadoNomina[0]->id_puesto,
-            'salario_real' => $salarioDiarioReal, // $empleadoNomina[0]->salario_diario_real,
-            'sueldo_real' => $totalSalarioReal, // $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
-            'total_no_fiscal' => $totalNoFiscal,
-            'horas_extras' => 0,
-            'horas_extras_grabable' => 0,
-            'horas_extras_excento' => 0,
-            'descuento_playeras' => $datos['descuento_playeras'],
-            'descuento_otros' => $datos['descuento_otros'],
-            'descuento_cocina' => $datos['descuento_cocina'],
-            'xml' => '',
-            'uuid' => '',
-            'utilidad_empresa' => $empleadoNomina[0]->utilidad_empresa,
-            'domingo' => $empleadoNomina[0]->domingo,
-            'esta_asegurado' => $datos['esta_asegurado'],
-            'fondo_ahorro' => $empleadoNomina[0]->fondo_ahorro,
-            'pasistencia' => 0,
-            'despensa' => 0,
-            'otros_datos' => ($otros_datos? json_encode($otros_datos): NULL),
+            'prima_vacacional_exento'   => 0,
+            'prima_vacacional'          => 0,
+            'aguinaldo_grabable'        => 0,
+            'aguinaldo_exento'          => 0,
+            'aguinaldo'                 => 0,
+            'total_percepcion'          => 0,
+            'imss'                      => 0,
+            'vejez'                     => 0,
+            'isr'                       => 0,
+            'infonavit'                 => 0,
+            'subsidio_cobrado'          => 0,
+            'prestamos'                 => $totalPrestamos,
+            'total_deduccion'           => 0,
+            'total_neto'                => 0,
+            'id_empleado_creador'       => $this->session->userdata('id_usuario'),
+            'ptu_exento'                => 0,
+            'ptu_grabable'              => 0,
+            'ptu'                       => 0,
+            'id_puesto'                 => $empleadoNomina[0]->id_puesto,
+            'salario_real'              => $salarioDiarioReal, // $empleadoNomina[0]->salario_diario_real,
+            'sueldo_real'               => $totalSalarioReal, // $empleadoNomina[0]->salario_diario_real * ($empleadoNomina[0]->dias_trabajados-1),
+            'total_no_fiscal'           => $totalNoFiscal,
+            'horas_extras'              => 0,
+            'horas_extras_grabable'     => 0,
+            'horas_extras_excento'      => 0,
+            'descuento_playeras'        => $datos['descuento_playeras'],
+            'descuento_otros'           => $datos['descuento_otros'],
+            'descuento_cocina'          => $datos['descuento_cocina'],
+            'xml'                       => '',
+            'uuid'                      => '',
+            'utilidad_empresa'          => $empleadoNomina[0]->utilidad_empresa,
+            'domingo'                   => $empleadoNomina[0]->domingo,
+            'esta_asegurado'            => $datos['esta_asegurado'],
+            'fondo_ahorro'              => $empleadoNomina[0]->fondo_ahorro,
+            'pasistencia'               => 0,
+            'despensa'                  => 0,
+            'otros_datos'               => ($otros_datos? json_encode($otros_datos): NULL),
           );
 
         $msg = 'Registrado, no asegurado.';
@@ -1260,10 +1272,13 @@ class nomina_fiscal_model extends CI_Model {
         'anio'      => $datos['anio']
       ];
 
+      $regPatronal = isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '';
+
       $empleadoNomina = $this->nomina(
         $configuraciones,
         array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
               'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+              'regPatronal' => $regPatronal,
               'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
               ),
         $empleadoId,
@@ -1282,6 +1297,9 @@ class nomina_fiscal_model extends CI_Model {
       $result = array('xml' => '', 'uuid' => '');
       if($datos['esta_asegurado'] == 't')
       {
+        // Asigna el registro patronal del timbrado
+        $empresa['info']->regPatronal = $regPatronal;
+
         // Obtiene los datos para la cadena original.
         $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
         $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
@@ -1315,7 +1333,9 @@ class nomina_fiscal_model extends CI_Model {
             'cfdi_ext' => json_encode($datosApi),
           );
           $this->db->update('nomina_fiscal', $nominasEmpleados,
-            "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$fechasSemana['anio']} AND semana = {$datos['numSemana']}");
+            "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND
+              anio = {$fechasSemana['anio']} AND semana = {$datos['numSemana']} AND
+              registro_patronal = '{$regPatronal}'");
 
           $this->cfdi->anio = $datos['anio'];
           $this->cfdi->semana = $datos['numSemana'];
@@ -1346,10 +1366,11 @@ class nomina_fiscal_model extends CI_Model {
   public function add_nomina_terminada($datos)
   {
     $this->db->insert('nomina_fiscal_guardadas', array(
-      'id_empresa' => $datos['empresa_id'],
-      'anio'       => $datos['anio'],
-      'semana'     => $datos['semana'],
-      'tipo'       => $datos['tipo'],
+      'id_empresa'        => $datos['empresa_id'],
+      'anio'              => $datos['anio'],
+      'semana'            => $datos['semana'],
+      'tipo'              => $datos['tipo'],
+      'registro_patronal' => $datos['registro_patronal'],
       ));
     return true;
   }
@@ -1818,7 +1839,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaInicialPago' => $nomina[0]->nomina->FechaInicialPago,
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
-      'registroPatronal' => $empresa['info']->registro_patronal,
+      'registroPatronal' => $empresa['info']->regPatronal,
       // 'esDependencia'    => 'IP',
       'data' => array(
         array(
@@ -10201,10 +10222,13 @@ class nomina_fiscal_model extends CI_Model {
           'anio'      => $datos['anio']
         ];
 
+        $regPatronal = isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '';
+
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
             'dia_inicia_semana' => $empresa['info']->dia_inicia_semana, 'asegurado'  => true, 'puestoId'  => '',
+            'regPatronal' => $regPatronal,
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
             ),
           $empleadoId,
@@ -10258,6 +10282,9 @@ class nomina_fiscal_model extends CI_Model {
             $empleadoNomina[0]->nomina->percepcionesTotales['TotalExento'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalExento']/2, 2);  // , 2);
             $empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos'] = round($empleadoNomina[0]->nomina->percepcionesTotales['TotalSueldos']/2, 2);  // , 2);
           }
+
+          // Asigna el registro patronal del timbrado
+          $empresa['info']->regPatronal = $regPatronal;
 
           // Obtiene los datos para la cadena original.
           $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina, 'ptu');
@@ -10329,6 +10356,7 @@ class nomina_fiscal_model extends CI_Model {
               'id_empresa'          => $empresaId,
               'anio'                => $fechasSemana['anio'],
               'semana'              => $datos['numSemana'],
+              'registro_patronal'   => $regPatronal,
               'fecha_inicio'        => $fechasSemana['fecha_inicio'],
               'fecha_final'         => $fechasSemana['fecha_final'],
               'dias_trabajados'     => $empleadoNomina[0]->dias_trabajados,
@@ -12288,10 +12316,13 @@ class nomina_fiscal_model extends CI_Model {
           'anio'      => $datos['anio']
         ];
 
+        $regPatronal = isset($datos['fregistro_patronal']) ? $datos['fregistro_patronal'] : '';
+
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
                 'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+                'regPatronal' => $regPatronal,
                 'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
                 ),
           $empleadoId,
@@ -12309,6 +12340,9 @@ class nomina_fiscal_model extends CI_Model {
         $result = array('xml' => '', 'uuid' => '');
         if($datos['esta_asegurado'] == 't')
         {
+          // Asigna el registro patronal del timbrado
+          $empresa['info']->regPatronal = $regPatronal;
+
           // Obtiene los datos para la cadena original.
           $datosApi = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina, 'aguinaldo');
           // $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
@@ -12375,6 +12409,7 @@ class nomina_fiscal_model extends CI_Model {
               'id_empresa'          => $empresaId,
               'anio'                => $fechasSemana['anio'],
               'semana'              => $datos['numSemana'],
+              'registro_patronal'   => $regPatronal,
               'fecha_inicio'        => $fechasSemana['fecha_inicio'],
               'fecha_final'         => $fechasSemana['fecha_final'],
               'dias_trabajados'     => ceil($empleadoNomina[0]->dias_aguinaldo),

@@ -31,6 +31,14 @@
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
+                <label for="fregistro_patronal" style="margin-top: 15px;">Registro Patronal</label>
+                  <select name="fregistro_patronal" id="fregistro_patronal" class="input-medium">
+                    <option value=""></option>
+                    <?php foreach ($registros_patronales as $key => $regp): ?>
+                    <option value="<?php echo $regp ?>" <?php echo set_select_get('fregistro_patronal', $regp, ($this->input->get('fregistro_patronal') == $regp)); ?>><?php echo $regp ?></option>
+                    <?php endforeach ?>
+                </select>
+
                 <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {

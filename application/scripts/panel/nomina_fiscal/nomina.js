@@ -50,6 +50,7 @@
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
           cargaSemanas();
+          cargaRegistrosPatronales();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -530,6 +531,7 @@
       data: {
         empresa_id: $('#empresaId').val(),
         anio: $('#anio').val(),
+        fregistro_patronal: $('#fregistro_patronal').val(),
         empleado_id: $tr.find('.empleado-id').val(),
         generar_nomina: $tr.find('.generar-nomina').val(),
         numSemana: $('#semanas').find('option:selected').val(),
@@ -573,7 +575,8 @@
                   empresa_id: $('#empresaId').val(),
                   anio: $('#anio').val(),
                   semana: $('#semanas').find('option:selected').val(),
-                  tipo: 'se'
+                  tipo: 'se',
+                  registro_patronal: $('#fregistro_patronal').find('option:selected').val()
                 }, function(data, textStatus, xhr) {
                   alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
                   location.reload();
@@ -643,6 +646,20 @@
         }
         $('#semanas').html(html);
         $('.txtTiponomin').text(tipoNomina.charAt(0).toUpperCase() + tipoNomina.slice(1));
+    });
+  };
+
+  var cargaRegistrosPatronales = function () {
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_reg_patronales/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
+      function(data){
+        var html = '', i;
+        console.log(data);
+
+        html += '<option value=""></option>';
+        for (i in data.registros_patronales) {
+          html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
+        }
+        $('#fregistro_patronal').html(html);
     });
   };
 

@@ -16,6 +16,34 @@
             FROM empresas WHERE registro_patronal <> '') AS subquery
       WHERE nomina_fiscal.id_empresa=subquery.id_empresa;
    UPDATE nomina_fiscal SET registro_patronal = '' WHERE registro_patronal IS NULL;
+   -- pcc
+   ALTER TABLE nomina_fiscal ALTER COLUMN registro_patronal SET NOT NULL;
+   ALTER TABLE public.nomina_fiscal DROP CONSTRAINT nomina_fiscal_pkey;
+   ALTER TABLE public.nomina_fiscal ADD CONSTRAINT nomina_fiscal_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
+   ALTER TABLE public.nomina_fiscal_guardadas ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying;
+   UPDATE nomina_fiscal_guardadas
+      SET registro_patronal = subquery.registro_patronal
+      FROM (SELECT id_empresa, registro_patronal
+            FROM empresas WHERE registro_patronal <> '') AS subquery
+      WHERE nomina_fiscal_guardadas.id_empresa=subquery.id_empresa;
+   ALTER TABLE public.nomina_fiscal_guardadas DROP CONSTRAINT nomina_fiscal_guardadas_pkey;
+   ALTER TABLE public.nomina_fiscal_guardadas ADD CONSTRAINT nomina_fiscal_guardadas_pkey PRIMARY KEY (id_empresa, anio, semana, tipo, registro_patronal);
+   ALTER TABLE public.nomina_ptu ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying;
+    UPDATE nomina_ptu
+      SET registro_patronal = subquery.registro_patronal
+      FROM (SELECT id_empresa, registro_patronal
+            FROM empresas WHERE registro_patronal <> '') AS subquery
+      WHERE nomina_ptu.id_empresa=subquery.id_empresa;
+    ALTER TABLE public.nomina_ptu DROP CONSTRAINT nomina_ptu_pkey;
+    ALTER TABLE public.nomina_ptu ADD CONSTRAINT nomina_ptu_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
+    ALTER TABLE public.nomina_aguinaldo ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying;
+    UPDATE nomina_aguinaldo
+      SET registro_patronal = subquery.registro_patronal
+      FROM (SELECT id_empresa, registro_patronal
+            FROM empresas WHERE registro_patronal <> '') AS subquery
+      WHERE nomina_aguinaldo.id_empresa=subquery.id_empresa;
+    ALTER TABLE public.nomina_aguinaldo DROP CONSTRAINT nomina_aguinaldo_pkey;
+    ALTER TABLE public.nomina_aguinaldo ADD CONSTRAINT nomina_aguinaldo_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
 
  ✔ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar, @done (22-02-07 13:22)
    - poliza diario -> producto : poner el importe sin la retencion en el producto, en el acumulado del proveedor poner el importe menos la retención, la diferencia del importe de la retencion poner la cuenta
