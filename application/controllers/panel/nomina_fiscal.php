@@ -1333,14 +1333,14 @@ class nomina_fiscal extends MY_Controller {
   public function nomina_fiscal_banco()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId'], $_GET['anio'], $_GET['fregistro_patronal']);
   }
 
   public function recibo_nomina_pdf()
   {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+    $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId'], null, $_GET['fregistro_patronal']);
   }
 
   public function recibo_tfiniquito_pdf()
@@ -1354,7 +1354,7 @@ class nomina_fiscal extends MY_Controller {
   {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId']);
+    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId'], $_GET['registro_patronal']);
   }
 
   public function asistencia_pdf()
@@ -1400,10 +1400,10 @@ class nomina_fiscal extends MY_Controller {
 
   public function cancelar()
   {
-    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}))
+    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}) && !empty($_GET['fregistro_patronal']))
     {
       $this->load->model('nomina_fiscal_model');
-      $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
+      $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId'], $_GET['fregistro_patronal']);
 
       // if ($response['cancelada']) {
       //   $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $_GET['empresaId'], 'anio' => $_GET['anio'],

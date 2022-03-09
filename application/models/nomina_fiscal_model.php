@@ -1759,6 +1759,7 @@ class nomina_fiscal_model extends CI_Model {
         'subsidio'                  => $subsidio,
         'deduccion_otros'           => (isset($empleadoFiniquito[0]->nomina->deducciones['otros']['total'])? $empleadoFiniquito[0]->nomina->deducciones['otros']['total']: 0),
         'cfdi_ext'                  => json_encode($datosApi),
+        'registro_patronal'         => $empleado['info'][0]->registro_patronal,
       );
       if ($despido2) {
         $data['indemnizaciones']          = $indemnizaciones;
@@ -3198,7 +3199,7 @@ class nomina_fiscal_model extends CI_Model {
     unlink(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
   }
 
-  public function descargarTxtBanco($semana, $empresaId, $anio=null)
+  public function descargarTxtBanco($semana, $empresaId, $anio=null, $regPatronal='')
   {
     $anio = $anio==null?date("Y"):$anio;
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
@@ -3210,7 +3211,9 @@ class nomina_fiscal_model extends CI_Model {
 
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
-    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio,
+      'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -3277,8 +3280,10 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     //Finiquito
-    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
-      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u
+        INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
+        AND f.registro_patronal = '{$regPatronal}'")->result();
     foreach ($finiquitos as $key => $empleado)
     {
       if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
@@ -3435,14 +3440,17 @@ class nomina_fiscal_model extends CI_Model {
       'anio' => $anio,
       'empresaId' => $empresaId,
       'asegurado' => 'si',
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
       'ordenar' => "ORDER BY u.id ASC",
       'dia_inicia_semana' => $diaComienza
     );
     $empleados = $this->nomina($configuraciones, $filtros);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
-    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
-      WHERE f.id_empresa = {$empresaId} AND f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u
+        INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.id_empresa = {$empresaId} AND f.registro_patronal = '{$regPatronal}'
+        AND f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
 
     // echo "<pre>";
     //   var_dump($empleados);
@@ -7275,7 +7283,7 @@ class nomina_fiscal_model extends CI_Model {
     echo $html;
   }
 
-  public function pdfRecibNomin($semana, $anio, $empresaId)
+  public function pdfRecibNomin($semana, $anio, $empresaId, $regPatronal = '')
   {
     $this->load->library('mypdf');
     $this->load->model('empresas_model');
@@ -7290,6 +7298,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
       'ordenar' => " ORDER BY u.id ASC", 'anio' => $anio,
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -7299,20 +7308,20 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($empleados as $key => $value)
     {
       if ($value->esta_asegurado == 't')
-        $this->pdfReciboNominaFiscal($value->id, $semana[$tipoNomina], $anio, $empresaId, $pdf);
+        $this->pdfReciboNominaFiscal($value->id, $semana[$tipoNomina], $anio, $empresaId, $pdf, $regPatronal);
     }
 
     $finiquitos = $this->db->query("SELECT * FROM finiquito AS f
       WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
     foreach ($finiquitos as $key => $value)
     {
-      $this->pdfReciboNominaFiscalFiniquito($value->id_empleado, $semana[$tipoNomina], $anio, $empresaId, $pdf);
+      $this->pdfReciboNominaFiscalFiniquito($value->id_empleado, $semana[$tipoNomina], $anio, $empresaId, $pdf, $regPatronal);
     }
 
     $pdf->Output('Nomina.pdf', 'I');
   }
 
-  public function pdfReciboNominaFiscal($empleadoId, $semanaa, $anio, $empresaId, $pdf=null)
+  public function pdfReciboNominaFiscal($empleadoId, $semanaa, $anio, $empresaId, $pdf=null, $regPatronal = '')
   {
     $pdfuno = $pdf==null? true: false;
     $this->load->model('empresas_model');
@@ -7325,7 +7334,9 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio,
+      'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
@@ -8487,7 +8498,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Output('Nomina.pdf', 'I');
   }
 
-  public function pdfReciboNominaFiscalFiniquito($empleadoId, $semanaa, $anio, $empresaId, $pdf=null)
+  public function pdfReciboNominaFiscalFiniquito($empleadoId, $semanaa, $anio, $empresaId, $pdf=null, $regPatronal = '')
   {
     $this->load->model('empresas_model');
 
@@ -8503,9 +8514,10 @@ class nomina_fiscal_model extends CI_Model {
 
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
-    $finiquitos = $this->db->query("SELECT u.*, f.*, up.nombre AS puesto FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+    $finiquitos = $this->db->query("SELECT u.*, f.*, up.nombre AS puesto
+      FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
         INNER JOIN usuarios_puestos AS up ON up.id_puesto = u.id_puesto
-      WHERE u.id = {$empleadoId} AND f.id_empresa = {$empresaId}
+      WHERE u.id = {$empleadoId} AND f.id_empresa = {$empresaId} AND f.registro_patronal = '{$regPatronal}'
         AND f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->row();
 
     if (isset($finiquitos->id_empresa)) {
@@ -12555,7 +12567,7 @@ class nomina_fiscal_model extends CI_Model {
    *
    * @return array
    */
-  public function cancelaFactura($idEmpleado, $anio, $semana, $idEmpresa)
+  public function cancelaFactura($idEmpleado, $anio, $semana, $idEmpresa, $regPatronal='')
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
@@ -12568,7 +12580,8 @@ class nomina_fiscal_model extends CI_Model {
                                 INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
                                 INNER JOIN usuarios AS u ON u.id = nf.id_empleado
                                WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa}
-                                AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+                                AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'
+                                AND nf.registro_patronal = '{$regPatronal}'")->row();
 
     // Si esta timbrada la nomina se cancela
     if ($query->uuid != '') {
@@ -12654,7 +12667,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       // Si se eliminaron entonces borra la nomina guardada para que recalcule
-      $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $idEmpresa, 'anio' => $anio, 'semana' => $semana, 'tipo' => 'se'));
+      $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $idEmpresa, 'anio' => $anio, 'semana' => $semana, 'tipo' => 'se', 'registro_patronal' => $regPatronal));
       return array('msg' => 201, 'empresa' => '', 'cancelada' => true);
     }
   }

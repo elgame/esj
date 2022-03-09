@@ -322,14 +322,14 @@
                           <?php if($nominas_finalizadas || $nominas_generadas){
                               // if ($e->esta_generada !== 'false') {
                           ?>
-                            <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
+                            <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>"
                               onclick="if(confirm('Seguro de cancelar el comprobante de nomina?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
                               <br>
                           <?php
                               // }
                               if ($nominas_finalizadas) {
                           ?>
-                            <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                            <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php
                               }
                           } ?>

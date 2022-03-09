@@ -1,6 +1,7 @@
 
+ ☐ Reporte de listado de empleados
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
- ☐ Nomina registros patronales
+ ✔ Nomina registros patronales @done (22-03-09 14:16)
    -- pcc|lap|san
    ALTER TABLE empresas ALTER COLUMN registro_patronal TYPE character varying(200);
    ALTER TABLE public.usuarios ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
@@ -16,7 +17,6 @@
             FROM empresas WHERE registro_patronal <> '') AS subquery
       WHERE nomina_fiscal.id_empresa=subquery.id_empresa;
    UPDATE nomina_fiscal SET registro_patronal = '' WHERE registro_patronal IS NULL;
-   -- pcc|san
    ALTER TABLE nomina_fiscal ALTER COLUMN registro_patronal SET NOT NULL;
    ALTER TABLE public.nomina_fiscal DROP CONSTRAINT nomina_fiscal_pkey;
    ALTER TABLE public.nomina_fiscal ADD CONSTRAINT nomina_fiscal_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
@@ -44,6 +44,10 @@
       WHERE nomina_aguinaldo.id_empresa=subquery.id_empresa;
     ALTER TABLE public.nomina_aguinaldo DROP CONSTRAINT nomina_aguinaldo_pkey;
     ALTER TABLE public.nomina_aguinaldo ADD CONSTRAINT nomina_aguinaldo_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
+    -- lap|san
+    ALTER TABLE public.finiquito ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT ''::character varying;
+    UPDATE finiquito SET registro_patronal = Coalesce(cfdi_ext->>'registroPatronal', '');
+
 
  ✔ Poner en polizas la opcion de retencion del 1.25, que lo puedan asignar, @done (22-02-07 13:22)
    - poliza diario -> producto : poner el importe sin la retencion en el producto, en el acumulado del proveedor poner el importe menos la retención, la diferencia del importe de la retencion poner la cuenta
