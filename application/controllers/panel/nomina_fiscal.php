@@ -20,6 +20,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/add_finiquito/',
     'nomina_fiscal/ajax_add_prenomina_empleado/',
     'nomina_fiscal/ajax_get_semana/',
+    'nomina_fiscal/ajax_get_reg_patronales/',
     'nomina_fiscal/ajax_add_nomina_ptu_empleado/',
     'nomina_fiscal/ajax_add_nomina_aguinaldo_empleado/',
     'nomina_fiscal/ajax_add_nomina_terminada/',
@@ -201,6 +202,7 @@ class nomina_fiscal extends MY_Controller {
       'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
@@ -220,6 +222,9 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
     $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
@@ -248,7 +253,8 @@ class nomina_fiscal extends MY_Controller {
     $data_nom_guar = $this->db->query("SELECT Count(*) AS num
       FROM nomina_fiscal_guardadas
       WHERE id_empresa = {$filtros['empresaId']} AND anio = {$filtros['anio']}
-        AND semana = {$filtros['semana']} AND tipo = 'se'")->row();
+        AND semana = {$filtros['semana']} AND tipo = 'se'
+        AND registro_patronal = '{$filtros['regPatronal']}'")->row();
     $params['nominas_generadas'] = $data_nom_guar->num > 0? true: false;
 
     // Total de nominas de los empleados generadas.
@@ -305,6 +311,7 @@ class nomina_fiscal extends MY_Controller {
       'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'asegurado'   => true,
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
@@ -374,6 +381,9 @@ class nomina_fiscal extends MY_Controller {
       }
     }
 
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
     // Indica si ya se generaron todas las nominas de los empleados de la semana.
     $params['nominas_finalizadas'] = false;
     if (count($params['empleados']) == $totalGeneradas && $totalGeneradas != 0)
@@ -413,10 +423,11 @@ class nomina_fiscal extends MY_Controller {
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
     $filtros = array(
-      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
-      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
-      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
-      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'semana'      => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
 
@@ -481,6 +492,9 @@ class nomina_fiscal extends MY_Controller {
         $params['nominas_generadas'] = true;
       }
     }
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     // Indica si ya se generaron todas las nominas de los empleados de la semana.
     $params['nominas_finalizadas'] = false;
@@ -1283,6 +1297,16 @@ class nomina_fiscal extends MY_Controller {
     $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['did_empresa'])->get()->row()->dia_inicia_semana;
     $anio = isset($_GET['anio'])? $_GET['anio']: null;
     echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia, $anio));
+  }
+
+  public function ajax_get_reg_patronales()
+  {
+    $this->load->model('empresas_model');
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['did_empresa'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
+    echo json_encode($params);
   }
 
   public function nomina_fiscal_pdf()

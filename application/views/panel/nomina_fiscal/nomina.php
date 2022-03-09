@@ -25,11 +25,19 @@
             <form action="<?php echo base_url('panel/nomina_fiscal/'); ?>" method="GET" class="form-search" id="form">
               <div class="form-actions form-filters">
                 <label for="anio">Año</label>
-                <input type="number" name="anio" class="search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
+                <input type="number" name="anio" class="input-small search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
 
                 <label for="empresa">Empresa</label>
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
+
+                <label for="fregistro_patronal" style="margin-top: 15px;">Registro Patronal</label>
+                  <select name="fregistro_patronal" id="fregistro_patronal" class="input-medium">
+                    <option value=""></option>
+                    <?php foreach ($registros_patronales as $key => $regp): ?>
+                    <option value="<?php echo $regp ?>" <?php echo set_select_get('fregistro_patronal', $regp, ($this->input->get('fregistro_patronal') == $regp)); ?>><?php echo $regp ?></option>
+                    <?php endforeach ?>
+                </select>
 
                 <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
@@ -50,14 +58,6 @@
                   ?>
                 </select>
                 <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
-
-               <!--  <label for="ffecha1" style="margin-top: 15px;">Puesto</label>
-                  <select name="puestoId" class="input-large">
-                    <option value=""></option>
-                  <?php //foreach ($puestos as $puesto) { ?>
-                    <option value="<?php //echo $puesto->id_puesto ?>" <?php //echo set_select_get('puestoId', $puesto->id_puesto) ?>><?php //echo $puesto->nombre ?></option>
-                  <?php //} ?>
-                </select> -->
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
                   <a rel="superbox-80x450" href="<?php echo base_url('panel/nomina_fiscal/calc_anual/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success pull-right" title="Calculo Anual" id="calculoAnual">Calculo Anual</a>

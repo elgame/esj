@@ -2948,7 +2948,8 @@ class caja_chica_model extends CI_Model {
 
           if ($noCajas == 2) {
             // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
-            $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+            // $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+            $totalGastosCaja2 += $gasto->folio_ant > 0? abs(floatval($gasto->diferencia_comp_gasto)): floatval($gasto->monto);
           }
 
           $colortxt = [[0, 0, 0]];
@@ -3039,7 +3040,8 @@ class caja_chica_model extends CI_Model {
 
             if ($noCajas == 2) {
               // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
-              $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              // $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              $totalReposicionGastosCaja2 += abs(floatval($gasto->diferencia_comp_gasto));
             }
           }
 
@@ -4095,7 +4097,8 @@ class caja_chica_model extends CI_Model {
 
         if ($noCajas == 2) {
           // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
-          $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+          // $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+          $totalGastosCaja2 += $gasto->folio_ant > 0? abs(floatval($gasto->diferencia_comp_gasto)): floatval($gasto->monto);
         }
 
         $html .= '<tr style="color: '.$colortxt.';">
@@ -4161,7 +4164,8 @@ class caja_chica_model extends CI_Model {
 
             if ($noCajas == 2) {
               // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
-              $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              // $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              $totalReposicionGastosCaja2 += abs(floatval($gasto->diferencia_comp_gasto));
             }
           }
 
