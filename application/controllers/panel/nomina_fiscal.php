@@ -1354,7 +1354,7 @@ class nomina_fiscal extends MY_Controller {
   {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId'], $_GET['registro_patronal']);
+    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId'], $_GET['fregistro_patronal']);
   }
 
   public function asistencia_pdf()
