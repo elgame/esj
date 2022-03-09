@@ -1,7 +1,7 @@
 
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ☐ Nomina registros patronales
-   -- pcc|lap
+   -- pcc|lap|san
    ALTER TABLE empresas ALTER COLUMN registro_patronal TYPE character varying(200);
    ALTER TABLE public.usuarios ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
    ALTER TABLE public.nomina_fiscal ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
@@ -16,7 +16,7 @@
             FROM empresas WHERE registro_patronal <> '') AS subquery
       WHERE nomina_fiscal.id_empresa=subquery.id_empresa;
    UPDATE nomina_fiscal SET registro_patronal = '' WHERE registro_patronal IS NULL;
-   -- pcc
+   -- pcc|san
    ALTER TABLE nomina_fiscal ALTER COLUMN registro_patronal SET NOT NULL;
    ALTER TABLE public.nomina_fiscal DROP CONSTRAINT nomina_fiscal_pkey;
    ALTER TABLE public.nomina_fiscal ADD CONSTRAINT nomina_fiscal_pkey PRIMARY KEY (id_empleado, id_empresa, anio, semana, registro_patronal);
