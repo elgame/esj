@@ -1701,6 +1701,7 @@ class inventario_model extends privilegios_model{
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
     $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
     $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $tipoFecha = $this->input->get('tipo_fecha')? $this->input->get('tipo_fecha'): 'co.fecha_aceptacion';
 
     $this->load->model('empresas_model');
     $client_default = $this->empresas_model->getDefaultEmpresa();
@@ -1753,20 +1754,20 @@ class inventario_model extends privilegios_model{
               GROUP BY pc.id_producto, pc.id_compra, pc.id_orden
             ) AS cp ON c.id_compra = cp.id_compra
             INNER JOIN compras_ordenes AS co ON cp.id_orden = co.id_orden
-            INNER JOIN (
+            LEFT JOIN (
               SELECT id_orden, array_agg(id_area) AS id_areas
               FROM public.compras_ordenes_areas
               {$sql_area}
               GROUP BY id_orden
             ) AS coa ON coa.id_orden = co.id_orden
-            INNER JOIN (
+            LEFT JOIN (
               SELECT id_orden, array_agg(id_rancho) AS id_ranchos
               FROM public.compras_ordenes_rancho
               {$sql_rancho}
               GROUP BY id_orden
             ) AS cor ON cor.id_orden = co.id_orden
           WHERE c.status <> 'ca' AND c.tipo = 'c' AND cp.id_producto = {$idsproveedores} {$sql} AND
-            Date(co.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            Date({$tipoFecha}) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
         ) AS cp ON p.id_producto = cp.id_producto
         INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
       WHERE p.id_producto = {$idsproveedores}
