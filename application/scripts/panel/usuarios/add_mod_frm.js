@@ -52,7 +52,7 @@ function cargaDepaPuesRegPat () {
       for (i in data.registros_patronales) {
         html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
       }
-      $('#fpuesto').html(html);
+      $('#fregistro_patronal').html(html);
 	});
 }
 

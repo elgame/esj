@@ -1288,7 +1288,7 @@ class nomina_fiscal extends MY_Controller {
   public function nomina_fiscal_pdf()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    $this->nomina_fiscal_model->pdfNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio'], $_GET['fregistro_patronal']);
   }
 
   public function nomina_fiscal_rpt_pdf()

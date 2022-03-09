@@ -3394,7 +3394,7 @@ class nomina_fiscal_model extends CI_Model {
    |------------------------------------------------------------------------
    */
 
-  public function pdfNominaFiscal($semana, $empresaId, $anio=null, $diaComienza=4)
+  public function pdfNominaFiscal($semana, $empresaId, $anio=null, $regPatronal='', $diaComienza=4)
   {
     $anio = $anio==null? date("Y"): $anio;
     $this->load->model('empresas_model');
