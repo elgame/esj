@@ -7358,7 +7358,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Si es la version 3.3 de CFDI
     if (isset($xml[0]['Version'])) {
-      $this->pdfReciboNominaFiscal33($empleadoId, $semanaa, $anio, $empresaId, $pdf);
+      $this->pdfReciboNominaFiscal33($empleadoId, $semanaa, $anio, $empresaId, $pdf, $regPatronal);
     } else {
       // echo "<pre>";
       //   var_dump($nomina, $xml);
@@ -7894,7 +7894,7 @@ class nomina_fiscal_model extends CI_Model {
     }
   }
 
-  public function pdfReciboNominaFiscal33($empleadoId, $semana, $anio, $empresaId, $pdf=null)
+  public function pdfReciboNominaFiscal33($empleadoId, $semana, $anio, $empresaId, $pdf=null, $regPatronal = '')
   {
     $pdfuno = $pdf==null? true: false;
     $this->load->model('empresas_model');
@@ -7907,7 +7907,9 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio, 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+    $filtros = array('semana' => $semana[$tipoNomina], 'anio' => $anio,
+      'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
