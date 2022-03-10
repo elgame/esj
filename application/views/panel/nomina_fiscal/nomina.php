@@ -223,7 +223,8 @@
 
                         $totalPercepcionesEmpleado = $e->nomina->percepciones['sueldo']['total'] +
                                              $e->nomina->percepciones['horas_extras']['total'] +
-                                             $e->nomina->percepciones['premio_asistencia']['total'];
+                                             $e->nomina->percepciones['premio_asistencia']['total']+
+                                             $e->nomina->vacaciones+$e->nomina->prima_vacacional;
                                              // $e->nomina->percepciones['despensa']['total'];
 
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
