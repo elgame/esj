@@ -1840,7 +1840,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaInicialPago' => $nomina[0]->nomina->FechaInicialPago,
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
-      'registroPatronal' => $empresa['info']->regPatronal,
+      'registroPatronal' => $empleado['info'][0]->registro_patronal,
       // 'esDependencia'    => 'IP',
       'data' => array(
         array(
