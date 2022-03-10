@@ -31,6 +31,14 @@
                   <button class="btn" type="submit" style="margin-left:-3px;">Buscar</button>
                 </div>
 
+                <label for="fregistro_patronal" style="margin-top: 15px;">Registro Patronal</label>
+                  <select name="fregistro_patronal" id="fregistro_patronal" class="input-medium">
+                    <option value=""></option>
+                    <?php foreach ($registros_patronales as $key => $regp): ?>
+                    <option value="<?php echo $regp ?>" <?php echo set_select_get('fregistro_patronal', $regp, ($this->input->get('fregistro_patronal') == $regp)); ?>><?php echo $regp ?></option>
+                    <?php endforeach ?>
+                </select>
+
                 <div class="input-append pull-right span6">
                   <input type="text" name="dempleado" value="" id="dempleado" class="span9" placeholder="Buscar">
                   <button class="btn" type="button" id="btnAddProveedor" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>

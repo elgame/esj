@@ -266,6 +266,7 @@ class empleados extends MY_Controller {
         'empresaId'         => $_GET['did_empresa'],
         'puestoId'          => '',
         'dia_inicia_semana' => '4',
+        'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
         'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
       );
       $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
@@ -333,6 +334,7 @@ class empleados extends MY_Controller {
       'anio'        => date("Y"),
       'empresaId'   => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
       'puestoId'    => '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
@@ -343,6 +345,9 @@ class empleados extends MY_Controller {
 
     $_GET['cid_empresa'] = $filtros['empresaId'];
     $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
 
