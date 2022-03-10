@@ -117,7 +117,7 @@ function removeProveedor(event){
 }
 
 var cargaRegistrosPatronales = function () {
-  $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_reg_patronales/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
+  $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_reg_patronales/', {'did_empresa': $("#did_empresa").val()},
     function(data){
       var html = '', i;
       console.log(data);
