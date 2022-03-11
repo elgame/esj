@@ -500,7 +500,7 @@
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_cocina[]" value="<?php echo $e->descuento_cocina ?>" class="span12 vpositive descuento-cocina" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_prestamoef[]" value="<?php echo $totalPrestamosEmpleadoEf ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
-                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_materiales[]" value="<?php echo $totalDescuentoMaterial ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_materiales[]" value="<?php echo $totalDescuentoMaterial ?>" class="span12 vpositive descuento-material" readonly></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php
 

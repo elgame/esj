@@ -150,7 +150,7 @@
 
       // metodo que recalcula el isr.
       ajaxGetEmpleado($parent);
-      // recalculaEmpleado($parent);
+      recalculaEmpleado($parent);
     });
   };
 
@@ -287,6 +287,10 @@
         $dcocina    = $parent.find('.descuento-cocina'),
         $isr        = $parent.find('.isr'),
         $fondo_ahorro = $parent.find('.fondo_ahorro'),
+        $totalPrestamosEmpleadoEf = $parent.find('.descuento-prestef'),
+        $totalDescuentoMaterial = $parent.find('.descuento-material'),
+        $pensionAlimenticia = $parent.find('.pension_alimenticia'),
+        $fonacot = $parent.find('.fonacot'),
 
         $bonos      = $parent.find('.bonos'),
         $otros      = $parent.find('.otros'),
@@ -386,12 +390,18 @@
                        parseFloat($bonos.val()) +
                        parseFloat($otros.val()) +
                        parseFloat($domingo.val()) -
-                       parseFloat($totalNomina.val()) -
-                       parseFloat($infonavit.val())-
+                       ($esta_asegurado.val() == 't'? parseFloat($totalNomina.val()): 0) -
+                       ($esta_asegurado.val() == 't'? parseFloat($infonavit.val()): 0) -
+                       ($esta_asegurado.val() == 't'? parseFloat($fondo_ahorro.val()): 0) -
                        parseFloat($prestamos.val()) -
                        parseFloat($playeras.val()) -
                        parseFloat($dotros.val()) -
-                       parseFloat($dcocina.val());
+                       parseFloat($dcocina.val()) -
+                       parseFloat($totalPrestamosEmpleadoEf.val()) -
+                       parseFloat($totalDescuentoMaterial.val()) -
+                       parseFloat($pensionAlimenticia.val()) -
+                       parseFloat($fonacot.val())
+                       ;
 
     $totalComplementoSpan.text(util.darFormatoNum(util.trunc2Dec(totalComplemento)));
     $totalComplemento.val(util.trunc2Dec(totalComplemento));
