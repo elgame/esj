@@ -479,7 +479,7 @@ class facturacion extends MY_Controller {
     if (isset($_GET['id_empresa']{0}) && isset($_GET['fecha1']{0}) && isset($_GET['fecha2']{0}))
     {
       $this->load->model('facturacion_model');
-      $this->facturacion_model->descargarMasiva($_GET['id_empresa'], $_GET['fecha1'], $_GET['fecha2']);
+      $this->facturacion_model->descargarMasiva($_GET['id_empresa'], $_GET['fecha1'], $_GET['fecha2'], $_GET['id_cliente']);
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }

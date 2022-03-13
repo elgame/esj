@@ -144,7 +144,7 @@ class compras_model extends privilegios_model{
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
-                  cp.ieps, cp.porcentaje_ieps,
+                  cp.ieps, cp.porcentaje_ieps, cp.porcentaje_isr,
                   cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
            FROM compras_facturas AS cf
              INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden

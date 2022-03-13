@@ -681,7 +681,7 @@ class polizas_model extends CI_Model {
   public function getTipoISRCompras($observaciones)
   {
     $observaciones = mb_strtoupper($observaciones, 'UTF-8');
-    $tipo = 'ho';
+    $tipo = '';
     if (strpos($observaciones, 'HONORARIOS') !== false) {
       $tipo = 'ho';
     } elseif (strpos($observaciones, 'RENTA') !== false) {
@@ -1213,6 +1213,7 @@ class polizas_model extends CI_Model {
                            'ieps_pagar9'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '0'),
                            'isr_retenerHo' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '1'),
                            'isr_retener'   => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'),
+                           'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
                           );
 
         //Agregamos el header de la poliza
@@ -1235,6 +1236,7 @@ class polizas_model extends CI_Model {
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
           $impuestos['isr_retener']['importe']   = 0;
+          $impuestos['isr_retenidoxpagar125']['importe']   = 0;
           $impuestos['isr_retenerHo']['importe'] = 0;
           $impuestos['ieps_pagar6']['importe']   = 0;
           $impuestos['ieps_pagar7']['importe']   = 0;
@@ -1246,6 +1248,7 @@ class polizas_model extends CI_Model {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
 
             $ret_iva_pos = ($value->retencion_iva/($value->importe>0 ? $value->importe : 1))*100;
+            $tipo_isr_ret = $this->getTipoISRCompras($inf_compra['info']->concepto);
 
             $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetxPagar();
             if($ret_iva_pos > 15)
@@ -1253,18 +1256,22 @@ class polizas_model extends CI_Model {
               $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagar100();
             }elseif($ret_iva_pos > 4.5)
             { // Asigana las cuentas de honorarios o arrendamiento
-              if ($this->getTipoISRCompras($inf_compra['info']->concepto) == 'ar') { // Arrendamiento
+              if ($tipo_isr_ret == 'ar') { // Arrendamiento
                 $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarArrend();
-              } else { // Honorarios
+              } elseif ($tipo_isr_ret == 'ho') { // Honorarios
                 $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarHono();
               }
             }
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
 
-            if ($this->getTipoISRCompras($inf_compra['info']->concepto) == 'ar') { // Arrendamiento
+            if ($tipo_isr_ret == 'ar') { // Arrendamiento
               $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
-            } else { // Honorario
+            } elseif ($tipo_isr_ret == 'ho') { // Honorario
               $impuestos['isr_retenerHo']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            }
+
+            if ($value->porcentaje_isr == 1.25) { // 1.25
+              $impuestos['isr_retenidoxpagar125']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
             }
 
             if ($value->ieps > 0) {
@@ -3092,6 +3099,8 @@ class polizas_model extends CI_Model {
         'isr_retenidoHo' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
         'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
         'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '1'),
         'ieps_pagado6'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
         'ieps_pagado7'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
         'ieps_pagado9'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
@@ -3150,9 +3159,14 @@ class polizas_model extends CI_Model {
             if ($this->getTipoISRCompras($value->observaciones) == 'ar') { // Arrendamiento
               $impuestos['isr_retener']['importe']    = $value->retencion_isr;
               $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
-            } else { // Honorario
+            } elseif ($this->getTipoISRCompras($value->observaciones) == 'ho') { // Honorario
               $impuestos['isr_retenerHo']['importe']    = $value->retencion_isr;
               $impuestos['isr_retenidoHo']['importe']   = $impuestos['isr_retenerHo']['importe'];
+            }
+
+            if ($value->porcentaje_isr == 1.25) {
+              $impuestos['isr_retenidoxpagar125']['importe'] = $value->retencion_isr;
+              $impuestos['isr_retenidopagado125']['importe'] = $impuestos['isr_retenidoxpagar125']['importe'];
             }
           }
 

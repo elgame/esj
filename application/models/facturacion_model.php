@@ -1503,10 +1503,15 @@ class facturacion_model extends privilegios_model{
         unlink(APPPATH.'media/documentos.zip');
     }
 
-    public function descargarMasiva($id_empresa, $fecha1, $fecha2)
+    public function descargarMasiva($id_empresa, $fecha1, $fecha2, $id_cliente = null)
     {
       $fecha1 = substr($fecha1, 0, 10);
       $fecha2 = substr($fecha2, 0, 10);
+      $sql = '';
+
+      if (!empty($id_cliente)) {
+        $sql = " AND c.id_cliente = {$id_cliente}";
+      }
 
       $res = $this->db->query("SELECT f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal
          FROM facturacion as f
@@ -1514,7 +1519,7 @@ class facturacion_model extends privilegios_model{
          WHERE f.id_empresa = {$id_empresa} AND
            Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}' AND
            id_nc IS NULL AND id_abono_factura IS NULL AND
-           is_factura = 't'
+           is_factura = 't' {$sql}
          ")->result();
 
       $num_files = 0;
