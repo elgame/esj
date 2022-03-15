@@ -24,7 +24,6 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'C' => 
         array (
             'Catalogos\\' => 10,
-            'Carbon\\' => 7,
         ),
     );
 
@@ -45,9 +44,19 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         array (
             0 => __DIR__ . '/../..' . '/application/libraries/catalogos',
         ),
-        'Carbon\\' => 
+    );
+
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/..' . '/nesbot/carbon/src',
+    );
+
+    public static $prefixesPsr0 = array (
+        'U' => 
         array (
-            0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
+            'UpdateHelper\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/kylekatarnls/update-helper/src',
+            ),
         ),
     );
 
@@ -58,13 +67,19 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'Carabiner' => __DIR__ . '/../..' . '/application/libraries/carabiner.php',
         'Carbon\\Carbon' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Carbon.php',
         'Carbon\\CarbonInterval' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonInterval.php',
+        'Carbon\\CarbonPeriod' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonPeriod.php',
         'Carbon\\Exceptions\\InvalidDateException' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Exceptions/InvalidDateException.php',
+        'Carbon\\Laravel\\ServiceProvider' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Laravel/ServiceProvider.php',
+        'Carbon\\Translator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Translator.php',
+        'Carbon\\Upgrade' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Upgrade.php',
         'Catalogos' => __DIR__ . '/../..' . '/application/libraries/catalogos/Catalogos.php',
         'Cheque' => __DIR__ . '/../..' . '/application/libraries/cheque.php',
         'CholeskyDecomposition' => __DIR__ . '/../..' . '/application/libraries/PHPExcel/PHPExcel/Shared/JAMA/CholeskyDecomposition.php',
         'Curl' => __DIR__ . '/../..' . '/application/libraries/curl.php',
+        'Datamatrix' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/datamatrix.php',
         'EigenvalueDecomposition' => __DIR__ . '/../..' . '/application/libraries/PHPExcel/PHPExcel/Shared/JAMA/EigenvalueDecomposition.php',
         'Email' => __DIR__ . '/../..' . '/application/core/system/Email.php',
+        'ExcelHelpersLib' => __DIR__ . '/../..' . '/application/libraries/ExcelHelpersLib.php',
         'FPDF' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/fpdi/fpdi2tcpdf_bridge.php',
         'FPDF_TPL' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/fpdi/fpdf_tpl.php',
         'FPDI' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/fpdi/fpdi.php',
@@ -79,6 +94,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'Incoterm' => __DIR__ . '/../..' . '/application/libraries/catalogos/Incoterm.php',
         'JSMin' => __DIR__ . '/../..' . '/application/libraries/jsmin.php',
         'JSMinException' => __DIR__ . '/../..' . '/application/libraries/jsmin.php',
+        'JsonSerializable' => __DIR__ . '/..' . '/nesbot/carbon/src/JsonSerializable.php',
         'MY_Controller' => __DIR__ . '/../..' . '/application/core/MY_Controller.php',
         'MY_Lang' => __DIR__ . '/../..' . '/application/core/MY_Lang.php',
         'MY_Session' => __DIR__ . '/../..' . '/application/libraries/MY_Session.php',
@@ -99,6 +115,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'OLE_PPS_File' => __DIR__ . '/../..' . '/application/libraries/excel2/File.php',
         'OLE_PPS_Root' => __DIR__ . '/../..' . '/application/libraries/excel2/Root.php',
         'PDF' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/fpdf/tutorial/tuto6.php',
+        'PDF417' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/pdf417.php',
         'PDFMerger' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/PDFMerger.php',
         'PHPExcel' => __DIR__ . '/../..' . '/application/libraries/PHPExcel/PHPExcel.php',
         'PHPExcel_Autoloader' => __DIR__ . '/../..' . '/application/libraries/PHPExcel/PHPExcel/Autoloader.php',
@@ -315,6 +332,9 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'Symfony\\Component\\Translation\\Command\\XliffLintCommand' => __DIR__ . '/..' . '/symfony/translation/Command/XliffLintCommand.php',
         'Symfony\\Component\\Translation\\DataCollectorTranslator' => __DIR__ . '/..' . '/symfony/translation/DataCollectorTranslator.php',
         'Symfony\\Component\\Translation\\DataCollector\\TranslationDataCollector' => __DIR__ . '/..' . '/symfony/translation/DataCollector/TranslationDataCollector.php',
+        'Symfony\\Component\\Translation\\DependencyInjection\\TranslationDumperPass' => __DIR__ . '/..' . '/symfony/translation/DependencyInjection/TranslationDumperPass.php',
+        'Symfony\\Component\\Translation\\DependencyInjection\\TranslationExtractorPass' => __DIR__ . '/..' . '/symfony/translation/DependencyInjection/TranslationExtractorPass.php',
+        'Symfony\\Component\\Translation\\DependencyInjection\\TranslatorPass' => __DIR__ . '/..' . '/symfony/translation/DependencyInjection/TranslatorPass.php',
         'Symfony\\Component\\Translation\\Dumper\\CsvFileDumper' => __DIR__ . '/..' . '/symfony/translation/Dumper/CsvFileDumper.php',
         'Symfony\\Component\\Translation\\Dumper\\DumperInterface' => __DIR__ . '/..' . '/symfony/translation/Dumper/DumperInterface.php',
         'Symfony\\Component\\Translation\\Dumper\\FileDumper' => __DIR__ . '/..' . '/symfony/translation/Dumper/FileDumper.php',
@@ -336,6 +356,11 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'Symfony\\Component\\Translation\\Extractor\\AbstractFileExtractor' => __DIR__ . '/..' . '/symfony/translation/Extractor/AbstractFileExtractor.php',
         'Symfony\\Component\\Translation\\Extractor\\ChainExtractor' => __DIR__ . '/..' . '/symfony/translation/Extractor/ChainExtractor.php',
         'Symfony\\Component\\Translation\\Extractor\\ExtractorInterface' => __DIR__ . '/..' . '/symfony/translation/Extractor/ExtractorInterface.php',
+        'Symfony\\Component\\Translation\\Extractor\\PhpExtractor' => __DIR__ . '/..' . '/symfony/translation/Extractor/PhpExtractor.php',
+        'Symfony\\Component\\Translation\\Extractor\\PhpStringTokenParser' => __DIR__ . '/..' . '/symfony/translation/Extractor/PhpStringTokenParser.php',
+        'Symfony\\Component\\Translation\\Formatter\\ChoiceMessageFormatterInterface' => __DIR__ . '/..' . '/symfony/translation/Formatter/ChoiceMessageFormatterInterface.php',
+        'Symfony\\Component\\Translation\\Formatter\\MessageFormatter' => __DIR__ . '/..' . '/symfony/translation/Formatter/MessageFormatter.php',
+        'Symfony\\Component\\Translation\\Formatter\\MessageFormatterInterface' => __DIR__ . '/..' . '/symfony/translation/Formatter/MessageFormatterInterface.php',
         'Symfony\\Component\\Translation\\IdentityTranslator' => __DIR__ . '/..' . '/symfony/translation/IdentityTranslator.php',
         'Symfony\\Component\\Translation\\Interval' => __DIR__ . '/..' . '/symfony/translation/Interval.php',
         'Symfony\\Component\\Translation\\Loader\\ArrayLoader' => __DIR__ . '/..' . '/symfony/translation/Loader/ArrayLoader.php',
@@ -358,17 +383,35 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'Symfony\\Component\\Translation\\MessageSelector' => __DIR__ . '/..' . '/symfony/translation/MessageSelector.php',
         'Symfony\\Component\\Translation\\MetadataAwareInterface' => __DIR__ . '/..' . '/symfony/translation/MetadataAwareInterface.php',
         'Symfony\\Component\\Translation\\PluralizationRules' => __DIR__ . '/..' . '/symfony/translation/PluralizationRules.php',
+        'Symfony\\Component\\Translation\\Reader\\TranslationReader' => __DIR__ . '/..' . '/symfony/translation/Reader/TranslationReader.php',
+        'Symfony\\Component\\Translation\\Reader\\TranslationReaderInterface' => __DIR__ . '/..' . '/symfony/translation/Reader/TranslationReaderInterface.php',
         'Symfony\\Component\\Translation\\Translator' => __DIR__ . '/..' . '/symfony/translation/Translator.php',
         'Symfony\\Component\\Translation\\TranslatorBagInterface' => __DIR__ . '/..' . '/symfony/translation/TranslatorBagInterface.php',
         'Symfony\\Component\\Translation\\TranslatorInterface' => __DIR__ . '/..' . '/symfony/translation/TranslatorInterface.php',
         'Symfony\\Component\\Translation\\Util\\ArrayConverter' => __DIR__ . '/..' . '/symfony/translation/Util/ArrayConverter.php',
         'Symfony\\Component\\Translation\\Writer\\TranslationWriter' => __DIR__ . '/..' . '/symfony/translation/Writer/TranslationWriter.php',
+        'Symfony\\Component\\Translation\\Writer\\TranslationWriterInterface' => __DIR__ . '/..' . '/symfony/translation/Writer/TranslationWriterInterface.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
         'Sys' => __DIR__ . '/../..' . '/application/core/system/Arrays.php',
+        'TCPDF' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf.php',
+        'TCPDF2DBarcode' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf_barcodes_2d.php',
+        'TCPDFBarcode' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf_barcodes_1d.php',
+        'TCPDF_COLORS' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_colors.php',
+        'TCPDF_FILTERS' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_filters.php',
+        'TCPDF_FONTS' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_fonts.php',
+        'TCPDF_FONT_DATA' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_font_data.php',
+        'TCPDF_IMAGES' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_images.php',
+        'TCPDF_IMPORT' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf_import.php',
+        'TCPDF_PARSER' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf_parser.php',
+        'TCPDF_STATIC' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/tcpdf_static.php',
         'TTFParser' => __DIR__ . '/../..' . '/application/libraries/PDFMerger/fpdf/makefont/ttfparser.php',
         'TipoDeComprobante' => __DIR__ . '/../..' . '/application/libraries/catalogos/TipoDeComprobante.php',
         'TipoRelacion' => __DIR__ . '/../..' . '/application/libraries/catalogos/TipoRelacion.php',
         'UnidadesMedida' => __DIR__ . '/../..' . '/application/libraries/catalogos/UnidadesMedida.php',
+        'UpdateHelper\\ComposerPlugin' => __DIR__ . '/..' . '/kylekatarnls/update-helper/src/UpdateHelper/ComposerPlugin.php',
+        'UpdateHelper\\NotUpdateInterfaceInstanceException' => __DIR__ . '/..' . '/kylekatarnls/update-helper/src/UpdateHelper/NotUpdateInterfaceInstanceException.php',
+        'UpdateHelper\\UpdateHelper' => __DIR__ . '/..' . '/kylekatarnls/update-helper/src/UpdateHelper/UpdateHelper.php',
+        'UpdateHelper\\UpdateHelperInterface' => __DIR__ . '/..' . '/kylekatarnls/update-helper/src/UpdateHelper/UpdateHelperInterface.php',
         'UploadFiles' => __DIR__ . '/../..' . '/application/core/system/UploadFiles.php',
         'UsoCfdi' => __DIR__ . '/../..' . '/application/libraries/catalogos/UsoCfdi.php',
         'Usuario_historial_model' => __DIR__ . '/../..' . '/application/models/usuario_historial_model.php',
@@ -379,6 +422,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'banco_cuentas_model' => __DIR__ . '/../..' . '/application/models/banco_cuentas_model.php',
         'banco_layout_bajio_model' => __DIR__ . '/../..' . '/application/models/banco_layout_bajio_model.php',
         'banco_layout_bancomer_model' => __DIR__ . '/../..' . '/application/models/banco_layout_bancomer_model.php',
+        'banco_layout_bancomer_simple_model' => __DIR__ . '/../..' . '/application/models/banco_layout_bancomer_simple_model.php',
         'banco_layout_model' => __DIR__ . '/../..' . '/application/models/banco_layout_model.php',
         'banco_model' => __DIR__ . '/../..' . '/application/models/banco_model.php',
         'banco_pagos_model' => __DIR__ . '/../..' . '/application/models/banco_pagos_model.php',
@@ -401,6 +445,8 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'camiones_model' => __DIR__ . '/../..' . '/application/models/camiones_model.php',
         'catalogos33_model' => __DIR__ . '/../..' . '/application/models/catalogos33_model.php',
         'catalogos_sft_model' => __DIR__ . '/../..' . '/application/models/catalogos_sft_model.php',
+        'cclave_mat_peligro_model' => __DIR__ . '/../..' . '/application/models/cclave_mat_peligro_model.php',
+        'cclave_stcc_model' => __DIR__ . '/../..' . '/application/models/cclave_stcc_model.php',
         'ccolonias_model' => __DIR__ . '/../..' . '/application/models/ccolonias_model.php',
         'ccp_model' => __DIR__ . '/../..' . '/application/models/ccp_model.php',
         'centros_costos_model' => __DIR__ . '/../..' . '/application/models/centros_costos_model.php',
@@ -412,6 +458,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'clientes_model' => __DIR__ . '/../..' . '/application/models/clientes_model.php',
         'clocalidad_model' => __DIR__ . '/../..' . '/application/models/clocalidad_model.php',
         'cmunicipio_model' => __DIR__ . '/../..' . '/application/models/cmunicipio_model.php',
+        'cnum_estacion_model' => __DIR__ . '/../..' . '/application/models/cnum_estacion_model.php',
         'compras_areas_model' => __DIR__ . '/../..' . '/application/models/compras_areas_model.php',
         'compras_departamentos_model' => __DIR__ . '/../..' . '/application/models/compras_departamentos_model.php',
         'compras_model' => __DIR__ . '/../..' . '/application/models/compras_model.php',
@@ -428,6 +475,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'cuentas_cpi_model' => __DIR__ . '/../..' . '/application/models/cuentas_cpi_model.php',
         'cuentas_pagar_model' => __DIR__ . '/../..' . '/application/models/cuentas_pagar_model.php',
         'cuentas_rendimiento_model' => __DIR__ . '/../..' . '/application/models/cuentas_rendimiento_model.php',
+        'cunidad_peso_model' => __DIR__ . '/../..' . '/application/models/cunidad_peso_model.php',
         'cunidadesmedida_model' => __DIR__ . '/../..' . '/application/models/cunidadesmedida_model.php',
         'devoluciones_iva_model' => __DIR__ . '/../..' . '/application/models/devoluciones_iva_model.php',
         'documentos_model' => __DIR__ . '/../..' . '/application/models/documentos_model.php',
@@ -449,6 +497,7 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         'my_email' => __DIR__ . '/../..' . '/application/libraries/my_email.php',
         'mypdf_ticket' => __DIR__ . '/../..' . '/application/libraries/mypdf_ticket.php',
         'nomina' => __DIR__ . '/../..' . '/application/libraries/nomina.php',
+        'nominaCalMensual' => __DIR__ . '/../..' . '/application/libraries/nominaCalMensual.php',
         'nomina_ajustes_model' => __DIR__ . '/../..' . '/application/models/nomina_ajustes_model.php',
         'nomina_catalogos_model' => __DIR__ . '/../..' . '/application/models/nomina_catalogos_model.php',
         'nomina_fiscal_model' => __DIR__ . '/../..' . '/application/models/nomina_fiscal_model.php',
@@ -498,6 +547,8 @@ class ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit9bfe49e624d99ba7146f19580c4a9b5b::$classMap;
 
         }, null, ClassLoader::class);

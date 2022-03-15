@@ -1,5 +1,7 @@
 
  ☐ etiqueta 50x25
+   -- pcc
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Etiquetas',128,true,'etiquetas/','qrcode',true);
  ☐ Poliza diario gastos y egreso gastos meter ret 1.25
  ☐ Reporte de listado de empleados
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
