@@ -1,8 +1,8 @@
 
- ☐ etiqueta 50x25
-   -- pcc
+ ✔ etiqueta 50x25 @done (22-03-16 08:44)
+   -- pcc|lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Etiquetas',128,true,'etiquetas/','qrcode',true);
- ☐ Poliza diario gastos y egreso gastos meter ret 1.25
+ ✔ Poliza diario gastos y egreso gastos meter ret 1.25 @done (22-03-16 08:44)
  ☐ Reporte de listado de empleados
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ✔ Nomina registros patronales @done (22-03-09 14:16)
