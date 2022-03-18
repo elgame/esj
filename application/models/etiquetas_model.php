@@ -31,6 +31,8 @@ class etiquetas_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 12);
       $pdf->Text(25, 9, "C-{$data['caja']}");
       $pdf->Line(22, 13, 47, 13);
+      $pdf->Line(22, 13.2, 47, 13.2);
+      $pdf->Line(22, 13.4, 47, 13.4);
       $pdf->SetFont('Arial','B', 12);
       $pdf->Text(25, 19, "R-{$rollo1}");
 
