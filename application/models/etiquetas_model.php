@@ -10,25 +10,29 @@ class etiquetas_model extends CI_Model {
 
 	public function etiqueta1_pdf($data)
   {
+    $empresa = $this->empresas_model->getInfoEmpresa($data['did_empresa'], true);
+
     $pdf = new FPDF('P', 'mm', [50, 25]);
     // $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
 
     $data['caja'] = str_pad($data['caja'], 6, "0", STR_PAD_LEFT);
     $pdf->AddPage('L', [50, 25]);
-    $pdf->SetFont('Arial','B', 20);
-    $pdf->Text(10, 15, "C-{$data['caja']}");
+    $pdf->SetFont('Arial','B', 18);
+    $pdf->Text(21, 15, "C-{$data['caja']}");
     $pdf->SetTextColor(0, 0, 0);
+    $pdf->Image($empresa['info']->logo, 1, 5, 18);
 
     for ($rollo=0; $rollo < intval($data['rollos']); $rollo++) {
       $pdf->AddPage('L', [50, 25]);
+      $pdf->Image($empresa['info']->logo, 1, 5, 18);
 
       $rollo1 = str_pad($rollo+1, 6, "0", STR_PAD_LEFT);
 
       $pdf->SetFont('Arial', 'B', 12);
-      $pdf->Text(15, 9, "C-{$data['caja']}");
-      $pdf->Line(3, 13, 47, 13);
+      $pdf->Text(25, 9, "C-{$data['caja']}");
+      $pdf->Line(22, 13, 47, 13);
       $pdf->SetFont('Arial','B', 12);
-      $pdf->Text(15, 19, "R-{$rollo1}");
+      $pdf->Text(25, 19, "R-{$rollo1}");
 
     }
 
@@ -37,7 +41,7 @@ class etiquetas_model extends CI_Model {
     //   unlink(RPATH."/panel/default/images/tmp/barcode2{$i}.png");
     // }
 
-    $pdf->Output('etiquetas-delmonte.pdf', 'I');
+    $pdf->Output('etiquetas.pdf', 'I');
   }
 
 	/**

@@ -61,7 +61,7 @@
   //   });
   // }
 
-  function autocompleteEmpresa () {
+  function autocompleteEmpresa() {
     // Autocomplete Empresas
     $("#dempresa").autocomplete({
       source: base_url + 'panel/empresas/ajax_get_empresas/',

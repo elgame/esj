@@ -699,7 +699,7 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-existencia_ant">
                           <thead>
                             <tr>
-                              <th colspan="6">EXISTENCIA ANTERIOR</th>
+                              <th colspan="7">EXISTENCIA ANTERIOR</th>
                             </tr>
                             <tr>
                               <th>CALIBRE</th>
@@ -707,6 +707,7 @@
                               <th>UNIDAD</th>
                               <th>KILOS</th>
                               <th>CANTIDAD</th>
+                              <th>COSTO</th>
                               <th>IMPORTE</th>
                             </tr>
                           </thead>
@@ -724,6 +725,7 @@
                                 <td><?php echo $existencia_ant->unidad ?></td>
                                 <td><?php echo $existencia_ant->kilos ?></td>
                                 <td class="existencia_ant_cantidad"><?php echo $existencia_ant->cantidad ?></td>
+                                <td class="existencia_ant_costo"><?php echo $existencia_ant->costo ?></td>
                                 <td class="existencia_ant_importe"><?php echo $existencia_ant->importe ?></td>
                               </tr>
                             <?php } ?>
@@ -732,6 +734,7 @@
                               <th colspan="3"></th>
                               <th><?php echo $existencia_ant_kilos ?></th>
                               <th><?php echo $existencia_ant_cantidad ?></th>
+                              <th></th>
                               <th><?php echo $existencia_ant_importe ?></th>
                             </tr>
                           </tbody>

@@ -3,6 +3,7 @@
 })(function ($, window) {
   $(function () {
     setAutocomplete();
+    autocompleteEmpresa();
     // autocompleteProductos();
 
     $('#form').on('submit', function(event) {
@@ -23,7 +24,7 @@
 
       console.log(linkDownXls.attr('href'));
 
-      if (url.dareas.length == 0) {
+      if (linkDownXls.attr('href') && url.dareas.length == 0) {
         noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
         return false;
       }
@@ -61,6 +62,22 @@
     });
   }
 
-
+  function autocompleteEmpresa () {
+    // Autocomplete Empresas
+    $("#dempresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_empresa").val(ui.item.id);
+        $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        $('#did_empresa').val('');
+      }
+    });
+  }
 
 });

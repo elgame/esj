@@ -33,7 +33,7 @@ class etiquetas extends MY_Controller {
     ));
     $this->carabiner->js(array(
       array('libs/jquery.treeview.js'),
-      // array('panel/productos_salidas/rpt_gastos.js'),
+      array('panel/productos_salidas/rpt_gastos.js'),
     ));
 
     $this->load->model('compras_areas_model');
@@ -42,7 +42,7 @@ class etiquetas extends MY_Controller {
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Etiquetas');
 
-    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $this->load->view('panel/header',$params);
     $this->load->view('panel/almacenes/etiquetas', $params);
