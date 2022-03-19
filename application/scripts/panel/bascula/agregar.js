@@ -640,6 +640,17 @@ $(function(){
     calculaTotales();
   });
 
+  $('#pisr').click(function(e) {
+    if((parseFloat($('#pisrPorcent').val())||0) > 0) {
+      // $('#pisr').val(0);
+      $('#pisrPorcent').val(0);
+    } else {
+      $('#pisrPorcent').val(1.25);
+    }
+    calculaKilosNeto();
+    calculaTotales();
+  });
+
   // Obtiene el pesaje de los brutos al tener el foco el input.
 
   if ($('#isEditar').length !== 1) {

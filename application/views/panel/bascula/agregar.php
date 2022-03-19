@@ -557,9 +557,9 @@
                   </div>
 
                   <div class="span3">
-                    <label for="pisr">ISR</label>
+                    <label for="pisr" style="cursor: pointer;">ISR</label>
                     <input type="text" name="pisr"
-                      value="<?php echo set_value('pisr', $this->input->post('pisr')) ?>" id="pisr" class="input-medium vpositive" <?php echo $disabled ?> readonly>
+                      value="<?php echo set_value('pisr', $this->input->post('pisr')) ?>" id="pisr" class="input-medium vpositive" <?php echo $disabled ?> readonly style="cursor: pointer;">
                     <input type="hidden" name="pisrPorcent" id="pisrPorcent" value="<?php echo set_value('pisrPorcent', $this->input->post('pisrPorcent')) ?>">
                   </div>
 

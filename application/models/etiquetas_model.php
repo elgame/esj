@@ -11,6 +11,7 @@ class etiquetas_model extends CI_Model {
 	public function etiqueta1_pdf($data)
   {
     $empresa = $this->empresas_model->getInfoEmpresa($data['did_empresa'], true);
+    $logo = $this->imgGrayScale($empresa['info']->logo);
 
     $pdf = new FPDF('P', 'mm', [50, 25]);
     // $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
@@ -20,11 +21,11 @@ class etiquetas_model extends CI_Model {
     $pdf->SetFont('Arial','B', 18);
     $pdf->Text(21, 15, "C-{$data['caja']}");
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Image($empresa['info']->logo, 1, 5, 18);
+    $pdf->Image($logo, 1, 5, 18);
 
     for ($rollo=0; $rollo < intval($data['rollos']); $rollo++) {
       $pdf->AddPage('L', [50, 25]);
-      $pdf->Image($empresa['info']->logo, 1, 5, 18);
+      $pdf->Image($logo, 1, 5, 18);
 
       $rollo1 = str_pad($rollo+1, 6, "0", STR_PAD_LEFT);
 
@@ -44,6 +45,25 @@ class etiquetas_model extends CI_Model {
     // }
 
     $pdf->Output('etiquetas.pdf', 'I');
+  }
+
+  private function imgGrayScale($logo) {
+    $partes_ruta = pathinfo($logo);
+    $im = null;
+
+    if ($partes_ruta['extension'] == 'png') {
+      $im = imagecreatefrompng($logo);
+    } elseif ($partes_ruta['extension'] == 'jpg' || $partes_ruta['extension'] == 'jpeg') {
+      $im = imagecreatefromjpeg('kalle.jpg');
+    }
+
+    $path = $logo;
+    if ($im && imagefilter($im, IMG_FILTER_GRAYSCALE)) {
+      imagepng($im, "application/media/temp/{$partes_ruta['basename']}");
+      $path = "application/media/temp/{$partes_ruta['basename']}";
+    }
+
+    return $path;
   }
 
 	/**
