@@ -21,7 +21,14 @@
     autocompleteEmpresas();
 
     addProdsCancelados();
+    eventosHandlers();
   });
+
+  var eventosHandlers = function() {
+    $("#fechaf").change(function(){
+      getFacturasLibres();
+    });
+  };
 
   var addProdsCancelados = function () {
     $("#addProdsCancelados").on('click', function(event) {
