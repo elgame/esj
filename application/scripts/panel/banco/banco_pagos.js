@@ -64,6 +64,8 @@ $(function(){
       $("#downloadInterban").show();
     } else if ($this.find('option:selected').attr('data-banco') === '6') { // bancomer
       $("#downloadBancomer").show();
+    } else if ($this.find('option:selected').attr('data-banco') === '3') { // bajio
+      $("#downloadBajio").show();
     }
   });
   $("#cuenta_retiro").change();
