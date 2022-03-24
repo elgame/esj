@@ -74,6 +74,7 @@
       id_compra: $("#id_compra").val(),
       id_cliente: $("#fid_cliente").val(),
       folio: $("#ffolio").val(),
+      fechaf: $("#fechaf").val(),
     };
     if (datavar.id_clasificacion !== '') {
       $.getJSON(base_url+"panel/gastos/ajax_get_facturas", datavar, function(resp){

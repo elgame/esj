@@ -54,7 +54,7 @@ class etiquetas_model extends CI_Model {
     if ($partes_ruta['extension'] == 'png') {
       $im = imagecreatefrompng($logo);
     } elseif ($partes_ruta['extension'] == 'jpg' || $partes_ruta['extension'] == 'jpeg') {
-      $im = imagecreatefromjpeg('kalle.jpg');
+      $im = imagecreatefromjpeg($logo);
     }
 
     $path = $logo;

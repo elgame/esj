@@ -337,8 +337,10 @@ class gastos_model extends privilegios_model{
     $sql = '';
     $sql .= isset($datos['id_cliente']{0})? " AND f.id_cliente = {$datos['id_cliente']}": '';
     $sql .= isset($datos['folio']{0})? " AND f.folio = '{$datos['folio']}'": '';
+    $sql .= isset($datos['fechaf']{0})? " AND f.fecha >= '{$datos['fechaf']}'": '';
     $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, f.fecha, f.cliente
-          FROM compras c INNER JOIN compras_facturacion_prodc AS cf ON (c.id_compra = cf.id_compra AND c.status <> 'ca')
+          FROM compras c
+            INNER JOIN compras_facturacion_prodc AS cf ON (c.id_compra = cf.id_compra AND c.status <> 'ca')
             RIGHT JOIN
             (
               SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente
