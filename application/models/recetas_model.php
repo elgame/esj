@@ -323,9 +323,10 @@ class recetas_model extends CI_Model {
       );
     }
 
-    $this->db->delete('otros.recetas_productos', ['id_receta' => $recetaId]);
-    if(count($productos) > 0)
+    if(count($productos) > 0){
+      $this->db->delete('otros.recetas_productos', ['id_receta' => $recetaId]);
       $this->db->insert_batch('otros.recetas_productos', $productos);
+    }
 
     $this->saveCatalogos($recetaId);
 
