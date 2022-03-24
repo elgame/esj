@@ -3,7 +3,7 @@
    -- pcc|lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Etiquetas',128,true,'etiquetas/','qrcode',true);
  ✔ Poliza diario gastos y egreso gastos meter ret 1.25 @done (22-03-16 08:44)
- ☐ Reporte de listado de empleados
+ ☐ Reporte de listado de empleados, que ponga los datos de la nomina
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ✔ Nomina registros patronales @done (22-03-09 14:16)
    -- pcc|lap|san
