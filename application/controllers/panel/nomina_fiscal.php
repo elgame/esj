@@ -1204,6 +1204,37 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_otros_model->getCuadroAntiguedadXls();
   }
 
+  public function listado_empleados()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info'];
+    $params['seo']           = array('titulo' => 'CUADRO DE ANTIGUEDAD DE LOS TRABAJADORES');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_cuadro_antiguedad',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function listado_empleados_pdf() {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getListadoEmpleadosXls(true);
+  }
+  public function listado_empleados_xls() {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getListadoEmpleadosXls();
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax

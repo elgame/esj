@@ -1075,6 +1075,8 @@ class bascula extends MY_Controller {
 
     if ($res_mdl['passess'])
     {
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
+
       $pesadas = '&pe='.implode(',', $_POST['ppagos']);
       redirect(base_url('panel/bascula/movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
     }

@@ -1074,6 +1074,8 @@ class bascula_model extends CI_Model {
     {
       $this->db->update('bascula', array('accion' => 'b'), array('id_bascula' => $pesada));
 
+      $this->logBitacora(false, $pesada, array('accion' => 'b'), false, null, true);
+
       $pesadas[] = array(
         'id_pago' => $id_bascula_pagos,
         'id_bascula' => $pesada
