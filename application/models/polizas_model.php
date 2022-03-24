@@ -3050,7 +3050,8 @@ class polizas_model extends CI_Model {
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha),
-            bm.tcambio, bm.uuid, tieps.ieps, tieps.porcentaje_ieps
+            bm.tcambio, bm.uuid, tieps.ieps, tieps.porcentaje_ieps,
+            tisr125.porcentaje_isr125, tisr125.retencion_isr125
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
