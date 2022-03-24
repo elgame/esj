@@ -59,7 +59,11 @@ class etiquetas_model extends CI_Model {
 
     $path = $logo;
     if ($im && imagefilter($im, IMG_FILTER_GRAYSCALE)) {
-      imagepng($im, "application/media/temp/{$partes_ruta['basename']}");
+      if ($partes_ruta['extension'] == 'png') {
+        imagepng($im, "application/media/temp/{$partes_ruta['basename']}");
+      } elseif ($partes_ruta['extension'] == 'jpg' || $partes_ruta['extension'] == 'jpeg') {
+        imagejpeg($im, "application/media/temp/{$partes_ruta['basename']}");
+      }
       $path = "application/media/temp/{$partes_ruta['basename']}";
     }
 
