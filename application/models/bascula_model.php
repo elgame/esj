@@ -1117,6 +1117,7 @@ class bascula_model extends CI_Model {
     {
 
       $bascula_pagos = array(
+        'fecha'        => $datos['dfecha'],
         'tipo_pago'    => $datos['fmetodo_pago'],
         'monto'        => $datos['dmonto'],
         'concepto'     => $datos['dconcepto'],
