@@ -2798,8 +2798,8 @@ class polizas_model extends CI_Model {
         'iva_acreditado' => array('cuenta_cpi' => $this->getCuentaIvaAcreditado(), 'importe' => 0, 'tipo' => '0'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
-        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
-        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '1'),
       );
 
       //Contenido de la Poliza
