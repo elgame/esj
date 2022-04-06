@@ -36,6 +36,15 @@
 	                  </div>
 	                </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dregistro_patronal">Registro Patronal: </label>
+                    <div class="controls">
+                      <select name="dregistro_patronal" id="dregistro_patronal" required data-registro="<?php echo (isset($_POST['dregistro_patronal'])? $_POST['dregistro_patronal']: ''); ?>">
+                        <option value=""></option>
+                      </select>
+                    </div>
+                  </div>
+
 	                <div class="control-group">
 	                  <label class="control-label" for="dnombre">*Nombre </label>
 	                  <div class="controls">

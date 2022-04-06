@@ -32,7 +32,7 @@ class polizas extends MY_Controller {
     $this->carabiner->js(array(
       // array('general/msgbox.js'),
       array('panel/polizas/genera.js'),
-      array('panel/bascula/reportes/rde.js')
+      // array('panel/bascula/reportes/rde.js')
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -46,6 +46,7 @@ class polizas extends MY_Controller {
 
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     $params['folio'] = $this->polizas_model->getFolio('3', 'v');
     $params['areas'] = $this->areas_model->getAreas();

@@ -27,7 +27,8 @@ class cuentas_cpi_model extends CI_Model {
 
 
 		$query = BDUtil::pagination(
-			"SELECT cc.id_cuenta, cc.id_padre, cc.nivel, cc.cuenta, cc.nombre, cc.tipo, e.id_empresa, e.nombre_fiscal
+			"SELECT cc.id_cuenta, cc.id_padre, cc.nivel, cc.cuenta, cc.nombre, cc.tipo,
+        cc.registro_patronal, e.id_empresa, e.nombre_fiscal
 			FROM cuentas_contpaq cc
 				INNER JOIN empresas e ON cc.id_empresa = e.id_empresa
 			WHERE cc.status = 't' AND cc.id_cuenta > 0 {$sql}
@@ -52,13 +53,14 @@ class cuentas_cpi_model extends CI_Model {
 	 */
 	public function addCuenta(){
 		$data = array(
-			'id_padre'   => ($this->input->post('dcuenta_padre')!='0'? $this->input->post('dcuenta_padre'): NULL),
-			'nivel'      => '1',
-			'cuenta'     => $this->input->post('dcuenta'),
-			'nombre'     => $this->input->post('dnombre'),
-			'tipo'       => '',
-      'id_empresa' => $this->input->post('did_empresa'),
-			'tipo_cuenta' => $this->input->post('dtipo_cuenta'),
+      'id_padre'          => ($this->input->post('dcuenta_padre')!='0'? $this->input->post('dcuenta_padre'): NULL),
+      'nivel'             => '1',
+      'cuenta'            => $this->input->post('dcuenta'),
+      'nombre'            => $this->input->post('dnombre'),
+      'tipo'              => '',
+      'id_empresa'        => $this->input->post('did_empresa'),
+      'tipo_cuenta'       => $this->input->post('dtipo_cuenta'),
+      'registro_patronal' => $this->input->post('dregistro_patronal'),
 		);
 		$this->db->insert('cuentas_contpaq', $data);
 		return array(true, '');
@@ -69,11 +71,12 @@ class cuentas_cpi_model extends CI_Model {
 	 */
 	public function updateCuenta($id_cuenta){
 		$data = array(
-			'id_padre'   => ($this->input->post('dcuenta_padre')!='0'? $this->input->post('dcuenta_padre'): NULL),
-			'cuenta'     => $this->input->post('dcuenta'),
-			'nombre'     => $this->input->post('dnombre'),
-			'id_empresa' => $this->input->post('did_empresa'),
-      'tipo_cuenta' => $this->input->post('dtipo_cuenta'),
+      'id_padre'          => ($this->input->post('dcuenta_padre')!='0'? $this->input->post('dcuenta_padre'): NULL),
+      'cuenta'            => $this->input->post('dcuenta'),
+      'nombre'            => $this->input->post('dnombre'),
+      'id_empresa'        => $this->input->post('did_empresa'),
+      'tipo_cuenta'       => $this->input->post('dtipo_cuenta'),
+      'registro_patronal' => $this->input->post('dregistro_patronal'),
 		);
 		$this->db->update('cuentas_contpaq', $data, "id_cuenta = '{$id_cuenta}'");
 		return array(true, '');

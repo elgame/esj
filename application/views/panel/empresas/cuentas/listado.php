@@ -52,7 +52,8 @@
 							  <tr>
 							  	<th>Cuenta</th>
 								  <th>Nombre</th>
-								  <th>Empresa</th>
+                  <th>Empresa</th>
+								  <th>Registro Patronal</th>
 								  <th>Opciones</th>
 							  </tr>
 						  </thead>
@@ -61,7 +62,9 @@
 								<tr>
 									<td><?php echo $priv->cuenta ?></td>
 									<td><?php echo $priv->nombre; ?></td>
-									<td><?php echo $priv->nombre_fiscal; ?></td>
+                  <td><?php echo $priv->nombre_fiscal; ?></td>
+									<td><?php echo $priv->registro_patronal; ?></td>
+
 									<td class="center">
 										<?php
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cpi/modificar/', array(

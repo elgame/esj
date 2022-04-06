@@ -1936,6 +1936,11 @@ class polizas_model extends CI_Model {
       $dias_desface = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['fid_empresa'])->get()->row()->dia_inicia_semana;
     }
 
+    if ($this->input->get('dregistro_patronal') != '') {
+      $sql .= " AND f.registro_patronal = '".$_GET['dregistro_patronal']."'";
+      $sql2 .= " AND f.registro_patronal = '".$_GET['dregistro_patronal']."'";
+    }
+
     $fecha = $_GET['ffecha1'];
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
