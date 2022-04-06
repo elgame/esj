@@ -68,6 +68,9 @@ class nomina_fiscal extends MY_Controller {
 
     'nomina_fiscal/cuadro_antiguedad_pdf/',
     'nomina_fiscal/cuadro_antiguedad_xls/',
+
+    'nomina_fiscal/nominas_empleados_pdf/',
+    'nomina_fiscal/nominas_empleados_xls/',
   );
 
   public function _remap($method)
@@ -1204,35 +1207,36 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_otros_model->getCuadroAntiguedadXls();
   }
 
-  public function listado_empleados()
+  public function nominas_empleados()
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/almacen/rpt_compras.js'),
+      array('panel/nomina_fiscal/rpt_nominas.js'),
     ));
 
     $this->load->library('pagination');
     $this->load->model('empresas_model');
 
     $params['info_empleado'] = $this->info_empleado['info'];
-    $params['seo']           = array('titulo' => 'CUADRO DE ANTIGUEDAD DE LOS TRABAJADORES');
+    $params['seo']           = array('titulo' => 'Reporte Acumulado Nominas');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header',$params);
-    $this->load->view('panel/nomina_fiscal/rpt_cuadro_antiguedad',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_acumulado_nominas',$params);
     $this->load->view('panel/footer',$params);
   }
-  public function listado_empleados_pdf() {
+  public function nominas_empleados_pdf() {
     $this->load->model('nomina_fiscal_otros_model');
-    $this->nomina_fiscal_otros_model->getListadoEmpleadosXls(true);
+    $this->nomina_fiscal_otros_model->getAcumuladoNominasEmpleadosXls(true);
   }
-  public function listado_empleados_xls() {
+  public function nominas_empleados_xls() {
     $this->load->model('nomina_fiscal_otros_model');
-    $this->nomina_fiscal_otros_model->getListadoEmpleadosXls();
+    $this->nomina_fiscal_otros_model->getAcumuladoNominasEmpleadosXls();
   }
 
   /*

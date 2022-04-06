@@ -1077,130 +1077,142 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   }
 
 
-  public function getListadoEmpleadosData()
+  public function getAcumuladoNominasEmpleadosData()
   {
     $sql = '';
+
+    $fecha1 = (isset($_GET['fechaini']) ? $_GET['fechaini'] : date("Y-m-01"));
+    $fecha2 = (isset($_GET['fechaend']) ? $_GET['fechaend'] : date("Y-m-d"));
 
     $this->load->model('empresas_model');
     $client_default = $this->empresas_model->getDefaultEmpresa();
     $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
     $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
     if($this->input->get('did_empresa') != ''){
-      $sql .= " AND u.id_empresa = '".$this->input->get('did_empresa')."'";
+      $sql .= " AND nf.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('dregistro_patronal') != ''){
+      $sql .= " AND nf.registro_patronal = '".$this->input->get('dregistro_patronal')."'";
     }
 
     $facturas = $this->db->query(
     "SELECT
-        id, COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre as nombre,
-        u.rfc, u.salario_diario, u.no_seguro, Date(u.fecha_entrada) AS fecha_entrada,
-        u.email, u.curp, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp, u.fecha_salida,
-        u.nacionalidad, u.estado_civil, u.cuenta_cpi, u.salario_diario, u.infonavit, u.salario_diario_real, u.fecha_imss, u.telefono,
-        u.id_departamente, ud.nombre AS departamento, Date(u.fecha_nacimiento) AS fecha_nacimiento,
-        (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) AS antiguedad, up.nombre AS puesto,
-        (SELECT dias FROM nomina_configuracion_vacaciones WHERE (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) >= anio1 AND (DATE_PART('year', NOW()) - DATE_PART('year', u.fecha_entrada)) <= anio2 ) AS dias_vacaciones
-      FROM usuarios AS u
-        INNER JOIN usuarios_departamento ud ON u.id_departamente = ud.id_departamento
-        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
-      WHERE u.user_nomina = 't' AND u.status = 't' {$sql}
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        Sum(nf.dias_trabajados) AS dias_trabajados, Sum(nf.subsidio) AS subsidio,
+        Sum(nf.sueldo_semanal) AS sueldo_semanal, Sum(nf.bonos) AS bonos,
+        Sum(nf.otros) AS otros, Sum(nf.vacaciones) AS vacaciones,
+        Sum(nf.prima_vacacional) AS prima_vacacional, Sum(nf.aguinaldo) AS aguinaldo,
+        Sum(nf.fondo_ahorro) AS fondo_ahorro, Sum(nf.pasistencia) AS pasistencia,
+        Sum(nf.imss) AS imss, Sum(nf.vejez) AS vejez, Sum(nf.isr) AS isr,
+        Sum(nf.infonavit) AS infonavit, Sum(nf.prestamos) AS prestamos,
+        Sum(nf.descuento_playeras) AS descuento_playeras, Sum(nf.descuento_otros) AS descuento_otros,
+        Sum(nf.descuento_cocina) AS descuento_cocina,
+        Sum(Coalesce((nf.otros_datos->>'totalPrestamosEf')::double precision, 0)) AS totalPrestamosEf,
+        Sum(Coalesce((nf.otros_datos->>'totalDescuentoMaterial')::double precision, 0)) AS totalDescuentoMaterial,
+        Sum(CASE WHEN Coalesce(Nullif(u.cuenta_banco, ''), '') <> '' AND nf.esta_asegurado = 't' THEN
+          nf.total_neto ELSE 0 END) AS total_neto,
+        Sum(nf.total_no_fiscal) AS total_no_fiscal
+      FROM nomina_fiscal nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+      WHERE 1 = 1 AND Date(nf.fecha_final) BETWEEN '{$fecha1}' AND '{$fecha2}' {$sql}
+      GROUP BY u.id
+      ORDER BY trabajador
     ");
-    $response = $facturas->result();
+    $response['data'] = $facturas->result();
+    $response['fecha1'] = $fecha1;
+    $response['fecha2'] = $fecha2;
 
     return $response;
   }
-  public function getListadoEmpleadosXls($show = false)
+  public function getAcumuladoNominasEmpleadosXls($show = false)
   {
     if (!$show) {
       header('Content-type: application/vnd.ms-excel; charset=utf-8');
-      header("Content-Disposition: attachment; filename=listadoEmpleados.xls");
+      header("Content-Disposition: attachment; filename=nominasEmpleados.xls");
       header("Pragma: no-cache");
       header("Expires: 0");
     }
 
-    $res = $this->getListadoEmpleadosData();
+    $res = $this->getAcumuladoNominasEmpleadosData();
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $titulo1 = (isset($empresa['info']->nombre_fiscal)? $empresa['info']->nombre_fiscal: '');
-    $titulo2 = 'Listado de Trabajadores';
-    $titulo3 = "";
+    $titulo2 = 'Reporte Acumulado de Nominas';
+    $titulo3 = "{$res['fecha1']} Al {$res['fecha1']}";
 
 
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="26" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="23" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="26" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="23" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="26" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="23" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="26"></td>
+          <td colspan="23"></td>
         </tr>';
 
-    foreach($res as $key => $item){
+    foreach($res['data'] as $key => $item){
       if ($key == 0) {
 
         $html .= '<tr style="font-weight:bold">
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">A PATERNO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">A MATERNO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CURP</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NSS</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DEPARTAMENTO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PUESTO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S.D.</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE INGRESO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE IMSS</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE SALIDA</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">F DE NACIMIENTO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ANTIGUEDAD</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">D VACACIONES</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CALLE</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NUMERO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">COLONIA</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">MUNICIPIO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTADO</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CP</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">NACIONALIDAD</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTADO CIVIL</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALARIO DIARIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DIAS TRABAJADOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SUBSIDIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SUELDO SEMANAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BONOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">OTROS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">VACACIONES</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRIMA VACACIONAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">AGUINALDO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FONDO AHORRO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PREMIO ASISTENCIA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMSS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">VEJEZ</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ISR</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">INFONAVIT</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALARIO REAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTAMOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO PLAYERAS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO OTROS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO COCINA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTAMOS EFECTIVO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO MATERIALES</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL FISCAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL NO FISCAL</td>
         </tr>';
       }
 
       $html .= '<tr>
-          <td style="width:150px;border:1px solid #000;">'.$item->nombre.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->apellido_paterno.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->apellido_materno.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->rfc.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->curp.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->no_seguro.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->departamento.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->puesto.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->fecha_entrada.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->fecha_imss.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->fecha_salida.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->fecha_nacimiento.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->antiguedad.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->dias_vacaciones.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->calle.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->numero.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->colonia.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->municipio.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->estado.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->cp.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->nacionalidad.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->estado_civil.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->trabajador.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->dias_trabajados.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->subsidio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->sueldo_semanal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->bonos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->otros.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->vacaciones.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->prima_vacacional.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->aguinaldo.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fondo_ahorro.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->pasistencia.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->imss.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->vejez.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->isr.'</td>
           <td style="width:150px;border:1px solid #000;">'.$item->infonavit.'</td>
-          <td style="width:150px;border:1px solid #000;">'.$item->salario_diario_real.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->prestamos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_playeras.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_otros.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_cocina.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->totalprestamosef.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->totaldescuentomaterial.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total_neto.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total_no_fiscal.'</td>
         </tr>';
     }
 

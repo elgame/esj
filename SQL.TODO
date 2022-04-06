@@ -4,7 +4,7 @@
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Etiquetas',128,true,'etiquetas/','qrcode',true);
  ✔ Poliza diario gastos y egreso gastos meter ret 1.25 @done (22-03-16 08:44)
  ✔ Reporte de las etiquetas de salidas de almacen, entregadas y devueltas @done (22-04-06 09:11)
- ☐ Poner separacion por registro patronal en cuentas compaq y poliza de nomina
+ ✔ Poner separacion por registro patronal en cuentas compaq y poliza de nomina @done (22-04-06 12:29)
    -- pcc|lap|san
    ALTER TABLE cuentas_contpaq ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
    UPDATE cuentas_contpaq
@@ -12,7 +12,9 @@
       FROM (SELECT id_empresa, SPLIT_PART(registro_patronal, '|', 1) AS registro_patronal
             FROM empresas WHERE registro_patronal <> '') AS subquery
       WHERE cuentas_contpaq.id_empresa=subquery.id_empresa;
- ☐ Reporte de listado de empleados, que ponga los datos de la nomina
+ ✔ Reporte de listado de empleados, que ponga los datos de la nomina @done (22-04-06 17:05)
+   -- lap|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Nominas',184,TRUE,'nomina_fiscal/nominas_empleados/','print',TRUE);
  ☐ En produccion de materiales crear un tipo de produccion que regrese al inventario y descuenta cajas
  ✔ Nomina registros patronales @done (22-03-09 14:16)
    -- pcc|lap|san

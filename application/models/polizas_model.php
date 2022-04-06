@@ -406,7 +406,7 @@ class polizas_model extends CI_Model {
     }
     return $cuenta;
   }
-  public function getCuentaNSueldo($basic=true, $departamento=null){
+  public function getCuentaNSueldo($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%SUELDOS%'"; //sanjorge
@@ -421,14 +421,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NSueldo': 'NSueldoProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNVacaciones($basic=true, $departamento=null){
+  public function getCuentaNVacaciones($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%VACACIONES%'"; //sanjorge
@@ -443,14 +445,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NVacaciones': 'NVacacionesProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNPrimaVacacional($basic=true, $departamento=null){
+  public function getCuentaNPrimaVacacional($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
@@ -465,14 +469,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NPrimaVacacional': 'NPrimaVacacionalProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNAguinaldo($basic=true, $departamento=null){
+  public function getCuentaNAguinaldo($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%AGUINALDO%'"; //sanjorge
@@ -487,14 +493,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NAguinaldo': 'NAguinaldoProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNHorasHex($basic=true, $departamento=null){
+  public function getCuentaNHorasHex($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%COMPENSACION%'"; //sanjorge
@@ -509,14 +517,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NHorasHex': 'NHorasHexProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  private function getPAsistenciaContpaq($basic=true, $departamento=1)
+  private function getPAsistenciaContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1296'"; //sanjorge
@@ -532,15 +542,17 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NPAsistencia': 'NPAsistenciaProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
     // return (isset($data->cuenta)? $data->cuenta: '');
   }
-  private function getNIndemnizacionesContpaq($basic=true, $departamento=1)
+  private function getNIndemnizacionesContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
@@ -556,10 +568,12 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NIndemnizaciones': 'NIndemnizacionesProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
@@ -581,7 +595,7 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNSubsidio($basic=true){
+  public function getCuentaNSubsidio($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%SUBSIDIO AL EMPLEO%'"; //francis -
@@ -593,13 +607,15 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NSubsidio'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NSubsidio' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNImss($basic=true){
+  public function getCuentaNImss($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IMSS RETENIDO%'"; //francis -
@@ -611,13 +627,15 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NImss'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NImss' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNVejez($basic=true){
+  public function getCuentaNVejez($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%CENSATIA Y VEJEZ%'"; //francis -
@@ -629,13 +647,15 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NVejez'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NVejez' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNInfonavit($basic=true){
+  public function getCuentaNInfonavit($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%INFONAVIT%'"; //francis -
@@ -647,13 +667,15 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NInfonavit'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NInfonavit' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNIsr($basic=true){
+  public function getCuentaNIsr($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISPT ANTES DEL SUB%'"; //francis -
@@ -665,15 +687,18 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NIsr'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NIsr' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNPAlimen($basic=true){
+  public function getCuentaNPAlimen($basic=true, $registro_patronal=''){
     $sql = '';
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NPAlimen'")->row();
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NPAlimen' {$registro_patronal}")->row();
 
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
@@ -2062,7 +2087,7 @@ class polizas_model extends CI_Model {
         $iper = ($value->departamento == "ADMINISTRACION")? 1: 2;
         if($value->sueldo_semanal > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNSueldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNSueldo(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->sueldo_semanal) , 20).  //importe movimiento - retencion
@@ -2074,7 +2099,7 @@ class polizas_model extends CI_Model {
         }
         if($value->vacaciones > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNVacaciones(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNVacaciones(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->vacaciones) , 20).  //importe movimiento - retencion
@@ -2086,7 +2111,7 @@ class polizas_model extends CI_Model {
         }
         if($value->prima_vacacional > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->prima_vacacional) , 20).  //importe movimiento - retencion
@@ -2098,7 +2123,7 @@ class polizas_model extends CI_Model {
         }
         if($value->aguinaldo > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNAguinaldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNAguinaldo(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->aguinaldo) , 20).  //importe movimiento - retencion
@@ -2110,7 +2135,7 @@ class polizas_model extends CI_Model {
         }
         if($value->horas_extras > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNHorasHex(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNHorasHex(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->horas_extras) , 20).  //importe movimiento - retencion
