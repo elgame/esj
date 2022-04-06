@@ -5,7 +5,7 @@
  ✔ Poliza diario gastos y egreso gastos meter ret 1.25 @done (22-03-16 08:44)
  ✔ Reporte de las etiquetas de salidas de almacen, entregadas y devueltas @done (22-04-06 09:11)
  ☐ Poner separacion por registro patronal en cuentas compaq y poliza de nomina
-   -- pcc
+   -- pcc|lap|san
    ALTER TABLE cuentas_contpaq ADD COLUMN registro_patronal character varying(20) COLLATE pg_catalog."default";
    UPDATE cuentas_contpaq
       SET registro_patronal = subquery.registro_patronal
