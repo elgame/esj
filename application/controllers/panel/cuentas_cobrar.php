@@ -415,7 +415,7 @@ class cuentas_cobrar extends MY_Controller {
           else
             $params['frm_errors'] = $this->showMsgs($respons['codigo']);
         }
-      }elseif (isset($_POST['save'])) {
+      } elseif (isset($_POST['save'])) {
         $params['frm_errors'] = $this->showMsgs('2', 'La cuenta del cliente es requerida.');
       }
 
