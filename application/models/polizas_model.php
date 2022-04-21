@@ -2147,7 +2147,7 @@ class polizas_model extends CI_Model {
         }
         if($value->pasistencia > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getPAsistenciaContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getPAsistenciaContpaq(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->pasistencia) , 20).  //importe movimiento - retencion
@@ -2159,7 +2159,7 @@ class polizas_model extends CI_Model {
         }
         if($value->indemnizaciones > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->indemnizaciones) , 20).  //importe movimiento - retencion
@@ -2173,7 +2173,7 @@ class polizas_model extends CI_Model {
         //Colocamos los abonos de la nomina
         if($value->total_neto > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNominaPagar(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNominaPagar(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->total_neto) , 20).  //importe movimiento - retencion
@@ -2185,7 +2185,7 @@ class polizas_model extends CI_Model {
         }
         if(abs($value->subsidio) > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNSubsidio(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNSubsidio(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->subsidio*-1) , 20).  //importe movimiento - retencion
@@ -2197,7 +2197,7 @@ class polizas_model extends CI_Model {
         }
         if($value->imss > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNImss(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNImss(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->imss) , 20).  //importe movimiento - retencion
@@ -2209,7 +2209,7 @@ class polizas_model extends CI_Model {
         }
         if($value->vejez > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNVejez(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNVejez(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->vejez) , 20).  //importe movimiento - retencion
@@ -2221,7 +2221,7 @@ class polizas_model extends CI_Model {
         }
         if($value->infonavit > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNInfonavit(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNInfonavit(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->infonavit) , 20).  //importe movimiento - retencion
@@ -2233,7 +2233,7 @@ class polizas_model extends CI_Model {
         }
         if($value->isr > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNIsr(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNIsr(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->isr) , 20).  //importe movimiento - retencion
@@ -2248,7 +2248,7 @@ class polizas_model extends CI_Model {
 
           if (isset($otros_datos->dePensionAlimenticia) && $otros_datos->dePensionAlimenticia > 0) {
             $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                            $this->setEspacios($this->getCuentaNPAlimen(),30).  //cuenta contpaq
+                            $this->setEspacios($this->getCuentaNPAlimen(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                             $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                             $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                             $this->setEspacios( $this->numero($otros_datos->dePensionAlimenticia) , 20).  //importe movimiento - retencion
