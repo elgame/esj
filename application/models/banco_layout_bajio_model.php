@@ -30,7 +30,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
         if ($value['monto'] > 0 && strlen($value['proveedor_cuenta']) > 5) {
           $reg .= '02';
           $reg .= $this->llena0(7, $renglon);
-          $reg .= '01';
+          $reg .= '40'; // 40, Indica que la cuenta es CLABE, 01 cuenta de cheques, 03 cuenta de débito
           $reg .= $this->llena0(20, $cuenta_retiro->cuenta); // '53708870201'
           $reg .= "01";
           $reg .= $this->llena0(5, $value['clave_banco']);
