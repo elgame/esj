@@ -554,7 +554,7 @@ class polizas_model extends CI_Model {
   }
   private function getNIndemnizacionesContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
-    $sql = '1 = 2';
+    $sql = ' AND 1 = 2';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%INDEMNIZACIONES%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
@@ -578,7 +578,7 @@ class polizas_model extends CI_Model {
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNominaPagar($basic=true, $registro_patronal=''){
-    $sql = '1 = 2';
+    $sql = ' AND 1 = 2';
     if ($this->empresaId==2) $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%NOMINAS POR PAGAR%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Raul jorge
