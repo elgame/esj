@@ -554,20 +554,20 @@ class polizas_model extends CI_Model {
   }
   private function getNIndemnizacionesContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
-    $sql = '';
+    $sql = '1 = 2';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%INDEMNIZACIONES%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
-    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
-    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
-    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
-    else{
-      $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
-    }
+    // elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    // elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    // elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    // elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    // else{
+    //   $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    // }
 
     $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
@@ -577,21 +577,23 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNominaPagar($basic=true){
-    $sql = '';
+  public function getCuentaNominaPagar($basic=true, $registro_patronal=''){
+    $sql = '1 = 2';
     if ($this->empresaId==2) $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%NOMINAS POR PAGAR%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NominaPagar'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NominaPagar' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
