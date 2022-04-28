@@ -79,7 +79,8 @@ $(function(){
   $("#cuenta_retiro").change();
 
   $('#downloadBajio').on('click', function(event) {
-    event.preventDefault();
+    // bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
+    // $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&nofile="+bajioCount).hide();
     localStorage.setItem('bajioCount', bajioCount+1);
   });
 
