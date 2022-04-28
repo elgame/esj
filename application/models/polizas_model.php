@@ -1272,6 +1272,9 @@ class polizas_model extends CI_Model {
           //Colocamos los productos de la factura
           foreach ($inf_compra['productos'] as $key => $value)
           {
+            echo "<pre>";
+            var_dump($value);
+            echo "</pre>";
             $impuestos['iva_acreditar']['importe'] += $value->iva;
 
             $ret_iva_pos = ($value->retencion_iva/($value->importe>0 ? $value->importe : 1))*100;

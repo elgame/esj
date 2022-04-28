@@ -139,19 +139,18 @@ class compras_model extends privilegios_model{
 
       //Productos
       $res = $this->db->query(
-          "SELECT cf.id_compra, cp.id_orden, cp.num_row,
-                  cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
-                  cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
-                  cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
-                  cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
-                  cp.ieps, cp.porcentaje_ieps, cp.porcentaje_isr,
-                  cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
-           FROM compras_facturas AS cf
-             INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
-             LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
-             LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
-             LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           WHERE cf.id_compra = {$id_compra}");
+          "SELECT cp.id_compra, cp.id_orden, cp.num_row,
+                cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
+                cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
+                cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
+                cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
+                cp.ieps, cp.porcentaje_ieps, cp.porcentaje_isr,
+                cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
+          FROM compras_productos AS cp
+            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
+            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
+            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
+          WHERE cp.id_compra = {$id_compra}");
 
       $response['productos'] = $res->result();
 
