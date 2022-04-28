@@ -1270,9 +1270,6 @@ class polizas_model extends CI_Model {
           $impuestos['ieps_pagar9']['importe']   = 0;
           $productos_grups = array();
           //Colocamos los productos de la factura
-          echo "<pre>";
-          var_dump($inf_compra['productos']);
-          echo "</pre>";exit;
           foreach ($inf_compra['productos'] as $key => $value)
           {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
