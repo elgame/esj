@@ -28,7 +28,7 @@ $(function(){
     {
       $tr.find('.ref_alfa').attr('maxlength', '40').attr('required', 'required');
       $tr.find('.ref_numerica').attr('maxlength', '7').attr('required', 'required');
-      $tr.find('.ref_descripcion').val('').attr('readonly', 'readonly').removeAttr('required');
+      $tr.find('.ref_descripcion').removeAttr('required');
       if($tr.find('.ref_alfa').val() === '')
         $tr.find('.ref_alfa').val($this.find('option:selected').attr('data-descrip').substr(0, 40));
     }else{
