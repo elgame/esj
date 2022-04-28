@@ -1297,7 +1297,7 @@ class polizas_model extends CI_Model {
               $impuestos['isr_retenerHo']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
             }
 
-            if ($value->porcentaje_isr == 1.25) { // 1.25
+            if ($value->porcentaje_isr >= 1.248 && $value->porcentaje_isr <= 1.26) { // 1.25
               $impuestos['isr_retenidoxpagar125']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
             }
 
