@@ -86,7 +86,7 @@ class banco_pagos_model extends CI_Model {
       foreach ($datos['id_pago'][$keyp] as $key => $id_pago)
       {
         $this->db->update('banco_pagos_compras', array(
-          'id_cuenta'        => ($cuenta[0]{0}? $cuenta[0]: NULL),
+          'id_cuenta'        => (!empty(trim($cuenta[0]))? $cuenta[0]: NULL),
           'referencia'       => $datos['ref_numerica'][$keyp][0],
           'ref_alfanumerica' => substr($datos['ref_alfanumerica'][$keyp][0], 0, 40),
           'monto'            => $datos['monto'][$keyp][$key],
