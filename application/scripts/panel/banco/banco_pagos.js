@@ -81,7 +81,7 @@ $(function(){
   $('#downloadBajio').on('click', function(event) {
     // bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
     // $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&nofile="+bajioCount).hide();
-    localStorage.setItem('bajioCount', bajioCount+1);
+    localStorage.setItem('bajioCount', (parseInt(bajioCount)||0)+1);
   });
 
   $("#dempresa").autocomplete({
