@@ -163,6 +163,7 @@ class compras_model extends privilegios_model{
         $response['productos'][count($response['productos'])-1]->retencion_iva   = $response['info']->retencion_iva;
         $response['productos'][count($response['productos'])-1]->importe         = $response['info']->subtotal;
         $response['productos'][count($response['productos'])-1]->retencion_isr   = $response['info']->retencion_isr;
+        $response['productos'][count($response['productos'])-1]->porcentaje_isr  = $response['info']->porcentaje_isr;
         $response['productos'][count($response['productos'])-1]->cuenta_cpi      = $response['info']->cuenta_cpi_gst; //Cuenta del gasto
 
         $response['info']->area = null;
