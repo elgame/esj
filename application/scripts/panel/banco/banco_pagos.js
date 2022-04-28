@@ -1,7 +1,7 @@
 $(function(){
   let bajioCount = localStorage.getItem('bajioCount');
   let bajioFecha = localStorage.getItem('bajioFecha');
-  if(!bajioCount || (new Date).toISOString().substring(0, 10) > bajioFecha) {
+  if(!bajioCount || (new Date).toISOString().substring(0, 10) != bajioFecha) {
     bajioCount = 1;
     localStorage.setItem('bajioCount', 1);
     localStorage.setItem('bajioFecha', (new Date).toISOString().substring(0, 10));
@@ -74,10 +74,14 @@ $(function(){
       $("#downloadBancomer").show();
     } else if ($this.find('option:selected').attr('data-banco') === '3') { // bajio
       $("#downloadBajio").show();
-      localStorage.setItem('bajioCount', bajioCount+1);
     }
   });
   $("#cuenta_retiro").change();
+
+  $('#downloadBajio').on('click', function(event) {
+    event.preventDefault();
+    localStorage.setItem('bajioCount', bajioCount+1);
+  });
 
   $("#dempresa").autocomplete({
       source: base_url+'panel/empresas/ajax_get_empresas/',
