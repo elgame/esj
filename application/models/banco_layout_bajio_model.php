@@ -86,8 +86,8 @@ class banco_layout_bajio_model extends banco_cuentas_model {
           'es_moral'           => $pago->es_moral,
           'clave_banco'        => $pago->pagos[0]->codigo_bajio,
           'ref_numerica'       => $pago->pagos[0]->referencia,
-          'descripcion'        => $pago->pagos[0]->descripcion,
-          'alias'              => $pago->pagos[0]->alias,
+          'descripcion'        => $this->cleanStr($pago->pagos[0]->descripcion),
+          'alias'              => $this->cleanStr($pago->pagos[0]->alias),
           'importe_iva'        => '0',
           'tipo_cuenta'        => $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro),
         );
@@ -146,7 +146,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
 	}
   private function cleanStr($string)
   {
-    return str_replace(array('ñ','Ñ','*','#','$','%','=','+'), array('n','N','','','','','',''), $string);
+    return str_replace(array('ñ','Ñ','*','#','$','%','=','+',',','-'), array('n','N','','','','','','',' ',' '), $string);
   }
 
   function getNombre($nombre){
