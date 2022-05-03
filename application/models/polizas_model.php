@@ -3164,6 +3164,23 @@ class polizas_model extends CI_Model {
       //Contenido de la Poliza de las facturas de compra
       foreach ($data as $key => $value)
       {
+        $impuestos['iva_acreditado']['importe'] = 0;
+        $impuestos['iva_acreditar']['importe'] = 0;
+        $impuestos['iva_retener']['importe'] = 0;
+        $impuestos['iva_retenido']['importe'] = 0;
+        $impuestos['isr_retenerHo']['importe'] = 0;
+        $impuestos['isr_retenidoHo']['importe'] = 0;
+        $impuestos['isr_retener']['importe'] = 0;
+        $impuestos['isr_retenido']['importe'] = 0;
+        $impuestos['isr_retenidoxpagar125']['importe'] = 0;
+        $impuestos['isr_retenidopagado125']['importe'] = 0;
+        $impuestos['ieps_pagado6']['importe'] = 0;
+        $impuestos['ieps_pagado7']['importe'] = 0;
+        $impuestos['ieps_pagado9']['importe'] = 0;
+        $impuestos['ieps_pagar6']['importe'] = 0;
+        $impuestos['ieps_pagar7']['importe'] = 0;
+        $impuestos['ieps_pagar9']['importe'] = 0;
+
         if ($value->tipoo == 'facturas')
         {
           //Agregamos el header de la poliza
