@@ -158,7 +158,7 @@
                     <div class="control-group">
                       <label class="control-label" for="dcurp">CURP:</label>
                       <div class="controls">
-                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo (isset($info['info']->curp)? $info['info']->curp: ''); ?>" maxlength="15">
+                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo (isset($info['info']->curp)? $info['info']->curp: ''); ?>" maxlength="20">
                       </div>
                     </div>
 

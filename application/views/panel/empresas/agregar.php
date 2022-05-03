@@ -145,14 +145,14 @@
                     <div class="control-group">
                       <label class="control-label" for="dcurp">CURP:</label>
                       <div class="controls">
-                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo set_value('dcurp'); ?>" maxlength="15">
+                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo set_value('dcurp'); ?>" maxlength="20">
                       </div>
                     </div>
 
                     <div class="control-group">
                       <label class="control-label" for="dregistro_patronal">Registro patronal:</label>
                       <div class="controls">
-                        <input type="text" name="dregistro_patronal" id="dregistro_patronal" class="span12" value="<?php echo set_value('dregistro_patronal'); ?>" maxlength="15">
+                        <input type="text" name="dregistro_patronal" id="dregistro_patronal" class="span12" value="<?php echo set_value('dregistro_patronal'); ?>" maxlength="50">
                       </div>
                     </div>
 
