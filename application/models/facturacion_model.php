@@ -6052,6 +6052,21 @@ class facturacion_model extends privilegios_model{
     ////////////////////
     $pdf->SetWidths(array(190));
     $pdf->SetAligns(array('L'));
+    if ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7) {
+      $pdf->SetXY(10, $pdf->GetY()+3);
+      $pdf->SetFounts(array($pdf->fount_txt), array(1), ['B']);
+      $pdf->Row2(array("COMUNICADO" ), false, false);
+
+      $pdf->SetXY(10, $pdf->GetY());
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->Row2(array("Queda estrictamente prohibido exportar a los Estados Unidos los productos de limón que nuestra empresa {$factura['info']->empresa->nombre_fiscal}, le suministre para su distribución en el territorio mexicano, asi como el uso de nuestra información empresarial tales como ID Number y el numero de registro FDA de nuestras instalaciones para fines de exportación. Esta información solo podrá ser utilizada bajo nuestro consentimiento que deba constar por escrito mediante la previa orden de compra . Cualquier acto contrario efectuado por el cliente a lo señalado será directamente responsable dejando a salvo a la empresa de cualquier tipo de reclamación que se quiera atribuir a la empresa {$factura['info']->empresa->nombre_fiscal} por parte de las autoridades competentes; toda vez que la compra que se hace en esta ocasión y que ampara la factura número {$factura['info']->serie}{$factura['info']->folio} que se origina de la orden de compra numero …. Es exclusivamente para venta y distribución en territorio mexicano." ), false, false, 18);
+    }
+
+    ////////////////////
+    // pagare      //
+    ////////////////////
+    $pdf->SetWidths(array(190));
+    $pdf->SetAligns(array('L'));
     if ($factura['info']->condicion_pago == 'cr') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
       $pdf->SetXY(10, $pdf->GetY()+3);
