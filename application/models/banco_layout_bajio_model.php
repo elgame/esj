@@ -36,7 +36,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
           $reg .= $this->llena0(5, $value['clave_banco']);
           $reg .= $this->llena0(15, number_format($value['monto'], 2, '', '') );
           $reg .= date("Ymd");
-          $reg .= $this->llena0(3, $value['tipo_cuenta']=='1'?'BCO':'SPI');
+          $reg .= $this->llena0(3, $value['tipo_trans']);
           $reg .= $this->llena0(2, $value['tipo_cuenta']); // 01 es cuenta de cheques con 11 dígitos (mismo banco) 40 es cuenta clabe con 18 digitos (TEF, SPEI, mismo banco) 03 es no. de tarjeta de debito con 16 dígitos (TEF, SPEI, mismo bco)
           $reg .= $this->llena0(20, $value['proveedor_cuenta']);
           $reg .= "000000000";
@@ -77,6 +77,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
       if ($total_proveedor > 0)
       {
         $num_abonos++;
+        $tipoCuenta = $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro);
         $pagos_archivo[] = array(
           'monto'              => $total_proveedor,
           'proveedor_sucursal' => $pago->pagos[0]->sucursal,
@@ -89,7 +90,8 @@ class banco_layout_bajio_model extends banco_cuentas_model {
           'descripcion'        => $this->cleanStr($pago->pagos[0]->descripcion),
           'alias'              => $this->cleanStr($pago->pagos[0]->alias),
           'importe_iva'        => '0',
-          'tipo_cuenta'        => $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro),
+          'tipo_cuenta'        => $tipoCuenta['tcuenta'],
+          'tipo_trans'         => $tipoCuenta['ttrans'],
         );
       }
     }
@@ -105,7 +107,10 @@ class banco_layout_bajio_model extends banco_cuentas_model {
     } elseif ($leng == 16) { // tarjetas
       $tipo = '3';
     }
-    return $tipo;
+
+    $tipo_trans = ($pago->id_banco == $cuenta_retiro->id_banco? 'BCO': 'SPI');
+
+    return ['tcuenta' => $tipo, 'ttrans' => $tipo_trans];
   }
 
 
