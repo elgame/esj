@@ -4580,9 +4580,14 @@ class facturacion_model extends privilegios_model{
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
+    $sinCE = isset($factura['ce'])? false: true;
+
     $pdf->SetFont('Arial','B', 70);
     $pdf->SetTextColor(160,160,160);
-    $pdf->RotatedText(65, 100, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 45);
+    $pdf->RotatedText(65, 100, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 35);
+    if ($sinCE && ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7)) {
+      $pdf->RotatedText(25, 175, 'VENTA NACIONAL', 35);
+    }
 
     $pdf->SetXY(0, 0);
     /////////////////////////////////////
@@ -5054,6 +5059,7 @@ class facturacion_model extends privilegios_model{
     // Comercio Exterior //
     ///////////////////////
     if (isset($factura['ce'])) {
+      $sinCE = false;
       $ceExtras = json_decode($factura['ce']->extras);
       $pdf->SetFillColor(0, 171, 72);
       $pdf->SetXY(0, $pdf->GetY() + 1);
@@ -6048,11 +6054,11 @@ class facturacion_model extends privilegios_model{
     }
 
     ////////////////////
-    // pagare      //
+    // COMUNICADO limon      //
     ////////////////////
     $pdf->SetWidths(array(190));
     $pdf->SetAligns(array('L'));
-    if ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7) {
+    if ($sinCE && ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7)) {
       $pdf->SetXY(10, $pdf->GetY()+3);
       $pdf->SetFounts(array($pdf->fount_txt), array(1), ['B']);
       $pdf->Row2(array("COMUNICADO" ), false, false);
