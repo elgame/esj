@@ -673,6 +673,12 @@ class facturacion extends MY_Controller {
         array('field'   => 'dplazo_credito',
             'label'   => 'Plazo de crédito',
             'rules'   => 'numeric'),
+        array('field'   => 'exportacion',
+              'label'   => 'Exportación',
+              'rules'   => $required.'|max_length[2]'),
+        array('field'   => 'exportacionText',
+              'label'   => 'Exportación',
+              'rules'   => ''),
 
         array('field'   => 'dempresa',
               'label'   => 'Empresa',

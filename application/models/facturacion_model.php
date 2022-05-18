@@ -649,6 +649,12 @@ class facturacion_model extends privilegios_model{
     $cfdi_ext = [
       'tipoDeComprobante' => $tipoDeComprobante,
       'usoCfdi'           => $this->input->post('duso_cfdi'),
+      'exportacion'       => $_POST['exportacion'],
+      'exportacionText'   => $_POST['exportacionText'],
+
+      // 'informacionGlobal.periodicidad'         => 'nullable|in:01,02,03,04,05',
+      // 'informacionGlobal.meses'                => 'nullable|in:01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18',
+      // 'informacionGlobal.anio'                 => 'nullable|numeric|min:2021',
     ];
     if (!empty($_POST['cp']['ubicaciones']) &&
         !empty($_POST['cp']['mercancias']['mercancias']) &&
@@ -838,7 +844,8 @@ class facturacion_model extends privilegios_model{
           'clave_unidad' => [
             'key'   => $_POST['pclave_unidad_cod'][$key],
             'value' => $_POST['pclave_unidad'][$key],
-          ]
+          ],
+          'objetoImp' => "02"
         ];
 
         $productosFactura[] = array(
@@ -911,6 +918,7 @@ class facturacion_model extends privilegios_model{
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
             'trasladoIvaPorcent'      => ($tipoDeComprobante !== 'T'? $_POST['prod_diva_porcent'][$key]: '16'),
             'valorUnitario'           => $_POST['prod_dpreciou'][$key],
+            'objetoImp'               => "02",
           );
         }
 
@@ -1062,7 +1070,7 @@ class facturacion_model extends privilegios_model{
 
 
     // xml 3.3
-    $datosApi = $this->cfdi->obtenDatosCfdi33($_POST, $productosApi, $cid_nc);
+    $datosApi = $this->cfdi->obtenDatosCfdi40($_POST, $productosApi, $cid_nc);
     // echo "<pre>";
     //   var_dump($datosApi);
     // echo "</pre>";exit;

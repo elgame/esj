@@ -330,6 +330,30 @@
                     </div>
                   </div>
                   <?php }?>
+                  <?php
+                  if (!isset($borrador) || (isset($borrador) && $borrador['info']->version > 3.9)) {
+                  ?>
+                  <div class="control-group">
+                    <label class="control-label" for="exportacion">Exportación</label>
+                    <div class="controls">
+                      <select name="exportacion" class="span9" id="exportacion">
+
+                        <?php
+                          $exportacionCats = [
+                            '01' => 'No aplica',
+                            '02' => 'Definitiva',
+                            '03' => 'Temporal',
+                          ];
+                          $exportacion = isset($borrador) ? $borrador['info']->cfdi_ext->exportacion : '02';
+                         ?>
+                         <?php foreach ($exportacionCats as $key => $textt): ?>
+                          <option value="<?php echo $key ?>" data-text="<?php echo $textt ?>" <?php echo set_select('exportacion', $key, $exportacion === $key ? true : false); ?>><?php echo "{$key} - {$textt}" ?></option>
+                         <?php endforeach ?>
+                      </select>
+                      <input type="hidden" name="exportacionText" id="exportacionText" value="<?php echo $exportacionCats[$exportacion] ?>">
+                    </div>
+                  </div>
+                  <?php }?>
 
                   <div style="text-align: center;">
                     <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>

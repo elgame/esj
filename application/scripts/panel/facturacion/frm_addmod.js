@@ -555,6 +555,10 @@ $(function(){
     });
   }
 
+  $('#exportacion').on('change', function(){
+    $('#exportacionText').val($('#exportacion option:selected').attr('data-text'));
+  });
+
   modalCfdiRel();
 });
 

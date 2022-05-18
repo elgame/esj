@@ -118,7 +118,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "{$this->apiURL}timbre/factura33";
+    $apiURL = "{$this->apiURL}timbre/factura40";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.
@@ -206,7 +206,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "{$this->apiURL}timbre/nomina33";
+    $apiURL = "{$this->apiURL}timbre/nomina40";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.

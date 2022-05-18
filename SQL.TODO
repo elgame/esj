@@ -1,7 +1,7 @@
 
- ☐ Nomina agregar a los trabajadores, el tipo de turno y en los nocturnos en el recibo poner 7 hrs x dia, premio puntualidad y asistencia asignar el %
+ ☐ Nomina agregar a los trabajadores, el tipo de turno recibo se imprima
  ☐ Reporte de combustible meter los servicios (reporte servicios Reporte Gasto de Activos)
- ☐ Crear listado de ordenes de compra frutas y ligarlos a factura, que salga en el texto de la factura de limon
+ ☐ Crear listado de ordenes de compra frutas y ligarlos a factura, que salga en el texto de la factura de limon, como la hoja
  ☐ CFDI 4.0
    -- lap|san
    ALTER TABLE public.clientes ADD COLUMN regimen_fiscal character varying(100) COLLATE pg_catalog."default";

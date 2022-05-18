@@ -1015,6 +1015,7 @@ class cfdi{
         'estado'       => $cliente['info']->estado,
         'pais'         => $cliente['info']->pais,
         'cp'           => $cliente['info']->cp,
+        'regimenFiscal' => $cliente['info']->regimen_fiscal,
       ),
       'serie'             => $data['dserie'],
       'folio'             => $data['dfolio'],
@@ -1031,6 +1032,7 @@ class cfdi{
       'totalImporte'      => $data['total_subtotal'],
       'descuento'         => '0',
       'total'             => $data['total_totfac'],
+      'exportacion'       => $data['exportacion'],
       'trasladosImporte'  => array(
         'iva'  => $data['total_iva'],
         'ieps' => floatval((isset($data['total_ieps'])? $data['total_ieps']: 0))
