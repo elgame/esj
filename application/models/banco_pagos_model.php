@@ -284,7 +284,9 @@ class banco_pagos_model extends CI_Model {
         'id_compra'    =>  $datos['id_compra'],
         'id_proveedor' =>  $datos['id_proveedor'],
         'monto'        => $datos['monto'],
-        'tcambio'      => floatval($datos['tcambio']) ));
+        'tcambio'      => floatval($datos['tcambio']),
+        'descripcion'  => isset($datos['folio'])? $datos['folio']: '',
+      ));
     }
     return array('status' => 'ok');
   }
