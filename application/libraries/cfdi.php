@@ -913,6 +913,176 @@ class cfdi{
     return $response;
   }
 
+  public function obtenDatosCfdi40($data, $productosApi, $id_nc = false)
+  {
+    $CI =& get_instance();
+
+    // Obtiene el ID de la empresa que emite la factura, si no llega
+    // entonces obtiene el ID por default.
+    // $id_empresa = isset($data['id_empresa']) ? $data['id_empresa'] : $this->default_id_empresa;
+    $id = isset($data['did_empresa']) ? $data['did_empresa'] : $this->default_id_empresa;
+
+    // Carga los datos de la empresa que emite la factura.
+    $this->cargaDatosFiscales($id, 'empresas');
+
+    // Obtiene los datos del receptor.
+    $CI->load->model('clientes_model');
+    $cliente = $CI->clientes_model->getClienteInfo($_POST['did_cliente'], true);
+
+    if ($id_nc) {
+      // Obtiene los datos de la factura.
+      $CI->load->model('facturacion_model');
+      $factura = $CI->facturacion_model->getInfoFactura($id_nc, true);
+
+      if ($factura['info']->tipo_comprobante === 'traslado') { // Traslados
+        $cfdiRel = array(
+          [
+            'tipoRelacion' => '06',
+            'cfdiRelacionado' => array(
+              array(
+                'uuid' => $factura['info']->uuid,
+              )
+            )
+          ]
+        );
+      } else { // Notas de credito
+        $cfdiRel = array(
+          [
+            'tipoRelacion' => '01',
+            'cfdiRelacionado' => array(
+              array(
+                'uuid' => $factura['info']->uuid,
+              )
+            )
+          ]
+        );
+      }
+    }
+
+    if (isset($data['cfdiRelPrev']) && $data['cfdiRelPrev'] != '') {
+      $cfdiRel = array(
+        [
+          'tipoRelacion' => (!empty($data['cfdiRelPrevTipo'])? $data['cfdiRelPrevTipo']: '04'),
+          'cfdiRelacionado' => array(
+            array(
+              'uuid' => $data['cfdiRelPrev'],
+            )
+          )
+        ]
+      );
+    }
+
+    // $CI->load->model('catalogos33_model');
+    // $this->regimen_fiscal = $CI->catalogos33_model->regimenFiscales($this->regimen_fiscal);
+
+    $tipoComprobante = 'I';
+    if ($data['dtipo_comprobante'] == 'ingreso')
+      $tipoComprobante = 'I';
+    elseif ($data['dtipo_comprobante'] == 'egreso')
+      $tipoComprobante = 'E';
+    elseif ($data['dtipo_comprobante'] == 'traslado')
+      $tipoComprobante = 'T';
+    elseif ($data['dtipo_comprobante'] == 'nomina')
+      $tipoComprobante = 'N';
+
+
+    $datosApi = array(
+      'emisor' => array(
+        'nombreFiscal'  => $this->nombre_fiscal,
+        'rfc'           => $this->rfc,
+        'calle'         => $this->calle,
+        'noExterior'    => $this->no_exterior,
+        'noInterior'    => $this->no_interior,
+        'colonia'       => $this->colonia,
+        'localidad'     => $this->localidad,
+        'municipio'     => $this->municipio,
+        'estado'        => $this->estado,
+        'pais'          => $this->pais,
+        'cp'            => $this->cp,
+        'regimenFiscal' => $this->regimen_fiscal,
+        'cer'           => $this->obtenCer($this->path_certificado),
+        'key'           => $this->obtenKey($this->path_key),
+      ),
+      'receptor' => array(
+        'nombreFiscal' => $cliente['info']->nombre_fiscal,
+        'rfc'          => $cliente['info']->rfc,
+        'calle'        => $cliente['info']->calle,
+        'noExterior'   => $cliente['info']->no_exterior,
+        'noInterior'   => $cliente['info']->no_interior,
+        'colonia'      => $cliente['info']->colonia,
+        'localidad'    => $cliente['info']->localidad,
+        'municipio'    => $cliente['info']->municipio,
+        'estado'       => $cliente['info']->estado,
+        'pais'         => $cliente['info']->pais,
+        'cp'           => $cliente['info']->cp,
+      ),
+      'serie'             => $data['dserie'],
+      'folio'             => $data['dfolio'],
+      'fecha'             => $data['dfecha'].date(':s'),
+      'formaDePago'       => $data['dforma_pago'],
+      'condicionesDePago' => $data['dcondicion_pago'] == 'cr'? 'CREDITO': 'CONTADO',
+      'moneda'            => $data['moneda'],
+      'tipoCambio'        => $data['tipoCambio']? $data['tipoCambio']: 1,
+      'tipoDeComprobante' => $tipoComprobante,
+      'metodoDePago'      => $data['dmetodo_pago'],
+      'confirmacion'      => '',
+      'usoCfdi'           => $data['duso_cfdi'],
+      'noCertificado'     => $data['dno_certificado'],
+      'totalImporte'      => $data['total_subtotal'],
+      'descuento'         => '0',
+      'total'             => $data['total_totfac'],
+      'trasladosImporte'  => array(
+        'iva'  => $data['total_iva'],
+        'ieps' => floatval((isset($data['total_ieps'])? $data['total_ieps']: 0))
+      ),
+      'retencionesImporte'  => array(
+        'iva' => $data['total_retiva']
+      ),
+      'productos' => $productosApi
+    );
+
+    if (isset($cfdiRel) && $cfdiRel) {
+      $datosApi['cfdiRelacionados'] = $cfdiRel;
+    }
+
+    if ($tipoComprobante === 'T') {
+      $datosApi['formaDePago'] = '';
+      $datosApi['metodoDePago'] = '';
+    }
+
+    if (!empty($_POST['comercioExterior']['tipoOperacion']) ||
+        !empty($_POST['comercioExterior']['clavePedimento']) ||
+        !empty($_POST['comercioExterior']['certificadoOrigen']) ) {
+      $datosApi['comercioExterior'] = $_POST['comercioExteriorPros'];
+
+      $datosApi['emisor']['calle']      = $datosApi['comercioExterior']['emisor']['domicilio']['calle'];
+      $datosApi['emisor']['noExterior'] = $datosApi['comercioExterior']['emisor']['domicilio']['numeroExterior'];
+      $datosApi['emisor']['noInterior'] = $datosApi['comercioExterior']['emisor']['domicilio']['numeroInterior'];
+      $datosApi['emisor']['colonia']    = $datosApi['comercioExterior']['emisor']['domicilio']['colonia'];
+      $datosApi['emisor']['localidad']  = $datosApi['comercioExterior']['emisor']['domicilio']['localidad'];
+      $datosApi['emisor']['municipio']  = $datosApi['comercioExterior']['emisor']['domicilio']['municipio'];
+      $datosApi['emisor']['estado']     = $datosApi['comercioExterior']['emisor']['domicilio']['estado'];
+      $datosApi['emisor']['pais']       = $datosApi['comercioExterior']['emisor']['domicilio']['pais'];
+      $datosApi['emisor']['cp']         = $datosApi['comercioExterior']['emisor']['domicilio']['codigoPostal'];
+
+      $datosApi['receptor']['numRegIdTrib'] = $datosApi['comercioExterior']['receptor']['numRegIdTrib'];
+      $datosApi['comercioExterior']['receptor']['numRegIdTrib'] = '';
+
+      if ($tipoComprobante !== 'T')
+        unset($datosApi['comercioExterior']['propietario']);
+    }
+
+    if (!empty($_POST['cp']['ubicaciones']) &&
+        !empty($_POST['cp']['mercancias']['mercancias']) &&
+        !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+        count($_POST['cp']['ubicaciones']) > 0 &&
+        count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+        count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
+      $datosApi['cartaPorteSat'] = $_POST['cp'];
+    }
+
+    return $datosApi;
+  }
 
   public function obtenDatosCfdi33($data, $productosApi, $id_nc = false)
   {
