@@ -1,5 +1,6 @@
 
  ☐ Reporte de combustible meter los servicios (reporte servicios Reporte Gasto de Activos)
+ ☐ Crear listado de ordenes de compra frutas y ligarlos a factura, que salga en el texto de la factura de limon
  ☐ CFDI 4.0
    -- lap|san
    ALTER TABLE public.clientes ADD COLUMN regimen_fiscal character varying(100) COLLATE pg_catalog."default";
