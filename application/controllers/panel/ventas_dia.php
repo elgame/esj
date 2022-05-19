@@ -495,7 +495,7 @@ class ventas_dia extends MY_Controller {
     $callback_isValidDate      = 'callback_isValidDate';
     $callback_val_total        = 'callback_val_total';
     $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    if ($borrador)
+    if ($borrador || true)
     {
       // $callback_seriefolio_check = '';
       $callback_isValidDate      = '';
@@ -872,17 +872,6 @@ class ventas_dia extends MY_Controller {
           return false;
         }
 
-      } else {
-        $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
-
-        $hoy = date('Y-m-d');
-        // $hoy = '2015-07-19';
-
-        if (strtotime($hoy) > strtotime($anoLimite))
-        {
-          $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya caducaron, no pueden ser utilizados.');
-          return false;
-        }
       }
     }
     return true;
