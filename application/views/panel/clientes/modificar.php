@@ -120,6 +120,22 @@
                     <input type="hidden" name="did_empresa_ap" value="<?php echo (isset($data->empresa_ap->id_empresa)? $data->empresa_ap->id_empresa: '') ?>" id="did_empresa_ap">
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dregimen_fiscal">Régimen fiscal </label>
+                    <div class="controls">
+                    <select name="dregimen_fiscal" id="dregimen_fiscal" class="span12">
+                      <option value=""></option>
+                    <?php foreach ($regimen_fiscales as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->c_RegimenFiscal ?>"
+                        <?php echo set_select('dregimen_fiscal', $value->c_RegimenFiscal, false, (isset($data->regimen_fiscal)?$data->regimen_fiscal:'')); ?>><?php echo $value->label ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
                 </div> <!--/span-->
 
                 <div class="span5">

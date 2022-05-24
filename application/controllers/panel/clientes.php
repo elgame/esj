@@ -214,6 +214,9 @@ class clientes extends MY_Controller {
     $this->load->model('banco_cuentas_model');
     $params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
+    $this->load->model('catalogos33_model');
+    $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
+
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -273,6 +276,9 @@ class clientes extends MY_Controller {
 			$this->load->model('documentos_model');
 			$params['documentos'] = $this->documentos_model->getDocumentos();
       $params['empresa']       = $this->empresas_model->getInfoEmpresa($params['cliente']['info']->id_empresa);
+
+      $this->load->model('catalogos33_model');
+      $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);

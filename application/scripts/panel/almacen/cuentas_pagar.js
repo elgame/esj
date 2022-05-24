@@ -134,7 +134,7 @@ var abonom = (function($){
     {
       var params = {
         id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
-        monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val()
+        monto: $this.attr("data-monto"), folio: $this.attr("data-folio"), tcambio: $("#tipo_cambio").val()
       };
 
       if ((parseInt(params.id_proveedor)||0) > 0) {
