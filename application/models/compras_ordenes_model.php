@@ -1699,7 +1699,7 @@ class compras_ordenes_model extends CI_Model {
 
     $this->load->model('inventario_model');
     $sqlEmpresa = "";
-    if ($idEmpresa)
+    if ($idEmpresa && $idEmpresa !== '')
     {
       $sqlEmpresa = "p.id_empresa = {$idEmpresa} AND";
       $_GET['did_empresa'] = $idEmpresa;
@@ -1713,10 +1713,11 @@ class compras_ordenes_model extends CI_Model {
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
-              p.last_precio AS precio_unitario, ep.existencia AS inventario
+              p.last_precio AS precio_unitario, ep.existencia AS inventario, e.nombre_fiscal AS empresa
         FROM productos AS p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        INNER JOIN empresas e ON e.id_empresa = p.id_empresa
         LEFT JOIN existencia_productos ep ON ep.id_producto = p.id_producto
         WHERE p.status = 'ac' AND
               {$term}
@@ -1752,11 +1753,11 @@ class compras_ordenes_model extends CI_Model {
 
         if ($def == 'codigo')
         {
-          $labelValue = $itm->codigo;
+          $labelValue = $itm->codigo.(($sqlEmpresa == '')? " (".substr($itm->empresa, 0, 15).")": '');
         }
         else
         {
-          $labelValue = $itm->nombre;
+          $labelValue = $itm->nombre.(($sqlEmpresa == '')? " (".substr($itm->empresa, 0, 15).")": '');
         }
 
         $response[] = array(
@@ -3866,9 +3867,9 @@ class compras_ordenes_model extends CI_Model {
     $sql .= " AND Date(co.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
     $this->load->model('empresas_model');
-    $client_default = $this->empresas_model->getDefaultEmpresa();
-    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
-    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    // $client_default = $this->empresas_model->getDefaultEmpresa();
+    // $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    // $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND co.id_empresa = '".$this->input->get('did_empresa')."'";
     }
@@ -3916,7 +3917,7 @@ class compras_ordenes_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $this->load->model('areas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $empresa = $this->empresas_model->getInfoEmpresa((!empty($_GET['did_empresa'])? $_GET['did_empresa']: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4007,7 +4008,7 @@ class compras_ordenes_model extends CI_Model {
     $res = $this->getActivosGastosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $empresa = $this->empresas_model->getInfoEmpresa((!empty($_GET['did_empresa'])? $_GET['did_empresa']: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte Gasto de Activos';
