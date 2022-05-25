@@ -12188,6 +12188,8 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
 
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
+
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
