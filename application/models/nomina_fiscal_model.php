@@ -10502,6 +10502,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
+            'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
@@ -10863,6 +10864,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
+            'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');

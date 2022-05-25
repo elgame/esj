@@ -310,7 +310,7 @@
                           <?php
                               }
                           ?>
-                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php } ?>
                         </td>
                         <td style="display: none;<?php echo $bgColor ?>">
