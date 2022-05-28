@@ -132,7 +132,7 @@ class facturacion_model extends privilegios_model{
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
                 cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext, fp.ieps, fp.porcentaje_ieps,
-                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real", false)
+                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', "u.nombre = fp.unidad", 'left')
@@ -693,6 +693,7 @@ class facturacion_model extends privilegios_model{
       // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'retencion_iva'       => $this->input->post('total_retiva'),
       'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
       'cfdi_ext'            => json_encode($cfdi_ext),
@@ -864,6 +865,8 @@ class facturacion_model extends privilegios_model{
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => (isset($_POST['dieps_total'][$key])? $_POST['dieps_total'][$key]: 0),
           'porcentaje_ieps'       => (isset($_POST['dieps'][$key])? $_POST['dieps'][$key]: 0),
+          'isr'                   => (isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0),
           'ids_pallets'           => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'ids_remisiones'        => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
           'kilos'                 => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
@@ -903,8 +906,8 @@ class facturacion_model extends privilegios_model{
             'noIdentificacion'        => $_POST['no_identificacion'][$key],
             'retencionCedular'        => '0',
             'retencionCedularPorcent' => '0',
-            'retencionIsr'            => '0',
-            'retencionIsrPorcent'     => '0',
+            'retencionIsr'            => floatval((isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0)),
+            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['dieps'][$key]: 0)),
             'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
             'retencionIvaPorcent'     => ($_POST['prod_dreten_iva_porcent'][$key]*100),
             'retencionIvc'            => '0',

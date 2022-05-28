@@ -123,12 +123,12 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="es_carta_porte">Carta Porte</label>
                 <div class="controls">
                   <input type="checkbox" name="es_carta_porte" id="es-carta-porte" value="1" <?php echo set_checkbox('es_carta_porte', '1', (isset($borrador) && isset($borrador['carta_porte'])) ? true : false); ?>>
                 </div>
-              </div>
+              </div> -->
 
               <?php
                 $displayCPorte = 'display: none;';
@@ -139,7 +139,7 @@
                 }
               ?>
 
-              <div id="campos-pallets" style="<?php echo $displayPallets ?>">
+              <!-- <div id="campos-pallets" style="<?php echo $displayPallets ?>">
                 <div class="control-group" style="margin-top: 145px;">
                   <label class="control-label">Folio Pallet</label>
                   <div class="controls">
@@ -165,7 +165,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <div id="capos-carta-porte" style="<?php echo $displayCPorte ?>">
                 <div class="control-group" style="margin-top: 145px;">
@@ -324,7 +324,7 @@
                     <th>IVA</th>
                     <th>Retención</th>
                     <th>Importe</th>
-                    <th>Cert.</th>
+                    <th>Export.</th>
                     <th>Accion</th>
                   </tr>
                 </thead>

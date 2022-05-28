@@ -10502,6 +10502,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
+            'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
@@ -10863,6 +10864,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($semana['anio']);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
             'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado'  => true,
+            'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
             'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
           );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
@@ -11214,7 +11216,9 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($anio);
-    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+    $filtros = array('semana' => $semana[$tipoNomina],
+      'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
@@ -11247,6 +11251,7 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($anio);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'asegurado' => 'si',
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0'],
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'ordenar' => "ORDER BY u.id ASC", 'anio' => $semana['anio']);
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
@@ -12183,10 +12188,13 @@ class nomina_fiscal_model extends CI_Model {
     else
       $dia = '4';
 
+    $tipoNomina = $dia == 15? 'quincena': 'semana';
+
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId,
               'dia_inicia_semana' => $dia, 'anio' => $semana['anio'], 'asegurado' => true,
+              'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
               'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
             );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');

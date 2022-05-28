@@ -178,7 +178,7 @@ $(function(){
   //Autocomplete productos
   $("#fproductos").autocomplete({
     source: function (request, response) {
-      if ($('#did_empresa').val()!='') {
+      // if ($('#did_empresa').val()!='') {
         $.ajax({
           url: base_url + 'panel/compras_ordenes/ajax_producto/',
           dataType: 'json',
@@ -191,9 +191,9 @@ $(function(){
             response(data)
           }
         });
-      } else {
-        noty({"text": 'Seleccione un empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-      }
+      // } else {
+      //   noty({"text": 'Seleccione un empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+      // }
     },
     minLength: 1,
     selectFirst: true,
@@ -215,7 +215,7 @@ $(function(){
   //Autocomplete activos
   $("#factivos").autocomplete({
     source: function (request, response) {
-      if ($('#did_empresa').val()!='') {
+      // if ($('#did_empresa').val()!='') {
         $.ajax({
           url: base_url + 'panel/productos/ajax_aut_productos/',
           dataType: 'json',
@@ -229,9 +229,9 @@ $(function(){
             response(data)
           }
         });
-      } else {
-        noty({"text": 'Seleccione un empresa para mostrar sus activos.', "layout":"topRight", "type": 'error'});
-      }
+      // } else {
+      //   noty({"text": 'Seleccione un empresa para mostrar sus activos.', "layout":"topRight", "type": 'error'});
+      // }
     },
     minLength: 1,
     selectFirst: true,
