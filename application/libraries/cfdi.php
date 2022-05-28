@@ -1031,7 +1031,8 @@ class cfdi{
         'ieps' => floatval((isset($data['total_ieps'])? $data['total_ieps']: 0))
       ),
       'retencionesImporte'  => array(
-        'iva' => $data['total_retiva']
+        'iva' => $data['total_retiva'],
+        'isr'  => floatval((isset($data['total_isr'])? $data['total_isr']: 0))
       ),
       'productos' => $productosApi
     );

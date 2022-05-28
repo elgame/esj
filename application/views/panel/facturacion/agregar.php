@@ -410,6 +410,8 @@
                                 $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
                                 $_POST['dieps_total'][$key]             = $p->ieps;
                                 $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
+                                $_POST['disr_total'][$key]              = $p->isr;
+                                $_POST['disr'][$key]                    = $p->porcentaje_isr;
 
                                 $_POST['prod_dclase'][$key]             = $p->clase;
                                 $_POST['prod_dpeso'][$key]              = $p->peso;
@@ -653,7 +655,7 @@
                                       <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
                                     </li>
                                     <li class="clearfix">
-                                      <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                      <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
                                       <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
                                     </li>
                                   </ul>

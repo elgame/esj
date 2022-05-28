@@ -1,7 +1,12 @@
 
+ ☐ isr factura
+   -- pcc
+   ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
+   ALTER TABLE public.facturacion_productos ADD COLUMN isr double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_isr double precision NOT NULL DEFAULT 0;
  ☐ Reporte de combustible meter los servicios (reporte servicios Reporte Gasto de Activos)
  ☐ CFDI 4.0
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE public.clientes ADD COLUMN regimen_fiscal character varying(100) COLLATE pg_catalog."default";
    INSERT INTO otros.c_regimen_fiscal ("c_RegimenFiscal", nombre, tipo_persona, created_at, updated_at) VALUES ('626', 'Régimen Simplificado de Confianza', 'fi', '2022-01-01 14:20:10', '2022-01-01 14:20:10');
    INSERT INTO otros.c_regimen_fiscal ("c_RegimenFiscal", nombre, tipo_persona, created_at, updated_at) VALUES ('625', 'Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas', 'fi', '2022-01-01 14:20:10', '2022-01-01 14:20:10');
