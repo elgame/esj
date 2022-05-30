@@ -1,6 +1,6 @@
 
  ☐ isr factura
-   -- pcc
+   -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN isr double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_isr double precision NOT NULL DEFAULT 0;

@@ -7964,6 +7964,8 @@ class nomina_fiscal_model extends CI_Model {
     $regimenFiscal     = $this->catalogos33_model->regimenFiscales($cfdi_ext->emisor->regimenFiscal);
     $tipoComp = $tipoDeComprobante->search((string)$xml[0]['TipoDeComprobante']);
 
+    $this->load->model('nomina_catalogos_model');
+
     $pdf->SetFont('Helvetica','', 9);
     $pdf->SetXY(111, $pdf->GetY()-10);
     $pdf->SetAligns(array('R'));
@@ -8398,6 +8400,12 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(6, $pdf->GetY()+4);
       $pdf->Cell(60, 4, 'Fecha de Pago: '.$cfdi_ext->fechaPago, 0, 0, 'L', 0);
+
+      if (!empty($empleado->tipo_jornada)) {
+        $pdf->SetXY(68, $pdf->GetY());
+        $tipo_jornadas = $this->nomina_catalogos_model->findByClave($empleado->tipo_jornada, 'tj');
+        $pdf->Cell(78, 4, "Jornada: ".($tipo_jornadas? "{$tipo_jornadas->descripcion}": ''), 0, 0, 'L', 0);
+      }
 
       ////////////////////
       // Timbrado Datos //
