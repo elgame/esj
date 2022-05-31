@@ -900,7 +900,7 @@ class facturacion_model extends privilegios_model{
             'retencionCedular'        => '0',
             'retencionCedularPorcent' => '0',
             'retencionIsr'            => floatval((isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0)),
-            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['dieps'][$key]: 0)),
+            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0)),
             'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
             'retencionIvaPorcent'     => ($_POST['prod_dreten_iva_porcent'][$key]*100),
             'retencionIvc'            => '0',
