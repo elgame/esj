@@ -366,6 +366,8 @@
                             // $_POST['id_size_rendimiento'][$key] = $p->id_size_rendimiento;
                             $_POST['dieps_total'][$key]             = $p->ieps;
                             $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
+                            $_POST['disr_total'][$key]              = $p->isr;
+                            $_POST['disr'][$key]                    = $p->porcentaje_isr;
 
                             $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
                             $_POST['isCert'][$key] = $p->certificado === 't' ? '1' : '0';
@@ -476,6 +478,10 @@
                                         <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
                                         <input type="hidden" name="dieps_total[]" value="<?php echo $_POST['dieps_total'][$k] ?>" id="dieps_total" class="span12">
                                       </li>
+                                      <li class="clearfix">
+                                        <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                        <input type="hidden" name="disr_total[]" value="<?php echo $_POST['disr_total'][$k] ?>" id="disr_total" class="span12">
+                                      </li>
                                     </ul>
                                   </div>
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
@@ -578,6 +584,10 @@
                             <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
                             <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
                           </li>
+                          <li class="clearfix">
+                            <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                            <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
+                          </li>
                         </ul>
                       </div>
                       <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
@@ -636,7 +646,7 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td rowspan="8">
+                    <td rowspan="9">
                         <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra', isset($borrador) ? $borrador['info']->total_letra : '');?></textarea>
                     </td>
                   </tr>
@@ -664,6 +674,11 @@
                     <td>IEPS</td>
                     <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
                     <input type="hidden" name="total_ieps" id="total_ieps" value="<?php echo set_value('total_ieps', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
+                  </tr>
+                  <tr>
+                    <td>Ret. Isr</td>
+                    <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
+                    <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
                   </tr>
                   <tr>
                     <td>Ret. IVA</td>

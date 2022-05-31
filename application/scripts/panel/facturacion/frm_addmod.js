@@ -1027,6 +1027,7 @@ function addProducto(unidades, prod) {
                       '<option value="0"'+(ivaSelected == '0' ? 'selected' : '')+'>0%</option>' +
                       '<option value="8"'+(ivaSelected == '8' ? 'selected' : '')+'>8%</option>' +
                       '<option value="16"'+(ivaSelected == '16' ? 'selected' : '')+'>16%</option>' +
+                      '<option value="exento"'+(ivaSelected == 'exento' ? 'selected' : '')+'>Exento</option>'+
                     '</select>' +
                     // '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
                     '<input type="hidden" name="prod_diva_porcent[]" value="'+ivaSelected+'" id="prod_diva_porcent" class="span12">' +
