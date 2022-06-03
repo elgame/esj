@@ -81,6 +81,30 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIsrRetCobradoAc($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO COBRADO'"; //sanjorge
+    else{
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO COBRADO'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetCobradoAc'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIsrRetXCobrarAc($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO X COBRAR'"; //sanjorge
+    else{
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO X COBRAR'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXCobrarAc'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaNCVenta($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //sanjorge
@@ -310,14 +334,14 @@ class polizas_model extends CI_Model {
   public function getCuentaIsrRetXPagar($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //sanjorge
-    elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISR%'"; //francis -
-    elseif($this->empresaId==4) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Raul jorge
-    elseif($this->empresaId==3) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
+    // elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISR%'"; //francis -
+    // elseif($this->empresaId==4) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Raul jorge
+    // elseif($this->empresaId==3) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Gomez gudiño
+    // elseif($this->empresaId==5) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //vianey rocio
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
     else{
-      $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO----%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -893,6 +917,7 @@ class polizas_model extends CI_Model {
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
                            'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '1'),
                            'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '1'),
                            'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '1'),
@@ -960,6 +985,7 @@ class polizas_model extends CI_Model {
 
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
+            $impuestos['isr_retenido']['importe']  = 0;
             $impuestos['ieps_cobrar6']['importe']  = 0;
             $impuestos['ieps_cobrar7']['importe']  = 0;
             $impuestos['ieps_cobrar9']['importe']  = 0;
@@ -979,6 +1005,7 @@ class polizas_model extends CI_Model {
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+                $impuestos['isr_retenido']['importe']  += $value->isr;
                 if ($value->ieps > 0) {
                   if ($value->porcentaje_ieps == 6) {
                     $impuestos['ieps_cobrar6']['importe'] += $value->ieps;
@@ -1086,7 +1113,9 @@ class polizas_model extends CI_Model {
         $this->load->model('facturacion_model');
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
+                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                         );
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -1106,11 +1135,13 @@ class polizas_model extends CI_Model {
 
           $impuestos['iva_trasladar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
+          $impuestos['isr_retenido']['importe']  = 0;
           //Colocamos los Ingresos de la factura
           foreach ($inf_factura['productos'] as $key => $value)
           {
             $impuestos['iva_trasladar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+            $impuestos['isr_retenido']['importe']  += $value->isr;
             $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($this->getCuentaNCVenta(), 30).  //cuenta nc ventas
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
@@ -2488,7 +2519,8 @@ class polizas_model extends CI_Model {
           SELECT
             bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/(f.total - Coalesce(nc.abononc, 0)))*f.importe_iva/100)) AS importe_iva,
-            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.isr/100)) AS isr,
+            c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
             'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid,
@@ -2532,7 +2564,7 @@ class polizas_model extends CI_Model {
         (
           SELECT
             bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
-            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva,
+            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS isr,
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
             0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
@@ -2568,6 +2600,8 @@ class polizas_model extends CI_Model {
         'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetCobradoAc(), 'importe' => 0, 'tipo' => '0'),
 
         'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '0'),
         'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '0'),
@@ -2614,6 +2648,7 @@ class polizas_model extends CI_Model {
 
           $importe_iva = $value->importe_iva;
           $importe_retencion = $value->retencion_iva;
+          $importe_retencion_isr = $value->isr;
           // Quitamos la opcion que ponga todo el iva en el primer pago
           // $facturasIds = explode(',', $value->idfacturas);
           // foreach ($facturasIds as $keyi => $facid)
@@ -2632,6 +2667,8 @@ class polizas_model extends CI_Model {
           // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
           $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;
           $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+          $impuestos['isr_retener']['importe']    = $importe_retencion_isr;
+          $impuestos['isr_retenido']['importe']   = $importe_retencion_isr;
 
           $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];

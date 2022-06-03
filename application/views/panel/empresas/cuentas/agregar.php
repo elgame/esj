@@ -80,6 +80,9 @@
                         <option value="IvaRetXPagarArrend" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Por Pagar Arrendamiento</option>
                         <option value="IvaRetPagadoArrend" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Pagado Arrendamiento</option>
 
+                        <option value="IsrRetCobradoAc" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Cobrado</option>
+                        <option value="IsrRetXCobrarAc" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Cobrar</option>
+
                         <option value="IepsPagar6Gasto" <?php echo set_select('dtipo_cuenta'); ?>>Ieps X Pagar 6% Gastos</option>
                         <option value="IepsPagar7Gasto" <?php echo set_select('dtipo_cuenta'); ?>>Ieps X Pagar 7% Gastos</option>
                         <option value="IepsPagar9Gasto" <?php echo set_select('dtipo_cuenta'); ?>>Ieps X Pagar 9% Gastos</option>
