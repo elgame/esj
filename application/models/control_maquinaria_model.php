@@ -160,6 +160,7 @@ class control_maquinaria_model extends CI_Model {
 
     $empresaId = isset($_GET['did_empresa']{0})? $_GET['did_empresa']: 2;
     $this->load->model('empresas_model');
+    $this->load->model('compras_ordenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
 
     // echo "<pre>";
@@ -337,7 +338,69 @@ class control_maquinaria_model extends CI_Model {
       ), false, false);
       // ------
 
-    }
+
+    //   /// se pone los gastos de activos
+    //   $pdf->SetY($pdf->GetY()+5);
+    //   $_GET['ids_activos'] = [$vehiculo->id_activo];
+    //   $res = $this->compras_ordenes_model->getActivosGastosData();
+    //   $pdf->AliasNbPages();
+    //   $pdf->SetFont('Arial','',8);
+
+    //   $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'L');
+    //   $widths = array(18, 18, 50, 50, 20, 20, 30);
+    //   $header = array('Fecha---', 'Folio', 'Productos', 'Activos', 'Cantidad', 'Importe', 'Descripcion');
+
+    //   $familia = '';
+    //   $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    //   foreach($res as $key => $producto){
+    //     if($pdf->GetY() >= $pdf->limiteY || $key==0){
+    //       $pdf->AddPage();
+
+    //       $pdf->SetFont('Arial','B',8);
+    //       $pdf->SetTextColor(255,255,255);
+    //       $pdf->SetFillColor(160,160,160);
+    //       $pdf->SetX(6);
+    //       $pdf->SetAligns($aligns);
+    //       $pdf->SetWidths($widths);
+    //       $pdf->Row($header, true);
+    //       $pdf->SetY($pdf->GetY()+2);
+    //     }
+
+    //     $pdf->SetTextColor(0,0,0);
+    //     $pdf->SetFont('Arial','',8);
+    //     $datos = array(
+    //       $producto->fecha,
+    //       $producto->folio,
+    //       $producto->productos,
+    //       $producto->activos,
+    //       MyString::formatoNumero($producto->cantidad, 2, '', false),
+    //       MyString::formatoNumero($producto->importe, 2, '', false),
+    //       $producto->descripcion
+    //     );
+    //     $pdf->SetXY(6, $pdf->GetY()-2);
+    //     $pdf->SetAligns($aligns);
+    //     $pdf->SetWidths($widths);
+    //     $pdf->Row($datos, false, false);
+
+    //     $proveedor_cantidad  += $producto->cantidad;
+    //     $proveedor_importe   += $producto->importe;
+    //   }
+
+    //   $datos = array(
+    //     '',
+    //     '',
+    //     '',
+    //     'Total General',
+    //     MyString::formatoNumero($proveedor_cantidad, 2, '', false),
+    //     MyString::formatoNumero($proveedor_importe, 2, '', false),
+    //   );
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->SetAligns($aligns);
+    //   $pdf->SetWidths($widths);
+    //   $pdf->SetMyLinks(array());
+    //   $pdf->Row($datos, false);
+
+    // }
 
     // ------
     $auxy = $pdf->GetY();

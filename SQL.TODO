@@ -1,5 +1,5 @@
 
- ☐ isr factura
+ ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN isr double precision NOT NULL DEFAULT 0;

@@ -339,7 +339,7 @@ class Ventas_model extends privilegios_model{
     }
 
     // Si tiene el # de Salida de fruta
-    if ($this->input->post('dno_salida_fruta') !== false) {
+    if ($this->input->post('dno_salida_fruta') !== false && $this->input->post('dno_salida_fruta') != '') {
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
 
@@ -437,8 +437,8 @@ class Ventas_model extends privilegios_model{
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => $_POST['dieps_total'][$key],
           'porcentaje_ieps'       => $_POST['dieps'][$key],
-          'isr'                   => (isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0),
-          'porcentaje_isr'        => (isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0),
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
