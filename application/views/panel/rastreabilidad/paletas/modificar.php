@@ -313,7 +313,7 @@
                   <div class="row-fluid">
                     <div class="span5">
                       <div id="select_pallets">
-                        <?php for ($i = 0; $i < 12; $i++): ?>
+                        <?php for ($i = 0; $i < 13; $i++): ?>
                         <div class="row-fluid">
                           <div class="span1 nums"><?php echo ($i*2)+1 ?></div>
                           <div class="span4 slots">
