@@ -1330,6 +1330,8 @@ class polizas_model extends CI_Model {
 
             if ($value->porcentaje_isr >= 1.248 && $value->porcentaje_isr <= 1.26) { // 1.25
               $impuestos['isr_retenidoxpagar125']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            } else {
+              $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
             }
 
             if ($value->ieps > 0) {
@@ -3260,17 +3262,23 @@ class polizas_model extends CI_Model {
           $impuestos['isr_retenerHo']['importe']  = 0;
           $impuestos['isr_retenidoHo']['importe'] = 0;
           if ($value->retencion_isr > 0) {
+            $bandisr = true;
             if ($this->getTipoISRCompras($value->observaciones) == 'ar') { // Arrendamiento
               $impuestos['isr_retener']['importe']    = $value->retencion_isr;
               $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+              $bandisr = false;
             } elseif ($this->getTipoISRCompras($value->observaciones) == 'ho') { // Honorario
               $impuestos['isr_retenerHo']['importe']    = $value->retencion_isr;
               $impuestos['isr_retenidoHo']['importe']   = $impuestos['isr_retenerHo']['importe'];
+              $bandisr = false;
             }
 
             if ($value->porcentaje_isr125 > 0) {
               $impuestos['isr_retenidoxpagar125']['importe'] = $value->retencion_isr125;
               $impuestos['isr_retenidopagado125']['importe'] = $impuestos['isr_retenidoxpagar125']['importe'];
+            } elseif($bandisr){ // cualquier isr
+              $impuestos['isr_retener']['importe']    = $value->retencion_isr;
+              $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
             }
           }
 
