@@ -574,7 +574,8 @@ class caja_chica_model extends CI_Model {
 
     $response = [];
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.monto_ini, cc.id_categoria, cc.abreviatura as empresa,
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.monto_ini, cc.id_categoria,
+          (cc.abreviatura || Coalesce((' / ' || es.nombre_fiscal), '')) as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
@@ -594,6 +595,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
          LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
          LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
+         LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
 
          LEFT JOIN (
           SELECT id_gasto, Sum(abono) AS abonos
@@ -5409,7 +5411,7 @@ class caja_chica_model extends CI_Model {
     if ($this->input->get('fno_caja') == 'prest1') {
       $gastos = $this->db->query(
         "SELECT id_prestamo, id_prestamo_nom, id_empleado, id_categoria, id_nomenclatura, concepto, fecha, monto, categoria, nombre_nomen, nomenclatura,
-          null AS folio, null AS id_area, null AS codigo_fin, null AS campo, null AS reposicion
+          null AS folio, null AS id_area, null AS codigo_fin, null AS campo, null AS reposicion, '' AS sucursal
         FROM (
           SELECT cp.id_prestamo, cp.id_prestamo_nom, cp.id_empleado, cp.id_categoria, cp.id_nomenclatura, cp.concepto, cp.fecha, cp.monto,
             cc.abreviatura as categoria, cn.nombre AS nombre_nomen, cn.nomenclatura
@@ -5435,12 +5437,13 @@ class caja_chica_model extends CI_Model {
           cn.id AS id_nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.reposicion
+          cg.reposicion, es.nombre_fiscal AS sucursal
         FROM cajachica_gastos cg
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
           LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+          LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
         WHERE cg.tipo <> 'gc' AND cg.status = 't' AND cg.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql}
         ORDER BY id_categoria ASC, fecha ASC");
