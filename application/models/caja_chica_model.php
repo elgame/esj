@@ -4686,7 +4686,7 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
-          cg.tipo, cg.id_compra, (c.serie || c.folio::text) AS folio_compra
+          cg.tipo, cg.id_compra, (c.serie || c.folio::text) AS folio_compra, es.nombre_fiscal AS sucursal
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -4694,6 +4694,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
          LEFT JOIN usuarios AS u ON u.id = cg.id_usuario
          LEFT JOIN compras AS c ON c.id_compra = cg.id_compra
+         LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
        WHERE cg.id_gasto = '{$id_gasto}'
        ORDER BY cg.id_gasto ASC"
     )->row();
@@ -4726,8 +4727,18 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-5);
     $pdf->Row(array($gastos->empresal), false, false);
 
+    $yini = 0;
+    if ($gastos->sucursal != '') {
+      $pdf->SetFont('helvetica','B', 7);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(63));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array($gastos->sucursal), false, false);
+      $yini = 4;
+    }
+
     $pdf->SetFont('helvetica','', 8);
-    $pdf->SetXY(0, 0);
+    $pdf->SetXY(0, $yini);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
