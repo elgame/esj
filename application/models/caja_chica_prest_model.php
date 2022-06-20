@@ -172,10 +172,10 @@ class caja_chica_prest_model extends CI_Model {
       $info['prestamos_lp'] = $prestamos->result();
       foreach ($info['prestamos_lp'] as $key => $item) {
         $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
-        $item->saldo_fin = $item->saldo_ini - $item->pago_dia;
+        $item->saldo_fin = round($item->saldo_ini - $item->pago_dia, 2);
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
-        if ($item->saldo_ini == 0)
+        if (round($item->saldo_ini, 2) == 0)
           unset($info['prestamos_lp'][$key]);
       }
     }

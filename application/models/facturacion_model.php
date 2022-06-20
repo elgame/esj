@@ -1889,6 +1889,8 @@ class facturacion_model extends privilegios_model{
             'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
             'ieps'                  => $_POST['dieps_total'][$key],
             'porcentaje_ieps'       => $_POST['dieps'][$key],
+            'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+            'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
             'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
             'ids_remisiones'        => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
             'kilos'                 => $_POST['prod_dkilos'][$key],
