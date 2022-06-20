@@ -1,4 +1,5 @@
 
+ ☐ descargas masivas de remisiones
  ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
