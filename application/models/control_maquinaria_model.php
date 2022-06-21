@@ -400,7 +400,7 @@ class control_maquinaria_model extends CI_Model {
     //   $pdf->SetMyLinks(array());
     //   $pdf->Row($datos, false);
 
-    // }
+    }
 
     // ------
     $auxy = $pdf->GetY();
