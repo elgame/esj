@@ -1,5 +1,15 @@
 
- ☐ descargas masivas de remisiones
+ ☐ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área
+ ☐ Descargas masivas de remisiones
+ ☐ Nomina corona
+   - catalogo de ranchos
+   - catalogo de tablas por rancho, numero de he
+   - catalogo de labores con precio de pago
+   - Apartado para capturar las actividades diaras ver foto, opcion de modificar actvidades ya registradas
+   - Reportes de costos de nomina
+   - Reporte de avances de labores por rancho
+   - Reporte concentrado de sueldo por trabajador
+   - Imprimir formato de trabajadores por rancho, asignarle al trabajador el rancho
  ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
