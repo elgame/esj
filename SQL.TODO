@@ -1,5 +1,9 @@
 
+ ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
  ☐ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área
+   -- lap|san
+   ALTER TABLE public.compras_requisicion_productos ADD COLUMN piezas double precision DEFAULT 0;
+   ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
  ☐ Descargas masivas de remisiones
  ☐ Nomina corona
    - catalogo de ranchos

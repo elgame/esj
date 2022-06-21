@@ -56,8 +56,8 @@ class ventas_dia extends MY_Controller {
     $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Ventas del dia'; //activa la opcion del menu
-    $params['seo'] = array('titulo' => 'Ventas del dia');
+    $params['opcmenu_active'] = 'Orden de Compra'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Orden de Compra');
 
     $params['datos_s'] = $this->ventas_dia_model->getFacturas('40', " AND id_nc IS NULL");
 

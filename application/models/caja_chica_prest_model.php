@@ -143,7 +143,7 @@ class caja_chica_prest_model extends CI_Model {
     $prestamos = $this->db->query(
       "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria,
         COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
         Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
         COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
@@ -1685,14 +1685,25 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->Output();
   }
 
-  public function printPrestamoLp($ticket, $fecha)
+  public function printPrestamoLp($ticket, $fecha=null)
   {
+    $tipo = false;
+    $sql = "id_prestamo = {$ticket}";
+    $sql_fecha = 'np.fecha';
+    $sql_folio = 'np.id_prestamo AS no_ticket';
+    if ($fecha) {
+      $tipo = true;
+      $sql = "no_ticket = {$ticket}";
+      $sql_fecha = 'abd.fecha';
+      $sql_folio = 'abd.no_ticket';
+    }
+    $fecha = $fecha? $fecha: date("Y-m-d");
     $fondoc = $this->db->query(
       "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(abd.fecha) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date({$sql_fecha}) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+        COALESCE(abd.pago_dia, 0) AS pago_dia, {$sql_folio}, np.tipo, np.pago_semana
       FROM nomina_prestamos np
       INNER JOIN usuarios u ON u.id = np.id_usuario
       INNER JOIN empresas e ON e.id_empresa = u.id_empresa
@@ -1707,9 +1718,9 @@ class caja_chica_prest_model extends CI_Model {
       INNER JOIN (
         SELECT id_prestamo, fecha, no_ticket, monto AS pago_dia
         FROM nomina_fiscal_prestamos
-        WHERE no_ticket = {$ticket}
+        WHERE {$sql}
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE abd.no_ticket = {$ticket}
+      WHERE abd.{$sql}
       ORDER BY id_prestamo_nom ASC"
     )->row();
 
@@ -1730,13 +1741,15 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()-5);
     $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
-    $pdf->SetAligns(array('C'));
-    $pdf->SetXY(0, $pdf->GetY()-3);
-    $pdf->Row(array('TICKET PRESTAMO LARGO PLAZO'), false, false);
+    if ($tipo) {
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array('TICKET PRESTAMO LARGO PLAZO'), false, false);
+    }
 
     $pdf->SetWidths(array(30, 33));
     $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetXY(0, $pdf->GetY());
     $pdf->Row(array('Folio: '.$fondoc->no_ticket, MyString::fechaAT($fondoc->fecha)), false, false);
 
     $pdf->SetWidths(array(30, 33));
@@ -1744,20 +1757,32 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('PRESTAMO: ', MyString::formatoNumero($fondoc->monto, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('SALDO INICIAL: ', MyString::formatoNumero($fondoc->saldo_ini, 2)), false, false);
+    if ($tipo) {
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('SALDO INICIAL: ', MyString::formatoNumero($fondoc->saldo_ini, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('ABONO '.(($fondoc->no_pagos+1).'/'.$fondoc->tno_pagos).':', MyString::formatoNumero($fondoc->pago_dia, 2)), false, false);
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('ABONO '.(($fondoc->no_pagos+1).'/'.$fondoc->tno_pagos).':', MyString::formatoNumero($fondoc->pago_dia, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('SALDO: ', MyString::formatoNumero($fondoc->saldo_ini-$fondoc->pago_dia, 2)), false, false);
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('SALDO: ', MyString::formatoNumero($fondoc->saldo_ini-$fondoc->pago_dia, 2)), false, false);
+    }
+
+    if (!$tipo) {
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('PAGO X SEM: ', MyString::formatoNumero($fondoc->pago_semana, 2)), false, false);
+
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()+5);
+    }
 
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));

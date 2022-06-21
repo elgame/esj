@@ -244,7 +244,10 @@
                                       }
                             ?>
                                     <tr>
-                                      <td><?php echo $prestamo->categoria ?></td>
+                                      <td><?php echo $prestamo->categoria ?>
+                                        <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom)?>" target="_blank" title="Imprimir vale prestamo">
+                                          <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                      </td>
                                       <td><?php echo $prestamo->empleado ?></td>
                                       <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
                                       <td><?php echo $prestamo->referencia ?></td>

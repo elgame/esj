@@ -687,6 +687,7 @@
           'concepto': ui.item.item.nombre,
           'id': ui.item.id,
           'cantidad': '1',
+          'piezas': '',
           'precio_unitario': '0',
           'presentacion': selectHtml,
           // 'presentacionId': $fpresentacion.find('option:selected').val() || '',
@@ -830,6 +831,7 @@
                 'concepto': data[0].nombre,
                 'id': data[0].id_producto,
                 'cantidad': '1',
+                'piezas': '',
                 'precio_unitario': '0',
                 'presentacion': selectHtml,
                 'presentacionCantidad': '',
@@ -1162,6 +1164,7 @@
           $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId   = $('#productos #fconceptoId'),
           $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
+          $fpiezas       = $('#productos #fpiezas').css({'background-color': '#FFF'}),
           $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
           $fpresentacion = $('#productos #fpresentacion'),
           $funidad       = $('#productos #funidad'),
@@ -1241,6 +1244,7 @@
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
+          'piezas': $fpiezas.val(),
           'precio_unitario': $fprecio.val(),
           'presentacion': selectHtml,
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
@@ -1265,6 +1269,7 @@
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
         $funidad.val('');
+        $fpiezas.val('');
         $ftraslado.val('0');
         $fpresentacion.html('');
         $fcodigo.val('');
@@ -1485,6 +1490,7 @@
                   '</td>' +
                   '<td style="width: 120px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
+                      '<input type="hidden" step="any" name="piezas[]" value="'+(producto.piezas||0)+'" id="piezas" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 70px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +

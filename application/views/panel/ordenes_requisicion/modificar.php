@@ -641,7 +641,7 @@
                           <th rowspan="2" style="vertical-align: middle;">PROVEEDOR</th>
                           <th rowspan="2" style="vertical-align: middle;">CODIGO AREA</th>
                           <th rowspan="2" style="vertical-align: middle;">CODIGO PROD.</th>
-                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
+                          <th rowspan="2" style="vertical-align: middle;">CANT / PIEZAS</th>
                           <th rowspan="2" style="vertical-align: middle;">UNIDAD PRESEN.</th>
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
                           <!-- <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
@@ -699,7 +699,8 @@
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $concepto->num_row ?>" class="span12">
                             </td>
                             <td style="width: 120px;">
-                                <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">
+                                <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">/
+                                <input type="number" step="any" name="piezas[]" value="<?php echo ($concepto->piezas) ?>" id="piezas" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
                               <select name="unidad[]" id="unidad" class="span12">
