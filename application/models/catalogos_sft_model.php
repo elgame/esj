@@ -1185,6 +1185,136 @@ class catalogos_sft_model extends CI_Model{
     echo $html;
   }
 
+  public function getDataCodigosComprasPiezas()
+  {
+    // $this->load->model('compras_areas_model');
+    $sql_compras = $sql_caja = $sql = $sql2 = '';
+    $sql_nom_dia = $sql_nom_hre = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    }
+    elseif($this->input->get('ffecha1') != '') {
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
+    }
+    elseif($this->input->get('ffecha2') != ''){
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
+    }
+
+    if ($this->input->get('did_empresa') != '') {
+      $sql_compras .= " AND co.id_empresa = ".$this->input->get('did_empresa')."";
+    }
+
+    if ($this->input->get('sucursalId') != '') {
+      $sql_compras .= " AND co.id_sucursal = ".$this->input->get('sucursalId')."";
+    }
+
+    $response = array();
+
+
+    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
+    {
+      $ids_hijos = [];
+      foreach ($_GET['dareas'] as $key => $value) {
+        $ids_hijos[] = $value.$this->getHijos($value);
+      }
+      $ids_hijos = implode(',', $ids_hijos);
+
+      $response = $this->db->query("
+        SELECT
+          cp.id_producto, cp.descripcion producto, Sum(cp.piezas) AS piezas
+        FROM compras_ordenes co
+          INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+          INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
+          LEFT JOIN compras c ON c.id_compra = cp.id_compra
+        WHERE cp.status = 'a' AND co.status <> 'ca' AND cp.piezas > 0
+          AND ca.id_cat_codigos In({$ids_hijos}) {$sql_compras}
+        GROUP BY cp.id_producto, cp.descripcion")->result();
+    }
+
+    return $response;
+  }
+  public function rpt_codigos_compras_piezas_pdf()
+  {
+    $compras = $this->getDataCodigosComprasPiezas();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(($this->input->get('did_empresa')? $this->input->get('did_empresa'): 2));
+    $sucursal = $this->empresas_model->infoSucursal(intval($this->input->get('sucursalId')));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Compras por Piezas";
+
+    $pdf->titulo3 = ($sucursal? $sucursal->nombre_fiscal."\n": ''); //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R');
+    $widths = array(170, 35);
+    $header = array('Producto', 'Piezas');
+
+    $lts_compras = 0;
+    $horas_totales = 0;
+
+    $entro = false;
+    foreach($compras as $key => $compra)
+    {
+      $cantidad = 0;
+      $importe = 0;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $compra->producto,
+        MyString::formatoNumero($compra->piezas, 2, '', false),
+      ), false, false);
+
+      $lts_compras += floatval($compra->piezas);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES',
+        MyString::formatoNumero($lts_compras, 2, '', false) ),
+    true, false);
+
+    $pdf->Output('rpt_codigos_compras_piezas.pdf', 'I');
+  }
+
   public function getDataCodigosCuentasSalidas()
   {
     // $this->load->model('compras_areas_model');
