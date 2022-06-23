@@ -1056,11 +1056,11 @@ function addProducto(unidades, prod) {
                     '</button>' +
                     '<ul class="dropdown-menu impuestosEx">' +
                       '<li class="clearfix">' +
-                        '<label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">' +
+                        '<label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">' +
                         '<input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">' +
                       '</li>' +
                       '<li class="clearfix">'+
-                        '<label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="" id="disr" max="100" min="0" class="span9 pull-right vpositive">'+
+                        '<label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="" id="disr" max="100" min="0" class="span9 pull-right vpositive">'+
                         '<input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">'+
                       '</li>'+
                     '</ul>' +
