@@ -1688,12 +1688,14 @@ class caja_chica_prest_model extends CI_Model {
   public function printPrestamoLp($ticket, $fecha=null)
   {
     $tipo = false;
-    $sql = "id_prestamo = {$ticket}";
+    $sql1 = "id_prestamo = {$ticket}";
+    $sql2 = "np.id_prestamo = {$ticket}";
     $sql_fecha = 'np.fecha';
     $sql_folio = 'np.id_prestamo AS no_ticket';
     if ($fecha) {
       $tipo = true;
-      $sql = "no_ticket = {$ticket}";
+      $sql1 = "no_ticket = {$ticket}";
+      $sql2 = "abd.no_ticket = {$ticket}";
       $sql_fecha = 'abd.fecha';
       $sql_folio = 'abd.no_ticket';
     }
@@ -1715,12 +1717,12 @@ class caja_chica_prest_model extends CI_Model {
         WHERE nfp.fecha < '{$fecha}'
         GROUP BY np.id_prestamo
       ) pai ON np.id_prestamo = pai.id_prestamo
-      INNER JOIN (
+      LEFT JOIN (
         SELECT id_prestamo, fecha, no_ticket, monto AS pago_dia
         FROM nomina_fiscal_prestamos
-        WHERE {$sql}
+        WHERE {$sql1}
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE abd.{$sql}
+      WHERE {$sql2}
       ORDER BY id_prestamo_nom ASC"
     )->row();
 
