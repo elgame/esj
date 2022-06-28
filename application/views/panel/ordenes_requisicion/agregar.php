@@ -366,6 +366,11 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="span12" style="text-align: center;">
+                    <input type="hidden" name="dimg_gas" id="dimg_gas" value="">
+                    <img id="img_show_gas" src="<?php echo base_url('application/images/ctrl-v.jpg') ?>" style="height: 250px;width: auto;border: 3px #000 solid;">
+                  </div>
                 </div>
 
                </div> <!-- /box-body -->

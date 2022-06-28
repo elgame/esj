@@ -5,6 +5,8 @@
   $(function(){
     $('#form').keyJump();
 
+    $.pasteimage(showImage);
+
     autocompleteEmpresas();
     autocompleteProveedores();
     autocompleteAutorizo();
@@ -99,6 +101,12 @@
     });
   });
 
+  var showImage = function(src) {
+    $('#img_show_gas').attr('src', src);
+    const uri = src.split(";base64,");
+    const ext = uri[0].split('/');
+    $('#dimg_gas').val(`${ext[1]};${uri[1]}`);
+  }
 
   var btnAutorizarClick = function(){
     $("#btnAutorizar").on('click', function(e) {
@@ -155,6 +163,8 @@
 
         $this.val(tipoOrderActual);
       } else {
+        $("#dimg_gas").val('');
+        $("#img_show_gas").attr('src', base_url + 'application/images/ctrl-v.jpg');
         $.get(base_url + 'panel/compras_requisicion/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
           $folio.val(folio);
           tipoOrderActual = $this.find('option:selected').val();
