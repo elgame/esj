@@ -15,6 +15,10 @@
    - Reporte de avances de labores por rancho
    - Reporte concentrado de sueldo por trabajador
    - Imprimir formato de trabajadores por rancho, asignarle al trabajador el rancho
+ ☐ Agregar imágenes a las ordenes de compra
+   --lap
+   ALTER TABLE public.compras_requisicion ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
+   ALTER TABLE public.compras_ordenes ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
  ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;

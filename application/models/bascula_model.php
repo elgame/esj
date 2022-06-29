@@ -4388,7 +4388,7 @@ class bascula_model extends CI_Model {
             // $datos = explode("\t", $line);
             $datos = $this->clearRowRecetaCorona($datos);
 
-            if (count($datos) === 14 && $datos[0] > 0 && $datos[1] > 0 && $datos[3] > 0) {
+            if (count($datos) === 16 && $datos[0] > 0 && $datos[1] > 0 && $datos[3] > 0) {
               $mins = rand(10, 80);
               $boletasData[] = [
                 'id_empresa'      => $datos[0],
@@ -4412,7 +4412,9 @@ class bascula_model extends CI_Model {
                 'kilos_neto'      => $datos[6],
                 'fecha_bruto'     => ($datos[7]? $datos[7]->format('Y-m-d H:i:s'): ''),
                 'fecha_tara'      => ($datos[7]? $datos[7]->add(new DateInterval("PT{$mins}M"))->format('Y-m-d H:i:s'): ''),
-                'importe'         => $datos[13],
+                'importe'         => round($datos[13] - round(empty($datos[15]) ? 0 : floatval($datos[15]), 2), 2),
+                'ret_isr'         => round(empty($datos[15]) ? 0 : floatval($datos[15]), 2),
+                'ret_isr_porcent' => empty($datos[14]) ? 0 : floatval($datos[14]),
                 'compras'         => []
               ];
 
@@ -4507,7 +4509,7 @@ class bascula_model extends CI_Model {
 
   private function clearRowRecetaCorona($data)
   {
-    $numeros = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13];
+    $numeros = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15];
     $fechas = [7];
     $ids = [0, 1, 8];
     foreach ($data as $key => $item) {
