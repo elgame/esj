@@ -2211,7 +2211,7 @@ class facturacion_model extends privilegios_model{
                     'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
       foreach ($res[0] as $key => $value)
       {
-        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
+        if($tipo != '' && isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
           unset($res[0][$key]);
       }
 
