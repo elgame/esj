@@ -1,4 +1,25 @@
 
+  ✔ bodega gdl @done (22-07-01 11:42)
+    CREATE TABLE otros.bodega_rastreo_efectivo
+      (
+          id_rastreo bigserial NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          fecha date NOT NULL,
+          nombre character varying(500) COLLATE pg_catalog."default" NOT NULL,
+          nota character varying(500) COLLATE pg_catalog."default" NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          fecha_rastreo timestamp without time zone DEFAULT now(),
+          id_usuario bigint,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          no_impresiones integer NOT NULL DEFAULT 0,
+          CONSTRAINT bodega_rastreo_efectivo_pkey PRIMARY KEY (id_rastreo),
+          CONSTRAINT bodega_rastreo_efectivo_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.bodega_rastreo_efectivo OWNER to programa;
+
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
  ✔ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área @done (22-06-21 19:38)
    -- lap|san
