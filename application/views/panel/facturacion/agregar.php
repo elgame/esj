@@ -735,8 +735,8 @@
                       </tr>
                       <tr>
                         <td>Ret. Isr</td>
-                        <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
-                        <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
+                        <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0))?></td>
+                        <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0); ?>">
                       </tr>
                       <tr>
                         <td>Ret. IVA</td>
