@@ -87,30 +87,32 @@ $(function(){
 });
 
 function loadSerieFolio (ide, forceLoad) {
-  var objselect = $('#fserie');
+  if (ide > 0){
+    var objselect = $('#fserie');
 
-  var url = 'panel/facturacion/get_series/?tipof=&ide=';
+    var url = 'panel/facturacion/get_series/?tipof=&ide=';
 
-  loader.create();
-    $.getJSON(base_url+url+ide,
-      function(res){
-        if(res.data) {
-          var html_option = '<option value=""></option>',
-              selected = '', serieSelected = '',
-              loadDefault = false;
+    loader.create();
+      $.getJSON(base_url+url+ide,
+        function(res){
+          if(res.data) {
+            var html_option = '<option value=""></option>',
+                selected = '', serieSelected = '',
+                loadDefault = false;
 
-          let ser = '';
-          console.log($('#fserie1').val());
-          for (var i in res.data){
-            selected = res.data[i].serie == $('#fserie1').val()? ' selected': '';
-            html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+            let ser = '';
+            console.log($('#fserie1').val());
+            for (var i in res.data){
+              selected = res.data[i].serie == $('#fserie1').val()? ' selected': '';
+              html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+            }
+            objselect.html(html_option);
+          } else {
+            noty({"text":res.msg, "layout":"topRight", "type":res.ico});
           }
-          objselect.html(html_option);
-        } else {
-          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
-        }
-        loader.close();
-      });
+          loader.close();
+        });
+  }
 }
 
 //complemento de pagos
