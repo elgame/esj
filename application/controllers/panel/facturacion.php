@@ -24,6 +24,8 @@ class facturacion extends MY_Controller {
     'facturacion/rnotas_cred_xls/',
     'facturacion/prodfact2_pdf/',
     'facturacion/prodfact2_xls/',
+    'facturacion/ventasAcumulado_pdf/',
+    'facturacion/ventasAcumulado_xls/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -33,8 +35,10 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_unidades/',
     'facturacion/ajax_get_pallets_cliente/',
     'facturacion/ajax_ligar_remisiones/',
+    'facturacion/ajax_remove_remision_fact/',
 
     'facturacion/xml/',
+    'facturacion/descarga_masiva/',
     'facturacion/nomina/',
 
     'facturacion/getRemisiones/'
@@ -158,6 +162,9 @@ class facturacion extends MY_Controller {
     if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/agregar/') == false && !isset($_GET['id_nr']))
       redirect(base_url('panel/home?msg=1'));
 
+    $this->carabiner->css(array(
+        array('panel/frm_cartaPorte.css'),
+    ));
     $this->carabiner->js(array(
         array('bootstrap/bootstrap-tab.js'),
         array('bootstrap/bootstrap-tooltip.js'),
@@ -167,6 +174,7 @@ class facturacion extends MY_Controller {
         array('panel/facturacion/gastos_productos.js'),
         array('panel/facturacion/frm_addmod.js'),
         array('panel/facturacion/frm_otros.js'),
+        array('panel/facturacion/frm_cartaPorte.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
@@ -269,6 +277,16 @@ class facturacion extends MY_Controller {
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
+    // Si no es un borrador carga los datos POST
+    if (empty($borrador['info']->cfdi_ext) && isset($_POST['cp'])) {
+      // echo "<pre>";
+      //   var_dump($_POST['cp']);
+      // echo "</pre>";exit;
+      $params['cfdiExt'] = json_encode([
+        'cartaPorteSat' => $_POST['cp']
+      ]);
+    }
+
     // $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
     $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
@@ -276,6 +294,7 @@ class facturacion extends MY_Controller {
     $metodosPago       = new MetodosPago();
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
+    $tipoRelacion      = new TipoRelacion();
     $tipoDeComprobante = new TipoDeComprobante();
     $ceUnidades        = new UnidadesMedida();
     $ceMotTraslado     = new MotivoTraslado();
@@ -284,6 +303,7 @@ class facturacion extends MY_Controller {
     $params['metodosPago']       = $metodosPago->get()->all();
     $params['formaPago']         = $formaPago->get()->all();
     $params['usoCfdi']           = $usoCfdi->get()->all();
+    $params['tipoRelacion']      = $tipoRelacion->get()->all();
     $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
     $params['ceUnidades']        = $ceUnidades->getCE()->all();
     $params['ceMotTraslado']     = $ceMotTraslado->get()->all();
@@ -427,10 +447,10 @@ class facturacion extends MY_Controller {
    */
   public function cancelar()
   {
-    if (isset($_GET['id']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['motivo']{0}) && isset($_GET['folioSustitucion']))
     {
       $this->load->model('facturacion_model');
-      $response = $this->facturacion_model->cancelaFactura($_GET['id']);
+      $response = $this->facturacion_model->cancelaFactura($_GET['id'], $_GET);
 
       if(isset($_GET['sec']) && $_GET['sec'] == 'pp')
         redirect(base_url("panel/facturacion/pago_parcialidad/?&msg={$response['msg']}"));
@@ -450,6 +470,16 @@ class facturacion extends MY_Controller {
     {
       $this->load->model('facturacion_model');
       $this->facturacion_model->descargarZip($_GET['id']);
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  public function descarga_masiva()
+  {
+    if (isset($_GET['id_empresa']{0}) && isset($_GET['fecha1']{0}) && isset($_GET['fecha2']{0}))
+    {
+      $this->load->model('facturacion_model');
+      $this->facturacion_model->descargarMasiva($_GET['id_empresa'], $_GET['fecha1'], $_GET['fecha2'], $_GET['id_cliente']);
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -621,6 +651,12 @@ class facturacion extends MY_Controller {
         array('field'   => 'total_retiva',
               'label'   => 'Retencion IVA',
               'rules'   => $required.'|numeric'),
+        array('field'   => 'total_ieps',
+              'label'   => 'IEPS',
+              'rules'   => 'numeric'),
+        array('field'   => 'total_isr',
+              'label'   => 'ISR',
+              'rules'   => 'numeric'),
         array('field'   => 'total_totfac',
               'label'   => 'Total',
               'rules'   => $required.'|numeric|'.$callback_val_total),
@@ -701,6 +737,18 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_diva_porcent[]',
               'label'   => 'prod_diva_porcent',
+              'rules'   => ''),
+        array('field'   => 'dieps[]',
+              'label'   => 'dieps',
+              'rules'   => ''),
+        array('field'   => 'dieps_total[]',
+              'label'   => 'dieps_total',
+              'rules'   => ''),
+        array('field'   => 'disr[]',
+              'label'   => 'disr',
+              'rules'   => ''),
+        array('field'   => 'disr_total[]',
+              'label'   => 'disr_total',
               'rules'   => ''),
         array('field'   => 'prod_dmedida[]',
               'label'   => 'prod_dmedida',
@@ -791,6 +839,9 @@ class facturacion extends MY_Controller {
                       'rules'   => 'required');
       $rules[] = array('field'   => 'prod_did_tamanio[]',
                       'label'   => 'Tamaño',
+                      'rules'   => 'required');
+      $rules[] = array('field'   => 'prod_did_tamanio_prod[]',
+                      'label'   => 'TamañoProd',
                       'rules'   => 'required');
     }
 
@@ -1188,7 +1239,7 @@ class facturacion extends MY_Controller {
       if($this->input->get('p') == 'true')
         $this->facturacion_model->generaFacturaPdf($_GET['id']);
       else {
-        $params['url'] = 'panel/facturacion/imprimir/?id='.$_GET['id'].'&p=true';
+        $params['url'] = 'panel/facturacion/imprimir/?id='.$_GET['id'].'&p=true&lang='.(!empty($_GET['lang'])? $_GET['lang']: null);
         $this->load->view('panel/facturacion/print_view', $params);
       }
     }
@@ -2182,6 +2233,15 @@ class facturacion extends MY_Controller {
     echo json_encode($response);
   }
 
+  public function ajax_remove_remision_fact()
+  {
+    $this->load->model('facturacion_model');
+
+    $response = $this->facturacion_model->removePallestRemisiones($_GET['id_remision'], $_GET['id_factura']);
+
+    echo json_encode($response);
+  }
+
   /*
    |-------------------------------------------------------------------------
    |  REPORTES
@@ -2244,12 +2304,14 @@ class facturacion extends MY_Controller {
     ));
 
     $this->load->model('empresas_model');
+    $this->load->model('facturacion_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['series'] = $this->facturacion_model->get_series($params['empresa']->id_empresa, 'r');
 
     $this->load->view('panel/header',$params);
     // $this->load->view('panel/general/menu',$params);
@@ -2296,6 +2358,37 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion2_model');
     $this->facturacion2_model->prodfact2_xls();
+  }
+
+  public function ventasAcumulado()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/admin.js'),
+      array('panel/facturacion/rep_productos_facturados.js'),
+    ));
+
+    $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte de ventas acumulado');
+
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/facturacion/rpt_ventas_acumulado',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function ventasAcumulado_pdf()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->ventasAcumulado_pdf();
+  }
+  public function ventasAcumulado_xls()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->ventasAcumulado_xls();
   }
 
   public function rventasc()

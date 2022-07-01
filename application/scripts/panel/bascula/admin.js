@@ -17,4 +17,20 @@ $(function(){
     numberOfMonths: 1, //muestra mas de un mes en el calendario, depende del numero
   });
 
+  // Autocomplete Empresas
+  $("#dempresa").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_empresas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#empresaId").val(ui.item.id);
+      $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#empresaId').val('');
+    }
+  });
+
 });

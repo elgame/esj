@@ -127,6 +127,7 @@ class compras_requisicion extends MY_Controller {
       array('general/util.js'),
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('panel/compras_ordenes/pasteimage.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));
@@ -141,11 +142,16 @@ class compras_requisicion extends MY_Controller {
       'titulo' => 'Agregar orden de requisición'
     );
 
+    $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
+
     $params['next_folio']    = $this->compras_requisicion_model->folio();
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_requisicion_model->departamentos();
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
+    $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
@@ -169,12 +175,7 @@ class compras_requisicion extends MY_Controller {
 
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    // $this->db
-    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-    //   ->from("empresas AS e")
-    //   ->where("e.predeterminado", "t")
-    //   ->get()
-    //   ->row();
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa_default']->id_empresa);
 
     if (isset($_GET['idf']) && $_GET['idf'] !== '')
     {
@@ -225,6 +226,7 @@ class compras_requisicion extends MY_Controller {
       array('general/util.js'),
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('panel/compras_ordenes/pasteimage.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));
@@ -238,10 +240,15 @@ class compras_requisicion extends MY_Controller {
       'titulo' => (isset($_GET['w'])? ($_GET['w']=='c'? 'Orden de compra': 'Orden de requisición'): 'Orden de compra')
     );
 
+    $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
+
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_requisicion_model->departamentos();
     $params['unidades']      = $this->compras_requisicion_model->unidades();
     $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
+    $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     $this->configAddOrden((isset($_POST['guardarprereq'])? true: false));
     if ($this->form_validation->run() == FALSE)
@@ -267,6 +274,12 @@ class compras_requisicion extends MY_Controller {
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
+
+    $_GET['did_empresa'] = $params['orden']['info'][0]->id_empresa;
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['orden']['info'][0]->id_empresa);
+
+    $this->load->model('proyectos_model');
+    // $params['proyectos'] = $this->proyectos_model->getProyectosAjax();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -488,22 +501,22 @@ class compras_requisicion extends MY_Controller {
 
   public function ajax_get_tipo_cambio($fecha=null)
   {
-    $fecha = MyString::suma_fechas(($fecha? $fecha: date("Y-m-d")), -1);
-    $isDia = MyString::dia($fecha, 'c');
-    if ($isDia == 'DO' || $isDia == 'SA') {
-      $fecha = date('Y-m-d', strtotime('previous friday', strtotime($fecha)));
-    }
-    $fecha = explode('-', $fecha);
-    $dia = $fecha[2];
-    $mes = $fecha[1];
-    $anio = $fecha[0];
-    $html_string = file_get_contents("https://dof.gob.mx/indicadores_detalle.php?cod_tipo_indicador=158&dfecha={$dia}%2F{$mes}%2F{$anio}&hfecha={$dia}%2F{$mes}%2F{$anio}");
-    preg_match('/\<td width="52%" align="center" class="txt"\>(\d+.?\d+)\<\/td\>/', $html_string, $coincidencias);
-    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[1]);
+    // $fecha = MyString::suma_fechas(($fecha? $fecha: date("Y-m-d")), -1);
+    // $isDia = MyString::dia($fecha, 'c');
+    // if ($isDia == 'DO' || $isDia == 'SA') {
+    //   $fecha = date('Y-m-d', strtotime('previous friday', strtotime($fecha)));
+    // }
+    // $fecha = explode('-', $fecha);
+    // $dia = $fecha[2];
+    // $mes = $fecha[1];
+    // $anio = $fecha[0];
+    // $html_string = file_get_contents("https://dof.gob.mx/indicadores_detalle.php?cod_tipo_indicador=158&dfecha={$dia}%2F{$mes}%2F{$anio}&hfecha={$dia}%2F{$mes}%2F{$anio}");
+    // preg_match('/\<td width="52%" align="center" class="txt"\>(\d+.?\d+)\<\/td\>/', $html_string, $coincidencias);
+    // echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[1]);
 
-    // $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
-    // preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
-    // echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
+    $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
+    preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
+    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
   }
 
   /*
@@ -516,13 +529,15 @@ class compras_requisicion extends MY_Controller {
   {
     $this->load->library('form_validation');
 
-    $valGasto = $valFlete = false;
+    $valEmpAp = $valGasto = $valFlete = false;
     $tipoOrden = $this->input->post('tipoOrden');
     if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f') {
-      $valGasto = true;
+      $valEmpAp = $valGasto = true;
 
       if ($tipoOrden == 'f')
         $valFlete = true;
+    } elseif ($this->input->post('empresaId') == 20) { // id de agro insumos
+      $valEmpAp = true;
     }
 
     $rules = array(
@@ -532,11 +547,18 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+      array('field' => 'sucursalId',
+            'label' => 'Sucursal',
+            'rules' => ''),
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => ($prereq? '': 'required')),
       array('field' => 'es_receta',
             'label' => 'Es receta',
+            'rules' => ''),
+
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
             'rules' => ''),
 
       // array('field' => 'proveedorId1',
@@ -590,6 +612,15 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'folio',
             'label' => 'Folio',
             'rules' => 'required'),
+      array('field' => 'folioHoja',
+            'label' => 'Folio Hoja',
+            'rules' => ''),
+      array('field' => 'duso_cfdi',
+            'label' => 'Uso de CFDI',
+            'rules' => 'required'),
+      array('field' => 'dforma_pago',
+            'label' => 'Forma de Pago',
+            'rules' => 'required'),
       array('field' => 'tipoPago',
             'label' => 'Tipo de Pago',
             'rules' => 'required'),
@@ -610,6 +641,12 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Entregar la mercancía',
             'rules' => ''),
 
+      array('field' => 'empresaApId',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required|numeric': '')),
+      array('field' => 'empresaAp',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required': '')),
       array('field' => 'areaId',
             'label' => 'Cultivo',
             'rules' => ($valGasto? 'required|numeric': '')),
@@ -638,6 +675,10 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'activosP[]',
             'label' => 'Activo del producto',
             'rules' => ($valGasto && !$valFlete? '': '')),
+
+      array('field' => 'observacionesP[]',
+            'label' => 'Observaciones del producto',
+            'rules' => ''),
 
       array('field' => 'proveedorId[]',
             'label' => 'Proveedor',
@@ -861,7 +902,84 @@ class compras_requisicion extends MY_Controller {
       }
     }
 
+    if($this->input->post('tipoOrden') == 'd')
+    {
+      $rules[] = array('field' => 'compras',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'compras_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+
+      $rules[] = array('field' => 'salidasAlmacen',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'salidasAlmacen_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+
+      $rules[] = array('field' => 'gastosCaja',
+                    'label' => 'Compras',
+                    'rules' => '');
+      $rules[] = array('field' => 'gastosCaja_folio',
+                    'label' => 'Compras',
+                    'rules' => '');
+    }
+
+    if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true' && $this->input->post('empresaId') == 20
+      && $this->input->post('empresaApId') != 20) {
+      $rules[] = array('field' => 'txtBtnAutorizar',
+                      'label' => 'Autorizo',
+                      'rules' => 'callback_val_productos_agro|callback_val_proveedor_agro');
+    }
+
     $this->form_validation->set_rules($rules);
+  }
+
+  public function val_productos_agro($auto)
+  {
+    if (is_array($this->input->post('productoId')) && count($this->input->post('productoId')) > 0)
+    {
+      $response = true;
+      $responseText = '';
+      foreach ($this->input->post('productoId') as $key => $item) {
+        $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE id_empresa = {$_POST['empresaApId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+        if (empty($data_prod)) {
+          $response = false;
+          $responseText .= "{$_POST['concepto'][$key]}, ";
+        }
+      }
+      $this->form_validation->set_message('val_productos_agro', "El/Los productos {$responseText} no se encuentran en la empresa {$_POST['empresaAp']}, se tienen que llamar igual en ambas empresas.");
+      return $response;
+    }
+    else
+    {
+      $this->form_validation->set_message('val_productos_agro', 'Para autorizar una orden con empresa de aplicación se requiere que agregue productos.');
+      return false;
+    }
+  }
+
+  public function val_proveedor_agro($auto)
+  {
+    if (is_array($this->input->post('proveedorId')) && count($this->input->post('proveedorId')) > 0)
+    {
+      $response = true;
+      $responseText = '';
+      foreach ($this->input->post('proveedorId') as $key => $item) {
+        $data_proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE id_empresa = {$_POST['empresaApId']} AND LOWER(nombre_fiscal) LIKE LOWER('AGRO INSUMOS SANJORGE SA DE CV')")->row();
+        if (empty($data_proveedor)) {
+          $response = false;
+          $responseText = "AGRO INSUMOS SANJORGE SA DE CV";
+        }
+      }
+      $this->form_validation->set_message('val_proveedor_agro', "El/Los proveedores {$responseText} no se encuentran en la empresa {$_POST['empresaAp']}, se tienen que llamar igual en ambas empresas.");
+      return $response;
+    }
+    else
+    {
+      $this->form_validation->set_message('val_proveedor_agro', 'Para autorizar una orden con empresa de aplicación se requiere que agregue productos.');
+      return false;
+    }
   }
 
   public function val_proveedor($proveedor)

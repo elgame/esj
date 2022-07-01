@@ -111,19 +111,21 @@ $(function(){
       $('#btnGuardar').trigger('click');
     },
     'alt+80': function () { // alt + p
+      imprimirBoletaa();
+
       // var win=window.open($('#btnPrint').attr('href'), '_blank');
       // win.focus();
 
-      var $form = $('#form');
+      // var $form = $('#form');
 
-      // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
-      if ($('#autorizar').length === 0) {
-        $form.attr('action', $form.attr('action') + '&p=t');
-        $form.submit();
-      } else {
-        var win=window.open($('#btnPrint').attr('href'), '_blank');
-        win.focus();
-      }
+      // // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      // if ($('#autorizar').length === 0) {
+      //   $form.attr('action', $form.attr('action') + '&p=t');
+      //   $form.submit();
+      // } else {
+      //   var win=window.open($('#btnPrint').attr('href'), '_blank');
+      //   win.focus();
+      // }
     },
   });
 
@@ -241,13 +243,23 @@ $(function(){
 
       if ($('#ptipo').find('option:selected').val() === 'en')
       {
-        $.get(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
-
-          if (data === '1') {
-            noty({"text": 'El limite de facturacion del proveedor seleccionado ya esta superado. ', "layout":"topRight", "type": 'error'});
+        $.getJSON(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
+          if (data.status) {
+            var msgg = '';
+            if(data.total >= 900000){
+              msgg = 'El limite ('+data.limite+') de facturación del proveedor seleccionado ya esta superado.';
+            } else if(data.total >= 850000){
+              msgg = 'El limite de facturación del proveedor esta por vencer, restan '+(data.limite - data.total);
+            }
+            noty({"text": msgg, "layout":"topRight", "type": 'error'});
           }
 
         });
+
+        if(ui.item.item.ret_isr == 't'){
+          $('#pisrPorcent').val(1.25); // Asigna el % de retención
+          calculaTotales();
+        }
       }
     }
   }).keydown(function(e){
@@ -292,6 +304,20 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#prancho").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+    }
+  });
+
+  // Autocomplete tablas
+  $("#ptabla").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_tablas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#ptabla").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -586,6 +612,9 @@ $(function(){
       calculaKilosNeto();
       calculaTotales();
     }
+  }).change(function(e) {
+    calculaKilosNeto();
+    calculaTotales();
   }).focusin(function(){
     if (this.setSelectionRange)
     {
@@ -611,6 +640,17 @@ $(function(){
     calculaTotales();
   });
 
+  $('#pisr').click(function(e) {
+    if((parseFloat($('#pisrPorcent').val())||0) > 0) {
+      // $('#pisr').val(0);
+      $('#pisrPorcent').val(0);
+    } else {
+      $('#pisrPorcent').val(1.25);
+    }
+    calculaKilosNeto();
+    calculaTotales();
+  });
+
   // Obtiene el pesaje de los brutos al tener el foco el input.
 
   if ($('#isEditar').length !== 1) {
@@ -619,7 +659,8 @@ $(function(){
     }).on('focusout', function(event) {
       var $this = $(this);
 
-      if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() !== 'sa') {
+      if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() !== 'sa'
+         && $('#paccion').val() === 'n') {
         $('#form').submit();
       }
 
@@ -683,17 +724,30 @@ $(function(){
   $('a#btnPrint').on('click', function(event) {
     event.preventDefault();
 
+    imprimirBoletaa();
+  });
+  var imprimirBoletaa = function () {
     var $form = $('#form');
 
     // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
     if ($('#autorizar').length === 0) {
-      $form.attr('action', $form.attr('action') + '&p=t');
+      let printt = '';
+      if ($('#ptipo').val() == 'en') {
+        if ($('#pid_empresa').val() != '' && $('#pid_proveedor').val() != '' && $('#prancho').val() != '' &&
+          $('#tableCajas tbody #pcajas').length > 0) {
+          printt = '&p=t';
+        }
+      } else {
+        printt = '&p=t';
+      }
+
+      $form.attr('action', $form.attr('action') + printt);
       $form.submit();
     } else {
       var win=window.open($('#btnPrint').attr('href'), '_blank');
       win.focus();
     }
-  });
+  };
 
   $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
     $.ajax({
@@ -965,11 +1019,14 @@ var calculaTotales = function (trIndex, kilosNeto) {
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
+      $pisr         = $('#pisr'),
+      $pisrPorcent  = $('#pisrPorcent'),
       $area         = $('#parea'),
 
       kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
       totalCajas = 0,
       totalCajasP = 0,
+      isrTotal    = 0,
       total      = 0,
 
       trIndex = trIndex || 0;
@@ -1028,8 +1085,10 @@ var calculaTotales = function (trIndex, kilosNeto) {
       total +=  parseFloat($(this).val());
   });
 
+  isrTotal = (total * (parseFloat($pisrPorcent.val())||0) / 100).toFixed(2);
   $ptotal_cajas.val(totalCajas);
-  $ptotal.val(total.toFixed(2));
+  $pisr.val(isrTotal);
+  $ptotal.val((total - isrTotal).toFixed(2));
 };
 
 function setLoteBoleta(){

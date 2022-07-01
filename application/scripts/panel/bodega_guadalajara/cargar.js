@@ -307,10 +307,6 @@
 
       var $table = $('#table-prestamos').find('tbody .row-total'),
           tr =  '<tr>'+
-                  '<td style="width: 100px;">'+
-                    '<input type="text" name="prestamo_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;">'+
-                    '<input type="hidden" name="prestamo_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
-                  '</td>'+
                   '<td style="width: 120px;">'+
                   '  <input type="text" name="prestamo_concepto[]" value="" class="span12">'+
                   '</td>'+
@@ -513,9 +509,6 @@
                     '</select>' +
                   '</td>' +
                   '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
-                  '<td style="">' +
-                    '<input type="text" name="gasto_nombre[]" value="" class="span12 gasto-nombre">' +
-                  '</td>' +
                   '<td style="">' +
                     '<input type="text" name="gasto_concepto[]" value="" class="span12 gasto-concepto">' +
                   '</td>' +

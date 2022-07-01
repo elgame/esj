@@ -7,6 +7,17 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      // Empresa Agro 20
+      if (ui.item.id == 20) {
+        $('#groupFempresa_ap').show();
+        $('#fempresa_ap').prop('required', true).val('');
+        $('#did_empresa_ap').val('');
+      } else {
+        $('#groupFempresa_ap').hide();
+        $('#fempresa_ap').removeAttr('required').val('');
+        $('#did_empresa_ap').val('');
+      }
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -15,10 +26,53 @@ $(function(){
     }
   });
 
+  // Autocomplete Empresas Aplicacion
+  $("#fempresa_ap").autocomplete({
+    source: base_url + 'panel/empresas/ajax_get_empresas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_empresa_ap").val(ui.item.id);
+      $("#fempresa_ap").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#did_empresa_ap').val('');
+    }
+  });
+
   autocompleteCatalogos();
 
+  $('#contratosa').click(function () {
+    $('#contrato').val('true');
+    $('#userfilter').click();
+  });
+
   cuentas.init();
+
+  $('#btn_add_registrop').click(function(event) {
+    if($('#registro_patronal_add').val() != '') {
+      $('#list_registrosp').append('<li><span class="removeRegPatronal btn btn-danger">X</span> <span class="txtRegPatronal">' + $('#registro_patronal_add').val() + '</span></li>');
+      $('#registro_patronal_add').val('');
+
+      joinRegistrosPatronales();
+    }
+  });
+
+  $('#list_registrosp').on('click', '.removeRegPatronal', function(){
+    $(this).parent().remove();
+    joinRegistrosPatronales();
+  });
 });
+
+function joinRegistrosPatronales(){
+  let registros = [];
+  $('#list_registrosp .txtRegPatronal').each(function(index, el) {
+    registros.push($(el).text());
+  });
+  $('#dregistro_patronal').val(registros.join('|'));
+}
 
 // Autocomplete para los catalogos.
 var autocompleteCatalogos = function () {
@@ -202,7 +256,9 @@ var cuentas = (function($){
   var jumpIndex = 0;
 
   function init(){
-    $('#formcliente').keyJump();
+    if($('#formcliente').keyJump){
+      $('#formcliente').keyJump();
+    }
 
     // $("#tableCuentas").on('change', '.chk_banamex', onChangeBanamex);
     $("#tableCuentas").on('click', '.delProd', onClickDeleteCuenta);

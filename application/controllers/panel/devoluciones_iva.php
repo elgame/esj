@@ -12,6 +12,11 @@ class devoluciones_iva extends MY_Controller {
     'devoluciones_iva/cedula_totalidad_iva_xls/',
     'devoluciones_iva/cedula_iva16_pdf/',
     'devoluciones_iva/cedula_iva16_xls/',
+    'devoluciones_iva/rpt_ieps_pdf/',
+    'devoluciones_iva/rpt_ieps_xls/',
+    'devoluciones_iva/rpt_ieps_ventas_pdf/',
+    'devoluciones_iva/rpt_ieps_ventas_xls/',
+
   );
 
 
@@ -125,6 +130,69 @@ class devoluciones_iva extends MY_Controller {
   public function cedula_iva16_xls(){
     $this->load->model('devoluciones_iva_model');
     $this->devoluciones_iva_model->getCedulaIva16Xls();
+  }
+
+
+  public function rpt_ieps()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de IEPS');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/devoluciones_iva/reporte_ieps',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_ieps_pdf(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getRptIepsXls(true);
+  }
+  public function rpt_ieps_xls(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getRptIepsXls();
+  }
+
+  public function rpt_ieps_ventas()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ieps_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de IEPS Ventas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/devoluciones_iva/reporte_ieps_ventas',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_ieps_ventas_pdf(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getRptIepsVentasXls(true);
+  }
+  public function rpt_ieps_ventas_xls(){
+    $this->load->model('devoluciones_iva_model');
+    $this->devoluciones_iva_model->getRptIepsVentasXls();
   }
 
 

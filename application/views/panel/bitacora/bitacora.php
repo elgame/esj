@@ -49,6 +49,15 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="fusuario">Usuario</label>
+                  <div class="controls">
+                    <input type="text" name="fusuario"
+                      value="<?php echo set_value('fusuario') ?>" id="fusuario" class="span12" placeholder="Usuario">
+                    <input type="hidden" name="fid_usuario" value="<?php echo set_value('fid_usuario') ?>" id="fid_usuario">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="fdescripcion">Descripcion</label>
                   <div class="controls">
                     <input type="text" name="fdescripcion" value="" class="span12">

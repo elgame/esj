@@ -16,6 +16,7 @@ class gastos_model extends privilegios_model{
     // datos del gasto.
     $datos = array(
       'id_empresa'      => $data['empresaId'],
+      'id_sucursal'     => (is_numeric($_POST['sucursalId'])? $_POST['sucursalId']: NULL),
       'id_proveedor'    => $data['proveedorId'],
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'serie'           => $data['serie'],
@@ -23,7 +24,8 @@ class gastos_model extends privilegios_model{
       'condicion_pago'  => $data['condicionPago'],
       'plazo_credito'   => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
       'tipo_documento'  => $data['tipo_documento'],
-      'fecha'           => str_replace('T', ' ', $data['fecha']),
+      'fecha'           => str_replace('T', ' ', $data['fecha']), // fecha de la poliza y cuentas pagar
+      'fecha_factura'   => str_replace('T', ' ', $data['fecha_factura']), // fecha real de la factura
       'subtotal'        => $data['subtotal'],
       'importe_iva'     => $data['iva'],
       'total'           => $data['total'],
@@ -36,7 +38,9 @@ class gastos_model extends privilegios_model{
       // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
       // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
       'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
-      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
+      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f'),
+
+      'id_proyecto'     => (!empty($data['proyecto'])? $data['proyecto']: NULL),
     );
     $datos['uuid']           = $this->input->post('uuid');
     $datos['no_certificado'] = $this->input->post('noCertificado');
@@ -195,7 +199,8 @@ class gastos_model extends privilegios_model{
       'retencion_iva' => MyString::float($this->input->post('ret_iva')),
       'retencion_isr' => MyString::float($this->input->post('ret_isr')),
       'total'         => MyString::float($this->input->post('total')),
-      'fecha'         => $this->input->post('fecha'),
+      'fecha'         => $this->input->post('fecha'), // fecha de la poliza y cuentas pagar
+      'fecha_factura' => $this->input->post('fecha_factura'), // fecha real de la factura
     );
 
     // Realiza el upload del XML.
@@ -332,8 +337,10 @@ class gastos_model extends privilegios_model{
     $sql = '';
     $sql .= isset($datos['id_cliente']{0})? " AND f.id_cliente = {$datos['id_cliente']}": '';
     $sql .= isset($datos['folio']{0})? " AND f.folio = '{$datos['folio']}'": '';
+    $sql .= isset($datos['fechaf']{0})? " AND f.fecha >= '{$datos['fechaf']}'": '';
     $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, f.fecha, f.cliente
-          FROM compras c INNER JOIN compras_facturacion_prodc AS cf ON (c.id_compra = cf.id_compra AND c.status <> 'ca')
+          FROM compras c
+            INNER JOIN compras_facturacion_prodc AS cf ON (c.id_compra = cf.id_compra AND c.status <> 'ca')
             RIGHT JOIN
             (
               SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente

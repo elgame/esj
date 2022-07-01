@@ -49,13 +49,16 @@
                       if($primera_cuenta == null)
                         $primera_cuenta = $cuentasp->id_cuenta;
                   ?>
-                    <option value="<?php echo $cuentasp->id_cuenta; ?>"><?php echo $cuentasp->alias.' * '.MyString::formatoNumero($cuentasp->saldo); ?></option>
+                    <option value="<?php echo $cuentasp->id_cuenta; ?>" data-banco="<?php echo $cuentasp->id_banco ?>"><?php echo $cuentasp->alias.' * '.MyString::formatoNumero($cuentasp->saldo); ?></option>
                   <?php
                     }
                   } ?>
                   </select>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=banamex&tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=banamex&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=bajio&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBajio" class="btn hide"><i class="icon-download-alt"></i> Bajio</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout_bascula/?layout=bancomer&tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBancomer" class="btn hide"><i class="icon-download-alt"></i> Bancomer</a>
+                  | <input type="date" name="fechaAplicacion" id="fechaAplicacion" value="<?php echo date("Y-m-d"); ?>" placeholder="fecha Aplicacion">
                   <a href="<?php echo base_url('panel/banco_pagos/aplica_pagos_bascula/?cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="aplicarPagos" class="btn"
                     onclick="msb.confirm('Estas seguro de Aplicar los Pagos?', 'Facturas', this); return false;"><i class="icon-tag"></i> Aplicar pagos</a>
               <?php

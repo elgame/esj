@@ -11,6 +11,8 @@ class cuentas_cobrar extends MY_Controller {
 
     'cuentas_cobrar/cuenta_pdf/',
     'cuentas_cobrar/cuenta_xls/',
+    'cuentas_cobrar/cuenta2_pdf/',
+    'cuentas_cobrar/cuenta2_xls/',
 
     'cuentas_cobrar/saldos_pdf/',
     'cuentas_cobrar/saldos_xls/',
@@ -122,6 +124,49 @@ class cuentas_cobrar extends MY_Controller {
     $this->cuentas_cobrar_model->cuentaClientePdf();
   }
   public function cuenta_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentaClienteExcel();
+  }
+
+  public function cuenta2()
+  {
+    $this->carabiner->css(array(
+      array('panel/cuentas_pagar_cobrar.css'),
+    ));
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_cobrar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por cobrar');
+
+    if($this->input->get('did_empresa') == false){
+      $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $params['empresa']->id_empresa;
+      $_GET['dempresa'] = $params['empresa']->nombre_fiscal;
+    }
+
+    $params['data'] = $this->cuentas_cobrar_model->getCuentaClienteData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_cobrar/cuentaCliente2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cuenta2_pdf(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuenta2ClientePdf();
+  }
+  public function cuenta2_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->cuentaClienteExcel();
   }
@@ -359,7 +404,7 @@ class cuentas_cobrar extends MY_Controller {
       if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');
-        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel']);
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0), $_POST['cfdiRel'], $_POST);
         if($respons['passes']) {
           $params['frm_errors'] = $this->showMsgs('8', $respons['msg']);
           $params['closeModal'] = true;
@@ -370,7 +415,7 @@ class cuentas_cobrar extends MY_Controller {
           else
             $params['frm_errors'] = $this->showMsgs($respons['codigo']);
         }
-      }elseif (isset($_POST['save'])) {
+      } elseif (isset($_POST['save'])) {
         $params['frm_errors'] = $this->showMsgs('2', 'La cuenta del cliente es requerida.');
       }
 
@@ -399,12 +444,12 @@ class cuentas_cobrar extends MY_Controller {
 
   public function cancelar_com_pago()
   {
-    if(isset($_GET['id']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['motivo']{0}) && isset($_GET['folioSustitucion']))
     {
       $this->load->model('banco_cuentas_model');
       $this->load->model('cuentas_cobrar_pago_model');
 
-      $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
+      $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id'], $_GET);
 
       // if (isset($pago->id))
       //   redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=101'));

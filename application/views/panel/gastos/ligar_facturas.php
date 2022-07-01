@@ -60,6 +60,9 @@
                     <input type="text" name="ffolio" id="ffolio" class="span12" value="<?php echo set_value('ffolio'); ?>"
                       maxlength="200" placeholder="Folio" data-next="funidad">
                   </div>
+                  <div class="span4">
+                    <input type="date" name="fechaf" class="span12" id="fechaf" value="<?php echo date("2018-m-d") ?>">
+                  </div>
                 </div>
                 <table class="table table-striped table-bordered bootstrap-datatable">
                   <thead>

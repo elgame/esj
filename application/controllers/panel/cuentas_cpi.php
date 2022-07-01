@@ -127,6 +127,9 @@ class cuentas_cpi extends MY_Controller {
 			$params['cuentas'] = $this->cuentas_cpi_model->getArbolCuenta($params['cuenta']['info']->id_empresa, 'NULL', true,
 																												(isset($params['cuenta']['info']->id_padre)? $params['cuenta']['info']->id_padre: 'radio'), true);
 
+      $params['empresa'] = $this->empresas_model->getInfoEmpresa($params['cuenta']['info']->id_empresa, true)['info'];
+      $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
 			if(isset($_GET['msg']{0}))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 		}else
@@ -194,10 +197,11 @@ class cuentas_cpi extends MY_Controller {
     $query = $this->db->query("SELECT id_cuenta
                                FROM cuentas_contpaq
                                WHERE status = 't' AND id_empresa = ".$this->input->post('did_empresa')."
-                               			AND lower(cuenta) = '".mb_strtolower(trim($cuenta))."'".$sql);
+                               			AND lower(cuenta) = '".mb_strtolower(trim($cuenta))."'
+                                    AND lower(registro_patronal) = '".mb_strtolower(trim($this->input->post('dregistro_patronal')))."'".$sql);
     if ($query->num_rows() > 0)
     {
-      $this->form_validation->set_message('valida_cuenta', 'Ya existe el No de cuenta');
+      $this->form_validation->set_message('valida_cuenta', 'Ya existe el No de cuenta y régimen patronal');
       return false;
     }
     return true;

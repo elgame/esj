@@ -49,6 +49,20 @@
                 </div>
               </div><!--/control-group -->
 
+              <div class="control-group sucursales" style="display: none;">
+                <label class="control-label" for="sucursalId">Sucursal </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <select name="sucursalId" class="span11" id="sucursalId">
+                      <option></option>
+                      <?php foreach ($sucursales as $key => $sucur) { ?>
+                        <option value="<?php echo $sucur->id_sucursal ?>" <?php echo set_select('sucursalId', $sucur->id_departamento); ?>><?php echo $depa->nombre_fiscal ?></option>
+                      <?php } ?>
+                    </select>
+                  </div>
+                </div>
+              </div><!--/control-group -->
+
               <div class="control-group">
                 <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
@@ -132,6 +146,17 @@
                 </div>
               </div>
 
+              <div class="control-group classProyecto" style="display: none;">
+                <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
+                <div class="controls">
+                  <select name="proyecto" id="proyecto" class="span9" style="float: left;">
+                    <!-- <?php foreach ($proyectos as $key => $value): ?>
+                      <option value="<?php echo $value->id_proyecto; ?>" <?php echo set_select('proyecto', $value->id_proyecto); ?>><?php echo $value->nombre; ?></option>
+                    <?php endforeach ?> -->
+                  </select>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">
@@ -173,6 +198,35 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="folioHoja">Folio Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folioHoja" class="span9" id="folioHoja" value="<?php echo set_value('folioHoja'); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="duso_cfdi">Uso de CFDI</label>
+                <div class="controls">
+                  <select name="duso_cfdi" class="span9" id="duso_cfdi">
+                    <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
+                      <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], false, 'G03'); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dforma_pago">Forma de Pago</label>
+                <div class="controls">
+                  <select name="dforma_pago" class="span9" id="dforma_pago">
+                    <?php foreach ($formPagos as $key => $formPago) { ?>
+                      <option value="<?php echo $formPago['key'] ?>" <?php echo set_select('dforma_pago', $formPago['key'], false, 'G03'); ?>><?php echo $formPago['key'].' - '.$formPago['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="tipoPago">Tipo de Pago</label>
                 <div class="controls">
                   <select name="tipoPago" class="span9" id="tipoPago">
@@ -191,6 +245,48 @@
                       echo $_POST['remfacs_folio'].' <input type="hidden" name="remfacs" value="'.$_POST['remfacs'].'"><input type="hidden" name="remfacs_folio" value="'.$_POST['remfacs_folio'].'">';
                     } else if (isset($ordenFlete) && $ordenFlete) {
                       echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="remfacs" value="t:'.$factura['info']->id_factura.'|"><input type="hidden" name="remfacs_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serCompras">
+                <label class="control-label" for="ligcompras">Ligar Compras</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-compras">Buscar</button>
+                  <span id="comprasLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['compras'])){
+                      echo $_POST['compras_folio'].' <input type="hidden" name="compras" value="'.$_POST['compras'].'"><input type="hidden" name="compras_folio" value="'.$_POST['compras_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="compras" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="compras_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serSalidasAlmacen">
+                <label class="control-label" for="show-salidasAlmacen">Ligar Salidas Almacén</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-salidasAlmacen">Buscar</button>
+                  <span id="salidasAlmacenLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['salidasAlmacen'])){
+                      echo $_POST['salidasAlmacen_folio'].' <input type="hidden" name="salidasAlmacen" value="'.$_POST['salidasAlmacen'].'"><input type="hidden" name="salidasAlmacen_folio" value="'.$_POST['salidasAlmacen_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="salidasAlmacen" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="salidasAlmacen_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="serGastosCaja">
+                <label class="control-label" for="show-gastosCaja">Ligar Gastos Caja 2</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-gastosCaja">Buscar</button>
+                  <span id="gastosCajaLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['gastosCaja'])){
+                      echo $_POST['gastosCaja_folio'].' <input type="hidden" name="gastosCaja" value="'.$_POST['gastosCaja'].'"><input type="hidden" name="gastosCaja_folio" value="'.$_POST['gastosCaja_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="gastosCaja" value="'.$factura['info']->id_factura.'|"><input type="hidden" name="gastosCaja_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
                     } ?>
                   </span>
                 </div>
@@ -270,6 +366,11 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="span12" style="text-align: center;">
+                    <input type="hidden" name="dimg_gas" id="dimg_gas" value="">
+                    <img id="img_show_gas" src="<?php echo base_url('application/images/ctrl-v.jpg') ?>" style="height: 250px;width: auto;border: 3px #000 solid;">
+                  </div>
                 </div>
 
                </div> <!-- /box-body -->
@@ -337,6 +438,16 @@
                 <div class="row-fluid">
                   <div class="span6">
                     <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="empresaAp">Empresa aplicación </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="empresaAp" class="span11" id="empresaAp" value="<?php echo set_value('empresaAp') ?>" placeholder="Empaque, Mamita, etc">
+                        </div>
+                        <input type="hidden" name="empresaApId" id="empresaApId" value="<?php echo set_value('empresaApId') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">
                         <div class="input-append span12">
@@ -345,7 +456,9 @@
                         <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                       </div>
                     </div><!--/control-group -->
+                  </div>
 
+                  <div class="span6">
                     <div class="control-group" id="ranchosGrup">
                       <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
                       <div class="controls">
@@ -363,9 +476,7 @@
                        <?php }} ?>
                       </ul>
                     </div><!--/control-group -->
-                  </div>
 
-                  <div class="span6">
                     <div class="control-group" id="centrosCostosGrup">
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">
@@ -416,20 +527,22 @@
                 <div class="row-fluid">
 
                   <div class="span12 mquit">
-                    <div class="span3">
-                      <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
-                    </div><!--/span3s -->
+                    <!-- <div class="span2"> -->
+                    <!-- </div> -->
                     <div class="span6">
                       <div class="input-append span12">
+                      <input type="hidden" class="span12" id="fcodigo" placeholder="Codigo" style="display: none;">
                         <input type="text" class="span10" id="fconcepto" placeholder="Producto / Descripción">
                         <a href="<?php echo base_url('panel/productos').'?modal=true' ?>" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a>
                       </div>
                       <input type="hidden" class="span1" id="fconceptoId">
                     </div><!--/span3s -->
-                    <div class="span1">
+                    <div class="span2">
                       <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
-                    </div><!--/span3s -->
+                    </div><!--/span2s -->
+                    <div class="span2">
+                      <input type="number" step="any" value="" class="span12 vpositive" id="fpiezas" min="0.01" placeholder="Piezas">
+                    </div><!--/span2s -->
                     <div class="span2">
                       <input type="text" class="span12 vpositive" id="fprecio" placeholder="Precio Unitario">
                     </div><!--/span3s -->
@@ -465,6 +578,8 @@
                         <option value="4">4%</option>
                         <option value="10.6667">2 Terceras</option>
                         <option value="16">100 %</option>
+                        <option value="6">6 %</option>
+                        <option value="8">8 %</option>
                       </select>
                     </div><!--/span1 -->
                     <div class="span1">
@@ -568,7 +683,7 @@
                               <input type="hidden" name="prodIdOrden[]" value="<?php echo $_POST['prodIdOrden'][$key] ?>" class="span12">
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $_POST['prodIdNumRow'][$key] ?>" class="span12">
                             </td>
-                            <td style="width: 65px;">
+                            <td style="width: 120px;">
                                 <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
@@ -588,7 +703,7 @@
                               <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                             </td>
-                            <td style="width: 90px;">
+                            <td style="width: 120px;">
                               <input type="text" name="valorUnitario1[]" value="<?php echo $_POST['valorUnitario1'][$key] ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
@@ -629,6 +744,10 @@
                                 <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
                                   <div class="arrow"></div><h3 class="popover-title">Activos</h3>
                                   <div class="popover-content">
+
+                                    <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="observacionesP[]" class="span11" value="<?php echo $_POST['observacionesP'][$key] ?>" placeholder="Observaciones">
+                                    </div>
 
                                     <div class="control-group activosGrup" style="width: 375px;">
                                       <div class="input-append span12">
@@ -677,6 +796,8 @@
                                               <option value="4" <?php echo $_POST['ret_iva'][$key] === '4' ? "selected" : '' ?>>4%</option>
                                               <option value="10.6667" <?php echo $_POST['ret_iva'][$key] === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                               <option value="16" <?php echo $_POST['ret_iva'][$key] === '16' ? "selected" : '' ?>>100 %</option>
+                                              <option value="6" <?php echo $_POST['ret_iva'][$key] === '6' ? "selected" : '' ?>>6 %</option>
+                                              <option value="8" <?php echo $_POST['ret_iva'][$key] === '8' ? "selected" : '' ?>>8 %</option>
                                             </select>
                                         </td>
                                         <td style="width: 66px;">
@@ -858,6 +979,131 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal Ligar Compras -->
+  <div id="modal-compras" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Compras</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serProveedor" class="pull-left" id="serProveedor" value="<?php echo set_value('serProveedor') ?>" placeholder="Proveedor">
+        <input type="hidden" name="serProveedorId" id="serProveedorId" value="<?php echo set_value('serProveedorId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="text" id="filFolioCompras" class="pull-left" placeholder="Folio">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-facturas">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Proveedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddCompra">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal Ligar Salidas Almacen -->
+  <div id="modal-salidas-almacen" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Salidas de Almacén</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serEmpresaSA" class="pull-left" id="serEmpresaSA" value="<?php echo set_value('serEmpresaSA') ?>" placeholder="Empresa">
+        <input type="hidden" name="serEmpresaSAId" id="serEmpresaSAId" value="<?php echo set_value('serEmpresaSAId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="number" id="filFolioSalidasAlmacen" class="pull-left" placeholder="Folio">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-salidas-almacen">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Empresa</th>
+              <th>Concepto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddSalidaAlmacen">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal Ligar Gastos caja -->
+  <div id="modal-gastos-caja" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Gastos de Caja</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" name="serEmpresaGC" class="pull-left" id="serEmpresaGC" value="<?php echo set_value('serEmpresaGC') ?>" placeholder="Empresa">
+        <input type="hidden" name="serEmpresaGCId" id="serEmpresaGCId" value="<?php echo set_value('serEmpresaGCId') ?>">
+         <span class="pull-left"> | </span>
+        <input type="number" id="filFolioGastosCaja" class="pull-left" placeholder="Folio">
+        <span class="pull-left"> | </span>
+        <input type="number" id="filCajaGastosCaja" class="pull-left" placeholder="Caja">
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-gastos-caja">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Empresa</th>
+              <th>No Caja</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddGastosCaja">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
 

@@ -163,6 +163,7 @@
                   '</select></td>' +
                 '<td style="width: 50px;">'+
                   '<select name="tipo_efectico[]" required style="width: 50px;" class="ptipo_efectico">'+
+                    '<option value="efd">Efectivo Fijo</option>'+
                     '<option value="ef">Efectivo</option>'+
                     '<option value="fi">Fiscal</option>'+
                     '<option value="mt">Materiales</option>'+

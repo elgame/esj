@@ -57,6 +57,11 @@
               </div>
             </form>
 
+            <?php if (!empty(set_value_get('did_empresa')) && !empty(set_value_get('ffecha1', date("Y-m-01"))) && !empty(set_value_get('ffecha2', $fecha))): ?>
+            <a class="btn btn-success pull-left" target="_blank" href="<?php echo base_url('panel/facturacion/descarga_masiva/?id_empresa='.set_value_get('did_empresa').'&id_cliente='.set_value_get('fid_cliente').'&fecha1='.set_value_get('ffecha1', date("Y-m-01")).'&fecha2='.set_value_get('ffecha2', substr($fecha, 0, 10))) ?>" style="margin-bottom: 10px;" title="Facturar">
+              <i class="icon-file-text-alt icon-white"></i> <span class="hidden-tablet">Descarga masiva</span></a>
+            <?php endif ?>
+
             <?php
             echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
                     'params'   => '',
@@ -161,7 +166,7 @@
                           echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
                             'params'   => 'id='.$fact->id_factura,
                             'btn_type' => 'btn-danger',
-                            'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
+                            'attrs' => array('onclick' => "msb.confirmCancel('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Cancelar Factura', this, callCancelFactura); return false;"))
                           );
                         }
 
@@ -212,6 +217,10 @@
                             'params'   => 'idr='.$fact->id_factura,
                             'btn_type' => 'btn-success')
                           );
+                        }
+
+                        if ($fact->uuid == '') {
+                          echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
                         }
                       } else {
                         echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';

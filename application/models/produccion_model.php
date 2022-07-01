@@ -90,7 +90,7 @@ class produccion_model extends CI_Model {
       'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $this->productos_salidas_model->folio(),
-      'concepto'        => 'Salida generada automaticamente en Produccion',
+      'concepto'        => 'Salida generada automáticamente en Producción',
       'status'          => 's',
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha_produccion']),
       'fecha_registro'  => date("Y-m-d H:i:s"),
@@ -151,13 +151,35 @@ class produccion_model extends CI_Model {
     return array('passes' => true);
   }
 
+  public function nivelar()
+  {
+    foreach ($this->input->post('concepto') as $key => $concepto) {
+      if ($_POST['tipoMovimiento'][$key] != '') {
+        $data = array(
+          'id_clasificacion' => $_POST['productoId'][$key],
+          'id_empresa'       => $_POST['empresaId'],
+          'id_empleado'      => $this->session->userdata('id_usuario'),
+          'fecha_produccion' => $_POST['fecha'],
+          'cantidad'         => $_POST['cantidad'][$key],
+          'costo_materiap'   => $_POST['costo'],
+          'costo_adicional'  => '0',
+          'costo'            => $_POST['costo'],
+          'tipo'             => $_POST['tipoMovimiento'][$key],
+        );
+        $this->db->insert('otros.produccion_historial', $data);
+      }
+    }
+
+    return array('passes' => true, 'msg' => 6);
+  }
+
 
   /**
    * Reporte existencias por unidad
    *
    * @return
    */
-  public function getInventarioData($id_producto=null, $id_almacen=null)
+  public function getInventarioData($id_producto=null, $id_empresa=null, $id_almacen=null)
   {
     $sqlall = $sql = '';
 
@@ -173,6 +195,10 @@ class produccion_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $client_default = $this->empresas_model->getDefaultEmpresa();
+    // if ($id_empresa > 0) {
+    //   $_GET['did_empresa']
+    //   $_GET['dempresa']
+    // }
     $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
     $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
     if($this->input->get('did_empresa') != ''){
@@ -202,8 +228,8 @@ class produccion_model extends CI_Model {
       (
         SELECT ph.id_clasificacion, Sum(ph.cantidad) AS ventas, (Sum(ph.cantidad*ph.precio_venta)/Sum(ph.cantidad)) AS precio_prom
         FROM otros.produccion_historial ph
-          INNER JOIN facturacion f on f.id_factura = ph.id_factura
-        WHERE ph.tipo = 'f' AND f.status <> 'ca' AND
+          LEFT JOIN facturacion f on f.id_factura = ph.id_factura
+        WHERE ph.tipo = 'f' AND ph.status = 't' AND (f.status <> 'ca' OR (ph.id_salida IS NULL AND ph.id_factura IS NULL)) AND
           Date(ph.fecha_produccion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sqlall}
         GROUP BY ph.id_clasificacion
       ) vnt ON c.id_clasificacion = vnt.id_clasificacion
@@ -216,8 +242,8 @@ class produccion_model extends CI_Model {
       LEFT JOIN (
         SELECT ph.id_clasificacion, Sum(ph.cantidad) AS ventas, (Sum(ph.cantidad*ph.precio_venta)/Sum(ph.cantidad)) AS precio_prom
         FROM otros.produccion_historial ph
-          INNER JOIN facturacion f on f.id_factura = ph.id_factura
-        WHERE ph.tipo = 'f' AND f.status <> 'ca' AND
+          LEFT JOIN facturacion f on f.id_factura = ph.id_factura
+        WHERE ph.tipo = 'f' AND ph.status = 't' AND (f.status <> 'ca' OR (ph.id_salida IS NULL AND ph.id_factura IS NULL)) AND
           Date(ph.fecha_produccion) < '{$fecha}' {$sqlall}
         GROUP BY ph.id_clasificacion
       ) svnt ON c.id_clasificacion = svnt.id_clasificacion

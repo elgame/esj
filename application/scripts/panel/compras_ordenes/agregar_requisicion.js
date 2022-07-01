@@ -5,6 +5,8 @@
   $(function(){
     $('#form').keyJump();
 
+    $.pasteimage(showImage);
+
     autocompleteEmpresas();
     autocompleteProveedores();
     autocompleteAutorizo();
@@ -15,6 +17,11 @@
     autocompleteRanchos();
     autocompleteCentroCosto();
     autocompleteActivos();
+
+    if ($('.editando').length == 0) {
+      getProyectos();
+    }
+    getSucursales();
 
     eventOtros();
 
@@ -37,6 +44,9 @@
 
     eventLigarFacturas();
     eventLigarBoletas();
+    eventLigarCompras();
+    eventLigarSalidasAlmacen();
+    eventLigarGastosCaja();
 
     btnAutorizarClick();
 
@@ -91,6 +101,12 @@
     });
   });
 
+  var showImage = function(src) {
+    $('#img_show_gas').attr('src', src);
+    const uri = src.split(";base64,");
+    const ext = uri[0].split('/');
+    $('#dimg_gas').val(`${ext[1]};${uri[1]}`);
+  }
 
   var btnAutorizarClick = function(){
     $("#btnAutorizar").on('click', function(e) {
@@ -147,6 +163,8 @@
 
         $this.val(tipoOrderActual);
       } else {
+        $("#dimg_gas").val('');
+        $("#img_show_gas").attr('src', base_url + 'application/images/ctrl-v.jpg');
         $.get(base_url + 'panel/compras_requisicion/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
           $folio.val(folio);
           tipoOrderActual = $this.find('option:selected').val();
@@ -158,10 +176,27 @@
           }
           $("#fleteDe").change();
 
-          if(tipoOrderActual == 'd')
+          if(tipoOrderActual == 'd'){
             $("#verVehiculoChk").show();
-          else
+            $("#serCompras").show();
+            $("#serSalidasAlmacen").show();
+            $("#serGastosCaja").show();
+            $("#serComprasProvee").show();
+          }
+          else {
             $("#verVehiculoChk").hide();
+            $("#serCompras").hide();
+            $("#serSalidasAlmacen").hide();
+            $("#serGastosCaja").hide();
+            $("#serComprasProvee").hide();
+          }
+
+          if(tipoOrderActual == 'oc' || tipoOrderActual == 'd') {
+            $('.classProyecto').show();
+          } else {
+            $('.classProyecto').hide();
+          }
+
 
           if (tipoOrderActual == 'p') {
             $('.grpes_receta').show();
@@ -222,12 +257,72 @@
         $("#proveedor1, #proveedor2, #proveedor3").val("");
         $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+        getProyectos();
+        getSucursales();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
         $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+        getProyectos();
+        getSucursales();
+      }
+    });
+
+    $("#empresaAp").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaAp =  $(this);
+
+        $empresaAp.val(ui.item.id);
+        $("#empresaApId").val(ui.item.id);
+        $empresaAp.css("background-color", "#A1F57A");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaAp").css("background-color", "#FFD071");
+        $("#empresaApId").val('');
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
+
+    $("#serEmpresaSA").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#serEmpresaSAId").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#serEmpresaSA").css("background-color", "#FFD071");
+        $("#serEmpresaSAId").val('');
+      }
+    });
+
+    $("#serEmpresaGC").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#serEmpresaGCId").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#serEmpresaGC").css("background-color", "#FFD071");
+        $("#serEmpresaGCId").val('');
       }
     });
   };
@@ -261,6 +356,36 @@
         var $proveedor =  $(this);
         $proveedor.css("background-color", "#FFD071");
         $("#fproveedorId").val('');
+      }
+    });
+
+    $("#serProveedor").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $proveedor =  $(this);
+
+        $("#serProveedorId").val(ui.item.id);
+        $proveedor.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        var $proveedor =  $(this);
+        $proveedor.css("background-color", "#FFD071");
+        $("#serProveedorId").val('');
       }
     });
   };
@@ -308,8 +433,8 @@
     $("#area").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         $.ajax({
             url: base_url + 'panel/areas/ajax_get_areas/',
             dataType: "json",
@@ -347,8 +472,8 @@
     $("#rancho").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
-        if(parseInt($("#empresaId").val()) > 0)
-          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#empresaApId").val()) > 0)
+          params.did_empresa = $("#empresaApId").val();
         if(parseInt($("#areaId").val()) > 0)
           params.area = $("#areaId").val();
         $.ajax({
@@ -458,8 +583,8 @@
       $(this).autocomplete({
         source: function(request, response) {
           var params = {term : request.term};
-          // if(parseInt($("#empresaId").val()) > 0)
-          //   params.did_empresa = $("#empresaId").val();
+          // if(parseInt($("#empresaApId").val()) > 0)
+          //   params.did_empresa = $("#empresaApId").val();
           params.tipo = 'a'; // activos
           $.ajax({
               url: base_url + 'panel/productos/ajax_aut_productos/',
@@ -572,6 +697,7 @@
           'concepto': ui.item.item.nombre,
           'id': ui.item.id,
           'cantidad': '1',
+          'piezas': '',
           'precio_unitario': '0',
           'presentacion': selectHtml,
           // 'presentacionId': $fpresentacion.find('option:selected').val() || '',
@@ -715,6 +841,7 @@
                 'concepto': data[0].nombre,
                 'id': data[0].id_producto,
                 'cantidad': '1',
+                'piezas': '',
                 'precio_unitario': '0',
                 'presentacion': selectHtml,
                 'presentacionCantidad': '',
@@ -819,6 +946,171 @@
       noty({"text": 'Selecciona un cliente', "layout":"topRight", "type": 'error'});
   };
 
+  var eventLigarCompras = function () {
+    $("#show-compras").on('click', function(event) {
+      $("#filFolioCompras").val("");
+
+      getCompras();
+      $("#modal-compras").modal('show');
+    });
+
+    $("#filFolioCompras, #serProveedor").on('change', function(event) {
+      getCompras();
+    });
+
+    $("#BtnAddCompra").on('click', function(event) {
+      var selected = $(".radioCompra:checked"), facts = ($('#comprasLigada input[name="compras"]').val()||''),
+        folios = ($('#comprasLigada input[name="compras_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#comprasLigada").html(folios+' <input type="hidden" name="compras" value="'+facts+'"><input type="hidden" name="compras_folio" value="'+folios+'">');
+      $("#modal-compras").modal('hide');
+    });
+    $("#comprasLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var eventLigarSalidasAlmacen = function () {
+    $("#show-salidasAlmacen").on('click', function(event) {
+      $("#filFolioSalidasAlmacen").val("");
+
+      $('#serEmpresaSA').val($('#empresa').val());
+      $('#serEmpresaSAId').val($('#empresaId').val());
+      getSalidasAlmacen();
+      $("#modal-salidas-almacen").modal('show');
+    });
+
+    $("#filFolioSalidasAlmacen, #serEmpresaSA").on('change', function(event) {
+      getSalidasAlmacen();
+    });
+
+    $("#BtnAddSalidaAlmacen").on('click', function(event) {
+      var selected = $(".radioSalidaAlmacen:checked"), facts = ($('#salidasAlmacenLigada input[name="salidasAlmacen"]').val()||''),
+        folios = ($('#salidasAlmacenLigada input[name="salidasAlmacen_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#salidasAlmacenLigada").html(folios+' <input type="hidden" name="salidasAlmacen" value="'+facts+'"><input type="hidden" name="salidasAlmacen_folio" value="'+folios+'">');
+      $("#modal-salidas-almacen").modal('hide');
+    });
+    $("#salidasAlmacenLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var eventLigarGastosCaja = function () {
+    $("#show-gastosCaja").on('click', function(event) {
+      $("#filFolioGastosCaja, #filCajaGastosCaja").val("");
+
+      $('#serEmpresaGC').val($('#empresa').val());
+      $('#serEmpresaGCId').val($('#empresaId').val());
+      getGastosCaja();
+      $("#modal-gastos-caja").modal('show');
+    });
+
+    $("#filFolioGastosCaja, #serEmpresaGC, #filCajaGastosCaja").on('change', function(event) {
+      getGastosCaja();
+    });
+
+    $("#BtnAddGastosCaja").on('click', function(event) {
+      var selected = $(".radioGastosCaja:checked"), facts = ($('#gastosCajaLigada input[name="gastosCaja"]').val()||''),
+        folios = ($('#gastosCajaLigada input[name="gastosCaja_folio"]').val()||'');
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#gastosCajaLigada").html(folios+' <input type="hidden" name="gastosCaja" value="'+facts+'"><input type="hidden" name="gastosCaja_folio" value="'+folios+'">');
+      $("#modal-gastos-caja").modal('hide');
+    });
+    $("#gastosCajaLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var getCompras = function(tipo){
+    // if($("#serProveedorId").val() !== '')
+    // {
+      var params = {
+        empresaId: $("#empresaId").val(),
+        proveedorId: $("#serProveedorId").val(),
+        filtro: $("#filFolioCompras").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetCompras/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioCompra" value="'+json[i].id_compra+'" class="radioCompra" data-folio="'+json[i].serie+json[i].folio+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].serie+json[i].folio+'</td>'+
+          '  <td>'+json[i].proveedor+'</td>'+
+          '</tr>';
+        }
+        $("#table-facturas tbody").html(html);
+      });
+    // }else
+    //   noty({"text": 'Selecciona un proveedor', "layout":"topRight", "type": 'error'});
+  };
+
+  var getSalidasAlmacen = function(tipo){
+    if($("#serEmpresaSAId").val() !== '')
+    {
+      var params = {
+        empresaId: $("#serEmpresaSAId").val(),
+        filtro: $("#filFolioSalidasAlmacen").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetSalidasAlmacen/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioSalidaAlmacen" value="'+json[i].id_salida+'" class="radioSalidaAlmacen" data-folio="'+json[i].folio+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].folio+'</td>'+
+          '  <td>'+json[i].empresa+'</td>'+
+          '  <td>'+json[i].concepto+'</td>'+
+          '</tr>';
+        }
+        $("#table-salidas-almacen tbody").html(html);
+      });
+    }else
+      noty({"text": 'Selecciona una empresa', "layout":"topRight", "type": 'error'});
+  };
+
+  var getGastosCaja = function(tipo){
+    if($("#serEmpresaGCId").val() !== '')
+    {
+      var params = {
+        empresaId: $("#serEmpresaGCId").val(),
+        caja: $('#filCajaGastosCaja').val(),
+        filtro: $("#filFolioGastosCaja").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetGastosCaja/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="checkbox" name="radioGastosCaja" value="'+json[i].id_gasto+'" class="radioGastosCaja" data-folio="'+json[i].folio_sig+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].folio_sig+'</td>'+
+          '  <td>'+json[i].empresa+'</td>'+
+          '  <td>'+json[i].no_caja+'</td>'+
+          '  <td>'+json[i].monto+'</td>'+
+          '</tr>';
+        }
+        $("#table-gastos-caja tbody").html(html);
+      });
+    }else
+      noty({"text": 'Selecciona una empresa', "layout":"topRight", "type": 'error'});
+  };
+
   var eventLigarBoletas = function () {
     $("#show-boletas").on('click', function(event) {
       // $(".filTipoFacturas").removeAttr('checked');
@@ -882,6 +1174,7 @@
           $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId   = $('#productos #fconceptoId'),
           $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
+          $fpiezas       = $('#productos #fpiezas').css({'background-color': '#FFF'}),
           $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
           $fpresentacion = $('#productos #fpresentacion'),
           $funidad       = $('#productos #funidad'),
@@ -961,6 +1254,7 @@
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
+          'piezas': $fpiezas.val(),
           'precio_unitario': $fprecio.val(),
           'presentacion': selectHtml,
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
@@ -985,6 +1279,7 @@
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
         $funidad.val('');
+        $fpiezas.val('');
         $ftraslado.val('0');
         $fpresentacion.html('');
         $fcodigo.val('');
@@ -1203,8 +1498,9 @@
                     '<input type="hidden" name="prodIdOrden[]" value="'+(producto.id_orden || 0)+'" class="span12 prodIdOrden">' +
                     '<input type="hidden" name="prodIdNumRow[]" value="'+(producto.num_row || 0)+'" class="span12">' +
                   '</td>' +
-                  '<td style="width: 65px;">' +
+                  '<td style="width: 120px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
+                      '<input type="hidden" step="any" name="piezas[]" value="'+(producto.piezas||0)+'" id="piezas" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 70px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
@@ -1221,7 +1517,7 @@
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
-                  '<td style="width: 90px;">' +
+                  '<td style="width: 120px;">' +
                     '<input type="text" name="valorUnitario1[]" value="'+producto.precio_unitario+'" id="valorUnitario1" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
@@ -1264,6 +1560,9 @@
                       '<div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">'+
                         '<div class="arrow"></div><h3 class="popover-title">Activos</h3>'+
                         '<div class="popover-content">'+
+                          '<div class="control-group" style="width: 375px;">'+
+                            '<input type="text" name="observacionesP[]" class="span11 observacionesP" value="" placeholder="Observaciones">'+
+                          '</div>'+
                           '<div class="control-group activosGrup" style="width: 375px;display: '+ ($('#tipoOrden').find('option:selected').val() !== 'f'? 'block' : 'none') +';">'+
                             '<div class="input-append span12">'+
                               '<input type="text" class="span11 clsActivos" value="" placeholder="Nissan FRX, Maquina limon">'+
@@ -1302,6 +1601,8 @@
                                     '<option value="4" '+(producto.ret_iva === '4' ? "selected" : "")+'>4%</option>'+
                                     '<option value="10.6667" '+(producto.ret_iva === '10.6667' ? "selected" : "")+'>2 Terceras</option>'+
                                     '<option value="16" '+(producto.ret_iva === '16' ? "selected" : "")+'>100 %</option>'+
+                                    '<option value="6" '+(producto.ret_iva === '6' ? "selected" : "")+'>6 %</option>'+
+                                    '<option value="8" '+(producto.ret_iva === '8' ? "selected" : "")+'>8 %</option>'+
                                   '</select>' +
                               '</td>' +
                               '<td style="width: 66px;">' +
@@ -1495,6 +1796,63 @@
   // Regresa true si esta seleccionada una empresa si no false.
   var isEmpresaSelected = function () {
     return $('#empresaId').val() !== '';
+  };
+
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
+  };
+
+  var getSucursales = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
+    }
   };
 
 });

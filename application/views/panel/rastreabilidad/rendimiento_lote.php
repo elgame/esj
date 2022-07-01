@@ -18,6 +18,7 @@
           <div class="box-header well" data-original-title>
             <h2><i class="icon-bar-chart"></i> Rendimiento por Lote</h2>
             <div class="box-icon">
+              <a href="<?php echo base_url('panel/rastreabilidad/rpt_lotes_pdf/?fecha='.$fecha.'&areaid='.(isset($clasificaciones['info']->id_area) ? $clasificaciones['info']->id_area : (isset($_GET['parea'])? $_GET['parea']: '2')) ); ?>" class="btn btn-round btn-danger" title="Imprimir reporte de lotes" target="_BLANK"><i class="icon-print"></i></a>
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
@@ -26,7 +27,7 @@
 
               <form action="<?php echo base_url('panel/rastreabilidad/rendimiento_lote?'.MyString::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
-                <div class="control-group span7">
+                <div class="control-group span9">
                   <table class="table">
                     <thead>
                       <tr class="center">
@@ -35,6 +36,7 @@
                         <th style="background-color: #FFF; text-align: center;" class="center">Fecha</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Semana</th>
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
+                        <th style="background-color: #FFF; text-align: center;">Fecha Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Actualizar</th>
                       </tr>
@@ -51,7 +53,13 @@
                           </select>
                         </td>
                         <td style="text-align: center;">
-                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
+                          <?php
+                          $certificado = '';
+                          if ((isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't') || $lote_actual_ext == 1) {
+                            $certificado = 'checked';
+                          }
+                          ?>
+                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo $certificado ?>>
                         </td>
                         <td>
                           <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span8"
@@ -59,6 +67,12 @@
                         </td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $semana ?></span></td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $dia_semana ?></span></td>
+
+                        <td style="text-align: center;">
+                          <input type="date" name="gfechaLote" value="<?php echo $fecha_lote; ?>" id="gfechaLote" class="span8"
+                            style="margin: -7px auto 0 auto; text-align: center;" maxlength="10">
+                        </td>
+
                         <td style="text-align: center;">
                           <select name="glote" id="glote" class="span12" style="margin: -7px auto 0 auto;">
                             <option value=""></option>
@@ -81,14 +95,14 @@
                   </table>
                 </div>
 
-                <div class="span2 nomarg">
+                <div class="span1 nomarg">
 
                   <?php if ($ant_lote >= 1) { ?>
                     <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Anterior Lote</a>
                   <?php } ?>
 
                 </div>
-                <div class="span2 nomarg">
+                <div class="span1 nomarg">
                   <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Siguiente Lote</a>
                 </div>
                 <div class="span1 nomarg">
@@ -106,7 +120,7 @@
                     <th>CLASIFICACIÓN</th>
                     <th style="width:110px;">CAJA</th>
                     <th style="width:55px;">TAMAÑO</th>
-                    <th style="width:55px;">PRET</th>
+                    <th style="width:55px;">CALIBRE</th>
                     <th style="width:110px;">ETIQUETA</th>
                     <th style="width:55px;">KILOS</th>
                     <th style="width:55px;">EXISTENTE</th>
@@ -168,6 +182,7 @@
                         <input type="hidden" id="frd" value="<?php echo $c->rendimiento ?>" class="span12 vpositive">
                       </td>
                       <td>
+                        <input type="checkbox" id="ffrutaCom" <?php echo ($c->fruta_com == 't'? 'checked': '') ?> data-rel="tooltip" title="Es fruta comprada?"> |
                         <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
                         <button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>
                       </td>
@@ -196,8 +211,8 @@
                       <input type="hidden" id="fidsize_old" value="" class="span12">
                     </td>
                     <td>
-                      <input type="text" id="fetiqueta" value="" class="span12">
-                      <input type="hidden" id="fidetiqueta" value="" class="span12">
+                      <input type="text" id="fetiqueta" value="SIN MARCA" class="span12">
+                      <input type="hidden" id="fidetiqueta" value="15" class="span12">
                       <input type="hidden" id="fidetiqueta_old" value="" class="span12">
                     </td>
                     <td>
@@ -222,6 +237,7 @@
                       <input type="hidden" id="frd" value="0" class="span12 vpositive">
                     </td>
                     <td>
+                      <input type="checkbox" id="ffrutaCom" data-rel="tooltip" title="Es fruta comprada?"> |
                       <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
                       <button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>
                     </td>

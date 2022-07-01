@@ -81,7 +81,7 @@ class btrabajo_agricola_model extends CI_Model {
 			];
 
 			$this->db->insert('otros.trabajo_agricola', $datos);
-			$response .= ','.$this->db->insert_id('otros.trabajo_agricola', 'id_trabajo_agricola');
+			$response .= ','.$this->db->insert_id('otros.trabajo_agricola_id_trabajo_agricola_seq');
 		}
 
 		return array('error' => FALSE, 'hojas' => $response);

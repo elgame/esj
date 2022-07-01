@@ -480,7 +480,7 @@ class ventas_dia_model extends privilegios_model{
     if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
     {
       $this->db->insert('facturacionv', $datosFactura);
-      $idFactura = $this->db->insert_id('facturacionv', 'id_factura');
+      $idFactura = $this->db->insert_id('facturacionv_id_factura_seq');
 
       $msg = '3';
       // // Bitacora
@@ -566,95 +566,97 @@ class ventas_dia_model extends privilegios_model{
           'id_clasificacion_asigna' => ($_POST['prod_did_asigna'][$key] !== '' ? $_POST['prod_did_asigna'][$key] : ($_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null)),
         );
 
-        if ($_POST['prod_did_prod'][$key] === '49')
-        {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['seg_id_proveedor'],
-            'pol_seg'          => $_POST['seg_poliza'],
-            'folio'            => $serieFolio,
-            'bultos'           => 0,
-            'certificado'      => null,
-          );
-        }
+        // if ($_POST['prod_did_prod'][$key] === '49')
+        // {
+        //   $dataSeguroCerti[] = array(
+        //     'id_factura'       => $idFactura,
+        //     'id_clasificacion' => $_POST['prod_did_prod'][$key],
+        //     'id_proveedor'     => $_POST['seg_id_proveedor'],
+        //     'pol_seg'          => $_POST['seg_poliza'],
+        //     'folio'            => $serieFolio,
+        //     'bultos'           => 0,
+        //     'certificado'      => null,
+        //   );
+        // }
 
-        if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
-        {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
-            'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
-            'folio'            => $serieFolio,
-            'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
-            'pol_seg'          => null,
-          );
-        }
+        // if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+        // {
+        //   $dataSeguroCerti[] = array(
+        //     'id_factura'       => $idFactura,
+        //     'id_clasificacion' => $_POST['prod_did_prod'][$key],
+        //     'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
+        //     'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
+        //     'folio'            => $serieFolio,
+        //     'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
+        //     'pol_seg'          => null,
+        //   );
+        // }
 
-        if ($_POST['prod_did_prod'][$key] === '53')
-        {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['supcarga_id_proveedor'],
-            'certificado'      => $_POST['supcarga_numero'],
-            'folio'            => $serieFolio,
-            'bultos'           => $_POST['supcarga_bultos'],
-            'pol_seg'          => null,
-          );
-        }
+        // if ($_POST['prod_did_prod'][$key] === '53')
+        // {
+        //   $dataSeguroCerti[] = array(
+        //     'id_factura'       => $idFactura,
+        //     'id_clasificacion' => $_POST['prod_did_prod'][$key],
+        //     'id_proveedor'     => $_POST['supcarga_id_proveedor'],
+        //     'certificado'      => $_POST['supcarga_numero'],
+        //     'folio'            => $serieFolio,
+        //     'bultos'           => $_POST['supcarga_bultos'],
+        //     'pol_seg'          => null,
+        //   );
+        // }
       }
     }
-
+    // echo "<pre>";
+    // var_dump($productosFactura);
+    // echo "</pre>";exit;
     if (count($productosFactura) > 0)
     {
       if ((isset($_GET['idb']) && ! $borrador) || $borrador)
       {
-        $this->db->delete('facturacionv_productos', array('id_factura' => $idFactura));
       }
+      $this->db->delete('facturacionv_productos', array('id_factura' => $idFactura));
 
       $this->db->insert_batch('facturacionv_productos', $productosFactura);
     }
 
-    // Inserta los pallests y las remisiones a la factura
-    $this->addPallestRemisiones($idFactura, $borrador);
+    // // Inserta los pallests y las remisiones a la factura
+    // $this->addPallestRemisiones($idFactura, $borrador);
 
-    if (isset($_POST['es_carta_porte']))
-    {
-      if (isset($_POST['es_carta_porte']) || $borrador)
-      {
-        $this->db->delete('facturacionv_remitente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacionv_destinatario', array('id_factura' => $idFactura));
-      }
+    // if (isset($_POST['es_carta_porte']))
+    // {
+    //   if (isset($_POST['es_carta_porte']) || $borrador)
+    //   {
+    //     $this->db->delete('facturacionv_remitente', array('id_factura' => $idFactura));
+    //     $this->db->delete('facturacionv_destinatario', array('id_factura' => $idFactura));
+    //   }
 
-      $remitente = array(
-        'id_factura' => $idFactura,
-        'nombre'    => $_POST['remitente_nombre'],
-        'rfc'       => $_POST['remitente_rfc'],
-        'direccion' => $_POST['remitente_domicilio'],
-        'chofer'    => $_POST['remitente_chofer'],
-        'marca'     => $_POST['remitente_marca'],
-        'modelo'    => $_POST['remitente_modelo'],
-        'placas'    => $_POST['remitente_placas'],
-      );
+    //   $remitente = array(
+    //     'id_factura' => $idFactura,
+    //     'nombre'    => $_POST['remitente_nombre'],
+    //     'rfc'       => $_POST['remitente_rfc'],
+    //     'direccion' => $_POST['remitente_domicilio'],
+    //     'chofer'    => $_POST['remitente_chofer'],
+    //     'marca'     => $_POST['remitente_marca'],
+    //     'modelo'    => $_POST['remitente_modelo'],
+    //     'placas'    => $_POST['remitente_placas'],
+    //   );
 
-      $destinatario = array(
-        'id_factura' => $idFactura,
-        'nombre'    => $_POST['destinatario_nombre'],
-        'rfc'       => $_POST['destinatario_rfc'],
-        'direccion' => $_POST['destinatario_domicilio'],
-      );
+    //   $destinatario = array(
+    //     'id_factura' => $idFactura,
+    //     'nombre'    => $_POST['destinatario_nombre'],
+    //     'rfc'       => $_POST['destinatario_rfc'],
+    //     'direccion' => $_POST['destinatario_domicilio'],
+    //   );
 
-      $this->db->insert('facturacionv_remitente', $remitente);
-      $this->db->insert('facturacionv_destinatario', $destinatario);
-    }
+    //   $this->db->insert('facturacionv_remitente', $remitente);
+    //   $this->db->insert('facturacionv_destinatario', $destinatario);
+    // }
 
-    if (count($dataSeguroCerti) > 0)
-    {
-      $this->db->delete('facturacionv_seg_cert', array('id_factura' => $idFactura));
-      $this->db->insert_batch('facturacionv_seg_cert', $dataSeguroCerti);
-    }
+    // if (count($dataSeguroCerti) > 0)
+    // {
+    //   $this->db->delete('facturacionv_seg_cert', array('id_factura' => $idFactura));
+    //   $this->db->insert_batch('facturacionv_seg_cert', $dataSeguroCerti);
+    // }
 
     // // Obtiene los datos del cliente.
     // $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
@@ -2228,14 +2230,14 @@ class ventas_dia_model extends privilegios_model{
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
-    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->SetXY(109, $pdf->GetY() - 6);
     $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
 
     // $pdf->SetXY(109, 0);
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta del Dia': 'Nota de Credito'), 0, 0, 'L', 1);
+    $pdf->SetXY(109, $pdf->GetY());
+    $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Orden de Compra': 'Nota de Credito'), 0, 0, 'L', 1);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->SetXY(109, $pdf->GetY() + 5);
     $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
 
     $pdf->SetFont('helvetica','B', 9);
@@ -2251,8 +2253,8 @@ class ventas_dia_model extends privilegios_model{
     // $pdf->SetFont('helvetica','B', 12);
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
-    $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
+    $pdf->SetXY(0, $pdf->GetY() + 2);
+    // $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -2277,23 +2279,6 @@ class ventas_dia_model extends privilegios_model{
 
     $end_y = $pdf->GetY();
 
-    /////////////////////////////////////
-    // Folio Fisca, CSD, Lugar y Fecha //
-    /////////////////////////////////////
-
-    // $pdf->SetFont('helvetica','B', 9);
-    // $pdf->SetFillColor(242, 242, 242);
-    // $pdf->SetTextColor(0, 171, 72);
-    // $pdf->SetXY(109, 0);
-    // $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
-
-    // $pdf->SetXY(109, 0);
-    // $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
-
-    // $pdf->SetTextColor(0, 0, 0);
-    // $pdf->SetXY(109, 6);
-    // $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
-
     $pdf->SetXY(109, 0);
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
@@ -2310,43 +2295,11 @@ class ventas_dia_model extends privilegios_model{
 
     $pdf->Cell(108, 4, "{$municipio}, {$estado} | {$fecha}", 0, 0, 'R', 0);
 
-    //////////////////
-    // domicilioEmisor //
-    //////////////////
-
-    // $domicilioEmisor = '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['calle'])) ? $xml->Emisor->DomicilioFiscal[0]['calle'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noExterior'])) ? ' #'.$xml->Emisor->DomicilioFiscal[0]['noExterior'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noInterior'])) ? ' Int. '.$xml->Emisor->DomicilioFiscal[0]['noInterior'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['colonia'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['colonia'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['localidad'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['localidad'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['municipio'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['municipio'] : '';
-    // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['estado'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['estado'] : '';
-
-    // $pdf->SetFont('helvetica','B', 9);
-    // $pdf->SetFillColor(242, 242, 242);
-    // $pdf->SetTextColor(0, 171, 72);
-    // $pdf->SetXY(0, $pdf->GetY() + 4);
-    // $pdf->Cell(216, 4, "Domicilio:", 0, 0, 'L', 1);
-
-    // $pdf->SetFont('helvetica','', 9);
-    // $pdf->SetTextColor(0, 0, 0);
-    // $pdf->SetXY(0, $pdf->GetY() + 4);
-    // $pdf->Cell(216, 4, $domicilioEmisor, 0, 0, 'C', 0);
 
     //////////////////
     // Datos Receptor //
     //////////////////
     $pdf->setY($end_y);
-    // $domicilioReceptor = '';
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['calle']) ? $xml->Receptor->Domicilio[0]['calle'] : '');
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['noExterior']) ? ' #'.$xml->Receptor->Domicilio[0]['noExterior'] : '');
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['noInterior'])) ? ' Int. '.$xml->Receptor->Domicilio[0]['noInterior'] : '';
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['colonia']) ? ', '.$xml->Receptor->Domicilio[0]['colonia'] : '');
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['localidad']) ? ', '.$xml->Receptor->Domicilio[0]['localidad'] : '');
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['municipio'])) ? ', '.$xml->Receptor->Domicilio[0]['municipio'] : '';
-    // $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['estado']) ? ', '.$xml->Receptor->Domicilio[0]['estado'] : '');
-
     $pdf->SetFillColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
     $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
@@ -2355,7 +2308,7 @@ class ventas_dia_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(0, $pdf->GetY() + 1);
-    $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
+    $pdf->Cell(216, 4, "Cliente:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -2402,8 +2355,8 @@ class ventas_dia_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY());
     $aligns = array('C', 'C', 'C', 'C', 'C','C');
     $aligns2 = array('C', 'C', 'C', 'C', 'R','R');
-    $widths = array(30, 35, 71, 20, 30, 30);
-    $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Cert.', 'Precio Unitario', 'Importe');
+    $widths = array(40, 45, 101, 30, 30, 30);
+    $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Exportacion');
 
     $conceptos = $factura['productos'];
 
@@ -2472,65 +2425,65 @@ class ventas_dia_model extends privilegios_model{
           $item->cantidad,
           $item->unidad,
           $item->descripcion,
-          $item->certificado === 't' ? 'Certificado' : '',
-          MyString::formatoNumero($item->precio_unitario, 2, '$', false),
-          MyString::formatoNumero($item->importe, 2, '$', false),
+          $item->certificado === 't' ? 'Exportación' : 'Nacional',
+          // MyString::formatoNumero($item->precio_unitario, 2, '$', false),
+          // MyString::formatoNumero($item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
       }
     }
 
-    $pdf->SetFont('Arial', 'B', 8);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFillColor(242, 242, 242);
-    $pdf->SetX(0);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths(array(30));
-    $pdf->Row(array($bultoss), true, true, null, 2, 1);
-    $pdf->SetY($pdf->GetY()+2);
+    // $pdf->SetFont('Arial', 'B', 8);
+    // $pdf->SetTextColor(0, 0, 0);
+    // $pdf->SetFillColor(242, 242, 242);
+    // $pdf->SetX(0);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths(array(30));
+    // $pdf->Row(array($bultoss), true, true, null, 2, 1);
+    // $pdf->SetY($pdf->GetY()+2);
 
-    foreach($gastos as $key => $item)
-    {
-      if($factura['info']->sin_costo == 'f')
-      {
-        if ($item->porcentaje_iva == '11')
-          $traslado11 += $item->iva;
-        elseif ($item->porcentaje_iva == '16')
-          $traslado16 += $item->iva;
-      }
-      $band_head = false;
+    // foreach($gastos as $key => $item)
+    // {
+    //   if($factura['info']->sin_costo == 'f')
+    //   {
+    //     if ($item->porcentaje_iva == '11')
+    //       $traslado11 += $item->iva;
+    //     elseif ($item->porcentaje_iva == '16')
+    //       $traslado16 += $item->iva;
+    //   }
+    //   $band_head = false;
 
-      if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
-      {
-        if($key > 0) $pdf->AddPage();
+    //   if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+    //   {
+    //     if($key > 0) $pdf->AddPage();
 
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetFillColor(242, 242, 242);
-        $pdf->SetX(0);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths(array(216));
-        $pdf->Row(array('Gastos'), true, true, null, 2, 1);
-      }
+    //     $pdf->SetFont('Arial', 'B', 8);
+    //     $pdf->SetTextColor(0, 0, 0);
+    //     $pdf->SetFillColor(242, 242, 242);
+    //     $pdf->SetX(0);
+    //     $pdf->SetAligns($aligns);
+    //     $pdf->SetWidths(array(216));
+    //     $pdf->Row(array('Gastos'), true, true, null, 2, 1);
+    //   }
 
-      $pdf->SetFont('Arial', '', 8);
-      $pdf->SetTextColor(0,0,0);
+    //   $pdf->SetFont('Arial', '', 8);
+    //   $pdf->SetTextColor(0,0,0);
 
-      $pdf->SetX(0);
-      $pdf->SetAligns($aligns2);
-      $pdf->SetWidths($widths);
+    //   $pdf->SetX(0);
+    //   $pdf->SetAligns($aligns2);
+    //   $pdf->SetWidths($widths);
 
-      if ($item->certificado === 't')
-        $hay_prod_certificados = true;
+    //   if ($item->certificado === 't')
+    //     $hay_prod_certificados = true;
 
-      $pdf->Row(array(
-        $item->cantidad,
-        $item->unidad,
-        $item->descripcion,
-        $item->certificado === 't' ? 'Certificado' : '',
-        MyString::formatoNumero($item->precio_unitario, 2, '$', false),
-        MyString::formatoNumero($item->importe, 2, '$', false),
-      ), false, true, null, 2, 1);
-    }
+    //   $pdf->Row(array(
+    //     $item->cantidad,
+    //     $item->unidad,
+    //     $item->descripcion,
+    //     $item->certificado === 't' ? 'Certificado' : '',
+    //     MyString::formatoNumero($item->precio_unitario, 2, '$', false),
+    //     MyString::formatoNumero($item->importe, 2, '$', false),
+    //   ), false, true, null, 2, 1);
+    // }
 
     /////////////
     // Totales //
@@ -2540,71 +2493,71 @@ class ventas_dia_model extends privilegios_model{
         $pdf->AddPage();
 
 
-    $pdf->SetFillColor(0, 171, 72);
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+    // $pdf->SetFillColor(0, 171, 72);
+    // $pdf->SetXY(0, $pdf->GetY());
+    // $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-    $h = 25 - ($traslado11 == 0 ? 5 : 0);
-    $h = $h - ($factura['info']->retencion_iva == 0 ? 5 : 0);
+    // $h = 25 - ($traslado11 == 0 ? 5 : 0);
+    // $h = $h - ($factura['info']->retencion_iva == 0 ? 5 : 0);
 
-    $pdf->SetFillColor(242, 242, 242);
-    $pdf->SetXY(0, $pdf->GetY() + 1);
-    $pdf->Cell(156, $h, "", 1, 0, 'L', 1);
+    // $pdf->SetFillColor(242, 242, 242);
+    // $pdf->SetXY(0, $pdf->GetY() + 1);
+    // $pdf->Cell(156, $h, "", 1, 0, 'L', 1);
 
-    $pdf->SetFont('helvetica','B', 9);
-    $pdf->SetXY(1, $pdf->GetY() + 1);
-    $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
+    // $pdf->SetFont('helvetica','B', 9);
+    // $pdf->SetXY(1, $pdf->GetY() + 1);
+    // $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
 
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->MultiCell(156, 6, $factura['info']->total_letra, 0, 'C', 0);
+    // $pdf->SetFont('helvetica', '', 10);
+    // $pdf->SetXY(0, $pdf->GetY() + 4);
+    // $pdf->MultiCell(156, 6, $factura['info']->total_letra, 0, 'C', 0);
 
-    $pdf->SetFont('helvetica','B', 9);
-    $pdf->SetXY(1, $pdf->GetY());
-    $pdf->Cell(78, 4, $factura['info']->forma_pago, 0, 0, 'L', 1);
+    // $pdf->SetFont('helvetica','B', 9);
+    // $pdf->SetXY(1, $pdf->GetY());
+    // $pdf->Cell(78, 4, $factura['info']->forma_pago, 0, 0, 'L', 1);
 
-    $pdf->SetFont('helvetica','B', 9);
-    $pdf->SetXY(78, $pdf->GetY());
-    $pdf->Cell(78, 4, "Pago en {$factura['info']->metodo_pago}", 0, 0, 'L', 1);
+    // $pdf->SetFont('helvetica','B', 9);
+    // $pdf->SetXY(78, $pdf->GetY());
+    // $pdf->Cell(78, 4, "Pago en {$factura['info']->metodo_pago}", 0, 0, 'L', 1);
 
-    $pdf->SetFont('helvetica','B', 10);
-    $pdf->SetXY(156, $pdf->GetY() - 11);
-    $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
+    // $pdf->SetFont('helvetica','B', 10);
+    // $pdf->SetXY(156, $pdf->GetY() - 11);
+    // $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
-    $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, MyString::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
+    // $pdf->SetXY(186, $pdf->GetY());
+    // $pdf->Cell(30, 5, MyString::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
 
-    // Pinta traslados, retenciones
+    // // Pinta traslados, retenciones
 
-    if ($traslado11 != 0)
-    {
-      $pdf->SetXY(156, $pdf->GetY() + 5);
-      $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
+    // if ($traslado11 != 0)
+    // {
+    //   $pdf->SetXY(156, $pdf->GetY() + 5);
+    //   $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
 
-      $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,MyString::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
-    }
+    //   $pdf->SetXY(186, $pdf->GetY());
+    //   $pdf->Cell(30, 5,MyString::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
+    // }
 
-    $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
+    // $pdf->SetXY(156, $pdf->GetY() + 5);
+    // $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
-    $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,MyString::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
+    // $pdf->SetXY(186, $pdf->GetY());
+    // $pdf->Cell(30, 5,MyString::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
 
-    if ($factura['info']->retencion_iva != 0)
-    {
-      $pdf->SetXY(156, $pdf->GetY() + 5);
-      $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
+    // if ($factura['info']->retencion_iva != 0)
+    // {
+    //   $pdf->SetXY(156, $pdf->GetY() + 5);
+    //   $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
-      $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
-    }
+    //   $pdf->SetXY(186, $pdf->GetY());
+    //   $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
+    // }
 
-    $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
+    // $pdf->SetXY(156, $pdf->GetY() + 5);
+    // $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
-    $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
+    // $pdf->SetXY(186, $pdf->GetY());
+    // $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Observaciones //
@@ -2623,26 +2576,26 @@ class ventas_dia_model extends privilegios_model{
         $pdf->SetFont('helvetica','B', 10);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
-        $pdf->Row(array('Observaciones'), true);
+        $pdf->Row(array('Observaciones'), false);
 
         $pdf->SetFont('helvetica','', 9);
         $pdf->SetXY(0, $pdf->GetY());
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
-        $pdf->Row(array($factura['info']->observaciones), true, 1);
+        $pdf->Row(array($factura['info']->observaciones), false, 1);
     }
 
-    if($hay_prod_certificados)
-    {
-      if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
-          $pdf->AddPage();
+    // if($hay_prod_certificados)
+    // {
+    //   if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+    //       $pdf->AddPage();
 
-      $pdf->SetFont('helvetica', 'B', 8);
-      $pdf->SetXY(10, $pdf->GetY());
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(196));
-      $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
-    }
+    //   $pdf->SetFont('helvetica', 'B', 8);
+    //   $pdf->SetXY(10, $pdf->GetY());
+    //   $pdf->SetAligns(array('L'));
+    //   $pdf->SetWidths(array(196));
+    //   $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
+    // }
 
     ////////////////////
     // Timbrado Datos //

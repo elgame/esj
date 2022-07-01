@@ -1077,6 +1077,153 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   }
 
 
+  public function getAcumuladoNominasEmpleadosData()
+  {
+    $sql = '';
+
+    $fecha1 = (isset($_GET['fechaini']) ? $_GET['fechaini'] : date("Y-m-01"));
+    $fecha2 = (isset($_GET['fechaend']) ? $_GET['fechaend'] : date("Y-m-d"));
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND nf.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('dregistro_patronal') != ''){
+      $sql .= " AND nf.registro_patronal = '".$this->input->get('dregistro_patronal')."'";
+    }
+
+    $facturas = $this->db->query(
+    "SELECT
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        Sum(nf.dias_trabajados) AS dias_trabajados, Sum(nf.subsidio) AS subsidio,
+        Sum(nf.sueldo_semanal) AS sueldo_semanal, Sum(nf.bonos) AS bonos,
+        Sum(nf.otros) AS otros, Sum(nf.vacaciones) AS vacaciones,
+        Sum(nf.prima_vacacional) AS prima_vacacional, Sum(nf.aguinaldo) AS aguinaldo,
+        Sum(nf.fondo_ahorro) AS fondo_ahorro, Sum(nf.pasistencia) AS pasistencia,
+        Sum(nf.imss) AS imss, Sum(nf.vejez) AS vejez, Sum(nf.isr) AS isr,
+        Sum(nf.infonavit) AS infonavit, Sum(nf.prestamos) AS prestamos,
+        Sum(nf.descuento_playeras) AS descuento_playeras, Sum(nf.descuento_otros) AS descuento_otros,
+        Sum(nf.descuento_cocina) AS descuento_cocina,
+        Sum(Coalesce((nf.otros_datos->>'totalPrestamosEf')::double precision, 0)) AS totalPrestamosEf,
+        Sum(Coalesce((nf.otros_datos->>'totalDescuentoMaterial')::double precision, 0)) AS totalDescuentoMaterial,
+        Sum(CASE WHEN Coalesce(Nullif(u.cuenta_banco, ''), '') <> '' AND nf.esta_asegurado = 't' THEN
+          nf.total_neto ELSE 0 END) AS total_neto,
+        Sum(nf.total_no_fiscal) AS total_no_fiscal
+      FROM nomina_fiscal nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+      WHERE 1 = 1 AND Date(nf.fecha_final) BETWEEN '{$fecha1}' AND '{$fecha2}' {$sql}
+      GROUP BY u.id
+      ORDER BY trabajador
+    ");
+    $response['data'] = $facturas->result();
+    $response['fecha1'] = $fecha1;
+    $response['fecha2'] = $fecha2;
+
+    return $response;
+  }
+  public function getAcumuladoNominasEmpleadosXls($show = false)
+  {
+    if (!$show) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=nominasEmpleados.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+    }
+
+    $res = $this->getAcumuladoNominasEmpleadosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = (isset($empresa['info']->nombre_fiscal)? $empresa['info']->nombre_fiscal: '');
+    $titulo2 = 'Reporte Acumulado de Nominas';
+    $titulo3 = "{$res['fecha1']} Al {$res['fecha1']}";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="23" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="23" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="23" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="23"></td>
+        </tr>';
+
+    foreach($res['data'] as $key => $item){
+      if ($key == 0) {
+
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TRABAJADOR</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DIAS TRABAJADOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SUBSIDIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SUELDO SEMANAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BONOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">OTROS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">VACACIONES</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRIMA VACACIONAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">AGUINALDO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FONDO AHORRO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PREMIO ASISTENCIA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMSS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">VEJEZ</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ISR</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">INFONAVIT</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTAMOS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO PLAYERAS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO OTROS</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO COCINA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTAMOS EFECTIVO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">DESCUENTO MATERIALES</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL FISCAL</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL NO FISCAL</td>
+        </tr>';
+      }
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$item->trabajador.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->dias_trabajados.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->subsidio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->sueldo_semanal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->bonos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->otros.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->vacaciones.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->prima_vacacional.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->aguinaldo.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->fondo_ahorro.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->pasistencia.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->imss.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->vejez.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->isr.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->infonavit.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->prestamos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_playeras.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_otros.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->descuento_cocina.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->totalprestamosef.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->totaldescuentomaterial.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total_neto.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$item->total_no_fiscal.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+
   public function importAsistencias($semana)
   {
     $config['upload_path'] = APPPATH.'media/temp/';
@@ -1176,4 +1323,273 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       return array('error' => '500');
     }
   }
+
+  public function importAsistencias2($semana)
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('ExcelHelpersLib');
+    $excelHelper = new ExcelHelpersLib;
+
+    $this->load->library('upload', $config);
+
+    if ( ! $this->upload->do_upload('archivo_asistencias'))
+    {
+      return array('error' => '501');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $nominaAsistencia = [];
+      $resumen = [];
+
+      $arrayAsistencias = $excelHelper->excelToArray($file['full_path']);
+
+      if (count($arrayAsistencias) > 0 && !empty($arrayAsistencias[0]['Clave Empleado'])) {
+        $this->load->model('usuarios_model');
+
+        foreach ($arrayAsistencias as $key => $datos) {
+
+          if (isset($datos['Clave Empleado']) && is_numeric($datos['Clave Empleado'])) { // si es un # de trabajador
+            $fecha = $excelHelper->formatFechaAsis($datos['Calendario']);
+            $fechaSem = MyString::obtenerSemanaDeFecha($fecha, $_POST['dia_inicia_semana']);
+
+            // si esta dentro del rango de la semana
+            if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
+              $empleado = $this->db->select("u.id, u.no_checador" )->from("usuarios u")
+                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.id", $datos['Clave Empleado'])->get()->row();
+              if (isset($empleado->id)) { // si existe el trabajador en la empresa
+                $tipo = 'f';
+                if ($datos['Status'] == 'Asistencia') {
+                  $tipo = 'a';
+                }
+
+                $incapasidad = $this->db->query("SELECT id_asistencia FROM nomina_asistencia
+                                           WHERE id_usuario = {$empleado->id} AND tipo = 'in'
+                                            AND DATE(fecha_ini) >= '{$fecha}' AND DATE(fecha_fin) <= '{$fecha}'")->row();
+
+                if (!isset($incapasidad->id_asistencia)) { // si no es incapacidad
+                  $this->db->where("id_usuario = {$empleado->id} AND tipo = 'f' AND
+                    DATE(fecha_ini) = '{$fecha}' AND DATE(fecha_fin) = '{$fecha}'"
+                  );
+                  $this->db->delete('nomina_asistencia'); // elimina la falta de ese día
+
+                  if ($tipo == 'f') { // si es una falta se inserta
+                    $nominaAsistencia[] = array(
+                      'fecha_ini'   => $fecha,
+                      'fecha_fin'   => $fecha,
+                      'id_usuario'  => $empleado->id,
+                      'tipo'        => $tipo,
+                      'id_clave'    => null,
+                      'id_registro' => $this->session->userdata('id_usuario'),
+                    );
+                  }
+                }
+
+                // Agregamos las horas trabajadas
+                $this->db->where("id_empleado = {$empleado->id} AND id_empresa = {$_POST['id_empresa']} AND DATE(fecha) = '{$fecha}'");
+                $this->db->delete('nomina_asistencia_hrs'); // elimina las hrs del dia
+                if ($tipo !== 'f') {
+                  $hrs = 0;
+                  if (trim($datos['Tiempo Trabajado']) != '') {
+                    $hhrr = explode(':', $datos['Tiempo Trabajado']);
+                    $hrs = floatval($hhrr[0]);
+                    $hrs += floatval($hhrr[1])/60;
+                  }
+                  $this->db->insert('nomina_asistencia_hrs', [
+                    'id_empresa'  => $_POST['id_empresa'],
+                    'anio'        => $semana['anio'],
+                    'semana'      => $semana['semana'],
+                    'id_empleado' => $empleado->id,
+                    'fecha'       => $fecha,
+                    'hrs'         => $hrs,
+                  ]);
+                }
+
+              } else {
+                $resumen[] = "El trabajador {$datos['Clave Empleado']} No esta registrado en la empresa seleccionada.";
+              }
+            } else {
+              $resumen[] = "El trabajador {$datos['Clave Empleado']}, La fecha {$fecha} no esta dentro de la semana seleccionada.";
+            }
+          }
+        }
+
+        // Si existen faltas o incapacidades las agrega.
+        if (count($nominaAsistencia) > 0)
+        {
+          $this->db->insert_batch('nomina_asistencia', $nominaAsistencia);
+        }
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500', 'resumen' => $resumen);
+    }
+  }
+
+  public function importNominaCorina($semana)
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('upload', $config);
+    // array(3) {
+    //   ["id"]=>
+    //   string(1) "2"
+    //   ["sem"]=>
+    //   string(2) "12"
+    //   ["anio"]=>
+    //   string(4) "2021"
+    // }
+
+    if ( ! $this->upload->do_upload('archivo_nomina'))
+    {
+      return array('error' => '551');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $nominaAsistencia = [];
+
+      $handle = fopen($file['full_path'], "r");
+      if ($handle) {
+        $this->load->model('usuarios_model');
+
+        $val_close   = false;
+        $val_res     = ['error' => '550'];
+        $val_resumen = [];
+        // Formato
+        // 0:empresa, 1:no_trabajador, 2:dias_laborados, 3:monto_pagado, 4:bono, 5:semana, 6:año
+        while (($line = fgets($handle)) !== false && !$val_close) {
+          $row = explode("\t", $line);
+
+          if (isset($row[0])) {
+            $row = $this->clenRowNominaCorona($row);
+
+            if ($row[0] == $_GET['id'] && $row[5] == $_GET['sem'] && $row[6] == $_GET['anio']) {
+              $empleado = $this->usuarios_model->get_usuario_info($row[1], true);
+              if (isset($empleado['info'][0])) {
+                if ($empleado['info'][0]->id_empresa == $row[0]) {
+                  $registro = $this->db->query("SELECT id
+                    FROM nomina_fiscal_monto_real
+                    WHERE id_empleado = {$row[1]} AND id_empresa = {$row[0]}
+                      AND anio = {$row[6]} AND semana = {$row[5]}")->row();
+
+                  if (isset($registro->id)) {
+                    $this->db->update('nomina_fiscal_monto_real', [
+                      'id_empleado'     => $row[1],
+                      'id_empresa'      => $row[0],
+                      'anio'            => $row[6],
+                      'semana'          => $row[5],
+                      'dias_trabajados' => $row[2],
+                      'monto'           => $row[3],
+                      'bono'            => $row[4],
+                    ], "id_empleado = {$row[1]} AND id_empresa = {$row[0]} AND anio = {$row[6]} AND semana = {$row[5]}");
+                  } else {
+                    $this->db->insert('nomina_fiscal_monto_real', [
+                      'id_empleado'     => $row[1],
+                      'id_empresa'      => $row[0],
+                      'anio'            => $row[6],
+                      'semana'          => $row[5],
+                      'dias_trabajados' => $row[2],
+                      'monto'           => $row[3],
+                      'bono'            => $row[4],
+                    ]);
+                  }
+                } else {
+                  $val_resumen[] = "El trabajador No {$row[1]} tiene asignada otra empresa ({$empleado['info'][0]->nombre_fiscal}).";
+                }
+              } else {
+                $val_resumen[] = "El trabajador No {$row[1]} no existe.";
+              }
+            } else {
+              $val_close = true;
+              $val_res = ['error' => '553'];
+            }
+          }
+        }
+        fclose($handle);
+
+      } else {
+        return array('error' => '552');
+      }
+
+      if (isset($val_resumen)) {
+        $val_res['resumen'] = $val_resumen;
+      }
+
+      return $val_res;
+    }
+  }
+
+  private function clenRowNominaCorona($row)
+  {
+    foreach ($row as $key => $value) {
+      $row[$key] = trim($value);
+      if ($key == 1) {
+        $row[$key] = intval(str_replace('"', '', $row[$key]));
+      }
+    }
+
+    return $row;
+  }
+
+  public function descargarNominaCorona($params) {
+    $queryNomina = $this->db->query(
+      "SELECT nf.id_empleado, nf.id_empresa, nf.anio, nf.semana, nf.fecha_inicio, Date(nf.fecha_final) AS fecha_final, nf.fecha,
+        nf.dias_trabajados, nf.salario_diario, nf.salario_integral, nf.subsidio, nf.sueldo_semanal, nf.bonos,
+        nf.otros, nf.subsidio_pagado, nf.vacaciones, nf.prima_vacacional_grabable, nf.prima_vacacional_exento,
+        nf.prima_vacacional, nf.aguinaldo_grabable, nf.aguinaldo_exento, nf.aguinaldo, nf.total_percepcion,
+        nf.imss, nf.vejez, nf.isr, nf.infonavit, nf.subsidio_cobrado, nf.prestamos, nf.deduccion_otros,
+        nf.total_deduccion, nf.total_neto, nf.id_empleado_creador, nf.ptu_exento, nf.ptu_grabable, nf.ptu,
+        nf.id_puesto, nf.salario_real, nf.sueldo_real, nf.total_no_fiscal, nf.horas_extras, nf.horas_extras_grabable,
+        nf.horas_extras_excento, nf.descuento_playeras, nf.utilidad_empresa, nf.descuento_otros, nf.domingo,
+        nf.esta_asegurado, nf.fondo_ahorro, nf.pasistencia, nf.despensa, nf.cfdi_ext, nf.descuento_cocina,
+        nf.otros_datos, Concat(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS empleado
+      FROM nomina_fiscal AS nf
+        INNER JOIN usuarios u ON u.id = nf.id_empleado
+      WHERE nf.anio = {$params['anio']} AND nf.semana = {$params['sem']} AND nf.id_empresa = {$params['id']}
+    ");
+    if ($queryNomina->num_rows() > 0) {
+    	$this->load->model('empresas_model');
+    	$empresa = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+    	header('Content-Type:text/html; charset=UTF-8');
+      header('Content-Disposition: attachment; filename="corona-'.$empresa->nombre_fiscal.'.txt"');
+
+      $nominas = $queryNomina->result();
+      $deducc = [
+        'infonavit' => ['IN', 'Infonavit'], 'prestamos' => ['PF', 'Prestamos fiscales'],
+        'fondo_ahorro' => ['FA', 'Fondo de ahorro'], 'descuento_playeras' => ['DP', 'Descuento materiales y otros'],
+        'descuento_otros' => ['DM', 'Descuento prestamos semanales'], 'descuento_cocina' => ['DC', 'Descuento de cocina']
+      ];
+      foreach ($nominas as $key => $p) {
+        $p->otros_datos = (!empty($p->otros_datos)? json_decode($p->otros_datos): null);
+        foreach ($deducc as $keyd => $deduc) {
+          if ($p->{$keyd} > 0) {
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"{$deduc[0]}{$p->anio}{$p->semana}\"	\"{$deduc[1]}, Año {$p->anio}, Sem {$p->semana}\"	{$p->{$keyd}}	0.00	{$p->{$keyd}}	\"\"	2\n";
+          }
+        }
+        if ($p->otros_datos) {
+          if (isset($p->otros_datos->totalPrestamosEf) && $p->otros_datos->totalPrestamosEf > 0) {
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"PE{$p->anio}{$p->semana}\"	\"Prestamos en efectivo, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalPrestamosEf}	0.00	{$p->otros_datos->totalPrestamosEf}	\"\"	2\n";
+          }
+
+          if (isset($p->otros_datos->totalDescuentoMaterial) && $p->otros_datos->totalDescuentoMaterial > 0) {
+            echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"M{$p->anio}{$p->semana}\"	\"Descuento Materiales, Año {$p->anio}, Sem {$p->semana}\"	{$p->otros_datos->totalDescuentoMaterial}	0.00	{$p->otros_datos->totalDescuentoMaterial}	\"\"	2\n";
+          }
+        }
+
+        if ($p->total_percepcion > 0) {
+	        echo "\"\"	\"\"	{$p->fecha_final}	{$p->id_empleado}	\"{$p->empleado}\"	\"S{$p->anio}{$p->semana}\"	\"Sueldo, Año {$p->anio}, Sem {$p->semana}\"	{$p->dias_trabajados}	0.00	{$p->total_percepcion}	\"\"	1\n";
+        }
+      }
+      exit;
+    }
+  }
+
 }

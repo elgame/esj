@@ -1104,21 +1104,21 @@
                     '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
-                  '<td style="width: 160px;">' +
-                    $(producto.presentacion).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
+                  '<td style="width: 80px;">' +
+                    $(producto.presentacion).css('width', '80px').addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
                     '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
                     '<input type="hidden" name="presentacionText[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
                   '</td>' +
                   '<td style="width: 150px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
                   '</td>' +
-                  '<td style="width: 65px;">' +
+                  '<td style="width: 120px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
-                  '<td style="width: 65px;">' +
+                  '<td style="width: 120px;">' +
                       '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
-                  '<td style="width: 90px;">' +
+                  '<td style="width: 120px;">' +
                     '<input type="text" name="valorUnitario[]" value="'+producto.precio_unitario+'" id="valorUnitario" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 66px;">' +
@@ -1140,6 +1140,8 @@
                         '<option value="4" '+(producto.ret_iva === '4' ? "selected" : '' )+'>4%</option>'+
                         '<option value="10.6667" '+(producto.ret_iva === '10.6667' ? "selected" : '' )+'>2 Terceras</option>'+
                         '<option value="16" '+(producto.ret_iva === '16' ? "selected" : '')+'>100 %</option>'+
+                        '<option value="6" '+(producto.ret_iva === '6' ? "selected" : "")+'>6 %</option>'+
+                        '<option value="8" '+(producto.ret_iva === '8' ? "selected" : "")+'>8 %</option>'+
                       '</select>'+
                       '<input type="text" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>'+
                   '</td>'+
@@ -1152,7 +1154,7 @@
                     '<input type="hidden" name="importe[]" value="0" id="importe" class="span12 vpositive">' +
                     '<input type="hidden" name="total[]" value="0" id="total" class="span12 vpositive">' +
                   '</td>' +
-                  '<td>' +
+                  '<td style="width: 150px;">' +
                     '<input type="text" name="observacion[]" value="" id="observacion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +

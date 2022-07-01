@@ -7,6 +7,8 @@ class bascula extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'bascula/import_boletas_intangibles/',
+
     'bascula/ajax_get_areas/',
     'bascula/ajax_get_empresas/',
     'bascula/ajax_get_proveedores/',
@@ -19,6 +21,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_kilos/',
     'bascula/ajax_check_limite_proveedor/',
     'bascula/ajax_get_ranchos/',
+    'bascula/ajax_get_tablas/',
 
     'bascula/fotos/',
     'bascula/ajax_pagar_boleta/',
@@ -42,6 +45,9 @@ class bascula extends MY_Controller {
     'bascula/rbp_pdf/',
     'bascula/rbp_xls/',
 
+    'bascula/rpt_ent_pina_pdf/',
+    'bascula/rpt_ent_pina_xls/',
+
     'bascula/imprimir_pagadas/',
 
     'bascula/snapshot/',
@@ -63,7 +69,9 @@ class bascula extends MY_Controller {
     'bascula/rdefull_xls/',
 
     'bascula/rpt_auditorias_pdf/',
-    );
+
+    'bascula/imprimir_movimiento/'
+  );
 
   public function _remap($method){
 
@@ -83,8 +91,9 @@ class bascula extends MY_Controller {
   public function index()
   {
     $this->carabiner->js(array(
-        array('general/msgbox.js'),
-        array('panel/bascula/admin.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -94,6 +103,10 @@ class bascula extends MY_Controller {
 
     $this->load->model('bascula_model');
     $this->load->model('areas_model');
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['basculas'] = $this->bascula_model->getBasculas(true);
     $params['areas'] = $this->areas_model->getAreas();
@@ -217,6 +230,7 @@ class bascula extends MY_Controller {
           $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
           $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
           $_POST['prancho']       = $info['info'][0]->rancho;
+          $_POST['ptabla']        = $info['info'][0]->tabla;
         }
         else
         {
@@ -344,6 +358,9 @@ class bascula extends MY_Controller {
         $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
         $params['intangible'] = $info['info'][0]->intangible === 't' ? '1' : '0';
 
+        $_POST['pisr'] = $info['info'][0]->ret_isr;
+        $_POST['pisrPorcent'] = $info['info'][0]->ret_isr_porcent;
+
         $params['fotos'] = $info['bascula_fotos'];
       }
       else
@@ -379,6 +396,49 @@ class bascula extends MY_Controller {
       if (isset($_GET['idb']{0}))
         redirect(base_url('panel/bascula/agregar/?idb='.$_GET['idb']).'&e=t');
     }
+  }
+
+  public function import_boletas_intangibles()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Recetas - Importar Recetas Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    if (isset($_FILES['archivo_boletas'])) {
+      $this->load->model('bascula_model');
+      $res_mdl = $this->bascula_model->importarBoletasIntangibles();
+      $_GET['msg'] = $res_mdl['error'];
+
+      if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+        $params['resumen'] = $res_mdl['resumen'];
+      }
+      if (isset($res_mdl['resumenok']) && count($res_mdl['resumenok']) > 0) {
+        $params['resumenok'] = $res_mdl['resumenok'];
+      }
+      if (isset($res_mdl['print'])) {
+        $params['print'] = $res_mdl['print'];
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/bascula/importar_boletas_intangibles', $params);
   }
 
   /**
@@ -519,7 +579,7 @@ class bascula extends MY_Controller {
         ->get()
         ->row();
 
-      $this->configAddModBascula();
+      $this->configAddModBascula(true);
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -563,6 +623,7 @@ class bascula extends MY_Controller {
             $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
             $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
             $_POST['prancho']       = $info['info'][0]->rancho;
+            $_POST['ptabla']        = $info['info'][0]->tabla;
           }
           else
           {
@@ -572,6 +633,7 @@ class bascula extends MY_Controller {
             $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
             $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
             $_POST['prancho']     = '';
+            $_POST['ptabla']      = '';
           }
 
           if ($info['info'][0]->id_chofer != null)
@@ -781,6 +843,48 @@ class bascula extends MY_Controller {
     $this->bascula_model->rbp_xls();
   }
 
+  public function rpt_ent_pina()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rpt_ent_pina.js')
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Boletas Pagadas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rpt_ent_pina', $params);
+    $this->load->view('panel/footer');
+  }
+  /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rpt_ent_pina_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rpt_entrada_fruta_pdf();
+  }
+  public function rpt_ent_pina_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rpt_entrada_fruta_xls();
+  }
+
   /**
    * Procesa los datos para mostrar el reporte rcr en pdf
    * @return void
@@ -793,9 +897,24 @@ class bascula extends MY_Controller {
   public function rmc_pdf()
   {
     $this->load->model('bascula_model');
+    $this->load->model('empresas_model');
 
+    $params['isXml'] = (isset($_GET['tipoo']) && $_GET['tipoo'] == 'xls');
     $params['data'] = $this->bascula_model->getMovimientos();
-    $this->load->view('panel/bascula/reportes/rmc', $params);
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa((empty($_GET['fid_empresa'])? 2: $_GET['fid_empresa']), true);
+    $params['empresa'] = isset($params['empresa']['info'])? $params['empresa']['info']: null;
+
+    if ($params['isXml']) {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=reporte_movimientos.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      echo $this->load->view('panel/bascula/reportes/rmc', $params, true);
+      exit;
+    } else {
+      $this->load->view('panel/bascula/reportes/rmc', $params);
+    }
   }
 
   public function rptAuditoria()
@@ -942,6 +1061,12 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
   }
 
+  public function imprimir_movimiento()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->imprimir_pago($_GET['id']);
+  }
+
   public function pago_basculas()
   {
     $this->load->model('bascula_model');
@@ -950,6 +1075,8 @@ class bascula extends MY_Controller {
 
     if ($res_mdl['passess'])
     {
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
+
       $pesadas = '&pe='.implode(',', $_POST['ppagos']);
       redirect(base_url('panel/bascula/movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
     }
@@ -1449,7 +1576,7 @@ class bascula extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddModBascula()
+  public function configAddModBascula($bonificacion = false)
   {
     $this->load->library('form_validation');
 
@@ -1526,31 +1653,16 @@ class bascula extends MY_Controller {
       array('field' => 'ptotal',
             'label' => '',
             'rules' => ''),
+      array('field' => 'pisr',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'pisrPorcent',
+            'label' => '',
+            'rules' => ''),
       array('field' => 'pobcervaciones',
             'label' => 'Observaciones',
             'rules' => 'max_length[254]'),
 
-      array('field' => 'pcajas[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pcalidad[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pcalidadtext[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pkilos[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'ppromedio[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pprecio[]',
-            'label' => '',
-            'rules' => ''),
-      array('field' => 'pimporte[]',
-            'label' => '',
-            'rules' => ''),
       array('field' => 'pcajas_prestadas',
             'label' => 'Cajas Prestadas',
             'rules' => ''),
@@ -1566,13 +1678,20 @@ class bascula extends MY_Controller {
 
         if ($_POST['ptipo'] == 'en')
         {
+          $requiredd = 'required';
+          if ($bonificacion) {
+            $requiredd = '';
+          }
           $rules[] = array('field' => 'pkilos_brutos',
                            'label' => 'Kilos Brutos',
                            'rules' => 'required');
 
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
-                           'rules' => '');
+                           'rules' => $requiredd);
+          $rules[] = array('field' => 'ptabla',
+                           'label' => 'Tabla/Lote',
+                           'rules' => $requiredd);
         }
         else
         {
@@ -1581,6 +1700,9 @@ class bascula extends MY_Controller {
                            'rules' => 'required');
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
+                           'rules' => '');
+          $rules[] = array('field' => 'ptabla',
+                           'label' => 'Tabla/Lote',
                            'rules' => '');
         }
       }
@@ -1597,15 +1719,40 @@ class bascula extends MY_Controller {
         $rules[] = array('field' => 'pkilos_neto',
                          'label' => 'Kilos Neto',
                          'rules' => 'required');
+
+        if ($_POST['ptipo'] === 'en') {
+          $rules[] = array('field' => 'pcajas[]',
+            'label' => 'Calidad cajas',
+            'rules' => 'required');
+          $rules[] = array('field' => 'pcalidad[]',
+                'label' => 'Calidad calidad',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pcalidadtext[]',
+                'label' => 'Calidad calidadtext',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pkilos[]',
+                'label' => 'Calidad kilos',
+                'rules' => 'required');
+          $rules[] = array('field' => 'ppromedio[]',
+                'label' => 'Calidad promedio',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pprecio[]',
+                'label' => 'Calidad precio',
+                'rules' => 'required');
+          $rules[] = array('field' => 'pimporte[]',
+                'label' => 'Calidad importe',
+                'rules' => 'required');
+        }
       }
     }
 
     if (isset($_POST['ptipo']))
     {
-      if ($_POST['ptipo'] === 'en')
+      if ($_POST['ptipo'] === 'en') {
         $rules[] = array('field'  => 'pid_proveedor',
                           'label' => 'Proveedor',
                           'rules' => 'required');
+      }
       else
       {
         $rules[] = array('field' => 'pid_cliente',
@@ -1971,6 +2118,16 @@ class bascula extends MY_Controller {
   }
 
   /**
+    * Obtiene los ranchos por peticion Ajax.
+    * @return void
+    */
+  public function ajax_get_tablas()
+  {
+    $this->load->model('proveedores_model');
+    echo json_encode($this->proveedores_model->getTablasAjax());
+  }
+
+  /**
     * Obtiene los proveedores por peticion Ajax.
     * @return void
     */
@@ -2050,7 +2207,7 @@ class bascula extends MY_Controller {
   public function ajax_check_limite_proveedor()
   {
     $this->load->model('bascula_model');
-    echo $this->bascula_model->checkLimiteProveedor($_GET['idp']);
+    echo json_encode($this->bascula_model->checkLimiteProveedor($_GET['idp']));
   }
 
   /*
@@ -2133,6 +2290,23 @@ class bascula extends MY_Controller {
       case 20:
         $txt = 'Se modifico correctamente la compra!';
         $icono = 'success';
+        break;
+
+      case 500:
+        $txt = 'Las boletas se guardaron correctamente.';
+        $icono = 'success';
+        break;
+      case 501:
+        $txt = 'Ocurrió un error al subir el archivo de boletas.';
+        $icono = 'error';
+        break;
+      case 502:
+        $txt = 'Ocurrió un error al leer el archivo de boletas.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Algunas boletas no se guardaron, revisar el detalle de errores.';
+        $icono = 'error';
         break;
     }
 

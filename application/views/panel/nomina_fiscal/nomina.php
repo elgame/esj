@@ -25,35 +25,39 @@
             <form action="<?php echo base_url('panel/nomina_fiscal/'); ?>" method="GET" class="form-search" id="form">
               <div class="form-actions form-filters">
                 <label for="anio">Año</label>
-                <input type="number" name="anio" class="search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
+                <input type="number" name="anio" class="input-small search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
 
                 <label for="empresa">Empresa</label>
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
-                <label for="ffecha1" style="margin-top: 15px;">Semana</label>
+                <label for="fregistro_patronal" style="margin-top: 15px;">Registro Patronal</label>
+                  <select name="fregistro_patronal" id="fregistro_patronal" class="input-medium">
+                    <option value=""></option>
+                    <?php foreach ($registros_patronales as $key => $regp): ?>
+                    <option value="<?php echo $regp ?>" <?php echo set_select_get('fregistro_patronal', $regp, ($this->input->get('fregistro_patronal') == $regp)); ?>><?php echo $regp ?></option>
+                    <?php endforeach ?>
+                </select>
+
+                <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
-                  <?php foreach ($semanasDelAno as $semana) {
-                      if ($semana['semana'] == $numSemanaSelected) {
+                  <?php
+                    $calcMes = 'false';
+                    foreach ($semanasDelAno as $semana) {
+                      if ($semana[$tipoNomina] == $numSemanaSelected) {
                         $semana2 =  $semana;
+                        $calcMes = ($semana['calcmes']? 'true': 'false');
                       }
                     ?>
-                    <option value="<?php echo $semana['semana'] ?>" <?php echo $semana['semana'] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana['semana']} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
+                    <option value="<?php echo $semana[$tipoNomina] ?>" <?php echo $semana[$tipoNomina] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana[$tipoNomina]} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
                   <?php }
                     $_GET['anio'] = isset($_GET['anio']) ? $_GET['anio'] : date("Y");
-                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2['semana'];
+                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2[$tipoNomina];
                     $_GET['empresaId'] = isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa;
                     $_GET['empresa'] = isset($_GET['empresa']) ? $_GET['empresa'] : $empresaDefault->nombre_fiscal;
                   ?>
                 </select>
-
-               <!--  <label for="ffecha1" style="margin-top: 15px;">Puesto</label>
-                  <select name="puestoId" class="input-large">
-                    <option value=""></option>
-                  <?php //foreach ($puestos as $puesto) { ?>
-                    <option value="<?php //echo $puesto->id_puesto ?>" <?php //echo set_select_get('puestoId', $puesto->id_puesto) ?>><?php //echo $puesto->nombre ?></option>
-                  <?php //} ?>
-                </select> -->
+                <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
                   <a rel="superbox-80x450" href="<?php echo base_url('panel/nomina_fiscal/calc_anual/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success pull-right" title="Calculo Anual" id="calculoAnual">Calculo Anual</a>
@@ -87,7 +91,7 @@
                 </div>
                 <div class="span5" style="text-align: center;">
                   <div style="font-size: 1.5em;">
-                    <?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
+                    <?php echo "<span class=\"txtTiponomin\">".ucfirst($tipoNomina)."</span> <span class=\"label\" style=\"font-size: 1em;\">{$semana2[$tipoNomina]}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
                   </div>
                 </div>
                 <div class="span3">
@@ -103,6 +107,7 @@
                     <button type="button" name="guardar" class="btn btn-success" style="float: right;" id="guardarNomina">Guardar</button>
                     <?php endif ?>
                   <?php } else { ?>
+                    <a href="<?php echo base_url('panel/nomina_fiscal/download_descuentos_corona/?id='.(isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa).'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-info" title="Descargar Nomina Corona"><i class="icon-download"></i></a> |
                     <span class="label label-success" style="font-size: 1.3em;">Nominas generadas</span>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                     <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_cfdis/?'.MyString::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar XML"><img src="<?php echo base_url('application/images/otros/doc_xml.png') ?>" width="40" height="40"></a>
@@ -112,15 +117,16 @@
               </div>
 
               <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
+              <input type="hidden" name="calcMes" value="<?php echo $calcMes ?>">
                 <table class="table table-striped" style="display: block; overflow-x: auto;">
                   <thead>
                     <tr>
                       <th style="width: 202px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
                       <th colspan="4"></th>
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="8" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
-                      <th colspan="7" style="background-color: #EEEEBC;"></th>
+                      <th colspan="9" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
                       <th style="position: absolute;z-index: 100;margin-top: -10px;">No. <?php echo count($empleados); ?></th>
@@ -147,6 +153,8 @@
                       <th style="background-color: #EEBCBC;">IMSS</th>
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
                       <th style="background-color: #EEBCBC;">FA</th>
+                      <th style="background-color: #EEBCBC;">PA</th>
+                      <th style="background-color: #EEBCBC;">Fonacot</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
@@ -157,9 +165,11 @@
                       <th style="background-color: #EEEEBC;">BONOS</th>
                       <th style="background-color: #EEEEBC;">OTRAS</th>
                       <th style="background-color: #EEEEBC;">DOMINGO</th>
-                      <th style="background-color: #EEBCBC;">DESC. PLAY</th>
-                      <th style="background-color: #EEBCBC;">DESC. OTRO</th>
-                      <th style="background-color: #EEBCBC;">DESC. COCINA</th>
+                      <th style="background-color: #EEBCBC;">DESC PLAY</th>
+                      <th style="background-color: #EEBCBC;">DESC OTRO</th>
+                      <th style="background-color: #EEBCBC;">DESC COCINA</th>
+                      <th style="background-color: #EEBCBC;">DESC PREST EF</th>
+                      <th style="background-color: #EEBCBC;">DESC MATERI</th>
                       <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
@@ -183,11 +193,15 @@
                       $totalPercepciones = 0; // total de todas las percepciones.
                       $totalInfonavit = 0;
                       $totalFondoAhorro = 0;
+                      $totalPensionAlimenticia = 0;
+                      $totalFonacot = 0;
                       $totalImss = 0;
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
                       $totalDescuentoOtros = 0;
                       $totalDescuentoCocina = 0;
+                      $ttotalPrestamosEmpleadoEf = 0;
+                      $ttotalDescuentoMaterial = 0;
                       $totalIsrs = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
@@ -215,10 +229,17 @@
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
                                             $e->nomina->deducciones['imss']['total'] +
                                             $e->nomina->deducciones['rcv']['total'] +
+                                            (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) +
+                                            (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0) +
                                             $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = (($e->esta_asegurado=='f' && $e->nomina_guardada=='f'? $e->dias_trabajados-1: $e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                        $dias_complemento = (($e->esta_asegurado=='f' && $e->nomina_guardada=='f'? $e->dias_trabajados-1: $e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) );
+                        // Ajuste de nomina real con monto de Corona *********************
+                        if (isset($e->monto_corona) && $e->monto_corona > 0) {
+                          $e->salario_diario_real = $e->monto_corona / $dias_complemento;
+                        }
+                        $totalComplementoEmpleado = $dias_complemento * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';
@@ -301,14 +322,14 @@
                           <?php if($nominas_finalizadas || $nominas_generadas){
                               // if ($e->esta_generada !== 'false') {
                           ?>
-                            <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
+                            <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>"
                               onclick="if(confirm('Seguro de cancelar el comprobante de nomina?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
                               <br>
                           <?php
                               // }
                               if ($nominas_finalizadas) {
                           ?>
-                            <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                            <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php
                               }
                           } ?>
@@ -399,14 +420,25 @@
                         <td style="<?php echo $bgColor ?>"><!-- prestamos -->
                           <?php
                                 $totalPrestamosEmpleado = 0;
+                                $totalPrestamosEmpleadoEf = 0;
+                                $totalDescuentoMaterial = 0;
                                 if (floatval($e->nomina_fiscal_prestamos) != 'false')
                                 {
                                   $totalPrestamosEmpleado = $e->nomina_fiscal_prestamos;
-                                }
-                                else
-                                {
+                                  $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
+                                  $totalDescuentoMaterial = isset($e->otros_datos->totalDescuentoMaterial)? $e->otros_datos->totalDescuentoMaterial: 0;
+                                } elseif (isset($e->otros_datos) && (isset($e->otros_datos->totalPrestamosEf) || isset($e->otros_datos->totalDescuentoMaterial))) {
+                                  $totalPrestamosEmpleadoEf = isset($e->otros_datos->totalPrestamosEf)? $e->otros_datos->totalPrestamosEf: 0;
+                                  $totalDescuentoMaterial = isset($e->otros_datos->totalDescuentoMaterial)? $e->otros_datos->totalDescuentoMaterial: 0;
+                                } else {
                                   foreach ($e->prestamos as $key => $prestamo) {
-                                    $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
+                                    if ($prestamo['tipo'] == 'ef' || $prestamo['tipo'] == 'efd') {
+                                      $totalPrestamosEmpleadoEf += $prestamo['pago_semana_descontar'];
+                                    } elseif ($prestamo['tipo'] == 'mt') {
+                                      $totalDescuentoMaterial += $prestamo['pago_semana_descontar'];
+                                    } else {
+                                      $totalPrestamosEmpleado += $prestamo['pago_semana_descontar'];
+                                    }
                                   }
                                 }
 
@@ -418,6 +450,14 @@
                         <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="fondo_ahorro-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$e->fondo_ahorro) ?></span>
                           <input type="hidden" name="fondo_ahorro[]" value="<?php echo $e->esta_asegurado=='f'?0:$e->fondo_ahorro ?>" class="span12 fondo_ahorro">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="pension_alimenticia-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0)) ?></span>
+                          <input type="hidden" name="pension_alimenticia[]" value="<?php echo $e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) ?>" class="span12 pension_alimenticia">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="fonacot-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0)) ?></span>
+                          <input type="hidden" name="fonacot[]" value="<?php echo $e->esta_asegurado=='f'? 0: (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0) ?>" class="span12 fonacot">
                         </td>
                         <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="isr-span"><?php echo MyString::formatoNumero($e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado) ?></span>
@@ -459,6 +499,8 @@
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_cocina[]" value="<?php echo $e->descuento_cocina ?>" class="span12 vpositive descuento-cocina" <?php echo $readonly ?>></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_prestamoef[]" value="<?php echo $totalPrestamosEmpleadoEf ?>" class="span12 vpositive descuento-prestef" readonly></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_materiales[]" value="<?php echo $totalDescuentoMaterial ?>" class="span12 vpositive descuento-material" readonly></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php
 
@@ -473,7 +515,11 @@
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros -
-                                                  $e->descuento_cocina;
+                                                  $e->descuento_cocina -
+                                                  $totalPrestamosEmpleadoEf -
+                                                  $totalDescuentoMaterial -
+                                                  (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0) -
+                                                  (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0);
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo MyString::formatoNumero($totalComplementoEmpleado) ?></span>
@@ -481,33 +527,37 @@
                         </td>
                       </tr>
                     <?php
-                      $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
-                      $totalPasistencia        += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'];
-                      // $totalDespensa           += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'];
-                      $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
-                      $totalDiasTrabajados     += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
-                      $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
-                      $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
-                      $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
-                      $totalHorasExtras        += $e->horas_extras_dinero;
-                      $totalAguinaldos         += $e->esta_asegurado=='f'?0:0;
-                      $totalSubsidios          += $e->esta_asegurado=='f'?0:$subsidioEmpleado+$subsidioAnualEmpleado;
-                      $totalPtu                += $e->esta_asegurado=='f'?0:$ptuEmpleado;
-                      $totalPercepciones       += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
-                      $totalInfonavit          += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
-                      $totalFondoAhorro        += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
-                      $totalImss               += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
-                      $totalPrestamos          += $totalPrestamosEmpleado;
-                      $totalDescuentoPlayeras  += $e->descuento_playeras;
-                      $totalDescuentoOtros     += $e->descuento_otros;
-                      $totalDescuentoCocina    += $e->descuento_cocina;
-                      $totalIsrs               += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
-                      $totalDeducciones        += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
-                      $totalTransferencias     += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
-                      $totalBonos              += $e->bonos;
-                      $totalOtras              += $e->otros;
-                      $totalDomingos           += $e->domingo;
-                      $totalComplementos       += $totalComplementoEmpleado;
+                      $totalSalarios             += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
+                      $totalPasistencia          += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'];
+                      // $totalDespensa          += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'];
+                      $totalSdi                  += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
+                      $totalDiasTrabajados       += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
+                      $totalSueldos              += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
+                      $totalVacaciones           += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
+                      $totalPrimasVacacionales   += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
+                      $totalHorasExtras          += $e->horas_extras_dinero;
+                      $totalAguinaldos           += $e->esta_asegurado=='f'?0:0;
+                      $totalSubsidios            += $e->esta_asegurado=='f'?0:$subsidioEmpleado+$subsidioAnualEmpleado;
+                      $totalPtu                  += $e->esta_asegurado=='f'?0:$ptuEmpleado;
+                      $totalPercepciones         += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
+                      $totalInfonavit            += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
+                      $totalFondoAhorro          += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
+                      $totalPensionAlimenticia   += (isset($e->nomina->deducciones['pencion_alimenticia']['total'])? $e->nomina->deducciones['pencion_alimenticia']['total']: 0);
+                      $totalFonacot              += (isset($e->nomina->deducciones['infonacot']['total'])? $e->nomina->deducciones['infonacot']['total']: 0);
+                      $totalImss                 += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
+                      $totalPrestamos            += $totalPrestamosEmpleado;
+                      $totalDescuentoPlayeras    += $e->descuento_playeras;
+                      $totalDescuentoOtros       += $e->descuento_otros;
+                      $totalDescuentoCocina      += $e->descuento_cocina;
+                      $ttotalPrestamosEmpleadoEf += $totalPrestamosEmpleadoEf;
+                      $ttotalDescuentoMaterial   += $totalDescuentoMaterial;
+                      $totalIsrs                 += $e->esta_asegurado=='f'?0:$isrEmpleado+$isrAnualEmpleado;
+                      $totalDeducciones          += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
+                      $totalTransferencias       += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
+                      $totalBonos                += $e->bonos;
+                      $totalOtras                += $e->otros;
+                      $totalDomingos             += $e->domingo;
+                      $totalComplementos         += $totalComplementoEmpleado;
                     } ?>
                     <tr>
                       <td colspan="2" style="width:202px; position: absolute; background-color: #BCD4EE; text-align: right; font-weight: bold;border-right: 1px #ccc solid;">TOTALES</td>
@@ -529,6 +579,8 @@
                       <td id="totales-imss" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalImss) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPrestamos) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalFondoAhorro) ?></td>
+                      <td id="totales-pension-aliment" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalPensionAlimenticia) ?></td>
+                      <td id="totales-fonacot" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalFonacot) ?></td>
                       <td id="totales-isrs" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalIsrs) ?></td>
                       <td id="totales-deducciones" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDeducciones) ?></td>
                       <td id="totales-transferencias" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalTransferencias) ?></td>
@@ -538,6 +590,8 @@
                       <td id="totales-descuento-playeras" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoPlayeras) ?></td>
                       <td id="totales-descuento-otros" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoOtros) ?></td>
                       <td id="totales-descuento-cocina" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoCocina) ?></td>
+                      <td id="totales-descuento-presef" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($ttotalPrestamosEmpleadoEf) ?></td>
+                      <td id="totales-descuento-materi" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($ttotalDescuentoMaterial) ?></td>
                       <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>

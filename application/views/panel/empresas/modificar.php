@@ -45,6 +45,14 @@
 											</div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="dsucursal">Sucursal:</label>
+                      <div class="controls">
+                        <input type="text" name="dsucursal" id="dsucursal" class="span12"
+                          value="<?php echo (isset($info['info']->sucursal)? $info['info']->sucursal: ''); ?>" maxlength="130">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 											<label class="control-label" for="dcalle">Calle:</label>
 											<div class="controls">
@@ -150,14 +158,26 @@
                     <div class="control-group">
                       <label class="control-label" for="dcurp">CURP:</label>
                       <div class="controls">
-                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo (isset($info['info']->curp)? $info['info']->curp: ''); ?>" maxlength="15">
+                        <input type="text" name="dcurp" id="dcurp" class="span12" value="<?php echo (isset($info['info']->curp)? $info['info']->curp: ''); ?>" maxlength="20">
                       </div>
                     </div>
 
                     <div class="control-group">
                       <label class="control-label" for="dregistro_patronal">Registro patronal:</label>
                       <div class="controls">
-                        <input type="text" name="dregistro_patronal" id="dregistro_patronal" class="span12" value="<?php echo (isset($info['info']->registro_patronal)? $info['info']->registro_patronal: ''); ?>" maxlength="15">
+                        <div class="input-append">
+                          <input id="registro_patronal_add" size="16" type="text">
+                          <button class="btn" type="button" id="btn_add_registrop">+</button>
+                        </div>
+                        <ul id="list_registrosp" style="list-style-type: none;margin: initial;">
+                          <?php
+                          $reg_p = explode('|', (isset($info['info']->registro_patronal)? $info['info']->registro_patronal: ''));
+                          ?>
+                          <?php foreach ($reg_p as $key => $regp): ?>
+                            <li><span class="removeRegPatronal btn btn-danger">X</span> <span class="txtRegPatronal"><?php echo $regp ?></span></li>
+                          <?php endforeach ?>
+                        </ul>
+                        <input type="hidden" name="dregistro_patronal" id="dregistro_patronal" class="span12" value="<?php echo (isset($info['info']->registro_patronal)? $info['info']->registro_patronal: ''); ?>">
                       </div>
                     </div>
 

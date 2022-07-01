@@ -124,12 +124,15 @@ class Ventas_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
+                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real,
+                fp.isr, fp.porcentaje_isr,
                 cc.id_categoria, cc.abreviatura as categoria')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
+        ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
         ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
         ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
+        ->join('calibres as cal', 'cal.id_calibre = fp.id_calibres', 'left')
         ->join('cajachica_categorias as cc', 'cc.id_categoria = fp.id_categoria', 'left')
         ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
         ->get();
@@ -284,6 +287,8 @@ class Ventas_model extends privilegios_model{
       'subtotal'            => $this->input->post('total_subtotal'),
       'importe_iva'         => $this->input->post('total_iva'),
       'retencion_iva'       => $this->input->post('total_retiva'),
+      'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
@@ -336,7 +341,7 @@ class Ventas_model extends privilegios_model{
     }
 
     // Si tiene el # de Salida de fruta
-    if ($this->input->post('dno_salida_fruta') !== false) {
+    if ($this->input->post('dno_salida_fruta') !== false && $this->input->post('dno_salida_fruta') != '') {
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
 
@@ -429,8 +434,13 @@ class Ventas_model extends privilegios_model{
           'iva'                   => $_POST['prod_diva_total'][$key],
           'unidad'                => $_POST['prod_dmedida'][$key],
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ieps'                  => $_POST['dieps_total'][$key],
+          'porcentaje_ieps'       => $_POST['dieps'][$key],
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
@@ -439,9 +449,9 @@ class Ventas_model extends privilegios_model{
           'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
-          'id_categoria'          => ($_POST['prod_dcategoria_id'][$key] !== ''? $_POST['prod_dcategoria_id'][$key]: NULL),
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
         );
@@ -779,8 +789,13 @@ class Ventas_model extends privilegios_model{
           'iva'                   => $_POST['prod_diva_total'][$key],
           'unidad'                => $_POST['prod_dmedida'][$key],
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ieps'                  => $_POST['dieps_total'][$key],
+          'porcentaje_ieps'       => $_POST['dieps'][$key],
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
@@ -789,9 +804,9 @@ class Ventas_model extends privilegios_model{
           'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
           'id_unidad'             => $did_unidad,
           'unidad_c'              => $dunidad_c,
-          'id_categoria'          => ($_POST['prod_dcategoria_id'][$key] !== ''? $_POST['prod_dcategoria_id'][$key]: NULL),
-          'id_calidad'            => (!empty($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
-          'id_tamanio'            => (!empty($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calidad'            => (isset($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
+          'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
         );
@@ -2786,7 +2801,7 @@ class Ventas_model extends privilegios_model{
 
       $result = $this->db->query("SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, f.total, c.id_cliente,
           c.nombre_fiscal AS cliente, c.cuenta_cpi, (fa.serie||fa.folio) AS factura, fa.is_factura,
-          e.id_empresa, e.nombre_fiscal AS empresa, fp.cantidad, fp.descripcion
+          e.id_empresa, e.nombre_fiscal AS empresa, fp.cantidad, fp.descripcion, f.status
         FROM facturacion f
           INNER JOIN clientes c ON c.id_cliente = f.id_cliente
           INNER JOIN empresas e ON e.id_empresa = f.id_empresa
@@ -2903,19 +2918,24 @@ class Ventas_model extends privilegios_model{
 
             foreach ($item['facturas'] as $keyf => $factura)
             {
-              $total_cantidad += $factura->cantidad;
-              $total_total += $factura->total;
+              $txt_cancelado = ' (Cancelada)';
+              if ($factura->status != 'ca') {
+                $total_cantidad += $factura->cantidad;
+                $total_total += $factura->total;
 
-              $total_cantidad_g += $factura->cantidad;
-              $total_total_g += $factura->total;
+                $total_cantidad_g += $factura->cantidad;
+                $total_total_g += $factura->total;
 
-              $total_cantidad_g2 += $factura->cantidad;
-              $total_total_g2 += $factura->total;
+                $total_cantidad_g2 += $factura->cantidad;
+                $total_total_g2 += $factura->total;
+
+                $txt_cancelado = '';
+              }
 
               $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
                       $factura->serie,
                       $factura->folio,
-                      $factura->descripcion,
+                      $factura->descripcion.$txt_cancelado,
                       MyString::formatoNumero($factura->cantidad, 2, '', false),
                       MyString::formatoNumero($factura->total, 2, '', false),
                       $factura->factura,
@@ -3049,20 +3069,25 @@ class Ventas_model extends privilegios_model{
 
             foreach ($item['facturas'] as $keyf => $factura)
             {
-              $total_cantidad += $factura->cantidad;
-              $total_total += $factura->total;
+              $txt_cancelado = ' (Cancelada)';
+              if ($factura->status != 'ca') {
+                $total_cantidad += $factura->cantidad;
+                $total_total += $factura->total;
 
-              $total_cantidad_g += $factura->cantidad;
-              $total_total_g += $factura->total;
+                $total_cantidad_g += $factura->cantidad;
+                $total_total_g += $factura->total;
 
-              $total_cantidad_g2 += $factura->cantidad;
-              $total_total_g2 += $factura->total;
+                $total_cantidad_g2 += $factura->cantidad;
+                $total_total_g2 += $factura->total;
+
+                $txt_cancelado = '';
+              }
 
               $html .= '<tr>
                   <td style="width:150px;border:1px solid #000;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->serie.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->folio.'</td>
-                  <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.'</td>
+                  <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.$txt_cancelado.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->cantidad.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->total.'</td>
                   <td style="width:150px;border:1px solid #000;">'.$factura->factura.'</td>

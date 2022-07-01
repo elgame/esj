@@ -27,6 +27,8 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      getSucursales(ui.item.item.id_empresa);
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -37,3 +39,36 @@ $(function(){
 
 });
 
+
+var getSucursales = function (did_empresa) {
+  var params = {
+    did_empresa: did_empresa
+  };
+
+  hhtml = '<option value=""></option>';
+  if (params.did_empresa > 0) {
+    $.ajax({
+        url: base_url + 'panel/empresas/ajax_get_sucursales/',
+        dataType: "json",
+        data: params,
+        success: function(data) {
+          if(data.length > 0) {
+            let idSelected = $('#sucursalId').data('selected'), selected = '';
+            for (var i = 0; i < data.length; i++) {
+              selected = (idSelected == data[i].id_sucursal? ' selected': '');
+              hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+            }
+
+            $('#sucursalId').html(hhtml); //.attr('required', 'required');
+            $('.sucursales').show();
+          } else {
+            $('#sucursalId').html(hhtml).removeAttr('required');
+            $('.sucursales').hide();
+          }
+        }
+    });
+  } else {
+    $('#sucursalId').html(hhtml).removeAttr('required');
+    $('.sucursales').hide();
+  }
+};

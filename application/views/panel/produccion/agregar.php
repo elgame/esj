@@ -6,7 +6,7 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <a href="<?php echo base_url('panel/produccion/'); ?>">Ordenes de produccion</a> <span class="divider">/</span>
+        <a href="<?php echo base_url('panel/produccion/'); ?>">Ordenes de producción</a> <span class="divider">/</span>
       </li>
       <li>Agregar</li>
     </ul>

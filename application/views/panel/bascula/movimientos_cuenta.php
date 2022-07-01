@@ -141,6 +141,7 @@
                         <!-- <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button> -->
                         <a href="#modalPagos" class="btn btn-success span3 pull-right <?php echo ($_GET['fid_proveedor']>0? '': 'hidden') ?>" role="button" data-toggle="modal">Pagar</a>
                         <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
+                        <a href="<?php echo base_url('panel/bascula/rmc_pdf/?tipoo=xls&'.MyString::getVarsLink(array('msg'))) ?>" class="btn span1 pull-right" target="_BLANK" style="margin-right: 5px;">Excel</a>
                       </div>
                     </div>
                   <?php } ?>
@@ -156,6 +157,7 @@
                           <th><input type="checkbox" checked id="checkPesadas"></th>
                           <th>TIPO</th>
                           <th>BOLETA</th>
+                          <th>REM/FAC</th>
                           <th>FECHA</th>
                           <th>CALIDAD</th>
                           <th>CAJAS</th>
@@ -163,6 +165,7 @@
                           <th>KILOS</th>
                           <th>PRECIO</th>
                           <th>IMPORTE</th>
+                          <th>RET ISR</th>
                           <th>TOTAL</th>
                           <th>TIPO PAGO</th>
                           <th>CONCEPTO</th>
@@ -190,6 +193,11 @@
                                    echo $mov->folio;
                                  } ?>
                           </td>
+                           <td>
+                            <?php if ($mov->folio != $lastboleta) {
+                                   echo "{$mov->folio_rem}/{$mov->folio_fact}";
+                                 } ?>
+                          </td>
                           <td>
                             <?php if ($mov->folio != $lastboleta) {
                                    echo $mov->fecha;
@@ -201,6 +209,7 @@
                           <td><?php echo $mov->kilos ?></td>
                           <td><?php echo MyString::formatoNumero($mov->precio) ?></td>
                           <td><?php echo $mov->importe ?></td>
+                          <td><?php echo $mov->ret_isr ?></td>
                           <td>
                             <?php if ($mov->folio != $lastboleta) { ?>
                               <?php echo $mov->importe_todas ?>

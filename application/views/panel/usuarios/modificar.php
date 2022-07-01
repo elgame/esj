@@ -221,6 +221,7 @@
                         <?php echo set_select('idEmpresa', $empresa->id_empresa, false, $this->input->post('idEmpresa')); ?>><?php echo $empresa->nombre_fiscal ?></option>
                       <?php } ?>
                       </select>
+                      <a href="<?php echo base_url('/panel/usuarios/copiar_privilegios?idu='.$_GET['id'].'&ide=') ?>" type="button" class="btn btn-info" id="btnCopiar" rel="superbox-80x550" data-supermodal-callback="getEmpresasIds" data-supermodal-autoshow="false">Copiar a:</a>
                     <?php } ?>
                       <div id="list_privilegios" style="height: 500px; overflow-y: auto; border:1px #ddd solid;">
                         <?php

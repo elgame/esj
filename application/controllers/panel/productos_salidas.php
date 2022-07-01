@@ -10,6 +10,14 @@ class productos_salidas extends MY_Controller {
     'productos_salidas/rpt_gastos_pdf/',
     'productos_salidas/rpt_gastos_xls/',
     'productos_salidas/imprimirticket/',
+    'productos_salidas/imprimir_etiquetas/',
+    'productos_salidas/comprobar_etiquetas/',
+    'productos_salidas/comprobar_etiquetas_ajax/',
+
+    'productos_salidas/rpt_salidas_prod_cod_pdf/',
+    'productos_salidas/rpt_salidas_prod_cod_xls/',
+    'productos_salidas/rpt_salidas_productos_pdf/',
+    'productos_salidas/rpt_salidas_productos_xls/'
   );
 
   public function _remap($method){
@@ -54,6 +62,39 @@ class productos_salidas extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/productos_salidas/admin', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function comprobar_etiquetas()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/productos_salidas/salida_codigos.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Almacen'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Salidas de Productos - Comprobar etiquetas');
+
+    $this->load->model('empresas_model');
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/productos_salidas/comprobar_etiquetas', $params);
+  }
+
+  public function comprobar_etiquetas_ajax()
+  {
+    $this->load->model('productos_salidas_model');
+    $response = $this->productos_salidas_model->comprobarEtiquetasAjax($this->input->post('codigo'));
+    echo json_encode($response);
   }
 
   /**
@@ -296,6 +337,15 @@ class productos_salidas extends MY_Controller {
       $this->productos_salidas_model->imprimir_salidaticket($_GET['id']);
     }
   }
+  public function imprimir_etiquetas()
+  {
+    $this->load->model('productos_salidas_model');
+
+    if (isset($_GET['id']))
+    {
+      $this->productos_salidas_model->imprimir_etiquetas($_GET['id']);
+    }
+  }
 
 
   /**
@@ -339,6 +389,82 @@ class productos_salidas extends MY_Controller {
     $this->productos_salidas_model->rpt_gastos_xls();
   }
 
+  public function rpt_salidas_codigo()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Salidas por Codigo');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/salidas/rpt_salidas_codigos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_salidas_prod_cod_pdf(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasCodPdf();
+  }
+  public function rpt_salidas_prod_cod_xls(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasCodXls();
+  }
+
+  public function rpt_salidas_productos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Salidas por Producto');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/salidas/rpt_salidas_productos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_salidas_productos_pdf(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasPdf();
+  }
+  public function rpt_salidas_productos_xls(){
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->getProductosSalidasXls();
+  }
+
 
 
   /*
@@ -357,19 +483,32 @@ class productos_salidas extends MY_Controller {
       $req2 = 'required|';
     }
 
+    $valEmpAp = false;
+    if ($this->input->post('empresaId') == 20) { // id de agro insumos
+      $valEmpAp = true;
+    }
+
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
-            'rules' => 'required|callback_productos_existencia'),
+            'rules' => 'required|callback_productos_existencia|callback_val_productos_traspaso'),
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+
+      array('field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'required'),
 
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => 'required'),
       array('field' => 'tid_almacen',
             'label' => 'Transferir',
+            'rules' => ''),
+
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
             'rules' => ''),
 
       array('field' => 'solicito',
@@ -396,52 +535,6 @@ class productos_salidas extends MY_Controller {
             'label' => 'Folio',
             'rules' => 'required'),
 
-      array('field' => 'no_receta',
-            'label' => 'No receta',
-            'rules' => 'max_length[20]'),
-      array('field' => 'etapa',
-            'label' => 'Etapa',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ranchoC',
-            'label' => 'Rancho',
-            'rules' => $req1.''),
-      array('field' => 'ranchoC_id',
-            'label' => 'Rancho',
-            'rules' => $req2.'numeric'),
-      array('field' => 'centro_costo',
-            'label' => 'Centro de costo',
-            'rules' => $req1.''),
-      array('field' => 'centro_costo_id',
-            'label' => 'Centro de costo',
-            'rules' => $req2.'numeric'),
-      array('field' => 'hectareas',
-            'label' => 'Hectareas',
-            'rules' => 'numeric'),
-      array('field' => 'grupo',
-            'label' => 'Grupo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'no_secciones',
-            'label' => 'No melgas/seccion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'dias_despues_de',
-            'label' => 'Dias despues de',
-            'rules' => 'numeric'),
-      array('field' => 'metodo_aplicacion',
-            'label' => 'Metodo de aplicacion',
-            'rules' => 'max_length[30]'),
-      array('field' => 'ciclo',
-            'label' => 'Ciclo',
-            'rules' => 'max_length[20]'),
-      array('field' => 'tipo_aplicacion',
-            'label' => 'Tipo de aplicacion',
-            'rules' => 'max_length[20]'),
-      array('field' => 'observaciones',
-            'label' => 'Observaciones',
-            'rules' => 'max_length[220]'),
-      array('field' => 'fecha_aplicacion',
-            'label' => 'Fecha de aplicacion',
-            'rules' => ''),
-
 
       // array('field' => 'codigoArea[]',
       //       'label' => 'Codigo Area',
@@ -466,10 +559,73 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => $req2.'|greater_than[0]')
+            'rules' => $req1.'|greater_than[0]'),
+
+      array('field' => 'empresaTrans',
+            'label' => 'Transferir a',
+            'rules' => ''),
+      array('field' => 'empresaTransId',
+            'label' => 'Transferir a',
+            'rules' => ''),
+
     );
 
+    if ($this->input->post('tipo') == 'r') { // recetas
+      $rules[] = array('field' => 'no_receta',
+            'label' => 'No receta',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'etapa',
+            'label' => 'Etapa',
+            'rules' => 'max_length[30]');
+      $rules[] = array('field' => 'ranchoC',
+            'label' => 'Rancho',
+            'rules' => $req1.'');
+      $rules[] = array('field' => 'ranchoC_id',
+            'label' => 'Rancho',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'centro_costo',
+            'label' => 'Centro de costo',
+            'rules' => $req1.'');
+      $rules[] = array('field' => 'centro_costo_id',
+            'label' => 'Centro de costo',
+            'rules' => $req2.'numeric');
+      $rules[] = array('field' => 'hectareas',
+            'label' => 'Hectareas',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'grupo',
+            'label' => 'Grupo',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'no_secciones',
+            'label' => 'No melgas/seccion',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'dias_despues_de',
+            'label' => 'Dias despues de',
+            'rules' => 'numeric');
+      $rules[] = array('field' => 'metodo_aplicacion',
+            'label' => 'Metodo de aplicacion',
+            'rules' => 'max_length[30]');
+      $rules[] = array('field' => 'ciclo',
+            'label' => 'Ciclo',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'tipo_aplicacion',
+            'label' => 'Tipo de aplicacion',
+            'rules' => 'max_length[20]');
+      $rules[] = array('field' => 'observaciones',
+            'label' => 'Observaciones',
+            'rules' => 'max_length[220]');
+      $rules[] = array('field' => 'fecha_aplicacion',
+            'label' => 'Fecha de aplicacion',
+            'rules' => '');
+    }
+
     if ($this->input->post('tid_almacen') == '') {
+      $rules[] = array('field' => 'empresaApId',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required|numeric': ''));
+      $rules[] = array('field' => 'empresaAp',
+            'label' => 'Empresa aplicacion',
+            'rules' => ($valEmpAp? 'required': ''));
+
       $rules[] = array('field' => 'areaId',
             'label' => 'Cultivo',
             'rules' => $req2.'numeric');
@@ -497,9 +653,40 @@ class productos_salidas extends MY_Controller {
       $rules[] = array('field' => 'activoId',
             'label' => 'Activo',
             'rules' => 'numeric');
+
+      $drequired = '';
+      if ($this->input->post('tipo') == 'c')
+        $drequired = 'required';
       $rules[] = array('field' => 'activos',
             'label' => 'Activo',
+            'rules' => $drequired);
+    }
+
+    if ($this->input->post('tipo') == 'c') { // combustible
+      $rules[] = array('field' => 'clabor',
+            'label' => 'Labor',
+            'rules' => 'required');
+      $rules[] = array('field' => 'clabor_id',
+            'label' => 'Labor',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'cimplemento',
+            'label' => 'Implemento',
+            'rules' => 'max_length[80]');
+      $rules[] = array('field' => 'chora_carga',
+            'label' => 'Hora de carga',
             'rules' => '');
+      $rules[] = array('field' => 'clitros',
+            'label' => 'Litros',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'codometro',
+            'label' => 'Odometro',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'chorometro',
+            'label' => 'Horómetro',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'cprecio',
+            'label' => 'Precio',
+            'rules' => 'required|numeric');
     }
 
     $this->form_validation->set_rules($rules);
@@ -514,9 +701,10 @@ class productos_salidas extends MY_Controller {
         if ($_POST['tipoProducto'][$key] == 'p') {
           // id_almacen
           $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'), true);
-          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          // $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas-$item[0]->con_req );
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
           if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
-            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
+            $productos[] = str_replace('%', '%%', $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')');
           }
         }
       }
@@ -525,6 +713,33 @@ class productos_salidas extends MY_Controller {
       $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
       return FALSE;
     }
+    return true;
+  }
+
+  public function val_productos_traspaso($auto)
+  {
+    if (!empty($_POST['tid_almacen']) && !empty($_POST['empresaTransId'])) {
+      if (is_array($this->input->post('productoId')) && count($this->input->post('productoId')) > 0)
+      {
+        $response = true;
+        $responseText = '';
+        foreach ($this->input->post('productoId') as $key => $item) {
+          $data_prod = $this->db->query("SELECT id_producto FROM productos WHERE status = 'ac' AND id_empresa = {$_POST['empresaTransId']} AND LOWER(nombre) LIKE LOWER('{$_POST['concepto'][$key]}')")->row();
+          if (empty($data_prod)) {
+            $response = false;
+            $responseText .= "{$_POST['concepto'][$key]}, ";
+          }
+        }
+        $this->form_validation->set_message('val_productos_traspaso', "El/Los productos {$responseText} no se encuentran en la empresa {$_POST['empresaTrans']}, se tienen que llamar igual en ambas empresas.");
+        return $response;
+      }
+      else
+      {
+        $this->form_validation->set_message('val_productos_traspaso', 'Para registrar el traspaso con empresa de aplicación se requiere que agregue productos.');
+        return false;
+      }
+    }
+
     return true;
   }
 

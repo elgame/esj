@@ -7,6 +7,7 @@ class MYpdf extends FPDF {
   var $titulo3 = '';
   var $reg_fed = 'REG. ESJ97052763A0620061646';
   var $logo = '/images/logo.png';
+  var $excel = null;
 
   var $fount_txt = 'helvetica';
   var $fount_num = 'SciFly-Sans'; // SciFly-Sans
@@ -19,6 +20,9 @@ class MYpdf extends FPDF {
   var $noShowPages = true;
   var $noShowDate = true;
   var $noShowPagesPos = null;
+  var $heightHeader = 20;
+
+  var $onAddPage = 0;
 
   var $auxy = 0;
 
@@ -50,7 +54,7 @@ class MYpdf extends FPDF {
       $this->{$this->hheader}();
 
       // Salto de línea
-      $this->Ln(20);
+      $this->Ln($this->heightHeader);
     }
 
     $this->auxy = 0;
@@ -64,10 +68,10 @@ class MYpdf extends FPDF {
     /**
      * Carta Vertical
      */
-    public function headerLetterP(){
+    public function headerLetterP($y = [6, 5, 8]){
       // Título
       $this->SetFont('Arial','B',14);
-      $this->SetXY(46, 6);
+      $this->SetXY(46, $y[0]);
       $this->MultiCell(141, 6, $this->titulo1, 0, 'C', false);
 
       $this->SetFont('Arial','B',11);
@@ -80,11 +84,15 @@ class MYpdf extends FPDF {
         $this->MultiCell(141, 4, $this->titulo3, 0, 'C', false);
       }
 
+      $this->SetXY(194, $this->GetY()+1);
+      if($this->excel)
+        $this->Cell(16, 5, 'Excel', 0, 0, 'R', false, $this->excel);
+
       $this->SetFont('Arial','I',8);
-      $this->SetXY(211, 5);
+      $this->SetXY(211, $y[1]);
       if($this->noShowPages)
        $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
-      $this->SetXY(194, 8);
+      $this->SetXY(194, $y[2]);
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
@@ -151,6 +159,8 @@ class MYpdf extends FPDF {
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
+      $this->limiteY = 255; //limite de alto
+
       $this->Line(6, 26, 210, 26);
     }
     /**
@@ -180,6 +190,8 @@ class MYpdf extends FPDF {
       $this->SetXY(333, 8);
       if($this->noShowDate)
         $this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
+
+      $this->limiteY = 190; //limite de alto
 
       $this->Line(6, 26, 349, 26);
     }
@@ -234,7 +246,7 @@ class MYpdf extends FPDF {
       $this->links=$a;
     }
 
-    function SetFounts($a, $z=array(), $b=[]){
+    function SetFounts($a=null, $z=array(), $b=[]){
         $this->font=$a;
         $this->fontz=$z;
         $this->fontb=$b;
@@ -291,7 +303,7 @@ class MYpdf extends FPDF {
     }
 
 
-    function Row2($data, $header=false, $bordes=true, $h=NULL, $colortxt=null){
+    function Row2($data, $header=false, $bordes=true, $h=NULL, $colortxt=null, $positionY=2){
         $nb=0;
         for($i=0;$i<count($data);$i++)
             $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
@@ -321,9 +333,9 @@ class MYpdf extends FPDF {
                 }
 
                 if($header)
-                    $this->SetXY($x,$y+3);
+                  $this->SetXY($x,$y+$positionY);
                 else
-                    $this->SetXY($x,$y+2);
+                  $this->SetXY($x,$y+$positionY);
 
                 if (isset($colortxt[$i])) {
                     $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);
@@ -341,14 +353,29 @@ class MYpdf extends FPDF {
             $this->Ln($h);
     }
 
+    public function chkSaltaPag($xy = [63, 10])
+    {
+      if($this->GetY()+10 >= $this->limiteY){
+        if (count($this->pages) > $this->page) {
+          $this->page++;
+          $this->SetXY($xy[0], $xy[1]);
+        } else
+          $this->AddPage();
+      }
+    }
+
     function CheckPageBreak($h, $limit=0){
       $limit = $limit==0? $this->PageBreakTrigger: $limit;
       if($this->GetY()+$h>$limit) {
         if (count($this->pages) > $this->page) {
           $this->page++;
           $this->SetXY(111, 10);
-        } else
+        } else {
           $this->AddPage($this->CurOrientation);
+          if ($this->onAddPage > 0) {
+            $this->SetY($this->GetY()+$this->onAddPage);
+          }
+        }
       }
     }
 

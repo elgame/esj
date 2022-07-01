@@ -2,6 +2,9 @@
 
 class bascula_model extends CI_Model {
 
+  private $snapshotCam1 = '';
+  private $snapshotCam2 = '';
+
   function __construct()
   {
     parent::__construct();
@@ -56,6 +59,11 @@ class bascula_model extends CI_Model {
       if ($this->input->get('fechaend') !== '')
         $sql .= (empty($sql) ? "WHERE ": " AND ") . "DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
 
+    if($this->input->get('did_empresa') != '')
+    {
+      $sql .= (empty($sql) ? "WHERE ": " AND ") . " e.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
     $str_query =
         "SELECT b.id_bascula,
                 b.folio,
@@ -105,6 +113,7 @@ class bascula_model extends CI_Model {
     if (is_null($data))
     {
       $idb = isset($_POST['pidb']) ? $_POST['pidb'] : '';
+      $this->getPreSnapshot();
 
       if ($_POST['paccion'] == 'n') // nueva boleta
       {
@@ -158,11 +167,13 @@ class bascula_model extends CI_Model {
         {
           $data['id_proveedor'] = $this->input->post('pid_proveedor');
           $data['rancho']       = mb_strtoupper($this->input->post('prancho'), 'UTF-8');
+          $data['tabla']        = mb_strtoupper($this->input->post('ptabla'), 'UTF-8');
         }
         else
         {
           $data['id_cliente'] = $this->input->post('pid_cliente');
           $data['rancho']     = '';
+          $data['tabla']      = '';
           $data['no_trazabilidad'] = $this->input->post('dno_trazabilidad');
         }
 
@@ -174,12 +185,15 @@ class bascula_model extends CI_Model {
       }
 
       $data2 = array(
-        'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
-        'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
-        'obcervaciones' => $this->input->post('pobcervaciones'),
-        'rancho'       => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
-        'certificado' => isset($_POST['certificado']) ? 't' : 'f',
-        'tipo' => $this->input->post('ptipo')
+        'importe'         => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
+        'ret_isr'         => empty($_POST['pisr']) ? 0 : $_POST['pisr'],
+        'ret_isr_porcent' => floatval($this->input->post('pisrPorcent')),
+        'total_cajas'     => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
+        'obcervaciones'   => $this->input->post('pobcervaciones'),
+        'rancho'          => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
+        'tabla'           => mb_strtoupper($this->input->post('ptabla'), 'UTF-8'),
+        'certificado'     => isset($_POST['certificado']) ? 't' : 'f',
+        'tipo'            => $this->input->post('ptipo')
       );
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
@@ -315,6 +329,7 @@ class bascula_model extends CI_Model {
         $this->updateBascula($idb, $data2, $cajas, $logBitacora, $usuario_auth);
       // }
 
+      log_message('error', "SegundaSnap {$idb}: bonificacion={$bonificacion} | accion=".$data2['accion']);
       if (!$bonificacion && isset($data2['accion']) && $data2['accion'] == 'sa') {
         $this->addSnapshot($idb, $data2['accion']);
       }
@@ -368,42 +383,82 @@ class bascula_model extends CI_Model {
     return array('passes' => true);
   }
 
-  public function addSnapshot($idBascula, $tipo='en')
+  public function addSnapshot($idBascula, $tipo='en', $insert=true)
   {
     $path = UploadFiles::validaDir(date("Y-m"), 'application/media/bascula_snap/');
 
-    if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+    // if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+    if ($this->snapshotCam1 != '') {
+      $time_start1 = microtime(true);
+
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 1')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam1_{$tipo}.jpg";
-        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
-        $datos = [
-          'id_bascula' => $idBascula,
-          'no_camara'  => '1',
-          'url_foto'   => $url,
-          'tipo'       => $tipo
-        ];
-        $this->db->insert('bascula_fotos', $datos);
+        file_put_contents($url, $this->snapshotCam1);
+        // file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
+        if ($insert) {
+          $datos = [
+            'id_bascula' => $idBascula,
+            'no_camara'  => '1',
+            'url_foto'   => $url,
+            'tipo'       => $tipo
+          ];
+          $this->db->insert('bascula_fotos', $datos);
+        }
       }
+
+      $time_end1 = microtime(true);
+      $time1 = $time_end1 - $time_start1;
+      log_message('error', "BasculaSnap1 {$idBascula}: {$time1} = {$time_end1} - {$time_start1}");
     }
 
-    if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+    // if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+    if ($this->snapshotCam2 != '') {
+      $time_start2 = microtime(true);
+
       $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
           ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 2')->where("tipo = '{$tipo}'")->get()->row();
       if (!isset($sql_res->id_bascula)) {
         $url = $path."{$idBascula}_cam2_{$tipo}.jpg";
-        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
-        $datos = [
-          'id_bascula' => $idBascula,
-          'no_camara'  => '2',
-          'url_foto'   => $url,
-          'tipo'       => $tipo
-        ];
-        $this->db->insert('bascula_fotos', $datos);
+        file_put_contents($url, $this->snapshotCam2);
+        // file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
+        if ($insert) {
+          $datos = [
+            'id_bascula' => $idBascula,
+            'no_camara'  => '2',
+            'url_foto'   => $url,
+            'tipo'       => $tipo
+          ];
+          $this->db->insert('bascula_fotos', $datos);
+        }
       }
+
+      $time_end2 = microtime(true);
+      $time2 = $time_end2 - $time_start2;
+      log_message('error', "BasculaSnap2 {$idBascula}: {$time2} = {$time_end2} - {$time_start2}");
     }
 
+    if (isset($time1) && isset($time2)) {
+      log_message('error', "BasculaEnd {$idBascula}: ".($time_end2 - $time_start1));
+    }
+
+  }
+
+  private function getPreSnapshot()
+  {
+    $this->snapshotCam1 = $this->snapshotCam2 = '';
+    try {
+      $this->snapshotCam1 = file_get_contents($this->config->item('snapshot_cam1'));
+    } catch (Exception $e) {
+      $this->snapshotCam1 = '';
+    }
+
+    try {
+      $this->snapshotCam2 = file_get_contents($this->config->item('snapshot_cam2'));
+    } catch (Exception $e) {
+      $this->snapshotCam2 = '';
+    }
   }
 
   public function ligarOrdenes($idb, $data)
@@ -624,56 +679,64 @@ class bascula_model extends CI_Model {
    * Imprime el ticket
    * @return pdf
    */
-  public function imprimir_ticket($id)
+  public function imprimir_ticket($idb)
   {
     $this->load->library('mypdf_ticket');
-
-    $data = $this->getBasculaInfo($id);
-    // Abonos
-    $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto, bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
-      FROM bascula_pagos bp
-        INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
-        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
-        LEFT JOIN usuarios u ON u.id = bp.usuario_creo
-      WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
-    // Bitacora
-    $_GET['boletaId'] = $id;
-    $data['info'][0]->bitacora = $this->bitacora(true, " AND (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) <> ''");
-
-    //Actualiza el control de impresiones, se le suma 1
-    //al valor de la BD para la siguiente impresion
-    $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false);
-    if ($data['info'][0]->no_impresiones == 0) {
-      $this->db->set('fecha_imp_orig', "'".date("Y-m-d H:i:s")."'", false);
-    }
-    $this->db->update('bascula');
-
-    foreach ($data['cajas'] as $key => $value)
-    {
-      if ($data['info'][0]->id_bonificacion != NULL)
-        $data['cajas'][$key]->calidad = 'BONIF.';
-    }
+    $ids = explode(',', $idb);
 
     $pdf = new mypdf_ticket();
-    $pdf->titulo1 = $data['info'][0]->empresa;
-    if($data['info'][0]->id_empresa != 2)
-      $pdf->reg_fed = '';
-    $pdf->SetFont('Arial','',8);
-    $pdf->AddPage();
+    foreach ($ids as $key => $id) {
+      $_GET['id'] = $id;
+      $data = $this->getBasculaInfo($id);
+      // Abonos
+      $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto,
+          bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
+        FROM bascula_pagos bp
+          INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
+          INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
+          LEFT JOIN usuarios u ON u.id = bp.usuario_creo
+        WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
+      // Bitacora
+      $_GET['boletaId'] = $id;
+      $data['info'][0]->bitacora = $this->bitacora(true, " AND (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) <> ''");
 
-    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+      //Actualiza el control de impresiones, se le suma 1
+      //al valor de la BD para la siguiente impresion
+      $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false);
+      if ($data['info'][0]->no_impresiones == 0) {
+        $this->db->set('fecha_imp_orig', "'".date("Y-m-d H:i:s")."'", false);
+      }
+      $this->db->update('bascula');
 
-    $pdf->header_entrar = true;
-    $pdf->SetWidths(array(63));
-    $pdf->SetAligns(array('R'));
-    $pdf->Row(array('Pag 1'), false, false);
-    $pdf->SetY($pdf->GetY()+10);
-    // $pdf->Row(array('---------------------------------------------------------'), false, false);
-    $pdf->SetY($pdf->GetY()+10);
-    $pdf->AddPage();
-    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
-    $pdf->SetAligns(array('R'));
-    $pdf->Row(array('Pag 2'), false, false);
+      foreach ($data['cajas'] as $key => $value)
+      {
+        if ($data['info'][0]->id_bonificacion != NULL)
+          $data['cajas'][$key]->calidad = 'BONIF.';
+      }
+
+
+      $pdf->titulo1 = $data['info'][0]->empresa;
+      if($data['info'][0]->id_empresa != 2)
+        $pdf->reg_fed = '';
+      $pdf->SetFont('Arial','',8);
+      $pdf->AddPage();
+
+      $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+
+      $pdf->header_entrar = true;
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('R'));
+      $pdf->Row(array('Pag 1'), false, false);
+      // $pdf->SetY($pdf->GetY()+10);
+      // $pdf->Row(array('---------------------------------------------------------'), false, false);
+      // $pdf->SetY($pdf->GetY()+10);
+      if (count($ids) === 1) {
+        $pdf->AddPage();
+        $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
+        $pdf->SetAligns(array('R'));
+        $pdf->Row(array('Pag 2'), false, false);
+      }
+    }
 
     // $pdf->AutoPrint(true);
     $pdf->Output();
@@ -794,22 +857,27 @@ class bascula_model extends CI_Model {
     $this->load->model('proveedores_facturacion_model');
 
     $info = $this->proveedores_facturacion_model->getLimiteProveedores($idProveedor, date('Y'));
+    $response = [
+      'status' => (floatval($total[0]->total) >= (floatval($info['limite'])-50000)),
+      'total' => floatval($total[0]->total),
+      'limite' => floatval($info['limite'])
+    ];
 
-    if (floatval($total[0]->total) > floatval($info['limite'])) return true;
-
-    else return false;
+    return $response;
   }
 
   public function getMovimientos()
   {
     $data =  array(
-      'movimientos' => array(),
-      'area'        => array(),
-      'proveedor'   => array(),
+      'movimientos'   => array(),
+      'area'          => array(),
+      'proveedor'     => array(),
+      'totalesClasif' => array(),
     );
 
     $data['totales'] = array(
         'importe'     => 0,
+        'ret_isr'     => 0,
         'pesada'      => 0,
         'total'       => 0,
         'pagados'     => 0,
@@ -885,23 +953,42 @@ class bascula_model extends CI_Model {
                Coalesce(bc.kilos, b.kilos_neto) AS kilos,
                COALESCE(bc.precio, bp.precio_unitario) AS precio,
                COALESCE(bc.importe, bp.importe) AS importe,
+               b.ret_isr,
                b.importe as importe_todas,
                b.tipo,
                pagos.tipo_pago,
                pagos.concepto,
                b.id_bonificacion,
                b.rancho,
-               COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago
+               b.tabla,
+               COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago,
+               fol.folio_rem, fol.folio_fact
         FROM bascula AS b
           LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
           LEFT JOIN bascula_productos AS bp ON b.id_bascula = bp.id_bascula
           {$table_ms}
           LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
-          LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
-                    FROM bascula_pagos AS bp
-                    INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
-                    WHERE bp.status = 't') AS pagos
-                    ON pagos.id_bascula = b.id_bascula
+          LEFT JOIN (
+            SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
+            FROM bascula_pagos AS bp
+              INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
+            WHERE bp.status = 't'
+          ) AS pagos ON pagos.id_bascula = b.id_bascula
+          LEFT JOIN (
+            SELECT ps.id_paleta_salida, b.id_bascula, b.folio, fol.folio_rem, fol.folio_fact
+            FROM otros.paletas_salidas ps
+              INNER JOIN bascula b ON b.id_bascula = ps.id_bascula
+              INNER JOIN (
+                SELECT fo.id_paleta_salida, (f.serie || f.folio) AS folio_rem,
+                  (ff.serie || ff.folio) AS folio_fact
+                FROM facturacion f
+                  INNER JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+                  LEFT JOIN facturacion_remision_hist fh ON f.id_factura = fh.id_remision
+                  LEFT JOIN facturacion ff ON (ff.id_factura = fh.id_factura AND ff.status <> 'ca' AND ff.status <> 'pf')
+                WHERE f.is_factura = 'f' AND f.status <> 'ca' AND f.status <> 'pf' AND fo.id_paleta_salida IS NOT NULL
+                ORDER BY f.id_factura ASC
+              ) fol ON ps.id_paleta_salida = fol.id_paleta_salida
+          ) fol ON b.id_bascula = fol.id_bascula
         WHERE
               b.status = true
               {$sql}
@@ -910,10 +997,12 @@ class bascula_model extends CI_Model {
 
       $movimientos = $query->result();
 
+      $lastFolio = 0;
       foreach ($movimientos as $key => $caja)
       {
-        $data['totales']['importe']     += floatval($caja->importe);
-        $data['totales']['total']       += floatval($caja->importe);
+        $data['totales']['importe'] += floatval($caja->importe);
+        $data['totales']['ret_isr'] += ($caja->id_bascula != $lastFolio)? floatval($caja->ret_isr): 0;
+        $data['totales']['total']   += ($caja->id_bascula != $lastFolio)? floatval($caja->importe_todas): 0;
         if(!is_numeric($caja->id_bonificacion))
         {
           $data['totales']['kilos']       += floatval($caja->kilos);
@@ -934,6 +1023,15 @@ class bascula_model extends CI_Model {
           $caja->tipo = 'E';
         elseif ($caja->tipo == 'sa')
           $caja->tipo = 'S';
+
+        // Totales x clasificaciones
+        if (isset($data['totalesClasif'][$caja->calidad])) {
+          $data['totalesClasif'][$caja->calidad] += floatval($caja->kilos);
+        } else {
+          $data['totalesClasif'][$caja->calidad] = floatval($caja->kilos);
+        }
+
+        $lastFolio = $caja->id_bascula;
       }
 
 
@@ -976,6 +1074,8 @@ class bascula_model extends CI_Model {
     {
       $this->db->update('bascula', array('accion' => 'b'), array('id_bascula' => $pesada));
 
+      $this->logBitacora(false, $pesada, array('accion' => 'b'), false, null, true);
+
       $pesadas[] = array(
         'id_pago' => $id_bascula_pagos,
         'id_bascula' => $pesada
@@ -995,6 +1095,7 @@ class bascula_model extends CI_Model {
     $data_cuenta  = $data_cuenta['info'];
     $_GET['id']   = $datos['boletas'][0]['id_bascula'];
     $inf_factura  = $this->getBasculaInfo($_GET['id'], 0, true);
+    $id_bascula_pagos = 0;
 
     $resp = $this->banco_cuentas_model->addRetiro(array(
           'id_cuenta'           => $datos['dcuenta'],
@@ -1016,6 +1117,7 @@ class bascula_model extends CI_Model {
     {
 
       $bascula_pagos = array(
+        'fecha'        => $datos['dfecha'],
         'tipo_pago'    => $datos['fmetodo_pago'],
         'monto'        => $datos['dmonto'],
         'concepto'     => $datos['dconcepto'],
@@ -1046,7 +1148,7 @@ class bascula_model extends CI_Model {
     }
 
 
-    return array('passess' => true);
+    return array('passess' => true, 'id_bascula_pagos' => $id_bascula_pagos);
   }
 
   public function getPagos($paginados=true)
@@ -1139,6 +1241,78 @@ class bascula_model extends CI_Model {
     else
       $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
       // $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
+  }
+
+  public function imprimir_pago($id_pago)
+  {
+    $data = $this->db->query("SELECT
+        bp.id_pago, b.id_empresa,
+        bp.tipo_pago, bp.monto, bp.concepto,
+        Date(bp.fecha) AS fecha_pago,
+        string_agg(b.folio::text, ', ') AS folios,
+        string_agg(Date(b.fecha_tara)::text, ', ') AS fechas,
+        string_agg(bpb.monto::text, ', ') AS pagos,
+        p.nombre_fiscal AS proveedor
+      FROM bascula AS b
+        INNER JOIN areas AS a ON a.id_area = b.id_area
+        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        INNER JOIN bascula_pagos_basculas AS bpb ON b.id_bascula = bpb.id_bascula
+        INNER JOIN bascula_pagos AS bp ON bpb.id_pago = bp.id_pago
+      WHERE bp.id_pago = {$id_pago}
+      GROUP BY b.id_empresa, p.nombre_fiscal, bp.id_pago, bp.tipo_pago, bp.monto, bp.concepto
+      ORDER BY bp.id_pago DESC
+    ")->row();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($data->id_empresa);
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = "Pago de boletas";
+    // $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    // $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+    // $pdf->titulo3 .= (isset($_GET['ftkilos']{0}) && $_GET['ftkilos']=='kb')?' Kilos de la bascula': ' Kilos calculados';
+
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $pdf->SetAligns(array('R', 'L', 'R', 'L'));
+    $pdf->SetWidths(array(25, 128, 20, 33));
+    $pdf->SetFounts(['helvetica', 'helvetica', 'helvetica', 'helvetica'], [0, 0, 0, 0], ['B', '', 'B', '']);
+    $pdf->SetX(6);
+    $pdf->Row2(["PROVEEDOR:", $data->proveedor, "FECHA:", $data->fecha_pago], false, false);
+
+    $pdf->SetX(6);
+    $pdf->Row2(["CONCEPTO:", $data->concepto, "TOTAL:", MyString::formatoNumero($data->monto, 2, '$', false)], false, false);
+
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetAligns(['C', 'C', 'R']);
+    $pdf->SetWidths([40, 50, 55]);
+    $pdf->SetX(6);
+    $pdf->Row(['FECHA', 'BOLETA', 'IMPORTE'], false, true);
+
+
+    $folios = explode(', ', $data->folios);
+    $fechas = explode(', ', $data->fechas);
+    $pagos  = explode(', ', $data->pagos);
+    foreach($folios as $keya => $row)
+    {
+      $pdf->SetX(6);
+      $pdf->Row([$fechas[$keya], $row, MyString::formatoNumero($pagos[$keya], 2, '$', false)], false, false);
+    }
+
+    $pdf->Output('pago_boletas.pdf', 'I');
   }
 
 
@@ -2237,7 +2411,7 @@ class bascula_model extends CI_Model {
    * @return [type] [description]
    */
   public function r_acumulados_data()
-   {
+  {
       $response = array('data' => array(), 'tipo' => 'Entrada');
       $sql = $sql2 = '';
 
@@ -2288,6 +2462,7 @@ class bascula_model extends CI_Model {
         "SELECT Sum(b.kilos_neto) AS kilos,
             Sum(b.total_cajas) AS cajas,
             Sum(b.importe) AS importe,
+            Sum(b.ret_isr) AS ret_isr,
             (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
             {$campo_id}
          FROM bascula b
@@ -2553,7 +2728,7 @@ class bascula_model extends CI_Model {
       }
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.(isset($area['info'])? $area['info']->nombre: '').'_'.$fecha->format('d/m/Y').'.pdf', 'I');
-    }
+   }
 
   public function rbp_xls()
   {
@@ -2650,6 +2825,415 @@ class bascula_model extends CI_Model {
     echo $html;
   }
 
+  public function rpt_entrada_fruta_no_data()
+  {
+    $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-').'01';
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'Date(b.fecha_tara)';
+
+    if ($this->input->get('ranchoId') != ''){
+      $sql .= " AND r.id_rancho = " . $_GET['ranchoId'];
+    }
+
+    if ($this->input->get('centroCostoId') != ''){
+      $centrosIds = implode(',', $_GET['centroCostoId']);
+      $sql .= " AND cc.id_centro_costo IN({$centrosIds})";
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    $sql .= " AND {$fecha_compara} BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
+              b.kilos_neto, bsp.id
+      FROM bascula b
+        LEFT JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
+      WHERE b.id_area = 3 AND b.tipo = 'en' AND bsp.id IS NULL {$sql}
+      ORDER BY bascula ASC
+      "
+    );
+
+    $response = array();
+    if ($query->num_rows() > 0)
+    {
+      $response = $query->result();
+    }
+
+    return $response;
+  }
+
+  public function rpt_entrada_fruta_data()
+  {
+    $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-').'01';
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'Date(b.fecha_tara)';
+
+    if ($this->input->get('ranchoId') != ''){
+      $sql .= " AND r.id_rancho = " . $_GET['ranchoId'];
+    }
+
+    if ($this->input->get('centroCostoId') != ''){
+      $centrosIds = implode(',', $_GET['centroCostoId']);
+      $sql .= " AND cc.id_centro_costo IN({$centrosIds})";
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+
+    $sql .= " AND {$fecha_compara} BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula, b.folio AS bascula, Date(b.fecha_tara) AS fecha,
+              bsp.kilos_neto, bsp.total_piezas, bsp.kg_pieza,
+              bspe.folio, bspe.estiba, c.id_calidad, c.nombre AS calidad, r.nombre AS rancho,
+              cc.nombre AS centro_costo, bspe.cantidad, bspec.num, (bspe.cantidad/bspec.num) AS cc_cantidad,
+              ((bspe.cantidad/bspec.num) * bsp.kg_pieza) AS cc_kilos
+      FROM bascula b
+        INNER JOIN otros.bascula_salida_pina bsp ON b.id_bascula = bsp.id_bascula
+        INNER JOIN otros.bascula_salida_pina_estibas bspe ON bsp.id = bspe.id_salida_pina
+        INNER JOIN otros.bascula_salida_pina_estibas_centro_costo bspec ON
+          (bspe.id_salida_pina = bspec.id_salida_pina AND bspe.estiba = bspec.estiba AND bspe.folio = bspec.folio)
+        INNER JOIN calidades c ON c.id_calidad = bspe.id_calidad
+        INNER JOIN otros.ranchos r ON r.id_rancho = bspe.id_rancho
+        INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = bspec.id_centro_costo
+      WHERE 1 = 1 {$sql}
+      ORDER BY bascula ASC, folio ASC, estiba ASC
+      "
+    );
+
+
+    $aux = 0;
+    $response = array();
+    if ($query->num_rows() > 0)
+    {
+      $response = $query->result();
+
+      foreach ($response as $key => $value) {
+        if ($aux != $value->id_bascula) {
+          $products = $this->db->query(
+            "SELECT id_calidad, precio
+            FROM bascula_compra
+            WHERE id_bascula = {$value->id_bascula}
+            ORDER BY id_calidad ASC
+            ")->result();
+          $precios = [];
+          foreach ($products as $keyp => $prod) {
+            $precios[$prod->id_calidad] = $prod->precio;
+          }
+
+          $aux = $value->id_bascula;
+        }
+
+        $value->precio = isset($precios[$value->id_calidad])? $precios[$value->id_calidad]: 0;
+        $value->importe = $value->precio * $value->cc_kilos;
+      }
+    }
+
+    return $response;
+  }
+
+  public function rpt_entrada_fruta_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_entrada_fruta_data();
+    $data_noasignados = $this->rpt_entrada_fruta_no_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $pdf->titulo2 = "REPORTE ENTRADA DE PIÑA";
+    $rancho = $this->input->get('rancho');
+    $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$rancho;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'L', 'L', 'R', 'R', 'R', 'R');
+    $widths = array(17, 18, 18, 33, 15, 15, 35, 30, 18, 13, 18, 18);
+    $header = array('FECHA', 'BOLETA', 'ENTRADA', 'RANCHO', 'KILOS', 'PIEZAS', 'CALIDAD', 'MELGA', 'KG/PIEZA', 'ESTIBA', 'PRECIO', 'IMPORTE');
+
+    $total_kg    = 0;
+    $total_piezas  = 0;
+    $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
+    $totalesMelgas = [];
+
+    foreach ($data as $key => $valuerp) {
+
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        if($key != 0)
+          $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false);
+      }
+
+      $pdf->SetFont('helvetica','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      // if($auxx['kilos_neto'] != $valuerp->kilos_neto) {
+      //   $total_kg = 0;
+      // }
+
+      $total_kg     += $valuerp->cc_kilos;
+      $total_piezas += $valuerp->cc_cantidad;
+
+      $datos = array(
+        ($auxx['fecha'] != $valuerp->fecha? MyString::fechaAT($valuerp->fecha): ''),
+        ($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: ''),
+        ($auxx['folio'] != $valuerp->folio? $valuerp->folio: ''),
+        ($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: ''),
+        // ($auxx['kilos_neto'] != $valuerp->kilos_neto? MyString::formatoNumero($valuerp->kilos_neto, 2, '', false): ''),
+        MyString::formatoNumero($valuerp->cc_kilos, 2, '', false),
+        MyString::formatoNumero($valuerp->cc_cantidad, 2, '', false),
+        $valuerp->calidad,
+        $valuerp->centro_costo,
+        ($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): ''),
+        $valuerp->estiba,
+        MyString::formatoNumero($valuerp->precio, 2, '', false),
+        MyString::formatoNumero($valuerp->importe, 2, '', false)
+      );
+
+      $pdf->SetY($pdf->GetY()-2);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      // totales melgas
+      if (isset($totalesMelgas[$valuerp->centro_costo])) {
+        $totalesMelgas[$valuerp->centro_costo] += $valuerp->cc_kilos;
+      } else {
+        $totalesMelgas[$valuerp->centro_costo] = $valuerp->cc_kilos;
+      }
+
+      $auxx['fecha'] = $valuerp->fecha;
+      $auxx['bascula'] = $valuerp->bascula;
+      $auxx['folio'] = $valuerp->folio;
+      $auxx['rancho'] = $valuerp->rancho;
+      $auxx['kilos_neto'] = $valuerp->kilos_neto;
+      $auxx['kg_pieza'] = $valuerp->kg_pieza;
+    }
+
+    if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+    {
+      $pdf->AddPage();
+    }
+
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()-1);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(86, 15, 15, 27, 30, 18));
+    $pdf->Row(array(
+      'TOTALES',
+      MyString::formatoNumero($total_kg, 0, '', false),
+      MyString::formatoNumero($total_piezas, 0, '', false),
+      '', '',
+      MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false)
+    ), false, false);
+
+    $auxy = $pdf->GetY();
+    $auxpage = $pdf->page;
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(70));
+    $pdf->Row(array(
+      'TOTALES X CENTRO DE COSTO',
+    ), false, true);
+    foreach ($totalesMelgas as $key => $value) {
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(50, 20));
+      $pdf->Row(array(
+        $key,
+        MyString::formatoNumero($value, 2, '', false),
+      ), false, true);
+    }
+
+    $auxpage2 = $pdf->page;
+    $pdf->page = $auxpage;
+    $pdf->SetY($auxy);
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetY($pdf->GetY()+5);
+    $pdf->SetX(90);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(70));
+    $pdf->Row(array(
+      'BOLETAS SIN ENTRADA DE PIÑA',
+    ), false, true);
+    foreach ($data_noasignados as $key => $value) {
+      $pdf->SetX(90);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(50, 20));
+      $pdf->Row(array(
+        $value->fecha,
+        $value->bascula,
+      ), false, true);
+    }
+
+    $pdf->page = $auxpage2;
+
+    $pdf->Output('reporte_entradas_pina.pdf', 'I');
+  }
+
+  public function rpt_entrada_fruta_xls()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_entrada_fruta_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_entradas_pina.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['fid_empresa']{0})? $_GET['fid_empresa']: 2));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE ENTRADA DE PIÑA";
+    $rancho = $this->input->get('rancho');
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$rancho;
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="10" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="10" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="10"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">ENTRADA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RANCHO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PIEZAS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CALIDAD</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">MELGA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KG/PIEZA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">ESTIBA</td>
+      </tr>';
+    $total_kg    = 0;
+    $total_piezas  = 0;
+    $auxx = ['fecha' => '', 'bascula' => '', 'folio' => '', 'rancho' => '', 'kilos_neto' => '', 'kg_pieza' => ''];
+    $totalesMelgas = [];
+
+    foreach ($data as $key => $valuerp) {
+      $total_kg     += $valuerp->cc_kilos;
+      $total_piezas += $valuerp->cc_cantidad;
+
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['fecha'] != $valuerp->fecha? MyString::fechaAT($valuerp->fecha): '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['bascula'] != $valuerp->bascula? $valuerp->bascula: '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['folio'] != $valuerp->folio? $valuerp->folio: '').'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.($auxx['rancho'] != $valuerp->rancho? $valuerp->rancho: '').'</td>
+
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_kilos, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($valuerp->cc_cantidad, 2, '', false).'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->calidad.'</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->centro_costo.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.($auxx['kg_pieza'] != $valuerp->kg_pieza? MyString::formatoNumero($valuerp->kg_pieza, 2, '', false): '').'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$valuerp->estiba.'</td>
+        </tr>';
+
+      // totales melgas
+      if (isset($totalesMelgas[$valuerp->centro_costo])) {
+        $totalesMelgas[$valuerp->centro_costo] += $valuerp->cc_kilos;
+      } else {
+        $totalesMelgas[$valuerp->centro_costo] = $valuerp->cc_kilos;
+      }
+
+      $auxx['fecha'] = $valuerp->fecha;
+      $auxx['bascula'] = $valuerp->bascula;
+      $auxx['folio'] = $valuerp->folio;
+      $auxx['rancho'] = $valuerp->rancho;
+      $auxx['kilos_neto'] = $valuerp->kilos_neto;
+      $auxx['kg_pieza'] = $valuerp->kg_pieza;
+    }
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTALES</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kg, 0, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_piezas, 0, '', false).'</td>
+          <td></td>
+          <td></td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero(($total_kg/($total_piezas>0? $total_piezas: 1)), 2, '', false).'</td>
+          <td></td>
+        </tr>';
+
+    $html .= '
+      <tr style="font-weight:bold">
+        <td colspan="2"></td>
+      </tr>
+      <tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;">TOTALES X CENTRO DE COSTO</td>
+      </tr>';
+    foreach ($totalesMelgas as $key => $value) {
+      $html .= '
+      <tr style="font-weight:bold">
+        <td style="border:1px solid #000;">'.$key.'</td>
+        <td style="border:1px solid #000;">'.MyString::formatoNumero($value, 2, '', false).'</td>
+      </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
    /**
     * Visualiza/Descarga el PDF para el Reporte Diario de Entradas.
     *
@@ -2686,13 +3270,15 @@ class bascula_model extends CI_Model {
       //$pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
-      $widths = array(20, 75, 30, 25, 20, 35);
-      $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
+      $aligns = array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(15, 75, 18, 15, 12, 25, 18, 25);
+      $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'IMPORTE', 'RET', 'TOTAL');
 
       $total_kilos   = 0;
       $total_cajas   = 0;
       $total_importe = 0;
+      $total_ret     = 0;
+      $total_total   = 0;
 
       foreach($data['data'] as $key => $proveedor)
       {
@@ -2723,11 +3309,15 @@ class bascula_model extends CI_Model {
               MyString::formatoNumero($proveedor->kilos, 2, ''),
               MyString::formatoNumero($proveedor->cajas, 2, ''),
               MyString::formatoNumero($proveedor->precio, 2, '$', false),
-              MyString::formatoNumero($proveedor->importe, 2, '$', false)
+              MyString::formatoNumero($proveedor->importe+$proveedor->ret_isr, 2, '$', false),
+              MyString::formatoNumero($proveedor->ret_isr, 2, '$', false),
+              MyString::formatoNumero($proveedor->importe, 2, '$', false),
             ), false, false);
         $total_cajas   += $proveedor->cajas;
         $total_kilos   += $proveedor->kilos;
-        $total_importe += $proveedor->importe;
+        $total_importe += $proveedor->importe+$proveedor->ret_isr;
+        $total_ret     += $proveedor->ret_isr;
+        $total_total   += $proveedor->importe;
       }
 
       if($pdf->GetY() >= $pdf->limiteY)
@@ -2743,7 +3333,9 @@ class bascula_model extends CI_Model {
             MyString::formatoNumero($total_kilos, 2, ''),
             MyString::formatoNumero($total_cajas, 2, ''),
             MyString::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1), 2, '$', false),
-            MyString::formatoNumero($total_importe, 2, '$', false)
+            MyString::formatoNumero($total_importe, 2, '$', false),
+            MyString::formatoNumero($total_ret, 2, '$', false),
+            MyString::formatoNumero($total_total, 2, '$', false)
           ), false, false);
 
       //Total de pagadas no pagadas
@@ -2811,11 +3403,15 @@ class bascula_model extends CI_Model {
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CAJAS</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">P.P.</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RET</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL</td>
       </tr>';
     $total_kilos   = 0;
     $total_cajas   = 0;
     $total_importe = 0;
+    $total_ret     = 0;
+    $total_total   = 0;
 
     foreach($data['data'] as $key => $proveedor)
     {
@@ -2825,12 +3421,16 @@ class bascula_model extends CI_Model {
           <td style="width:150px;border:1px solid #000;">'.$proveedor->kilos.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->cajas.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->precio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($proveedor->importe+$proveedor->ret_isr).'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->ret_isr.'</td>
           <td style="width:150px;border:1px solid #000;">'.$proveedor->importe.'</td>
         </tr>';
 
       $total_cajas   += $proveedor->cajas;
       $total_kilos   += $proveedor->kilos;
-      $total_importe += $proveedor->importe;
+      $total_importe += $proveedor->importe+$proveedor->ret_isr;
+      $total_ret     += $proveedor->ret_isr;
+      $total_total   += $proveedor->importe;
 
     }
 
@@ -2841,6 +3441,8 @@ class bascula_model extends CI_Model {
           <td style="border:1px solid #000;">'.$total_cajas.'</td>
           <td style="border:1px solid #000;">'.($total_importe/($total_kilos>0? $total_kilos: 1)).'</td>
           <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_ret.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
         </tr>
         <tr>
           <td colspan="6"></td>
@@ -2917,10 +3519,10 @@ class bascula_model extends CI_Model {
       //$pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-      $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 28, 30, 12);
+      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+      $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 17, 28, 30, 12);
       $header = array('',   'BOLETA', 'FECHA','CALIDAD',
-                      'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
+                      'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'RET ISR', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
 
       $lastFolio = 0;
       $total_bonificaciones = 0;
@@ -2952,6 +3554,7 @@ class bascula_model extends CI_Model {
                        MyString::formatoNumero($caja->kilos, 2, ''),
                        MyString::formatoNumero($caja->precio, 2, ''),
                        MyString::formatoNumero($caja->importe, 2, ''),
+                       ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->ret_isr, 2, '') : '',
                        ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '') : '',
                        ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
                        ($caja->id_bascula != $lastFolio) ? $caja->concepto: '',
@@ -2983,6 +3586,7 @@ class bascula_model extends CI_Model {
         $data['totales']['kilos'],
         $data['totales']['kilos'] != 0 ? MyString::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 3, '') : 0,
         MyString::formatoNumero($data['totales']['importe']),
+        MyString::formatoNumero($data['totales']['ret_isr']),
         MyString::formatoNumero($data['totales']['total']),
         '',''
       ), false, false);
@@ -3741,6 +4345,190 @@ class bascula_model extends CI_Model {
           ));
       }
     }
+  }
+
+
+
+  public function importarBoletasIntangibles()
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('upload', $config);
+
+    if ( ! $this->upload->do_upload('archivo_boletas'))
+    {
+      return array('error' => '501');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $boletasData = [];
+      $val_resumenok = [];
+      $foliosLink = [];
+
+      $handle = fopen($file['full_path'], "r");
+      if ($handle) {
+        $this->load->model('usuarios_model');
+
+        // if ($_POST['id_empresa'] !== '')
+        //   $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_POST['id_empresa'])->get()->row()->dia_inicia_semana;
+        // else
+        //   $diaComienza = '4';
+        // $ff = explode('-', $_POST['fecha']);
+        // $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
+
+        $count = 0;
+        // Empresa,Area,Folio,ProveedorID,KilosBruto,KilosTara,KilosNeto,Fecha Bruto,Calidad,Cajas,Kilos,Promedio,Precio,Importe
+        // Construcción de los datos de las recetas
+        while (($line = fgets($handle)) !== false) {
+          if (trim($line) != '' && $count !== 0) {
+            $datos = str_getcsv($line);
+            // $datos = explode("\t", $line);
+            $datos = $this->clearRowRecetaCorona($datos);
+
+            if (count($datos) === 16 && $datos[0] > 0 && $datos[1] > 0 && $datos[3] > 0) {
+              $mins = rand(10, 80);
+              $boletasData[] = [
+                'id_empresa'      => $datos[0],
+                'id_area'         => $datos[1],
+                'id_proveedor'    => $datos[3],
+                'id_chofer'       => null,
+                'id_camion'       => null,
+                'folio'           => $datos[2],
+                'accion'          => 'f',
+                'tipo'            => 'en',
+                'cajas_prestadas' => 0,
+                'certificado'     => 'f',
+                'intangible'      => 't',
+
+                'metodo_pago'     => 'co',
+                'id_productor'    => null,
+                'id_usuario'      => $this->session->userdata('id_usuario'),
+
+                'kilos_bruto'     => $datos[4],
+                'kilos_tara'      => $datos[5],
+                'kilos_neto'      => $datos[6],
+                'fecha_bruto'     => ($datos[7]? $datos[7]->format('Y-m-d H:i:s'): ''),
+                'fecha_tara'      => ($datos[7]? $datos[7]->add(new DateInterval("PT{$mins}M"))->format('Y-m-d H:i:s'): ''),
+                'importe'         => round($datos[13] - round(empty($datos[15]) ? 0 : floatval($datos[15]), 2), 2),
+                'ret_isr'         => round(empty($datos[15]) ? 0 : floatval($datos[15]), 2),
+                'ret_isr_porcent' => empty($datos[14]) ? 0 : floatval($datos[14]),
+                'compras'         => []
+              ];
+
+              if ($datos[8] > 0) {
+                $boletasData[count($boletasData)-1]['compras'][] = [
+                  'id_bascula'   => null,
+                  'id_calidad'   => $datos[8],
+                  'cajas'        => $datos[9],
+                  'kilos'        => $datos[10],
+                  'promedio'     => $datos[11],
+                  'precio'       => $datos[12],
+                  'importe'      => $datos[13],
+                  'num_registro' => 0,
+                ];
+              }
+            }
+          }
+          ++$count;
+        }
+        // fclose($handle);
+        // echo "<pre>";
+        // var_dump($boletasData);
+        // echo "</pre>";exit;
+
+        // Validación
+        $val_resumen = [];
+        if (count($boletasData) > 0) {
+          foreach ($boletasData as $key => $boleta) {
+            $this->validaBoletasIntangibles($boletasData[$key], $val_resumen);
+          }
+        }
+        // echo "<pre>";
+        // var_dump($boletasData);
+        // echo "</pre>";exit;
+
+        if (count($val_resumen) > 0) {
+          return ['error' => '503', 'resumen' => $val_resumen];
+        } else {
+          // Se guardan todas las boletas
+          foreach ($boletasData as $key => $boleta) {
+            $foliosLink[] = $this->saveBoletaData($boleta);
+          }
+        }
+
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500', 'resumenok' => $val_resumenok, 'print' => 'http://192.168.1.30/sanjorge/panel/bascula/imprimir/?id='.implode(',', $foliosLink));
+    }
+  }
+
+  public function saveBoletaData($boleta)
+  {
+    $compras = $boleta['compras'];
+    unset($boleta['compras']);
+
+    $this->db->insert('bascula', $boleta);
+    $idb = $this->db->insert_id('bascula_id_bascula_seq');
+    foreach ($compras as $key => $value) {
+      $value['id_bascula'] = $idb;
+      $this->db->insert('bascula_compra', $value);
+    }
+    return $idb;
+  }
+
+  private function validaBoletasIntangibles(&$boleta, &$val_resumen)
+  {
+    $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula WHERE folio = {$boleta['folio']} AND tipo = '{$boleta['tipo']}' AND id_area = {$boleta['id_area']}")->row();
+    if($result->num > 0) {
+      $val_resumen[] = "Boleta No {$boleta['folio']}; Ya esta registrada.";
+      return false;
+    }
+
+    $result = $this->db->query("SELECT Count(id_proveedor) AS num FROM proveedores WHERE id_empresa = {$boleta['id_empresa']} AND id_proveedor = {$boleta['id_proveedor']}")->row();
+    if($result->num === 0) {
+      $val_resumen[] = "Boleta No {$boleta['folio']}; El ID del proveedor no pertenece a la empresa seleccionada.";
+      return false;
+    }
+
+    if(count($boleta['compras']) > 0) {
+      $this->load->model('calidades_model');
+      $result = $this->calidades_model->getCalidades($boleta['id_area'], false, $boleta['compras'][0]['id_calidad']);
+      if (count($result['calidades']) === 0) {
+        $val_resumen[] = "Boleta No {$boleta['folio']}; La calidad no pertenece al área seleccionada, o no es valido el valor.";
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private function clearRowRecetaCorona($data)
+  {
+    $numeros = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15];
+    $fechas = [7];
+    $ids = [0, 1, 8];
+    foreach ($data as $key => $item) {
+      $data[$key] = trim($item);
+      $data[$key] = str_replace('"', '', $data[$key]);
+      if (in_array($key, $numeros)) {
+        $data[$key] = floatval(str_replace([',', '$'], '', $data[$key]));
+      } elseif (in_array($key, $fechas)) {
+        try {
+          $data[$key] = new DateTime($data[$key]);
+        } catch (Exception $exc) {
+          $data[$key] = false;
+        }
+      } elseif (in_array($key, $ids)) {
+        $data[$key] = intval($data[$key]);
+      }
+    }
+
+    return $data;
   }
 
 }

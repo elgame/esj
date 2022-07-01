@@ -9,6 +9,9 @@
     initDate();
     autocompleteCodigos();
     autocompleteLabores();
+    autocompleteActivos();
+    autocompleteImplementos();
+
     showCodigoArea();
     btnModalAreasSel();
 
@@ -30,7 +33,7 @@
     });
 
     // Asigna evento focusout a los inputs que estan en existete, linea1, linea2
-    $('#tableClasif').on('focusout', '#flts_combustible, #fhr_ini, #fhr_fin', function(event) {
+    $('#tableClasif').on('focusout', '#flts_combustible, #fhorometro, #fhorometro_fin, #fodometro, #fodometro_fin', function(event) {
       var $this = $(this),
           $tr =  $this.parent().parent();
 
@@ -128,19 +131,82 @@
     });
   };
 
+  var autocompleteActivos = function () {
+    $('#tableClasif').on('focus', 'input.factivos:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: function(request, response) {
+          var params = {term : request.term};
+          // if(parseInt($("#empresaId").val()) > 0)
+          //   params.did_empresa = $("#empresaId").val();
+          params.tipo = 'a'; // activos
+          $.ajax({
+              url: base_url + 'panel/productos/ajax_aut_productos/',
+              dataType: "json",
+              data: params,
+              success: function(data) {
+                response(data);
+              }
+          });
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#A1F57A");
+          $tr.find(".factivoId").val(ui.item.id);
+        }
+      }).on("keydown", function(event) {
+        if(event.which == 8 || event.which == 46) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+          $this.css("background-color", "#FFD071");
+          $tr.find(".factivoId").val('');
+        }
+      });
+    });
+  };
+
+  var autocompleteImplementos = function () {
+    $('#tableClasif').on('focus', 'input.fimplemento:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/control_maquinaria/ajax_get_implemento/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $this = $(this);
+
+          $this.css("background-color", "#FFD9B3");
+        }
+      });
+    });
+  };
+
+
   var ajaxSave = function ($tr) {
 
     var postData = {};
 
     postData.fecha           = $('#gfecha').val();
     postData.id_combustible  = $tr.find('#fid_combustible').val();
-    postData.id_centro_costo = $tr.find('#fcentro_costo_id').val();
     postData.id_labor        = $tr.find('#flabor_id').val();
-    postData.id_implemento   = $tr.find('#fimplemento_id').val();
+    postData.implemento      = $tr.find('#fimplemento').val();
     postData.lts_combustible = $tr.find('#flts_combustible').val();
-    postData.hora_inicial    = $tr.find('#fhr_ini').val()+':00';
-    postData.hora_final      = $tr.find('#fhr_fin').val()+':00';
+    postData.precio          = $tr.find('#fprecio').val();
+    postData.horometro       = $tr.find('#fhorometro').val();
+    postData.horometro_fin   = $tr.find('#fhorometro_fin').val();
+    postData.odometro        = $tr.find('#fodometro').val();
+    postData.odometro_fin    = $tr.find('#fodometro_fin').val();
     postData.horas_totales   = $tr.find('#ftotal_hrs').val();
+    postData.hora_carga      = $tr.find('#fhora_carga').val();
 
     if ( validExisCombustible(postData, $tr) ) {
       $.post(base_url + 'panel/control_maquinaria/ajax_save/', postData, function(data) {
@@ -154,7 +220,7 @@
           $tr.remove();
         }
 
-        addNewTr();
+        // addNewTr();
       }, "json");
     } else {
       $tr.find('#fcentro_costo').focus();
@@ -213,42 +279,52 @@
         indexJump = jumpIndex + 1;
 
 
-    trHtml = '<tr>' +
-                '<td>' +
-                  '<input type="text" id="fcentro_costo" value="" class="span11 jump'+(++jumpIndex)+' pull-left showCodigoAreaAuto" data-next="jump'+(++jumpIndex)+'">' +
-                  '<input type="hidden" id="fcentro_costo_id" value="" class="span12">' +
-                  '<i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>' +
-                  '<input type="hidden" id="fid_combustible" value="" class="span12">' +
-                '</td>' +
-                '<td>' +
-                  '<input type="text" id="flabor" value="" class="span12 jump'+jumpIndex+' showLabores" data-next="jump'+(++jumpIndex)+'">' +
-                  '<input type="hidden" id="flabor_id" value="" class="span12">' +
-                '</td>' +
-                '<td>' +
-                  '<input type="text" id="fimplemento" value="" class="span11 jump'+jumpIndex+' pull-left showCodigoAreaAuto" data-next="jump'+(++jumpIndex)+'">' +
-                  '<input type="hidden" id="fimplemento_id" value="" class="span12">' +
-                  '<i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>' +
-                '</td>' +
-                '<td>' +
-                  '<input type="number" id="flts_combustible" value="" class="span12 jump'+jumpIndex+' vpositive" data-next="jump'+(++jumpIndex)+'">' +
-                '</td>' +
-                '<td>' +
-                  '<input type="time" name="fhr_ini" id="fhr_ini" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                '</td>' +
-                '<td>' +
-                  '<input type="time" name="fhr_fin" id="fhr_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                '</td>' +
-                '<td>' +
-                  '<input type="text" id="ftotal_hrs" value="" class="span12" readonly>' +
-                '</td>' +
-                '<td>' +
-                  '<input type="text" id="flitro_hr" value="" class="span12" readonly>' +
-                '</td>' +
-                '<td>' +
-                  '<button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>' +
-                  '<button type="button" class="btn btn-danger btn-small" id="btnDelClasif">Eliminar</button>' +
-                '</td>' +
-              '</tr>';
+    trHtml =
+      '<tr>' +
+        '<td>'+
+          '<input type="time" id="fhora_carga" value="" class="span11 pull-left fhora_carga jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
+        '<td>' +
+          '<input type="text" name="factivos" class="span11 factivos jump'+jumpIndex+'" value="" placeholder="Nissan FRX, Maquina limon" data-next="jump'+(++jumpIndex)+'">' +
+          '<input type="hidden" name="factivoId" class="factivoId" value="">' +
+          '<input type="hidden" id="fid_combustible" value="" class="span12">' +
+        '</td>' +
+        '<td>' +
+          '<input type="text" id="flabor" value="" class="span12 showLabores jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+          '<input type="hidden" id="flabor_id" value="" class="span12">' +
+        '</td>' +
+        '<td>' +
+          '<input type="text" id="fimplemento" value="" class="span11 pull-left fimplemento jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+        '</td>' +
+        '<td>' +
+          '<input type="number" id="flts_combustible" value="" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+        '</td>' +
+        '<td>' +
+          '<input type="number" id="fprecio" value="" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+        '</td>' +
+        '<td>' +
+          '<input type="number" name="fhorometro" id="fhorometro" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+        '</td>' +
+        '<td>' +
+          '<input type="number" name="fhorometro_fin" id="fhorometro_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+        '</td>' +
+        '<td>' +
+          '<input type="text" id="ftotal_hrs" value="" class="span12" readonly>' +
+        '</td>' +
+        '<td>' +
+          '<input type="text" id="flitro_hr" value="" class="span12" readonly>' +
+        '</td>' +
+        '<td>'+
+          '<input type="number" name="fodometro" id="fodometro" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
+        '<td>'+
+          '<input type="number" name="fodometro_fin" id="fodometro_fin" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+        '</td>'+
+        '<td>' +
+          '<button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>' +
+          '<button type="button" class="btn btn-danger btn-small" id="btnDelClasif">Eliminar</button>' +
+        '</td>' +
+      '</tr>';
 
     $(trHtml).appendTo($tabla.find('tbody'));
 
@@ -262,15 +338,18 @@
   };
 
   var calculaTotalesHrs = function ($tr) {
-
     var $flts_combustible = $tr.find('#flts_combustible'),
-        $fhr_ini    = $tr.find('#fhr_ini'),
-        $fhr_fin    = $tr.find('#fhr_fin'),
+        $fhr_ini    = $tr.find('#fhorometro'),
+        $fhr_fin    = $tr.find('#fhorometro_fin'),
+        $fkm_ini    = $tr.find('#fodometro'),
+        $fkm_fin    = $tr.find('#fodometro_fin'),
 
         $ftotal_hrs = $tr.find('#ftotal_hrs'),
         $flitro_hr  = $tr.find('#flitro_hr'),
 
-        total_hrs = calculaHoras($("#gfecha").val(), $fhr_ini.val()+':00', $fhr_fin.val()+':00').toFixed(2);
+    total_hrs = (parseFloat($fhr_fin.val())||0) - (parseFloat($fhr_ini.val())||0);
+    total_kms = (parseFloat($fkm_fin.val())||0) - (parseFloat($fkm_ini.val())||0);
+        // total_hrs = calculaHoras($("#gfecha").val(), $fhr_ini.val()+':00', $fhr_fin.val()+':00').toFixed(2);
 
     if(total_hrs) {
       $ftotal_hrs.val(total_hrs);

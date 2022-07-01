@@ -95,6 +95,7 @@
                   <th>Almacén</th>
                   <th>Autorizada</th>
                   <th>Estado</th>
+                  <th>Compras</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -136,6 +137,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td style="font-size: 11px;"><?php echo $orden->compras; ?></td>
                   <td class="center">
                     <?php
 
@@ -196,6 +198,12 @@
                           'params'   => 'id='.$orden->id_orden.'&p=true',
                           'btn_type' => 'btn-success',
                           'attrs' => array('target' => '_BLANK'))
+                        );
+
+                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar_ext/', array(
+                          'params'   => 'id='.$orden->id_orden,
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('rel' => 'superbox-80x550'))
                         );
                       }
 

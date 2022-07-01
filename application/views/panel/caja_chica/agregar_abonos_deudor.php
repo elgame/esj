@@ -129,9 +129,10 @@
   <?php if ($closeModal) { ?>
     <script>
     $(function(){
-      setInterval(function() {
+      setTimeout(function() {
         window.parent.$('#supermodal').modal('hide');
-        window.parent.location = window.parent.location;
+        console.log('test', window.parent.location.href);
+        window.parent.location.href = window.parent.location.href;
       }, 1000);
     });
     </script>

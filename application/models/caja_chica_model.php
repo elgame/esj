@@ -17,6 +17,7 @@ class caja_chica_model extends CI_Model {
       'cheques_transito_total'   => 0,
       'saldo_clientes'           => array(),
       'denominaciones'           => array(),
+      'pregastos'                => array(),
       'gastos'                   => array(),
       'gastos_comprobar'         => array(),
       'reposicion_gastos'        => array(),
@@ -24,6 +25,7 @@ class caja_chica_model extends CI_Model {
       'deudores'                 => array(),
       'acreedores'               => array(),
       'categorias'               => array(),
+      'efcbodega'                => array(),
       'deudores_prest_dia'       => 0,
       'deudores_abonos_dia'      => 0,
       'acreedor_prest_dia'       => 0,
@@ -318,13 +320,13 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    // Tryana y sra vianey
-    if ($noCaja == '2' || $noCaja == '4') {
+    // Tryana y sra vianey, plasticos gdl
+    if ($noCaja == '2' || $noCaja == '4' || $noCaja == '6') {
       // saldo de clientes
       $info['saldo_clientes'] = $this->getCajaSaldosClientes($fecha, $noCaja);
     }
 
-    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4' || $noCaja == '5') {
+    if ($noCaja == '2' || $noCaja == '1' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
       // deudores
       $deudores = $this->db->query(
         "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
@@ -365,18 +367,21 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
-      $ddNoCaja = '1, 4, 5';
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
+      $ddNoCaja = '1, 4, 5, 6';
       $ddTipo = 'caja_gastos';
       if ($noCaja == '1') {
-        $ddNoCaja = "2, 4, 5";
+        $ddNoCaja = "2, 4, 5, 6";
         $ddTipo = 'caja_limon';
       } elseif ($noCaja == '4') {
-        $ddNoCaja = "2, 1, 5";
+        $ddNoCaja = "2, 1, 5, 6";
         $ddTipo = 'caja_general';
       } elseif ($noCaja == '5') {
-        $ddNoCaja = "2, 1, 4";
+        $ddNoCaja = "2, 1, 4, 6";
         $ddTipo = 'caja_fletes';
+      } elseif ($noCaja == '6') {
+        $ddNoCaja = "1, 2, 4, 5";
+        $ddTipo = 'caja_plasticos';
       }
 
       // acreedores
@@ -417,16 +422,41 @@ class caja_chica_model extends CI_Model {
       }
     }
 
-    // gastos por comprobar
-    if ($noCaja == '2' || $noCaja == '5') {
-      $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
+    // efcbodega
+    $efcbodega = $this->db->query(
+      "SELECT cb.id_bodega, cb.id_usuario, cb.fecha, cb.no_caja, cb.nombre,
+        cb.concepto, cb.monto, cb.no_impresiones, cb.fecha_creacion, cb.status,
+        cb.fecha_recibido
+      FROM cajachica_bodega_gdl cb
+      WHERE cb.no_caja = {$noCaja} AND cb.fecha <= '{$fecha}' AND
+        (cb.status = 'f' OR (cb.status = 't' AND cb.fecha_recibido = '{$fecha}'))"
+    );
+
+    if ($efcbodega && $efcbodega->num_rows() > 0 && $noCaja == '4')
+    {
+      $info['efcbodega'] = $efcbodega->result();
     }
+
+    // gastos por comprobar
+    if ($noCaja == '2' || $noCaja == '5' || $noCaja == '6') {
+      $info['gastos_comprobar'] = $this->getCajaGastos(['gc', $fecha], $noCaja, $all);
+
+      $query = $this->db->query("SELECT Sum(monto) AS monto
+        FROM cajachica_gastos
+        WHERE no_caja = {$noCaja} AND status = 'f' AND monto_ini = 0
+          AND tipo = 'gc' AND fecha_cancelado = '{$fecha}'")->row();
+      $info['gastos_comprobar_cancel'] = $query->monto;
+    }
+
+    // Pregastos
+    $info['pregastos'] = $this->getCajaGastos(['pre', $fecha], $noCaja, $all);
 
     // gastos
     $info['gastos'] = $this->getCajaGastos($fecha, $noCaja, $all);
+    $info['gastosAcumuladosCaja1'] = $this->getCajaGastos($fecha, $noCaja, $all, true, " AND cg.fecha >= '2022-01-01' AND cg.fecha <= '{$fecha}'");
 
     // reposición de gastos
-    if ($noCaja == '2') {
+    if ($noCaja == '2' || $noCaja == '6') {
       $info['reposicion_gastos'] = $this->getCajaGastos(['rg', $fecha], $noCaja, $all);
     }
     // reposición de gastos caja de transporte
@@ -435,7 +465,7 @@ class caja_chica_model extends CI_Model {
     }
 
     // Traspasos
-    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5') {
+    if ($noCaja == '1' || $noCaja == '2' || $noCaja == '4' || $noCaja == '5' || $noCaja == '6') {
       $traspasos = $this->getTraspasos($fecha, $noCaja, false, (!$all? " AND bt.status = 't'": ''));
       if (count($traspasos) > 0)
       {
@@ -507,7 +537,7 @@ class caja_chica_model extends CI_Model {
     return $response;
   }
 
-  public function getCajaGastos($fecha, $noCaja, $all)
+  public function getCajaGastos($fecha, $noCaja, $all, $suma = false, $sqle = '')
   {
     $sql = '';
     $sql_status2 = "(CASE WHEN cg.fecha_cancelado IS NULL THEN true
@@ -527,9 +557,13 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')
         AND (cg.fecha_compro_gasto IS NULL OR cg.fecha_compro_gasto >= '{$fecha[1]}')";
       $fecha1 = $fecha[1];
+    } elseif (is_array($fecha) && $fecha[0] === 'pre') {
+      $sql .= " AND cg.tipo = 'pre'";
+      $sql .= " AND cg.fecha <= '{$fecha[1]}' AND (cg.fecha_cancelado IS NULL OR cg.fecha_cancelado >= '{$fecha[1]}')";
+      $fecha1 = $fecha[1];
     } else {
       $sql .= " AND cg.tipo = 'g'";
-      $sql .= " AND cg.fecha = '{$fecha}'";
+      $sql .= $suma? '': " AND cg.fecha = '{$fecha}'";
       $fecha1 = $fecha;
     }
 
@@ -540,16 +574,18 @@ class caja_chica_model extends CI_Model {
 
     $response = [];
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.monto_ini, cc.id_categoria, cc.abreviatura as empresa,
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.monto_ini, cc.id_categoria,
+          (cc.abreviatura || Coalesce((' / ' || es.nombre_fiscal), '')) as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion, cg.id_areac, cg.id_rancho, cg.id_centro_costo, cg.id_activo, cc.id_empresa,
-          cg.nombre, cg.status, cg.folio_sig,
+          cg.nombre, cg.status, cg.folio_sig, cg.folio_ant, cg.id_sucursal,
           ar.nombre AS area, r.nombre AS rancho, ceco.nombre AS centro_costo, a.nombre AS activo,
           {$sql_status2} AS status2, (cg.monto_ini - Coalesce(cga.abonos, 0)) AS saldo, Coalesce(cga.abonos, 0) AS abonos, cg.fecha_compro_gasto,
-          (cg.monto_ini > 0 AND cg.status = 'f' AND '{$fecha1}' < cg.fecha_cancelado) AS show_back_cortes
+          (cg.monto_ini > 0 AND cg.status = 'f' AND ('{$fecha1}' < cg.fecha_cancelado)) AS show_back_cortes,
+          cg.diferencia_comp_gasto
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -559,6 +595,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.ranchos AS r ON r.id_rancho = cg.id_rancho
          LEFT JOIN otros.centro_costo AS ceco ON ceco.id_centro_costo = cg.id_centro_costo
          LEFT JOIN productos AS a ON a.id_producto = cg.id_activo
+         LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
 
          LEFT JOIN (
           SELECT id_gasto, Sum(abono) AS abonos
@@ -566,10 +603,11 @@ class caja_chica_model extends CI_Model {
           WHERE fecha <= '{$fecha1}'
           GROUP BY id_gasto
          ) cga ON cga.id_gasto = cg.id_gasto
-       WHERE cg.no_caja = {$noCaja} {$sql}
+       WHERE cg.no_caja = {$noCaja} {$sql} {$sqle}
        ORDER BY cg.id_gasto ASC"
     );
 
+    $totalGastoss = 0;
     if ($gastos->num_rows() > 0)
     {
       $response = $gastos->result();
@@ -577,17 +615,29 @@ class caja_chica_model extends CI_Model {
         if (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes === 't') {
           $value->monto = $value->monto_ini;
           $value->saldo = $value->monto - $value->abonos;
+          $value->monto = $value->saldo;
+        } elseif (is_array($fecha) && $fecha[0] === 'gc' && $value->show_back_cortes == '') {
+          $value->saldo = $value->monto_ini - $value->abonos;
+          $value->monto = $value->saldo;
+        }
+
+        if ($value->status == 't') {
+          $totalGastoss += floatval($value->monto);
         }
       }
     }
 
-    return $response;
+    if ($suma) {
+      return $totalGastoss;
+    } else {
+      return $response;
+    }
   }
 
   public function getCajaGastosTransporte($fecha, $noCaja, $all)
   {
-    if (!$all) {
       return $this->getCajaGastos($fecha, $noCaja, $all);
+    if (!$all) {
     }
 
     $sql = '';
@@ -733,6 +783,8 @@ class caja_chica_model extends CI_Model {
       $tno_caja = 'caja_general';
     } elseif ($noCaja == 5) {
       $tno_caja = 'caja_fletes';
+    } elseif ($noCaja == 6) {
+      $tno_caja = 'caja_plasticos';
     }
 
     $traspaso = $this->db->query(
@@ -752,8 +804,9 @@ class caja_chica_model extends CI_Model {
   {
     $ingresos = array();
 
-    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes'];
-    $anio = date('Y');
+    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja General', '5' => 'Caja Fletes', '6' => 'Caja Plasticos'];
+    $fpartes = explode('-', $data['fecha_caja_chica']);
+    $anio = $fpartes[0]; // date('Y');
 
     // ingresos
     if (isset($data['ingreso_concepto']) && is_array($data['ingreso_concepto'])) {
@@ -976,6 +1029,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['sucursalId'][$key])? $data['sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
             // 'folio'           => $data['gasto_folio'][$key],
             'concepto'        => $gasto,
@@ -1008,6 +1062,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['sucursalId'][$key])? $data['sucursalId'][$key]: NULL),
             'id_nomenclatura'          => $data['gasto_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_folio'][$key],
             'concepto'                 => $gasto,
@@ -1043,6 +1098,98 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Pre gastos
+    if (isset($data['gasto_pre_concepto']))
+    {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'pre'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['gasto_pre_concepto'] as $key => $gasto)
+      {
+        if (isset($data['gasto_pre_del'][$key]) && $data['gasto_pre_del'][$key] == 'true' &&
+          isset($data['gasto_pre_id_gasto'][$key]) && floatval($data['gasto_pre_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_pre_id_gasto'][$key]);
+
+          // $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+          $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+        } elseif (isset($data['gasto_pre_id_gasto'][$key]) && floatval($data['gasto_pre_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            'id_categoria'    => $data['gasto_pre_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['pre_sucursalId'][$key])? $data['pre_sucursalId'][$key]: NULL),
+            'id_nomenclatura' => $data['gasto_pre_nomenclatura'][$key],
+            // 'folio'           => $data['gasto_pre_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['gasto_pre_nombre'][$key],
+            'monto'           => $data['gasto_pre_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            $data['pre_codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            'reposicion'      => ($data['gasto_pre_reposicion'][$key]=='t'? 't': 'f'),
+            'id_areac'        => (!empty($data['pre_areaId'][$key])? $data['pre_areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['pre_ranchoId'][$key])? $data['pre_ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['pre_centroCostoId'][$key])? $data['pre_centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['pre_activoId'][$key])? $data['pre_activoId'][$key]: NULL),
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_pre_id_gasto'][$key], $gastos_udt,
+                          array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_gasto',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_pre_id_gasto'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'                => $data_folio->folio,
+            'id_categoria'             => $data['gasto_pre_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['pre_sucursalId'][$key])? $data['pre_sucursalId'][$key]: NULL),
+            'id_nomenclatura'          => $data['gasto_pre_nomenclatura'][$key],
+            'folio'                    => '', //$data['gasto_pre_folio'][$key],
+            'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_pre_nombre'][$key],
+            'monto'                    => $data['gasto_pre_importe'][$key],
+            'monto_ini'                => $data['gasto_pre_importe'][$key],
+            'fecha'                    => $data['fecha_caja_chica'],
+            'no_caja'                  => $data['fno_caja'],
+            // 'id_area'               => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            $data['pre_codigoCampo'][$key] => (isset($data['pre_codigoAreaId'][$key]{0})? $data['pre_codigoAreaId'][$key]: NULL),
+            'reposicion'               => ($data['gasto_pre_reposicion'][$key]=='t'? 't': 'f'),
+            'tipo'                     => 'pre',
+            'id_usuario'               => $this->session->userdata('id_usuario'),
+            'id_areac'                 => (!empty($data['pre_areaId'][$key])? $data['pre_areaId'][$key]: NULL),
+            'id_rancho'                => (!empty($data['pre_ranchoId'][$key])? $data['pre_ranchoId'][$key]: NULL),
+            'id_centro_costo'          => (!empty($data['pre_centroCostoId'][$key])? $data['pre_centroCostoId'][$key]: NULL),
+            'id_activo'                => (!empty($data['pre_activoId'][$key])? $data['pre_activoId'][$key]: NULL),
+          );
+          $this->db->insert('cajachica_gastos', $gastos);
+          $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
+          $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                        array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$gasto} | Monto: {$data['gasto_pre_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
+
+      if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+        $this->enviarEmail($gastos_ids);
+        // $this->db->insert_batch('cajachica_gastos', $gastos);
+      }
+    }
+
     // Gastos x comprobar
     // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_comprobar_concepto']))
@@ -1064,8 +1211,11 @@ class caja_chica_model extends CI_Model {
           $this->db->update('cajachica_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica'], 'monto_ini' => 0],
             "id_gasto = ".$data['gasto_comprobar_id_gasto'][$key]);
         } elseif (isset($data['gasto_comprobar_id_gasto'][$key]) && floatval($data['gasto_comprobar_id_gasto'][$key]) > 0) {
+          // $infoGasto = $this->getDataGasto($data['gasto_comprobar_id_gasto'][$key]);
+
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_comprobar_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['comprobar_sucursalId'][$key])? $data['comprobar_sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['gasto_comprobar_nomenclatura'][$key],
             // 'folio'           => $data['gasto_comprobar_folio'][$key],
             'concepto'        => $gasto,
@@ -1083,6 +1233,10 @@ class caja_chica_model extends CI_Model {
             'id_activo'       => (!empty($data['comprobar_activoId'][$key])? $data['comprobar_activoId'][$key]: NULL),
           );
 
+          // if ($infoGasto->fecha == $data['fecha_caja_chica']) {
+          //   $gastos_udt['monto_ini'] = $data['gasto_comprobar_importe'][$key];
+          // }
+
           // Bitacora
           $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_comprobar_id_gasto'][$key], $gastos_udt,
                           array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
@@ -1099,6 +1253,7 @@ class caja_chica_model extends CI_Model {
           $gastos = array(
             'folio_sig'                => $data_folio->folio,
             'id_categoria'             => $data['gasto_comprobar_empresa_id'][$key],
+            'id_sucursal'              => (!empty($data['comprobar_sucursalId'][$key])? $data['comprobar_sucursalId'][$key]: NULL),
             'id_nomenclatura'          => $data['gasto_comprobar_nomenclatura'][$key],
             'folio'                    => '', //$data['gasto_folio'][$key],
             'concepto'                 => $gasto,
@@ -1167,6 +1322,7 @@ class caja_chica_model extends CI_Model {
         } elseif (isset($data['reposicionGasto_id_gasto'][$key]) && floatval($data['reposicionGasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['reposicionGasto_empresa_id'][$key],
+            'id_sucursal'     => (!empty($data['reposicionGasto_sucursalId'][$key])? $data['reposicionGasto_sucursalId'][$key]: NULL),
             'id_nomenclatura' => $data['reposicionGasto_nomenclatura'][$key],
             // 'folio'           => $data['gasto_comprobar_folio'][$key],
             'concepto'        => $gasto,
@@ -1230,6 +1386,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 4;
             } elseif ($data_traspp->tipo_caja == 'caja_fletes') {
               $tno_caja = 5;
+            } elseif ($data_traspp->tipo_caja == 'caja_plasticos') {
+              $tno_caja = 6;
             }
 
             if ($tno_caja > 0) {
@@ -1244,13 +1402,15 @@ class caja_chica_model extends CI_Model {
 
           $this->db->update('public.cajachica_traspasos', ['status' => 'f'], "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
         } elseif (isset($data['traspaso_id_traspaso'][$key]) && floatval($data['traspaso_id_traspaso'][$key]) > 0) {
-          $gastos_udt = array(
-            'concepto' => $concepto,
-            'monto'    => $data['traspaso_importe'][$key],
-            // 'tipo'     => $data['traspaso_tipo'][$key],
-          );
+          if ($concepto != '-@-') {
+            $gastos_udt = array(
+              'concepto' => $concepto,
+              'monto'    => $data['traspaso_importe'][$key],
+              // 'tipo'     => $data['traspaso_tipo'][$key],
+            );
 
-          $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+            $this->db->update('public.cajachica_traspasos', $gastos_udt, "id_traspaso = ".$data['traspaso_id_traspaso'][$key]);
+          }
         } else {
           $data_folio->folio += 1;
           $traspaso = array(
@@ -1279,6 +1439,8 @@ class caja_chica_model extends CI_Model {
               $tno_caja = 4;
             } elseif ($data['traspaso_tipo'][$key] == 'caja_fletes') {
               $tno_caja = 5;
+            } elseif ($data['traspaso_tipo'][$key] == 'caja_plasticos') {
+              $tno_caja = 6;
             }
 
             if ($tno_caja > 0) {
@@ -1360,6 +1522,71 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Efectivo Bodega
+    if (isset($data['efcbodega_nombre']))
+    {
+      // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $efcbodega_udt = $efcbodega = array();
+
+      // $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_deudores
+      //   WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+      //   ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['efcbodega_nombre'] as $key => $nombre)
+      {
+        $nombre = mb_strtoupper($nombre, 'UTF-8');
+        if (isset($data['efcbodega_del'][$key]) && $data['efcbodega_del'][$key] == 'true' &&
+          isset($data['efcbodega_id'][$key]) && floatval($data['efcbodega_id'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['efcbodega_id'][$key]);
+
+          $this->db->delete('cajachica_bodega_gdl', "id_bodega = ".$data['efcbodega_id'][$key]);
+        } elseif (isset($data['efcbodega_id'][$key]) && floatval($data['efcbodega_id'][$key]) > 0) {
+          $efcbodega_udt = array(
+            'nombre'          => $nombre,
+            'concepto'        => $data['efcbodega_concepto'][$key],
+            'monto'           => $data['efcbodega_monto'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'status'          => $data['efcbodega_recibido'][$key],
+            'fecha_recibido'  => ($data['efcbodega_recibido'][$key] == 't' && empty($data['efcbodega_fecha_recibido'][$key])? $data['fecha_caja_chica']: (empty($data['efcbodega_fecha_recibido'][$key])? NULL: $data['efcbodega_fecha_recibido'][$key])),
+          );
+
+          // // Bitacora
+          // $id_bitacora = $this->bitacora_model->_update('cajachica_bodega_gdl', $data['efcbodega_id'][$key], $efcbodega_udt,
+          //                 array(':accion'       => 'bodega_gdl', ':seccion' => 'caja chica',
+          //                       ':folio'        => '',
+          //                       // ':id_empresa'   => $datosFactura['id_empresa'],
+          //                       ':empresa'      => '', // .$this->input->post('dempresa')
+          //                       ':id'           => 'id_bodega',
+          //                       ':titulo'       => $nombresCajas[$data['fno_caja']])
+          //               );
+
+          $this->db->update('cajachica_bodega_gdl', $efcbodega_udt, "id_bodega = ".$data['efcbodega_id'][$key]);
+        } else {
+          // $data_folio->folio += 1;
+          $efcbodega = array(
+            'nombre'          => $nombre,
+            'concepto'        => $data['efcbodega_concepto'][$key],
+            'monto'           => $data['efcbodega_monto'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'status'          => $data['efcbodega_recibido'][$key],
+            'fecha_recibido'  => ($data['efcbodega_recibido'][$key] == 't' && empty($data['efcbodega_fecha_recibido'][$key])? $data['fecha_caja_chica']: (empty($data['efcbodega_fecha_recibido'][$key])? NULL: $data['efcbodega_fecha_recibido'][$key])),
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'fecha'           => $data['fecha_caja_chica'],
+          );
+          $this->db->insert('cajachica_bodega_gdl', $efcbodega);
+          $gastooidd = $this->db->insert_id('cajachica_bodega_gdl_id_bodega_seq');
+          // $gastos_ids['adds'][] = $gastooidd;
+
+          // // Bitacora
+          // $this->bitacora_model->_insert('cajachica_bodega_gdl', $gastooidd,
+          //               array(':accion'    => 'bodega_gdl', ':seccion' => 'caja chica',
+          //                     ':folio'     => "Concepto: {$nombre} | Monto: {$data['efcbodega_monto'][$key]}",
+          //                     // ':id_empresa' => $datosFactura['id_empresa'],
+          //                     ':empresa'   => ''));
+        }
+      }
+    }
+
     return true;
   }
 
@@ -1380,7 +1607,9 @@ class caja_chica_model extends CI_Model {
         FROM cajachica_deudores cd
           LEFT JOIN (
             SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
-            WHERE no_caja = {$datos['no_caja']} AND fecha <= Date(Now()) GROUP BY id_deudor
+            WHERE id_deudor = {$datos['id']} AND no_caja = {$datos['no_caja']}
+              AND fecha <= Date(Now())
+            GROUP BY id_deudor
           ) ab ON cd.id_deudor = ab.id_deudor
         WHERE cd.id_deudor = {$datos['id']} AND cd.no_caja = {$datos['no_caja']}
           AND fecha <= Date(Now())"
@@ -1489,21 +1718,21 @@ class caja_chica_model extends CI_Model {
           FROM cajachica_categorias
           WHERE status = 't' AND id_empresa IS NOT NULL
         ) cc ON cc.id_empresa = c.id_empresa
-        INNER JOIN areas a ON a.id_area = c.id_area
-        INNER JOIN (
+        LEFT JOIN areas a ON a.id_area = c.id_area
+        LEFT JOIN (
           SELECT cc.id_centro_costo, cc.nombre, ccc.id_compra, ccc.num
           FROM otros.centro_costo cc
             INNER JOIN compras_centro_costo ccc ON cc.id_centro_costo = ccc.id_centro_costo
           ORDER BY cc.id_centro_costo ASC
         ) ccc ON ccc.id_compra = c.id_compra
-        INNER JOIN (
+        LEFT JOIN (
           SELECT r.id_rancho, r.nombre, cr.id_compra, cr.num
           FROM otros.ranchos r
             INNER JOIN compras_rancho cr ON r.id_rancho = cr.id_rancho
           ORDER BY r.id_rancho ASC
         ) ra ON ra.id_compra = c.id_compra
         LEFT JOIN productos ac ON ac.id_producto = c.id_activo
-      WHERE c.isgasto = 't' {$sql} AND c.status = 'p' AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
+      WHERE c.status = 'p' {$sql} AND EXTRACT(YEAR FROM Age(Now(), c.fecha)) = 0
       GROUP BY c.id_compra, p.id_proveedor, cc.abreviatura, cc.id_categoria, a.id_area, ac.id_producto
       ORDER BY (c.fecha, c.serie, c.folio) DESC"
     );
@@ -1636,64 +1865,69 @@ class caja_chica_model extends CI_Model {
     return true;
   }
 
+  public function ajaxCambiarPreGastos($data)
+  {
+    $anio = date('Y');
+
+    $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = '{$data['tipo_gasto']}'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+    $data_folio->folio += 1;
+
+    $this->db->update('cajachica_gastos', array('tipo' => $data['tipo_gasto'], 'folio' => $data_folio->folio, 'fecha' => $data['fecha_caja']), array('id_gasto' => $data['id_gasto']));
+
+    return true;
+  }
+
   public function ajaxRegGastosComprobar($data)
   {
+    if (empty($data['remisiones']) && empty($data['gastos'])) {
+      return ['result' => false];
+    }
+
     $anio = date('Y');
     $data_gasto = $this->db->query("SELECT * FROM cajachica_gastos WHERE id_gasto = {$data['id_gasto']}")->row();
 
-    // $data_folio->folio += 1;
+    $diferencia_comp_gasto = 0;
     $datos_gasto_com = [
       // 'folio_sig' => $data_folio->folio,
       // 'fecha'  => $data['fecha_caja'],
       // 'tipo'  => 'g',
       'monto' => $data_gasto->monto - $data['importe'],
       'status' => 'f',
-      'concepto' => "GASTO COMPROBADO ({$data['importe']})"
+      'concepto' => "{$data_gasto->monto} (COMPROBADO {$data['importe']})"
     ];
     if ($data['importe'] >= $data['importe_old'] || $data['saldarMont'] == 'true') {
       $datos_gasto_com['fecha_cancelado'] = $data['fecha_caja'];
+
+      // Obtenemos la diferencia para la caja 2 de tryana
+      $diferencia_comp_gasto = $data['fecha_caja'] == $data_gasto->fecha? -1*$data['importe']: ($data['importe_old'] - $data['importe']);
+      $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
+      $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
+      $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
+    } elseif($data['fecha_caja'] == $data_gasto->fecha) {
+      // Obtenemos la diferencia para la caja 2 de tryana
+      $diferencia_comp_gasto = -1*$data['importe'];
+      $num_gastoss = isset($data['remisiones'])? count($data['remisiones']): 0;
+      $num_gastoss += isset($data['gastos'])? count($data['gastos']): 0;
+      $diferencia_comp_gasto = round($diferencia_comp_gasto / ($num_gastoss > 0? $num_gastoss: 1), 5);
     }
     $this->db->update('cajachica_gastos', $datos_gasto_com, "id_gasto = ".$data['id_gasto']);
 
-    // cuando es diferente fecha regresa el dinero para registrar los gastos en el dia
-    // if ($data['fecha_caja'] != $data_gasto->fecha) {
-    //   $anio = date('Y');
-    //   $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_ingresos
-    //     WHERE folio IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-    //     ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
-
-    //   $data_folio->folio += 1;
-    //   $ingresos = array(
-    //     'folio'           => $data_folio->folio,
-    //     'concepto'        => "DEVOLUCION DE GASTO POR COMPROBAR ({$data_gasto->folio_sig})",
-    //     'monto'           => $data['importe_old'],
-    //     'fecha'           => $data['fecha_caja'],
-    //     'otro'            => 'f',
-    //     'id_categoria'    => $data_gasto->id_categoria,
-    //     'id_nomenclatura' => 10, // ingresos x gastos
-    //     'poliza'          => null,
-    //     'id_movimiento'   => null,
-    //     'no_caja'         => $data['fno_caja'],
-    //     'banco'           => 'EFECTIVO',
-    //     'nombre'          => $data_gasto->nombre,
-    //     'id_usuario'      => $this->session->userdata('id_usuario'),
-    //   );
-
-    //   $this->db->insert('cajachica_ingresos', $ingresos);
-    // }
-
     // Agrega las remisiones (gastos del dia)
+    $data_folio_rem = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+          AND tipo = 'g'
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
     if (isset($data['remisiones']) && count($data['remisiones']) > 0) {
-      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM cajachica_gastos
-          WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
-            AND tipo = 'g'
-          ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
 
       foreach ($data['remisiones'] as $key => $remm) {
-        $data_folio->folio += 1;
+        $data_folio_rem->folio += 1;
         $gastos = array(
-          'folio_sig'       => $data_folio->folio,
+          'folio_sig'       => $data_folio_rem->folio,
           'id_categoria'    => $data['id_empresa'],
+          'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
           'id_nomenclatura' => $data_gasto->id_nomenclatura,
           'folio'           => $remm['folio'],
           'concepto'        => $remm['proveedor'],
@@ -1709,6 +1943,8 @@ class caja_chica_model extends CI_Model {
           'id_rancho'       => $data_gasto->id_rancho,
           'id_centro_costo' => $data_gasto->id_centro_costo,
           'id_activo'       => $data_gasto->id_activo,
+          'folio_ant'       => $data_gasto->folio_sig,
+          'diferencia_comp_gasto' => $diferencia_comp_gasto,
         );
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
@@ -1742,27 +1978,57 @@ class caja_chica_model extends CI_Model {
         $centros_costos = (!empty($gastoo['centros_costos_id'])? explode('|', $gastoo['centros_costos_id']): [NULL]);
         $ranchos = (!empty($gastoo['ranchos_id'])? explode('|', $gastoo['ranchos_id']): [NULL]);
 
-        $data_folio->folio += 1;
-        $gastos = array(
-          'folio_sig'       => $data_folio->folio,
-          'id_categoria'    => $gastoo['idempresa'],
-          'id_nomenclatura' => $data_gasto->id_nomenclatura,
-          'folio'           => $gastoo['folio'],
-          'concepto'        => $gastoo['proveedor'],
-          'nombre'          => $data_gasto->nombre,
-          'monto'           => $gastoo['total'],
-          'fecha'           => $data['fecha_caja'],
-          'no_caja'         => $data['fno_caja'],
-          'id_cat_codigos'  => $data_gasto->id_cat_codigos,
-          'reposicion'      => $data_gasto->reposicion,
-          'id_usuario'      => $this->session->userdata('id_usuario'),
-          'id_compra'       => $gastoo['id'],
-          'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: NULL),
-          'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: NULL),
-          'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: NULL),
-          'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: NULL),
-          'tipo'            => 'rg',
-        );
+        if ($gastoo['sin_factura'] == 'true') {
+          $data_folio_rem->folio += 1;
+          $gastos = array(
+            'folio_sig'       => $data_folio_rem->folio,
+            'id_categoria'    => $gastoo['idempresa'],
+            'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
+            'id_nomenclatura' => $data_gasto->id_nomenclatura,
+            'folio'           => $gastoo['folio'],
+            'concepto'        => $gastoo['proveedor'],
+            'nombre'          => $data_gasto->nombre,
+            'monto'           => $gastoo['total'],
+            'fecha'           => $data['fecha_caja'],
+            'no_caja'         => $data['fno_caja'],
+            'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+            'reposicion'      => $data_gasto->reposicion,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_compra'       => $gastoo['id'],
+            'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: $data_gasto->id_areac),
+            'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: $data_gasto->id_rancho),
+            'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: $data_gasto->id_centro_costo),
+            'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: $data_gasto->id_activo),
+            'folio_ant'       => $data_gasto->folio_sig,
+            'diferencia_comp_gasto' => $diferencia_comp_gasto,
+          );
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'       => $data_folio->folio,
+            'id_categoria'    => $gastoo['idempresa'],
+            'id_sucursal'     => (!empty($data_gasto->id_sucursal)? $data_gasto->id_sucursal: NULL),
+            'id_nomenclatura' => $data_gasto->id_nomenclatura,
+            'folio'           => $gastoo['folio'],
+            'concepto'        => $gastoo['proveedor'],
+            'nombre'          => $data_gasto->nombre,
+            'monto'           => $gastoo['total'],
+            'fecha'           => $data['fecha_caja'],
+            'no_caja'         => $data['fno_caja'],
+            'id_cat_codigos'  => $data_gasto->id_cat_codigos,
+            'reposicion'      => $data_gasto->reposicion,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_compra'       => $gastoo['id'],
+            'id_areac'        => ($gastoo['id_area']>0? $gastoo['id_area']: $data_gasto->id_areac),
+            'id_rancho'       => ($ranchos[0]>0? $ranchos[0]: $data_gasto->id_rancho),
+            'id_centro_costo' => ($centros_costos[0]>0? $centros_costos[0]: $data_gasto->id_centro_costo),
+            'id_activo'       => ($gastoo['id_activo']>0? $gastoo['id_activo']: $data_gasto->id_activo),
+            'tipo'            => 'rg',
+            'folio_ant'       => $data_gasto->folio_sig,
+            'diferencia_comp_gasto' => $diferencia_comp_gasto,
+          );
+        }
+
         $this->db->insert('cajachica_gastos', $gastos);
         $gastooidd = $this->db->insert_id('cajachica_gastos_id_gasto_seq');
 
@@ -1809,6 +2075,26 @@ class caja_chica_model extends CI_Model {
         ORDER BY bc.id_cuenta ASC
         LIMIT 1")->row();
     return (isset($cuenta->id_cuenta)? $cuenta->id_cuenta: 16);
+  }
+
+  public function getGastosAjax($datos)
+  {
+    $filtro = isset($datos['filtro']{0})? " AND cg.folio_sig = {$datos['filtro']}": '';
+    $filtro .= isset($datos['caja']{0})? " AND cg.no_caja = {$datos['caja']} ": '';
+
+    $query = $this->db->query("SELECT cg.id_gasto, Date(cg.fecha) AS fecha, cg.folio, e.nombre_fiscal AS empresa,
+        cg.concepto, cg.monto, cg.no_caja, cg.folio_sig
+     FROM cajachica_gastos AS cg
+        INNER JOIN cajachica_categorias AS cc ON cc.id_categoria = cg.id_categoria
+        INNER JOIN empresas AS e ON e.id_empresa = cc.id_empresa
+     WHERE cg.tipo in('g', 'rg') AND cc.status = 't' AND e.id_empresa = {$datos['empresaId']} AND cg.status = 't'
+      {$filtro} AND Date(cg.fecha) >= (now() - interval '8 months')
+     ORDER BY cg.fecha DESC, cg.folio_sig DESC");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
   }
 
   public function ajaxCategorias()
@@ -2153,6 +2439,9 @@ class caja_chica_model extends CI_Model {
     elseif ($noCajas == 5){
       $subtitulo = ' FLETES';
       $logo = '/images/transporte.png';
+    } elseif ($noCajas == 6){
+      $subtitulo = ' '; // PLASTICOS GDL
+      $logo = '/images/plasticos.png';
     }
 
     // echo "<pre>";
@@ -2264,12 +2553,21 @@ class caja_chica_model extends CI_Model {
       }
       $ttotalIngresos += $totalIngresos;
     }
+    if ($totalIngresos > 0) {
+      $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array('TOTAL: ', MyString::formatoNumero($totalIngresos, 2, '$', false)), false, true);
+    }
 
 
     // ingresos Remisiones
     $pdf->SetTextColor(0, 0, 0);
     $totalRemisiones = 0;
-    if ($noCajas == 4 && count($caja['remisiones']) > 0) {
+    if (($noCajas == 4 || $noCajas == 2) && count($caja['remisiones']) > 0) {
       $pdf->SetFont('Arial','B', 7);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetFillColor(230, 230, 230);
@@ -2314,15 +2612,24 @@ class caja_chica_model extends CI_Model {
       $pdf->SetTextColor(0, 0, 0);
       $ttotalIngresos += $totalRemisiones;
     }
+    if ($totalRemisiones > 0) {
+      $pdf->SetTextColor(0, 0, 0);
 
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array('TOTAL: ', MyString::formatoNumero($totalRemisiones, 2, '$', false)), false, true);
+    }
     if (($totalRemisiones + $totalIngresos) > 0) {
       $pdf->SetTextColor(0, 0, 0);
 
       $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
-      $pdf->SetWidths(array(105, 50, 50));
+      $pdf->SetWidths(array(180, 25));
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(6);
-      $pdf->Row(array('', 'ACUMULADO: '.MyString::formatoNumero($ttotalIngresos, 2, '$', false), 'TOTAL: '.MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, true);
+      $pdf->Row(array('ACUMULADO: ', MyString::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
+      // $pdf->Row(array('', 'ACUMULADO: '.MyString::formatoNumero($ttotalIngresos, 2, '$', false), 'TOTAL: '.MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, true);
     }
 
 
@@ -2357,9 +2664,9 @@ class caja_chica_model extends CI_Model {
           ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
           ($traspaso->afectar_fondo=='t'? 'Si': 'No'),
           ($traspaso->status == 't'? $traspaso->concepto: 0),
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($traspaso->status == 't'? $traspaso->monto: 0),
-            2, '', false))), false, true, $colortxt);
+            2, '', false)), false, true, $colortxt);
       }
 
       $pdf->SetTextColor(0, 0, 0);
@@ -2374,7 +2681,7 @@ class caja_chica_model extends CI_Model {
 
     // Acreedores
     $totalAcreedores = $totalAcreedoresHoy = 0;
-    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5) && count($caja['acreedores']) > 0) {
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
@@ -2512,25 +2819,25 @@ class caja_chica_model extends CI_Model {
 
     // Gastos x comprobar
     $totalGastosComprobarTot = $totalGastosComprobar = 0;
-    if ($noCajas == 2 || $noCajas == 5) {
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(183, 22));
+      $pdf->SetWidths(array(185, 20));
       $pdf->Row(array('GASTOS POR COMPROBAR', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
+      $pdf->SetWidths(array(16, 13, 22, 23, 23, 9, 20, 33, 26, 20));
       $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
+      $pdf->SetWidths(array(16, 13, 22, 23, 23, 9, 20, 33, 26, 20));
 
       $codigoAreas = array();
       foreach ($caja['gastos_comprobar'] as $key => $gasto)
@@ -2548,7 +2855,7 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
@@ -2561,6 +2868,7 @@ class caja_chica_model extends CI_Model {
           $colortxt = [[0, 0, 0]];
         }
 
+        $pdf->SetFont('Helvetica','', 6);
         $pdf->SetAligns(array('C', 'C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
@@ -2570,14 +2878,14 @@ class caja_chica_model extends CI_Model {
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, // $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2589,14 +2897,14 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '',
+      $pdf->Row(array('', '', '', '', 'CANCELADOS DIA', MyString::formatoNumero($caja['gastos_comprobar_cancel'], 2, '$', false),
         'TOTAL DIA', MyString::formatoNumero($totalGastosComprobar, 2, '$', false),
         'TOTAL', MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false)), true, true);
     }
 
 
     // Gastos del Dia
-    $totalGastos = 0;
+    $totalGastos = $totalGastosCaja2 = 0;
     if (count($caja['gastos']) > 0) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
@@ -2604,18 +2912,18 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFillColor(230, 230, 230);
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->SetAligns(array('L', 'C'));
-      $pdf->SetWidths(array(183, 22));
+      $pdf->SetWidths(array(185, 20));
       $pdf->Row(array('GASTOS GENERALES', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
+      $pdf->SetWidths(array(16, 22, 24, 24, 11, 20, 35, 33, 20));
       $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
+      $pdf->SetWidths(array(16, 22, 24, 24, 11, 20, 35, 33, 20));
 
       $codigoAreas = array();
       foreach ($caja['gastos'] as $key => $gasto)
@@ -2633,12 +2941,19 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 22, 24, 24, 11, 20, 37, 33, 22));
-          $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'NOMBRE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
         if ($gasto->status2 == 't') {
           $totalGastos += floatval($gasto->monto);
+
+          if ($noCajas == 2) {
+            // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+            $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+            // $totalGastosCaja2 += $gasto->folio_ant > 0? abs(floatval($gasto->diferencia_comp_gasto)): floatval($gasto->monto);
+          }
+
           $colortxt = [[0, 0, 0]];
         }
 
@@ -2646,19 +2961,19 @@ class caja_chica_model extends CI_Model {
         $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
-          $gasto->folio_sig,
+          (!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig,
           $gasto->empresa,
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, // $gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
           ($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
+          MyString::formatoNumero(
             ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2670,13 +2985,18 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
-      $pdf->Row(array('', '', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
+      $arraytotales = array('', '', '', '', '', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false));
+      if ($noCajas == 2) {
+        $arraytotales[5] = 'TOTAL CON DIFERENCIA';
+        $arraytotales[6] = MyString::formatoNumero($totalGastosCaja2, 2, '$', false);
+      }
+      $pdf->Row($arraytotales, true, true);
     }
 
 
     // Reposición de gastos
-    $totalReposicionGastosAnt = $totalReposicionGastos = 0;
-    if ($noCajas == 2) {
+    $totalReposicionGastosAnt = $totalReposicionGastosCaja2 = $totalReposicionGastos = 0;
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2690,7 +3010,7 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
       $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-      $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+      $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
 
       $pdf->SetFont('Arial','', 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
@@ -2712,13 +3032,19 @@ class caja_chica_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
           $pdf->SetWidths(array(12, 13, 22, 23, 23, 9, 20, 35, 26, 22));
-          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'ACTIVO', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
+          $pdf->Row(array('FOLIO', 'FECHA', 'EMPRESA', 'CULTIVO/ACTIV/PROD', 'INMUEBLE/AREA/LINEA', 'NOM', 'COD AREA', 'CONCEPTO', 'RECIBE', 'IMPORTE'), true, true);
         }
 
         $colortxt = [[100, 100, 100]];
-        if ($gasto->status2 == 't') {
+        if (!isset($gasto->status2) || $gasto->status2 == 't') {
           if ($gasto->fecha == $fecha) {
             $totalReposicionGastos += floatval($gasto->monto);
+
+            if ($noCajas == 2) {
+              // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+              // $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              $totalReposicionGastosCaja2 += abs(floatval($gasto->diferencia_comp_gasto));
+            }
           }
 
           $totalReposicionGastosAnt += floatval($gasto->monto);
@@ -2728,20 +3054,20 @@ class caja_chica_model extends CI_Model {
         $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'R'));
         $pdf->SetX(6);
         $pdf->Row(array(
-          $gasto->folio_sig,
+          (!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig,
           $gasto->fecha,
           $gasto->empresa,
           $gasto->area,
           $gasto->rancho,
           $gasto->nomenclatura,
-          $gasto->activo,
+          $gasto->codigo_fin, //$gasto->activo,
           // $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
           // $gasto->centro_costo,
-          ($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
+          (!isset($gasto->status2) || $gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO'),
           $gasto->nombre,
-          MyString::float(MyString::formatoNumero(
-            ($gasto->status2 == 't'? $gasto->monto: 0),
-            2, '', false))
+          MyString::formatoNumero(
+            (!isset($gasto->status2) || $gasto->status2 == 't'? $gasto->monto: 0),
+            2, '', false)
         ), false, true, $colortxt);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -2753,9 +3079,14 @@ class caja_chica_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetAligns(array('C', 'L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R'));
-      $pdf->Row(array('', '', '', '', '', '',
+      $arraytotales = array('', '', '', '', '', '',
         'TOTAL DIA', MyString::formatoNumero($totalReposicionGastos, 2, '$', false),
-        'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false)), true, true);
+        'TOTAL', MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false));
+      if ($noCajas == 2) {
+        $arraytotales[3] = 'TOTAL DIA DIFERENCIA';
+        $arraytotales[4] = MyString::formatoNumero($totalReposicionGastosCaja2, 2, '$', false);
+      }
+      $pdf->Row($arraytotales, true, true);
     } else if ($noCajas == 5) { // caja de fletes
       $codigoAreas = array();
       $aux_emp = 0;
@@ -2827,7 +3158,7 @@ class caja_chica_model extends CI_Model {
         $pdf->Row(array(
           $gasto->proveedor,
           $gasto->centro_costo,
-          MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))
+          MyString::formatoNumero($gasto->monto, 2, '', false)
         ), false, true);
       }
 
@@ -2844,7 +3175,7 @@ class caja_chica_model extends CI_Model {
 
     // Deudores
     $totalDeudores = 0;
-    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5) && count($caja['deudores']) > 0) {
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['deudores']) > 0) {
       // $pag_aux2 = $pdf->page;
       // $pdf->page = $pag_aux;
       // $pdf->SetY($pag_yaux);
@@ -2910,6 +3241,75 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
         'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
         'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
+    }
+
+
+    // Efectivo Bodega Gdl
+    $totalEfcbodega = 0;
+    if (($noCajas == 4) && count($caja['efcbodega']) > 0) {
+      // $pag_aux2 = $pdf->page;
+      // $pdf->page = $pag_aux;
+      // $pdf->SetY($pag_yaux);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(185, 20));
+      $pdf->Row(array('EFECTIVO BODEGA GDL', ''), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(18, 57, 80, 30, 20));
+      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'MONTO', 'RECIBIDO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'C'));
+      $pdf->SetWidths(array(18, 57, 80, 30, 20));
+
+      $codigoAreas = array();
+      foreach ($caja['efcbodega'] as $key => $deudor)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(18, 57, 80, 30, 20));
+          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'MONTO', 'RECIBIDO'), true, true);
+        }
+
+        $totalEfcbodega += floatval($deudor->monto);
+
+        $pdf->SetAligns(array('C', 'C', 'C', 'R', 'C'));
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $deudor->fecha,
+          $deudor->nombre,
+          $deudor->concepto,
+          MyString::formatoNumero($deudor->monto, 2, '$', false),
+          ($deudor->status == 't'? 'Si': 'No'),
+        ), false, true);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetFont('Arial', 'B', 6.4);
+      $pdf->SetX(6);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetWidths(array(155, 30, 20));
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->Row(array('',
+        'TOTAL: '.MyString::formatoNumero($totalEfcbodega, 2, '$', false),
+        ''
+      ), true, true);
     }
 
     // Boletas pendientes x recuperar
@@ -3165,15 +3565,21 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 1) {
       $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
       $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
-      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
       $pdf->SetX(98);
-      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivoCorte , 2, '$', false)), false, false);
+      $pdf->Row(array('DIFERENCIA', MyString::formatoNumero(-1*$totalEfectivoCorte , 2, '$', false)), false, false);
     } else {
       if ($noCajas == 4) {
         $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
           $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
           $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+
+        $totalFondoCaja = false;
+      } elseif ($noCajas == 2) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+          $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
 
         $totalFondoCaja = false;
       } else {
@@ -3215,7 +3621,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetX(153);
         $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
       }
-      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $pdf->SetX(153);
       $pdf->Row(array('SALDO EFECTIVO', MyString::formatoNumero($saldoEfectivo, 2, '$', false)), false, false);
 
@@ -3308,6 +3714,943 @@ class caja_chica_model extends CI_Model {
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }
 
+  public function xlsCaja($fecha, $noCajas){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=caja_chica.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/'.($noCajas==1? '': "caja{$noCajas}/"), true);
+
+    $caja = $this->get($fecha, $noCajas, true);
+    $nomenclaturas = $this->nomenclaturas($noCajas);
+
+    $subtitulo = '';
+    $logo = '/images/logo.png';
+    if ($noCajas == 1)
+      $subtitulo = ' LIMON';
+    elseif ($noCajas == 2)
+      $subtitulo = ' GASTOS';
+    elseif ($noCajas == 4)
+      $subtitulo = ' GENERAL';
+    elseif ($noCajas == 5){
+      $subtitulo = ' FLETES';
+      $logo = '/images/transporte.png';
+    } elseif ($noCajas == 6){
+      $subtitulo = ' '; //PLASTICOS GDL
+      $logo = '/images/plasticos.png';
+    }
+
+
+    $titulo1 = mb_strtoupper($privilegio->nombre.$subtitulo, 'UTF-8');
+    $titulo2 = 'FECHA ' . MyString::fechaAT($fecha);
+    $titulo3 = 'SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $ttotalGastos = 0;
+    foreach ($caja['gastos'] as $gasto)
+    {
+      if ($gasto->status == 't') {
+        $ttotalGastos += floatval($gasto->monto);
+      }
+    }
+
+    // Ingresos por reposicion
+    $ttotalIngresos = $caja['saldo_inicial'];
+    $totalIngresos = 0;
+
+    if (count($caja['ingresos']) > 0) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="7" style="border:1px solid #000;background-color: #cccccc;">INGRESOS '.($noCajas == 4? 'DE CAJA': 'POR REPOSICION').'</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">BANCO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONO</td>
+        </tr>';
+
+      foreach ($caja['ingresos'] as $key => $ingreso)
+      {
+        $colortxt = '#000000';
+        if ($ingreso->status == 'f') {
+          $colortxt = '#666666';
+        }
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$ingreso->folio.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->categoria.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->banco.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->poliza.'</td>
+          <td style="border:1px solid #000;">'.$ingreso->nombre.'</td>
+          <td style="border:1px solid #000;">'.($ingreso->status == 't'? $ingreso->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;color:'.$colortxt.';">'.MyString::formatoNumero(($ingreso->status == 't'? $ingreso->monto: 0), 2, '', false).'</td>
+        </tr>';
+
+        if ($ingreso->status == 't') {
+          $totalIngresos += floatval($ingreso->monto);
+        }
+      }
+      $ttotalIngresos += $totalIngresos;
+    }
+    if ($totalIngresos > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">TOTAL: </td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // ingresos Remisiones
+    $totalRemisiones = 0;
+    if (($noCajas == 2 || $noCajas == 4) && count($caja['remisiones']) > 0) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">INGRESOS CLIENTES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REM FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONO</td>
+        </tr>';
+
+      foreach ($caja['remisiones'] as $key => $remision)
+      {
+        $colortxt = '#000000';
+        if ($remision->status == 'f') {
+          $colortxt = '#666666';
+        }
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$remision->cfolio.'</td>
+          <td style="border:1px solid #000;">'.$remision->empresa.'</td>
+          <td style="border:1px solid #000;">'.$remision->folio.'</td>
+          <td style="border:1px solid #000;">'.MyString::fechaAT($remision->fecha_rem).'</td>
+          <td style="border:1px solid #000;">'.($remision->status == 't'? $remision->observacion: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($remision->status == 't'? $remision->monto: 0), 2, '', false).'</td>
+        </tr>';
+
+        if ($remision->status == 't') {
+          $totalRemisiones += floatval($remision->monto);
+        }
+      }
+      $ttotalIngresos += $totalRemisiones;
+    }
+    if ($totalRemisiones > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TOTAL: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalRemisiones, 2, '$', false).'</td>
+        </tr>';
+    }
+    if (($totalRemisiones + $totalIngresos) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">ACUMULADO: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotalIngresos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">TRASPASOS</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TIPO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">AF. FONDO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = '#666666';
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = '#000000';
+        }
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.$traspaso->folio.'</td>
+          <td style="border:1px solid #000;">'.($traspaso->tipo=='t'? 'Ingreso': 'Egreso').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->afectar_fondo=='t'? 'Si': 'No').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->status == 't'? $traspaso->concepto: 0).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($traspaso->status == 't'? $traspaso->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">SUMA: </td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Acreedores
+    $totalAcreedores = $totalAcreedoresHoy = 0;
+    if (($noCajas == 1 || $noCajas == 2 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['acreedores']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">ACREEDOR CAJA '.($noCajas == 1? 'GASTOS': ($noCajas == 4? 'GENERAL': 'LIMON')).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;"></td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['acreedores'] as $key => $acreedor)
+      {
+        $totalAcreedores += floatval($acreedor->saldo);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$acreedor->folio.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->fecha.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->nombre.'</td>
+          <td style="border:1px solid #000;">'.$acreedor->concepto.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->monto, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->abonos, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($acreedor->saldo, 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PRESTADO: '.MyString::formatoNumero($caja['acreedor_prest_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">ABONADO: '.MyString::formatoNumero($caja['acreedor_abonos_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL: '.MyString::formatoNumero($totalAcreedores, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Boletas
+    $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
+    if ($noCajas == 1) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">COMPRA MATERIA PRIMA: LIMON</td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">BASCULA</td>
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">IMPORTES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FACTURADOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SUPERVISOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PENDIENTE</td>
+        </tr>';
+
+      foreach ($caja['boletas'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$boleta->boleta.'</td>
+          <td style="border:1px solid #000;">'.$boleta->fecha.'</td>
+          <td style="border:1px solid #000;">'.$boleta->proveedor.'</td>
+          <td style="border:1px solid #000;">'.$boleta->productor.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe_pagada, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe_pendiente, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletas           += floatval($boleta->importe);
+        $totalBoletasPagadas    += floatval($boleta->importe_pagada);
+        $totalBoletasPendientes += floatval($boleta->importe_pendiente);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPendientes, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Gastos x comprobar
+    $totalGastosComprobarTot = $totalGastosComprobar = 0;
+    if ($noCajas == 2 || $noCajas == 5 || $noCajas == 6) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS POR COMPROBAR</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">RECIBE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['gastos_comprobar'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalGastosComprobar += floatval($gasto->monto);
+          }
+
+          $totalGastosComprobarTot += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">CANCELADOS DIA</td>
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['gastos_comprobar_cancel'], 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobar, 2, '$', false).'</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Gastos del Dia
+    $totalGastosCaja2 = $totalGastos = 0;
+    if (count($caja['gastos']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">GASTOS GENERALES</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['gastos'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          $totalGastos += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        if ($noCajas == 2) {
+          // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+          $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+          // $totalGastosCaja2 += $gasto->folio_ant > 0? abs(floatval($gasto->diferencia_comp_gasto)): floatval($gasto->monto);
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.(!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? $gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      if ($noCajas == 2) {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL CON DIFERENCIA</td>
+            <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosCaja2, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      } else {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="4" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastos, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      }
+    }
+
+
+    // Reposición de gastos
+    $totalReposicionGastosCaja2 = $totalReposicionGastosAnt = $totalReposicionGastos = 0;
+    if ($noCajas == 2 || $noCajas == 6) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">REPOSICION DE GASTOS</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EMPRESA/ACTIV/PROD</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CULTIVO/ACTIV/PROD/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">INMUEBLE/AREA/LINEA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ACTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">RECIBE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['reposicion_gastos'] as $key => $gasto)
+      {
+        $colortxt = '#999999';
+        if ($gasto->status2 == 't') {
+          if ($gasto->fecha == $fecha) {
+            $totalReposicionGastos += floatval($gasto->monto);
+
+            if ($noCajas == 2) {
+              // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+              // $totalReposicionGastosCaja2 += -1*floatval($gasto->diferencia_comp_gasto);
+              $totalReposicionGastosCaja2 += abs(floatval($gasto->diferencia_comp_gasto));
+            }
+          }
+
+          $totalReposicionGastosAnt += floatval($gasto->monto);
+          $colortxt = '#000000';
+        }
+
+        $html .= '<tr style="color: '.$colortxt.';">
+          <td style="border:1px solid #000;">'.(!empty($gasto->folio_ant)? "{$gasto->folio_ant}/": '').$gasto->folio_sig.'</td>
+          <td style="border:1px solid #000;">'.$gasto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$gasto->empresa.'</td>
+          <td style="border:1px solid #000;">'.$gasto->area.'</td>
+          <td style="border:1px solid #000;">'.$gasto->rancho.'</td>
+          <td style="border:1px solid #000;">'.$gasto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$gasto->activo.'</td>
+          <td style="border:1px solid #000;">'.($gasto->status2 == 't'? "(FOLIO COMPRA: {$gasto->folio}) ".$gasto->concepto: 'CANCELADO').'</td>
+          <td style="border:1px solid #000;">'.$gasto->nombre.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero( ($gasto->status2 == 't'? $gasto->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      if ($noCajas == 2) {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA DIFERENCIA</td>
+            <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosCaja2, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      } else {
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="6" style="border:1px solid #000;background-color: #cccccc;"></td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL DIA</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastos, 2, '$', false).'</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+            <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+          </tr>
+          <tr><td> </td></tr>';
+      }
+
+    } else if ($noCajas == 5) { // caja de fletes
+      $codigoAreas = array();
+      $aux_emp = 0;
+      $totalReposicionGastosEmp = 0;
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">GASTOS FACTURADOS</td>
+        </tr>';
+
+      foreach ($caja['reposicion_gastos'] as $key => $gasto)
+      {
+        if ($aux_emp !== $gasto->id_categoria) {
+          if ($aux_emp > 0) {
+            $html .= '<tr style="font-weight:bold">
+              <td style="border:1px solid #000;background-color: #cccccc;"></td>
+              <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+              <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosEmp, 2, '$', false).'</td>
+            </tr>';
+          }
+
+          $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$gasto->empresa.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          </tr>';
+
+          $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">CENTRO COSTO</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          </tr>';
+
+          $aux_emp = $gasto->id_categoria;
+          $totalReposicionGastosEmp = 0;
+        }
+
+        // $totalReposicionGastos += floatval($gasto->monto);
+        $totalReposicionGastosAnt += floatval($gasto->monto);
+        $totalReposicionGastosEmp += floatval($gasto->monto);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$gasto->proveedor.'</td>
+          <td style="border:1px solid #000;">'.$gasto->centro_costo.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($gasto->monto, 2, '', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosEmp, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Deudores
+    $totalDeudores = 0;
+    if (($noCajas == 2 || $noCajas == 1 || $noCajas == 4 || $noCajas == 5 || $noCajas == 6) && count($caja['deudores']) > 0) {
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="8" style="border:1px solid #000;background-color: #cccccc;">DEUDORES</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">ABONOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['deudores'] as $key => $deudor)
+      {
+        $totalDeudores += floatval($deudor->saldo);
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$deudor->folio.'</td>
+          <td style="border:1px solid #000;">'.$deudor->fecha.'</td>
+          <td style="border:1px solid #000;">'.$deudor->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$deudor->nombre.'</td>
+          <td style="border:1px solid #000;">'.$deudor->concepto.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->monto, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->abonos, 2, '$', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($deudor->saldo, 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false).'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Boletas pendientes x recuperar
+    $totalBoletas2 = 0;
+    $page_aux = null;
+    $y_aux = null;
+    if ($noCajas == 1 || $noCajas == 3) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">PENDIENTES DE RECUPERAR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FACTURADOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      foreach ($caja['boletas_arecuperar'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$boleta->proveedor.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->importe, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletas2 += floatval($boleta->importe);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletas2, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // cheques de boletas en transito
+    $totalBoletasTransito = 0;
+    if ($noCajas == 1 || $noCajas == 3) {
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">FECHA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">REF</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PRODUTOR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      foreach ($caja['boletas_ch_entransito'] as $key => $boleta)
+      {
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.MyString::fechaAT($boleta->fecha).'</td>
+          <td style="border:1px solid #000;">'.$boleta->numero_ref.'</td>
+          <td style="border:1px solid #000;">'.$boleta->nombre_fiscal.'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($boleta->monto, 2, '', false).'</td>
+        </tr>';
+
+        $totalBoletasTransito += floatval($boleta->monto);
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasTransito, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+    // Saldo de clientes remisiones
+    $totalSaldoClientes = 0;
+    if ($noCajas == 4) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO DE CLIENTES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">CLIENTE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO</td>
+        </tr>';
+
+      foreach ($caja['saldo_clientes'] as $key => $empresa)
+      {
+        if (count($empresa->clientes) > 0) {
+          $html .= '<tr style="font-weight:bold">
+            <td colspan="2" style="border:1px solid #000;">'.$empresa->nombre_fiscal.'</td>
+          </tr>';
+
+          foreach ($empresa->clientes as $key => $cliente)
+          {
+            $html .= '<tr style="">
+              <td style="border:1px solid #000;">'.$cliente->nombre.'</td>
+              <td style="border:1px solid #000;">'.MyString::formatoNumero($cliente->saldo, 2, '', false).'</td>
+            </tr>';
+
+            $totalSaldoClientes += floatval($cliente->saldo);
+          }
+        }
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalSaldoClientes, 2, '$', false).'</td>
+        </tr>
+        <tr><td> </td></tr>';
+    }
+
+
+    // Tabulaciones
+    $html .= '<tr style="font-weight:bold">
+          <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">TABULACION DE EFECTIVO</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">NUMERO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DENOMIN</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+        </tr>';
+
+    $totalEfectivo = 0;
+    foreach ($caja['denominaciones'] as $key => $denominacion)
+    {
+      $html .= '<tr style="">
+              <td style="border:1px solid #000;">'.$denominacion['cantidad'].'</td>
+              <td style="border:1px solid #000;">'.$denominacion['denominacion'].'</td>
+              <td style="border:1px solid #000;">'.MyString::formatoNumero($denominacion['total'], 2, '', false).'</td>
+            </tr>';
+
+      $totalEfectivo += floatval($denominacion['total']);
+    }
+    $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL EFECTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo, 2, '$', false).'</td>
+        </tr>';
+
+
+    if ($noCajas == 1) {
+      $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
+      $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalFondoCaja = false;
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DIFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivoCorte , 2, '$', false).'</td>
+        </tr>
+        <tr><td></td></tr>';
+    } else {
+      if ($noCajas == 4) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $ttotalGastos - $totalReposicionGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) -
+          $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] + $totalTraspasos;
+
+        $totalFondoCaja = false;
+      } elseif ($noCajas == 2) {
+        $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+          $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+          $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
+
+        $totalFondoCaja = false;
+      } else {
+        $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $ttotalGastos - $totalReposicionGastosAnt -
+          $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'];
+
+        $totalFondoCaja = $totalEfectivoCorte + $totalGastosComprobarTot + $ttotalGastos + $totalReposicionGastosAnt + $totalDeudores +
+           $totalBoletasPagadas + $caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] - $totalAcreedores;
+      }
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">DIFERENCIA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivo - $totalEfectivoCorte , 2, '$', false).'</td>
+        </tr>
+        <tr><td></td></tr>';
+    }
+
+
+    if ($noCajas == 1) {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['fondo_caja'], 2, '$', false).'</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
+        </tr>';
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
+        </tr>';
+
+      if ($totalDeudores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalAcreedores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
+        </tr>';
+      }
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO EFECTIVO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($saldoEfectivo, 2, '$', false).'</td>
+        </tr>';
+
+      $pdf->SetY($pdf->GetY()+5);
+      if ($totalIngresos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPagadas > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO LIMON EF</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPendientes > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO LIMON CR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPendientes, 2, '$', false).'</td>
+        </tr>';
+      }
+    } else {
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDO INICIAL CR</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false).'</td>
+        </tr>';
+      if ($totalIngresos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalIngresos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalRemisiones > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL INGRESOS REM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalRemisiones, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalAcreedores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalBoletasPagadas > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO TOT LIMON</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalBoletasPagadas, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalGastosComprobarTot > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO GASTOS COM</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalGastosComprobarTot, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($ttotalGastos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">PAGO TOT GASTOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($ttotalGastos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalReposicionGastosAnt > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL REPOSICION GASTOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalReposicionGastosAnt, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalDeudores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($totalTraspasos > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL TRASPASOS</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+        </tr>';
+      }
+      if ($noCajas == 1 && ($caja['boletas_arecuperar_total'] > 0 || $caja['cheques_transito_total'] > 0)) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
+        </tr>';
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">EFECT. DEL CORTE</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalEfectivoCorte, 2, '$', false).'</td>
+        </tr>';
+      if ($totalFondoCaja !== false) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">FONDO DE CAJA</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalFondoCaja, 2, '$', false).'</td>
+        </tr>';
+      }
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
   public function nomenclaturas($noCaja = 0)
   {
     $sql = '';
@@ -3343,7 +4686,7 @@ class caja_chica_model extends CI_Model {
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
-          cg.tipo, cg.id_compra, (c.serie || c.folio::text) AS folio_compra
+          cg.tipo, cg.id_compra, (c.serie || c.folio::text) AS folio_compra, es.nombre_fiscal AS sucursal
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -3351,6 +4694,7 @@ class caja_chica_model extends CI_Model {
          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
          LEFT JOIN usuarios AS u ON u.id = cg.id_usuario
          LEFT JOIN compras AS c ON c.id_compra = cg.id_compra
+         LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
        WHERE cg.id_gasto = '{$id_gasto}'
        ORDER BY cg.id_gasto ASC"
     )->row();
@@ -3383,12 +4727,29 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-5);
     $pdf->Row(array($gastos->empresal), false, false);
 
+    $yini = 0;
+    if ($gastos->sucursal != '') {
+      $pdf->SetFont('helvetica','B', 7);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(63));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array($gastos->sucursal), false, false);
+      $yini = 4;
+    }
+
     $pdf->SetFont('helvetica','', 8);
-    $pdf->SetXY(0, 0);
+    $pdf->SetXY(0, $yini);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()+4);
-    $pdf->Row(array(($gastos->tipo=='g'? 'VALE DE GASTO EN CAJA': 'GASTO POR COMPROBAR')), false, false);
+    $tituloo = 'GASTO POR COMPROBAR';
+    if ($gastos->tipo == 'g')
+      $tituloo = 'GASTOS GENERALES';
+    elseif ($gastos->tipo == 'rg')
+      $tituloo = 'REPOSICION DE GASTOS';
+    elseif ($gastos->tipo == 'pre')
+      $tituloo = 'PRE GASTOS';
+    $pdf->Row(array($tituloo), false, false);
 
     $pdf->SetAligns(array('L'));
     // $pdf->SetWidths(array(63));
@@ -3893,7 +5254,6 @@ class caja_chica_model extends CI_Model {
     $pdf->Output('vale_deudor.pdf', 'I');
   }
 
-
   public function getCajaByCode($codigo)
   {
     $no_caja = '';
@@ -3905,6 +5265,8 @@ class caja_chica_model extends CI_Model {
       $no_caja = 4;
     } elseif ($codigo == 'caja_fletes') {
       $no_caja = 5;
+    } elseif ($codigo == 'caja_plasticos') {
+      $no_caja = 6;
     }
 
     $caja = $this->db->query(
@@ -3914,6 +5276,97 @@ class caja_chica_model extends CI_Model {
     )->row();
 
     return (!empty($caja)? $caja: 'Otros');
+  }
+
+
+  public function getDataValeBodGdl($id_bodega, $noCaja)
+  {
+    $bdg = $this->db->query(
+      "SELECT bg.id_bodega, bg.id_usuario, bg.fecha, bg.no_caja, bg.nombre, bg.concepto,
+        bg.monto, bg.no_impresiones, bg.fecha_creacion, bg.status, bg.fecha_recibido,
+        c.nombre AS caja, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+      FROM cajachica_bodega_gdl bg
+        INNER JOIN cajachicas c ON c.no_caja = bg.no_caja::character varying
+        INNER JOIN usuarios u ON u.id = bg.id_usuario
+      WHERE bg.id_bodega = {$id_bodega}"
+    )->row();
+
+    return $bdg;
+  }
+
+  public function printValeBodGdl($id_bodega, $noCaja)
+  {
+    $bdg = $this->getDataValeBodGdl($id_bodega, $noCaja);
+
+    // echo "<pre>";
+    //   var_dump($bdg);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(5, $pdf->GetY()-5);
+    $pdf->Row(array('BODEGA GDL'), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('Folio: '.$bdg->id_bodega), false, false);
+
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array($bdg->caja), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Se entrega: '.$bdg->nombre), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('Monto: '.MyString::formatoNumero($bdg->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(MyString::num2letras($bdg->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($bdg->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($bdg->no_impresiones==0? 'ORIGINAL': 'COPIA '.$bdg->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', MyString::fechaAT($bdg->fecha)), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $bdg->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', MyString::fechaAT($bdg->fecha_creacion)), false, false);
+
+    $this->db->update('cajachica_bodega_gdl', ['no_impresiones' => $bdg->no_impresiones+1],
+        "id_bodega = '{$id_bodega}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_bod_gdl.pdf', 'I');
   }
 
   public function getCajasChicas()
@@ -3947,6 +5400,10 @@ class caja_chica_model extends CI_Model {
       $sqlprs1 .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
+    if ($this->input->get('sucursalId') > 0) {
+      $sql .= " AND cg.id_sucursal = '".$this->input->get('sucursalId')."'";
+    }
+
     if ($this->input->get('fnomenclatura') != '') {
       $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
       $sqlprs1 .= " AND cn.id = ".$this->input->get('fnomenclatura');
@@ -3965,7 +5422,7 @@ class caja_chica_model extends CI_Model {
     if ($this->input->get('fno_caja') == 'prest1') {
       $gastos = $this->db->query(
         "SELECT id_prestamo, id_prestamo_nom, id_empleado, id_categoria, id_nomenclatura, concepto, fecha, monto, categoria, nombre_nomen, nomenclatura,
-          null AS folio, null AS id_area, null AS codigo_fin, null AS campo, null AS reposicion
+          null AS folio, null AS id_area, null AS codigo_fin, null AS campo, null AS reposicion, '' AS sucursal
         FROM (
           SELECT cp.id_prestamo, cp.id_prestamo_nom, cp.id_empleado, cp.id_categoria, cp.id_nomenclatura, cp.concepto, cp.fecha, cp.monto,
             cc.abreviatura as categoria, cn.nombre AS nombre_nomen, cn.nomenclatura
@@ -3991,12 +5448,13 @@ class caja_chica_model extends CI_Model {
           cn.id AS id_nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.reposicion
+          cg.reposicion, es.nombre_fiscal AS sucursal
         FROM cajachica_gastos cg
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
           LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+          LEFT JOIN empresas_sucursales AS es ON es.id_sucursal = cg.id_sucursal
         WHERE cg.tipo <> 'gc' AND cg.status = 't' AND cg.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql}
         ORDER BY id_categoria ASC, fecha ASC");
@@ -4015,7 +5473,12 @@ class caja_chica_model extends CI_Model {
     $this->load->model('catalogos_sft_model');
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = intval($this->input->get('did_empresa'));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
+    if ($this->input->get('sucursalId') > 0) {
+      $sucursal = $this->empresas_model->infoSucursal($this->input->get('sucursalId'));
+    }
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4028,6 +5491,7 @@ class caja_chica_model extends CI_Model {
 
     $pdf->titulo2 = 'Reporte de Gastos';
     $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= isset($sucursal)? $sucursal->nombre_fiscal: '';
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -4116,7 +5580,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptGastosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = intval($this->input->get('did_empresa'));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Gastos';
@@ -4360,7 +5826,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = intval($this->input->get('did_empresa'));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4455,7 +5923,9 @@ class caja_chica_model extends CI_Model {
     $res = $this->getRptIngresosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = intval($this->input->get('did_empresa'));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Ingresos';
@@ -4659,7 +6129,8 @@ class caja_chica_model extends CI_Model {
 
     $this->load->model('empresas_model');
     $id_empresa = $this->input->get('did_empresa');
-    $empresa = $this->empresas_model->getInfoEmpresa(($id_empresa>0? $id_empresa: 2));
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -4699,7 +6170,8 @@ class caja_chica_model extends CI_Model {
 
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
-      $datos = array($item->fecha,
+      $datos = array(
+        $item->fecha,
         $item->categoria,
         ucfirst($item->tipo),
         $item->observacion,
@@ -4737,10 +6209,12 @@ class caja_chica_model extends CI_Model {
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    $res = $this->getRptIngresosData();
+    $res = $this->getRptIngresosGastosData();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $id_empresa = $this->input->get('did_empresa');
+    $categg = $this->db->query("SELECT id_empresa, nombre FROM cajachica_categorias WHERE id_categoria = {$id_empresa}")->row();
+    $empresa = $this->empresas_model->getInfoEmpresa((isset($categg->id_empresa)? $categg->id_empresa: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de Ingresos';
@@ -4749,70 +6223,60 @@ class caja_chica_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
-        </tr>';
-    $aux_categoria = '';
-    $total_nomenclatura = array();
-    $aux_proveedor_total = $proveedor_total = 0;
-    foreach($res['movimientos'] as $key => $producto){
-
-      if($key==0 || $aux_categoria != $producto->id_categoria) {
-        if($aux_categoria != $producto->id_categoria && $key > 0)
-        {
-          $aux_proveedor_total = $proveedor_total;
-          $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
-
-          $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
-        }elseif($key == 0)
-          $aux_categoria = $producto->id_categoria;
-
-        $html .= '<tr style="font-weight:bold">
-          <td colspan="6"></td>
+          <td colspan="7"></td>
         </tr>
-        <tr style="font-weight:bold">
-          <td colspan="6" style="background-color: #cccccc;">'.$producto->categoria.'</td>
-        </tr>
+        <tr><td colspan="7"></td></tr>
         <tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Poliza</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
-          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Empresa</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Tipo</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Observacion</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Caja</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Ingreso</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Gasto</td>
         </tr>';
+
+    $total_ingresos = $total_gastos = 0;
+    foreach($res as $key => $item){
+
+      $ingreso = $gasto = 0;
+      if ($item->ingreso == 1) {
+        $ingreso = MyString::formatoNumero($item->monto, 2, '', false);
+        $total_ingresos += $item->monto;
+      } else {
+        $gasto = MyString::formatoNumero($item->monto, 2, '', false);
+        $total_gastos += $item->monto;
       }
 
       $html .= '<tr style="">
-          <td style="border:1px solid #000;">'.$producto->fecha.'</td>
-          <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
-          <td style="border:1px solid #000;">'.$producto->poliza.'</td>
-          <td style="border:1px solid #000;">'.$producto->concepto.'</td>
-          <td style="border:1px solid #000;">'.$producto->monto.'</td>
+          <td style="border:1px solid #000;">'.$item->fecha.'</td>
+          <td style="border:1px solid #000;">'.$item->categoria.'</td>
+          <td style="border:1px solid #000;">'.ucfirst($item->tipo).'</td>
+          <td style="border:1px solid #000;">'.$item->observacion.'</td>
+          <td style="border:1px solid #000;">'.$item->no_caja.'</td>
+          <td style="border:1px solid #000;">'.$ingreso.'</td>
+          <td style="border:1px solid #000;">'.$gasto.'</td>
         </tr>';
-
-      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
-        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
-      else
-        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
-
-      $proveedor_total += $producto->monto;
     }
 
-    if(isset($producto))
-    {
-      $aux_proveedor_total = $proveedor_total;
-      $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
-
-      $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
-    }
+    $html .= '<tr style="">
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;"></td>
+        <td style="border:1px solid #000;font-weight:bold;">'.$total_ingresos.'</td>
+        <td style="border:1px solid #000;font-weight:bold;">'.$total_gastos.'</td>
+      </tr>';
 
     $html .= '
       </tbody>

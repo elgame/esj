@@ -39,6 +39,12 @@
                 </select>
 
                 <br>
+                <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
+                <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01')); ?>" size="10">
+                <label for="ffecha2">Al</label>
+                <input type="date" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
+
+                <br>
 
                 <label for="darea">Cultivo</label>
                 <input type="text" name="darea" class="input-large search-query" id="darea" value="<?php echo set_value_get('darea') ?>" size="73">
@@ -62,6 +68,8 @@
                 'attrs' => array('style' => 'margin-bottom: 10px;') )
               );
              ?>
+             <a href="<?php echo base_url('panel/recetas/show_import_recetas_corona/?id='.set_value_get('did_empresa', $empresa_default->id_empresa).'&id_area='.set_value_get('did_area').'&cultivo='.set_value_get('darea'). '&fecha=' . set_value_get('ffecha2', $fecha)) ?>" class="btn btn-info" rel="superbox-50x450" title="Importar Recetas Corona"><i class="icon-upload"></i></a>
+
 
              <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 130px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:16px;font-weight:bold;"></div>
 
@@ -69,8 +77,10 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
+                  <th>F. Aplicación</th>
                   <th>Cultivo</th>
                   <th>Folio</th>
+                  <th>Folio Corona</th>
                   <th>Formula</th>
                   <th>Tipo</th>
                   <th>Estado</th>
@@ -82,8 +92,10 @@
             <?php foreach($recetas['recetas'] as $receta) { ?>
                 <tr>
                   <td><?php echo $receta->fecha; ?></td>
+                  <td><?php echo $receta->fecha_aplicacion; ?></td>
                   <td><?php echo $receta->area; ?></td>
                   <td><?php echo $receta->folio; ?></td>
+                  <td><?php echo $receta->folio_hoja; ?></td>
                   <td><?php echo $receta->nombre; ?></td>
                   <td><?php echo $receta->tipo; ?></td>
                   <td><?php

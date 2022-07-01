@@ -44,6 +44,7 @@ class rastreabilidad_model extends CI_Model {
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
+      'fruta_com'        => $_POST['fruta_com'],
     );
 
     $passess = false;
@@ -130,6 +131,7 @@ class rastreabilidad_model extends CI_Model {
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
+      'fruta_com'        => $_POST['fruta_com'],
     );
 
     $passess = false;
@@ -139,7 +141,7 @@ class rastreabilidad_model extends CI_Model {
     if( ! $this->existeRendimiento($dataval, 'edit'))
     {
       // Actualiza los datos de la clasificacion
-      $this->db->update('rastria_rendimiento_clasif',$data, array(
+      $this->db->update('rastria_rendimiento_clasif', $data, array(
         'id_rendimiento'   => $_POST['id_rendimiento'],
         'id_clasificacion' => $_POST['id_clasificacion_old'],
         'id_unidad'        => $_POST['id_unidad_old'],
@@ -455,6 +457,7 @@ class rastreabilidad_model extends CI_Model {
     $this->db->insert('rastria_rendimiento', array(
       'lote'        => $lote,
       'fecha'       => $fecha,
+      'fecha_lote'  => $fecha,
       'lote_ext'    => $lote_ext,
       'certificado' => $certificado,
       'id_area'     => $id_area,
@@ -485,7 +488,7 @@ class rastreabilidad_model extends CI_Model {
 
   public function getLoteInfo($id_rendimiento, $full_info = true)
   {
-    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext, certificado, id_area")
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext, certificado, id_area, fecha_lote")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $id_rendimiento)
       ->get();
@@ -505,7 +508,7 @@ class rastreabilidad_model extends CI_Model {
 
         $sql = $this->db->query(
           "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.kilos, rrc.linea1, rrc.linea2,
-                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion,
+                  rrc.total, rrc.rendimiento, rrc.fruta_com, cl.nombre as clasificacion,
                   u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre,
                   e.id_etiqueta, e.nombre AS etiqueta, cas.id_calibre AS id_size, cas.nombre AS size
           FROM rastria_rendimiento_clasif AS rrc
@@ -545,9 +548,13 @@ class rastreabilidad_model extends CI_Model {
     return intval($lote)+1;
   }
 
-  public function actualizaLoteExt($id_rendimiento, $lote_ext, $estaCertificado)
+  public function actualizaLoteExt($id_rendimiento, $lote_ext, $estaCertificado, $params = [])
   {
-    $this->db->update('rastria_rendimiento', array('lote_ext' => $lote_ext, 'certificado' => $estaCertificado), "id_rendimiento = {$id_rendimiento}");
+    $datos = array('lote_ext' => $lote_ext, 'certificado' => $estaCertificado);
+    if (isset($params['fecha_lote'])) {
+      $datos['fecha_lote'] = $params['fecha_lote'];
+    }
+    $this->db->update('rastria_rendimiento', $datos, "id_rendimiento = {$id_rendimiento}");
     return array('passess' => true);
   }
 
@@ -562,21 +569,20 @@ class rastreabilidad_model extends CI_Model {
                                         $id_unidad, $id_calibre, $id_etiqueta,
                                         $id_size, $kilos)
   {
-
-    //Si no es un id, se inserta o se obtiene el calibre
-    if ( ! is_numeric($id_calibre))
-    {
-      $this->load->model('calibres_model');
-      $data_calibre = $this->calibres_model->addCalibre($_GET['fcalibre']);
-      $id_calibre   = $data_calibre['id'];
-    }
-    //Si no es un id, se inserta o se obtiene el calibre
-    if ( ! is_numeric($id_size))
-    {
-      $this->load->model('calibres_model');
-      $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
-      $id_size   = $data_size['id'];
-    }
+    // //Si no es un id, se inserta o se obtiene el calibre
+    // if ( ! is_numeric($id_calibre))
+    // {
+    //   $this->load->model('calibres_model');
+    //   $data_calibre = $this->calibres_model->addCalibre($_GET['fcalibre']);
+    //   $id_calibre   = $data_calibre['id'];
+    // }
+    // //Si no es un id, se inserta o se obtiene el calibre
+    // if ( ! is_numeric($id_size))
+    // {
+    //   $this->load->model('calibres_model');
+    //   $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
+    //   $id_size   = $data_size['id'];
+    // }
 
     $info = $this->getLoteInfo($id_rendimiento, false);
 
@@ -1788,7 +1794,7 @@ class rastreabilidad_model extends CI_Model {
           ->get()->row()->kilos
           );
 
-        $fecha = new DateTime($lote['info']->fecha);
+        $fecha = new DateTime($lote['info']->fecha_lote);
 
         $pdf->SetXY($x + 25, $y);
         $pdf->Image(APPPATH.'images/logo.png');
@@ -1838,6 +1844,150 @@ class rastreabilidad_model extends CI_Model {
       }
 
       $pdf->Output('rendimiento_lote_'.$fecha->format('d/m/Y').'.pdf', 'I');
+   }
+
+   /**
+    * Visualiza/Descarga el PDF para el Reporte Rendimiento por Lote
+    *
+    * @return void
+    */
+   public function rpt_lotes_pdf($fecha, $areaId)
+   {
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf->show_head = true;
+      $pdf->titulo2 = "Rendimiento por Lote del {$fecha}";
+
+      $pdf->AliasNbPages();
+      $pdf->SetFont('helvetica','', 8);
+      $query = $this->db->query(
+        "SELECT rr.lote, rr.lote_ext, rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente,
+          rrc.kilos, rrc.linea1, rrc.linea2,
+          rrc.total, rrc.rendimiento, rrc.fruta_com, cl.nombre as clasificacion,
+          u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre,
+          e.id_etiqueta, e.nombre AS etiqueta, cas.id_calibre AS id_size, cas.nombre AS size
+        FROM rastria_rendimiento rr
+          INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
+          INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
+          LEFT JOIN unidades AS u ON u.id_unidad = rrc.id_unidad
+          LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre
+          LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
+          LEFT JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
+        WHERE rr.fecha = '{$fecha}' AND rr.id_area = {$areaId}
+        ORDER BY (rr.lote, rrc.id_rendimiento, cl.nombre, u.nombre, ca.nombre, e.nombre) ASC");
+      if($query->num_rows() > 0) {
+        $lotes = $query->result();
+
+        $lot = -1;
+        foreach ($lotes as $key => $lote)
+        {
+          if($pdf->GetY() >= $pdf->limiteY || $key==0 || $lot != $lote->lote_ext){ //salta de pagina si exede el max
+            if ($pdf->GetY() >= $pdf->limiteY || $key==0) {
+              $pdf->AddPage();
+            }
+
+            if ($key > 0 && $lot != $lote->lote_ext) {
+              $pdf->SetY($pdf->GetY()+5);
+            }
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(250));
+            $pdf->SetX(5);
+            $pdf->Row(array("LOTE NO: {$lote->lote_ext}"), false, false);
+
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(5);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C'));
+            $pdf->SetWidths(array(70, 35, 25, 25, 20, 15, 15, 15, 15, 15, 15));
+            $pdf->Row(array('CLASIF.', 'CAJA', 'TAMAÑO', 'CALIBRE', 'ETIQUETA', 'KILOS', 'EXIST', 'LINEA1', 'LINEA2', 'TOTAL', 'RD'), true);
+            $lot = $lote->lote_ext;
+          }
+
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetX(5);
+          $pdf->SetFont('Arial', '', 7);
+          $pdf->Row(array(
+              $lote->clasificacion,
+              $lote->unidad,
+              $lote->calibre,
+              $lote->size,
+              $lote->etiqueta,
+              $lote->kilos,
+              $lote->existente,
+              $lote->linea1,
+              $lote->linea2,
+              $lote->total,
+              $lote->rendimiento,
+            ), false);
+
+          // $pdf->SetXY($x + 56, $y + 17);
+          // $pdf->SetTextColor(0, 0, 0);
+          // $pdf->SetFillColor(200,200,200);
+          // $pdf->Cell(50, 4, "Kilos=> E:{$kilos} | S:{$kilos_reales}", 0, 0, 'R', 1);
+
+        }
+      }
+      $query->free_result();
+
+
+      // Reporte de limon
+      $this->load->model('existencias_limon_model');
+      $caja = $this->existencias_limon_model->get($fecha, 1, $areaId);
+
+      if (count($pdf->pages) == 0) {
+        $pdf->AddPage();
+      }
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(240, 240, 240);
+
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(204));
+      $pdf->Row(array('EXISTENCIA EMPACADA'), true, 'B');
+
+      $pdf->SetFont('Arial','B', 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
+      $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD'), FALSE, FALSE);
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+      $pdf->SetWidths(array(30, 85, 30, 30, 30));
+
+      $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
+      foreach ($caja['existencia'] as $existencia) {
+        if($pdf->GetY() >= $pdf->limiteY){
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(6, 10);
+          } else
+            $pdf->AddPage();
+        }
+
+        $existencia_kilos    += floatval($existencia->kilos);
+        $existencia_cantidad += floatval($existencia->cantidad);
+        $existencia_importe  += floatval($existencia->importe);
+
+        if ($existencia->cantidad != 0 ) {
+          $pdf->SetX(6);
+          $pdf->Row(array(
+            $existencia->calibre,
+            $existencia->clasificacion,
+            $existencia->unidad,
+            MyString::formatoNumero($existencia->kilos, 2, '', false),
+            MyString::formatoNumero($existencia->cantidad, 2, '', false),
+            // MyString::formatoNumero($existencia->costo, 2, '', false),
+            // MyString::formatoNumero($existencia->importe, 2, '', false),
+          ), false, 'B');
+        }
+      }
+
+      $pdf->Output('rendimiento_lote_'.$fecha.'.pdf', 'I');
    }
 
    private function acomodaStringClasificacion($clasifi)

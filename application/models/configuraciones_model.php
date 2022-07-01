@@ -75,6 +75,20 @@ class configuraciones_model extends CI_Model {
         $this->db->insert('nomina_diaria_art_113', $data);
       }
 		}
+    $sql_res = $this->db->select("anio")->from("nomina_mensual_art_113")->where("anio", $this->input->post('dzona_anio'))->get();
+    foreach ($this->input->post('mes_id') as $key => $mes_id)
+    {
+      if ($sql_res->num_rows() > 0) {
+        $data = array('lim_inferior' => $_POST['mes_lim_inferior'][$key], 'lim_superior' => $_POST['mes_lim_superior'][$key],
+              'cuota_fija' => $_POST['mes_cuota_fija'][$key], 'porcentaje' => $_POST['mes_porcentaje'][$key]);
+        $this->db->update('nomina_mensual_art_113', $data, array('id_art_113' => $mes_id));
+      } else {
+        $data = array('lim_inferior' => $_POST['mes_lim_inferior'][$key], 'lim_superior' => $_POST['mes_lim_superior'][$key],
+              'cuota_fija' => $_POST['mes_cuota_fija'][$key], 'porcentaje' => $_POST['mes_porcentaje'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+        $this->db->insert('nomina_mensual_art_113', $data);
+      }
+    }
 
 		//Tablas de Subsidios
 		$sql_res = $this->db->select("anio")->from("nomina_semanal_subsidios")->where("anio", $this->input->post('dzona_anio'))->get();
@@ -105,6 +119,20 @@ class configuraciones_model extends CI_Model {
         $this->db->insert('nomina_diaria_subsidios', $data);
       }
 		}
+    $sql_res = $this->db->select("anio")->from("nomina_mensual_subsidios")->where("anio", $this->input->post('dzona_anio'))->get();
+    foreach ($this->input->post('sub_mes_id') as $key => $sub_mes_id)
+    {
+      if ($sql_res->num_rows() > 0) {
+        $data = array('de' => $_POST['sub_mes_lim_inferior'][$key], 'hasta' => $_POST['sub_mes_lim_superior'][$key],
+              'subsidio' => $_POST['sub_mes_subsidio'][$key]);
+        $this->db->update('nomina_mensual_subsidios', $data, array('id_subsidio' => $sub_mes_id));
+      } else {
+        $data = array('de' => $_POST['sub_mes_lim_inferior'][$key], 'hasta' => $_POST['sub_mes_lim_superior'][$key],
+              'subsidio' => $_POST['sub_mes_subsidio'][$key],
+              'anio' => $this->input->post('dzona_anio'));
+        $this->db->insert('nomina_mensual_subsidios', $data);
+      }
+    }
 
 		return array('error' => FALSE);
 	}
@@ -117,13 +145,15 @@ class configuraciones_model extends CI_Model {
 	 */
 	public function getConfiguraciones($anio)
 	{
-		$data['conf']              = array();
-		$data['conf_vacaciones']   = array();
-		$data['salarios_minimos']  = array();
-		$data['semanal_art113']    = array();
-		$data['semanal_subsidios'] = array();
-		$data['diaria_art113']     = array();
-		$data['diaria_subsidios']  = array();
+    $data['conf']              = array();
+    $data['conf_vacaciones']   = array();
+    $data['salarios_minimos']  = array();
+    $data['semanal_art113']    = array();
+    $data['semanal_subsidios'] = array();
+    $data['diaria_art113']     = array();
+    $data['diaria_subsidios']  = array();
+    $data['mensual_art113']    = array();
+    $data['mensual_subsidios'] = array();
 
 		$sql_res = $this->db->select("id_configuracion, aguinaldo, prima_vacacional, puntualidad, asistencia, despensa" )
 							->from("nomina_configuracion")
@@ -170,6 +200,18 @@ class configuraciones_model extends CI_Model {
 		if ($sql_res->num_rows() > 0)
 			$data['diaria_subsidios']	= $sql_res->result();
 		$sql_res->free_result();
+
+    $sql_res = $this->db->select("id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje" )
+              ->from("nomina_mensual_art_113")->where("anio", $anio)->get();
+    if ($sql_res->num_rows() > 0)
+      $data['mensual_art113']  = $sql_res->result();
+    $sql_res->free_result();
+
+    $sql_res = $this->db->select("id_subsidio, de, hasta, subsidio" )
+              ->from("nomina_mensual_subsidios")->where("anio", $anio)->get();
+    if ($sql_res->num_rows() > 0)
+      $data['mensual_subsidios'] = $sql_res->result();
+    $sql_res->free_result();
 
 
 		return $data;

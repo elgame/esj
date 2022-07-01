@@ -36,6 +36,18 @@
 	                  </div>
 	                </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dregistro_patronal">Registro Patronal: </label>
+                    <div class="controls">
+                      <select name="dregistro_patronal" id="dregistro_patronal" required>
+                        <option value=""></option>
+                        <?php foreach ($registros_patronales as $key => $regp): ?>
+                        <option value="<?php echo $regp ?>" <?php echo set_select('dregistro_patronal', $regp, false, (isset($cuenta['info']->registro_patronal)?$cuenta['info']->registro_patronal:'')); ?>><?php echo $regp ?></option>
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+                  </div>
+
 	                <div class="control-group">
 	                  <label class="control-label" for="dnombre">*Nombre </label>
 	                  <div class="controls">
@@ -68,9 +80,33 @@
                         <option value="IvaRetPagado" <?php echo set_select('dtipo_cuenta', 'IvaRetPagado', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado</option>
                         <option value="IvaRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IvaRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Por Pagar Honorarios</option>
                         <option value="IvaRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IvaRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado Honorarios</option>
+                        <option value="IvaRetXPagarArrend" <?php echo set_select('dtipo_cuenta', 'IvaRetXPagarArrend', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Por Pagar Arrendamiento</option>
+                        <option value="IvaRetPagadoArrend" <?php echo set_select('dtipo_cuenta', 'IvaRetPagadoArrend', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Iva Ret Pagado Arrendamiento</option>
+
+                        <option value="IsrRetCobradoAc" <?php echo set_select('dtipo_cuenta', 'IsrRetCobradoAc', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Cobrado</option>
+                        <option value="IsrRetXCobrarAc" <?php echo set_select('dtipo_cuenta', 'IsrRetXCobrarAc', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Cobrar</option>
+
+                        <option value="IepsPagar6Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar6Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Pagar 6% Gastos</option>
+                        <option value="IepsPagar7Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar7Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Pagar 7% Gastos</option>
+                        <option value="IepsPagar9Gasto" <?php echo set_select('dtipo_cuenta', 'IepsPagar9Gasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Pagar 9% Gastos</option>
+                        <option value="IepsPagado6Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado6Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Pagado 6% Egreso</option>
+                        <option value="IepsPagado7Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado7Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Pagado 7% Egreso</option>
+                        <option value="IepsPagado9Egreso" <?php echo set_select('dtipo_cuenta', 'IepsPagado9Egreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Pagado 9% Egreso</option>
+
+                        <option value="IepsCobrar6Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar6Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Cobrar 6% Ventas</option>
+                        <option value="IepsCobrar7Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar7Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Cobrar 7% Ventas</option>
+                        <option value="IepsCobrar9Ventas" <?php echo set_select('dtipo_cuenta', 'IepsCobrar9Ventas', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps X Cobrar 9% Ventas</option>
+                        <option value="IepsCobrado6Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado6Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Cobrado 6% Ingresos</option>
+                        <option value="IepsCobrado7Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado7Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Cobrado 7% Ingresos</option>
+                        <option value="IepsCobrado9Ingreso" <?php echo set_select('dtipo_cuenta', 'IepsCobrado9Ingreso', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Ieps Cobrado 9% Ingresos</option>
+
                         <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagarHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar Honorarios</option>
                         <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta', 'IsrRetPagadoHono', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado Honorarios</option>
                         <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagar', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar</option>
+                        <option value="IsrRetPagado" <?php echo set_select('dtipo_cuenta', 'IsrRetPagado', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado</option>
+                        <option value="IsrRetXPagar125" <?php echo set_select('dtipo_cuenta', 'IsrRetXPagar125', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Por Pagar 1.25%</option>
+                        <option value="IsrRetPagado125" <?php echo set_select('dtipo_cuenta', 'IsrRetPagado125', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Isr Ret Pagado 1.25%</option>
+
                         <option value="NCGasto" <?php echo set_select('dtipo_cuenta', 'NCGasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Rebajas Y Bonificaciones Gastos</option>
                         <option value="CuadreGasto" <?php echo set_select('dtipo_cuenta', 'CuadreGasto', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Cuenta Cuadre Gasto</option>
                         <option value="NSueldo" <?php echo set_select('dtipo_cuenta', 'NSueldo', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Sueldo</option>
@@ -93,6 +129,7 @@
                         <option value="NVejez" <?php echo set_select('dtipo_cuenta', 'NVejez', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Cesantia Y Vejez</option>
                         <option value="NInfonavit" <?php echo set_select('dtipo_cuenta', 'NInfonavit', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Infonavit</option>
                         <option value="NIsr" <?php echo set_select('dtipo_cuenta', 'NIsr', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Isr</option>
+                        <option value="NPAlimen" <?php echo set_select('dtipo_cuenta', 'NPAlimen', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Nomina Pensión Alimenticia</option>
                         <option value="PagoAdicional" <?php echo set_select('dtipo_cuenta', 'PagoAdicional', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Pago Adicional</option>
                         <option value="PagoMenor" <?php echo set_select('dtipo_cuenta', 'PagoMenor', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Pago Menor</option>
                         <option value="DiarioProductos" <?php echo set_select('dtipo_cuenta', 'DiarioProductos', false, (isset($cuenta['info']->tipo_cuenta)?$cuenta['info']->tipo_cuenta:'')); ?>>Diario Productos</option>

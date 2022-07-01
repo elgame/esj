@@ -105,7 +105,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $factura;
   }
 
-  public function addComPago($id_movimiento, $id_cuenta_cliente, $cfdiRel = null)
+  public function addComPago($id_movimiento, $id_cuenta_cliente, $cfdiRel = null, $posts = [])
   {
     $query = $this->db->query(
           "SELECT *, (select Count(id_movimiento) from banco_movimientos_com_pagos where id_movimiento = {$id_movimiento}) AS num_row
@@ -158,7 +158,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         // xml 3.3
         // $cfdiRel = $cfdiRel['tipo'] != '' && isset($cfdiRel['uuids'])? $cfdiRel: null;
         $cfdiRel = $cfdiRel['tipo'] != ''? $cfdiRel: null;
-        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio, $cfdiRel);
+        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio, $cfdiRel, $posts);
         // echo "<pre>";
         //   var_dump($datosApi);
         // echo "</pre>";exit;
@@ -256,7 +256,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $result;
   }
 
-  public function cancelaFactura($id_compago)
+  public function cancelaFactura($id_compago, $datos)
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
@@ -273,13 +273,15 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $factura->cfdi_ext->emisor->rfc,
-        'rfcRec' => $factura->cfdi_ext->receptor->rfc,
-        'uuids'  => $factura->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $factura->cfdi_ext->total,
-        'sello'  => $factura->sello,
+        'rfc'              => $factura->cfdi_ext->emisor->rfc,
+        'rfcRec'           => $factura->cfdi_ext->receptor->rfc,
+        'uuids'            => $factura->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $factura->cfdi_ext->total,
+        'sello'            => $factura->sello,
+        'motivo'           => $datos['motivo'],
+        'folioSustitucion' => $datos['folioSustitucion'],
       );
 
       // Llama el metodo cancelar para que realiza la peticion al webservice.
@@ -354,7 +356,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         // Obtiene la info de la factura.
         $factura = $this->getInfoComPago($idFactura);
 
-        $cliente = strtoupper($factura->cfdi_ext->receptor->nombreFiscal);
+        $cliente = MyString::quitAcentos(strtoupper($factura->cfdi_ext->receptor->nombreFiscal));
         $fecha   = explode('-', $factura->fecha);
         $ano     = $fecha[0];
         $mes     = strtoupper(MyString::mes(floatval($fecha[1])));

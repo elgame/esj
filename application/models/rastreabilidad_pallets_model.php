@@ -90,7 +90,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			if(!$basic_info)
 			{
 				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext,
-            to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
+            to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rr.fecha_lote, rpr.cajas,
 						u.id_unidad, u.nombre AS unidad, u.cantidad AS unidad_cantidad, cal.id_calibre, cal.nombre AS calibre,
             e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
 						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion, rr.certificado, c.codigo AS cls_codigo
@@ -199,21 +199,29 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	 * @param  [type] $id_clasificacion [description]
  	 * @return [type]                   [description]
  	 */
- 	public function getRendimientoLibre($id_clasificacion, $idunidad, $idcalibre, $idetiqueta){
+ 	public function getRendimientoLibre($id_clasificacion, $idunidad, $idcalibre, $idetiqueta, $idarea=null){
 		$sql = $idunidad!=''? ' AND rcl.id_unidad = '.$idunidad: '';
 		$sql .= $idcalibre!=''? ' AND rcl.id_calibre = '.$idcalibre: '';
-		$sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
+    $sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
+		if($idarea){
+      // $idss = [$idarea];
+      // if (isset($this->config->item('clasif_joins')[$idarea])) {
+      //   $idss[] = $this->config->item('clasif_joins')[$idarea];
+      // }
+      // $sql .= " AND rr.id_area in(".implode(',', $idss).")";
+      $sql .= " AND rr.id_area = {$idarea}";
+    }
  		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
- 										rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
- 										rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
- 		                           FROM rastria_rendimiento AS rr
-									INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
-									LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
-									LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
-									LEFT JOIN etiquetas AS e ON rcl.id_etiqueta = e.id_etiqueta
-									LEFT JOIN calibres AS sz ON rcl.id_size = sz.id_calibre
- 		                           WHERE rcl.id_clasificacion = {$id_clasificacion} {$sql}
- 		                           ORDER BY fecha DESC, lote ASC, unidad ASC");
+        rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
+        rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
+      FROM rastria_rendimiento AS rr
+        INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
+        LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
+        LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
+        LEFT JOIN etiquetas AS e ON rcl.id_etiqueta = e.id_etiqueta
+        LEFT JOIN calibres AS sz ON rcl.id_size = sz.id_calibre
+      WHERE rcl.id_clasificacion = {$id_clasificacion} {$sql}
+      ORDER BY fecha DESC, lote ASC, unidad ASC");
  		$response = array('rendimientos' => array());
 		if($result->num_rows() > 0)
 			$response['rendimientos'] = $result->result();
@@ -233,11 +241,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		{
 			$data = array(
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
-						'folio'        => $this->input->post('ffolio'),
-						'no_cajas'     => $this->input->post('fcajas'),
-						'no_hojas'     => 0,
-						'kilos_pallet' => $this->input->post('fkilos'),
-						'id_area'      => $this->input->post('parea'),
+            'folio'        => $this->input->post('ffolio'),
+            'no_cajas'     => $this->input->post('fcajas'),
+            'no_hojas'     => 0,
+            'kilos_pallet' => $this->input->post('fkilos'),
+            'id_area'      => $this->input->post('parea'),
+            'folio_int'    => $this->input->post('ffolio_int'),
+            'certificado'  => $this->input->post('fcertificado'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -246,7 +256,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		//se valida que no este un pallet pendiente de la misma clasificacion
 		// if($this->checkPalletPendiente($data['id_clasificacion'])){
 			$this->db->insert('rastria_pallets', $data);
-			$id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
+			$id_pallet = $this->db->insert_id('rastria_pallets_id_pallet_seq');
 
       // Bitacora
       $this->bitacora_model->_insert('rastria_pallets', $id_pallet,
@@ -284,6 +294,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'no_hojas'     => 0,
 						'kilos_pallet' => $this->input->post('fkilos'),
             'calibre_fijo' => $this->input->post('fcalibre_fijo'),
+            'folio_int'    => $this->input->post('ffolio_int'),
+            'certificado'  => $this->input->post('fcertificado'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -570,34 +582,34 @@ class rastreabilidad_pallets_model extends privilegios_model {
     //   var_dump($data);
     // echo "</pre>";exit;
 
-    $certificados = $data;
-    $noCertificados = $data;
+    // $certificados = $data;
+    // $noCertificados = $data;
 
-    $certificados['rendimientos'] = array();
-    $certificados['info'] = clone $data['info'];
-    $certificados['info']->cajas = 0;
-    $certificados['info']->kilos_pallet = 0;
+    // $certificados['rendimientos'] = array();
+    // $certificados['info'] = clone $data['info'];
+    // $certificados['info']->cajas = 0;
+    // $certificados['info']->kilos_pallet = 0;
 
-    $noCertificados['rendimientos'] = array();
-    $noCertificados['info'] = clone $data['info'];
-    $noCertificados['info']->cajas = 0;
-    $noCertificados['info']->kilos_pallet = 0;
+    // $noCertificados['rendimientos'] = array();
+    // $noCertificados['info'] = clone $data['info'];
+    // $noCertificados['info']->cajas = 0;
+    // $noCertificados['info']->kilos_pallet = 0;
 
-    foreach ($data['rendimientos'] as $rendimiento)
-    {
-      if ($rendimiento->certificado === 't')
-      {
-        $certificados['rendimientos'][] = $rendimiento;
-        $certificados['info']->cajas += $rendimiento->cajas;
-        $certificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
-      }
-      else
-      {
-        $noCertificados['rendimientos'][] = $rendimiento;
-        $noCertificados['info']->cajas += $rendimiento->cajas;
-        $noCertificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
-      }
-    }
+    // foreach ($data['rendimientos'] as $rendimiento)
+    // {
+    //   if ($rendimiento->certificado === 't')
+    //   {
+    //     $certificados['rendimientos'][] = $rendimiento;
+    //     $certificados['info']->cajas += $rendimiento->cajas;
+    //     $certificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
+    //   }
+    //   else
+    //   {
+    //     $noCertificados['rendimientos'][] = $rendimiento;
+    //     $noCertificados['info']->cajas += $rendimiento->cajas;
+    //     $noCertificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
+    //   }
+    // }
 
     // echo "<pre>";
     //   var_dump($data, $certificados, $noCertificados);
@@ -610,104 +622,15 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
     $this->mergePalletsPdf($pdf, $data);
 
-    if (count($certificados['rendimientos']) > 0)
-    {
-      $this->mergePalletsPdf($pdf, $certificados, true);
-    }
+    // if (count($certificados['rendimientos']) > 0)
+    // {
+    //   $this->mergePalletsPdf($pdf, $certificados, true);
+    // }
 
-    if (count($noCertificados['rendimientos']) > 0 && count($certificados['rendimientos']) > 0)
-    {
-      $this->mergePalletsPdf($pdf, $noCertificados);
-    }
-		// $pdf->AliasNbPages();
-  //   $pdf->AddPage();
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->SetAligns(array('L'));
-		// $pdf->SetWidths(array(90));
-
-		// $pdf->Rect(6, 8, 100, 60, '');
-		// $pdf->SetXY(23, 23);
-		// $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
-
-		// $pdf->Rect(106, 8, 100, 20, '');
-		// $pdf->SetXY(110, 13);
-		// $pdf->Cell(33, 10, 'PALLET No. ', 0);
-		// $pdf->SetFont('helvetica','B', 22);
-		// $pdf->Cell(90, 10, $data['info']->folio, 0);
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->Rect(106, 28, 100, 40, '');
-		// $pdf->SetXY(109, 30);
-		// $pdf->Cell(90, 10, 'PACKING DATE/ FECHA DE EMPAQUE', 0);
-		// $pdf->SetFont('helvetica','B', 22);
-		// $pdf->SetXY(109, 45);
-		// $pdf->Row(array( date("d/m/Y", strtotime($data['info']->fecha)) ), false, false);
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->Rect(6, 68, 100, 80, '');
-		// $pdf->SetXY(9, 70);
-		// $pdf->Cell(90, 10, 'SIZE/ CALIBRE', 0);
-		// $nombre_calibres = array();
-  //   if($data['info']->calibre_fijo == '')
-  //   {
-  // 		foreach ($data['rendimientos'] as $key => $value)
-  // 		{
-  // 			if( ! isset($nombre_calibres[$value->size]) )
-  // 				$nombre_calibres[$value->size] = 1;
-  // 		}
-  //     $data['info']->calibre_fijo = implode(',', array_keys($nombre_calibres));
-  //   }
-		// $pdf->SetFont('helvetica','B', 22);
-		// $pdf->SetXY(9, 80);
-		// $pdf->Row(array( $data['info']->calibre_fijo ), false, false);
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->Rect(6, 108, 100, 40, '');
-		// $pdf->SetXY(9, 110);
-		// $pdf->Cell(90, 10, 'KILOS', 0);
-		// $pdf->SetFont('helvetica','B', 30);
-		// $pdf->SetXY(9, 120);
-		// $pdf->Row(array($data['info']->kilos_pallet), false, false);
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->Rect(106, 68, 100, 40, '');
-		// $pdf->SetXY(109, 70);
-		// $pdf->Cell(90, 10, 'CLIENTE', 0);
-		// $pdf->SetXY(109, 80);
-
-  //   $nombreFiscal = isset($data['cliente']->nombre_fiscal) ? $data['cliente']->nombre_fiscal : '';
-		// $pdf->Row(array($nombreFiscal), false, false);
-
-		// $pdf->Rect(106, 108, 100, 40, '');
-		// $pdf->SetXY(109, 110);
-		// $pdf->Cell(90, 10, 'BOXES/ CAJAS', 0);
-		// $pdf->SetFont('helvetica','B', 30);
-		// $pdf->SetXY(109, 120);
-		// $pdf->Row(array($data['info']->cajas), false, false);
-		// $pdf->SetFont('helvetica','B', 14);
-
-		// $pdf->Rect(6, 148, 20, 111, '');
-		// $pdf->RotatedText(16, 240, 'LISTA DE LOTIFICACION', 90);
-
-		// $pdf->SetXY(26, 148);
-		// $pdf->SetTextColor(0,0,0);
-		// // $pdf->SetX(6);
-		// $pdf->SetAligns(array('C', 'C'));
-		// $pdf->SetWidths(array(80, 100));
-		// $pdf->Row(array('No. LOTE', "No. DE CAJAS"), false);
-		// $filas = 13;
-		// foreach ($data['rendimientos'] as $key => $value) {
-		// 	$fecha = strtotime($value->fecha);
-		// 	$pdf->SetX(26);
-		// 	$pdf->Row(array(date("Ww", $fecha).'-'.$value->lote_ext, $value->cajas), false);
-		// 	$filas--;
-		// }
-		// for ($i = $filas; $i > 0; $i--)
-		// {
-		// 	$pdf->SetX(26);
-		// 	$pdf->Row(array('', ''), false);
-		// }
+    // if (count($noCertificados['rendimientos']) > 0 && count($certificados['rendimientos']) > 0)
+    // {
+    //   $this->mergePalletsPdf($pdf, $noCertificados);
+    // }
 
 		$pdf->Output('REPORTE_DIARIO.pdf', 'I');
 	}
@@ -729,7 +652,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
     $pdf->Rect(6, 8, 100, 60, '');
     $pdf->SetXY(23, 38);
-    $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
+    if ($data['info']->id_area == 2) {
+      $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
+    }
 
     $pdf->Rect(106, 8, 100, 20, '');
     $pdf->SetXY(110, 13);
@@ -807,9 +732,10 @@ class rastreabilidad_pallets_model extends privilegios_model {
     $pdf->Row(array('No. LOTE', "No. DE CAJAS"), false);
     $filas = 13;
     foreach ($data['rendimientos'] as $key => $value) {
-      $fecha = strtotime($value->fecha);
+      $fecha = strtotime($value->fecha_lote);
       $pdf->SetX(26);
-      $pdf->Row(array(date("Ww", $fecha).'-'.$value->lote_ext, $value->cajas), false);
+      $certificado = $value->certificado == 't'? 'C': 'N';
+      $pdf->Row(array(date("Ww", $fecha).'-'.$value->lote_ext."/{$certificado}", $value->cajas), false);
       $filas--;
     }
     for ($i = $filas; $i > 0; $i--)

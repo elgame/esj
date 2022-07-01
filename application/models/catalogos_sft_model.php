@@ -837,20 +837,20 @@ class catalogos_sft_model extends CI_Model{
     //Filtro de fecha.
     if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
       $sql_caja .= " AND Date(cg.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-      $sql_compras .= " AND Date(co.fecha_creacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
     }
     elseif($this->input->get('ffecha1') != '') {
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha1')."'";
-      $sql_compras .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha1')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha1')."'";
     }
     elseif($this->input->get('ffecha2') != ''){
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha2')."'";
-      $sql_compras .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha2')."'";
@@ -862,6 +862,14 @@ class catalogos_sft_model extends CI_Model{
       // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('did_empresa')."";
       $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('did_empresa')."";
       $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('did_empresa')."";
+    }
+
+    if ($this->input->get('sucursalId') != '') {
+      $sql_caja .= " AND cg.id_sucursal = ".$this->input->get('sucursalId')."";
+      $sql_compras .= " AND co.id_sucursal = ".$this->input->get('sucursalId')."";
+      // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('sucursalId')."";
+      // $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('sucursalId')."";
+      // $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('sucursalId')."";
     }
 
     $sql2 = $sql;
@@ -884,7 +892,8 @@ class catalogos_sft_model extends CI_Model{
               UNION
               SELECT Sum(cg.monto) importe
               FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-              WHERE cg.id_cat_codigos In({$ids_hijos}) {$sql_caja}
+              WHERE cg.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
+                AND cg.tipo <> 'pre' {$sql_caja}
               UNION
               SELECT Sum(ndl.importe) importe
               FROM nomina_trabajos_dia_labores ndl
@@ -926,7 +935,8 @@ class catalogos_sft_model extends CI_Model{
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
                   INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-                WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_caja}
+                WHERE ca.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
+                  AND cg.tipo <> 'pre' {$sql_caja}
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
@@ -962,7 +972,8 @@ class catalogos_sft_model extends CI_Model{
     $combustible = $this->getDataCodigosCuentas();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa(2);
+    $empresa = $this->empresas_model->getInfoEmpresa(($this->input->get('did_empresa')? $this->input->get('did_empresa'): 2));
+    $sucursal = $this->empresas_model->infoSucursal(intval($this->input->get('sucursalId')));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -975,7 +986,7 @@ class catalogos_sft_model extends CI_Model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Reporte de Gastos";
 
-    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    $pdf->titulo3 = ($sucursal? $sucursal->nombre_fiscal."\n": ''); //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
         $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
@@ -1174,6 +1185,136 @@ class catalogos_sft_model extends CI_Model{
     echo $html;
   }
 
+  public function getDataCodigosComprasPiezas()
+  {
+    // $this->load->model('compras_areas_model');
+    $sql_compras = $sql_caja = $sql = $sql2 = '';
+    $sql_nom_dia = $sql_nom_hre = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    }
+    elseif($this->input->get('ffecha1') != '') {
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
+    }
+    elseif($this->input->get('ffecha2') != ''){
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
+    }
+
+    if ($this->input->get('did_empresa') != '') {
+      $sql_compras .= " AND co.id_empresa = ".$this->input->get('did_empresa')."";
+    }
+
+    if ($this->input->get('sucursalId') != '') {
+      $sql_compras .= " AND co.id_sucursal = ".$this->input->get('sucursalId')."";
+    }
+
+    $response = array();
+
+
+    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
+    {
+      $ids_hijos = [];
+      foreach ($_GET['dareas'] as $key => $value) {
+        $ids_hijos[] = $value.$this->getHijos($value);
+      }
+      $ids_hijos = implode(',', $ids_hijos);
+
+      $response = $this->db->query("
+        SELECT
+          cp.id_producto, cp.descripcion producto, Sum(cp.piezas) AS piezas
+        FROM compras_ordenes co
+          INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+          INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
+          LEFT JOIN compras c ON c.id_compra = cp.id_compra
+        WHERE cp.status = 'a' AND co.status <> 'ca' AND cp.piezas > 0
+          AND ca.id_cat_codigos In({$ids_hijos}) {$sql_compras}
+        GROUP BY cp.id_producto, cp.descripcion")->result();
+    }
+
+    return $response;
+  }
+  public function rpt_codigos_compras_piezas_pdf()
+  {
+    $compras = $this->getDataCodigosComprasPiezas();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(($this->input->get('did_empresa')? $this->input->get('did_empresa'): 2));
+    $sucursal = $this->empresas_model->infoSucursal(intval($this->input->get('sucursalId')));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Compras por Piezas";
+
+    $pdf->titulo3 = ($sucursal? $sucursal->nombre_fiscal."\n": ''); //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R');
+    $widths = array(170, 35);
+    $header = array('Producto', 'Piezas');
+
+    $lts_compras = 0;
+    $horas_totales = 0;
+
+    $entro = false;
+    foreach($compras as $key => $compra)
+    {
+      $cantidad = 0;
+      $importe = 0;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $compra->producto,
+        MyString::formatoNumero($compra->piezas, 2, '', false),
+      ), false, false);
+
+      $lts_compras += floatval($compra->piezas);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES',
+        MyString::formatoNumero($lts_compras, 2, '', false) ),
+    true, false);
+
+    $pdf->Output('rpt_codigos_compras_piezas.pdf', 'I');
+  }
+
   public function getDataCodigosCuentasSalidas()
   {
     // $this->load->model('compras_areas_model');
@@ -1229,11 +1370,13 @@ class catalogos_sft_model extends CI_Model{
               FROM (
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
-                  p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe
+                  p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe, cp.cantidad, cp.precio_unitario,
+                  pu.nombre AS unidad
                 FROM compras_salidas co
                   INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
                   INNER JOIN productos p ON p.id_producto = cp.id_producto
+                  INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_salida}
                   AND co.status <> 'ca' AND co.status <> 'n'
               ) t
@@ -1280,9 +1423,9 @@ class catalogos_sft_model extends CI_Model{
     $aligns = array('L', 'R');
     $widths = array(170, 35);
     $header = array('Nombre', 'Importe');
-    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R');
-    $widths2 = array(18, 18, 36, 60, 45, 29);
-    $header2 = array('Fecha S', 'Folio S', 'Solicito', 'C Costo', 'Producto', 'Importe');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
+    $widths2 = array(18, 17, 31, 42, 32, 13, 12, 12, 29);
+    $header2 = array('Fecha S', 'Folio S', 'Solicito', 'C Costo', 'Producto', 'Unidad', 'Cantidad', 'Costo', 'Importe');
 
     $lts_combustible = 0;
     $horas_totales = 0;
@@ -1349,6 +1492,9 @@ class catalogos_sft_model extends CI_Model{
             $item->solicito,
             $item->nombre,
             $item->producto,
+            $item->unidad,
+            MyString::formatoNumero($item->cantidad, 2, '', false),
+            MyString::formatoNumero($item->precio_unitario, 2, '', false),
             MyString::formatoNumero($item->importe, 2, '', false),
           );
 
@@ -1422,6 +1568,9 @@ class catalogos_sft_model extends CI_Model{
         <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Solicito</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Costo</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
       </tr>';
     }
@@ -1444,6 +1593,9 @@ class catalogos_sft_model extends CI_Model{
               <td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$item->solicito.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
+              <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->unidad.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->cantidad.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->precio_unitario.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
             </tr>';
         }

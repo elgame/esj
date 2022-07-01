@@ -158,6 +158,7 @@
                             </td>
                             <td style="width: 50px;">
                               <select name="tipo_efectico[]" required style="width: 50px;" class="ptipo_efectico">
+                                <option value="efd" <?php echo set_select('tipo_efectico', 'efd', false, $prestamo->tipo); ?>>Efectivo Fijo</option>
                                 <option value="ef" <?php echo set_select('tipo_efectico', 'ef', false, $prestamo->tipo); ?>>Efectivo</option>
                                 <option value="fi" <?php echo set_select('tipo_efectico', 'fi', false, $prestamo->tipo); ?>>Fiscal</option>
                                 <option value="mt" <?php echo set_select('tipo_efectico', 'mt', false, $prestamo->tipo); ?>>Materiales</option>
@@ -334,7 +335,7 @@
   $(document).ready(function(){
 
     <?php if (isset($close)) {?>
-        setInterval(function() {
+        setTimeout(function() {
           window.parent.$('#supermodal').modal('hide');
           window.parent.location.reload();
       }, 2000);

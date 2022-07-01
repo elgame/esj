@@ -90,8 +90,15 @@ class MyString {
   public static function getVarsLink($quit=array()){
     $vars = '';
     foreach($_GET as $key => $val){
-      if(array_search($key, $quit) === false)
-        $vars .= '&'.$key.'='.$val;
+      if (is_string($val)) {
+        if(array_search($key, $quit) === false)
+          $vars .= '&'.$key.'='.urlencode($val);
+      } elseif(is_array($val) && count($val) > 0) {
+        foreach ($val as $key2 => $val2) {
+          if(array_search($key, $quit) === false)
+            $vars .= '&'.$key.'[]='.urlencode($val2);
+        }
+      }
     }
 
     return substr($vars, 1);
@@ -106,6 +113,11 @@ class MyString {
     if(count($fecha) != 3 && strlen($str_fecha) != 10)
       return false;
     return true;
+  }
+
+  public static function encodeURIComponent($str) {
+    $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+    return strtr(rawurlencode($str), $revert);
   }
 
   /**
@@ -471,6 +483,11 @@ class MyString {
     return $response;
   }
 
+  public static function fechaFormat($fecha, $format='d/m/Y') {
+    $fecha = DateTime::createFromFormat($format, $fecha);
+    return $fecha->format('Y-m-d');
+  }
+
 
   public static function fechaAT($fecha) {
     return self::fechaATexto($fecha, 'in');
@@ -481,7 +498,7 @@ class MyString {
    * Devuelve la cadena de texto asociada a la fecha ingresada
    *
    * @param   string fecha (cadena con formato XXXX-XX-XX)
-   * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'in')
+   * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'cm', 'in')
    * @return  string  fecha_en_formato_texto
    */
   public static function fechaATexto($fecha, $formato = 'c', $conHr = false) {
@@ -500,8 +517,12 @@ class MyString {
 
       if($formato == '/c')
         return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1] . $hr;
+      elseif($formato == 'cm')
+        return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. substr($partes[1], -2, 2) . $hr;
       elseif($formato == 'in')
         return $partes[3] .'/'. $partes[2] .'/'. $partes[1] . $hr;
+      elseif($formato == 'inm')
+        return $partes[3] .'/'. $partes[2] .'/'. substr($partes[1], -2, 2) . $hr;
       else{
         $mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
         if ($formato == 'u') {
@@ -636,6 +657,44 @@ class MyString {
      }
   }
 
+  public static function obtenerQuincenasDelAnio($anio, $todas = false, $quincenaBus = null)
+  {
+    $quincenas = [];
+
+    $fecha_actual = date("Y-m-d");
+    $fecha = new DateTime("{$anio}-01-01");
+
+    for ($i=1; $i <= 24; $i++) {
+      $siguientePrimerDia = $fecha->format("Y-m-d");
+      if ($i % 2 == 0) {
+        $fecha->modify('last day of this month');
+      } else {
+        $fecha->add(new DateInterval('P14D'));
+      }
+      $siguienteUltimoDia = $fecha->format("Y-m-d");
+
+      $fecha->add(new DateInterval('P1D'));
+
+      $quincenas[] = [
+        'fecha_inicio' => $siguientePrimerDia,
+        'fecha_final'  => $siguienteUltimoDia,
+        'anio'         => $anio,
+        'quincena'     => $i,
+        'calcmes'      => ($i % 2 == 0),
+      ];
+
+      if (!$todas && $fecha_actual >= $siguientePrimerDia && $fecha_actual <= $siguienteUltimoDia) {
+        break;
+      }
+
+      if ($quincenaBus && ($quincenaBus == $i || ($siguientePrimerDia <= $quincenaBus && $siguienteUltimoDia >= $quincenaBus)) ) {
+        return $quincenas[$i-1];
+      }
+    }
+
+    return $quincenas;
+  }
+
   /**
    * Obtiene las semanas del año.
    *
@@ -727,28 +786,48 @@ class MyString {
     // Almacena las semanas.
     $semanas = array();
 
+    $mesAux = date('n', $siguienteUltimoDia);
     $semanasDefault = 52;
 
     while ($numeroSemana <= $semanasDefault)
     {
+      $calcmes = false;
+      $mes = date('n', $siguienteUltimoDia);
+      if ($mesAux != $mes) {
+        $semanas[count($semanas)-1]['calcmes'] = true;
+        $mesAux = $mes;
+      }
+
       if ($semanaFecha)
       {
         if ((intval($semanaFecha) === $numeroSemana) || ($siguientePrimerDia <= strtotime($semanaFecha) && $siguienteUltimoDia >= strtotime($semanaFecha)))
         {
+          $siguienteUltimoDiaAux = strtotime('+1 week', $siguienteUltimoDia);
+          $mes = date('n', $siguienteUltimoDiaAux);
+          if ($mesAux != $mes) {
+            $calcmes = true;
+          }
+
           return array(
             'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
             'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
             'anio'         => $anio,
             'semana'       => $numeroSemana,
+            'calcmes'      => $calcmes,
           );
         }
       }
 
+      if ($numeroSemana === 53)
+      {
+        $calcmes = true;
+      }
       $semanas[] = array(
         'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
         'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
         'anio'         => $anio,
         'semana'       => $numeroSemana,
+        'calcmes'      => $calcmes,
       );
 
       if ($todas === false && (strtotime(date('Y-m-d')) >= $siguientePrimerDia && strtotime(date('Y-m-d')) <= $siguienteUltimoDia))
@@ -767,13 +846,24 @@ class MyString {
     return $semanas;
   }
 
+  public static function obtenerUltimaSemanaAnio($year) {
+    $date = new DateTime;
+    $date->setISODate($year, 53);
+    return ($date->format("W") === "53" ? 53 : 52);
+  }
+
   public static function obtenerSemanaDeFecha($fecha, $diaEmpieza = 0)
   {
     $fecha_split = explode('-', $fecha);
     $semanas = self::obtenerSemanasDelAnioV2($fecha_split[0], 0, $diaEmpieza);
+    $lastWeek = self::obtenerUltimaSemanaAnio($fecha_split[0]);
 
     foreach ($semanas as $key => $value) {
       if ($value['fecha_inicio'] <= $fecha && $value['fecha_final'] >= $fecha) {
+        if ($value['semana'] > $lastWeek) {
+          $value['anio'] = $value['anio']+1;
+          $value['semana'] = 1;
+        }
         return $value;
       }
     }

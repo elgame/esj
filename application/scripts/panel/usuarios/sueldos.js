@@ -7,6 +7,7 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      cargaRegistrosPatronales();
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -21,6 +22,7 @@ $(function(){
       var params = {term : request.term, empleados: 'true'};
       if(parseInt($("#did_empresa").val()) > 0)
         params.did_empresa = $("#did_empresa").val();
+        params.fregistro_patronal = $("#fregistro_patronal").val();
       $.ajax({
           url: base_url + 'panel/empleados/ajax_get_usuarios2/',
           dataType: "json",
@@ -114,3 +116,16 @@ function removeProveedor(event){
   $(this).parents('tr').remove();
 }
 
+var cargaRegistrosPatronales = function () {
+  $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_reg_patronales/', {'did_empresa': $("#did_empresa").val()},
+    function(data){
+      var html = '', i;
+      console.log(data);
+
+      html += '<option value=""></option>';
+      for (i in data.registros_patronales) {
+        html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
+      }
+      $('#fregistro_patronal').html(html);
+  });
+};

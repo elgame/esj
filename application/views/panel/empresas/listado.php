@@ -50,8 +50,9 @@
 						<table class="table table-striped table-bordered bootstrap-datatable">
 						  <thead>
 							  <tr>
-								  <th>Nombre</th>
+                  <th>Nombre</th>
 									<th>RFC</th>
+								  <th>Sucursal</th>
 									<th>Domicilio</th>
 									<th>Status</th>
 								  <th>Opc</th>
@@ -62,6 +63,7 @@
 								<tr>
 									<td><?php echo $empresa->nombre_fiscal; ?></td>
 									<td><?php echo $empresa->rfc; ?></td>
+                  <td><?php echo $empresa->sucursal; ?></td>
 									<td><?php echo $empresa->domicilio; ?></td>
 									<td>
 										<?php

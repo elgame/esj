@@ -11,19 +11,10 @@ class recetas extends MY_Controller {
 
     'recetas/ajax_get_folio/',
     'recetas/ajax_get_recetas/',
+    'recetas/ajax_get_calendarios/',
     'recetas/imprimir_salida/',
-
-
-
-    'compras_requisicion/ajax_producto_by_codigo/',
-    'compras_requisicion/ajax_producto/',
-    'compras_requisicion/ajax_get_producto_all/',
-    'compras_requisicion/ajax_get_tipo_cambio/',
-
-    'compras_requisicion/ligar/',
-    'compras_requisicion/imprimir_recibo_faltantes/',
-    'compras_requisicion/ajaxGetFactRem/',
-    );
+    'recetas/show_import_recetas_corona/'
+  );
 
   public function _remap($method){
 
@@ -63,7 +54,7 @@ class recetas extends MY_Controller {
 
     $params['recetas'] = $this->recetas_model->getRecetas();
 
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
 
     $params['requisicion'] = false;
     $params['method']     = '';
@@ -98,6 +89,7 @@ class recetas extends MY_Controller {
       array('general/util.js'),
       array('general/keyjump.js'),
       array('panel/recetas/recetas_add.js'),
+      array('panel/recetas/rango_centros_costo.js'),
     ));
 
     $this->load->model('recetas_model');
@@ -186,6 +178,7 @@ class recetas extends MY_Controller {
     }
 
     $params['receta'] = $this->recetas_model->info($_GET['id'], true);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax($params['receta']['info']->id_area);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -315,6 +308,102 @@ class recetas extends MY_Controller {
 
 
 
+  public function surtir()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/recetas/surtir_recetas.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Surtir Recetas'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('recetas_model');
+    $this->load->model('almacenes_model');
+
+    if (isset($_POST['guardar'])) {
+      $this->recetas_model->guardarSurtirReceta();
+    } elseif (isset($_POST['requisiciones'])) {
+      $respo = $this->recetas_model->crearRequisiciones();
+      $_GET['msg'] = $respo['msg'];
+    }
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['recetas'] = $this->recetas_model->getSurtirRecetas();
+    $params['almacenes'] = $this->almacenes_model->getAlmacenes(false);
+
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
+
+    $params['requisicion'] = false;
+    $params['method']     = 'surtir';
+    $params['titleBread'] = 'Surtir Recetas';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/admin_surtir', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function calendario()
+  {
+    $this->carabiner->css(array(
+      array('libs/fullcalendar.css'),
+      array('libs/fullcalendar.print.css'),
+      array('panel/recetas_calendario.css', 'screen'),
+    ));
+    $this->carabiner->js(array(
+      array('libs/fullcalendar-moment.min.js'),
+      array('libs/fullcalendar.min.js'),
+      array('libs/fullcalendar-lang-all.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/recetas/calendarios.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Calendarios'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('recetas_model');
+
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['eventos'] = $this->recetas_model->getEventosCalendario($_GET);
+    $params['calendarios'] = $this->recetas_model->getCalendariosAjax((isset($_GET['did_area'])? $_GET['did_area']: ''));
+
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
+
+    $params['requisicion'] = false;
+    $params['method']     = 'surtir';
+    $params['titleBread'] = 'Calendarios';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/recetas/calendarios', $params);
+    $this->load->view('panel/footer');
+  }
+
+
+
   public function faltantes_productos()
   {
     $this->carabiner->js(array(
@@ -361,6 +450,81 @@ class recetas extends MY_Controller {
     redirect(base_url('panel/recetas/faltantes_productos'));
   }
 
+
+  public function show_import_recetas_corona()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Recetas - Importar Recetas Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    // Obtiene la informacion de la empresa.
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+
+    if (isset($_POST['id_empresa'])) {
+      $this->configImportarRecetasCorona();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('recetas_model');
+        $res_mdl = $this->recetas_model->importRecetasCorona();
+        $_GET['msg'] = $res_mdl['error'];
+
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $params['resumen'] = $res_mdl['resumen'];
+        }
+        if (isset($res_mdl['resumenok']) && count($res_mdl['resumenok']) > 0) {
+          $params['resumenok'] = $res_mdl['resumenok'];
+        }
+
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/recetas/importar_recetas_corona', $params);
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function configImportarRecetasCorona()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required|is_natural'),
+      array('field' => 'id_area',
+            'label' => 'Cultivo',
+            'rules' => 'required|is_natural'),
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -377,6 +541,16 @@ class recetas extends MY_Controller {
   {
     $this->load->model('recetas_model');
     $formulas = $this->recetas_model->getFormulasAjax($_GET['term'], $_GET['did_empresa'], $_GET['tipo']);
+    echo json_encode($formulas);
+  }
+
+  public function ajax_get_calendarios()
+  {
+    $this->load->model('recetas_model');
+    $formulas = [];
+    if ($_GET['id_area'] > 0) {
+      $formulas = $this->recetas_model->getCalendariosAjax($_GET['id_area']);
+    }
     echo json_encode($formulas);
   }
 
@@ -410,8 +584,10 @@ class recetas extends MY_Controller {
     $rules = array(
       ['field' => 'empresa',                'label' => 'Empresa',              'rules' => 'required'],
       ['field' => 'empresaId',              'label' => 'Empresa',              'rules' => 'required|numeric'],
-      ['field' => 'formula',                'label' => 'Formula',              'rules' => 'required'],
-      ['field' => 'formulaId',              'label' => 'Formula',              'rules' => 'required|numeric'],
+      ['field' => 'empresa_ap',             'label' => 'Empresa Aplicación',   'rules' => ''],
+      ['field' => 'empresaId_ap',           'label' => 'Empresa Aplicación',   'rules' => 'numeric'],
+      ['field' => 'formula',                'label' => 'Formula',              'rules' => ''],
+      ['field' => 'formulaId',              'label' => 'Formula',              'rules' => 'numeric'],
       ['field' => 'area',                   'label' => 'Cultivo',              'rules' => 'required'],
       ['field' => 'areaId',                 'label' => 'Cultivo',              'rules' => 'required|numeric'],
       ['field' => 'rancho',                 'label' => 'Rancho',               'rules' => ''],
@@ -424,23 +600,25 @@ class recetas extends MY_Controller {
       ['field' => 'centroCostoNoplantas[]', 'label' => 'CentroCosto',          'rules' => ''],
       ['field' => 'objetivo',               'label' => 'Objetivo',             'rules' => ''],
       ['field' => 'tipo',                   'label' => 'Tipo',                 'rules' => 'required'],
-      ['field' => 'folio_formula',          'label' => 'Folio_formula',        'rules' => 'required|numeric'],
+      ['field' => 'folio_formula',          'label' => 'Folio formula',        'rules' => 'numeric'],
       ['field' => 'folio',                  'label' => 'Folio',                'rules' => 'required|numeric'],
+      ['field' => 'folio_hoja',             'label' => 'Folio Hoja',           'rules' => 'max_length[15]'],
       ['field' => 'fecha',                  'label' => 'Fecha',                'rules' => 'required'],
       ['field' => 'solicito',               'label' => 'solicito',             'rules' => 'required'],
       ['field' => 'solicitoId',             'label' => 'solicitoId',           'rules' => 'required|numeric'],
       ['field' => 'autorizo',               'label' => 'autorizo',             'rules' => 'required'],
       ['field' => 'autorizoId',             'label' => 'autorizoId',           'rules' => 'required|numeric'],
 
-      ['field' => 'a_etapa',                'label' => 'Etapa',                'rules' => ''],
-      ['field' => 'a_ciclo',                'label' => 'Ciclo',                'rules' => ''],
-      ['field' => 'a_dds',                  'label' => 'DDS',                  'rules' => ''],
-      ['field' => 'a_turno',                'label' => 'Turno',                'rules' => ''],
-      ['field' => 'a_via',                  'label' => 'Via',                  'rules' => ''],
-      ['field' => 'a_aplic',                'label' => 'Aplicación',           'rules' => ''],
-      ['field' => 'a_equipo',               'label' => 'Equipo',               'rules' => ''],
+      ['field' => 'a_etapa',                'label' => 'Etapa',                'rules' => 'max_length[40]'],
+      ['field' => 'a_ciclo',                'label' => 'Ciclo',                'rules' => 'max_length[40]'],
+      ['field' => 'a_dds',                  'label' => 'DDS',                  'rules' => 'max_length[40]'],
+      ['field' => 'a_turno',                'label' => 'Turno',                'rules' => 'max_length[40]'],
+      ['field' => 'a_via',                  'label' => 'Via',                  'rules' => 'max_length[40]'],
+      ['field' => 'a_aplic',                'label' => 'Aplicación',           'rules' => 'max_length[40]'],
+      ['field' => 'a_equipo',               'label' => 'Equipo',               'rules' => 'max_length[40]'],
       ['field' => 'a_observaciones',        'label' => 'Observaciones',        'rules' => ''],
       ['field' => 'fecha_aplicacion',       'label' => 'Fecha Aplicación',     'rules' => ''],
+      ['field' => 'calendario',             'label' => 'Calendario',           'rules' => 'required'],
 
       ['field' => 'dosis_planta',           'label' => 'Dosis Planta',         'rules' => ($val_datos['dosis_planta']? 'required': '')],
       ['field' => 'ha_bruta',               'label' => 'Ha Bruta',             'rules' => ($val_datos['ha_bruta']? 'required': '')],
@@ -503,12 +681,12 @@ class recetas extends MY_Controller {
     $rules = array(
       ['field' => 'empresa',                  'label' => 'Empresa',                  'rules' => 'required'],
       ['field' => 'empresaId',                'label' => 'Empresa',                  'rules' => 'required|numeric'],
-      ['field' => 'formula',                  'label' => 'Formula',                  'rules' => 'required'],
-      ['field' => 'formulaId',                'label' => 'Formula',                  'rules' => 'required|numeric'],
+      ['field' => 'formula',                  'label' => 'Formula',                  'rules' => ''],
+      ['field' => 'formulaId',                'label' => 'Formula',                  'rules' => 'numeric'],
       ['field' => 'area',                     'label' => 'Cultivo',                  'rules' => 'required'],
       ['field' => 'areaId',                   'label' => 'Cultivo',                  'rules' => 'required|numeric'],
       ['field' => 'tipo',                     'label' => 'Tipo',                     'rules' => 'required'],
-      ['field' => 'folio_formula',            'label' => 'Folio formula',            'rules' => 'required|numeric'],
+      ['field' => 'folio_formula',            'label' => 'Folio formula',            'rules' => 'numeric'],
       ['field' => 'folio',                    'label' => 'Folio',                    'rules' => 'required|numeric'],
       ['field' => 'fecha',                    'label' => 'Fecha',                    'rules' => 'required'],
       ['field' => 'almacenId',                'label' => 'Almacén',                  'rules' => 'required'],
@@ -539,6 +717,8 @@ class recetas extends MY_Controller {
    */
   private function showMsgs($tipo, $msg='', $title='Bascula')
   {
+    $txt = '';
+    $icono = 'error';
     switch($tipo){
       case 1:
         $txt = 'El campo ID es requerido.';
@@ -589,6 +769,23 @@ class recetas extends MY_Controller {
         $txt = 'La cuenta no tiene saldo suficiente.';
         $icono = 'error';
       break;
+
+      case 500:
+        $txt = 'Las recetas se guardaron correctamente.';
+        $icono = 'success';
+        break;
+      case 501:
+        $txt = 'Ocurrió un error al subir el archivo de recetas.';
+        $icono = 'error';
+        break;
+      case 502:
+        $txt = 'Ocurrió un error al leer el archivo de recetas.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Algunas recetas no se guardaron, revisar el detalle de errores.';
+        $icono = 'error';
+        break;
     }
 
     return array(

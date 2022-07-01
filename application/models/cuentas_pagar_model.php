@@ -31,9 +31,9 @@ class cuentas_pagar_model extends privilegios_model{
 		$sql = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
 		$sqlt = $this->input->get('ftipo')=='pv'? " AND (Date('".$fecha."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito": '';
 
-		if($this->input->get('fid_cliente') != ''){
-			$sql .= " AND f.id_proveedor = '".$this->input->get('fid_cliente')."'";
-			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_cliente')."'";
+		if($this->input->get('fid_proveedor') != ''){
+			$sql .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
+			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
 		}
 
 		$this->load->model('empresas_model');
@@ -253,9 +253,9 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Saldo de un cliente seleccionado
 	 * @return [type] [description]
 	 */
-	public function getCuentaProveedorData()
+	public function getCuentaProveedorData($otros = null)
 	{
-		$sql = '';
+		$sqlp1 = $sqlp2 = $sqlp3 = $sql = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -277,10 +277,32 @@ class cuentas_pagar_model extends privilegios_model{
 			$sql2 = 'WHERE saldo > 0';
 		}
 
-	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	    }
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('id_proveedor') != ''){
+      $sqlp1 = " AND f.id_proveedor = '".$this->input->get('id_proveedor')."'";
+      $sqlp2 = " AND c.id_proveedor = '".$this->input->get('id_proveedor')."'";
+      $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
+    }
+
+    $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = $sql_only_sel_fiels = '';
+    if (isset($otros['only_select'])) { // solo los seleccionados para pago masivo
+      $sql_only_sel_table = " INNER JOIN banco_pagos_compras bpc ON f.id_compra = bpc.id_compra
+        LEFT JOIN (
+          SELECT
+              cf.id_compra,
+              ('Ordenes: ' || String_agg(co.folio::character varying, ', ')) AS ordenes
+          FROM compras_ordenes co
+            INNER JOIN compras_facturas as cf ON co.id_orden = cf.id_orden
+          GROUP BY cf.id_compra
+        ) ord ON f.id_compra = ord.id_compra";
+      $sql_only_sel_where = " AND bpc.status = 'f'";
+      $sql_only_sel_order = 'proveedor ASC,';
+      $sql_only_sel_fiels = ', ord.ordenes';
+    }
 
 		/*** Saldo anterior ***/
 		$saldo_anterior = $this->db->query(
@@ -319,7 +341,7 @@ class cuentas_pagar_model extends privilegios_model{
                   compras AS f
                     INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
                 WHERE f.status <> 'ca' AND f.status <> 'b'
-                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  {$sqlp1}
                   AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_proveedor, f.id_compra
 
@@ -332,13 +354,13 @@ class cuentas_pagar_model extends privilegios_model{
                 FROM
                   compras AS f
                 WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  {$sqlp1}
                   AND Date(f.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_proveedor, f.id_compra
               ) AS d
               GROUP BY d.id_proveedor, d.id_compra
             ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
-          WHERE c.id_proveedor = '{$_GET['id_proveedor']}' AND f.status <> 'ca' AND f.status <> 'b'
+          WHERE f.status <> 'ca' AND f.status <> 'b' {$sqlp2}
              AND id_nc IS NULL
              AND Date(f.fecha) < '{$fecha1}'
              {$sql}
@@ -354,26 +376,30 @@ class cuentas_pagar_model extends privilegios_model{
 				f.id_compra,
 				f.serie,
 				f.folio,
-				Date(f.fecha) AS fecha,
+        Date(f.fecha) AS fecha,
+				Date(f.fecha_factura) AS fecha_factura,
 				COALESCE(f.total, 0) AS cargo,
 				COALESCE(f.importe_iva, 0) AS iva,
 				COALESCE(ac.abono, 0) AS abono,
 				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
+				Date(f.fecha_factura + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha_factura)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
-        COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
+        COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago,
+        p.nombre_fiscal AS proveedor {$sql_only_sel_fiels}
 			FROM
 				compras AS f
+        {$sql_only_sel_table}
 				LEFT JOIN (
 					SELECT id_compra, Sum(abono) AS abono
 					FROM (
 						(
 							SELECT
 								id_compra,
-								Sum(total) AS abono
+								Sum(total) AS abono,
+                'a' AS tipo
 							FROM
 								compras_abonos as fa
 							WHERE Date(fecha) <= '{$fecha2}'
@@ -383,34 +409,41 @@ class cuentas_pagar_model extends privilegios_model{
 						(
 							SELECT
 								id_nc AS id_compra,
-								Sum(total) AS abonos
+								Sum(total) AS abonos,
+                'nc' AS tipo
 							FROM
 								compras
 							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-								AND id_proveedor = {$_GET['id_proveedor']}
+								{$sqlp3}
 								AND Date(fecha) <= '{$fecha2}'
 							GROUP BY id_nc
 						)
 					) AS ffs
 					GROUP BY id_compra
 				) AS ac ON f.id_compra = ac.id_compra {$sql}
-			WHERE f.id_proveedor = {$_GET['id_proveedor']}
-				AND f.status <> 'ca' AND f.id_nc IS NULL
+        LEFT JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+			WHERE f.status <> 'ca' AND f.id_nc IS NULL
+        {$sqlp1}
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
+        {$sql_only_sel_where}
 
-			ORDER BY fecha ASC, serie ASC, folio ASC
+			ORDER BY {$sql_only_sel_order} fecha ASC, serie ASC, folio ASC
 			");
 
 
 		//obtenemos la info del proveedor
-		$this->load->model('proveedores_model');
-		$prov = $this->proveedores_model->getProveedorInfo($_GET['id_proveedor'], true);
+    $prov = null;
+		if (!empty($_GET['id_proveedor'])) {
+      $this->load->model('proveedores_model');
+      $prov = $this->proveedores_model->getProveedorInfo($_GET['id_proveedor'], true);
+      $prov = $prov['info'];
+    }
 
 		$response = array(
 			'cuentas'   => array(),
 			'anterior'  => array(),
-			'proveedor' => $prov['info'],
+			'proveedor' => $prov,
 			'fecha1'    => $fecha1
 		);
 		if($res->num_rows() > 0){
@@ -555,11 +588,11 @@ class cuentas_pagar_model extends privilegios_model{
 			}
 		}
 
-		//si es normex y sagarpa
-		if ($_GET['id_proveedor'] == 3297) {
+		//si es NORMATIVIDAD, NORMEX
+		if ($_GET['id_proveedor'] == 3297 || $_GET['id_proveedor'] == 807) {
 			$aux = $_GET['id_proveedor'];
 
-			$_GET['id_proveedor'] = 147;
+			$_GET['id_proveedor'] = 147; // sagarpa
 			$res = $this->getCuentaProveedorData();
 			$response2 = $this->cuentaProveedorCurpPdf($pdf, $res, false, $response[1]);
 
@@ -712,9 +745,9 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$bad_saldo_ante = true;
 		if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
-			$total_cargo += $res['anterior']->total;
-			$total_abono += $res['anterior']->abonos;
-			$total_saldo += $res['anterior']->saldo;
+			// $total_cargo += $res['anterior']->total;
+			// $total_abono += $res['anterior']->abonos;
+			// $total_saldo += $res['anterior']->saldo;
 		}else{
 			$res['anterior'] = new stdClass();
 			$res['anterior']->total = 0;
@@ -866,6 +899,241 @@ class cuentas_pagar_model extends privilegios_model{
 			$xls->workbook->close();
 		}
 	}
+
+
+  public function cuenta2ProveedorPdf(){
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    $res = $this->getCuentaProveedorData(['only_select' => true]);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
+    $pdf->titulo2 = isset($res['proveedor']->nombre_fiscal)? 'Cuenta de '.$res['proveedor']->nombre_fiscal: '';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+
+    // $response = $this->cuentaProveedorCurpPdf($pdf, $res);
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
+
+
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('C', 'C', 'C', 'L', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+    $widths = array(17, 17, 26, 45, 47, 24, 24, 24, 16, 17, 13);
+    $header = array('Fecha F', 'Fecha', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D Trans');
+
+    $total_cargo = 0;
+    $total_abono = 0;
+    $total_saldo = 0;
+    $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+    $aux_prov = '';
+    $totales_x_tipo = array('nacional' => 0, 'internacional' => 0);
+
+    $bad_saldo_ante = true;
+    if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
+      // $total_cargo += $res['anterior']->total;
+      // $total_abono += $res['anterior']->abonos;
+      // $total_saldo += $res['anterior']->saldo;
+    }else{
+      $res['anterior'] = new stdClass();
+      $res['anterior']->total = 0;
+      $res['anterior']->abonos = 0;
+      $res['anterior']->saldo = 0;
+    }
+    $res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
+    $comprasids = array();
+    foreach($res['cuentas'] as $key => $item){
+      $comprasids[] = $item->id_compra;
+      $band_head = false;
+      if($pdf->GetY()+5 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        if ($pdf->GetY()+5 >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      if($bad_saldo_ante){
+        $pdf->SetFont('Arial','',7);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array('', '', '', $res['anterior']->concepto, '',
+          MyString::formatoNumero($res['anterior']->total, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
+          '', '', ''), false);
+        $bad_saldo_ante = false;
+      }
+
+
+      // if (!isset($res['cuentas'][$key+1]) || $aux_prov != $res['cuentas'][$key+1]->proveedor) {
+      if ($aux_prov != $res['cuentas'][$key]->proveedor) {
+        if ($key > 0) {
+          $pdf->SetX(6);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(220,220,220);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(152, 24, 24, 24));
+          $pdf->Row(array('Totales:',
+              MyString::formatoNumero($total_cargo_p, 2, '$', false),
+              MyString::formatoNumero($total_abono_p, 2, '$', false),
+              MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+        }
+
+        $total_cargo_p = $total_abono_p = $total_saldo_p = 0;
+        $pdf->SetY($pdf->GetY()+3);
+        $aux_prov = $res['cuentas'][$key]->proveedor;
+      }
+
+      $pdf->SetFont('Arial','',8);
+
+      if (preg_match('/internacional/', $item->concepto2)) {
+        $totales_x_tipo['internacional'] += $item->cargo;
+      } else {
+        $totales_x_tipo['nacional'] += $item->cargo;
+      }
+
+      $datos = array($item->fecha_factura,
+                  $item->fecha,
+                  $item->serie.$item->folio,
+                  $item->ordenes,
+                  $item->proveedor,
+                  MyString::formatoNumero($item->cargo, 2, '$', false),
+                  MyString::formatoNumero($item->abono, 2, '$', false),
+                  MyString::formatoNumero($item->saldo, 2, '$', false),
+                  $item->estado, $item->fecha_vencimiento,
+                  $item->dias_transc);
+
+      $total_cargo_p += $item->cargo;
+      $total_abono_p += $item->abono;
+      $total_saldo_p += $item->saldo;
+
+      $total_cargo += $item->cargo;
+      $total_abono += $item->abono;
+      $total_saldo += $item->saldo;
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(220,220,220);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(152, 24, 24, 24));
+    $pdf->Row(array('Totales:',
+        MyString::formatoNumero($total_cargo_p, 2, '$', false),
+        MyString::formatoNumero($total_abono_p, 2, '$', false),
+        MyString::formatoNumero($total_saldo_p, 2, '$', false)), true);
+
+    $pdf->SetX(6);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(152, 24, 24, 24));
+    $pdf->Row(array('Totales:',
+        MyString::formatoNumero($total_cargo, 2, '$', false),
+        MyString::formatoNumero($total_abono, 2, '$', false),
+        MyString::formatoNumero($total_saldo, 2, '$', false)), true);
+
+
+    $pdf->Output('cuentas_proveedor.pdf', 'I');
+  }
+  public function cuenta2ProveedorExcel(&$xls=null, $close=true){
+    $res = $this->getCuentaProveedorData(['only_select' => true]);
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
+    $this->load->library('myexcel');
+    if($xls == null)
+      $xls = new myexcel();
+
+    $worksheet =& $xls->workbook->addWorksheet();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $xls->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $xls->titulo2 = (isset($res['proveedor']->nombre_fiscal)? 'Cuenta de '.$res['proveedor']->nombre_fiscal: '');
+    $xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
+
+    if(is_array($res['anterior'])){
+      $res['anterior'] = new stdClass();
+      $res['anterior']->cargo = 0;
+      $res['anterior']->abono = 0;
+      $res['anterior']->saldo = 0;
+    }else{
+      $res['anterior']->cargo = $res['anterior']->total;
+      $res['anterior']->abono = $res['anterior']->abonos;
+    }
+    $res['anterior']->fecha = $res['anterior']->fecha_factura = $res['anterior']->serie = $res['anterior']->folio = '';
+    $res['anterior']->concepto = $res['anterior']->estado = $res['anterior']->fecha_vencimiento = '';
+    $res['anterior']->proveedor = '';
+    $res['anterior']->dias_transc = '';
+    $res['anterior']->command_sum = false;
+
+    array_unshift($res['cuentas'], $res['anterior']);
+
+    $data_fac = $res['cuentas'];
+
+    $row=0;
+    //Header
+    $xls->excelHead($worksheet, $row, 8, array(
+        array($xls->titulo2, 'format_title2'),
+        array($xls->titulo3, 'format_title3'),
+        array($xls->titulo4, 'format_title3')
+    ));
+
+    $row +=3;
+    $xls->excelContent($worksheet, $row, $data_fac, array(
+        'head' => array('Fecha F.', 'Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Cargo', 'Abono', 'Saldo', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
+        'conte' => array(
+            array('name' => 'fecha_factura', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'fecha', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'serie', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'folio', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'concepto', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'proveedor', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'cargo', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'abono', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'estado', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'fecha_vencimiento', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'dias_transc', 'format' => 'format4', 'sum' => -1))
+    ));
+
+    if($close){
+      $xls->workbook->send('cuentaProveedor.xls');
+      $xls->workbook->close();
+    }
+  }
 
 
 
@@ -1551,9 +1819,9 @@ class cuentas_pagar_model extends privilegios_model{
           $sql_field_cantidad = ", (SELECT Sum(cp.cantidad) FROM compras_facturas AS cf
                                     INNER JOIN compras_productos AS cp ON cp.id_orden = cf.id_orden
                                     WHERE cf.id_compra = f.id_compra) AS cantidad_productos";
-        $facturas = $this->db->query("SELECT id_compra, Date(fecha) AS fecha, serie, folio,
+        $facturas = $this->db->query("SELECT id_compra, Date(fecha) AS fecha, Date(fecha) AS fecha_factura, serie, folio,
             (CASE tipo_documento WHEN 'fa' THEN 'FACTURA' ELSE 'REMISION' END)::text AS concepto, subtotal, importe_iva, total,
-            Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
+            Date(fecha_factura + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
           FROM compras as f
           WHERE id_proveedor = {$proveedor->id_proveedor}
             AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
@@ -2086,14 +2354,15 @@ class cuentas_pagar_model extends privilegios_model{
       f.serie,
       f.folio,
       Date(f.fecha) AS fecha,
+      Date(f.fecha_factura) AS fecha_factura,
       p.nombre_fiscal AS proveedor,
       COALESCE(f.total, 0) AS cargo,
       COALESCE(f.importe_iva, 0) AS iva,
       COALESCE(ac.abono, 0) AS abono,
       (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
       (CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-      Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-      (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
+      Date(f.fecha_factura + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+      (Date('2019-09-10'::timestamp with time zone)-Date(f.fecha_factura)) AS dias_transc,
       ('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
       'f'::text as tipo, f.status,
       COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago

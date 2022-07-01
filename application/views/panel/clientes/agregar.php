@@ -103,8 +103,32 @@
                   <div class="control-group">
                     <label class="control-label" for="fempresa">Empresa </label>
                     <div class="controls">
-                    <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
-                    <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">
+                      <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
+                      <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">
+                    </div>
+                  </div>
+
+                  <div class="control-group hide" id="groupFempresa_ap">
+                    <label class="control-label" for="fempresa_ap">Empresa Aplicación </label>
+                    <div class="controls">
+                      <input type="text" name="fempresa_ap" id="fempresa_ap" class="span10" value="" placeholder="Nombre">
+                      <input type="hidden" name="did_empresa_ap" value="" id="did_empresa_ap">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dregimen_fiscal">Régimen fiscal </label>
+                    <div class="controls">
+                    <select name="dregimen_fiscal" id="dregimen_fiscal" class="span12">
+                      <option value=""></option>
+                    <?php foreach ($regimen_fiscales as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->c_RegimenFiscal ?>"
+                        <?php echo set_select('dregimen_fiscal', $value->c_RegimenFiscal, false, $this->input->post('dregimen_fiscal')); ?>><?php echo $value->label ?></option>
+                    <?php
+                    } ?>
+                    </select>
                     </div>
                   </div>
 								</div> <!--/span-->

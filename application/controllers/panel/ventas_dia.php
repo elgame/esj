@@ -56,8 +56,8 @@ class ventas_dia extends MY_Controller {
     $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Ventas del dia'; //activa la opcion del menu
-    $params['seo'] = array('titulo' => 'Ventas del dia');
+    $params['opcmenu_active'] = 'Orden de Compra'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Orden de Compra');
 
     $params['datos_s'] = $this->ventas_dia_model->getFacturas('40', " AND id_nc IS NULL");
 
@@ -495,7 +495,7 @@ class ventas_dia extends MY_Controller {
     $callback_isValidDate      = 'callback_isValidDate';
     $callback_val_total        = 'callback_val_total';
     $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    if ($borrador)
+    if ($borrador || true)
     {
       // $callback_seriefolio_check = '';
       $callback_isValidDate      = '';
@@ -872,17 +872,6 @@ class ventas_dia extends MY_Controller {
           return false;
         }
 
-      } else {
-        $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
-
-        $hoy = date('Y-m-d');
-        // $hoy = '2015-07-19';
-
-        if (strtotime($hoy) > strtotime($anoLimite))
-        {
-          $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya caducaron, no pueden ser utilizados.');
-          return false;
-        }
       }
     }
     return true;

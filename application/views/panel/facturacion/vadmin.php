@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Ventas del dia
+            Orden de Compra
           </li>
         </ul>
       </div>
@@ -16,7 +16,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Ventas del dia</h2>
+            <h2><i class="icon-file"></i> Orden de Compra</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
@@ -135,17 +135,17 @@
                         if ($fact->status !== 'ca' && $fact->id_nc === null)
                         {
                           if ($fact->id_factura_asignada == '') {
-                            echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
-                              'params'   => 'id_vd='.$fact->id_factura,
-                              'btn_type' => 'btn',
-                              'attrs' => array('onclick' => "msb.confirm('Estas seguro de Facturar la venta?', 'Facturas', this); return false;"))
-                            );
+                            // echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
+                            //   'params'   => 'id_vd='.$fact->id_factura,
+                            //   'btn_type' => 'btn',
+                            //   'attrs' => array('onclick' => "msb.confirm('Estas seguro de Facturar la venta?', 'Facturas', this); return false;"))
+                            // );
 
-                            echo $this->usuarios_model->getLinkPrivSm('ventas/agregar/', array(
-                              'params'   => 'id_vd='.$fact->id_factura,
-                              'btn_type' => 'btn',
-                              'attrs' => array('onclick' => "msb.confirm('Estas seguro de Remisionar la venta?', 'Facturas', this); return false;"))
-                            );
+                            // echo $this->usuarios_model->getLinkPrivSm('ventas/agregar/', array(
+                            //   'params'   => 'id_vd='.$fact->id_factura,
+                            //   'btn_type' => 'btn',
+                            //   'attrs' => array('onclick' => "msb.confirm('Estas seguro de Remisionar la venta?', 'Facturas', this); return false;"))
+                            // );
 
                             echo $this->usuarios_model->getLinkPrivSm('ventas_dia/cancelar/', array(
                               'params'   => 'id='.$fact->id_factura,

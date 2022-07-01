@@ -160,6 +160,14 @@
                     </div>
 
                     <div class="control-group">
+                      <label class="control-label" for="ffecha_contrato">Fecha vencimiento contrato </label>
+                      <div class="controls">
+                        <input type="date" name="ffecha_contrato" id="ffecha_contrato" class="span6"
+                          value="<?php echo isset($data['info'][0]->fecha_contrato)?$data['info'][0]->fecha_contrato:''; ?>" maxlength="25" placeholder="Fecha vencimiento de contrato">
+                      </div>
+                    </div>
+
+                    <div class="control-group">
                       <label class="control-label" for="fnacionalidad">Nacionalidad </label>
                       <div class="controls">
                         <input type="text" name="fnacionalidad" id="fnacionalidad" class="span6"
@@ -272,6 +280,18 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dregistro_patronal">Registro patronal:</label>
+                    <div class="controls">
+                      <select name="fregistro_patronal" id="fregistro_patronal">
+                        <option></option>
+                        <?php foreach ($registros_patronales as $key => $regp): ?>
+                        <option value="<?php echo $regp ?>" <?php echo set_select('fregistro_patronal', $regp, false, (isset($data['info'][0]->registro_patronal)? $data['info'][0]->registro_patronal:'')); ?>><?php echo $regp ?></option>
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="cultivosGrup">
                     <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                     <div class="controls">
@@ -327,6 +347,7 @@
                     <select name="fbanco" id="fbanco">
                       <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>BBVA Bancomer</option>
                       <option value="santr" <?php echo set_select('fbanco', 'santr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Santander</option>
+                      <option value="banor" <?php echo set_select('fbanco', 'banor', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Banorte</option>
                       <option value="efectivo" <?php echo set_select('fbanco', 'efectivo', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Efectivo</option>
                     </select>
                     </div>
@@ -340,25 +361,32 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="dno_proveedor_banorte">Clave Proveedor Banco </label>
+                    <div class="controls">
+                      <input type="text" name="dno_proveedor_banorte" id="dno_proveedor_banorte" class="span12 vpositive" value="<?php echo isset($data['info'][0]->no_proveedor_banorte)?$data['info'][0]->no_proveedor_banorte:''; ?>" maxlength="13" placeholder="Clave Proveedor Banco">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="dno_seguro">No Seguro </label>
                     <div class="controls">
                       <input type="text" name="dno_seguro" id="dno_seguro" class="span12 vpositive" value="<?php echo isset($data['info'][0]->no_seguro)?$data['info'][0]->no_seguro:''; ?>" maxlength="12" placeholder="# Seguro">
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <!-- <div class="control-group">
                     <label class="control-label" for="dno_trabajador">No Trabajador </label>
                     <div class="controls">
                       <input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo isset($data['info'][0]->no_empleado)?$data['info'][0]->no_empleado:''; ?>" maxlength="8" placeholder="# Trabajador">
                     </div>
-                  </div>
+                  </div> -->
 
-                  <div class="control-group">
+                  <!-- <div class="control-group">
                     <label class="control-label" for="dno_checador">No Checador </label>
                     <div class="controls">
                       <input type="text" name="dno_checador" id="dno_checador" class="span12" value="<?php echo isset($data['info'][0]->no_checador)?$data['info'][0]->no_checador:''; ?>" maxlength="8" placeholder="# Checador">
                     </div>
-                  </div>
+                  </div> -->
 
                   <div class="control-group">
                     <label class="control-label" for="tipo_contrato">Tipo Contrato </label>
@@ -417,6 +445,20 @@
                     <?php
                     } ?>
                     </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dp_alimenticia">Pensión alimenticia %</label>
+                    <div class="controls">
+                      <input type="text" name="dp_alimenticia" id="dp_alimenticia" class="span12 vpositive" value="<?php echo isset($data['info'][0]->p_alimenticia)? $data['info'][0]->p_alimenticia:''; ?>" max="100" placeholder="% Pension alimenticia">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dinfonacot">Infonacot x sem</label>
+                    <div class="controls">
+                      <input type="text" name="dinfonacot" id="dinfonacot" class="span12 vpositive" value="<?php echo isset($data['info'][0]->fonacot)? $data['info'][0]->fonacot:''; ?>" max="100" placeholder="">
                     </div>
                   </div>
 

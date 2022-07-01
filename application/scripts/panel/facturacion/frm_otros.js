@@ -10,11 +10,23 @@ $(function(){
     }
   });
 
+  $('#table_prod, #table_prod2').on('click', '.btn.impuestosEx', function(){
+    var $group = $(this).parents(".btn-group"),
+      $ul = $group.find('.dropdown-menu.impuestosEx');
+    if ($ul.css('display') == 'none') {
+      $ul.show();
+      $group.find('#dieps').focus();
+    } else {
+      $ul.hide();
+    }
+  });
+
   $("#table_prod tbody tr .btn-group .btn.ventasmore").click();
   $("#table_prod tbody tr:last-child .btn-group .btn.ventasmore").click();
 
   autocompleteCalidadLive();
   autocompleteTamanioLive();
+  autocompleteTamanioProdLive();
   closeGroupMoreOut();
   extrasProductosEspeciales();
 
@@ -96,8 +108,31 @@ function autocompleteTamanioLive () {
       }
     });
   });
+}
 
+function autocompleteTamanioProdLive () {
+  $('#table_prod').on('focus', 'input#prod_dtamanio_prod:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this),
+            $tr = $this.parent().parent();
 
+        $this.css("background-color", "#B0FFB0");
+
+        $tr.find('#prod_did_tamanio_prod').val(ui.item.id);
+      }
+    }).keydown(function(event){
+      if(event.which == 8 || event == 46) {
+        var $tr = $(this).parent().parent();
+
+        $(this).css("background-color", "#FFD9B3");
+        $tr.find('#prod_did_tamanio_prod').val('');
+      }
+    });
+  });
 }
 
 /****** Supervisor, certificados, etc  ********/
@@ -721,7 +756,9 @@ var autocompleteFraccionArancelaria = function () {
         var $empresa =  $(this),
         $tr = $empresa.parent().parent();
 
-        $empresa.val(ui.item.id).css("background-color", "#A1F57A");
+        setTimeout(function(){
+          $empresa.val(ui.item.id).css("background-color", "#A1F57A");
+        }, 300);
         $tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]').prop('selected', true);
         console.log($tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]'), $tr);
       }

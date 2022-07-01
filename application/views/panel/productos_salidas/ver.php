@@ -57,6 +57,28 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="tipo">Tipo</label>
+                <div class="controls">
+                  <?php
+                  if (isset($salida['info'][0]->tipo)) {
+                    switch ($salida['info'][0]->tipo) {
+                      case 'c':
+                        $tipooo = 'Combustible';
+                        break;
+                      case 'r':
+                        $tipooo = 'Recetas';
+                        break;
+                      default:
+                        $tipooo = 'Salida';
+                        break;
+                    }
+                    echo $tipooo;
+                  }
+                  ?>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $salida['info'][0]->folio); ?>" readonly>
@@ -74,6 +96,13 @@
                       'btn_type' => 'btn-info btn-large btn-block',
                       'attrs' => array('target' => '_BLANK'))
                     );
+
+                    if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
+                      echo ' <a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida['info'][0]->id_salida."&itipo=0").'" target="_BLANK" title="Imprimir">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                      echo ' <a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida['info'][0]->id_salida."&itipo=1").'" target="_BLANK" title="Imprimir">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket Vig</span></a>';
+                    }
               ?>
                     </div>
                   </div>
@@ -92,6 +121,16 @@
               <div class="box-content">
                 <div class="row-fluid">
                   <div class="span6">
+                    <div class="control-group" id="empresaApGrup">
+                      <label class="control-label" for="empresaAp">Empresa aplicación </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="empresaAp" class="span11" id="empresaAp" value="<?php echo set_value('empresaAp', isset($salida['info'][0]->empresa_ap) ? $salida['info'][0]->empresa_ap : '') ?>" placeholder="Empaque, Mamita, etc">
+                        </div>
+                        <input type="hidden" name="empresaApId" id="empresaApId" value="<?php echo set_value('empresaApId', isset($salida['info'][0]->id_empresa_ap) ? $salida['info'][0]->id_empresa_ap : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
                     <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                       <div class="controls">

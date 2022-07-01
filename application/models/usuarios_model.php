@@ -23,7 +23,7 @@ class Usuarios_model extends privilegios_model {
 				$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 		}
 
-		$sql = "WHERE user_nomina = '{$tipo}'";
+		$sql = "WHERE u.tipo = 'admin' AND user_nomina = '{$tipo}'";
     $sql .= " AND u.de_rancho = '{$de_rancho}'"; //filtro para los de rancho
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
@@ -39,20 +39,30 @@ class Usuarios_model extends privilegios_model {
     if($this->input->get('did_empresa') != '')
       $sql .= ' AND u.id_empresa = ' . $this->input->get('did_empresa');
 
+    if ($this->input->get('contrato') == 'true') {
+      $sql .= " AND u.fecha_contrato IS NOT NULL AND (u.fecha_contrato - Date(now())) <= 15";
+    }
+
 		$query = BDUtil::pagination("
 				SELECT u.id AS id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.usuario, u.email, u.tipo,
-					u.status, u.rfc, u.cuenta_banco, u.no_seguro
+					u.status, u.rfc, u.cuenta_banco, u.no_seguro, (fecha_contrato - Date(now())) AS dias_faltantes
 				FROM usuarios u
 				".$sql."
 				ORDER BY (u.nombre || u.apellido_paterno || u.apellido_materno) ASC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
+    $rescontrato = $this->db->query("
+      SELECT Count(id) AS nums
+      FROM usuarios
+      WHERE fecha_contrato IS NOT NULL AND (fecha_contrato - Date(now())) <= 15")->row();
+
 		$response = array(
 				'usuarios'      => array(),
 				'total_rows'     => $query['total_rows'],
 				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
+				'result_page'    => $params['result_page'],
+        'contrato'       => $rescontrato->nums
 		);
 		if($res->num_rows() > 0)
 			$response['usuarios'] = $res->result();
@@ -103,6 +113,8 @@ class Usuarios_model extends privilegios_model {
 
 						'id_empresa'           => $this->input->post('did_empresa'),
             'id_puesto'            => $this->input->post('fpuesto'),
+            'registro_patronal'    => (strlen($this->input->post('fregistro_patronal'))>0? $this->input->post('fregistro_patronal'): NULL),
+
 						'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
 						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
@@ -127,6 +139,10 @@ class Usuarios_model extends privilegios_model {
             // 'tipo_regimen'  => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
             'tipo_jornada'  => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
             'riesgo_puesto' => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+            'p_alimenticia' => trim($this->input->post('dp_alimenticia'))? $this->input->post('dp_alimenticia'): 0,
+            'fonacot' => trim($this->input->post('dinfonacot'))? $this->input->post('dinfonacot'): 0,
+
+            'fecha_contrato' => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -138,7 +154,7 @@ class Usuarios_model extends privilegios_model {
 		}
 
 		$this->db->insert('usuarios', $data);
-		$id_usuario = $this->db->insert_id('usuarios', 'id');
+		$id_usuario = $this->db->insert_id('usuarios_id_seq');
 
 		//privilegios
 		if (is_array( $data_privilegios )) {
@@ -188,6 +204,8 @@ class Usuarios_model extends privilegios_model {
 
 						'id_empresa'           => $this->input->post('did_empresa'),
 						'id_puesto'            => $this->input->post('fpuesto'),
+            'registro_patronal'    => (strlen($this->input->post('fregistro_patronal'))>0? $this->input->post('fregistro_patronal'): NULL),
+
             'id_area'              => is_numeric($this->input->post('areaId'))? $this->input->post('areaId'): NULL, // cultivo
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
             'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
@@ -198,18 +216,23 @@ class Usuarios_model extends privilegios_model {
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
 						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
 
-            'cuenta_banco'    => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
-            'no_seguro'       => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
-            'user_nomina'     => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
-            'id_departamente' => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
-            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
-            'no_empleado'     => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
-            'no_checador'     => trim($this->input->post('dno_checador'))? intval($this->input->post('dno_checador')): NULL,
+            'cuenta_banco'         => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
+            'no_proveedor_banorte' => trim($this->input->post('dno_proveedor_banorte'))?$this->input->post('dno_proveedor_banorte'): '',
+            'no_seguro'            => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+            'user_nomina'          => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+            'id_departamente'      => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'            => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+            'no_empleado'          => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+            'no_checador'          => trim($this->input->post('dno_checador'))? intval($this->input->post('dno_checador')): NULL,
 
-            'tipo_contrato'   => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
-            // 'tipo_regimen'    => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
-            'tipo_jornada'    => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
-            'riesgo_puesto'   => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+            'tipo_contrato'        => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
+            // 'tipo_regimen'      => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
+            'tipo_jornada'         => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
+            'riesgo_puesto'        => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
+            'p_alimenticia'        => trim($this->input->post('dp_alimenticia'))? $this->input->post('dp_alimenticia'): 0,
+            'fonacot'              => trim($this->input->post('dinfonacot'))? $this->input->post('dinfonacot'): 0,
+
+            'fecha_contrato'       => ($this->input->post('ffecha_contrato')!=''? $this->input->post('ffecha_contrato'): NULL)
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');
@@ -229,6 +252,8 @@ class Usuarios_model extends privilegios_model {
         array('evento' => 'Cambio de Salario Diario', 'campo' => 'salario_diario', 'valor_nuevo' => $data['salario_diario']),
         array('evento' => 'Cambio de Salario Diario Real', 'campo' => 'salario_diario_real', 'valor_nuevo' => $data['salario_diario_real']),
         array('evento' => 'Cambio de Empresa', 'campo' => 'id_empresa', 'valor_nuevo' => $data['id_empresa']),
+        array('evento' => 'Fecha de salida', 'campo' => 'fecha_salida', 'valor_nuevo' => $data['fecha_salida'], 'date' => true),
+        array('evento' => 'Fecha de entrada', 'campo' => 'fecha_entrada', 'valor_nuevo' => $data['fecha_entrada'], 'date' => true),
       );
 
       $this->usuario_historial_model->make($camposHistorial);
@@ -254,6 +279,20 @@ class Usuarios_model extends privilegios_model {
     }
   }
 
+  public function copiarPrivilegios($datos)
+  {
+    $this->load->model('usuarios_model');
+
+    $data = $this->usuarios_model->get_usuario_info($datos['usuarioId'], false, $datos['empresaId']);
+    $privilegios = isset($data['privilegios']) ? $data['privilegios']: [];
+
+    foreach ($datos['id_empresas'] as $key => $empresa) {
+      $this->updatePrivilegios($privilegios, $datos['usuarioId'], $empresa);
+    }
+
+    return array('error' => FALSE);
+  }
+
 	/*
 	 |	Obtiene la informacion de un usuario
 	 */
@@ -261,18 +300,20 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
+		$sql_res = $this->db->select("u.id, u.id AS no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
-            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono" )
+            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto, u.no_checador, u.id_area, u.telefono, u.fecha_contrato,
+            u.no_proveedor_banorte, u.p_alimenticia, u.fonacot, u.registro_patronal" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")
-												->where("id", $id_usuario)
+                        ->where("id", $id_usuario)
+												->where("e.status", 't')
 												->get();
 		$data['info'] = array();
 
@@ -331,7 +372,7 @@ class Usuarios_model extends privilegios_model {
     $this->load->model('usuario_historial_model');
     $this->usuario_historial_model->setIdUsuario($id_usuario);
 
-    $evento = array('evento' => 'Activado del listado de empleados', 'valor_anterior' => null, 'valor_nuevo' => null);
+    $evento = array('evento' => 'Activado del listado de empleados', 'campo' => 'fecha_entrada', 'valor_nuevo' => $fechaEntrada, 'date' => true);
     $historial = $this->usuario_historial_model->buildEvent($evento);
     $this->usuario_historial_model->guardaHistorial(array($historial));
 
@@ -419,7 +460,7 @@ class Usuarios_model extends privilegios_model {
 		return false;
 	}
 
-  public function getEmpresasPermiso()
+  public function getEmpresasPermiso($tipo=null)
   {
     if ($this->session->userdata('selempresa') == false) {
       $this->load->model('empresas_model');
@@ -431,17 +472,19 @@ class Usuarios_model extends privilegios_model {
     if ($this->session->userdata('id_usuario') > 0) {
       $result = $this->db->query("SELECT e.id_empresa, e.nombre_fiscal
         FROM empresas e INNER JOIN usuarios_privilegios up ON e.id_empresa = up.id_empresa
-        WHERE up.usuario_id = ".$this->session->userdata('id_usuario')." GROUP BY e.id_empresa");
+        WHERE e.status = 't' AND up.usuario_id = ".$this->session->userdata('id_usuario')."
+        GROUP BY e.id_empresa");
       $result = $result->result();
     }
 
-    // $result = $this->db->query(
-    //   "SELECT p.id, p.nombre, p.url_accion
-    //   FROM usuarios u
-    //     INNER JOIN usuarios_privilegios up ON u.id = up.usuario_id
-    //     INNER JOIN privilegios p ON p.id = up.privilegio_id
-    //   WHERE u.id = ".$this->session->userdata('id_usuario')."
-    //     AND up.privilegio_id in(SELECT id FROM privilegios WHERE id_padre = 382)");
+    if ($tipo == 'ids') {
+      $ids = [];
+      foreach ($result as $key => $value) {
+        $ids[] = $value->id_empresa;
+      }
+      return $ids;
+    }
+
     return $result;
   }
 
@@ -519,22 +562,30 @@ class Usuarios_model extends privilegios_model {
    * Obtiene el listado de empresas para usar en peticiones Ajax.
    */
   public function getUsuariosAjax(){
-    $sql = '';
+    $sql = "";
     if($this->input->get('empleados')!='')
       $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
       $sql .= " AND id_empresa = ".$this->input->get('did_empresa');
     if($this->input->get('only_usuario')!='')
       $sql .= " AND usuario IS NOT NULL";
+    if($this->input->get('status')!='') {
+      $status = $this->input->get('status')==='all'? '': $this->input->get('status');
+      if (!empty($status)) {
+        $sql .= " AND status = '{$status}'";
+      }
+    } else {
+      $sql .= " AND status = 't'";
+    }
 
     $res = $this->db->query(
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,
                 DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
-        WHERE status = 't' AND
-                (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                 lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-                 lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
+        WHERE
+              (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+               lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+               lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
           {$sql}
         ORDER BY nombre ASC
         LIMIT 20");

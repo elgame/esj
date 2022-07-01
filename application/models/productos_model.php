@@ -91,7 +91,7 @@ class productos_model extends CI_Model {
 
 		$this->db->insert('productos_familias', $data);
 
-		$id_familia = $this->db->insert_id('productos_familias', 'id_familia');
+		$id_familia = $this->db->insert_id('productos_familias_id_familia_seq');
 
 		return array('error' => FALSE, $id_familia);
 	}
@@ -272,9 +272,13 @@ class productos_model extends CI_Model {
 		}
 
 		$this->db->insert('productos', $data);
-		$id_producto = $this->db->insert_id('productos', 'id_producto');
+		$id_producto = $this->db->insert_id('productos_id_producto_seq');
 
-		$this->addPresentacion($id_producto);
+    $this->addPresentacion($id_producto);
+
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
+      $this->addColores($id_producto);
+    }
 
 		return array('error' => FALSE, $id_producto);
 	}
@@ -323,6 +327,10 @@ class productos_model extends CI_Model {
 		$this->db->update('productos', $data, "id_producto = {$id_producto}");
 
 		$this->addPresentacion($id_producto);
+
+    if ($data['id_empresa'] == '20') { // Empresa Agro 20
+      $this->addColores($id_producto);
+    }
 
 		return array('error' => FALSE, $id_producto);
 	}
@@ -377,6 +385,24 @@ class productos_model extends CI_Model {
 		return true;
 	}
 
+  public function addColores($id_producto, $data=NULL)
+  {
+    if ($data == NULL) {
+      $this->db->delete('productos_color_agro', "id_producto = {$id_producto}");
+
+      if ($this->input->post('colorEmpresaId')) {
+        foreach ($this->input->post('colorEmpresaId') as $key => $idEmpresa) {
+          $this->db->insert('productos_color_agro', [
+            'id_producto' => $id_producto,
+            'id_empresa'  => $_POST['colorEmpresaId'][$key],
+            'color'       => $_POST['colorColor'][$key],
+            'tipo_apli'   => $_POST['colorTipoApli'][$key],
+          ]);
+        }
+      }
+    }
+  }
+
 	/**
 	 * Obtiene la informacion de un producto
 	 * @param  boolean $id_producto [description]
@@ -407,6 +433,7 @@ class productos_model extends CI_Model {
       $data['presentaciones'] = $this->getPresentaciones($id_producto);
   		$data['piezas'] = $this->getPiezas($id_producto);
       $data['familia'] = $this->getFamiliaInfo($data['info']->id_familia, true)['info'];
+      $data['colores'] = $this->getColores($id_producto);
   	}
 
 		return $data;
@@ -421,20 +448,21 @@ class productos_model extends CI_Model {
 	public function getFolioNext($id_familia)
 	{
 		$codigo = 1;
-		$res = $this->db->query("SELECT Coalesce(t.codigo[2], t.codigo[1]) AS codigo, t.rfc,
+		$res = $this->db->query("SELECT Coalesce(t.codigo[2], t.codigo[1]) AS codigo,
+        substring(t.cod from '([0-9]+)') AS cod, t.rfc,
         t.codigo[3] AS codigo_fecha, t.tipo
       FROM (
-        SELECT string_to_array(p.codigo, '-') AS codigo, substring(e.rfc, 1, 3) AS rfc,
+        SELECT string_to_array(p.codigo, '-') AS codigo, p.codigo AS cod, substring(e.rfc, 1, 3) AS rfc,
           pf.tipo
         FROM empresas e
           LEFT JOIN productos_familias pf ON e.id_empresa = pf.id_empresa
           LEFT JOIN productos p ON pf.id_familia = p.id_familia
         WHERE pf.id_familia = {$id_familia}
       ) t
-      ORDER BY Coalesce(t.codigo[2], t.codigo[1])::integer DESC")->row();
+      ORDER BY substring(t.cod from '([0-9]+)')::integer DESC")->row();
 
 		if(isset($res->codigo)){
-      $codigo = intval($res->codigo) + 1;
+      $codigo = intval($res->cod) + 1;
     }
 
     // Si es activo
@@ -509,6 +537,26 @@ class productos_model extends CI_Model {
 		return $response;
 	}
 
+  public function getColores($id_producto)
+  {
+    $str_query = "
+        SELECT pca.id_producto, pca.id_empresa, pca.color, pca.tipo_apli,
+          e.nombre_fiscal AS empresa
+        FROM productos_color_agro pca
+          INNER JOIN empresas e ON e.id_empresa = pca.id_empresa
+        WHERE pca.id_producto = {$id_producto}
+        ORDER BY empresa ASC
+        ";
+    $res = $this->db->query($str_query);
+
+    $response = array();
+    if($res->num_rows() > 0){
+      $response = $res->result();
+    }
+
+    return $response;
+  }
+
   public function getPiezas($id_producto)
   {
     $str_query = "
@@ -578,6 +626,12 @@ class productos_model extends CI_Model {
         $sql .= " AND pf.tipo = '".$this->input->get('tipo')."'";
     }
 
+    if ($this->input->get('status') == 'all') {
+      $sql .= "";
+    } else {
+      $sql .= " AND p.status = 'ac'";
+    }
+
     if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
       $sql .= " AND p.id_empresa in(".$this->input->get('did_empresa').")";
 
@@ -585,7 +639,7 @@ class productos_model extends CI_Model {
         "SELECT p.id_producto, p.nombre, p.codigo, p.tipo, pf.nombre AS familia
         FROM productos p
           INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
-        WHERE pf.status = 'ac' AND p.status = 'ac'
+        WHERE pf.status = 'ac'
           {$sql}
         ORDER BY p.nombre ASC
         LIMIT 20"
@@ -608,6 +662,221 @@ class productos_model extends CI_Model {
     }
 
     return $response;
+  }
+
+  public function getFamiliasAjax($params)
+  {
+    $sql = '';
+    if (isset($params['id_empresa'])) {
+      $sql = " AND id_empresa = {$params['id_empresa']}";
+    }
+
+    if (isset($params['tipo'])) {
+      $sql = " AND tipo = '{$params['tipo']}'";
+    }
+
+    $query = $this->db->query("SELECT id_familia, id_empresa, codigo, nombre, tipo
+        FROM productos_familias
+        WHERE status = 'ac' {$sql}
+        ORDER BY nombre ASC");
+
+    return $query->result();
+  }
+
+
+
+
+  /**
+   * Reporte de salidas por codigo
+   *
+   * @return
+   */
+  public function getListaColoresData()
+  {
+    $sqlr = $sqlc = $sql = '';
+
+    //Filtros para buscar
+    if($this->input->get('fid_producto') != ''){
+      $id_producto = $this->input->get('fid_producto');
+      $sql .= " AND p.id_producto = ".$id_producto;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : 20); // agro insumos
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : '');
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('empresaApId') > 0) {
+      $sql .= " AND pc.id_empresa = ".$this->input->get('empresaApId');
+    }
+
+    if ($this->input->get('dcolor')) {
+      $sql .= " AND pc.color = '{$this->input->get('dcolor')}'";
+    }
+
+    $res = $this->db->query(
+      "SELECT p.id_producto, p.nombre AS producto, pf.nombre AS familia, pc.color, pc.tipo_apli
+      FROM productos p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_color_agro pc ON p.id_producto = pc.id_producto
+      WHERE 1 = 1 {$sql}
+      ORDER BY color ASC, producto ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+
+  /**
+   * Reporte salidas de productos
+   */
+  public $tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad', '' => ''];
+  public $colores   = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo', '' => ''];
+
+  public function getListaColoresPdf(){
+    $res = $this->getListaColoresData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Productos por Colores';
+    $pdf->titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $pdf->titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$this->colores[$_GET['dcolor']]}": '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L');
+    $widths = array(90, 80, 30);
+    $header = array('Producto', 'Familia', 'Tipo Aplic');
+
+    $total_importe = 0;
+    $aux_color = '';
+    foreach($res as $key => $item){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+      }
+
+      if ($item->color != $aux_color) {
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(['L']);
+        $pdf->SetWidths([200]);
+        $pdf->Row([$this->colores[$item->color]], false, false);
+
+        $pdf->SetFillColor(200, 200, 200);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        $aux_color = $item->color;
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        $item->producto,
+        $item->familia,
+        $this->tipo_apli[$item->tipo_apli]
+      );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->Output('colores_productos.pdf', 'I');
+  }
+
+  public function getListaColoresXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=color_productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getListaColoresData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    if (!empty($_GET['empresaApId'])) {
+      $empresaAp = $this->empresas_model->getInfoEmpresa($this->input->get('empresaApId'));
+    }
+
+    $this->tipo_apli = ['n' => 'Nutrición', 'fs' => 'Fito sanidad'];
+    $this->colores = ['v' => 'Verde', 'a' => 'Amarillo', 'r' => 'Rojo'];
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Productos por Colores';
+    $titulo3 = (isset($empresaAp)? $empresaAp['info']->nombre_fiscal."\n": '');
+    $titulo3 .= (isset($_GET['dcolor']{0})? "Color: {$this->colores[$_GET['dcolor']]}": '');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>';
+
+    $aux_color = '';
+    foreach($res as $key => $item){
+      if ($item->color != $aux_color) {
+        $html .= '
+          <tr>
+            <td colspan="3"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="3" style="background-color: #cccccc;">'.$this->colores[$item->color].'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Familia</td>
+            <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Tipo Aplic</td>
+          </tr>';
+
+        $aux_color = $item->color;
+      }
+
+      $html .= '<tr>
+          <td style="width:200px;border:1px solid #000;">'.$item->producto.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$item->familia.'</td>
+          <td style="width:200px;border:1px solid #000;">'.$this->tipo_apli[$item->tipo_apli].'</td>
+        </tr>';
+    }
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
   }
 
 }

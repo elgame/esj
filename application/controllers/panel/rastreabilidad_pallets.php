@@ -231,7 +231,8 @@ class rastreabilidad_pallets extends MY_Controller {
     $this->load->model('rastreabilidad_pallets_model');
     $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
                 $this->input->get('id'), $this->input->get('idunidad'),
-                $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
+                $this->input->get('idcalibre'), $this->input->get('idetiqueta'),
+                $this->input->get('id_area'));
 
     echo json_encode($params);
   }
@@ -307,6 +308,14 @@ class rastreabilidad_pallets extends MY_Controller {
       array('field' => 'fid_cliente',
             'label' => 'Cliente',
             'rules' => 'is_natural_no_zero'),
+
+      array('field' => 'ffolio_int',
+            'label' => 'Folio Interno',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'fcertificado',
+            'label' => 'Certificado',
+            'rules' => ''),
+
       // array('field' => 'fhojaspapel',
       //       'label' => 'Hojas de papel',
       //       'rules' => 'required|is_natural'),
@@ -345,7 +354,7 @@ class rastreabilidad_pallets extends MY_Controller {
           $item = $this->inventario_model->getEPUData($value);
           $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
           if ( MyString::float($existencia-$_POST['ps_num'][$key]) < 0) {
-            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')';
+            $productos[] = str_replace('%', '%%', $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')');
           }
         }
       }

@@ -138,6 +138,7 @@ body {
   font-size: 13px;
   line-height: 18px;
   color: #333333;
+  background-color: #f3f3f3;
   background-color: #ffffff;
 }
 a {
@@ -4358,4 +4359,9 @@ a.badge:hover {
 }
 .btn-group ul.dropdown-menu.ventasmore li.divider{
   margin: 2px 1px;
+}
+
+.btn-group ul.dropdown-menu.impuestosEx {
+  left: -200px;
+  display: none;
 }

@@ -70,11 +70,18 @@ class compras_model extends privilegios_model{
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
                 co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
-                co.tipo, co.id_nc, co.observaciones, co.total, co.uuid
+                co.tipo, co.id_nc, co.observaciones, co.total, co.uuid,
+                ligord.ordenes
         FROM compras AS co
-        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
-        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
-        INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
+          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
+          INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          LEFT JOIN (
+            SELECT cf.id_compra, STRING_AGG((Date(co.fecha_creacion)::text || ' / ' || co.folio::text), '<br>') AS ordenes
+            FROM compras_facturas cf
+              INNER JOIN compras_ordenes co ON co.id_orden = cf.id_orden
+            GROUP BY cf.id_compra
+          ) ligord ON ligord.id_compra = co.id_compra
         WHERE 1 = 1 {$sql}
         ORDER BY (co.fecha, co.folio) DESC
         ", $params, true);
@@ -132,29 +139,32 @@ class compras_model extends privilegios_model{
 
       //Productos
       $res = $this->db->query(
-          "SELECT cf.id_compra, cp.id_orden, cp.num_row,
-                  cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
-                  cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
-                  cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
-                  cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
-           FROM compras_facturas AS cf
-             INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
-             LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
-             LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
-             LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           WHERE cf.id_compra = {$id_compra}");
+          "SELECT cp.id_compra, cp.id_orden, cp.num_row,
+                cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
+                cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
+                cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
+                cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
+                cp.ieps, cp.porcentaje_ieps, cp.porcentaje_isr,
+                cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
+          FROM compras_productos AS cp
+            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
+            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
+            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
+          WHERE cp.id_compra = {$id_compra}");
 
       $response['productos'] = $res->result();
 
       if($response['info']->isgasto == 't')
       {
         $response['productos'][] = new stdClass;
-        $response['productos'][count($response['productos'])-1]->iva           = $response['info']->importe_iva;
-        $response['productos'][count($response['productos'])-1]->retencion_iva = $response['info']->retencion_iva;
-        $response['productos'][count($response['productos'])-1]->importe       = $response['info']->subtotal;
-        $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
-        $response['productos'][count($response['productos'])-1]->cuenta_cpi    = $response['info']->cuenta_cpi_gst;//Cuenta del gasto
+        $response['productos'][count($response['productos'])-1]->iva             = $response['info']->importe_iva;
+        $response['productos'][count($response['productos'])-1]->ieps            = 0;
+        $response['productos'][count($response['productos'])-1]->porcentaje_ieps = 0;
+        $response['productos'][count($response['productos'])-1]->retencion_iva   = $response['info']->retencion_iva;
+        $response['productos'][count($response['productos'])-1]->importe         = $response['info']->subtotal;
+        $response['productos'][count($response['productos'])-1]->retencion_isr   = $response['info']->retencion_isr;
+        $response['productos'][count($response['productos'])-1]->porcentaje_isr  = round($response['info']->retencion_isr*100/$response['info']->subtotal, 2);
+        $response['productos'][count($response['productos'])-1]->cuenta_cpi      = $response['info']->cuenta_cpi_gst; //Cuenta del gasto
 
         $response['info']->area = null;
         if ($response['info']->id_area)
@@ -178,6 +188,25 @@ class compras_model extends privilegios_model{
         {
           $this->load->model('productos_model');
           $response['info']->activo = $this->productos_model->getProductosInfo($response['info']->id_activo, true)['info'];
+        }
+      }
+
+      if ($response['info']->id_proyecto > 0) {
+        $this->load->model('proyectos_model');
+        $response['info']->proyecto = $this->proyectos_model->getProyectoInfo($response['info']->id_proyecto, true);
+      }
+
+      $response['info']->comprasligadas = array();
+      if ($response['info']->ids_compras != '') { // compras
+        $this->load->model('compras_model');
+        $comprasss = explode('|', $response['info']->ids_compras);
+        if (count($comprasss) > 0)
+        {
+          array_pop($comprasss);
+          foreach ($comprasss as $key => $value)
+          {
+            $response['info']->comprasligadas[] = $this->compras_model->getInfoCompra($value)['info'];
+          }
         }
       }
 
@@ -263,9 +292,10 @@ class compras_model extends privilegios_model{
       }
     }
 
-    $compra['fecha'] = $this->input->post('fecha');
-    $compra['serie'] = $this->input->post('serie');
-    $compra['folio'] = $this->input->post('folio');
+    $compra['fecha']         = $this->input->post('fecha'); // fecha de poliza y cuentas pagar
+    $compra['fecha_factura'] = $this->input->post('fecha_factura'); // fecha real de la factura
+    $compra['serie']         = $this->input->post('serie');
+    $compra['folio']         = $this->input->post('folio');
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
@@ -469,7 +499,7 @@ class compras_model extends privilegios_model{
       'folio' => $data['folio'],
       // 'condicion_pago' => $data['asdasdasd'],
       // 'plazo_credito' => $data['asdasdasd'],
-      // 'tipo_documento' => $data['asdasdasd'],
+      'tipo_documento' => $compra['info']->tipo_documento,
       'fecha' => $data['fecha'],
       'subtotal' => $data['totalImporte'],
       'importe_iva' => $data['totalImpuestosTrasladados'],
@@ -561,6 +591,9 @@ class compras_model extends privilegios_model{
     }
     //Actualiza la compra si es que se paga
     $this->actualizaCompra($compraId, $datos['total']);
+
+    // Se registra la salida de almacén si es que hay productos
+    $this->addSalidaAutNC($datos, $productos);
 
     return array('passes' => true, 'msg' => '5');
   }
@@ -692,6 +725,46 @@ class compras_model extends privilegios_model{
       $this->db->update('compras', array('status' => 'pa'), "id_compra = {$id_compra}");
     }else
       $this->db->update('compras', array('status' => 'p'), "id_compra = {$id_compra}");
+  }
+
+  public function addSalidaAutNC($nc, $productos)
+  {
+    if (count($productos) > 0) {
+      $this->load->model('productos_salidas_model');
+
+      // ============================================================
+      // Se registra la salida de almacen con la materia prima
+      $res = $this->productos_salidas_model->agregar(array(
+        'id_empresa'     => $nc['id_empresa'],
+        'id_almacen'     => 1,
+        'id_empleado'    => $nc['id_empleado'],
+        'folio'          => $this->productos_salidas_model->folio(),
+        'concepto'       => "Salida generada automáticamente por la Nota de Crédito {$nc['serie']}{$nc['folio']}",
+        'status'         => 's',
+        'fecha_creacion' => $nc['fecha'],
+        'fecha_registro' => date("Y-m-d H:i:s"),
+        'tipo'           => 's',
+        'id_empresa_ap'  => $nc['id_empresa'],
+
+        'id_area'        => NULL,
+      ));
+      $id_salida = $res['id_salida'];
+
+      // En productos_salidas_model->agregar se insertan los ranchos y centros de costo del POST
+
+      $salida = array();
+      foreach ($productos as $key => $produto)
+      {
+        $salida[] = array(
+          'id_salida'       => $id_salida,
+          'no_row'          => $key,
+          'id_producto'     => $produto['id_producto'],
+          'cantidad'        => abs($produto['cantidad']),
+          'precio_unitario' => $produto['precio_unitario'],
+        );
+      }
+      $this->productos_salidas_model->agregarProductos($id_salida, $salida);
+    }
   }
 
   /*

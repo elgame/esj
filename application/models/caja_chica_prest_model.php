@@ -88,18 +88,26 @@ class caja_chica_prest_model extends CI_Model {
     return $info;
   }
 
-  public function get($fecha, $noCaja)
+  public function get($fecha, $noCaja, $all = false)
   {
     $info = array(
-      'saldo_inicial'    => 0,
-      'fondos_caja'      => array(),
-      'prestamos_lp'     => array(),
-      'prestamos'        => array(),
-      'prestamos_dia'    => array(),
-      'pagos'            => array(),
-      'denominaciones'   => array(),
-      'categorias'       => array(),
-      'saldos_empleados' => array(),
+      'saldo_inicial'       => 0,
+      'fondos_caja'         => array(),
+      'prestamos_lp'        => array(),
+      'prestamos'           => array(),
+      'prestamos_dia'       => array(),
+      'pagos'               => array(),
+      'denominaciones'      => array(),
+      'categorias'          => array(),
+      'saldos_empleados'    => array(),
+      'traspasos'           => 0,
+      'saldo_prest_fijo'    => 0,
+      'deudores'            => array(),
+      'acreedores'          => array(),
+      'deudores_prest_dia'  => 0,
+      'deudores_abonos_dia' => 0,
+      'acreedor_prest_dia'  => 0,
+      'acreedor_abonos_dia' => 0,
     );
 
     // Obtiene el saldo incial.
@@ -133,8 +141,9 @@ class caja_chica_prest_model extends CI_Model {
 
     // Prestamos a largo plazo
     $prestamos = $this->db->query(
-      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria,
+        COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
         Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
         COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
@@ -155,7 +164,7 @@ class caja_chica_prest_model extends CI_Model {
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
       WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
-      ORDER BY fecha ASC, id_prestamo_nom ASC"
+      ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
     );
 
     if ($prestamos->num_rows() > 0)
@@ -163,10 +172,10 @@ class caja_chica_prest_model extends CI_Model {
       $info['prestamos_lp'] = $prestamos->result();
       foreach ($info['prestamos_lp'] as $key => $item) {
         $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
-        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
+        $item->saldo_fin = round($item->saldo_ini - $item->pago_dia, 2);
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
-        if ($item->saldo_ini == 0)
+        if (round($item->saldo_ini, 2) == 0)
           unset($info['prestamos_lp'][$key]);
       }
     }
@@ -335,6 +344,105 @@ class caja_chica_prest_model extends CI_Model {
       $info['saldos_empleados'] = $saldos->result();
     }
 
+    // Saldo prestamos fijos anterior
+    $prest_fijo_sald = $this->db->query(
+      "SELECT *
+       FROM otros.cajaprestamo_efectivo
+       WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
+       ORDER BY fecha DESC LIMIT 1"
+    )->row();
+    if (isset($prest_fijo_sald->saldo_prest_fijo)) {
+      $info['saldo_prest_fijo'] = $prest_fijo_sald->saldo_prest_fijo;
+    }
+
+    // Traspasos
+    $traspasos = $this->getTraspasos($fecha, 'caja_prestamo', true, (!$all? " AND bt.status = 't'": ''));
+    $info['traspasos'] = $traspasos;
+
+    if (true) {
+      $noCajaDeudor = $noCaja+100;
+      // deudores
+      $deudores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura,
+          cd.no_caja
+        FROM cajachica_deudores cd
+          LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja = {$noCajaDeudor} AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja = {$noCajaDeudor} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($deudores && $deudores->num_rows() > 0)
+      {
+        $info['deudores'] = $deudores->result();
+        $info['deudores_prest_dia'] = 0;
+        foreach ($info['deudores'] as $key => $value) {
+          $info['deudores'][$key]->mismo_dia = 'readonly';
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['deudores_prest_dia'] += $value->monto;
+            $info['deudores'][$key]->mismo_dia = '';
+          }
+        }
+
+      }
+
+      $info['deudores_abonos_dia'] = 0;
+      $deudores = $this->db->query(
+        "SELECT Sum(monto) AS abonos FROM cajachica_deudores_pagos
+        WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
+      )->row();
+      if (isset($deudores->abonos)) {
+        if (!($noCaja == '4' && $fecha == '2019-04-08')) {
+          $info['deudores_abonos_dia'] = $deudores->abonos;
+        }
+      }
+    }
+
+    if (true) {
+      $ddNoCaja = '1, 2, 3, 4, 5';
+      $ddTipo = 'caja_prestamo';
+
+      // acreedores
+      $acreedores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo, cd.tipo, cd.folio, cd.id_nomenclatura, cn.nomenclatura
+        FROM cajachica_deudores cd
+          LEFT JOIN cajachica_nomenclaturas cn ON cn.id = cd.id_nomenclatura
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja in({$ddNoCaja}) AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja in({$ddNoCaja}) AND cd.tipo = '{$ddTipo}' AND fecha <= '{$fecha}'
+          AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($acreedores && $acreedores->num_rows() > 0)
+      {
+        $info['acreedores'] = $acreedores->result();
+        $info['acreedor_prest_dia'] = 0;
+        foreach ($info['acreedores'] as $key => $value) {
+          $info['acreedores'][$key]->mismo_dia = false;
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['acreedor_prest_dia'] += $value->monto;
+            $info['acreedores'][$key]->mismo_dia = true;
+          }
+        }
+      }
+
+      $info['acreedor_abonos_dia'] = 0;
+      $acreedores = $this->db->query(
+        "SELECT Sum(ab.monto) AS abonos FROM cajachica_deudores cd
+          INNER JOIN cajachica_deudores_pagos ab ON cd.id_deudor = ab.id_deudor
+        WHERE ab.no_caja in({$ddNoCaja}) AND cd.tipo = '{$ddTipo}' AND ab.fecha = '{$fecha}'"
+      )->row();
+      if (isset($acreedores->abonos)) {
+        $info['acreedor_abonos_dia'] = $acreedores->abonos;
+      }
+    }
+
     // denominaciones
     $denominaciones = $this->db->query(
       "SELECT *
@@ -422,8 +530,35 @@ class caja_chica_prest_model extends CI_Model {
     return $info;
   }
 
+  public function getTraspasos($fecha, $tno_caja, $total=false, $sql = '')
+  {
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM public.cajachica_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}"
+      )->row();
+      return floatval($traspaso->monto);
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones,
+        bt.id_usuario, bt.fecha_creacion, bt.afectar_fondo, bt.folio, bt.status,
+        (NOT bt.tipo) AS tipo,
+        false AS guardado, bt.tipo_caja
+       FROM public.cajachica_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}
+       ORDER BY bt.folio ASC"
+    );
+
+    return $traspaso->result();
+  }
+
   public function guardar($data)
   {
+    $fpartes = explode('-', $data['fecha_caja_chica']);
+    $anio = $fpartes[0]; // date('Y');
+
     $fondoc = array();
     $fondoc_updt = array();
 
@@ -510,49 +645,118 @@ class caja_chica_prest_model extends CI_Model {
     $pagos_updt = array();
 
     // pagos
-    foreach ($data['pago_importe'] as $key => $ingreso)
-    {
-      if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
-        isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
-        // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
+    if (isset($data['pago_importe'])) {
+      foreach ($data['pago_importe'] as $key => $ingreso)
+      {
+        if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
+          isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
 
-        $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
-      } elseif ($data['pago_id'][$key] > 0) {
-        $pagos_updt = array(
-          // 'id_pago' => $data['pago_id'][$key],
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
-        $this->db->update('otros.cajaprestamo_pagos', $pagos_updt, "id_pago = ".$data['pago_id'][$key]);
-      } else {
-        $pagos[] = array(
-          'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
-          'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
-          'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
-          'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
-          'id_categoria'    => $data['pago_empresa_id'][$key],
-          'concepto'        => $data['pago_concepto'][$key],
-          'monto'           => $data['pago_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'id_nomenclatura' => $data['pago_nomenclatura'][$key],
-          'no_caja'         => $data['fno_caja'],
-        );
+          $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
+        } elseif ($data['pago_id'][$key] > 0) {
+          $pagos_updt = array(
+            // 'id_pago' => $data['pago_id'][$key],
+            'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
+            'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
+            'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
+            'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
+            'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
+            'id_categoria'    => $data['pago_empresa_id'][$key],
+            'concepto'        => $data['pago_concepto'][$key],
+            'monto'           => $data['pago_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'id_nomenclatura' => $data['pago_nomenclatura'][$key],
+            'no_caja'         => $data['fno_caja'],
+          );
+          $this->db->update('otros.cajaprestamo_pagos', $pagos_updt, "id_pago = ".$data['pago_id'][$key]);
+        } else {
+          $pagos[] = array(
+            'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),
+            'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
+            'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
+            'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
+            'id_prestamo'     => ($data['pago_id_prestamo'][$key]!=''? $data['pago_id_prestamo'][$key]: NULL),
+            'id_categoria'    => $data['pago_empresa_id'][$key],
+            'concepto'        => $data['pago_concepto'][$key],
+            'monto'           => $data['pago_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'id_nomenclatura' => $data['pago_nomenclatura'][$key],
+            'no_caja'         => $data['fno_caja'],
+          );
+        }
       }
     }
 
     if (count($pagos) > 0)
     {
       $this->db->insert_batch('otros.cajaprestamo_pagos', $pagos);
+    }
+
+    // Deudores
+    if (isset($data['deudor_nombre']))
+    {
+      // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $deudor_udt = $deudor = array();
+      $noCajaDeudor = $data['fno_caja'] + 100;
+
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_deudores
+        WHERE folio IS NOT NULL AND no_caja = {$noCajaDeudor} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
+
+      foreach ($data['deudor_nombre'] as $key => $nombre)
+      {
+        $nombre = mb_strtoupper($nombre, 'UTF-8');
+        if (isset($data['deudor_del'][$key]) && $data['deudor_del'][$key] == 'true' &&
+          isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['deudor_id_deudor'][$key]);
+
+          $this->db->delete('cajachica_deudores', "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } elseif (isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          $deudor_udt = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
+            'nombre'          => $nombre,
+            'concepto'        => $data['deudor_concepto'][$key],
+            'id_nomenclatura' => $data['deudor_nomenclatura'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $noCajaDeudor,
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_deudores', $data['deudor_id_deudor'][$key], $deudor_udt,
+                          array(':accion'       => 'deudores', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_deudor',
+                                ':titulo'       => $nombresCajas[$noCajaDeudor])
+                        );
+
+          $this->db->update('cajachica_deudores', $deudor_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $deudor = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
+            'tipo'            => $data['deudor_tipo'][$key],
+            'nombre'          => $nombre,
+            'id_nomenclatura' => $data['deudor_nomenclatura'][$key],
+            'concepto'        => $data['deudor_concepto'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $noCajaDeudor,
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+            'folio'           => $data_folio->folio,
+          );
+          $this->db->insert('cajachica_deudores', $deudor);
+          $gastooidd = $this->db->insert_id('cajachica_deudores_id_deudor_seq');
+          // $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_deudores', $gastooidd,
+                        array(':accion'    => 'deudores', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$nombre} | Monto: {$data['deudor_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
     }
 
     // Denominaciones
@@ -718,7 +922,7 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetFillColor(240, 240, 240);
 
     // Fecha
     $pdf->SetXY(6, $pdf->GetY() - 20);
@@ -741,7 +945,7 @@ class caja_chica_prest_model extends CI_Model {
     $page_aux = $pdf->page;
 
     // Deudores diversos
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetXY(6, 32);
@@ -788,11 +992,11 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     // PRESTAMOS A LARGO PLAZO
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(204));
+    $pdf->SetWidths(array(206));
     $pdf->SetXY(6, $pdf->GetY()+3);
     $pdf->Row(array('PRESTAMOS A LARGO PLAZO'), true, 'B');
 
@@ -807,11 +1011,16 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
     $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
 
-    $totalpreslp_salini = $totalpreslp_pago_dia = 0;
-    $totalpreslp_salfin = 0;
+    $tipoo = '';
+    $empresaaux = '';
+    $first = false;
+    $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
+    $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
     $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
     $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
-    foreach ($caja['prestamos_lp'] as $prestamo) {
+    $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+    $totalpreslp_ef_rec = [];
+    foreach ($caja['prestamos_lp'] as $key => $prestamo) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
           $pdf->page++;
@@ -823,17 +1032,75 @@ class caja_chica_prest_model extends CI_Model {
       $totalpreslp_salini += floatval($prestamo->saldo_ini);
       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
       $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
-      if ($prestamo->tipo      == 'fi') {
-        $totalpreslp_salini_fi   += floatval($prestamo->saldo_ini);
-        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
-        $totalpreslp_salfin_fi   += floatval($prestamo->saldo_fin);
-      }
-      else {
-        $totalpreslp_salini_ef   += floatval($prestamo->saldo_ini);
+      if ($prestamo->tipo == 'efd') {
+        $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+        if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+          $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        } else {
+          $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        }
+      } elseif ($prestamo->tipo == 'ef') {
+        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
         $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-        $totalpreslp_salfin_ef   += floatval($prestamo->saldo_fin);
+        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+        // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+        // } else {
+        //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+        // }
+      } else {
+        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
       }
 
+      if ($empresaaux != $prestamo->categoria) {
+        if ($first) {
+          $pdf->SetFont('Arial', 'B', 7);
+          $pdf->SetX(120);
+          $pdf->SetFillColor(255, 255, 255);
+          $pdf->SetAligns(array('R', 'R', 'R', 'C', 'R', 'R'));
+          $pdf->SetWidths(array(18, 18, 18, 10, 10, 18));
+          $pdf->Row(array('SUMAS',
+            MyString::formatoNumero($totalpreslp_grup_salini, 2, '$', false),
+            MyString::formatoNumero($totalpreslp_grup_pago_dia, 2, '$', false),
+            '', '',
+            MyString::formatoNumero($totalpreslp_grup_salfin, 2, '$', false),
+            ), true, 'B');
+
+          $pdf->SetY($pdf->GetY()+5);
+        }
+        $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+        $empresaaux = $prestamo->categoria;
+      }
+      $first = true;
+      $totalpreslp_grup_salini   += floatval($prestamo->saldo_ini);
+      $totalpreslp_grup_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_grup_salfin   += floatval($prestamo->saldo_fin);
+
+      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+        switch ($prestamo->tipo) {
+          case 'efd': $tipo = 'Efectivo Fijo'; break;
+          case 'ef': $tipo = 'Efectivo'; break;
+          default: $tipo = 'Fiscal'; break;
+        }
+        $tipoo = $prestamo->tipo;
+
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->SetWidths(array(206));
+        $pdf->SetAligns(array('L', 'R', 'R', 'C', 'R', 'R'));
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetX(6);
+        $pdf->Row(array($tipo), true, 'B');
+      }
+
+      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
         $prestamo->categoria,
@@ -874,9 +1141,60 @@ class caja_chica_prest_model extends CI_Model {
       '', '',
       MyString::formatoNumero($totalpreslp_salfin_ef, 2, '$', false),
       ), true, 'B');
+    $pdf->SetX(120);
+    $pdf->Row(array('Efectivo Fijo',
+      MyString::formatoNumero($totalpreslp_salini_efd, 2, '$', false),
+      MyString::formatoNumero($totalpreslp_pago_dia_efd, 2, '$', false),
+      '', '',
+      MyString::formatoNumero($totalpreslp_salfin_efd, 2, '$', false),
+      ), true, 'B');
+
+
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(68));
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array('Recuperar Efectivo Fijo'), true, 'B');
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Saldo Anterior', MyString::formatoNumero($caja['saldo_prest_fijo'], 2, '$', false)), false, 'B');
+
+    $total_prestamos_recuperar = 0;
+    if (count($totalpreslp_ef_rec) > 0) {
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(68));
+      $pdf->SetX(6);
+      $pdf->Row(array('Cobro Prestamos Fijos'), true, 'B');
+
+      foreach ($totalpreslp_ef_rec as $key => $value) {
+        if ($value > 0) {
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(20, 48));
+          $pdf->SetFont('Arial', 'B', 7);
+          $pdf->SetX(6);
+          $pdf->Row(array($key, MyString::formatoNumero($value, 2, '$', false)), false, 'B');
+
+          $total_prestamos_recuperar += $value;
+        }
+      }
+    }
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Traspasos', MyString::formatoNumero($caja['traspasos'], 2, '$', false)), false, 'B');
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(20, 48));
+    $pdf->SetX(6);
+    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos']), 2, '$', false) ), false, 'B');
+
 
     // PRESTAMOS A CORTO PLAZO
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
@@ -939,7 +1257,7 @@ class caja_chica_prest_model extends CI_Model {
       ), true, 'B');
 
     // PRESTAMOS DEL DIA
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetAligns(array('L'));
@@ -1367,14 +1685,27 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->Output();
   }
 
-  public function printPrestamoLp($ticket, $fecha)
+  public function printPrestamoLp($ticket, $fecha=null)
   {
+    $tipo = false;
+    $sql1 = "id_prestamo = {$ticket}";
+    $sql2 = "np.id_prestamo = {$ticket}";
+    $sql_fecha = 'np.fecha';
+    $sql_folio = 'np.id_prestamo AS no_ticket';
+    if ($fecha) {
+      $tipo = true;
+      $sql1 = "no_ticket = {$ticket}";
+      $sql2 = "abd.no_ticket = {$ticket}";
+      $sql_fecha = 'abd.fecha';
+      $sql_folio = 'abd.no_ticket';
+    }
+    $fecha = $fecha? $fecha: date("Y-m-d");
     $fondoc = $this->db->query(
       "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
-        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
-        Date(abd.fecha) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date({$sql_fecha}) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
-        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+        COALESCE(abd.pago_dia, 0) AS pago_dia, {$sql_folio}, np.tipo, np.pago_semana
       FROM nomina_prestamos np
       INNER JOIN usuarios u ON u.id = np.id_usuario
       INNER JOIN empresas e ON e.id_empresa = u.id_empresa
@@ -1386,12 +1717,12 @@ class caja_chica_prest_model extends CI_Model {
         WHERE nfp.fecha < '{$fecha}'
         GROUP BY np.id_prestamo
       ) pai ON np.id_prestamo = pai.id_prestamo
-      INNER JOIN (
+      LEFT JOIN (
         SELECT id_prestamo, fecha, no_ticket, monto AS pago_dia
         FROM nomina_fiscal_prestamos
-        WHERE no_ticket = {$ticket}
+        WHERE {$sql1}
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE abd.no_ticket = {$ticket}
+      WHERE {$sql2}
       ORDER BY id_prestamo_nom ASC"
     )->row();
 
@@ -1412,13 +1743,15 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY()-5);
     $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
-    $pdf->SetAligns(array('C'));
-    $pdf->SetXY(0, $pdf->GetY()-3);
-    $pdf->Row(array('TICKET PRESTAMO LARGO PLAZO'), false, false);
+    if ($tipo) {
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array('TICKET PRESTAMO LARGO PLAZO'), false, false);
+    }
 
     $pdf->SetWidths(array(30, 33));
     $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetXY(0, $pdf->GetY());
     $pdf->Row(array('Folio: '.$fondoc->no_ticket, MyString::fechaAT($fondoc->fecha)), false, false);
 
     $pdf->SetWidths(array(30, 33));
@@ -1426,20 +1759,32 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('PRESTAMO: ', MyString::formatoNumero($fondoc->monto, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('SALDO INICIAL: ', MyString::formatoNumero($fondoc->saldo_ini, 2)), false, false);
+    if ($tipo) {
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('SALDO INICIAL: ', MyString::formatoNumero($fondoc->saldo_ini, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('ABONO '.(($fondoc->no_pagos+1).'/'.$fondoc->tno_pagos).':', MyString::formatoNumero($fondoc->pago_dia, 2)), false, false);
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('ABONO '.(($fondoc->no_pagos+1).'/'.$fondoc->tno_pagos).':', MyString::formatoNumero($fondoc->pago_dia, 2)), false, false);
 
-    $pdf->SetWidths(array(30, 33));
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('SALDO: ', MyString::formatoNumero($fondoc->saldo_ini-$fondoc->pago_dia, 2)), false, false);
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('SALDO: ', MyString::formatoNumero($fondoc->saldo_ini-$fondoc->pago_dia, 2)), false, false);
+    }
+
+    if (!$tipo) {
+      $pdf->SetWidths(array(30, 33));
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('PAGO X SEM: ', MyString::formatoNumero($fondoc->pago_semana, 2)), false, false);
+
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()+5);
+    }
 
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));

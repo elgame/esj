@@ -16,7 +16,11 @@ class Usuario_historial_model extends CI_Model {
 
     foreach ($eventos as $evento)
     {
-      $campos[] = $evento['campo'];
+      $campo = $evento['campo'];
+      if (isset($evento['date']) && $evento['date']) {
+        $campo = "Date({$evento['campo']}) AS {$evento['campo']}";
+      }
+      $campos[] = $campo;
     }
 
     $camposAObtener = implode(', ', $campos);

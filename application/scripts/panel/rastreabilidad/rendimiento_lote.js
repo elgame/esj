@@ -33,7 +33,8 @@
             'id_rendimiento': $("#id_lote_actual").val(),
             'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote")),
             'es_certificado': ($('#esta-certificado').is(':checked') ? 1 : 0),
-            'id_area': $("#parea").val()
+            'id_area': $("#parea").val(),
+            'fecha_lote': $("#gfechaLote").val()
           },
           function(data) {
               window.location.reload(true);
@@ -335,7 +336,7 @@
   //Autocomplete Calibre
   var autocompleteCalibre = function () {
     $("input#fcalibre").autocomplete({
-      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=t',
       minLength: 1,
       selectFirst: true,
       select: funcAutocompleteCalibre
@@ -345,7 +346,7 @@
   var autocompleteCalibreLive = function () {
     $("#tableClasif").on("focus", 'input#fcalibre:not(.ui-autocomplete-input)', function (event) {
         $(this).autocomplete({
-          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=t',
           minLength: 1,
           selectFirst: true,
           select: funcAutocompleteCalibre
@@ -384,7 +385,7 @@
   //Autocomplete Size
   var autocompleteSize = function () {
     $("input#fsize").autocomplete({
-      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
       minLength: 1,
       selectFirst: true,
       select: funcAutocompleteSize
@@ -394,7 +395,7 @@
   var autocompleteSizeLive = function () {
     $("#tableClasif").on("focus", 'input#fsize:not(.ui-autocomplete-input)', function (event) {
         $(this).autocomplete({
-          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
           minLength: 1,
           selectFirst: true,
           select: funcAutocompleteSize
@@ -524,6 +525,7 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
+    postData.fruta_com        = ($tr.find('#ffrutaCom').is(':checked')? 't': 'f');
 
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
@@ -588,6 +590,7 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
+    postData.fruta_com        = ($tr.find('#ffrutaCom').is(':checked')? 't': 'f');
 
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
@@ -727,8 +730,8 @@
                   '<input type="hidden" id="fidsize_old" value="" class="span12">'+
                 '</td>'+
                 '<td>'+
-                  '<input type="text" id="fetiqueta" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<input type="hidden" id="fidetiqueta" value="" class="span12">'+
+                  '<input type="text" id="fetiqueta" value="SIN MARCA" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="hidden" id="fidetiqueta" value="15" class="span12">'+
                   '<input type="hidden" id="fidetiqueta_old" value="" class="span12">'+
                 '</td>'+
                 '<td>' +
@@ -753,6 +756,7 @@
                   '<input type="hidden" id="frd" value="0" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
+                  '<input type="checkbox" id="ffrutaCom" data-rel="tooltip" title="Es fruta comprada?"> | '+
                   '<button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>' +
                   '<button type="button" class="btn btn-success btn-small" id="btnDelClasif">Eliminar</button>' +
                 '</td>' +

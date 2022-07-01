@@ -109,6 +109,8 @@ class empleados extends MY_Controller {
     $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
     $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
 
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -169,6 +171,9 @@ class empleados extends MY_Controller {
       $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
       $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
 
+      $params['empresa'] = $this->empresas_model->getInfoEmpresa($params['data']['info'][0]->id_empresa, true)['info'];
+      $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -207,8 +212,8 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_checador($user->no_checador) || $user->no_checador == '') {
-        if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
+      if ($this->validano_checador($user->no_checador) || $user->no_checador == '' || true) {
+        if ($this->validano_empleado($user->no_empleado, $user->id_empresa) || true)
         {
     			$this->load->model('usuarios_model');
     			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
@@ -261,6 +266,7 @@ class empleados extends MY_Controller {
         'empresaId'         => $_GET['did_empresa'],
         'puestoId'          => '',
         'dia_inicia_semana' => '4',
+        'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
         'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
       );
       $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
@@ -278,6 +284,10 @@ class empleados extends MY_Controller {
   	$this->load->model('usuarios_departamentos_model');
   	$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false)['puestos'];
   	$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($empresa->registro_patronal)? $empresa->registro_patronal: ''));
+
   	echo json_encode($params);
    }
 
@@ -324,6 +334,7 @@ class empleados extends MY_Controller {
       'anio'        => date("Y"),
       'empresaId'   => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
       'puestoId'    => '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
@@ -334,6 +345,9 @@ class empleados extends MY_Controller {
 
     $_GET['cid_empresa'] = $filtros['empresaId'];
     $configuraciones = $this->nomina_fiscal_model->configuraciones($filtros['anio']);
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
 
@@ -444,6 +458,11 @@ class empleados extends MY_Controller {
               array('field' => 'ffecha_salida',
                     'label' => 'Fecha de salida',
                     'rules' => 'max_length[25]'),
+
+              array('field' => 'ffecha_contrato',
+                    'label' => 'Fecha vencimiento contrato',
+                    'rules' => 'max_length[25]'),
+
               array('field' => 'fnacionalidad',
                     'label' => 'Nacionalidad',
                     'rules' => 'max_length[20]'),
@@ -473,20 +492,29 @@ class empleados extends MY_Controller {
 							array('field' => 'festa_asegurado',
 										'label' => 'Asegurado',
 										'rules' => ''),
+              array('field' => 'dp_alimenticia',
+                    'label' => 'Pensión alimenticia',
+                    'rules' => ''),
+              array('field' => 'dinfonacot',
+                    'label' => 'Infonacot',
+                    'rules' => ''),
 
 							array('field' => 'dcuenta_banco',
 										'label' => 'Banco',
 										'rules' => ''),
+              array('field' => 'dno_proveedor_banorte',
+                    'label' => 'Clave Proveedor Banco',
+                    'rules' => ''),
 							array('field' => 'dno_seguro',
 										'label' => 'No seguro',
 										'rules' => ''),
-              array('field' => 'dno_trabajador',
-                    'label' => 'No Trabajador',
-                    'rules' => 'required|max_length[8]|callback_validano_empleado'),
+              // array('field' => 'dno_trabajador',
+              //       'label' => 'No Trabajador',
+              //       'rules' => 'required|max_length[8]|callback_validano_empleado'),
 
-              array('field' => 'dno_checador',
-                    'label' => 'No Checador',
-                    'rules' => 'max_length[8]|callback_validano_checador'),
+              // array('field' => 'dno_checador',
+              //       'label' => 'No Checador',
+              //       'rules' => 'max_length[8]|callback_validano_checador'),
 
               array('field' => 'fdepartamente',
                     'label' => 'Departamento',
@@ -494,6 +522,10 @@ class empleados extends MY_Controller {
               array('field' => 'fpuesto',
                     'label' => 'Puesto',
                     'rules' => ''),
+              array('field' => 'fregistro_patronal',
+                    'label' => 'Registro Patronal',
+                    'rules' => ''),
+
               array('field' => 'area',
                     'label' => 'Cultivo',
                     'rules' => ''),

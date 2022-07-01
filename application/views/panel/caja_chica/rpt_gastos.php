@@ -28,6 +28,16 @@
                   </div>
                 </div>
 
+                <div class="control-group sucursales" style="display: none;">
+                  <label class="control-label" for="sucursalId">Sucursal </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <select name="sucursalId" class="span11" id="sucursalId" data-selected="">
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="control-group">
                   <label class="control-label" for="dprov_clien">Concepto</label>
                   <div class="controls">

@@ -77,6 +77,14 @@
                   ?>
                   <div id="is_lotes" class="<?php echo $show_lote ?>">
                     <div class="control-group">
+                      <label class="control-label" for="codigo">Código </label>
+                      <div class="controls">
+                        <input type="text" step="any" name="codigo" id="codigo" class="span10" maxlength="50"
+                        value="<?php echo isset($data->codigo)? $data->codigo:''; ?>" placeholder="4, 5, 6">
+                      </div>
+                    </div>
+
+                    <div class="control-group">
                       <label class="control-label" for="farea">Cultivo </label>
                       <div class="controls">
                       <input type="text" name="farea" id="farea" class="span10" value="<?php echo isset($data->area)? $data->area->nombre:''; ?>" placeholder="Limon, Piña">

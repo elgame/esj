@@ -146,6 +146,13 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="ffecha_contrato">Fecha vencimiento contrato </label>
+                      <div class="controls">
+                        <input type="date" name="ffecha_contrato" id="ffecha_contrato" class="span6" value="<?php echo set_value('ffecha_contrato'); ?>" maxlength="25" placeholder="Fecha vencimiento de contrato">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="fnacionalidad">Nacionalidad </label>
 										  <div class="controls">
@@ -252,6 +259,18 @@
 									  </div>
 									</div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dregistro_patronal">Registro patronal:</label>
+                    <div class="controls">
+                      <select name="fregistro_patronal" id="fregistro_patronal">
+                        <option></option>
+                        <?php foreach ($registros_patronales as $key => $regp): ?>
+                        <option value="<?php echo $regp ?>" <?php echo set_select('fregistro_patronal', $regp, false, $this->input->post('fregistro_patronal')); ?>><?php echo $regp ?></option>
+                        <?php endforeach ?>
+                      </select>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="cultivosGrup">
                     <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
                     <div class="controls">
@@ -304,6 +323,8 @@
                     <select name="fbanco" id="fbanco">
                       <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, $this->input->post('fbanco')); ?>>BBVA Bancomer</option>
                       <option value="santr" <?php echo set_select('fbanco', 'santr', false, $this->input->post('fbanco')); ?>>Santander</option>
+                      <option value="banor" <?php echo set_select('fbanco', 'banor', false, $this->input->post('fbanco')); ?>>Banorte</option>
+                      <option value="efectivo" <?php echo set_select('fbanco', 'efectivo', false, $this->input->post('fbanco')); ?>>Efectivo</option>
                     </select>
                     </div>
                   </div>
@@ -322,19 +343,19 @@
 									  </div>
 									</div>
 
-									<div class="control-group">
+									<!-- <div class="control-group">
 									  <label class="control-label" for="dno_trabajador">No Trabajador </label>
 									  <div class="controls">
 											<input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo set_value('dno_trabajador'); ?>" maxlength="8" placeholder="# Trabajador">
 									  </div>
-									</div>
+									</div> -->
 
-                  <div class="control-group">
+                  <!-- <div class="control-group">
                     <label class="control-label" for="dno_checador">No Checador </label>
                     <div class="controls">
                       <input type="text" name="dno_checador" id="dno_checador" class="span12" value="<?php echo set_value('dno_checador'); ?>" maxlength="8" placeholder="# Checador">
                     </div>
-                  </div>
+                  </div> -->
 
                   <div class="control-group">
                     <label class="control-label" for="tipo_contrato">Tipo Contrato </label>
@@ -393,6 +414,20 @@
                     <?php
                     } ?>
                     </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dp_alimenticia">Pensión alimenticia %</label>
+                    <div class="controls">
+                      <input type="text" name="dp_alimenticia" id="dp_alimenticia" class="span12 vpositive" value="<?php echo set_value('dp_alimenticia'); ?>" max="100" placeholder="% Pension alimenticia">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dinfonacot">Infonacot x sem</label>
+                    <div class="controls">
+                      <input type="text" name="dinfonacot" id="dinfonacot" class="span12 vpositive" value="<?php echo set_value('dinfonacot'); ?>" max="100" placeholder="">
                     </div>
                   </div>
 

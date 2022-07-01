@@ -11,7 +11,7 @@ $(function(){
 		select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
-      cargaDepaPues();
+      cargaDepaPuesRegPat();
 		}
 	}).keydown(function(e){
 		if (e.which === 8) {
@@ -27,9 +27,11 @@ $(function(){
 
   getPrivilegiosEmpresa();
   autocompleteCultivo();
+
+  changeEmpresa();
 });
 
-function cargaDepaPues () {
+function cargaDepaPuesRegPat () {
 	$.getJSON(base_url+'panel/empleados/ajax_get_depa_pues/', {'did_empresa': $("#did_empresa").val()},
 		function(data){
       var html = '', i;
@@ -44,6 +46,13 @@ function cargaDepaPues () {
         html += '<option value="'+data.puestos[i].id_puesto+'">'+data.puestos[i].nombre+'</option>';
       }
       $('#fpuesto').html(html);
+
+      html = '';
+      html += '<option value=""></option>';
+      for (i in data.registros_patronales) {
+        html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
+      }
+      $('#fregistro_patronal').html(html);
 	});
 }
 
@@ -141,3 +150,25 @@ var autocompleteCultivo = function () {
     }
   });
 };
+
+
+function changeEmpresa() {
+  getEmpresasIds($('#btnCopiar'));
+
+  $("#id_empresa").on('change', function() {
+    getEmpresasIds($('#btnCopiar'));
+  })
+}
+
+function getEmpresasIds ($button, $modal) {
+  console.log('test', $button, $modal);
+  var ide   = $('#id_empresa').val(),
+      idu   = $('#usuarioId').val(),
+      exist = false,
+      ids   = [];
+
+  $button.attr('href', base_url + 'panel/usuarios/copiar_privilegios/?idu='+idu+'&ide='+ide);
+  if ($modal) {
+    $modal.modal('show');
+  }
+}

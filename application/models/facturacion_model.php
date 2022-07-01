@@ -131,12 +131,14 @@ class facturacion_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
-                cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext", false)
+                cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext, fp.ieps, fp.porcentaje_ieps,
+                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->join('unidades as u', "u.nombre = fp.unidad and u.status = 't'", 'left')
+        ->join('unidades_unq as u', "u.nombre = fp.unidad", 'left')
         ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
         ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
+        ->join('calibres as cal', 'cal.id_calibre = fp.id_calibres', 'left')
         ->where('id_factura = ' . $idFactura)->order_by('fp.num_row', 'asc')
         ->get();
 
@@ -481,6 +483,14 @@ class facturacion_model extends privilegios_model{
       return array('passes' => true, 'msg' => 'Se ligaron las remisiones correctamente');
     }
 
+    public function removePallestRemisiones($id_remision, $id_factura)
+    {
+      $this->db->delete('facturacion_ventas_remision_pivot', ['id_factura' => $id_factura, 'id_venta' => $id_remision]);
+      $this->db->delete('facturacion_remision_hist', ['id_factura' => $id_factura, 'id_remision' => $id_remision]);
+
+      return array('passes' => true, 'msg' => 'Se quito la remisión correctamente');
+    }
+
     public function addComercioExterior($idFactura, $borrador)
     {
       if ((isset($_GET['idb']) && ! $borrador) || $borrador)
@@ -532,7 +542,7 @@ class facturacion_model extends privilegios_model{
         'updated_at'                  => date("Y-m-d H:i:s")
         );
       $this->db->insert('facturacion_ce', $ce);
-      $idce = $this->db->insert_id('facturacion_ce', 'id');
+      $idce = $this->db->insert_id('facturacion_ce_id_seq');
 
       $ce = array(
         'comercio_exterior_id' => $idce,
@@ -640,6 +650,14 @@ class facturacion_model extends privilegios_model{
       'tipoDeComprobante' => $tipoDeComprobante,
       'usoCfdi'           => $this->input->post('duso_cfdi'),
     ];
+    if (!empty($_POST['cp']['ubicaciones']) &&
+        !empty($_POST['cp']['mercancias']['mercancias']) &&
+        !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+        count($_POST['cp']['ubicaciones']) > 0 &&
+        count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+        count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
+      $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
+    }
 
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
@@ -668,6 +686,8 @@ class facturacion_model extends privilegios_model{
       'status'              => $borrador ? 'b' : 'p',
       // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'retencion_iva'       => $this->input->post('total_retiva'),
+      'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
       'cfdi_ext'            => json_encode($cfdi_ext),
@@ -709,7 +729,7 @@ class facturacion_model extends privilegios_model{
     if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
     {
       $this->db->insert('facturacion', $datosFactura);
-      $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+      $idFactura = $this->db->insert_id('facturacion_id_factura_seq');
 
       // Si tiene el # de trazabilidad
       if ($this->input->post('dno_trazabilidad') !== false) {
@@ -833,8 +853,13 @@ class facturacion_model extends privilegios_model{
           'iva'                   => $_POST['prod_diva_total'][$key],
           'unidad'                => $_POST['prod_dmedida'][$key],
           'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+          'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ieps'                  => (isset($_POST['dieps_total'][$key])? $_POST['dieps_total'][$key]: 0),
+          'porcentaje_ieps'       => (isset($_POST['dieps'][$key])? $_POST['dieps'][$key]: 0),
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'ids_remisiones'        => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
           'kilos'                 => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
@@ -848,6 +873,7 @@ class facturacion_model extends privilegios_model{
           'unidad_c'              => $dunidad_c,
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+          'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'no_identificacion'     => $_POST['no_identificacion'][$key],
           'cfdi_ext'              => json_encode($cfdi_extpp),
@@ -873,16 +899,16 @@ class facturacion_model extends privilegios_model{
             'noIdentificacion'        => $_POST['no_identificacion'][$key],
             'retencionCedular'        => '0',
             'retencionCedularPorcent' => '0',
-            'retencionIsr'            => '0',
-            'retencionIsrPorcent'     => '0',
+            'retencionIsr'            => floatval((isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0)),
+            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0)),
             'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
             'retencionIvaPorcent'     => ($_POST['prod_dreten_iva_porcent'][$key]*100),
             'retencionIvc'            => '0',
             'retencionIvcPorcent'     => '0',
             'trasladoCedular'         => '0',
             'trasladoCedularPorcent'  => '0',
-            'trasladoIeps'            => '0',
-            'trasladoIepsPorcent'     => '0',
+            'trasladoIeps'            => floatval((isset($_POST['dieps_total'][$key])? $_POST['dieps_total'][$key]: 0)),
+            'trasladoIepsPorcent'     => floatval((isset($_POST['dieps'][$key])? $_POST['dieps'][$key]: 0)),
             'trasladoIsh'             => '0',
             'trasladoIshPorcent'      => '0',
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
@@ -1040,6 +1066,9 @@ class facturacion_model extends privilegios_model{
 
     // xml 3.3
     $datosApi = $this->cfdi->obtenDatosCfdi33($_POST, $productosApi, $cid_nc);
+    // echo "<pre>";
+    //   var_dump($datosApi);
+    // echo "</pre>";exit;
 
     // Obtiene los datos para la cadena original
     // $datosCadOrig = $this->datosCadenaOriginal();
@@ -1182,8 +1211,15 @@ class facturacion_model extends privilegios_model{
       // Si es true $delFile entonces elimina todo lo relacionado con la factura.
       if ($delFiles)
       {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        if (empty($_GET['idb'])) {
+          $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+          $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        } else {
+          $dataTimbrado = array(
+            'status' => 'b',
+          );
+          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+        }
         // unlink($pathXML);
       }
 
@@ -1227,8 +1263,15 @@ class facturacion_model extends privilegios_model{
       // Si es true $delFile entonces elimina todo lo relacionado con la factura.
       if ($delFiles)
       {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        if (empty($_GET['idb'])) {
+          $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+          $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        } else {
+          $dataTimbrado = array(
+            'status' => 'b',
+          );
+          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+        }
         // unlink($pathXML);
       }
 
@@ -1290,7 +1333,7 @@ class facturacion_model extends privilegios_model{
    *
    * @return array
 	 */
-	public function cancelaFactura($idFactura)
+	public function cancelaFactura($idFactura, $datos)
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
@@ -1307,13 +1350,15 @@ class facturacion_model extends privilegios_model{
 
       // Parametros que necesita el webservice para la cancelacion.
       $params = array(
-        'rfc'    => $factura['info']->empresa->rfc,
-        'rfcRec' => $factura['info']->cliente->rfc,
-        'uuids'  => $factura['info']->uuid,
-        'cer'    => $this->cfdi->obtenCer(),
-        'key'    => $this->cfdi->obtenKey(),
-        'total'  => $factura['info']->total,
-        'sello'  => $factura['info']->sello,
+        'rfc'              => $factura['info']->empresa->rfc,
+        'rfcRec'           => $factura['info']->cliente->rfc,
+        'uuids'            => $factura['info']->uuid,
+        'cer'              => $this->cfdi->obtenCer(),
+        'key'              => $this->cfdi->obtenKey(),
+        'total'            => $factura['info']->total,
+        'sello'            => $factura['info']->sello,
+        'motivo'           => $datos['motivo'],
+        'folioSustitucion' => $datos['folioSustitucion'],
       );
 
       // Lama el metodo cancelar para que realiza la peticion al webservice.
@@ -1459,6 +1504,67 @@ class facturacion_model extends privilegios_model{
         readfile(APPPATH.'media/documentos.zip');
 
         unlink(APPPATH.'media/documentos.zip');
+    }
+
+    public function descargarMasiva($id_empresa, $fecha1, $fecha2, $id_cliente = null)
+    {
+      $fecha1 = substr($fecha1, 0, 10);
+      $fecha2 = substr($fecha2, 0, 10);
+      $sql = '';
+
+      if (!empty($id_cliente)) {
+        $sql = " AND c.id_cliente = {$id_cliente}";
+      }
+
+      $res = $this->db->query("SELECT f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal
+         FROM facturacion as f
+          INNER JOIN clientes as c ON f.id_cliente = c.id_cliente
+         WHERE f.id_empresa = {$id_empresa} AND
+           Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}' AND
+           id_nc IS NULL AND id_abono_factura IS NULL AND
+           is_factura = 't' {$sql}
+         ")->result();
+
+      $num_files = 0;
+      if ($res && count($res) > 0) {
+        $zip = new ZipArchive;
+        if ($zip->open(APPPATH.'media/facturas_masivas.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+        {
+          foreach ($res as $key => $value) {
+            $cliente = MyString::quitAcentos(strtoupper($value->nombre_fiscal));
+            $fecha   = explode('-', $value->fecha);
+            $ano     = $fecha[0];
+            $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
+            $serie   = $value->serie !== '' ? $value->serie.'-' : '';
+            $folio   = $value->folio;
+
+            $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+            if (file_exists($pathDocs)) {
+              // Scanea el directorio para obtener los archivos.
+              $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+              foreach ($archivos as $archivo){
+                $zip->addFile($pathDocs.$archivo, $archivo);
+                ++$num_files;
+              }
+            }
+          }
+          $zip->close();
+        } else {
+          exit('Error al intentar crear el ZIP.');
+        }
+      }
+
+      if ($num_files > 0) {
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=facturas_masivas.zip');
+        readfile(APPPATH.'media/facturas_masivas.zip');
+        unlink(APPPATH.'media/facturas_masivas.zip');
+      } else {
+        echo "No hay archivos";
+      }
+
     }
 
    /**
@@ -1688,6 +1794,14 @@ class facturacion_model extends privilegios_model{
         'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
         'usoCfdi'           => $this->input->post('duso_cfdi'),
       ];
+      if (!empty($_POST['cp']['ubicaciones']) &&
+          !empty($_POST['cp']['mercancias']['mercancias']) &&
+          !empty($_POST['cp']['figuraTransporte']['tiposFigura']) &&
+          count($_POST['cp']['ubicaciones']) > 0 &&
+          count($_POST['cp']['mercancias']['mercancias']) > 0 &&
+          count($_POST['cp']['figuraTransporte']['tiposFigura']) > 0 ) {
+        $cfdi_ext['cartaPorteSat'] = $_POST['cp'];
+      }
 
       $datosFactura = array(
         'id_cliente'          => $this->input->post('did_cliente'),
@@ -1712,6 +1826,7 @@ class facturacion_model extends privilegios_model{
         'observaciones'       => $this->input->post('dobservaciones'),
         'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
         'retencion_iva'       => $this->input->post('total_retiva'),
+        'ieps'                => floatval($this->input->post('total_ieps')),
         'cfdi_ext'            => json_encode($cfdi_ext),
       );
 
@@ -1759,31 +1874,37 @@ class facturacion_model extends privilegios_model{
           ];
 
           $productosFactura[] = array(
-            'id_factura'       => $idBorrador,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-            'num_row'          => intval($key),
-            'cantidad'         => $_POST['prod_dcantidad'][$key],
-            'descripcion'      => $descripcion,
-            'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-            'importe'          => $_POST['prod_importe'][$key],
-            'iva'              => $_POST['prod_diva_total'][$key],
-            'unidad'           => $_POST['prod_dmedida'][$key],
-            'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
-            'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
-            'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-            'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-            'ids_remisiones'    => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
-            'kilos'             => $_POST['prod_dkilos'][$key],
-            'cajas'             => $_POST['prod_dcajas'][$key],
+            'id_factura'            => $idBorrador,
+            'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+            'num_row'               => intval($key),
+            'cantidad'              => $_POST['prod_dcantidad'][$key],
+            'descripcion'           => $descripcion,
+            'precio_unitario'       => $_POST['prod_dpreciou'][$key],
+            'importe'               => $_POST['prod_importe'][$key],
+            'iva'                   => $_POST['prod_diva_total'][$key],
+            'unidad'                => $_POST['prod_dmedida'][$key],
+            'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
+            'porcentaje_iva'        => ($_POST['prod_diva_porcent'][$key]=='exento'? 0: $_POST['prod_diva_porcent'][$key]),
+            'porcentaje_iva_real'   => $_POST['prod_diva_porcent'][$key],
+            'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+            'ieps'                  => $_POST['dieps_total'][$key],
+            'porcentaje_ieps'       => $_POST['dieps'][$key],
+            'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+            'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
+            'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+            'ids_remisiones'        => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
+            'kilos'                 => $_POST['prod_dkilos'][$key],
+            'cajas'                 => $_POST['prod_dcajas'][$key],
             'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
             'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
-            'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : null,
-            'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : null,
-            'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
-            'id_unidad'   => $did_unidad,
-            'unidad_c'   => $dunidad_c,
+            'clase'                 => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : null,
+            'peso'                  => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : null,
+            'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+            'id_unidad'             => $did_unidad,
+            'unidad_c'              => $dunidad_c,
             'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
             'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+            'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
             'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
             'no_identificacion'     => $_POST['no_identificacion'][$key],
             'cfdi_ext'              => json_encode($cfdi_extpp),
@@ -2090,7 +2211,7 @@ class facturacion_model extends privilegios_model{
                     'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
       foreach ($res[0] as $key => $value)
       {
-        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
+        if($tipo != '' && isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
           unset($res[0][$key]);
       }
 
@@ -2233,29 +2354,33 @@ class facturacion_model extends privilegios_model{
      */
     public function getFacEmpresasAjax()
     {
-        $sql = "rfc != '' AND
-                calle != '' AND
-                no_exterior != '' AND
-                colonia != '' AND
-                localidad != '' AND
-                municipio != '' AND
-                estado != '' AND
-                regimen_fiscal != '' AND
-                cer_org != '' AND
-                cer != '' AND
-                key_path != '' AND
-                pass != '' AND
-                cfdi_version != '' AND";
-        if ($this->input->get('all') == 1) {
-          $sql = '';
+        $sql = '';
+
+        $ids = $this->usuarios_model->getEmpresasPermiso('ids');
+        if (count($ids) > 0) {
+          $sql .= " AND id_empresa in(".implode(',', $ids).")";
         }
+
         $res = $this->db->query("
             SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
-                  e.no_exterior, e.no_interior, e.rfc
+                  e.no_exterior, e.no_interior, e.rfc, e.sucursal
             FROM empresas AS e
             WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
-                  {$sql}
+                  rfc != '' AND
+                  calle != '' AND
+                  no_exterior != '' AND
+                  colonia != '' AND
+                  localidad != '' AND
+                  municipio != '' AND
+                  estado != '' AND
+                  regimen_fiscal != '' AND
+                  cer_org != '' AND
+                  cer != '' AND
+                  key_path != '' AND
+                  pass != '' AND
+                  cfdi_version != '' AND
                   status = true
+                  {$sql}
             ORDER BY nombre_fiscal ASC
             LIMIT 20");
 
@@ -2270,8 +2395,8 @@ class facturacion_model extends privilegios_model{
 
             $response[] = array(
                 'id' => $itm->id_empresa,
-                'label' => $itm->nombre_fiscal,
-                'value' => $itm->nombre_fiscal,
+                'label' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
+                'value' => $itm->nombre_fiscal . (!empty($itm->sucursal)? " - $itm->sucursal": ''),
                 'item' => $itm,
             );
           }
@@ -2310,96 +2435,6 @@ class facturacion_model extends privilegios_model{
                                     GROUP BY fp.id_producto");
 
         return $query->result();
-    }
-
-    public function getRPF()
-    {
-      $sql = '';
-      $response = array();
-
-      if ( !is_array($this->input->get('ids_productos')) && $this->input->get('dcontiene') == '')
-      {
-        exit();
-      }
-
-      if ($this->input->get('dcontiene') != '') {
-        $_GET['ids_productos'] = array($this->input->get('dcontiene'));
-      }
-
-      foreach ($this->input->get('ids_productos') as $key => $prod)
-      {
-        $sql = "WHERE 1 = 1";
-        if (is_numeric($prod)) {
-          $sql .= " AND fp.id_clasificacion = {$prod}";
-        } else {
-          $prod = mb_strtoupper($prod, 'UTF-8');
-          $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
-        }
-
-        //Filtro de fecha.
-        if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-          $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-        elseif($this->input->get('ffecha1') != '')
-          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
-        elseif($this->input->get('ffecha2') != '')
-          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
-
-        if ($this->input->get('fid_cliente') != '')
-        {
-          $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
-        }
-
-        if ($this->input->get('did_empresa') != '')
-        {
-          $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
-
-          if ($this->input->get('did_empresa') == 12) {
-            $sql .= " AND f.id_factura <> 23525";
-          }
-        }
-
-        if ($this->input->get('dtipo') != '')
-        {
-          $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
-        }
-
-        // filtra por pagadas
-        if (isset($_GET['dpagadas']))
-        {
-          $sql .= " AND f.status = 'pa'";
-        }
-
-        // filtra por las que esten pendientes y pagadas.
-        else
-        {
-          $sql .= " AND f.status != 'ca'";
-        }
-
-        $query = $this->db->query(
-            "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
-                    SUM(cantidad) as cantidad, fp.precio_unitario,
-                    SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza
-            FROM facturacion f
-            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
-            INNER JOIN clientes c ON c.id_cliente= f.id_cliente
-            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
-            {$sql}
-            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado
-            ORDER BY f.fecha ASC");
-
-        if (is_numeric($prod)) {
-          $prodcto = $this->db->query(
-              "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
-        } else {
-          $prodcto = $this->db->query(
-              "SELECT 0 AS id_clasificacion, '{$prod}' AS nombre")->row();
-        }
-
-        $response[] = array('producto' => $prodcto, 'listado' => $query->result());
-        $query->free_result();
-      }
-
-      return $response;
     }
 
     public function rvc_pdf()
@@ -2523,6 +2558,194 @@ class facturacion_model extends privilegios_model{
 
       $pdf->Output('Reporte_Ventas_Productos.pdf', 'I');
     }
+
+    public function getRPF()
+    {
+      $sql = '';
+      $response = array();
+
+      if ( !is_array($this->input->get('ids_productos')) && $this->input->get('dcontiene') == '')
+      {
+        exit();
+      }
+
+      if ($this->input->get('dcontiene') != '') {
+        $_GET['ids_productos'] = array($this->input->get('dcontiene'));
+      }
+
+      foreach ($this->input->get('ids_productos') as $key => $prod)
+      {
+        $sql = "WHERE 1 = 1";
+        if (is_numeric($prod)) {
+          $sql .= " AND fp.id_clasificacion = {$prod}";
+        } else {
+          $prod = mb_strtoupper($prod, 'UTF-8');
+          $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
+        }
+
+        //Filtro de fecha.
+        if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+          $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+        elseif($this->input->get('ffecha1') != '')
+          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+        elseif($this->input->get('ffecha2') != '')
+          $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+
+        if ($this->input->get('fid_cliente') != '')
+        {
+          $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
+        }
+
+        if ($this->input->get('did_empresa') != '')
+        {
+          $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+
+          if ($this->input->get('did_empresa') == 12) {
+            $sql .= " AND f.id_factura <> 23525";
+          }
+        }
+
+        if ($this->input->get('dtipo') != '')
+        {
+          $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
+        }
+
+        // filtra por pagadas
+        if (isset($_GET['dpagadas']))
+        {
+          $sql .= " AND f.status = 'pa'";
+        }
+
+        // filtra por las que esten pendientes y pagadas.
+        else
+        {
+          $sql .= " AND f.status != 'ca'";
+        }
+
+        $query = $this->db->query(
+            "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
+                    SUM(cantidad) as cantidad, fp.precio_unitario,
+                    SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza
+            FROM facturacion f
+            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
+            INNER JOIN clientes c ON c.id_cliente= f.id_cliente
+            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
+            {$sql}
+            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado
+            ORDER BY f.fecha ASC");
+
+        if (is_numeric($prod)) {
+          $prodcto = $this->db->query(
+              "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
+        } else {
+          $prodcto = $this->db->query(
+              "SELECT 0 AS id_clasificacion, '{$prod}' AS nombre")->row();
+        }
+
+        $response[] = array('producto' => $prodcto, 'listado' => $query->result());
+        $query->free_result();
+      }
+
+      return $response;
+    }
+
+    public function getRPF2()
+    {
+      $response = array();
+
+      $sql = "WHERE 1 = 1";
+
+      $prod = null;
+      if ($this->input->get('dcontiene') != '') {
+        $prod = mb_strtoupper($prod, 'UTF-8');
+        $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
+      }
+
+      if (is_array($this->input->get('ids_productos'))) {
+        $sql .= " AND fp.id_clasificacion in(".implode(', ', $this->input->get('ids_productos')).")";
+      }
+
+      //Filtro de fecha.
+      if($this->input->get('ffecha1') == '' && $this->input->get('ffecha2') == '')
+        $sql .= " AND Date(f.fecha) BETWEEN '".date("Y-m")."-01' AND '".date("Y-m-d")."'";
+      elseif($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+        $sql .= " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      elseif($this->input->get('ffecha1') != '')
+        $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+      elseif($this->input->get('ffecha2') != '')
+        $sql .= " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+
+      if ($this->input->get('fid_cliente') != '')
+      {
+        $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
+      }
+
+      if ($this->input->get('did_empresa') != '')
+      {
+        $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+      }
+
+      if ($this->input->get('dserie') != '')
+      {
+        $sql .= " AND f.serie = '".$this->input->get('dserie')."'";
+      }
+
+      if ($this->input->get('dtipo') != '')
+      {
+        $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
+      }
+
+      // filtra por pagadas
+      if (isset($_GET['dpagadas']))
+      {
+        $sql .= " AND f.status = 'pa'";
+      }
+      // filtra por las que esten pendientes y pagadas.
+      else
+      {
+        $sql .= " AND f.status != 'ca'";
+      }
+
+      $query = $this->db->query(
+          "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
+                  SUM(cantidad) as cantidad, fp.precio_unitario,
+                  SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza,
+                  cl.id_clasificacion, cl.nombre
+          FROM facturacion f
+            INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
+            INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+            INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
+            LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
+          {$sql}
+          GROUP BY f.id_factura, c.id_cliente, fp.precio_unitario, fc.pol_seg, fc.certificado, cl.id_clasificacion
+          ORDER BY cl.nombre ASC, f.fecha ASC");
+
+      $productos = $query->result();
+      if (count($productos) > 0) {
+        $auxp = 0;
+        $lista = [];
+        $prodcto = ['id_clasificacion' => $productos[0]->id_clasificacion, 'nombre' => $productos[0]->nombre];
+        foreach ($productos as $key => $prod)
+        {
+          if ($prod->id_clasificacion != $auxp) {
+            if(count($lista) > 0){
+              $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
+            }
+
+            $prodcto = ['id_clasificacion' => $prod->id_clasificacion, 'nombre' => $prod->nombre];
+
+            $auxp = $prod->id_clasificacion;
+            $lista = [];
+          }
+
+          $lista[] = $prod;
+        }
+        $response[] = array('producto' => (object)$prodcto, 'listado' => $lista);
+      }
+
+      return $response;
+    }
+
     /**
      * Reportes Productos Facturados.
      *
@@ -2530,9 +2753,14 @@ class facturacion_model extends privilegios_model{
      */
     public function prodfact_pdf()
     {
-      if (isset($_GET['did_producto']))
-      {
-        $facturas = $this->getRPF();
+      // if (isset($_GET['did_producto']))
+      // {
+        if (empty($_GET['did_empresa'])) {
+          $empresaDef = $this->empresas_model->getDefaultEmpresa();
+          $_GET['did_empresa'] = $empresaDef->id_empresa;
+        }
+
+        $facturas = $this->getRPF2();
 
         $this->load->model('empresas_model');
         $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -2657,7 +2885,7 @@ class facturacion_model extends privilegios_model{
             MyString::formatoNumero($importet, 2, '$', false) ), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
-      }
+      // }
     }
 
     public function prodfact_xls()
@@ -2667,7 +2895,7 @@ class facturacion_model extends privilegios_model{
       header("Pragma: no-cache");
       header("Expires: 0");
 
-      $facturas = $this->getRPF();
+      $facturas = $this->getRPF2();
 
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -4345,6 +4573,9 @@ class facturacion_model extends privilegios_model{
     // echo "</pre>";exit;
 
     $this->load->library('mypdf');
+    if (!empty($_GET['lang']) && $_GET['lang'] === 'en') {
+      $this->lang->load('factura', 'english');
+    }
 
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -4354,9 +4585,14 @@ class facturacion_model extends privilegios_model{
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
+    $sinCE = isset($factura['ce'])? false: true;
+
     $pdf->SetFont('Arial','B', 70);
     $pdf->SetTextColor(160,160,160);
-    $pdf->RotatedText(65, 130, ($factura['info']->no_impresiones==0? 'ORIGINAL': 'COPIA #'.$factura['info']->no_impresiones), 45);
+    $pdf->RotatedText(65, 100, ($factura['info']->no_impresiones==0? 'ORIGINAL': $this->lang->line('factura_copy', 'COPIA').' #'.$factura['info']->no_impresiones), 35);
+    if ($sinCE && ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7)) {
+      $pdf->RotatedText(25, 175, 'VENTA NACIONAL', 35);
+    }
 
     $pdf->SetXY(0, 0);
     /////////////////////////////////////
@@ -4367,15 +4603,15 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 2);
-    $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_folio_fiscal', 'Folio Fiscal')}:", 0, 0, 'R', 1);
 
-    $titulo_comprobante = '                 '.($factura['info']->condicion_pago=='co'? 'Factura al contado': 'Factura a credito');
+    $titulo_comprobante = '                 '.($factura['info']->condicion_pago=='co'? $this->lang->line('factura_factura_contado', 'Factura al contado'): $this->lang->line('factura_factura_credito', 'Factura a crédito'));
     if($factura['info']->id_nc != '')
-      $titulo_comprobante = '                 Nota de Crédito';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_nota_credito', 'Nota de Crédito');
     elseif($factura['info']->id_abono_factura != '')
-      $titulo_comprobante = '                 Abono del Cliente';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_abono_cliente', 'Abono del Cliente');
     elseif (isset($factura['carta_porte']))
-      $titulo_comprobante = '                 Carta Porte - Factura';
+      $titulo_comprobante = '                 '.$this->lang->line('factura_carta_porte', 'Carta Porte - Factura');
     $pdf->SetXY(0, $pdf->GetY());
     $pdf->Cell(50, 4, $titulo_comprobante.':  '.($factura['info']->serie.$factura['info']->folio) , 0, 0, 'L', 1);
 
@@ -4385,9 +4621,9 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(48, 4, "Fecha y hora de impresión:", 0, 0, 'L', 1);
+    $pdf->Cell(48, 4, "{$this->lang->line('factura_fecha_hr_impresion', 'Fecha y hora de impresión')}:", 0, 0, 'L', 1);
     $pdf->SetXY(48, $pdf->GetY());
-    $pdf->Cell(60, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+    $pdf->Cell(60, 4, "{$this->lang->line('factura_no_certificado_csd', 'No de Serie del Certificado del CSD')}:", 0, 0, 'R', 1);
 
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica','', 9);
@@ -4400,7 +4636,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_lugar_fecha_emision', 'Lugar. fecha y hora de emisión')}:", 0, 0, 'R', 1);
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
@@ -4430,7 +4666,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_emisor', 'Emisor')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -4439,19 +4675,23 @@ class facturacion_model extends privilegios_model{
     $pdf->SetX(0);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(19, 93));
-    $pdf->Row(array('RFC:', $factura['info']->cfdi_ext->emisor->rfc), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['info']->cfdi_ext->emisor->rfc), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 196));
     $pdf->SetX(0);
-    $pdf->Row(array('NOMBRE:', $factura['info']->cfdi_ext->emisor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['info']->cfdi_ext->emisor->nombreFiscal), false, false, null, 2, 1);
     $pdf->SetX(0);
-    $pdf->Row(array('DOMICILIO:', $factura['info']->cfdi_ext->emisor->calle.' No. '.$factura['info']->cfdi_ext->emisor->noExterior.
+    $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['info']->cfdi_ext->emisor->calle.' No. '.$factura['info']->cfdi_ext->emisor->noExterior.
           ((isset($factura['info']->cfdi_ext->emisor->noInterior)) ? ' Int. '.$factura['info']->cfdi_ext->emisor->noInterior : '') ), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 83, 19, 83));
     $pdf->SetX(0);
-    $pdf->Row(array('COLONIA:', $factura['info']->cfdi_ext->emisor->colonia, 'LOCALIDAD:', $factura['info']->cfdi_ext->emisor->localidad), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_colonia', 'COLONIA').':', $factura['info']->cfdi_ext->emisor->colonia,
+        $this->lang->line('factura_emisor_localidad', 'LOCALIDAD').':', $factura['info']->cfdi_ext->emisor->localidad), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 46, 19, 40, 11, 46, 11, 30));
     $pdf->SetX(0);
-    $pdf->Row(array('MUNICIPIO:', $factura['info']->cfdi_ext->emisor->municipio, 'ESTADO:', $factura['info']->cfdi_ext->emisor->estado, 'PAIS:', $factura['info']->cfdi_ext->emisor->pais, 'CP:', $factura['info']->cfdi_ext->emisor->cp), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_municipio', 'MUNICIPIO').':', $factura['info']->cfdi_ext->emisor->municipio,
+        $this->lang->line('factura_emisor_estado', 'ESTADO').':', $factura['info']->cfdi_ext->emisor->estado,
+        $this->lang->line('factura_emisor_pais', 'PAIS').':', $factura['info']->cfdi_ext->emisor->pais,
+        $this->lang->line('factura_emisor_cp', 'CP').':', $factura['info']->cfdi_ext->emisor->cp), false, false, null, 2, 1);
 
     $end_y = $pdf->GetY();
 
@@ -4467,7 +4707,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Régimen Fiscal: ", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "{$this->lang->line('factura_emisor_regimen_fiscal', 'Régimen Fiscal')}: ", 0, 0, 'R', 1);
 
     $regimen_fiscal = "{$regimenFiscal->c_RegimenFiscal} - {$regimenFiscal->nombre} ";
     $uso_cfdi = $usoCfdi->search($factura['info']->cfdi_ext->usoCfdi);
@@ -4478,9 +4718,9 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(109, $pdf->GetY() + 4);
     $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'R', 0);
     $pdf->SetXY(119, $pdf->GetY() + 1);
-    $pdf->MultiCell(98, 4, "TIPO DE COMPROBANTE : {$tipo_comprobante['key']} - {$tipo_comprobante['value']} ", 0, 'R', 0);
+    $pdf->MultiCell(98, 4, "{$this->lang->line('factura_emisor_tipo_compro', 'TIPO DE COMPROBANTE')} : {$tipo_comprobante['key']} - {$tipo_comprobante['value']} ", 0, 'R', 0);
     $pdf->SetXY(119, $pdf->GetY() + 1);
-    $pdf->MultiCell(98, 4, "USO: {$uso_cfdi['key']} - {$uso_cfdi['value']} ", 0, 'R', 0);
+    $pdf->MultiCell(98, 4, "{$this->lang->line('factura_emisor_uso', 'USO')}: {$uso_cfdi['key']} - {$uso_cfdi['value']} ", 0, 'R', 0);
 
     //////////////////
     // Datos Receptor //
@@ -4503,7 +4743,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(0, $pdf->GetY() + 1);
-    $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
+    $pdf->Cell(216, 4, "{$this->lang->line('factura_receptor', 'Receptor')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -4512,23 +4752,23 @@ class facturacion_model extends privilegios_model{
     $pdf->SetX(0);
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(19, 93));
-    $pdf->Row(array('RFC:', $factura['info']->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['info']->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 196));
     $pdf->SetX(0);
-    $pdf->Row(array('NOMBRE:', $factura['info']->cfdi_ext->receptor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['info']->cfdi_ext->receptor->nombreFiscal), false, false, null, 2, 1);
     $pdf->SetX(0);
-    $pdf->Row(array('DOMICILIO:', (isset($factura['info']->cfdi_ext->receptor->calle) ? $factura['info']->cfdi_ext->receptor->calle : '').
+    $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', (isset($factura['info']->cfdi_ext->receptor->calle) ? $factura['info']->cfdi_ext->receptor->calle : '').
               ' No. '.(isset($factura['info']->cfdi_ext->receptor->noExterior) ? $factura['info']->cfdi_ext->receptor->noExterior : '').
               ((isset($factura['info']->cfdi_ext->receptor->noInterior)) ? ' Int. '.$factura['info']->cfdi_ext->receptor->noInterior : '') ), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 83, 19, 83));
     $pdf->SetX(0);
-    $pdf->Row(array('COLONIA:', (isset($factura['info']->cfdi_ext->receptor->colonia) ? $factura['info']->cfdi_ext->receptor->colonia : ''),
-              'LOCALIDAD:', (isset($factura['info']->cfdi_ext->receptor->localidad) ? $factura['info']->cfdi_ext->receptor->localidad : '')), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_colonia', 'COLONIA').':', (isset($factura['info']->cfdi_ext->receptor->colonia) ? $factura['info']->cfdi_ext->receptor->colonia : ''),
+              $this->lang->line('factura_emisor_localidad', 'LOCALIDAD').':', (isset($factura['info']->cfdi_ext->receptor->localidad) ? $factura['info']->cfdi_ext->receptor->localidad : '')), false, false, null, 2, 1);
     $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
     $pdf->SetX(0);
-    $pdf->Row(array('ESTADO:', (isset($factura['info']->cfdi_ext->receptor->estado) ? $factura['info']->cfdi_ext->receptor->estado : ''),
-            'PAIS:', (isset($factura['info']->cfdi_ext->receptor->pais) ? $factura['info']->cfdi_ext->receptor->pais : ''),
-            'CP:', (isset($factura['info']->cfdi_ext->receptor->cp) ? $factura['info']->cfdi_ext->receptor->cp : '') ), false, false, null, 2, 1);
+    $pdf->Row(array($this->lang->line('factura_emisor_estado', 'ESTADO').':', (isset($factura['info']->cfdi_ext->receptor->estado) ? $factura['info']->cfdi_ext->receptor->estado : ''),
+            $this->lang->line('factura_emisor_pais', 'PAIS').':', (isset($factura['info']->cfdi_ext->receptor->pais) ? $factura['info']->cfdi_ext->receptor->pais : ''),
+            $this->lang->line('factura_emisor_cp', 'CP').':', (isset($factura['info']->cfdi_ext->receptor->cp) ? $factura['info']->cfdi_ext->receptor->cp : '') ), false, false, null, 2, 1);
 
     if (isset($factura['carta_porte']))
     {
@@ -4537,7 +4777,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetTextColor(0, 171, 72);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $y_aux = $pdf->GetY();
-      $pdf->Cell(108, 4, "Remitente:", 0, 0, 'L', 1);
+      $pdf->Cell(108, 4, "{$this->lang->line('factura_remitente_remitente', 'Remitente')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetTextColor(0, 0, 0);
@@ -4546,21 +4786,21 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(19, 93));
-      $pdf->Row(array('RFC:', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
       $pdf->SetWidths(array(19, 196));
       $pdf->SetX(0);
-      $pdf->Row(array('NOMBRE:', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
       $pdf->SetX(0);
-      $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
 
       // $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(80, 50, 35, 45));
       $pdf->SetX(0);
       $pdf->Row(array(
-        'OPERADOR: ' . $factura['carta_porte']['remitente'][0]->chofer,
-        'MARCA: ' . $factura['carta_porte']['remitente'][0]->marca,
-        'MODELO:' . $factura['carta_porte']['remitente'][0]->modelo,
-        'PLACAS:' . $factura['carta_porte']['remitente'][0]->placas
+        $this->lang->line('factura_remitente_operador', 'OPERADOR').': ' . $factura['carta_porte']['remitente'][0]->chofer,
+        $this->lang->line('factura_remitente_marca', 'MARCA').': ' . $factura['carta_porte']['remitente'][0]->marca,
+        $this->lang->line('factura_remitente_modelo', 'MODELO').':' . $factura['carta_porte']['remitente'][0]->modelo,
+        $this->lang->line('factura_remitente_placas', 'PLACAS').':' . $factura['carta_porte']['remitente'][0]->placas
       ), false, false, null, 2, 1);
 
       $end_y = $pdf->GetY();
@@ -4570,7 +4810,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(110, $y_aux);
-      $pdf->Cell(216, 4, "Destinatario:", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_remitente_remitente', 'Destinatario')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetTextColor(0, 0, 0);
@@ -4579,12 +4819,12 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(110);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(19, 93));
-      $pdf->Row(array('RFC:', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_rfc', 'RFC').':', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
       $pdf->SetWidths(array(19, 196));
       $pdf->SetX(110);
-      $pdf->Row(array('NOMBRE:', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_nombre', 'NOMBRE').':', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
       $pdf->SetX(110);
-      $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['destinatario'][0]->direccion ), false, false, null, 2, 1);
+      $pdf->Row(array($this->lang->line('factura_emisor_domicilio', 'DOMICILIO').':', $factura['carta_porte']['destinatario'][0]->direccion ), false, false, null, 2, 1);
     }
 
     ///////////////
@@ -4599,7 +4839,15 @@ class facturacion_model extends privilegios_model{
     $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C');
     $aligns2 = array('C', 'C', 'L', 'L', 'C', 'R', 'R');
     $widths = array(25, 35, 16, 19, 61, 30, 30);
-    $header = array('Cantidad', 'Unidad de Medida', 'C. Unidad', 'C. ProdServ', 'Descripcion', 'Precio Unitario', 'Importe');
+    $header = array(
+      $this->lang->line('factura_productos_cantidad', 'Cantidad'),
+      $this->lang->line('factura_productos_unidad_medida', 'Unidad de Medida'),
+      $this->lang->line('factura_productos_c_unidad', 'C. Unidad'),
+      $this->lang->line('factura_productos_c_prodserv', 'C. ProdServ'),
+      $this->lang->line('factura_productos_descripcion', 'Descripcion'),
+      $this->lang->line('factura_productos_precio_unitario', 'Precio Unitario'),
+      $this->lang->line('factura_productos_importe', 'Importe'),
+    );
 
     $pdf->limiteY = 250;
 
@@ -4672,13 +4920,13 @@ class facturacion_model extends privilegios_model{
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY() + 1);
-    $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
+    $pdf->Cell(154, 4, "{$this->lang->line('factura_totales_total_letra', 'Total con letra')}:", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(90, $pdf->GetY());
-    $pdf->Cell(39, 4, "Moneda: ".$factura['info']->moneda, 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "{$this->lang->line('factura_totales_moneda', 'Moneda')}: ".$factura['info']->moneda, 0, 0, 'L', 1);
     $pdf->SetXY(115, $pdf->GetY());
-    $pdf->Cell(39, 4, "Tipo de Cambio: ".MyString::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "{$this->lang->line('factura_totales_tipo_cambio', 'Tipo de Cambio')}: ".MyString::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetXY(0, $pdf->GetY() + 4);
@@ -4689,11 +4937,11 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY()+1);
     $frmPago = $formaPago->search($factura['info']->cfdi_ext->formaDePago);
-    $pdf->Cell(91, 4, "Forma de Pago: {$frmPago['key']} - {$frmPago['value']}", 0, 0, 'L', 1);
+    $pdf->Cell(91, 4, "{$this->lang->line('factura_totales_forma_pago', 'Forma de Pago')}: {$frmPago['key']} - {$frmPago['value']}", 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(91, $pdf->GetY());
-    $text_condicionpago = 'Condicion de Pago: '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito');
+    $text_condicionpago = $this->lang->line('factura_totales_condicion_pago', 'Condición de Pago').': '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito');
     if($factura['info']->id_abono_factura != '')
       $text_condicionpago = '';
     $pdf->Cell(65, 4, $text_condicionpago, 0, 0, 'L', 1);
@@ -4701,12 +4949,12 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY()+4.5);
     $metPago = $metodosPago->search($factura['info']->cfdi_ext->metodoDePago);
-    $pdf->Cell(148, 4, "Metodo de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
+    $pdf->Cell(148, 4, "{$this->lang->line('factura_totales_metodo_pago', 'Metodo de Pago')}: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
 
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(156, $pdf->GetY() - 16);
-    $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_subtotal', 'Subtotal')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5, MyString::formatoNumero(($factura['info']->subtotal/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
@@ -4714,22 +4962,40 @@ class facturacion_model extends privilegios_model{
     // Pinta traslados, retenciones
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva', 'IVA')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->importe_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
 
+    if ($factura['info']->ieps > 0)
+    {
+      $pdf->SetXY(156, $pdf->GetY() + 5);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_ieps', 'IEPS')}", 1, 0, 'C', 1);
+
+      $pdf->SetXY(186, $pdf->GetY());
+      $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->ieps/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
+    }
+
+    if ($factura['info']->isr > 0)
+    {
+      $pdf->SetXY(156, $pdf->GetY() + 5);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva_retenido', 'ISR Retenido')}", 1, 0, 'C', 1);
+
+      $pdf->SetXY(186, $pdf->GetY());
+      $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->isr/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
+    }
+
     if ($factura['info']->retencion_iva > 0)
     {
       $pdf->SetXY(156, $pdf->GetY() + 5);
-      $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva_retenido', 'IVA Retenido')}", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
       $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->retencion_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
-    $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
+    $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_total', 'TOTAL')}", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
     $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->total/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
@@ -4751,7 +5017,7 @@ class facturacion_model extends privilegios_model{
         $pdf->SetFont('helvetica','B', 10);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
-        $pdf->Row(array('Observaciones'), true);
+        $pdf->Row(array($this->lang->line('factura_otros_observaciones', 'Observaciones')), true);
 
         $pdf->SetFont('helvetica','', 9);
         $pdf->SetXY(0, $pdf->GetY());
@@ -4786,7 +5052,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "CFDI Relacionados:", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "{$this->lang->line('factura_otros_cfdi_relacionados', 'CFDI Relacionados')}:", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4794,7 +5060,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetWidths(array(216));
 
       $pdf->SetXY(0, $pdf->GetY()+4);
-      $pdf->Row(array("Tipo de Relacion: {$tipo_rel['key']} - {$tipo_rel['value']}" ), false, true, null, 2, 1);
+      $pdf->Row(array("{$this->lang->line('factura_otros_tipo_relacion', 'Tipo de Relación')}: {$tipo_rel['key']} - {$tipo_rel['value']}" ), false, true, null, 2, 1);
 
       foreach ($factura['info']->cfdi_ext->cfdiRelacionados->cfdiRelacionado as $key => $value) {
         $pdf->SetXY(0, $pdf->GetY());
@@ -4807,16 +5073,22 @@ class facturacion_model extends privilegios_model{
     // Comercio Exterior //
     ///////////////////////
     if (isset($factura['ce'])) {
+      $sinCE = false;
       $ceExtras = json_decode($factura['ce']->extras);
       $pdf->SetFillColor(0, 171, 72);
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFont('helvetica','B', 10);
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "Comercio Exterior V{$ceExtras->version}", 0, 0, 'L', 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce', 'Comercio Exterior')} V{$ceExtras->version}"
+      ), false, true, null, 2, 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4824,56 +5096,63 @@ class facturacion_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(35, 73, 35, 73));
       $pdf->Row(array(
-            'Motivo traslado', $factura['ce']->motivo_traslado,
-            'Incoterm', $factura['ce']->incoterm
+            $this->lang->line('factura_ce_motivo_traslado', 'Motivo traslado'), $factura['ce']->motivo_traslado,
+            $this->lang->line('factura_ce_incoterm', 'Incoterm'), $factura['ce']->incoterm
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Tipo Operacion', $factura['ce']->tipo_operacion,
-            'Subdivision', $factura['ce']->subdivision
+            $this->lang->line('factura_ce_tipo_operacion', 'Tipo Operacion'), $factura['ce']->tipo_operacion,
+            $this->lang->line('factura_ce_subdivision', 'Subdivision'), $factura['ce']->subdivision
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Clave de pedimento', $factura['ce']->clave_pedimento,
-            'Observaciones', $factura['ce']->observaciones
+            $this->lang->line('factura_ce_clave_pedimento', 'Clave de pedimento'), $factura['ce']->clave_pedimento,
+            $this->lang->line('factura_ce_observaciones', 'Observaciones'), $factura['ce']->observaciones
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Cer de origen', $factura['ce']->certificado_origen,
-            'Tipo Cambio USD', $factura['ce']->tipocambio_USD
+            $this->lang->line('factura_ce_cer_origen', 'Cer de origen'), $factura['ce']->certificado_origen,
+            $this->lang->line('factura_ce_tipo_cambio_usd', 'Tipo Cambio USD'), $factura['ce']->tipocambio_USD
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# cer de origen', $factura['ce']->num_certificado_origen,
-            'Total USD', $factura['ce']->total_USD
+            $this->lang->line('factura_ce_cer_origen', '# cer de origen'), $factura['ce']->num_certificado_origen,
+            $this->lang->line('factura_ce_total_usd', 'Total USD'), $factura['ce']->total_USD
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# Expt confiable', $factura['ce']->numero_exportador_confiable,
+            $this->lang->line('factura_ce_expt_confiable', '# Expt confiable'), $factura['ce']->numero_exportador_confiable,
             '', ''
           ), false, true, null, 2, 1);
 
+      if ($pdf->GetY()+10 >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Emisor ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": ''), 0, 0, 'L', 1);
+      $pdf->SetFont('helvetica','B', 10);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_emisor', 'Emisor')} ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": '')
+      ), false, true, null, 2, 1);
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $ceExtras->emisor->domicilio->calle,
-            'No. Exterior', $ceExtras->emisor->domicilio->numeroExterior,
-            'No. Interior', $ceExtras->emisor->domicilio->numeroInterior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->emisor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->emisor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->emisor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
 
       $this->load->model('clocalidad_model');
       $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
-            'Colonia', $ceExtras->emisor->domicilio->colonia,
-            'Localidad', ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
-            'Codigo Postal', $ceExtras->emisor->domicilio->codigoPostal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->emisor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->emisor->domicilio->codigoPostal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
@@ -4882,90 +5161,106 @@ class facturacion_model extends privilegios_model{
       $this->load->model('cmunicipio_model');
       $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
-            'Municipio', ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
-            'Estado', $ceExtras->emisor->domicilio->estado,
-            'Pais', $ceExtras->emisor->domicilio->pais,
-            'Referencia', '',
+            $this->lang->line('factura_ce_municipio', 'Municipio'), ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->emisor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->emisor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
           ), false, true, null, 2, 1);
 
       if ($ceExtras->propietario[0]->numRegIdTrib != '') {
-        $pdf->SetXY(0, $pdf->GetY() + 1);
         $pdf->SetFont('helvetica','B', 8);
-        $pdf->Cell(216, 4, "Propietario ", 0, 0, 'L', 1);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Row(array(
+          "Propietario "
+        ), false, true, null, 2, 1);
+
         $pdf->SetFont('helvetica','', 8);
         $pdf->SetXY(0, $pdf->GetY() + 4);
         $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
         $pdf->SetWidths(array(17, 64, 17, 118));
         $pdf->SetX(0);
         $pdf->Row(array(
-              'Num Id Trib', $ceExtras->propietario[0]->numRegIdTrib,
-              'Nombre', $ceExtras->propietario[0]->residenciaFiscal,
+              $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $ceExtras->propietario[0]->numRegIdTrib,
+              $this->lang->line('factura_ce_nombre', 'Nombre'), $ceExtras->propietario[0]->residenciaFiscal,
             ), false, true, null, 2, 1);
       }
 
-      $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Receptor ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": ''), 0, 0, 'L', 1);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_ce_receptor', 'Receptor')} ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": '')
+      ), false, true, null, 2, 1);
+
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $ceExtras->receptor->domicilio->calle,
-            'No. Exterior', $ceExtras->receptor->domicilio->numeroExterior,
-            'No. Interior', $ceExtras->receptor->domicilio->numeroInterior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $ceExtras->receptor->domicilio->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $ceExtras->receptor->domicilio->numeroExterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $ceExtras->receptor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Colonia', $ceExtras->receptor->domicilio->colonia,
-            'Localidad', $ceExtras->receptor->domicilio->localidad,
-            'Codigo Postal', $ceExtras->receptor->domicilio->codigoPostal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $ceExtras->receptor->domicilio->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $ceExtras->receptor->domicilio->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $ceExtras->receptor->domicilio->codigoPostal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Municipio', $ceExtras->receptor->domicilio->municipio,
-            'Estado', $ceExtras->receptor->domicilio->estado,
-            'Pais', $ceExtras->receptor->domicilio->pais,
-            'Referencia', '',
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $ceExtras->receptor->domicilio->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $ceExtras->receptor->domicilio->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $ceExtras->receptor->domicilio->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), '',
           ), false, true, null, 2, 1);
 
-      $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->SetFont('helvetica','B', 8);
-      $pdf->Cell(216, 4, "Destinatario", 0, 0, 'L', 1);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "Destinatario"
+      ), false, true, null, 2, 1);
+
+
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 64, 17, 118));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Num Id Trib', $factura['ce']->destinatario->numregidtrib,
-            'Nombre', $factura['ce']->destinatario->nombre,
+            $this->lang->line('factura_ce_num_trib', 'Num Id Trib'), $factura['ce']->destinatario->numregidtrib,
+            $this->lang->line('factura_ce_nombre', 'Nombre'), $factura['ce']->destinatario->nombre,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Calle', $factura['ce']->destinatario->calle,
-            'No. Exterior', $factura['ce']->destinatario->numero_exterior,
-            'No. Interior', $factura['ce']->destinatario->numero_interior,
+            $this->lang->line('factura_ce_calle', 'Calle'), $factura['ce']->destinatario->calle,
+            $this->lang->line('factura_ce_no_exterior', 'No. Exterior'), $factura['ce']->destinatario->numero_exterior,
+            $this->lang->line('factura_ce_no_interior', 'No. Interior'), $factura['ce']->destinatario->numero_interior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Colonia', $factura['ce']->destinatario->colonia,
-            'Localidad', $factura['ce']->destinatario->localidad,
-            'Codigo Postal', $factura['ce']->destinatario->codigo_postal,
+            $this->lang->line('factura_ce_colonia', 'Colonia'), $factura['ce']->destinatario->colonia,
+            $this->lang->line('factura_ce_localidad', 'Localidad'), $factura['ce']->destinatario->localidad,
+            $this->lang->line('factura_ce_codigo', 'Codigo Postal'), $factura['ce']->destinatario->codigo_postal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Municipio', $factura['ce']->destinatario->municipio,
-            'Estado', $factura['ce']->destinatario->estado,
-            'Pais', $factura['ce']->destinatario->pais,
-            'Referencia', $factura['ce']->destinatario->referencia,
+            $this->lang->line('factura_ce_municipio', 'Municipio'), $factura['ce']->destinatario->municipio,
+            $this->lang->line('factura_ce_estado', 'Estado'), $factura['ce']->destinatario->estado,
+            $this->lang->line('factura_ce_pais', 'Pais'), $factura['ce']->destinatario->pais,
+            $this->lang->line('factura_ce_referencia', 'Referencia'), $factura['ce']->destinatario->referencia,
           ), false, true, null, 2, 1);
 
       $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
@@ -4973,7 +5268,12 @@ class facturacion_model extends privilegios_model{
       $aligns3 = array('L', 'L', 'L', 'L');
       $widths = array(36, 36, 36, 36, 36, 36);
       $widths3 = array(50, 50, 50, 50);
-      $header = array('No Ident', 'Frac Aran', 'Cantidad', 'Unidad', 'Valor Unitario', 'Valor Dolares');
+      $header = array('No Ident', 'Frac Aran',
+        $this->lang->line('factura_ce_cantidad', 'Cantidad'),
+        $this->lang->line('factura_ce_unidad', 'Unidad'),
+        $this->lang->line('factura_ce_valor_unitario', 'Valor Unitario'),
+        $this->lang->line('factura_ce_valor_dolares', 'Valor Dolares'),
+      );
       $pdf->setY($pdf->GetY() + 1);
       $hay_prod_certificados = false;
       foreach($factura['ce']->mercancias as $key => $item)
@@ -5023,16 +5323,641 @@ class facturacion_model extends privilegios_model{
             $pdf->SetAligns($aligns3);
             $pdf->SetWidths($widths3);
             $pdf->Row(array(
-              'Marca: '.$esp->marca,
-              'Modelo: '.$esp->modelo,
-              'Sub Modelo: '.$esp->submodelo,
-              'Numero Serie: '.$esp->numeroserie,
+              $this->lang->line('factura_ce_marca', 'Marca').': '.$esp->marca,
+              $this->lang->line('factura_ce_modelo', 'Modelo').': '.$esp->modelo,
+              $this->lang->line('factura_ce_sub_modelo', 'Sub Modelo').': '.$esp->submodelo,
+              $this->lang->line('factura_ce_numero_serie', 'Numero Serie').': '.$esp->numeroserie,
             ), false, true, null, 2, 1);
           }
         }
       }
     }
 
+
+    ////////////////////////
+    //  Carta Porte Sat  //
+    ///////////////////////
+    if (isset($factura['info']->cfdi_ext->cartaPorteSat)) {
+      $cartaPorteSat = $factura['info']->cfdi_ext->cartaPorteSat;
+      $pdf->SetFillColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 11);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Row(array(
+        "{$this->lang->line('factura_cp', 'Carta Porte')} V2.0"
+      ), true, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','', 8);
+
+      $pdf->SetFounts(null, [0, 0, 0, 0], ['B', '', 'B', '']);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(35, 73, 35, 73));
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_transpInternac', 'Transporte Internacional     '), (isset($cartaPorteSat->transpInternac)? $cartaPorteSat->transpInternac: ''),
+            $this->lang->line('factura_cp_viaEntradaSalida', 'Via de Entrada / Salida'), (isset($cartaPorteSat->viaEntradaSalida)? $cartaPorteSat->viaEntradaSalida: '')
+          ), false, true, null, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_entradaSalidaMerc', 'Entrada / Salida de Mercancía'), (isset($cartaPorteSat->entradaSalidaMerc)? $cartaPorteSat->entradaSalidaMerc: ''),
+            $this->lang->line('factura_cp_totalDistRec', 'Total Distancia Recorrida (Km)'), (isset($cartaPorteSat->totalDistRec)? $cartaPorteSat->totalDistRec: '')
+          ), false, true, null, null, 1);
+      $pdf->SetX(0);
+      $pdf->Row2(array(
+            $this->lang->line('factura_cp_paisOrigenDestino_text', 'País'), (isset($cartaPorteSat->paisOrigenDestino_text)? $cartaPorteSat->paisOrigenDestino_text: '')." (".(isset($cartaPorteSat->paisOrigenDestino)? $cartaPorteSat->paisOrigenDestino: '').")",
+            '', ''
+          ), false, true, null, null, 1);
+
+      if ($pdf->GetY()+10 >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
+
+      if (isset($cartaPorteSat->ubicaciones) && count($cartaPorteSat->ubicaciones) > 0) {
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->Row(array(
+          "{$this->lang->line('factura_cp_ubicaciones', 'Ubicaciones')} "
+        ), true, true, null, 2, 1);
+
+        foreach ($cartaPorteSat->ubicaciones as $key => $ubic) {
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY());
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_tipoUbicacion', 'Tipo Ubicación'), (isset($ubic->tipoUbicacion)? $ubic->tipoUbicacion: ''),
+                $this->lang->line('factura_cp_idUbicacion', 'ID Ubicación'), (isset($ubic->idUbicacion)? $ubic->idUbicacion: ''),
+                $this->lang->line('factura_cp_rfcRemitenteDestinatario', 'RFC'), (isset($ubic->rfcRemitenteDestinatario)? $ubic->rfcRemitenteDestinatario: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_nombreRemitenteDestinatario', 'Nombre'), (isset($ubic->nombreRemitenteDestinatario)? $ubic->nombreRemitenteDestinatario: ''),
+                $this->lang->line('factura_cp_numRegIdTrib', 'Num Reg Id Trib'), (isset($ubic->numRegIdTrib)? $ubic->numRegIdTrib: ''),
+                $this->lang->line('factura_cp_residenciaFiscal', 'Residencia Fiscal'), (isset($ubic->residenciaFiscal_text)? "{$ubic->residenciaFiscal_text} ($ubic->residenciaFiscal)": ''),
+              ), false, true, null, 2, 1);
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_numEstacion', 'Num Estación'), (isset($ubic->numEstacion)? $ubic->numEstacion: ''),
+                $this->lang->line('factura_cp_nombreEstacion', 'Nombre Estación'), (isset($ubic->nombreEstacion)? "{$ubic->numEstacion_text} ({$ubic->nombreEstacion})": ''),
+                $this->lang->line('factura_cp_navegacionTrafico', 'Navegación Trafico'), (isset($ubic->navegacionTrafico)? $ubic->navegacionTrafico: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_fechaHoraSalidaLlegada', 'Fecha y Hora de Salida'), (isset($ubic->fechaHoraSalidaLlegada)? $ubic->fechaHoraSalidaLlegada: ''),
+                $this->lang->line('factura_cp_tipoEstacion', 'Tipo Estación'), (isset($ubic->tipoEstacion)? $ubic->tipoEstacion: ''),
+                $this->lang->line('factura_cp_distanciaRecorrida', 'Distancia Recorrida (Km)'), (isset($ubic->distanciaRecorrida)? $ubic->distanciaRecorrida: ''),
+              ), false, true, null, 2, 1);
+
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_calle', 'Calle'), (isset($ubic->domicilio->calle)? $ubic->domicilio->calle: ''),
+                $this->lang->line('factura_cp_ubic_no_exterior', 'No. Exterior'), (isset($ubic->domicilio->numeroExterior)? $ubic->domicilio->numeroExterior: ''),
+                $this->lang->line('factura_cp_ubic_no_interior', 'No. Interior'), (isset($ubic->domicilio->numeroInterior)? $ubic->domicilio->numeroInterior: ''),
+              ), false, true, null, 2, 1);
+          $pdf->SetX(0);
+          $this->load->model('clocalidad_model');
+          $localidad = $this->clocalidad_model->getLocalidadKey((isset($ubic->domicilio->localidad)? $ubic->domicilio->localidad: ''), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''));
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_colonia', 'Colonia'), (isset($ubic->domicilio->colonia)? $ubic->domicilio->colonia: ''),
+                $this->lang->line('factura_cp_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$ubic->domicilio->localidad})" : $ubic->domicilio->localidad),
+                $this->lang->line('factura_cp_ubic_codigo', 'Codigo Postal'), $ubic->domicilio->codigoPostal,
+              ), false, true, null, 2, 1);
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+          $pdf->SetX(0);
+          $this->load->model('cmunicipio_model');
+          $municipio = $this->cmunicipio_model->getMunicipioKey((isset($ubic->domicilio->municipio)? $ubic->domicilio->municipio: ''), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''));
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$ubic->domicilio->municipio})" : $ubic->domicilio->municipio),
+                $this->lang->line('factura_cp_ubic_estado', 'Estado'), (isset($ubic->domicilio->estado)? $ubic->domicilio->estado: ''),
+                $this->lang->line('factura_cp_ubic_pais', 'Pais'), (isset($ubic->domicilio->pais)? $ubic->domicilio->pais: ''),
+                $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), (isset($ubic->domicilio->referencia)? $ubic->domicilio->referencia: ''),
+              ), false, true, null, 2, 1);
+        }
+      }
+
+      if (isset($cartaPorteSat->mercancias)) {
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->Row(array(
+          "{$this->lang->line('factura_cp_mercancias', 'Mercancías')} "
+        ), true, true, null, 2, 1);
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+        $pdf->SetWidths(array(37, 35, 37, 35, 37, 35));
+        $pdf->SetX(0);
+        $pdf->Row2(array(
+              $this->lang->line('factura_cp_merca_pesoBrutoTotal', 'Peso Bruto Total'), (isset($cartaPorteSat->mercancias->pesoBrutoTotal)? $cartaPorteSat->mercancias->pesoBrutoTotal: ''),
+              $this->lang->line('factura_cp_merca_pesoNetoTotal', 'Peso Neto Total'), (isset($cartaPorteSat->mercancias->pesoNetoTotal)? $cartaPorteSat->mercancias->pesoNetoTotal: ''),
+              $this->lang->line('factura_cp_merca_cargoPorTasacion', 'Cargo Por Tasacion'), (isset($cartaPorteSat->mercancias->cargoPorTasacion)? $cartaPorteSat->mercancias->cargoPorTasacion: ''),
+            ), false, true, null, null, 1);
+        $pdf->SetX(0);
+        $pdf->Row2(array(
+              $this->lang->line('factura_cp_merca_unidadPeso_text', 'Unidad Peso'), (isset($cartaPorteSat->mercancias->unidadPeso_text)? $cartaPorteSat->mercancias->unidadPeso_text: '').(isset($cartaPorteSat->mercancias->unidadPeso)? "({$cartaPorteSat->mercancias->unidadPeso})": ''),
+              $this->lang->line('factura_cp_merca_numTotalMercancias', 'Num Total Mercancías'), (isset($cartaPorteSat->mercancias->numTotalMercancias)? $cartaPorteSat->mercancias->numTotalMercancias: ''),
+              '', '',
+            ), false, true, null, null, 1);
+        if ($pdf->GetY()+10 >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
+
+        if (isset($cartaPorteSat->mercancias->mercancias) && count($cartaPorteSat->mercancias->mercancias) > 0) {
+          foreach ($cartaPorteSat->mercancias->mercancias as $key => $merca) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_mercancias1', "Mercancía ".($key+1))} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_bienesTransp', 'Bienes Transportados'), (isset($merca->bienesTransp_text)? $merca->bienesTransp_text: ''),
+                  $this->lang->line('factura_cp_merca_claveSTCC', 'Clave STCC'), (isset($merca->claveSTCC_text)? $merca->claveSTCC_text: ''),
+                  $this->lang->line('factura_cp_merca_rfcRemitenteDestinatario', 'Descripción'), (isset($merca->descripcion)? $merca->descripcion: ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_cantidad', 'Cantidad'), (isset($merca->cantidad)? $merca->cantidad: ''),
+                  $this->lang->line('factura_cp_merca_claveUnidad', 'Clave Unidad'), (isset($merca->claveUnidad_text)? $merca->claveUnidad_text: ''),
+                  $this->lang->line('factura_cp_merca_unidad', 'Unidad'), (isset($merca->unidad)? "{$merca->unidad}": ''),
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_dimensiones', 'Dimensiones'), (isset($merca->dimensiones)? $merca->dimensiones: ''),
+                  $this->lang->line('factura_cp_merca_materialPeligroso', 'Material Peligroso'), (isset($merca->materialPeligroso)? $merca->materialPeligroso: ''),
+                  $this->lang->line('factura_cp_merca_cveMaterialPeligroso', 'Clave Material Peligroso'), (isset($merca->cveMaterialPeligroso_text)? "{$merca->cveMaterialPeligroso_text}": ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_embalaje', 'Embalaje'), (isset($merca->embalaje)? $merca->embalaje: ''),
+                  $this->lang->line('factura_cp_merca_descripEmbalaje', 'Descripción Embalaje'), (isset($merca->descripEmbalaje)? $merca->descripEmbalaje: ''),
+                  $this->lang->line('factura_cp_merca_pesoEnKg', 'Peso en Kg'), (isset($merca->pesoEnKg)? $merca->pesoEnKg: ''),
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_valorMercancia', 'Valor Mercancía'), (isset($merca->valorMercancia)? $merca->valorMercancia: ''),
+                  $this->lang->line('factura_cp_merca_moneda', 'Moneda'), (isset($merca->moneda)? $merca->moneda: ''),
+                  $this->lang->line('factura_cp_merca_fraccionArancelaria', 'Fracción Arancelaria'), (isset($merca->fraccionArancelaria_text)? "{$merca->fraccionArancelaria_text}": ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_uuidComercioExt', 'UUID Comercio Ext'), (isset($merca->uuidComercioExt)? $merca->uuidComercioExt: ''),
+                  '', '',
+                  '', '',
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            if (isset($merca->pedimentos) && count($merca->pedimentos) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_pedimentos', "Pedimentos")} "
+              ), true, true, null, 2, 1);
+
+              foreach ($merca->pedimentos as $keyp => $pedi) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetFont('helvetica','', 8);
+                $pdf->SetXY(0, $pdf->GetY());
+                $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+                $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+                $pdf->SetWidths(array(60, 156));
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                      $this->lang->line('factura_cp_merca_pedimento', "Pedimento ".($keyp+1)), (isset($pedi->pedimento)? $pedi->pedimento: ''),
+                    ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (isset($merca->guiasIdentificacion) && count($merca->guiasIdentificacion) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_guiasIdentificacion', "Guías de Identificación")} "
+              ), true, true, null, 2, 1);
+
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(60, 100, 56));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_numeroGuiaIdentificacion', "Numero Guía"),
+                  $this->lang->line('factura_cp_merca_descripGuiaIdentificacion', "Descripción"),
+                  $this->lang->line('factura_cp_merca_pesoGuiaIdentificacion', "Peso"),
+                ), true, true, 5, 2, 1);
+              foreach ($merca->guiasIdentificacion as $keyg => $guia) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                    (isset($guia->numeroGuiaIdentificacion)? $guia->numeroGuiaIdentificacion: ''),
+                    (isset($guia->descripGuiaIdentificacion)? $guia->descripGuiaIdentificacion: ''),
+                    (isset($guia->pesoGuiaIdentificacion)? $guia->pesoGuiaIdentificacion: ''),
+                  ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (isset($merca->cantidadTransporta) && count($merca->cantidadTransporta) > 0) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_cantidadTransporta', "Cantidad Transporta")} "
+              ), true, true, null, 2, 1);
+
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(54, 54, 54, 54));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_cantidad', "Cantidad"),
+                  $this->lang->line('factura_cp_merca_idOrigen', "Id Origen"),
+                  $this->lang->line('factura_cp_merca_idDestino', "Id Destino"),
+                  $this->lang->line('factura_cp_merca_cvesTransporte', "Cves Transporte"),
+                ), true, true, 5, 2, 1);
+              foreach ($merca->cantidadTransporta as $keyg => $cantTrans) {
+                if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                  $pdf->AddPage();
+                }
+                $pdf->SetX(0);
+                $pdf->Row2(array(
+                    (isset($cantTrans->cantidad)? $cantTrans->cantidad: ''),
+                    (isset($cantTrans->idOrigen)? $cantTrans->idOrigen: ''),
+                    (isset($cantTrans->idDestino)? $cantTrans->idDestino: ''),
+                    (isset($cantTrans->cvesTransporte)? $cantTrans->cvesTransporte: ''),
+                  ), false, true, 5, 2, 1);
+              }
+            }
+
+            if (!empty($merca->detalleMercancia)) {
+              $pdf->SetAligns(array('L'));
+              $pdf->SetWidths(array(216));
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFont('helvetica','B', 8);
+              $pdf->Row(array(
+                "{$this->lang->line('factura_cp_detalleMercancia', "Detalle Mercancía")} "
+              ), true, true, null, 2, 1);
+
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_unidadPeso_text', 'Unidad Peso'), (isset($merca->detalleMercancia->unidadPeso_text)? $merca->detalleMercancia->unidadPeso_text: ''),
+                  $this->lang->line('factura_cp_merca_pesoBruto', 'Peso Bruto'), (isset($merca->detalleMercancia->pesoBruto)? $merca->detalleMercancia->pesoBruto: ''),
+                  $this->lang->line('factura_cp_merca_pesoNeto', 'Peso Neto'), (isset($merca->detalleMercancia->pesoNeto)? $merca->detalleMercancia->pesoNeto: ''),
+                ), false, true, null, 2, 1);
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_merca_pesoTara', 'Peso Tara'), (isset($merca->detalleMercancia->pesoTara)? $merca->detalleMercancia->pesoTara: ''),
+                  $this->lang->line('factura_cp_merca_numPiezas', 'Num Piezas'), (isset($merca->detalleMercancia->numPiezas)? $merca->detalleMercancia->numPiezas: ''),
+                  '', '',
+                ), false, true, null, 2, 1);
+            }
+
+            // $pdf->SetX(0);
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_calle', 'Calle'), (isset($merca->domicilio->calle)? $merca->domicilio->calle: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_no_exterior', 'No. Exterior'), (isset($merca->domicilio->numeroExterior)? $merca->domicilio->numeroExterior: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_no_interior', 'No. Interior'), (isset($merca->domicilio->numeroInterior)? $merca->domicilio->numeroInterior: ''),
+            //     ), false, true, null, 2, 1);
+            // $pdf->SetX(0);
+            // $this->load->model('clocalidad_model');
+            // $localidad = $this->clocalidad_model->getLocalidadKey((isset($merca->domicilio->localidad)? $merca->domicilio->localidad: ''), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''));
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_colonia', 'Colonia'), (isset($merca->domicilio->colonia)? $merca->domicilio->colonia: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$merca->domicilio->localidad})" : $merca->domicilio->localidad),
+            //       $this->lang->line('factura_cp_merca_ubic_codigo', 'Codigo Postal'), $merca->domicilio->codigoPostal,
+            //     ), false, true, null, 2, 1);
+            // $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+            // $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+            // $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+            // $pdf->SetX(0);
+            // $this->load->model('cmunicipio_model');
+            // $municipio = $this->cmunicipio_model->getMunicipioKey((isset($merca->domicilio->municipio)? $merca->domicilio->municipio: ''), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''));
+            // $pdf->Row2(array(
+            //       $this->lang->line('factura_cp_merca_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$merca->domicilio->municipio})" : $merca->domicilio->municipio),
+            //       $this->lang->line('factura_cp_merca_ubic_estado', 'Estado'), (isset($merca->domicilio->estado)? $merca->domicilio->estado: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_pais', 'Pais'), (isset($merca->domicilio->pais)? $merca->domicilio->pais: ''),
+            //       $this->lang->line('factura_cp_merca_ubic_referencia', 'Referencia'), (isset($merca->domicilio->referencia)? $merca->domicilio->referencia: ''),
+            //     ), false, true, null, 2, 1);
+          }
+        }
+
+        if (!empty($cartaPorteSat->mercancias->autotransporte)) {
+          $autrans = $cartaPorteSat->mercancias->autotransporte;
+
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(216));
+          $pdf->SetXY(0, $pdf->GetY()+1);
+          $pdf->SetFont('helvetica','B', 10);
+          $pdf->Row(array(
+            "{$this->lang->line('factura_cp_autotransporte', "Autotransporte")} "
+          ), true, true, null, 2, 1);
+
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY());
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(25, 75, 35, 75, 20, 36));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_permSCT', 'Permiso SCT'), (isset($autrans->permSCT)? $autrans->permSCT: ''),
+                $this->lang->line('factura_cp_auto_numPermisoSCT', 'Num del Permiso SCT'), (isset($autrans->numPermisoSCT)? $autrans->numPermisoSCT: ''),
+              ), false, true, 5, 2, 1);
+
+          if (!empty($autrans->identificacionVehicular)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_auto_identificacionVehicular', "Identificación Vehicular")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(36, 36, 36, 36, 36, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_configVehicular', 'Configuracion Vehicular'), (isset($autrans->identificacionVehicular->configVehicular)? $autrans->identificacionVehicular->configVehicular: ''),
+                $this->lang->line('factura_cp_auto_placaVM', 'Placa vehicular del autotransporte'), (isset($autrans->identificacionVehicular->placaVM)? $autrans->identificacionVehicular->placaVM: ''),
+                $this->lang->line('factura_cp_auto_anioModeloVM', 'Año del autotransporte'), (isset($autrans->identificacionVehicular->anioModeloVM)? $autrans->identificacionVehicular->anioModeloVM: ''),
+              ), false, true, null, 2, 1);
+          }
+
+          if (!empty($autrans->seguros)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_auto_seguros', "Seguros")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(45, 75, 36, 60, 36, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraRespCivil', 'Aseguradora Civil'), (isset($autrans->seguros->aseguraRespCivil)? $autrans->seguros->aseguraRespCivil: ''),
+                $this->lang->line('factura_cp_auto_polizaRespCivil', 'No Poliza Civil'), (isset($autrans->seguros->polizaRespCivil)? $autrans->seguros->polizaRespCivil: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraMedAmbiente', 'Aseguradora Med Ambiente'), (isset($autrans->seguros->aseguraMedAmbiente)? $autrans->seguros->aseguraMedAmbiente: ''),
+                $this->lang->line('factura_cp_auto_polizaMedAmbiente', 'No Poliza Med Ambiente'), (isset($autrans->seguros->polizaMedAmbiente)? $autrans->seguros->polizaMedAmbiente: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_aseguraCarga', 'Aseguradora Carga'), (isset($autrans->seguros->aseguraCarga)? $autrans->seguros->aseguraCarga: ''),
+                $this->lang->line('factura_cp_auto_polizaCarga', 'No Poliza Carga'), (isset($autrans->seguros->polizaCarga)? $autrans->seguros->polizaCarga: ''),
+              ), false, true, 5, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                $this->lang->line('factura_cp_auto_primaSeguro', 'Prima Seguro'), (isset($autrans->seguros->primaSeguro)? $autrans->seguros->primaSeguro: ''),
+                '', '',
+              ), false, true, 5, 2, 1);
+          }
+
+          if (!empty($autrans->remolques) && count($autrans->remolques) > 0) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_auto_remolques', "Remolques")} "
+            ), true, true, null, 2, 1);
+
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(25, 83, 25, 83, 36, 36));
+            foreach ($autrans->remolques as $keyre => $remol) {
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_auto_subTipoRem', 'Tipo'), (isset($remol->subTipoRem)? $remol->subTipoRem: ''),
+                  $this->lang->line('factura_cp_auto_placa', 'Placa'), (isset($remol->placa)? $remol->placa: ''),
+                ), false, true, 5, 2, 1);
+            }
+          }
+        }
+      }
+
+      if (!empty($cartaPorteSat->figuraTransporte) && isset($cartaPorteSat->figuraTransporte->tiposFigura)) {
+
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->SetXY(0, $pdf->GetY()+1);
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->Row(array(
+          "{$this->lang->line('factura_cp_figuraTransporte', "Figuras Transporte")} "
+        ), true, true, null, 2, 1);
+
+        $figurass = ['01' => '01 - Operador', '02' => '02 - Propietario', '03' => '03 - Arrendatario', '04' => '04 - Notificado'];
+        foreach ($cartaPorteSat->figuraTransporte->tiposFigura as $keyfig => $figura) {
+          if ($pdf->GetY()+10 >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetXY(0, $pdf->GetY());
+          $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+          $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(25, 50, 25, 40, 25, 51));
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_figura_tipoFigura', 'Tipo Figura'), (isset($figura->tipoFigura)? $figurass[$figura->tipoFigura]: ''),
+                $this->lang->line('factura_cp_figura_rfcFigura', 'RFC'), (isset($figura->rfcFigura)? $figura->rfcFigura: ''),
+                $this->lang->line('factura_cp_figura_numLicencia', 'Num Licencia'), (isset($figura->numLicencia)? $figura->numLicencia: ''),
+              ), false, true, 5, 2, 1);
+
+          $pdf->SetX(0);
+          $pdf->Row2(array(
+                $this->lang->line('factura_cp_figura_nombreFigura', 'Nombre'), (isset($figura->nombreFigura)? $figura->nombreFigura: ''),
+                $this->lang->line('factura_cp_figura_numRegIdTribFigura', 'Num Reg Id Trib'), (isset($figura->numRegIdTribFigura)? $figura->numRegIdTribFigura: ''),
+                $this->lang->line('factura_cp_figura_residenciaFiscalFigura', 'Residencia Fiscal'), (isset($figura->residenciaFiscalFigura)? "{$figura->residenciaFiscalFigura_text} ({$figura->residenciaFiscalFigura})": ''),
+              ), false, true, null, 2, 1);
+
+          if (!empty($figura->partesTransporte) && count($figura->partesTransporte) > 0) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_figura_partesTransporte', "Partes Transporte")} "
+            ), true, true, null, 2, 1);
+
+            foreach ($figura->partesTransporte as $keypart => $parte) {
+              if ($pdf->GetY()+10 >= $pdf->limiteY) {
+                $pdf->AddPage();
+              }
+              $pdf->SetFont('helvetica','', 8);
+              $pdf->SetXY(0, $pdf->GetY());
+              $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+              $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+              $pdf->SetWidths(array(36, 180, 36, 36, 36, 36));
+              $pdf->SetX(0);
+              $pdf->Row2(array(
+                  $this->lang->line('factura_cp_figura_parteTransporte', "Parte {$keypart}"), (isset($parte->parteTransporte)? $parte->parteTransporte: ''),
+                ), false, true, 5, 2, 1);
+            }
+          }
+
+          if (!empty($figura->domicilio)) {
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFont('helvetica','B', 8);
+            $pdf->Row(array(
+              "{$this->lang->line('factura_cp_figura_domicilio', "Domicilio")} "
+            ), true, true, null, 2, 1);
+
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetFont('helvetica','', 8);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+            $pdf->SetX(0);
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_calle', 'Calle'), (isset($figura->domicilio->calle)? $figura->domicilio->calle: ''),
+                  $this->lang->line('factura_cp_ubic_no_exterior', 'No. Exterior'), (isset($figura->domicilio->numeroExterior)? $figura->domicilio->numeroExterior: ''),
+                  $this->lang->line('factura_cp_ubic_no_interior', 'No. Interior'), (isset($figura->domicilio->numeroInterior)? $figura->domicilio->numeroInterior: ''),
+                ), false, true, null, 2, 1);
+            $pdf->SetX(0);
+            $this->load->model('clocalidad_model');
+            $localidad = $this->clocalidad_model->getLocalidadKey((isset($figura->domicilio->localidad)? $figura->domicilio->localidad: ''), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''));
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_colonia', 'Colonia'), (isset($figura->domicilio->colonia)? $figura->domicilio->colonia: ''),
+                  $this->lang->line('factura_cp_ubic_localidad', 'Localidad'), ($localidad? $localidad."({$figura->domicilio->localidad})" : $figura->domicilio->localidad),
+                  $this->lang->line('factura_cp_ubic_codigo', 'Codigo Postal'), $figura->domicilio->codigoPostal,
+                ), false, true, null, 2, 1);
+            if ($pdf->GetY()+10 >= $pdf->limiteY) {
+              $pdf->AddPage();
+            }
+            $pdf->SetFounts(null, [0, 0, 0, 0, 0, 0, 0, 0], ['B', '', 'B', '', 'B', '', 'B', '']);
+            $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+            $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+            $pdf->SetX(0);
+            $this->load->model('cmunicipio_model');
+            $municipio = $this->cmunicipio_model->getMunicipioKey((isset($figura->domicilio->municipio)? $figura->domicilio->municipio: ''), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''));
+            $pdf->Row2(array(
+                  $this->lang->line('factura_cp_ubic_municipio', 'Municipio'), ($municipio? $municipio."({$figura->domicilio->municipio})" : $figura->domicilio->municipio),
+                  $this->lang->line('factura_cp_ubic_estado', 'Estado'), (isset($figura->domicilio->estado)? $figura->domicilio->estado: ''),
+                  $this->lang->line('factura_cp_ubic_pais', 'Pais'), (isset($figura->domicilio->pais)? $figura->domicilio->pais: ''),
+                  $this->lang->line('factura_cp_ubic_referencia', 'Referencia'), (isset($figura->domicilio->referencia)? $figura->domicilio->referencia: ''),
+                ), false, true, null, 2, 1);
+          }
+        }
+      }
+    }
 
     ////////////////////
     // Timbrado Datos //
@@ -5045,7 +5970,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(3, $pdf->GetY());
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(196));
-    $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
+    $pdf->Row(array($this->lang->line('factura_otros_sello_digital_cfdi', 'Sello Digital del CFDI').':'), false, 0);
 
     $pdf->SetFont('helvetica', '', 8);
     $pdf->SetXY(3, $pdf->GetY() - 3);
@@ -5060,7 +5985,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(3, $pdf->GetY() - 2);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(196));
-    $pdf->Row(array('Sello Digital del SAT:'), false, 0);
+    $pdf->Row(array($this->lang->line('factura_otros_sello_digital_sat', 'Sello Digital del SAT').':'), false, 0);
 
     $pdf->SetFont('helvetica', '', 8);
     $pdf->SetXY(3, $pdf->GetY() - 3);
@@ -5104,7 +6029,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 1);
-    $pdf->Cell(80, 6, "RFC Prov Certif:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_rfc_prov_certif', 'RFC Prov Certif').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5114,7 +6039,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 10);
-    $pdf->Cell(80, 6, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_no_serie_cer_sat', 'No de Serie del Certificado del SAT').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5124,7 +6049,7 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(45, $pdf->GetY() + 10);
-    $pdf->Cell(80, 6, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+    $pdf->Cell(80, 6, $this->lang->line('factura_otros_fecha_hora_certificacion', 'Fecha y hora de certificación').":", 0, 0, 'R', 1);
 
     $pdf->SetXY(125, $pdf->GetY());
     $pdf->SetTextColor(0, 0, 0);
@@ -5133,13 +6058,28 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY()+13);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica', 'B', 8);
-    $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
+    $pdf->Cell(220, 6, $this->lang->line('factura_otros_leyenda_cfdi', 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI'), 0, 0, 'C', 0);
     $pdf->SetXY(10, $pdf->GetY()+3);
 
     //------------ IMAGEN CANDELADO --------------------
 
     if($factura['info']->status === 'ca'){
       $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
+    }
+
+    ////////////////////
+    // COMUNICADO limon      //
+    ////////////////////
+    $pdf->SetWidths(array(190));
+    $pdf->SetAligns(array('L'));
+    if ($sinCE && ($factura['info']->empresa->id_empresa == 2 || $factura['info']->empresa->id_empresa == 15 || $factura['info']->empresa->id_empresa == 7)) {
+      $pdf->SetXY(10, $pdf->GetY()+3);
+      $pdf->SetFounts(array($pdf->fount_txt), array(1), ['B']);
+      $pdf->Row2(array("COMUNICADO" ), false, false);
+
+      $pdf->SetXY(10, $pdf->GetY());
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->Row2(array("Queda estrictamente prohibido exportar a los Estados Unidos los productos de limón que nuestra empresa {$factura['info']->empresa->nombre_fiscal}, le suministre para su distribución en el territorio mexicano, asi como el uso de nuestra información empresarial tales como ID Number y el numero de registro FDA de nuestras instalaciones para fines de exportación. Esta información solo podrá ser utilizada bajo nuestro consentimiento que deba constar por escrito mediante la previa orden de compra . Cualquier acto contrario efectuado por el cliente a lo señalado será directamente responsable dejando a salvo a la empresa de cualquier tipo de reclamación que se quiera atribuir a la empresa {$factura['info']->empresa->nombre_fiscal} por parte de las autoridades competentes; toda vez que la compra que se hace en esta ocasión y que ampara la factura número {$factura['info']->serie}{$factura['info']->folio} que se origina de la orden de compra numero …. Es exclusivamente para venta y distribución en territorio mexicano." ), false, false, 18);
     }
 
     ////////////////////

@@ -47,9 +47,9 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
 
-                <label for="dcliente">Proveedor</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
+                <label for="dproveedor">Proveedor</label>
+                <input type="text" name="dproveedor" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
+                <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>"> |
 
                 <input type="hidden" name="id_proveedor" id="id_proveedor" value="<?php echo set_value_get('id_proveedor'); ?>">
 
@@ -92,6 +92,7 @@
               <thead>
                 <tr>
                   <th style="width:15px;"></th>
+                  <th>Fecha F.</th>
                   <th>Fecha</th>
 									<th>Serie</th>
 									<th>Folio</th>
@@ -106,6 +107,7 @@
               </thead>
               <tbody>
             		<tr>
+                  <td></td>
                   <td></td>
 									<td></td>
 									<td></td>
@@ -147,6 +149,7 @@
                         data-folio="<?php echo $cuenta->serie.$cuenta->folio; ?>">
                   <?php } ?>
                   </td>
+                  <td><?php echo $cuenta->fecha_factura; ?></td>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->serie; ?></td>
 									<td>
@@ -167,7 +170,7 @@
 						<?php }
 						} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
-									<td colspan="4" class="a-r">Totales:</td>
+									<td colspan="5" class="a-r">Totales:</td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_cargo, 2, "$", false); ?></td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_abono, 2, "$", false); ?></td>
 									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_saldo, 2, "$", false); ?></td>

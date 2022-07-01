@@ -231,17 +231,17 @@ $(function(){
     }
   });
 
-  $('#table_prod').on('keyup', '#prod_dcantidad, #prod_dpreciou', function(e) {
+  $('#table_prod').on('keyup', '#prod_dcantidad, #prod_dpreciou, #dieps, #disr', function(e) {
     var key = e.which,
         $this = $(this),
-        $tr = $this.parent().parent();
+        $tr = $this.parents('tr');
 
     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaTotalProducto($tr);
     }
-  }).on('change', '#prod_dcantidad, #prod_dpreciou', function(e) {
+  }).on('change', '#prod_dcantidad, #prod_dpreciou, #dieps, #disr', function(e) {
     var $this = $(this),
-        $tr = $this.parent().parent();
+        $tr = $this.parents('tr');
 
     calculaTotalProducto($tr);
   });
@@ -384,6 +384,22 @@ $(function(){
       $td.find('.certificado').val('0');
     }
   });
+
+  // CALCULA TOTALES DE LA TABLA DE GASTOS
+  $('#table_prod2').on('keyup', '#prod_dcantidad, #prod_dpreciou, #dieps', function(e) {
+    var key = e.which,
+        $this = $(this),
+        $tr = $this.parents('tr');
+
+    if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+      calculaTotalProducto($tr);
+    }
+  }).on('change', '#prod_dcantidad, #prod_dpreciou, #dieps, #diva, #dreten_iva', function(e) {
+    var $this = $(this),
+        $tr = $this.parents('tr');
+
+    calculaTotalProducto($tr);
+  });
 });
 
 var EventOnChangeMoneda = function () {
@@ -506,18 +522,27 @@ function calculaTotalProducto ($tr, $calculaT) {
   var $cantidad   = $tr.find('#prod_dcantidad'),
       $precio_uni = $tr.find('#prod_dpreciou'),
       $iva        = $tr.find('#diva'),
+      $ieps       = $tr.find('#dieps'),
+      $isr        = $tr.find('#disr'),
       $retencion  = $tr.find('#dreten_iva'),
       $importe    = $tr.find('#prod_importe'),
 
       $totalIva       = $tr.find('#prod_diva_total'),
       $totalRetencion = $tr.find('#prod_dreten_iva_total'),
+      $totalIeps      = $tr.find('#dieps_total'),
+      $totalIsr       = $tr.find('#disr_total'),
 
       totalImporte   = trunc2Dec(parseFloat($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0) ),
-      totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
+      totalIva       = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100),
+      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val())),
+      totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100),
+      totalIsr       = trunc2Dec(((totalImporte) * (parseFloat($isr.val())||0) ) / 100)
+      ;
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
 
   $totalIva.val(totalIva);
+  $totalIeps.val(totalIeps);
+  $totalIsr.val(totalIsr);
   $totalRetencion.val(totalRetencion);
   $importe.val(totalImporte);
 
@@ -553,7 +578,8 @@ function addProducto(unidades, prod) {
 
   var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
       ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false,
-      prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '';
+      prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '',
+      prod_dtamanio_prod = '', prod_did_tamanio_prod = '';
 
   // Pasa los gastos a la otra tabla
   pasaGastosTabla();
@@ -590,11 +616,13 @@ function addProducto(unidades, prod) {
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
     prod_certificado =  prod.certificado === 't' ? true : false;
 
-    prod_dcalidad      = prod.areas_calidad;
-    prod_did_calidad   = prod.id_calidad;
-    prod_dtamanio      = prod.areas_tamanio;
-    prod_did_tamanio   = prod.id_tamanio;
-    prod_ddescripcion2 = prod.descripcion2;
+    prod_dcalidad         = prod.areas_calidad;
+    prod_did_calidad      = prod.id_calidad;
+    prod_dtamanio         = prod.areas_tamanio;
+    prod_did_tamanio      = prod.id_tamanio;
+    prod_dtamanio_prod    = prod['areas_tamanio_prod']? prod.areas_tamanio_prod: '';
+    prod_did_tamanio_prod = prod['id_tamanio_prod']? prod.id_tamanio_prod: '';
+    prod_ddescripcion2    = prod.descripcion2;
 
   } else {
     idUnidad = unidades[0].id_unidad;
@@ -680,6 +708,11 @@ function addProducto(unidades, prod) {
                       '</li>' +
                       '<li class="divider"></li>' +
                       '<li class="clearfix">' +
+                        '<label class="pull-left">TamañoProd</label> <input type="text" name="prod_dtamanio_prod[]" value="'+prod_dtamanio_prod+'" id="prod_dtamanio_prod" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                        '<input type="hidden" name="prod_did_tamanio_prod[]" value="'+prod_did_tamanio_prod+'" id="prod_did_tamanio_prod" class="span12">' +
+                      '</li>' +
+                      '<li class="divider"></li>' +
+                      '<li class="clearfix">' +
                         '<label class="pull-left">Descripción:</label> <input type="text" name="prod_ddescripcion2[]" value="'+prod_ddescripcion2+'" id="prod_ddescripcion2" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                       '</li>' +
                     '</ul>' +
@@ -718,6 +751,7 @@ function addProducto(unidades, prod) {
                       '<option value="0"'+(ivaSelected == '0' ? 'selected' : '')+'>0%</option>' +
                       '<option value="8"'+(ivaSelected == '8' ? 'selected' : '')+'>8%</option>' +
                       '<option value="16"'+(ivaSelected == '16' ? 'selected' : '')+'>16%</option>' +
+                      '<option value="exento"'+(ivaSelected == 'exento' ? 'selected' : '')+'>Exento</option>'+
                     '</select>' +
                     // '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
                     '<input type="hidden" name="prod_diva_porcent[]" value="'+ivaSelected+'" id="prod_diva_porcent" class="span12">' +
@@ -739,7 +773,25 @@ function addProducto(unidades, prod) {
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
                 '<td><input type="checkbox" class="is-cert-check" ' + (prod_certificado ? 'checked' : '')  + ' ><input type="hidden" name="isCert[]" value="' + (prod_certificado ? '1' : '0') + '" class="certificado"></td>' +
-                '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
+                '<td>' +
+                  '<div class="btn-group">' +
+                    '<button type="button" class="btn impuestosEx">' +
+                      '<span class="caret"></span>' +
+                    '</button>' +
+                    '<ul class="dropdown-menu impuestosEx">' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">' +
+                        '<input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">' +
+                      '</li>' +
+                      '<li class="clearfix">'+
+                        '<label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="" id="disr" max="100" min="0" class="span9 pull-right vpositive">'+
+                        '<input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">'+
+                      '</li>'+
+                    '</ul>' +
+                  '</div>' +
+                  '<button type="button" class="btn btn-danger" id="delProd">' +
+                  '<i class="icon-remove"></i></button>' +
+                '</td>' +
               '</tr>';
 
     $(trHtml).appendTo($tabla.find('tbody'));
@@ -793,6 +845,8 @@ function calculaTotal ($calculaT) {
   var total_importes    = 0,
       total_descuentos  = 0,
       total_ivas        = 0,
+      total_ieps        = 0,
+      total_isr         = 0,
       total_retenciones = 0,
       total_factura     = 0;
 
@@ -841,6 +895,35 @@ function calculaTotal ($calculaT) {
       }
     }
   });
+  total_ivas = trunc2Dec(total_ivas);
+
+  $('input#dieps_total').each(function(i, e) {
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_ieps += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
+        total_ieps += parseFloat($(this).val());
+      }
+    }
+  });
+  total_ieps = trunc2Dec((total_ieps||0));
+
+  $('input#disr_total').each(function(i, e) {
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_isr += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      // if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      if ( !searchGastosProductos(idProd) ) {
+        total_isr += parseFloat($(this).val());
+      }
+    }
+  });
+  total_isr = trunc2Dec((total_isr||0));
 
   $('input#prod_dreten_iva_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -854,8 +937,9 @@ function calculaTotal ($calculaT) {
       }
     }
   });
+  total_retenciones = trunc2Dec(total_retenciones);
 
-  total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
+  total_factura = trunc2Dec(parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_retenciones) - parseFloat(total_isr));
 
   $('#importe-format').html(util.darFormatoNum(total_importes));
   $('#total_importe').val(total_importes);
@@ -868,6 +952,12 @@ function calculaTotal ($calculaT) {
 
   $('#iva-format').html(util.darFormatoNum(total_ivas));
   $('#total_iva').val(total_ivas);
+
+  $('#ieps-format').html(util.darFormatoNum(total_ieps));
+  $('#total_ieps').val(total_ieps);
+
+  $('#isr-format').html(util.darFormatoNum(total_isr));
+  $('#total_isr').val(total_isr);
 
   $('#retiva-format').html(util.darFormatoNum(total_retenciones));
   $('#total_retiva').val(total_retenciones);
@@ -1005,6 +1095,11 @@ function autocompleteClasifi () {
       $tr.find('#diva').val(ui.item.item.iva).trigger('change');
 
       loadModalSegCert(ui.item.item.id_clasificacion);
+
+      setTimeout(function(){
+        let parts = $this.val().split(' - ');
+        $this.val((parts.length > 1? parts[0]: $this.val()));
+      }, 300);
     }
   }).keydown(function(event){
       if(event.which == 8 || event == 46){
@@ -1036,6 +1131,11 @@ function autocompleteClasifiLive () {
         $tr.find('#diva').val(ui.item.item.iva).trigger('change');
 
         loadModalSegCert(ui.item.item.id_clasificacion);
+
+        setTimeout(function(){
+          let parts = $this.val().split(' - ');
+          $this.val((parts.length > 1? parts[0]: $this.val()));
+        }, 300);
       }
     }).keydown(function(event){
       if(event.which == 8 || event == 46) {

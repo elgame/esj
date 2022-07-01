@@ -17,13 +17,19 @@ class recetas_model extends CI_Model {
         'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
     );
 
+    $_GET['ffecha1'] = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m")."-01";
+    $_GET['ffecha2'] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(r.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+
     if($params['result_page'] % $params['result_items_per_page'] == 0)
       $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
     if($this->input->get('fbuscar') != '')
     {
       $sqlfolio = is_numeric($this->input->get('fbuscar'))? "f.folio = '".$this->input->get('fbuscar')."' OR r.folio = '".$this->input->get('fbuscar')."' OR ": '';
-      $sql .= " AND ({$sqlfolio} f.nombre LIKE '%".$this->input->get('fbuscar')."%')";
+      $sql .= " AND ({$sqlfolio} f.nombre LIKE '%".$this->input->get('fbuscar')."%' OR
+         r.folio_hoja LIKE '".$this->input->get('fbuscar')."')";
     }
 
     if($this->input->get('ftipo') != '')
@@ -49,9 +55,10 @@ class recetas_model extends CI_Model {
     $query = BDUtil::pagination(
         "SELECT r.id_recetas, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
           f.nombre, r.folio, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
-          r.total_importe, r.paso
-        FROM otros.recetas r INNER JOIN otros.formulas f ON r.id_formula = f.id_formula
+          r.total_importe, r.paso, r.fecha_aplicacion, r.folio_hoja
+        FROM otros.recetas r
           INNER JOIN areas a ON a.id_area = r.id_area
+          LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
         WHERE 1 = 1 {$sql}
         ORDER BY r.folio DESC
         ", $params, true);
@@ -95,14 +102,16 @@ class recetas_model extends CI_Model {
         r.a_etapa, r.a_ciclo, r.a_dds, r.a_turno, r.a_via, r.a_aplic, r.a_equipo, r.a_observaciones, r.status,
         r.id_formula, f.nombre AS formula, f.folio AS folio_formula, r.tipo, r.ha_bruta, r.carga1, r.carga2, r.ph,
         r.dosis_equipo, r.dosis_equipo_car2, r.total_importe, (r.carga1+r.carga2-Coalesce(rs.cargas, 0)) AS saldo_cargas,
-        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion
+        (r.no_plantas-Coalesce(rs.cargas, 0)) AS saldo_plantas, r.fecha_aplicacion, r.id_recetas_calendario,
+        r.id_empresa_ap, eap.nombre_fiscal AS empresa_ap, r.folio_hoja, r.extras
       FROM otros.recetas r
         INNER JOIN areas a ON a.id_area = r.id_area
         INNER JOIN empresas e ON e.id_empresa = r.id_empresa
         INNER JOIN usuarios aut ON aut.id = r.id_autorizo
         INNER JOIN usuarios rea ON rea.id = r.id_realizo
         INNER JOIN usuarios sol ON sol.id = r.id_solicito
-        INNER JOIN otros.formulas f ON f.id_formula = r.id_formula
+        LEFT JOIN empresas eap ON eap.id_empresa = r.id_empresa_ap
+        LEFT JOIN otros.formulas f ON f.id_formula = r.id_formula
         LEFT JOIN (
           SELECT id_recetas, Sum(cargas) AS cargas FROM otros.recetas_salidas GROUP BY id_recetas
         ) rs ON r.id_recetas = rs.id_recetas
@@ -112,6 +121,11 @@ class recetas_model extends CI_Model {
     if ($query->num_rows() > 0)
     {
       $data['info'] = $query->row();
+      if (!empty($data['info']->extras)) {
+        $data['info']->extras = json_decode($data['info']->extras);
+      } else {
+        $data['info']->extras = null;
+      }
 
       $query->free_result();
       if ($full)
@@ -119,7 +133,7 @@ class recetas_model extends CI_Model {
         $query = $this->db->query(
           "SELECT rp.id_receta, rp.id_producto, rp.rows, pr.nombre AS producto, pr.codigo,
             pr.id_unidad, rp.percent, rp.dosis_mezcla, rp.aplicacion_total, rp.precio, rp.importe,
-            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo
+            rp.dosis_carga1, rp.dosis_carga2, rp.aplicacion_total_saldo, rp.dosis_ha, rp.no_etiqueta
           FROM otros.recetas_productos AS rp
             INNER JOIN productos AS pr ON pr.id_producto = rp.id_producto
           WHERE rp.id_receta = {$data['info']->id_recetas}
@@ -136,7 +150,7 @@ class recetas_model extends CI_Model {
                                     INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
                                   WHERE csr.id_receta = {$data['info']->id_recetas}")->result();
 
-        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cscc.num,
+        $data['info']->centroCosto = $this->db->query("SELECT cc.id_centro_costo, cc.nombre, cc.codigo, cscc.num,
                                     cc.hectareas, cc.no_plantas
                                   FROM otros.recetas_centro_costo cscc
                                     INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
@@ -161,15 +175,19 @@ class recetas_model extends CI_Model {
     $ff = explode('-', $_POST['fecha']);
     $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
 
+    $folio = $this->folio($_POST['empresaId'], $_POST['tipo']);
+
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
-      'id_formula'        => $_POST['formulaId'],
+      'id_empresa_ap'     => (!empty($_POST['empresaId_ap'])? $_POST['empresaId_ap']: NULL),
+      'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       'id_realizo'        => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],
       'id_autorizo'       => $_POST['autorizoId'],
       'id_area'           => $_POST['areaId'],
       'fecha'             => $_POST['fecha'],
-      'folio'             => $_POST['folio'],
+      'folio'             => $folio,
+      'folio_hoja'        => $_POST['folio_hoja'],
       'objetivo'          => $_POST['objetivo'],
       'semana'            => $semana['semana'],
       'tipo'              => $_POST['tipo'],
@@ -186,15 +204,16 @@ class recetas_model extends CI_Model {
       'dosis_equipo'      => floatval($_POST['dosis_equipo']),
       'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'           => $_POST['a_etapa'],
-      'a_ciclo'           => $_POST['a_ciclo'],
-      'a_dds'             => $_POST['a_dds'],
-      'a_turno'           => $_POST['a_turno'],
-      'a_via'             => $_POST['a_via'],
-      'a_aplic'           => $_POST['a_aplic'],
-      'a_equipo'          => $_POST['a_equipo'],
-      'a_observaciones'   => $_POST['a_observaciones'],
-      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
+      'a_etapa'               => $_POST['a_etapa'],
+      'a_ciclo'               => $_POST['a_ciclo'],
+      'a_dds'                 => $_POST['a_dds'],
+      'a_turno'               => $_POST['a_turno'],
+      'a_via'                 => $_POST['a_via'],
+      'a_aplic'               => $_POST['a_aplic'],
+      'a_equipo'              => $_POST['a_equipo'],
+      'a_observaciones'       => $_POST['a_observaciones'],
+      'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
+      'id_recetas_calendario' => $_POST['calendario'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -244,13 +263,15 @@ class recetas_model extends CI_Model {
 
     $data = array(
       'id_empresa'        => $_POST['empresaId'],
-      'id_formula'        => $_POST['formulaId'],
+      'id_empresa_ap'     => (!empty($_POST['empresaId_ap'])? $_POST['empresaId_ap']: NULL),
+      'id_formula'        => (!empty($_POST['formulaId'])? $_POST['formulaId']: NULL),
       // 'id_realizo'     => $this->session->userdata('id_usuario'),
       'id_solicito'       => $_POST['solicitoId'],
       'id_autorizo'       => $_POST['autorizoId'],
       'id_area'           => $_POST['areaId'],
       'fecha'             => $_POST['fecha'],
       'folio'             => $_POST['folio'],
+      'folio_hoja'        => $_POST['folio_hoja'],
       'objetivo'          => $_POST['objetivo'],
       'semana'            => $semana['semana'],
       'tipo'              => $_POST['tipo'],
@@ -267,15 +288,16 @@ class recetas_model extends CI_Model {
       'dosis_equipo'      => floatval($_POST['dosis_equipo']),
       'dosis_equipo_car2' => floatval($_POST['dosis_equipo_car2']),
 
-      'a_etapa'           => $_POST['a_etapa'],
-      'a_ciclo'           => $_POST['a_ciclo'],
-      'a_dds'             => $_POST['a_dds'],
-      'a_turno'           => $_POST['a_turno'],
-      'a_via'             => $_POST['a_via'],
-      'a_aplic'           => $_POST['a_aplic'],
-      'a_equipo'          => $_POST['a_equipo'],
-      'a_observaciones'   => $_POST['a_observaciones'],
-      'fecha_aplicacion'  => $_POST['fecha_aplicacion'],
+      'a_etapa'               => $_POST['a_etapa'],
+      'a_ciclo'               => $_POST['a_ciclo'],
+      'a_dds'                 => $_POST['a_dds'],
+      'a_turno'               => $_POST['a_turno'],
+      'a_via'                 => $_POST['a_via'],
+      'a_aplic'               => $_POST['a_aplic'],
+      'a_equipo'              => $_POST['a_equipo'],
+      'a_observaciones'       => $_POST['a_observaciones'],
+      'fecha_aplicacion'      => $_POST['fecha_aplicacion'],
+      'id_recetas_calendario' => $_POST['calendario'],
 
       'total_importe'     => floatval($_POST['total_importe']),
     );
@@ -297,12 +319,14 @@ class recetas_model extends CI_Model {
         'dosis_carga1'           => floatval($_POST['pcarga1'][$key]),
         'dosis_carga2'           => floatval($_POST['pcarga2'][$key]),
         'aplicacion_total_saldo' => $_POST['aplicacion_total'][$key],
+        'dosis_ha'               => $_POST['dosis_ha'][$key],
       );
     }
 
-    $this->db->delete('otros.recetas_productos', ['id_receta' => $recetaId]);
-    if(count($productos) > 0)
+    if(count($productos) > 0){
+      $this->db->delete('otros.recetas_productos', ['id_receta' => $recetaId]);
       $this->db->insert_batch('otros.recetas_productos', $productos);
+    }
 
     $this->saveCatalogos($recetaId);
 
@@ -361,7 +385,7 @@ class recetas_model extends CI_Model {
   {
     $this->load->model('productos_salidas_model');
 
-    $receta = $this->info($_GET['id'], true);
+    $receta = $this->info($recetaId, true);
     // echo "<pre>";
     //   var_dump($_POST, $receta);
     // echo "</pre>";exit;
@@ -375,7 +399,7 @@ class recetas_model extends CI_Model {
         'cantidad' => $_POST['cantidad'][$key],
       ];
     }
-    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos);
+    $res = $this->productos_salidas_model->validaProductosExistencia($id_almacen, $productos, ['empresa' => $_POST['empresaId'], 'con_req' => false] );
     if (!$res['passes']) {
       return $res;
     }
@@ -384,7 +408,7 @@ class recetas_model extends CI_Model {
     $fecha      = date("Y-m-d");
     $next_folio = $this->productos_salidas_model->folio();
     $res = $this->productos_salidas_model->agregar(array(
-        'id_empresa'        => $_POST['empresaId'],
+        'id_empresa'        => $receta['info']->id_empresa,
         'id_almacen'        => $id_almacen,
         'id_empleado'       => $this->session->userdata('id_usuario'),
         'folio'             => $next_folio,
@@ -397,6 +421,9 @@ class recetas_model extends CI_Model {
         'recibio'           => $receta['info']->autorizo,
         'no_receta'         => $receta['info']->folio,
         'id_area'           => $receta['info']->id_area,
+        'id_empresa_ap'     => $receta['info']->id_empresa_ap,
+
+        'tipo'              => 'r',
 
         'etapa'             => $receta['info']->a_etapa,
         'ciclo'             => $receta['info']->a_ciclo,
@@ -437,6 +464,7 @@ class recetas_model extends CI_Model {
         'no_row'          => $key,
         'cantidad'        => $_POST['cantidad'][$key],
         'precio_unitario' => $_POST['precio'][$key],
+        'no_etiqueta'     => (intval($_POST['no_etiqueta'][$key])>0? $_POST['no_etiqueta'][$key]: 1),
       ];
     }
     $this->productos_salidas_model->agregarProductos($id_salida, $productos);
@@ -482,6 +510,226 @@ class recetas_model extends CI_Model {
 
     return $salidas;
   }
+
+
+
+  public function getSurtirRecetas()
+  {
+    $sql = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1')? $this->input->get('ffecha1'): date("Y-m")."-01";
+    $_GET['ffecha2'] = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(r.fecha_aplicacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+
+    if($this->input->get('ftipo') != '')
+    {
+      $sql .= " AND r.tipo = '".$this->input->get('ftipo')."'";
+    }
+
+    if($this->input->get('did_empresa') != '')
+    {
+      $sql .= "  AND r.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('did_area') != '')
+    {
+      $sql .= " AND r.id_area = '".$this->input->get('did_area')."'";
+    }
+
+    $res = $this->db->query(
+      "SELECT r.id_recetas, rp.rows, r.id_formula, r.id_empresa, r.id_area, a.nombre AS area,
+        f.nombre, r.folio, r.folio_hoja, f.folio AS folio_formula, r.tipo, r.status, r.fecha,
+        rp.importe, r.paso, r.fecha_aplicacion, pr.id_producto, pr.nombre AS producto,
+        p.id_proveedor, p.nombre_fiscal AS proveedor, rp.aplicacion_total, rp.precio, rp.surtir,
+        r.id_empresa_ap, rp.quitar
+      FROM otros.recetas_productos rp
+        INNER JOIN productos pr ON pr.id_producto = rp.id_producto
+        INNER JOIN otros.recetas r ON r.id_recetas = rp.id_receta
+        INNER JOIN areas a ON a.id_area = r.id_area
+        LEFT JOIN otros.formulas f ON r.id_formula = f.id_formula
+        LEFT JOIN proveedores p ON p.id_proveedor = rp.id_proveedor
+      WHERE r.status = 't' AND rp.id_requisicion IS NULL AND rp.quitar = 'f' {$sql}
+      ORDER BY r.folio DESC, p.id_proveedor ASC, pr.nombre ASC
+      ");
+
+    $response = $res->result();
+
+    return $response;
+  }
+
+  public function guardarSurtirReceta()
+  {
+    if (isset($_POST['id_proveedor']) && count($_POST['id_proveedor']) > 0) {
+      foreach ($_POST['id_proveedor'] as $key => $id_proveedor) {
+        $id_proveedor = ($id_proveedor > 0? $id_proveedor : null);
+
+        $this->db->update('otros.recetas_productos', [
+          'id_proveedor' => $id_proveedor,
+          'surtir'       => $_POST['aplicar'][$key],
+          'quitar'       => $_POST['quitar'][$key],
+        ], [
+          'id_receta'   => $_POST['id_receta'][$key],
+          'id_producto' => $_POST['id_producto'][$key],
+          'rows'        => $_POST['rows'][$key],
+        ]);
+      }
+    }
+  }
+
+  public function crearRequisiciones()
+  {
+    $this->load->model('compras_requisicion_model');
+    $this->guardarSurtirReceta();
+
+    $productos_recetas = $this->getSurtirRecetas();
+    $productos_recetasg = [];
+    $auxarea = '';
+    foreach ($productos_recetas as $key => $value) {
+      if ($value->surtir == 't') {
+        $productos_recetasg["{$value->id_empresa}.{$value->id_proveedor}.{$value->id_area}"][] = $value;
+      }
+    }
+
+    $requisiciones = [];
+    $requisiciones_productos = [];
+    $requisiciones_ranchos = [];
+    $requisiciones_centros = [];
+    $auxid = '';
+    foreach ($productos_recetasg as $key => $item) {
+      $requisiciones[$key] = [
+        'id_empresa'      => '',
+        'id_departamento' => 24,
+        'id_empleado'     => $this->session->userdata('id_usuario'),
+        'folio'           => '',
+        'fecha_creacion'  => date("Y-m-d H:i:s"),
+        'tipo_pago'       => 'cr',
+        'tipo_orden'      => 'p',
+        'solicito'        => '',
+        'id_cliente'      => NULL,
+        'descripcion'     => '',
+        'id_almacen'      => (is_numeric($_POST['id_almacen'])? $_POST['id_almacen']: NULL),
+        'descripcion'     => 'Requisición creada del modulo de recetas',
+
+        'id_area'         => '',
+        'es_receta'       => 't',
+        'id_empresa_ap'   => ''
+      ];
+
+      // Si trae datos extras
+      $requisiciones[$key]['otros_datos']['noRecetas'] = [];
+
+      foreach ($item as $key2 => $item2) {
+        $requisiciones[$key]['id_empresa']    = $item2->id_empresa;
+        $requisiciones[$key]['id_area']       = $item2->id_area;
+        $requisiciones[$key]['id_empresa_ap'] = (isset($item2->id_empresa_ap)? $item2->id_empresa_ap: NULL);
+
+        $receta = $this->info($item2->id_recetas, true);
+        $requisiciones[$key]['solicito'] = $receta['info']->solicito;
+
+        if (!in_array("{$item2->folio}/{$item2->folio_hoja}", $requisiciones[$key]['otros_datos']['noRecetas'])) {
+          $requisiciones[$key]['otros_datos']['noRecetas'][] = "{$item2->folio}/{$item2->folio_hoja}";
+        }
+
+        if ($item2->id_proveedor) {
+          $requisiciones_productos[$key][] = [
+            'id_requisicion'       => '',
+            'id_proveedor'         => $item2->id_proveedor,
+            'num_row'              => $key2,
+            'id_producto'          => $item2->id_producto,
+            'id_presentacion'      => null,
+            'descripcion'          => $item2->producto,
+            'cantidad'             => $item2->aplicacion_total,
+            'precio_unitario'      => $item2->precio,
+            'importe'              => $item2->importe,
+            'iva'                  => 0,
+            'retencion_iva'        => 0,
+            'total'                => $item2->importe,
+            'porcentaje_iva'       => 0,
+            'porcentaje_retencion' => 0,
+            'observacion'          => '',
+            'ieps'                 => 0,
+            'porcentaje_ieps'      => 0,
+            'tipo_cambio'          => 0,
+            'id_cat_codigos'       => null,
+            'retencion_isr'        => 0,
+            'porcentaje_isr'       => 0,
+            'activos'              => NULL,
+
+            'prodSurtir' => [
+              [
+                'id_receta'   => $item2->id_recetas,
+                'id_producto' => $item2->id_producto,
+                'rows'        => $item2->rows
+              ]
+            ]
+          ];
+        }
+
+        if (isset($receta['info']->rancho) && count($receta['info']->rancho)> 0) {
+          foreach ($receta['info']->rancho as $keyR => $rancho) {
+            if (!isset($requisiciones_ranchos[$key])) {
+              $requisiciones_ranchos[$key] = [];
+            }
+
+            if (!in_array($rancho->id_rancho, $requisiciones_ranchos[$key])) {
+              $requisiciones_ranchos[$key][] = $rancho->id_rancho;
+            }
+          }
+        }
+
+        if (isset($receta['info']->centroCosto) && count($receta['info']->centroCosto) > 0) {
+          foreach ($receta['info']->centroCosto as $keyR => $centroCosto) {
+            if (!isset($requisiciones_centros[$key])) {
+              $requisiciones_centros[$key] = [];
+            }
+
+            if (!in_array($centroCosto->id_centro_costo, $requisiciones_centros[$key])) {
+              $requisiciones_centros[$key][] = $centroCosto->id_centro_costo;
+            }
+          }
+        }
+
+      }
+      $requisiciones[$key]['otros_datos'] = json_encode($requisiciones[$key]['otros_datos']);
+    }
+
+    // Unir productos repetidos
+    $requisiciones_productos2 = [];
+    foreach ($requisiciones_productos as $key => $reqs) {
+      foreach ($reqs as $key2 => $prod) {
+        if (!isset($requisiciones_productos2[$key][$prod['id_producto']])) {
+          $requisiciones_productos2[$key][$prod['id_producto']] = $prod;
+        } else {
+          $requisiciones_productos2[$key][$prod['id_producto']]['cantidad'] += $prod['cantidad'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['importe'] += $prod['importe'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['total'] += $prod['total'];
+          $requisiciones_productos2[$key][$prod['id_producto']]['prodSurtir'][] = $prod['prodSurtir'][0];
+        }
+      }
+    }
+
+    // echo "<pre>";
+    // var_dump($requisiciones, $requisiciones_productos, $requisiciones_productos2);
+    // echo "</pre>";exit;
+
+    // Agrega las ordenes de requisición
+    $response = $this->compras_requisicion_model->agregarData($requisiciones, $requisiciones_productos2, $requisiciones_ranchos, $requisiciones_centros);
+
+    // Se actualizan los productos de las recetas con el id de la requisición
+    if ($response['passes']) {
+      foreach ($response['productosReq'] as $id_requisicion => $ordenes) {
+        foreach ($ordenes as $keyp => $product) {
+          $this->db->update('otros.recetas_productos', ['id_requisicion' => $id_requisicion], $product);
+        }
+      }
+    }
+
+    return $response;
+
+  }
+
+
 
   /**
    * Obtiene el listado de facturas
@@ -753,12 +1001,356 @@ class recetas_model extends CI_Model {
   }
 
 
+  public function importRecetasCorona()
+  {
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
+    $config['max_size'] = '2000';
+
+    $this->load->library('upload', $config);
+
+    if ( ! $this->upload->do_upload('archivo_recetas'))
+    {
+      return array('error' => '501');
+    }
+    else
+    {
+      $file = $this->upload->data();
+      $recetasData = [];
+      $val_resumenok = [];
+
+      $handle = fopen($file['full_path'], "r");
+      if ($handle) {
+        $this->load->model('usuarios_model');
+
+        if ($_POST['id_empresa'] !== '')
+          $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_POST['id_empresa'])->get()->row()->dia_inicia_semana;
+        else
+          $diaComienza = '4';
+        $ff = explode('-', $_POST['fecha']);
+        $semana = MyString::obtenerSemanasDelAnioV2($ff[0], 0, $diaComienza, false, $_POST['fecha']);
+
+        // Construcción de los datos de las recetas
+        while (($line = fgets($handle)) !== false) {
+          if (trim($line) != '') {
+            // $datos = str_getcsv($line);
+            $datos = explode("\t", utf8_encode($line));
+            $datos = $this->clearRowRecetaCorona($datos);
+
+            // tipo row, id_empresa, id_emp_aplicacion, folio_hoja, fecha, fecha_aplicacion, id_area, id_rancho, centros_costo, ha_neta, cargas
+            if ($datos[0] == 'H') { // Cabecera
+              $cargas = explode('.', $datos[10]);
+
+              $recetasData[] = [
+                'id_empresa'       => $datos[1],
+                'id_empresa_ap'    => $datos[2],
+                'folio_hoja'       => $datos[3],
+                'tipo'             => 'lts',
+                'fecha'            => MyString::fechaFormat($datos[4]),
+                'fecha_aplicacion' => MyString::fechaFormat($datos[5]),
+                'id_area'          => $datos[6],
+                'id_rancho'        => $datos[7],
+                'centros_costo'    => $datos[8],
+                'dosis_planta'     => 0,
+                'planta_ha'        => ($datos[11]/($datos[9]>0? $datos[9]: 1)),
+                'ha_neta'          => $datos[9],
+                'no_plantas'       => $datos[11],
+                'kg_totales'       => 0,
+                'ha_bruta'         => $datos[9],
+                'cargas'           => $datos[10],
+                'carga1'           => $cargas[0],
+                'carga2'           => (isset($cargas[1])? "0.{$cargas[1]}": 0),
+                'total_importe'    => 0,
+                'semana'           => $semana['semana'],
+                'calendario'       => NULL,
+                'a_etapa'          => (isset($datos[12])? $datos[12]: ''),
+                'a_ciclo'          => (isset($datos[13])? $datos[13]: ''),
+                'a_dds'            => (isset($datos[14])? $datos[14]: ''), // fecha_programada
+                'a_turno'          => (isset($datos[15])? $datos[15]: ''), // grupo
+                'a_via'            => (isset($datos[16])? $datos[16]: ''), // cosecha
+                'a_aplic'          => (isset($datos[17])? $datos[17]: ''), // tipo_aplicacion
+                'a_equipo'         => (isset($datos[18])? $datos[18]: ''), // tanque
+                'a_observaciones'  => (isset($datos[19])? $datos[19]: ''), // volumen
+                'extras'           => '{}',
+                'productos'        => []
+              ];
+            } else {
+              if (strtoupper($datos[1]) === 'AGUA') {
+                $json = ['a_nombre' => 'AGUA', 'a_total' => $datos[2], 'a_ha' => $datos[3]];
+                $recetasData[count($recetasData)-1]['extras'] = json_encode($json);
+              } else {
+                $rowh = $recetasData[count($recetasData)-1];
+                $cantidad_carga = ($datos[2]/($rowh['cargas']>0? $rowh['cargas']: 1));
+                $recetasData[count($recetasData)-1]['productos'][] = [
+                  'id_producto'            => $datos[1],
+                  'dosis_mezcla'           => round($cantidad_carga, 6), // cantidad
+                  'aplicacion_total'       => $datos[2],
+                  'precio'                 => 0,
+                  'importe'                => 0,
+                  'dosis_carga1'           => round($cantidad_carga, 6),
+                  'dosis_carga2'           => round($cantidad_carga*$rowh['carga2'], 6),
+                  'aplicacion_total_saldo' => $datos[2],
+                  'dosis_ha'               => $datos[3],
+                ];
+              }
+            }
+          }
+        }
+        fclose($handle);
+        // echo "<pre>";
+        // var_dump($recetasData);
+        // echo "</pre>";exit;
+
+        // Validación
+        $val_resumen = [];
+        if (count($recetasData) > 0) {
+          foreach ($recetasData as $key => $receta) {
+            $this->validaRecetaCorona($recetasData[$key], $val_resumen);
+          }
+        }
+        // echo "<pre>";
+        // var_dump($recetasData);
+        // echo "</pre>";exit;
+
+        if (count($val_resumen) > 0) {
+          return ['error' => '503', 'resumen' => $val_resumen];
+        } else {
+          // Se guardan todas las recetas
+          foreach ($recetasData as $key => $receta) {
+            // Valida si ya existe la receta no se agrega
+            $res = $this->db->query("SELECT id_recetas FROM otros.recetas WHERE folio_hoja = '{$receta['folio_hoja']}' AND id_empresa = {$receta['id_empresa']} AND id_empresa_ap = {$receta['id_empresa_ap']} AND id_area = {$receta['id_area']} AND status = 't'")->row();
+            if (!isset($res->id_recetas)) {
+              $this->saveRecetaData($receta);
+            } else {
+              $val_resumenok[] = "Receta No {$receta['folio_hoja']} ya esta registrada en la empresa y cultivo seleccionados.";
+            }
+          }
+        }
+
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500', 'resumenok' => $val_resumenok);
+    }
+  }
+
+  private function validaRecetaCorona(&$receta, &$val_resumen)
+  {
+    // $areas = [3 => 21, 15 => ];
+    $areas = [21 => 3, 14 => 15, 23 => 15, 3 => 2, 15 => 2];
+    if ($receta['id_empresa'] != $this->input->post('id_empresa')) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa seleccionada no coincide con la del archivo.";
+      return false;
+    } elseif ($receta['id_area'] != $this->input->post('id_area')) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; El cultivo seleccionada no coincide con el del archivo.";
+      return false;
+    } elseif (!isset($areas[$receta['id_empresa_ap']]) || $areas[$receta['id_empresa_ap']] != $receta['id_area']) {
+      $val_resumen[] = "Receta No {$receta['folio_hoja']}; La empresa de aplicación no coincide con el cultivo.";
+      return false;
+    } else {
+      $res = $this->db->query("SELECT id_rancho FROM otros.ranchos WHERE codigo = '{$receta['id_rancho']}' AND id_empresa = {$receta['id_empresa_ap']} AND id_area = {$receta['id_area']} AND status = 't'")->row();
+      if (!isset($res->id_rancho) ) {
+        $val_resumen[] = "Receta No {$receta['folio_hoja']}; El rancho '{$receta['id_rancho']}' no existe en la empresa de aplicación y cultivo seleccionados.";
+        return false;
+      } else {
+        $receta['id_rancho'] = $res->id_rancho;
+
+        $acentrosc = explode(',', $receta['centros_costo']);
+        if (count($acentrosc) > 0) {
+          $centros_costos = [];
+          $centros_costos_e = [];
+          foreach ($acentrosc as $key => $cc) {
+            $res = $this->db->query("SELECT id_centro_costo FROM otros.centro_costo WHERE codigo = '{$cc}' AND id_area = {$receta['id_area']} AND status = 't'")->row();
+            if (isset($res->id_centro_costo)) {
+              $centros_costos[] = $res->id_centro_costo;
+            } else {
+              $centros_costos_e[] = $cc;
+            }
+          }
+
+          if (count($centros_costos_e) > 0) {
+            $centros_costos_e = implode(', ', $centros_costos_e);
+            $val_resumen[] = "Receta No {$receta['folio_hoja']}; Los centros de costo '{$centros_costos_e}' no existen en el cultivo seleccionado.";
+            return false;
+          }
+          $receta['centros_costo'] = $centros_costos;
+
+
+          if (count($receta['productos']) > 0) {
+            $productos_e = [];
+            foreach ($receta['productos'] as $key => $pp) {
+              if (is_numeric($pp['id_producto'])) {
+                $res = $this->db->query("SELECT id_producto, last_precio FROM productos WHERE id_producto = '{$pp['id_producto']}' AND status = 'ac'")->row();
+                if (isset($res->id_producto)) {
+                  $receta['productos'][$key]['precio'] = $res->last_precio;
+                  $receta['productos'][$key]['importe'] = round($res->last_precio * $receta['productos'][$key]['aplicacion_total'], 2);
+                  $receta['kg_totales'] += $receta['productos'][$key]['aplicacion_total'];
+                  $receta['total_importe'] += $receta['productos'][$key]['importe'];
+                } else {
+                  $productos_e[] = $pp['id_producto'];
+                }
+              } else {
+                $productos_e[] = $pp['id_producto'];
+              }
+            }
+            $receta['dosis_planta'] = round($receta['kg_totales']/($receta['no_plantas']>0? $receta['no_plantas']: 1), 6);
+
+            if (count($productos_e) > 0) {
+              $productos_e = implode(', ', $productos_e);
+              $val_resumen[] = "Receta No {$receta['folio_hoja']}; Los productos '{$productos_e}' no existen en el catalogo de la empresa.";
+              return false;
+            } else {
+
+              $calendarios = $this->getCalendariosAjax($receta['id_area']);
+              if (count($calendarios) == 0) {
+                $val_resumen[] = "Receta No {$receta['folio_hoja']}; El cultivo no cuenta con un calendario asignado.";
+                return false;
+              } else {
+                $receta['calendario'] = $calendarios[0]->id;
+              }
+            }
+
+          } else {
+            $val_resumen[] = "Receta No {$receta['folio_hoja']}; No tiene productos asignados.";
+            return false;
+          }
+
+        } else {
+          $val_resumen[] = "Receta No {$receta['folio_hoja']}; No tiene centros de costo asignados.";
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  private function clearRowRecetaCorona($data)
+  {
+    foreach ($data as $key => $item) {
+      $data[$key] = str_replace(['"', '/  /'], ['', ' '], $data[$key]);
+      $data[$key] = trim($data[$key]);
+    }
+
+    return $data;
+  }
+
+  /**
+   * Recetas agregar
+   *
+   * @return array
+   */
+  public function saveRecetaData($receta)
+  {
+    $folio = $this->folio($receta['id_empresa'], $receta['tipo']);
+
+    $data = array(
+      'id_empresa'            => $receta['id_empresa'],
+      'id_empresa_ap'         => $receta['id_empresa_ap'],
+      'id_formula'            => NULL,
+      'id_realizo'            => $this->session->userdata('id_usuario'),
+      'id_solicito'           => 14, // sr vianey
+      'id_autorizo'           => 14,
+      'id_area'               => $receta['id_area'],
+      'fecha'                 => $receta['fecha'],
+      'folio'                 => $folio,
+      'folio_hoja'            => $receta['folio_hoja'],
+      'objetivo'              => 'Receta cargada automáticamente del sistema de Corona',
+      'semana'                => $receta['semana'],
+      'tipo'                  => $receta['tipo'],
+
+      'dosis_planta'          => round(floatval($receta['dosis_planta']), 5),
+      'planta_ha'             => round(floatval($receta['planta_ha']), 5),
+      'ha_neta'               => round(floatval($receta['ha_neta']), 5),
+      'no_plantas'            => round(floatval($receta['no_plantas']), 5),
+      'kg_totales'            => round(floatval($receta['kg_totales']), 5),
+      'ha_bruta'              => round(floatval($receta['ha_bruta']), 5),
+      'carga1'                => round(floatval($receta['carga1']), 5),
+      'carga2'                => round(floatval($receta['carga2']), 5),
+      'ph'                    => floatval(0),
+      'dosis_equipo'          => floatval(0),
+      'dosis_equipo_car2'     => floatval(0),
+
+      'a_etapa'               => $receta['a_etapa'],
+      'a_ciclo'               => $receta['a_ciclo'],
+      'a_dds'                 => $receta['a_dds'],
+      'a_turno'               => $receta['a_turno'],
+      'a_via'                 => $receta['a_via'],
+      'a_aplic'               => $receta['a_aplic'],
+      'a_equipo'              => $receta['a_equipo'],
+      'a_observaciones'       => $receta['a_observaciones'],
+      'extras'                => $receta['extras'],
+      'fecha_aplicacion'      => $receta['fecha_aplicacion'],
+      'id_recetas_calendario' => $receta['calendario'],
+
+      'total_importe'         => floatval($receta['total_importe']),
+    );
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+    $this->db->insert('otros.recetas', $data);
+    $recetaId = $this->db->insert_id('otros.recetas_id_recetas_seq');
+
+    $productos = array();
+    foreach ($receta['productos'] as $key => $producto)
+    {
+      $productos[] = array(
+        'id_receta'              => $recetaId,
+        'id_producto'            => $producto['id_producto'],
+        'rows'                   => $key,
+        'percent'                => round($producto['aplicacion_total']*100/$receta['kg_totales'], 2),
+        'dosis_mezcla'           => $producto['dosis_mezcla'],
+        'aplicacion_total'       => $producto['aplicacion_total'],
+        'precio'                 => $producto['precio'],
+        'importe'                => $producto['importe'],
+        'dosis_carga1'           => floatval($producto['dosis_carga1']),
+        'dosis_carga2'           => floatval($producto['dosis_carga2']),
+        'aplicacion_total_saldo' => $producto['aplicacion_total_saldo'],
+        'dosis_ha'               => $producto['dosis_ha'],
+      );
+    }
+
+    if(count($productos) > 0)
+      $this->db->insert_batch('otros.recetas_productos', $productos);
+
+    $this->saveCatalogosData($recetaId, $receta);
+
+    return array('passes' => true, 'msg' => 3);
+  }
+
+  private function saveCatalogosData($recetaId, $receta)
+  {
+    // Inserta los ranchos
+    $this->db->delete('otros.recetas_rancho', ['id_receta' => $recetaId]);
+    if (isset($receta['id_rancho'])) {
+      $this->db->insert('otros.recetas_rancho', [
+        'id_rancho' => $receta['id_rancho'],
+        'id_receta' => $recetaId,
+        'num'       => 1
+      ]);
+    }
+
+    // Inserta los centros de costo
+    $this->db->delete('otros.recetas_centro_costo', ['id_receta' => $recetaId]);
+    if (isset($receta['centros_costo']) && count($receta['centros_costo']) > 0) {
+      foreach ($receta['centros_costo'] as $keyr => $id_centro_costo) {
+        $this->db->insert('otros.recetas_centro_costo', [
+          'id_centro_costo' => $id_centro_costo,
+          'id_receta'       => $recetaId,
+          'num'             => count($receta['centros_costo'])
+        ]);
+      }
+    }
+  }
+
+
   /**
     * Visualiza/Descarga el PDF de la receta.
     *
     * @return void
     */
-   public function print_receta($recetaId, $pdf = null)
+   public function print_receta($recetaId, $pdf = null, $rep = 0)
    {
       $receta = $this->info($recetaId, true);
       // echo "<pre>";
@@ -768,8 +1360,12 @@ class recetas_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       if (is_null($pdf)) {
-        $pdf = new MYpdf('L', 'mm', 'Letter');
+        $pdf = new MYpdf('P', 'mm', 'Letter');
+        $pdf->titulo2 = 'ADMINISTRADOR';
+        $rep++;
+      } elseif ($rep === 1) {
         $pdf->titulo2 = 'ALMACENISTA';
+        $rep++;
       } else {
         $pdf->titulo2 = 'APLICADOR';
       }
@@ -778,17 +1374,25 @@ class recetas_model extends CI_Model {
 
       $pdf->logo = $receta['info']->empresaData->logo!=''? (file_exists($receta['info']->empresaData->logo)? $receta['info']->empresaData->logo: '') : '';
 
-      $pdf->AliasNbPages();
-      $pdf->AddPage();
-
+      if (is_null($pdf->GetY()) || $pdf->GetY()+12 >= ($pdf->limiteY/2)) {
+        $pdf->AliasNbPages();
+        $pdf->AddPage();
+        $pdf->SetXY(6, $pdf->GetY()-8);
+      } else {
+        $pdf->SetY($pdf->GetY()+12);
+        if($pdf->logo != '')
+          $pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), 6, $pdf->GetY(), 20);
+        $pdf->headerLetterP([$pdf->GetY()+1, $pdf->GetY(), $pdf->GetY()+3]);
+        $pdf->SetY($pdf->GetY()+12);
+      }
       $pdf->SetFillColor(190, 190, 190);
 
       $pdf->SetXY(6, $pdf->GetY());
       $yaux = $pdf->GetY();
-      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetFont('helvetica','B', 6.5);
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(22, 90));
-      $pdf->Row(array('EMPRESA', $receta['info']->empresa), false, 'B');
+      $pdf->SetWidths(array(15, 95));
+      $pdf->Row(array('EMPRESA', $receta['info']->empresa_ap), false, 'B');
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('CULTIVO', $receta['info']->area), false, 'B');
       $pdf->SetXY(6, $pdf->GetY());
@@ -803,7 +1407,7 @@ class recetas_model extends CI_Model {
       $centros_costo = [];
       if (count($receta['info']->centroCosto) > 0) {
         foreach ($receta['info']->centroCosto as $key => $value) {
-          $centros_costo[] = $value->nombre;
+          $centros_costo[] = $value->codigo;
         }
       }
       $pdf->Row(array('C COSTO', implode(', ', $centros_costo)), false, 'B');
@@ -812,49 +1416,49 @@ class recetas_model extends CI_Model {
 
       if ($receta['info']->tipo === 'kg') {
         // $yaux = $pdf->GetY();
-        $pdf->SetXY(120, $yaux);
-        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetXY(118, $yaux);
+        $pdf->SetFont('helvetica','B', 6.5);
         $pdf->SetAligns(array('C', 'C'));
-        $pdf->SetWidths(array(35, 35));
+        $pdf->SetWidths(array(20, 20));
         $pdf->Row(array('Dosis Planta', 'Planta x Ha'), false, false);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array($receta['info']->dosis_planta, $receta['info']->planta_ha), false, true);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array('Ha Neta', 'No Plantas'), false, false);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array($receta['info']->ha_neta, $receta['info']->no_plantas), false, true);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array('Kg Total', $receta['info']->kg_totales), false, true);
       } else { // lts
-        $pdf->SetXY(120, $yaux);
-        $pdf->SetFont('helvetica','B', 8);
+        $pdf->SetXY(118, $yaux);
+        $pdf->SetFont('helvetica','B', 6.5);
         $pdf->SetAligns(array('C', 'C'));
-        $pdf->SetWidths(array(35, 35));
+        $pdf->SetWidths(array(20, 20));
         $pdf->Row(array('Ha Bruta', 'Planta x Ha'), false, false);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array($receta['info']->ha_bruta, $receta['info']->planta_ha), false, true);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array('Ha Neta', 'No Plantas'), false, false);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array($receta['info']->ha_neta, $receta['info']->no_plantas), false, true);
-        $pdf->SetXY(120, $pdf->GetY());
+        $pdf->SetXY(118, $pdf->GetY());
         $pdf->Row(array('PH', $receta['info']->ph), false, true);
       }
 
       $yaux_datos = $pdf->GetY();
 
-      $pdf->SetXY(192, $yaux);
-      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(160, $yaux);
+      $pdf->SetFont('helvetica','B', 6);
       $pdf->SetAligns(array('R', 'L'));
-      $pdf->SetWidths(array(25, 55));
-      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(2,3), array('B', 'B'));
-      $pdf->Row2(array('RECETA:', $receta['info']->folio), false, 'B', null, [[0,0,0], [236,0,0]]);
+      $pdf->SetWidths(array(18, 35));
+      $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(-1, 0), array('B', 'B'));
+      $pdf->Row2(array('RECETA:', $receta['info']->folio.'/'.$receta['info']->folio_hoja ), false, 'B', null, [[0,0,0], [236,0,0]]);
       $pdf->SetTextColor(0,0,0);
-      $pdf->SetXY(192, $pdf->GetY());
+      $pdf->SetXY(160, $pdf->GetY());
       $pdf->Row2(array('FORMULA:', $receta['info']->folio_formula), false, 'B', null);
-      $pdf->SetXY(192, $pdf->GetY());
+      $pdf->SetXY(160, $pdf->GetY());
       $pdf->Row2(array('FECHA:', MyString::fechaATexto($receta['info']->fecha, '/c')), false, 'B', null);
-      $pdf->SetXY(192, $pdf->GetY());
+      $pdf->SetXY(160, $pdf->GetY());
       $pdf->Row2(array('SEMANA:', $receta['info']->semana), false, 'B', null);
 
       $yaux_sem = $pdf->GetY();
@@ -862,15 +1466,15 @@ class recetas_model extends CI_Model {
       if ($receta['info']->tipo === 'kg') {
         $tpercent = $tcantidad = $ttaplicacion = $timporte = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R');
-        if ($pdf->titulo2 === 'ALMACENISTA') {
-          $widths = array(14, 75, 22, 26, 22, 26);
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+          $widths = array(10, 62, 18, 22, 18, 22);
           $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
-          $widths = array(14, 75, 22, 26);
+          $widths = array(10, 62, 18, 22);
           $header = array('%', 'PRODUCTO', 'DOSIS MEZCLA', 'A. TOTAL');
         }
 
-        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+5);
+        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+3);
         $yaux = $pdf->GetY();
         $page_aux = $pdf->page;
         foreach ($receta['info']->productos as $key => $prod)
@@ -878,7 +1482,7 @@ class recetas_model extends CI_Model {
           if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
             if($pdf->GetY()+5 >= $pdf->limiteY)
               $pdf->AddPage();
-            $pdf->SetFont('Arial','B',7);
+            $pdf->SetFont('Arial','B', 6);
 
             $pdf->SetX(6);
             $pdf->SetAligns($aligns);
@@ -886,9 +1490,9 @@ class recetas_model extends CI_Model {
             $pdf->Row($header, true);
           }
 
-          $pdf->SetFont('Arial','',7);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetTextColor(0,0,0);
-          if ($pdf->titulo2 === 'ALMACENISTA') {
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
@@ -918,32 +1522,46 @@ class recetas_model extends CI_Model {
         }
 
         // Totales
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetX(6);
-        $pdf->Row([
-          "{$tpercent}%",
-          $prod->producto,
-          MyString::formatoNumero($tcantidad, 2, '', false),
-          MyString::formatoNumero($ttaplicacion, 2, '', false)
-        ], false);
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+          $pdf->Row([
+            "",
+            '',
+            MyString::formatoNumero($tcantidad, 2, '', false),
+            MyString::formatoNumero($ttaplicacion, 2, '', false),
+            '',
+            MyString::formatoNumero($timporte, 2, '', false),
+          ], false);
+        } else {
+          $pdf->Row([
+            "",
+            '',
+            MyString::formatoNumero($tcantidad, 2, '', false),
+            MyString::formatoNumero($ttaplicacion, 2, '', false),
+          ], false);
+        }
+
       } else { // lts
         $tpercent = $tcantidad = $ttaplicacion = $timporte = $tcarga1 = $tcarga2 = 0;
         $aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
-        if ($pdf->titulo2 === 'ALMACENISTA') {
-          $widths = array(14, 68, 16, 16, 16, 18, 16, 20);
-          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+          $widths = array(10, 64, 14, 14, 17, 15, 18);
+          // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
+          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL', 'PRECIO', 'IMPORTE');
         } else {
-          $widths = array(14, 68, 16, 16, 16, 18);
-          $header = array('%', 'PRODUCTO', 'D. Equipo', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $widths = array(10, 64, 14, 14, 17);
+          // $header = array('%', 'PRODUCTO', 'Dosis/Ha', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
+          $header = array('%', 'PRODUCTO', 'CARGA 1', 'CARGA 2', 'A. TOTAL');
         }
 
-        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem)+2);
+        $pdf->SetY(($yaux_datos > $yaux_sem? $yaux_datos: $yaux_sem));
 
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->SetX(6);
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $datos = [
             '', '', 'Cargas',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
@@ -952,7 +1570,7 @@ class recetas_model extends CI_Model {
           ];
         } else {
           $datos = [
-            '', '', 'Cargas',
+            '', 'Cargas',
             MyString::formatoNumero($receta['info']->carga1, 2, '', false),
             MyString::formatoNumero($receta['info']->carga2, 2, '', false),
             ''
@@ -967,7 +1585,7 @@ class recetas_model extends CI_Model {
           if($pdf->GetY() >= $pdf->limiteY || $key === 0) {
             if($pdf->GetY()+5 >= $pdf->limiteY)
               $pdf->AddPage();
-            $pdf->SetFont('Arial','B',7);
+            $pdf->SetFont('Arial','B', 6);
 
             if ($key === 0) {
               $header[3] = MyString::formatoNumero($receta['info']->dosis_equipo, 2, '', false);
@@ -980,13 +1598,13 @@ class recetas_model extends CI_Model {
             $pdf->Row($header, true);
           }
 
-          $pdf->SetFont('Arial','',7);
+          $pdf->SetFont('Arial','', 6);
           $pdf->SetTextColor(0,0,0);
-          if ($pdf->titulo2 === 'ALMACENISTA') {
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false),
@@ -997,7 +1615,7 @@ class recetas_model extends CI_Model {
             $datos = array(
               "{$prod->percent}%",
               $prod->producto,
-              MyString::formatoNumero($prod->dosis_mezcla, 2, '', false),
+              // MyString::formatoNumero($prod->dosis_ha, 2, '', false), // dosis_mezcla
               MyString::formatoNumero($prod->dosis_carga1, 2, '', false),
               MyString::formatoNumero($prod->dosis_carga2, 2, '', false),
               MyString::formatoNumero($prod->aplicacion_total, 2, '', false)
@@ -1017,13 +1635,13 @@ class recetas_model extends CI_Model {
         }
 
         // Totales
-        $pdf->SetFont('Arial','B',7);
+        $pdf->SetFont('Arial','B', 6);
         $pdf->SetX(6);
-        if ($pdf->titulo2 === 'ALMACENISTA') {
+        if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
           $pdf->Row([
             "{$tpercent}%",
             '',
-            MyString::formatoNumero($tcantidad, 2, '', false),
+            // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
             MyString::formatoNumero($tcarga2, 2, '', false),
             MyString::formatoNumero($ttaplicacion, 2, '', false),
@@ -1034,25 +1652,56 @@ class recetas_model extends CI_Model {
           $pdf->Row([
             "{$tpercent}%",
             '',
-            MyString::formatoNumero($tcantidad, 2, '', false),
+            // MyString::formatoNumero($tcantidad, 2, '', false),
             MyString::formatoNumero($tcarga1, 2, '', false),
             MyString::formatoNumero($tcarga2, 2, '', false),
             MyString::formatoNumero($ttaplicacion, 2, '', false)
           ], false);
+        }
+
+        // Agua $json = ['a_nombre' => 'AGUA', 'a_total' => $datos[2], 'a_ha' => $datos[3]];
+        if (!empty($receta['info']->extras) && isset($receta['info']->extras->a_nombre)) {
+          if($pdf->GetY()+5 >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Arial','', 6);
+          $pdf->SetTextColor(0,0,0);
+          if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+            $datos = array(
+              "",
+              $receta['info']->extras->a_nombre,
+              // MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              '', '',
+              MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false),
+              '', ''
+            );
+          } else {
+            $datos = array(
+              "",
+              $receta['info']->extras->a_nombre,
+              // MyString::formatoNumero($receta['info']->extras->a_ha, 2, '', false), // dosis_mezcla
+              '', '',
+              MyString::formatoNumero($receta['info']->extras->a_total, 2, '', false)
+            );
+          }
+
+          $pdf->SetX(6);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
         }
       }
 
       $page_aux2 = $pdf->page;
       $yaux_prod = $pdf->GetY();
 
-      $val_x = ($pdf->titulo2 !== 'ALMACENISTA')? 155: 192;
-      $val_widths1 = ($pdf->titulo2 !== 'ALMACENISTA')? array(117): array(80);
-      $val_widths2 = ($pdf->titulo2 !== 'ALMACENISTA')? array(20, 60): array(20, 60);
+      $val_x = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? 130: 160;
+      $val_widths1 = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? array(83): array(53);
+      $val_widths2 = ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR')? array(16, 37): array(16, 37);
       $pdf->page = $page_aux;
       $pdf->SetXY($val_x, $yaux);
       $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths($val_widths1);
-      $pdf->Row(['PROGRAMA DE APLICACION'], true);
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->Row(['PROGRAMA DE APLICACION'], true);
 
       $pdf->SetAligns(array('R', 'L'));
       $pdf->SetWidths($val_widths2);
@@ -1061,51 +1710,57 @@ class recetas_model extends CI_Model {
       $pdf->SetX($val_x);
       $pdf->Row(['CICLO', $receta['info']->a_ciclo], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['DDS', $receta['info']->a_dds], false, false);
+      $pdf->Row(['FECHA PROGRA', $receta['info']->a_dds], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['TURNO', $receta['info']->a_turno], false, false);
+      $pdf->Row(['GRUPO', $receta['info']->a_turno], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['VIA', $receta['info']->a_via], false, false);
+      $pdf->Row(['COSECHA', $receta['info']->a_via], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['APLICACION', $receta['info']->a_aplic], false, false);
-      $pdf->SetAligns(array('C', 'L'));
-      $pdf->SetWidths($val_widths1);
+      $pdf->Row(['TIPO APLICACION', $receta['info']->a_aplic], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row(['OBSERVACIONES'], false);
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths($val_widths1);
+      $pdf->Row(['VOLUMEN', $receta['info']->a_observaciones], false, false);
       $pdf->SetX($val_x);
-      $pdf->Row([$receta['info']->a_observaciones], false, 'B');
-      $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
-      $pdf->Line(272, $yaux, 272, $pdf->GetY());
+      $pdf->Row(['TANQUE', $receta['info']->a_equipo], false, 'B');
 
-      if ($pdf->titulo2 !== 'ALMACENISTA') {
+      // $pdf->SetAligns(array('C', 'L'));
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->SetX($val_x);
+      // $pdf->Row(['OBSERVACIONES'], false);
+      // $pdf->SetAligns(array('L', 'L'));
+      // $pdf->SetWidths($val_widths1);
+      // $pdf->SetX($val_x);
+      // $pdf->Row([$receta['info']->a_observaciones], false, 'B');
+      $pdf->Line($val_x, $yaux, $val_x, $pdf->GetY());
+      $pdf->Line(213, $yaux, 213, $pdf->GetY());
+      $pdf->Line($val_x, $yaux, 213, $yaux);
+
+      if ($pdf->titulo2 !== 'ALMACENISTA' && $pdf->titulo2 !== 'ADMINISTRADOR') {
         $pdf->page = $page_aux;
-        $pdf->SetXY(195, $yaux+8);
+        $pdf->SetXY(175, $yaux+6);
         $pdf->SetAligns(array('C', 'L'));
         $pdf->SetWidths(array(36));
         $pdf->Row(['FECHA'], false);
-        $pdf->SetXY(195, $pdf->GetY());
+        $pdf->SetXY(175, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(12, 12, 12));
         $pdf->Row(['', '', ''], false);
 
-        $pdf->SetXY(235, $pdf->GetY()-8);
+        $pdf->SetXY(175, $pdf->GetY()-1);
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(14, 22));
         $pdf->Row(['SEM', '______________'], false, false);
 
-        $pdf->SetXY(235, $pdf->GetY()+2);
+        $pdf->SetXY(175, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(14, 22));
         $pdf->Row(['INICIO', '______________'], false, false);
 
-        $pdf->SetXY(235, $pdf->GetY());
+        $pdf->SetXY(175, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(14, 22));
         $pdf->Row(['TERMINO', '______________'], false, false);
 
-        $pdf->SetXY(235, $pdf->GetY());
+        $pdf->SetXY(175, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C'));
         $pdf->SetWidths(array(14, 22));
         $pdf->Row(['TOTAL', '______________'], false, false);
@@ -1113,6 +1768,11 @@ class recetas_model extends CI_Model {
 
       $pdf->page = $page_aux2;
       $pdf->SetXY(6, $yaux_prod);
+
+      $width_firmas2 = 68;
+      if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR'){
+        $width_firmas2 = 83;
+      }
 
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(71));
@@ -1123,9 +1783,9 @@ class recetas_model extends CI_Model {
       $pdf->Row(array(strtoupper($receta['info']->solicito)), false, false);
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetXY(83, $pdf->GetY()-9);
+      $pdf->SetXY($width_firmas2, $pdf->GetY()-9);
       $pdf->Row(array('REALIZO: _________________________________________'), false, false);
-      $pdf->SetXY(83, $pdf->GetY()-2);
+      $pdf->SetXY($width_firmas2, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(strtoupper($receta['info']->realizo)), false, false);
 
@@ -1140,14 +1800,14 @@ class recetas_model extends CI_Model {
       $pdf->Row(array(strtoupper($receta['info']->autorizo)), false, false);
 
       $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetXY(83, $pdf->GetY()-9);
+      $pdf->SetXY($width_firmas2, $pdf->GetY()-9);
       $pdf->Row(array('RECIBIO: _________________________________________'), false, false);
-      $pdf->SetXY(83, $pdf->GetY()-2);
+      $pdf->SetXY($width_firmas2, $pdf->GetY()-2);
       $pdf->SetAligns(array('C', 'L'));
       $pdf->Row(array(''), false, false);
 
-      if ($pdf->titulo2 === 'ALMACENISTA') {
-        $this->print_receta($recetaId, $pdf);
+      if ($pdf->titulo2 === 'ALMACENISTA' || $pdf->titulo2 === 'ADMINISTRADOR') {
+        $this->print_receta($recetaId, $pdf, $rep);
       }
       $pdf->Output('receta'.date('Y-m-d').'.pdf', 'I');
       exit;
@@ -1180,10 +1840,10 @@ class recetas_model extends CI_Model {
     // Título
     $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
     $pdf->SetXY(0, 3);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->MultiCell($pdf->pag_size[0], 4, $receta['info']->empresa, 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 7);
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+    // $pdf->SetX(0);
+    // $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
 
     $pdf->SetFont($pdf->fount_txt, 'B', 7);
     $pdf->SetX(0);
@@ -1197,12 +1857,12 @@ class recetas_model extends CI_Model {
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
     $pdf->Row2(array('Receta: '.$receta['info']->folio,
-        'Fecha S.: '.MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) ) ), false, false, 5);
+        'Fecha S.: '.MyString::fechaATexto( substr($orden['info'][0]->fecha, 0, 10), 'cm') ), false, false, 5);
 
     $pdf->SetWidths(array(32, 32));
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array('Fecha R.: '.$receta['info']->fecha, 'Semana: '.$receta['info']->semana ), false, false, 5);
+    $pdf->Row2(array('Fecha R.: '.MyString::fechaATexto($receta['info']->fecha, 'cm'), 'Semana: '.$receta['info']->semana ), false, false, 5);
 
     if ($receta['info']->tipo == 'lts') {
       $pdf->SetXY(0, $pdf->GetY()-1);
@@ -1218,6 +1878,8 @@ class recetas_model extends CI_Model {
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
 
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Empresa: '.$receta['info']->empresa_ap ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $ranchos = [];
     foreach ($receta['info']->rancho as $keyr => $item) {
@@ -1239,7 +1901,7 @@ class recetas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $centrosc = [];
     foreach ($receta['info']->centroCosto as $keyr => $item) {
-      $centrosc[] = $item->nombre;
+      $centrosc[] = $item->codigo;
     }
     $pdf->Row2(array('Centros de costo: '.implode(', ', $centrosc) ), false, false);
 
@@ -1270,26 +1932,26 @@ class recetas_model extends CI_Model {
 
     $pdf->SetX(0);
     if ($tipo_imp === 'almacen') {
-      $pdf->SetWidths(array(10, 28, 11, 14));
+      $pdf->SetWidths(array(15, 23, 11, 14));
       $pdf->SetAligns(array('L','L','R','R'));
       $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
       $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
     } elseif ($tipo_imp === 'vigilancia') {
-      $pdf->SetWidths(array(10, 40, 11, 14));
+      $pdf->SetWidths(array(15, 48, 11, 14));
       $pdf->SetAligns(array('L','L','R','R'));
       $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
       $pdf->Row2(array('CANT.', 'DESCRIPCION'), false, true, 5);
     }
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(0,-1.5,-1.3,-1.2));
+                   array(-0.5,-1.5,-1.3,-1.2));
     $cantidad = $subtotal = $iva = $total = $retencion = $ieps = 0;
     $tipoCambio = 0;
     $codigoAreas = array();
     foreach ($orden['info'][0]->productos as $key => $prod) {
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pprod = [
-        $prod->cantidad.' '.$prod->abreviatura,
+        MyString::formatoNumero($prod->cantidad, 2, '', true).' '.$prod->abreviatura,
         $prod->producto
       ];
 
@@ -1305,7 +1967,7 @@ class recetas_model extends CI_Model {
     }
 
     $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(10, 25, 14, 14));
+    $pdf->SetWidths(array(15, 18, 14, 16));
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(0);
     if ($tipo_imp === 'almacen') {
@@ -1326,9 +1988,9 @@ class recetas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(66, 0));
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->Row2(array('ELABORO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->Row2(array('SOLICITO: '.strtoupper($orden['info'][0]->solicito)), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('AUTORIZO: '.strtoupper($orden['info'][0]->recibio)), false, false);
 
@@ -1339,16 +2001,18 @@ class recetas_model extends CI_Model {
     $pdf->Row2(array('PLACAS: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion_placas : '') )), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('CAMION: '.strtoupper( (isset($orden['info'][0]->bascula)? $orden['info'][0]->bascula->camion : '') )), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('RECIBIO: '), false, false);
 
     $pdf->SetWidths(array(63, 0));
     $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array('____________________________'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-3);
+    $pdf->Row2(array('____________________________________'), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Firma de Recibido'), false, false);
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.MyString::fechaATexto(date("Y-m-d H:i:s"), 'in', true)), false, false);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaATexto(date("Y-m-d H:i:s"), 'in', true)." Por: {$this->session->userdata('usuario')}"), false, false);
 
     // if ($orden['info'][0]->trabajador != '') {
     //   $pdf->SetXY(0, $pdf->GetY()-2);
@@ -1375,6 +2039,51 @@ class recetas_model extends CI_Model {
       $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
       $pdf->Output();
     }
+  }
+
+
+  public function getEventosCalendario($datos)
+  {
+    $fecha = new DateTime( (isset($datos['ffecha1'])? $datos['ffecha1']: date("Y-m-d")) );
+    $fecha->modify('first day of this month');
+    $fecha1 = $fecha->format('Y-m-d');
+    $fecha->modify('last day of this month');
+    $fecha2 = $fecha->format('Y-m-d');
+
+    $response = array();
+    if (isset($datos['did_area'])) {
+      $result = $this->db->query("SELECT r.id_recetas,
+          ('Receta: ' || r.folio || ' | Fecha: ' || r.fecha || ' | Tipo: ' || r.tipo) AS title,
+          r.fecha_aplicacion AS start
+        FROM otros.recetas r
+        WHERE r.status = 't' AND r.id_area = {$datos['did_area']} AND r.id_recetas_calendario = {$datos['calendario']}
+          AND r.fecha_aplicacion BETWEEN '{$fecha1}' AND '{$fecha2}'");
+
+      if($result->num_rows() > 0)
+      {
+        $response = $result->result();
+      }
+    }
+
+    return $response;
+  }
+
+  public function getCalendariosAjax($id_area){
+    $response = array();
+
+    if ($id_area > 0) {
+      $res = $this->db->query(
+         "SELECT id, nombre
+          FROM otros.recetas_calendarios
+          WHERE status = 't' AND id_area = {$id_area}");
+
+      if($res->num_rows() > 0)
+      {
+        $response = $res->result();
+      }
+    }
+
+    return $response;
   }
 
 }

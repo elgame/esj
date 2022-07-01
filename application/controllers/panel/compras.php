@@ -310,6 +310,9 @@ class compras extends MY_Controller {
       array('field' => 'uuid',
             'label' => 'UUID',
             'rules' => 'callback_uuid_check'),
+      array('field' => 'fecha_factura',
+            'label' => 'Fecha Factura',
+            'rules' => 'required'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -332,11 +335,11 @@ class compras extends MY_Controller {
   {
     if (isset($_POST['uuid']) && $_POST['uuid'] !== '')
     {
-      $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
+      $query = $this->db->query("SELECT Count(id_compra) AS num, STRING_AGG((serie || folio)::text, ', ') AS folios FROM compras WHERE status <> 'ca' AND uuid = '{$uuid}'".
         (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
 
       if ($query->num > 0) {
-        $this->form_validation->set_message('uuid_check', 'El UUID ya esta registrado en otra compra.');
+        $this->form_validation->set_message('uuid_check', "El UUID ya esta registrado en la(s) compra(s) {$query->folios}.");
         return false;
       }
       return true;

@@ -42,10 +42,20 @@
               </div><!--/control-group -->
 
               <div class="control-group">
+                <label class="control-label" for="empresa_ap">Empresa Aplicación </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="empresa_ap" class="span11" id="empresa_ap" value="<?php echo $receta['info']->empresa_ap ?>" data-next="tipo">
+                  </div>
+                  <input type="hidden" name="empresaId_ap" id="empresaId_ap" value="<?php echo $receta['info']->id_empresa_ap ?>">
+                </div>
+              </div><!--/control-group -->
+
+              <div class="control-group">
                 <label class="control-label" for="formula">Formula </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo $receta['info']->formula ?>" placeholder="Selecciona una formula" required>
+                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo $receta['info']->formula ?>" placeholder="Selecciona una formula">
                     <input type="hidden" name="formulaId" id="formulaId" value="<?php echo $receta['info']->id_formula ?>">
                   </div>
                 </div>
@@ -147,7 +157,7 @@
               <div class="control-group">
                 <label class="control-label" for="folio_formula">Folio Formula</label>
                 <div class="controls">
-                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo $receta['info']->folio_formula ?>" size="25" readonly required>
+                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo $receta['info']->folio_formula ?>" size="25" readonly>
                 </div>
               </div>
 
@@ -155,6 +165,13 @@
                 <label class="control-label" for="folio">Folio Receta</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo $receta['info']->folio ?>" size="25" readonly>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="folio_hoja">Folio Receta Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folio_hoja" class="span9" id="folio_hoja" value="<?php echo $receta['info']->folio_hoja; ?>" size="25">
                 </div>
               </div>
 
@@ -169,6 +186,17 @@
                 <label class="control-label" for="fecha_aplicacion">Fecha Aplicación</label>
                 <div class="controls">
                   <input type="date" name="fecha_aplicacion" class="span9" id="fecha_aplicacion" value="<?php echo $receta['info']->fecha_aplicacion ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="calendario">Calendario</label>
+                <div class="controls">
+                  <select name="calendario" class="span9" id="calendario" data-next="formula" required>
+                    <?php foreach ($calendarios as $key => $value): ?>
+                    <option value="<?php echo $value->id ?>" <?php echo ($value->id == $receta['info']->id_recetas_calendario? 'selected': '') ?>><?php echo $value->nombre ?></option>
+                    <?php endforeach ?>
+                  </select>
                 </div>
               </div>
 
@@ -270,12 +298,12 @@
 
                 <div class="span3">
                   No plantas
-                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" readonly data-next="carga1" style="display: none;">
+                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo $receta['info']->no_plantas ?>" data-next="carga1" style="display: none;"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>" readonly>
+                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo $receta['info']->kg_totales ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -295,7 +323,7 @@
 
                 <div class="span3 datos-lts">
                   Lts de Cargas Extras
-                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>" readonly>
+                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo $receta['info']->dosis_equipo_car2 ?>"> <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -379,18 +407,19 @@
                               <?php echo $prod->producto ?>
                               <input type="hidden" name="concepto[]" value="<?php echo $prod->producto ?>" id="concepto" class="span12">
                               <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
+                              <input type="hidden" name="dosis_ha[]" value="<?php echo $prod->dosis_ha ?>" id="dosis_ha" class="span12">
                             </td>
                             <td style="width: 80px;">
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $prod->dosis_mezcla ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $prod->dosis_carga1 ?>" id="pcarga1" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $prod->dosis_carga2 ?>" id="pcarga2" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $prod->aplicacion_total ?>" id="aplicacion_total" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
                               <input type="number" step="any" name="precio[]" value="<?php echo $prod->precio ?>" id="precio" class="span12 vpositive" min="0">

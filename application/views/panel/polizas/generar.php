@@ -25,6 +25,18 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dregistro_patronal">Registro Patronal: </label>
+                  <div class="controls">
+                    <select name="dregistro_patronal" id="dregistro_patronal">
+                      <option value=""></option>
+                      <?php foreach ($registros_patronales as $key => $regp): ?>
+                      <option value="<?php echo $regp ?>" <?php echo set_select('dregistro_patronal', $regp, false, (isset($cuenta['info']->registro_patronal)?$cuenta['info']->registro_patronal:'')); ?>><?php echo $regp ?></option>
+                      <?php endforeach ?>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="ftipo">Tipo</label>
                   <div class="controls">
                     <select name="ftipo" id="ftipo">

@@ -33,6 +33,17 @@
                   </div>
                 </div>
 
+                <div class="control-group sucursales" style="display: none;">
+                  <label class="control-label" for="sucursalId">Sucursal </label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <select name="sucursalId" class="span11" id="sucursalId" data-selected="">
+                        <option></option>
+                      </select>
+                    </div>
+                  </div>
+                </div><!--/control-group -->
+
                 <div class="control-group">
                   <label class="control-label" for="proveedor">Proveedor</label>
                   <div class="controls">
@@ -81,6 +92,17 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="proyecto">Asignar a un Proyecto</label>
+                  <div class="controls">
+                    <select name="proyecto" id="proyecto" class="span8" style="float: left;">
+                      <!-- <?php foreach ($proyectos as $key => $value): ?>
+                        <option value="<?php echo $value->id_proyecto; ?>" <?php echo set_select('proyecto', $value->id_proyecto); ?>><?php echo $value->nombre; ?></option>
+                      <?php endforeach ?> -->
+                    </select>
+                  </div>
+                </div>
+
               </div><!--/span6 -->
 
               <div class="span6">
@@ -89,6 +111,13 @@
                   <label class="control-label" for="fecha">Fecha</label>
                   <div class="controls">
                     <input type="datetime-local" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', $fecha); ?>">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fecha_factura">Fecha Factura</label>
+                  <div class="controls">
+                    <input type="datetime-local" name="fecha_factura" class="span9" id="fecha_factura" value="<?php echo set_value('fecha_factura', $fecha); ?>">
                   </div>
                 </div>
 

@@ -25,6 +25,7 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_get_lotes/',
     'rastreabilidad/rrl_pdf/',
     'rastreabilidad/rrl_xls/',
+    'rastreabilidad/rpt_lotes_pdf/',
 
     'rastreabilidad/siguiente_lote/',
   );
@@ -109,6 +110,7 @@ class rastreabilidad extends MY_Controller {
     }
 
     $params['fecha'] = isset($_GET['gfecha']) ? $_GET['gfecha'] : date('Y-m-d');
+    $params['fecha_lote'] = isset($_GET['gfechaLote']) ? $_GET['gfechaLote'] : $params['fecha'];
 
     $fecha = new DateTime($params['fecha']);
 
@@ -130,6 +132,8 @@ class rastreabilidad extends MY_Controller {
       $params['lote_actual_ext'] = intval($params['clasificaciones']['info']->lote_ext);
       $params['id_lote_actual'] = intval($params['clasificaciones']['info']->id_rendimiento);
 
+      $params['fecha_lote'] = $params['clasificaciones']['info']->fecha_lote;
+
       $params['ant_lote'] = $params['lote_actual'] - 1;
       $params['sig_lote'] = $params['lote_actual'] + 1;
     }
@@ -145,6 +149,8 @@ class rastreabilidad extends MY_Controller {
         $params['clasificaciones'] = $this->rastreabilidad_model->getLoteInfo($params['lotes'][0]->id_rendimiento);
         $params['id_lote_actual']  = intval($params['clasificaciones']['info']->id_rendimiento);
         $params['lote_actual_ext'] = intval($params['clasificaciones']['info']->lote_ext);
+
+        $params['fecha_lote'] = $params['clasificaciones']['info']->fecha_lote;
       }else
       {
         // Crea el primer lote para la fecha indicada
@@ -214,6 +220,16 @@ class rastreabilidad extends MY_Controller {
     else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
   }
 
+  public function rpt_lotes_pdf()
+  {
+    if (isset($_GET['fecha']{0}))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rpt_lotes_pdf($_GET['fecha'], $_GET['areaid']);
+    }
+    else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
+  }
+
   /*
    |------------------------------------------------------------------------
    | METODOS AJAX
@@ -275,7 +291,7 @@ class rastreabilidad extends MY_Controller {
     $estaCertificado = $_POST['es_certificado'] == 1 ? 't' : 'f';
 
     $this->load->model('rastreabilidad_model');
-    echo json_encode($this->rastreabilidad_model->actualizaLoteExt($_POST['id_rendimiento'], $_POST['lote_ext'], $estaCertificado));
+    echo json_encode($this->rastreabilidad_model->actualizaLoteExt($_POST['id_rendimiento'], $_POST['lote_ext'], $estaCertificado, $_POST));
   }
 
 

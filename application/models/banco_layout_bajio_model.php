@@ -30,20 +30,21 @@ class banco_layout_bajio_model extends banco_cuentas_model {
         if ($value['monto'] > 0 && strlen($value['proveedor_cuenta']) > 5) {
           $reg .= '02';
           $reg .= $this->llena0(7, $renglon);
-          $reg .= '01';
+          $reg .= '40'; // 40, Indica que la cuenta es CLABE, 01 cuenta de cheques, 03 cuenta de débito
           $reg .= $this->llena0(20, $cuenta_retiro->cuenta); // '53708870201'
           $reg .= "01";
           $reg .= $this->llena0(5, $value['clave_banco']);
           $reg .= $this->llena0(15, number_format($value['monto'], 2, '', '') );
           $reg .= date("Ymd");
-          $reg .= $this->llena0(3, $value['tipo_cuenta']=='1'?'BCO':'SPI');
-          $reg .= $this->llena0(2, $value['tipo_cuenta']);
+          $reg .= $this->llena0(3, $value['tipo_trans']);
+          $reg .= $this->llena0(2, $value['tipo_cuenta']); // 01 es cuenta de cheques con 11 dígitos (mismo banco) 40 es cuenta clabe con 18 digitos (TEF, SPEI, mismo banco) 03 es no. de tarjeta de debito con 16 dígitos (TEF, SPEI, mismo bco)
           $reg .= $this->llena0(20, $value['proveedor_cuenta']);
           $reg .= "000000000";
           $reg .= $this->llena0(15, trim($value['alias']), ' ', 'D');
           $reg .= $this->llena0(15, number_format($value['importe_iva'], 2, '', '') );
           //$reg .= "000000000000000"
-          $reg .= $this->llena0(40, trim($value['descripcion']), ' ', 'D')."\r\n";
+          $reg .= $this->llena0(250, trim($value['descripcion']), ' ', 'D');
+          $reg .= $this->llena0(7, '0')."\r\n";
           $total += floatval(number_format($value['monto'], 2, '.', ''));
           $renglon++;
         }
@@ -76,6 +77,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
       if ($total_proveedor > 0)
       {
         $num_abonos++;
+        $tipoCuenta = $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro);
         $pagos_archivo[] = array(
           'monto'              => $total_proveedor,
           'proveedor_sucursal' => $pago->pagos[0]->sucursal,
@@ -85,10 +87,11 @@ class banco_layout_bajio_model extends banco_cuentas_model {
           'es_moral'           => $pago->es_moral,
           'clave_banco'        => $pago->pagos[0]->codigo_bajio,
           'ref_numerica'       => $pago->pagos[0]->referencia,
-          'descripcion'        => $pago->pagos[0]->descripcion,
-          'alias'              => $pago->pagos[0]->alias,
+          'descripcion'        => $this->cleanStr($pago->pagos[0]->descripcion),
+          'alias'              => $this->cleanStr($pago->pagos[0]->alias),
           'importe_iva'        => '0',
-          'tipo_cuenta'        => $this->getTipoCuenta($pago->pagos[0], $cuenta_retiro),
+          'tipo_cuenta'        => $tipoCuenta['tcuenta'],
+          'tipo_trans'         => $tipoCuenta['ttrans'],
         );
       }
     }
@@ -104,7 +107,10 @@ class banco_layout_bajio_model extends banco_cuentas_model {
     } elseif ($leng == 16) { // tarjetas
       $tipo = '3';
     }
-    return $tipo;
+
+    $tipo_trans = ($pago->id_banco == $cuenta_retiro->id_banco? 'BCO': 'SPI');
+
+    return ['tcuenta' => $tipo, 'ttrans' => $tipo_trans];
   }
 
 
@@ -145,7 +151,7 @@ class banco_layout_bajio_model extends banco_cuentas_model {
 	}
   private function cleanStr($string)
   {
-    return str_replace(array('ñ','Ñ','*','#','$','%','=','+'), array('n','N','','','','','',''), $string);
+    return str_replace(array('ñ','Ñ','*','#','$','%','=','+',',','-'), array('n','N','','','','','','',' ',' '), $string);
   }
 
   function getNombre($nombre){

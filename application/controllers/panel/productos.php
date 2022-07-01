@@ -10,7 +10,11 @@ class productos extends MY_Controller {
 			'productos/ajax_get_familias/',
       'productos/ajax_get_productos/',
 			'productos/ajax_aut_productos/',
-			'productos/acomoda_codigos/',
+      'productos/acomoda_codigos/',
+			'productos/ajax_get_familias2/',
+
+      'productos/rpt_lista_colores_pdf/',
+      'productos/rpt_lista_colores_xls/',
 		);
 
 	public function _remap($method){
@@ -189,6 +193,13 @@ class productos extends MY_Controller {
 						'data' => $html
 				));
 	}
+
+  public function ajax_get_familias2(){
+    $this->load->model('productos_model');
+    $familias = $this->productos_model->getFamiliasAjax($_GET);
+
+    echo json_encode($familias);
+  }
 
 
 	public function acomoda_codigos()
@@ -378,6 +389,45 @@ class productos extends MY_Controller {
   }
 
 
+  public function rpt_lista_colores()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_salidas_codigos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado'] = $this->info_empleado['info'];
+    $params['seo']           = array('titulo' => 'Productos por Colores');
+
+    $resp_selemp = $this->session->userdata('selempresa');
+    $this->session->set_userdata('selempresa', 20); // agro insumo
+    $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
+    $this->session->set_userdata('selempresa', $resp_selemp);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/almacen/productos/rpt_lista_colores', $params);
+    $this->load->view('panel/footer', $params);
+  }
+  public function rpt_lista_colores_pdf(){
+    $this->load->model('productos_model');
+    $this->productos_model->getListaColoresPdf();
+  }
+  public function rpt_lista_colores_xls(){
+    $this->load->model('productos_model');
+    $this->productos_model->getListaColoresXls();
+  }
+
+
 
   /*
  	|	Asigna las reglas para validar una familia
@@ -463,6 +513,21 @@ class productos extends MY_Controller {
 			            'label' => 'Familia',
 			            'rules' => 'numeric|callback_val_familia');
 		}
+
+    if (isset($_POST['did_empresa']) && $_POST['did_empresa'] == '20' && $_POST['tipo_familia'] == 'p') { // Empresa Agro 20
+      $rules[] = array('field' => 'colorEmpresa[]',
+                  'label' => 'Color Empresa',
+                  'rules' => 'required');
+      $rules[] = array('field' => 'colorEmpresaId[]',
+                  'label' => 'Color Empresa',
+                  'rules' => 'required|numeric');
+      $rules[] = array('field' => 'colorColor[]',
+                  'label' => 'Color',
+                  'rules' => 'required');
+      $rules[] = array('field' => 'colorTipoApli[]',
+                  'label' => 'Tipo aplicación',
+                  'rules' => 'required');
+    }
 
 		$this->form_validation->set_rules($rules);
 	}

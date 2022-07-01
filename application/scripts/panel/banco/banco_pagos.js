@@ -1,10 +1,19 @@
 $(function(){
+  let bajioCount = localStorage.getItem('bajioCount');
+  let bajioFecha = localStorage.getItem('bajioFecha');
+  if(!bajioCount || (new Date).toISOString().substring(0, 10) != bajioFecha) {
+    bajioCount = 1;
+    localStorage.setItem('bajioCount', 1);
+    localStorage.setItem('bajioFecha', (new Date).toISOString().substring(0, 10));
+  }
+  $("#bajioCount").val(bajioCount);
+  console.log(localStorage.getItem('bajioFecha'));
 
   $('.ref_numerica').numeric({ decimal: false, negative: false });
   $(".tipo_cuenta").on('change', function(event) {
     event.preventDefault();
     var $this = $(this), datos = $this.val().split('-'), $tr = $this.parents("tr");
-    console.log(datos[1]);
+    // console.log(datos[1]);
     if(datos[1] == 't') // es banamex
     {
       $tr.find('.ref_numerica').attr('maxlength', '10').attr('required', 'required');
@@ -20,7 +29,7 @@ $(function(){
     {
       $tr.find('.ref_alfa').attr('maxlength', '40').attr('required', 'required');
       $tr.find('.ref_numerica').attr('maxlength', '7').attr('required', 'required');
-      $tr.find('.ref_descripcion').val('').attr('readonly', 'readonly').removeAttr('required');
+      $tr.find('.ref_descripcion').removeAttr('required');
       if($tr.find('.ref_alfa').val() === '')
         $tr.find('.ref_alfa').val($this.find('option:selected').attr('data-descrip').substr(0, 40));
     }else{
@@ -45,16 +54,39 @@ $(function(){
     $("#total_pagar").text(util.darFormatoNum(suma));
   });
 
-  $("#cuenta_retiro").on('change', function(event) {
+  $("#cuenta_retiro, #fechaAplicacion, #bajioCount").on('change', function(event) {
+    bajioCount = $("#bajioCount").val();
+
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
-    bajio = $("#downloadBajio").attr('href').split('&cuentaretiro'),
-    aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
+    bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
+    bancomer = ($("#downloadBancomer").length > 0 ? $("#downloadBancomer").attr('href').split('&cuentaretiro') : ['']),
+    aplicarPagos = ($("#aplicarPagos").length > 0 ? $("#aplicarPagos").attr('href').split('?cuentaretiro') : ['']),
     id_empresa = $("#did_empresa").val();
-    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
-    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
-    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
-    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&nofile="+bajioCount).hide();
+    $("#bajioCount").hide();
+    $("#downloadBancomer").attr('href', bancomer[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa).hide();
+    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&fecha="+$('#fechaAplicacion').val());
+
+    var $this = $('#cuenta_retiro');
+    if ($this.find('option:selected').attr('data-banco') === '2') { // banamex
+      $("#downloadBanamex").show();
+      $("#downloadInterban").show();
+    } else if ($this.find('option:selected').attr('data-banco') === '6') { // bancomer
+      $("#downloadBancomer").show();
+    } else if ($this.find('option:selected').attr('data-banco') === '3') { // bajio
+      $("#downloadBajio").show();
+      $("#bajioCount").show();
+    }
+  });
+  $("#cuenta_retiro").change();
+
+  $('#downloadBajio').on('click', function(event) {
+    // bajio = ($("#downloadBajio").length> 0 ? $("#downloadBajio").attr('href').split('&cuentaretiro') : ['']),
+    // $("#downloadBajio").attr('href', bajio[0]+"&cuentaretiro="+$('#cuenta_retiro').val()+"&ide="+id_empresa+"&nofile="+bajioCount).hide();
+    localStorage.setItem('bajioCount', (parseInt(bajioCount)||0)+1);
   });
 
   $("#dempresa").autocomplete({

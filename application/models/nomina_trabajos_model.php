@@ -213,11 +213,12 @@ class nomina_trabajos_model extends CI_Model {
       // $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
     else
       $diaComienza = '4';
+    $tipoNomina = $diaComienza == 15? 'quincena': 'semana';
 
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $empleados = $this->db->query("SELECT nf.*, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador
       FROM nomina_fiscal nf INNER JOIN usuarios u ON u.id = nf.id_empleado
-      WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
+      WHERE nf.id_empresa = {$empresaId} AND nf.anio = {$anio} AND nf.semana = {$semana[$tipoNomina]}
         ")->result();
     // echo "<pre>";
     //   var_dump($empleados);
@@ -325,7 +326,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->show_head = true;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
-    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->titulo3 = "Periodo Semanal No. {$semana[$tipoNomina]} del Año {$semana['anio']}";
     $pdf->AliasNbPages();
     $pdf->AddPage();
 

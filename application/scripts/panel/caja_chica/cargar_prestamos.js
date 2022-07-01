@@ -25,6 +25,11 @@
 
     quitarAdeudosEmpleados();
 
+    btnAddDeudor();
+    btnDelDeudor();
+    onChanceImporteDeudores();
+    autocompleteDeudoresLive();
+
     onSubmit();
 
 
@@ -395,6 +400,142 @@
             }, 200);
         });
       }
+    });
+  };
+
+
+  var btnAddDeudor = function () {
+    $('#btn-add-deudor').on('click', function(event) {
+      agregarDeudor();
+    });
+  };
+
+  var agregarDeudor = function () {
+    var $table = $('#table-deudor').find('tbody .row-total'),
+        fecha = $('#fecha_caja').val(),
+        tr =  '<tr>'+
+                '<td style="width: 80px;">'+
+                  fecha+
+                  '<input type="hidden" name="deudor_fecha[]" value="'+fecha+'">'+
+                '</td>'+
+                '<td style="width: 80px;">'+
+                  '<select name="deudor_tipo[]" style="width: 80px;">'+
+                    '<option value="otros">Otros</option>'+
+                    '<option value="caja_limon">Caja limón</option>'+
+                    '<option value="caja_gastos">Caja gastos</option>'+
+                    '<option value="caja_fletes">Caja fletes</option>'+
+                    '<option value="caja_plasticos">Caja Plasticos Gdl</option>'+
+                    '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Prestamo</option>'+
+                  '</select>'+
+                '</td>'+
+                '<td style="width: 80px;">'+
+                  '<select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura">'+
+                    $('#nomeclaturas_base').html() +
+                  '</select>'+
+                '</td>'+
+                '<td style="width: 200px;">'+
+                  '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor_nombre" required autocomplete="off">'+
+                  '<input type="hidden" name="deudor_id_deudor[]" value="" id="deudor_id_deudor">'+
+                  '<input type="hidden" name="deudor_del[]" value="" id="deudor_del">'+
+                '</td>'+
+                '<td style="width: 200px;">'+
+                  '<input type="text" name="deudor_concepto[]" value="" class="span12 deudor-cargo" required>'+
+                '</td>'+
+                '<td style="width: 80px;">'+
+                  '<input type="text" name="deudor_importe[]" value="" class="span12 vpositive deudor-importe">'+
+                '</td>'+
+                '<td style="width: 80px;" class="deudor_abonos" data-abonos="0">'+
+                '</td>'+
+                '<td style="width: 80px;" class="deudor_saldo" data-saldo="0" data-mismo="">'+
+                '</td>'+
+                '<td style="width: 30px;">'+
+                  '<button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+                '</td>'+
+              '</tr>';
+
+    $(tr).insertBefore($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var btnDelDeudor = function () {
+    $('#table-deudor').on('click', '.btn-del-deudor', function(event) {
+      var $tr = $(this).parents('tr'),
+          $deudor_id_deudor = $tr.find('#deudor_id_deudor'),
+          $deudor_del = $tr.find('#deudor_del'),
+          total = 0;
+
+      if ($deudor_id_deudor.val() != '') {
+        $deudor_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
+      calculaTotalDeudores();
+      calculaCorte();
+    });
+
+    // $('#table-gastos').on('change', '.gasto-reposicion', function(event) {
+    //   var $tr = $(this).parents('tr');
+    //   $tr.find('.gasto-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
+    //   console.log($tr.find('.gasto-reposicionhid').val());
+    // });
+  };
+
+  var onChanceImporteDeudores = function () {
+    $('#table-deudor').on('keyup change', '.deudor-importe', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent(),
+          total = 0,
+          monto = (parseFloat($this.val())||0);
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8 || monto > 0) {
+
+        var abonos = (parseFloat($tr.find('.deudor_abonos').attr('data-abonos'))||0),
+        saldo = (monto-abonos).toFixed(2);
+
+        $tr.find('.deudor_saldo').attr('data-saldo', saldo).text(saldo);
+
+        calculaTotalDeudores();
+        calculaCorte();
+      }
+    });
+  };
+
+  var calculaTotalDeudores = function () {
+    var total = 0, total_dia = 0;
+
+    $('#table-deudor .deudor_saldo').each(function(index, el) {
+      total += parseFloat($(this).attr('data-saldo') || 0);
+
+      if ($(this).attr('data-mismo') == '') {
+        total_dia += (parseFloat($(this).attr('data-saldo'))||0);
+      }
+    });
+
+    // $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
+    $('input#total-deudores-pres-dia').val(total_dia.toFixed(2));
+    $('input#total-deudores').val(total.toFixed(2));
+    $('#ttotal-deudores').val(total_dia.toFixed(2));
+  };
+
+  var autocompleteDeudoresLive = function () {
+    $('body').on('focus', '.deudor_nombre:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/caja_chica/ajax_get_deudores/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          $(this).val(ui.item.id);
+          $(this).css("background-color", "#B0FFB0");
+        }
+      }).on("keydown", function(event){
+        if(event.which == 8 || event == 46){
+          $(this).val("").css("background-color", "#FFD9B3");
+        }
+      });
     });
   };
 

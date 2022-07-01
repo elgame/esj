@@ -224,7 +224,14 @@
 										</div>
 									</div>
 
-	              				</div> <!--/span-->
+                  <div class="control-group">
+                    <label class="control-label" for="retIsrBascula">Retención de ISR Bascula:</label>
+                    <div class="controls">
+                      <input type="checkbox" name="retIsrBascula" class="span9" id="retIsrBascula" value="si" <?php echo set_checkbox('retIsrBascula', 'si') ?>>
+                    </div>
+                  </div>
+
+	              </div> <!--/span-->
 
         				<div class="span11">
         					<table class="table table-striped table-bordered table-hover table-condensed">

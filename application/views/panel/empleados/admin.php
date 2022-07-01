@@ -41,7 +41,14 @@
 									<option value="0" <?php echo set_select('fstatus', '0', false, $this->input->get('fstatus')); ?>>ELIMINADOS</option>
 								</select>
 
-								<input type="submit" name="enviar" value="Buscar" class="btn">
+                <?php if ($usuarios['contrato'] > 0): ?>
+                  <label style="color: red; animation: blinker 2s linear infinite; cursor: pointer;" id="contratosa">
+                    Contratos próximos a vencer (<?php echo $usuarios['contrato'] ?>)
+                    <input type="hidden" id="contrato" name="contrato" value="false">
+                  </label>
+                <?php endif ?>
+
+								<input type="submit" name="enviar" value="Buscar" class="btn" id="userfilter">
 							</fieldset>
 						</form>
 
@@ -55,20 +62,24 @@
 						<table class="table table-striped table-bordered bootstrap-datatable">
 						  <thead>
 							  <tr>
+                  <th>No Trabajador</th>
 							  	<th>Nombre</th>
 									<th>RFC</th>
 									<th>Banco</th>
-									<th>No Seguro</th>
+                  <th>No Seguro</th>
+									<th>Contrato</th>
 								  <th>Opciones</th>
 							  </tr>
 						  </thead>
 						  <tbody>
 						<?php foreach($usuarios['usuarios'] as $usuario){ ?>
 							<tr>
+                <td><?php echo $usuario->id_usuario; ?></td>
 								<td><?php echo $usuario->nombre.' '.$usuario->apellido_paterno.' '.$usuario->apellido_materno; ?></td>
 								<td><?php echo $usuario->rfc; ?></td>
 								<td><?php echo $usuario->cuenta_banco; ?></td>
 								<td><?php echo $usuario->no_seguro; ?></td>
+                <td><?php echo $usuario->dias_faltantes ?> Días</td>
 								<td class="center">
 										<?php
 										echo $this->usuarios_model->getLinkPrivSm('empleados/modificar/', array(

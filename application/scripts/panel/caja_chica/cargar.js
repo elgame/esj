@@ -25,6 +25,7 @@
     btnAddGasto();
     btnDelGasto();
     btnShowGastoCat();
+    btnShowChangePreGasto();
     btnAddTraspaso();
     btnDelTraspaso();
 
@@ -32,6 +33,10 @@
     btnDelDeudor();
     onChanceImporteDeudores();
     autocompleteDeudoresLive();
+
+    btnAddEfcbodega();
+    btnDelEfcbodega();
+    onChanceImporteEfcbodega();
 
     autocompleteCategorias();
     autocompleteCategoriasLive();
@@ -206,13 +211,13 @@
                 '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
                 '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
               '</td>' +
-              '<td style=""><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
+              '<td style=""><input type="number" step="any" name="remision_importe[]" value="'+abono+'" max="'+abono+'" class="remision-importe vpositive" placeholder="Importe" required></td>' +
               '<td style="width: 30px;">'+
                 '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
                 '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
               '</td>' +
             '</tr>';
-
+            console.log($table);
       $(tr).insertBefore($table);
       $(".vpositive").numeric({ negative: false }); //Numero positivo
     } else {
@@ -273,6 +278,13 @@
           $this = $(this);
 
           agregarRemisiones({
+            id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
+            total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
+            concepto: $this.attr('data-concepto'),
+            idempresa: $this.attr('data-idempresa'), empresa: $this.attr('data-empresa'),
+            fecha: $this.attr('data-fecha')
+          });
+          console.log({
             id: $this.attr('data-id'), numremision: $this.attr('data-numremision'),
             total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'),
             concepto: $this.attr('data-concepto'),
@@ -373,9 +385,14 @@
       totalCorte += parseFloat($('#ttotal-efectivo_tab_total').val());
 
       saldo_efectivo = ((parseFloat($("#ffondo_caja").val())||0) - (parseFloat($("#ttotal-boletas_arecuperar_total").val())||0) -
-              (parseFloat($("#ttotal-cheques_transito_total").val())||0) - (parseFloat($("#ttotal-deudores").val())||0) +
-              (parseFloat($("#ttotal-acreedores").val())||0)).toFixed(2);
+              (parseFloat($("#ttotal-cheques_transito_total").val())||0) -
+              (parseFloat($("#ttotal-deudores").val())||0) + (parseFloat($("#ttotal-acreedores").val())||0) -
+              (parseFloat($("#gastosAcumuladosCaja1").val())||0)
+            ).toFixed(2);
+      totalCorte = saldo_efectivo;
+      $('#ttotal-corte').val(saldo_efectivo);
       $('#saldo_efetivo_tab_total').val(saldo_efectivo);
+      console.log('saldo_efetivo_tab_total', saldo_efectivo);
     }
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum((parseFloat(total) - totalCorte).toFixed(2)));
@@ -400,6 +417,7 @@
     });
 
     $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
+    btnAddPreGastoComprobar();
     btnAddGastoComprobar();
     btnShowCompGasto();
 
@@ -411,8 +429,15 @@
   };
 
   var agregarGasto = function () {
-    var tabla_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? '#table-gastos-comprobar': '#table-gastos';
-    var prefix_gastos = $('#accion_catalogos_tipo').val() == 'gasto_comp'? 'comprobar_': '';
+    var tabla_gastos = '#table-gastos';
+    var prefix_gastos = '';
+    if ($('#accion_catalogos_tipo').val() == 'gasto_comp') {
+      tabla_gastos = '#table-gastos-comprobar';
+      prefix_gastos = 'comprobar_';
+    } else if ($('#accion_catalogos_tipo').val() == 'pre_gasto') {
+      tabla_gastos = '#table-pregastos';
+      prefix_gastos = 'pre_';
+    }
     var area = $('#area').val();
     var areaId = $('#areaId').val();
     var rancho = $('#rancho').val();
@@ -424,16 +449,17 @@
     var dempresa = $('#dempresa').val();
     var did_categoria = $('#did_categoria').val();
     var empresaId = $('#did_empresa').val();
+    var sucursalId = $('#sucursalId').val();
 
     if (areaId != '' && ranchoId != '' && centroCostoId != '' && empresaId != '') {
       var $table = $(tabla_gastos).find('tbody .row-total'),
           tr =  '<tr>' +
-                  (prefix_gastos!=''? '<td></td>': '')+
+                  (prefix_gastos!='' && prefix_gastos!='pre_'? '<td></td>': '')+
                   '<td style="">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'id_gasto[]" value="" id="gasto_id_gasto">'+
                     '<input type="hidden" name="gasto_'+prefix_gastos+'del[]" value="" id="gasto_del">'+
-                    '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
-                    '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                    '<input type="text" name="'+prefix_gastos+'codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto">'+
+                    '<input type="hidden" name="'+prefix_gastos+'codigoAreaId[]" value="" id="codigoAreaId" class="span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
                     '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                     '<input type="hidden" name="'+prefix_gastos+'area[]" value="'+ area +'" class="area span12">'+
@@ -445,6 +471,7 @@
                     '<input type="hidden" name="'+prefix_gastos+'activos[]" value="'+ activos +'" class="activos span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'activoId[]" value="'+ activoId +'" class="activoId span12">'+
                     '<input type="hidden" name="'+prefix_gastos+'empresaId[]" value="'+ empresaId +'" class="empresaId span12">'+
+                    '<input type="hidden" name="'+prefix_gastos+'sucursalId[]" value="'+ sucursalId +'" class="sucursalId span12">'+
                   '</td>'+
                   '<td style="">' +
                     '<input type="text" name="gasto_'+prefix_gastos+'empresa[]" value="'+ dempresa +'" class="span12 gasto-cargo" readonly>' +
@@ -482,7 +509,7 @@
   };
 
   var btnDelGasto = function () {
-    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos').on('click', '.btn-del-gasto', function(event) {
+    $('#table-gastos, #table-gastos-comprobar, #table-reposicionGastos, #table-pregastos').on('click', '.btn-del-gasto', function(event) {
       var $tr = $(this).parents('tr'),
           id = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
@@ -537,8 +564,30 @@
       $trGastoCat.find('.activoId').val($('#activoId').val());
       $trGastoCat.find('.gasto-cargo').val($('#dempresa').val());
       $trGastoCat.find('.gasto-cargo-id').val($('#did_categoria').val());
+      $trGastoCat.find('.sucursalId').val(($('#sucursalId').val()!=''? $('#sucursalId').val(): ''));
       $('#modalCatalogos').modal('hide');
     }
+  };
+
+  var btnAddPreGastoComprobar = function () {
+    $('#btn-add-pregasto').on('click', function(event) {
+      $('#accion_catalogos').val('true');
+      $('#accion_catalogos_tipo').val('pre_gasto');
+      $('#modalCatalogos').modal('show');
+      $('#area').val('');
+      $('#areaId').val('');
+      $('#rancho').val('');
+      $('#ranchoId').val('');
+      $('#centroCosto').val('');
+      $('#centroCostoId').val('');
+      $('#activos').val('');
+      $('#activoId').val('');
+      $('#dempresa').val('');
+      $('#did_empresa').val('');
+      $('#did_categoria').val('');
+    });
+
+    // $('#btnModalCatalogosSel').on('click', btnModalCatalogosSel);
   };
 
   var btnAddGastoComprobar = function () {
@@ -582,8 +631,47 @@
     }
 
     $('#table-gastos').on('click', '.btn-show-cat', setDataGastos);
+    $('#table-pregastos').on('click', '.btn-show-cat', setDataGastos);
     $('#table-gastos-comprobar').on('click', '.btn-show-cat', setDataGastos);
     $('#table-reposicionGastos').on('click', '.btn-show-cat', setDataGastos);
+  };
+
+  var btnShowChangePreGasto = function () {
+    var $trGasto;
+
+    $('#table-pregastos').on('click', '.btn-change-pregasto', function(event) {
+      $trGasto = $(this).parents('tr');
+      $('#modal-pregastos').modal('show');
+      $('#pregastos_id_gasto').val($trGasto.find('#gasto_id_gasto').val());
+    });
+    // $('#modal-pregastos').on('shown', function () {
+    //   $('#compGastoMonto').focus();
+    // });
+
+    $('#cambiar-pregastos').on('click', function(event) {
+      if ($('#pregasto_new').val() != '' && $('#pregastos_id_gasto').val() != '') {
+
+        var params = {
+          'id_gasto'   : $('#pregastos_id_gasto').val(),
+          'tipo_gasto' : $('#pregasto_new').val(),
+          'fno_caja'   : $('#fno_caja').val(),
+          'fecha_caja' : $('#fecha_caja').val(),
+        };
+        // console.log('test', params);
+
+        $.post(base_url+'panel/caja_chica/ajax_cambiar_pregasto/', params, function(json, textStatus) {
+          $('#modal-pregastos').modal('hide');
+          $trGasto.remove();
+
+          setTimeout(function () {
+            var iframe = parent.document.getElementById('iframe-reporte');
+            iframe.src = iframe.src + '&ffecha=' + parent.$('#ffecha').val();
+          }, 300);
+        }, 'json');
+      } else {
+        noty({"text": 'El nuevo tipo de gasto es requerido.', "layout":"topRight", "type": 'error'});
+      }
+    });
   };
 
   var btnShowCompGasto = function () {
@@ -611,6 +699,7 @@
           $tr = $(this).parent().parent();
           $json = JSON.parse(decodeURIComponent($(this).val()));
           $json.total = $tr.find('.compGastoGMonto').val();
+          $json.sin_factura = $tr.find('.compGastoGSinFactura').is(':checked')? true: false;
           gastos.push( $json );
         });
 
@@ -670,6 +759,8 @@
           $('#ranchoId').val('');
           $('#activos').val('');
           $('#activoId').val('');
+
+          getSucursales(ui.item.item.id_empresa);
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -959,6 +1050,39 @@
     });
   };
 
+  var getSucursales = function (did_empresa) {
+    var params = {
+      did_empresa: did_empresa
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
+    }
+  };
+
   var btnAddDeudor = function () {
     $('#btn-add-deudor').on('click', function(event) {
       agregarDeudor();
@@ -979,7 +1103,9 @@
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
+                    '<option value="caja_plasticos">Caja Plasticos Gdl</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Prestamo</option>'+
                   '</select>'+
                 '</td>'+
                 '<td style="width: 80px;">'+
@@ -1092,6 +1218,89 @@
     });
   };
 
+  var btnAddEfcbodega = function () {
+    $('#btn-add-efcbodega').on('click', function(event) {
+      agregarEfcbodega();
+    });
+  };
+
+  var agregarEfcbodega = function () {
+    var $table = $('#table-efcbodega').find('tbody .row-total'),
+        fecha = $('#fecha_caja').val(),
+        tr =  '<tr>'+
+                '<td>'+fecha+'</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_nombre[]" class="span12 efcbodega_nombre" required>'+
+                  '<input type="hidden" name="efcbodega_id[]" class="span12 efcbodega_id">'+
+                  '<input type="hidden" name="efcbodega_del[]" value="" class="efcbodega_del">'+
+                  '<input type="hidden" name="efcbodega_fecha_recibido[]" value="" class="efcbodega_fecha_recibido">'+
+                '</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_concepto[]" class="span12 efcbodega_concepto" required>'+
+                '</td>'+
+                '<td>'+
+                  '<input type="text" name="efcbodega_monto[]" class="span12 vpositive efcbodega_monto" required>'+
+                '</td>'+
+                '<td>'+
+                  '<input type="checkbox" name="efcbodega_crecibido[]" value="si" class="efcbodega_crecibido">'+
+                  '<input type="hidden" name="efcbodega_recibido[]" value="f" class="efcbodega_recibido">'+
+                '</td>'+
+                '<td><button type="button" class="btn btn-danger btn-del-efcbodega" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
+              '</tr>';
+    $(tr).insertBefore($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var btnDelEfcbodega = function () {
+    $('#table-efcbodega').on('click', '.btn-del-efcbodega', function(event) {
+      var $tr = $(this).parents('tr'),
+          $efcbodega_id = $tr.find('.efcbodega_id'),
+          $efcbodega_del = $tr.find('.efcbodega_del'),
+          total = 0;
+
+      if ($efcbodega_id.val() != '') {
+        $efcbodega_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
+      calculaTotalEfcbodega();
+    });
+  };
+
+  var onChanceImporteEfcbodega = function () {
+    $('#table-efcbodega').on('keyup change', '.efcbodega_monto', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent(),
+          total = 0,
+          monto = (parseFloat($this.val())||0);
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8 || monto > 0) {
+        calculaTotalEfcbodega();
+      }
+    });
+
+    $('#table-efcbodega').on('change', '.efcbodega_crecibido', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent();
+
+      $tr.find('.efcbodega_recibido').val(($this.is(':checked')? 't': 'f'));
+    });
+  };
+
+  var calculaTotalEfcbodega = function () {
+    var total = 0;
+
+    $('#table-efcbodega .efcbodega_monto').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
+
+    $('input#total-efcbodega').val(total.toFixed(2));
+  };
+
   var btnAddTraspaso = function () {
     $('#btn-add-traspaso').on('click', function(event) {
       agregarTraspaso();
@@ -1110,7 +1319,9 @@
                     '<option value="caja_limon">Caja limón</option>'+
                     '<option value="caja_gastos">Caja gastos</option>'+
                     '<option value="caja_fletes">Caja fletes</option>'+
+                    '<option value="caja_plasticos">Caja Plasticos Gdl</option>'+
                     '<option value="caja_general">Caja Distribuidora</option>'+
+                    '<option value="caja_prestamo">Caja Préstamo</option>'+
                   '</select>'+
                   '<input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">'+
                   '<input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">'+
@@ -1400,6 +1611,7 @@
             centros_costos_id: $this.attr('data-centros_costos_id'),
             ranchos: $this.attr('data-ranchos'),
             ranchos_id: $this.attr('data-ranchos_id'),
+            sin_factura: false,
           };
 
           html +=
@@ -1414,6 +1626,9 @@
             '</td>'+
             '<td>'+
               '<input type="number" class="compGastoGMonto" value="'+datos.total+'">'+
+            '</td>'+
+            '<td>'+
+              '<input type="checkbox" class="compGastoGSinFactura" value="true">'+
             '</td>'+
             '<td><button type="button" class="btn compGastoGFrmRemRem"><i class="icon-remove"></i></button></td>'+
           '</tr>';

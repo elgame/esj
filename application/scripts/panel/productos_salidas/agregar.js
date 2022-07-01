@@ -12,7 +12,9 @@
     autocompleteRanchos();
     autocompleteCentroCosto();
     autocompleteActivos();
+    autocompleteLabores();
 
+    eventOnChangeTipo();
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnDelProducto();
@@ -20,6 +22,8 @@
     eventChangeTraspaso();
 
     copyCodigoAll();
+
+    getProyectos();
   });
 
   /*
@@ -40,11 +44,53 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+        getProyectos();
+        clearDatos();
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+        getProyectos();
+        clearDatos();
+      }
+    });
+
+    $("#empresaAp").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaAp =  $(this);
+
+        $empresaAp.val(ui.item.id);
+        $("#empresaApId").val(ui.item.id);
+        $empresaAp.css("background-color", "#A1F57A");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaAp").css("background-color", "#FFD071");
+        $("#empresaApId").val('');
+        $("#empresaTrans, #empresaTransId, #area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+      }
+    });
+
+    $("#empresaTrans").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresaTrans =  $(this);
+
+        $empresaTrans.val(ui.item.id);
+        $("#empresaTransId").val(ui.item.id);
+        $empresaTrans.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresaTrans").css("background-color", "#FFD071");
+        $("#empresaTransId").val('');
       }
     });
   };
@@ -72,13 +118,17 @@
     $("#fconcepto").autocomplete({
       source: function (request, response) {
         if (isEmpresaSelected()) {
+          var tipoo = 'p';
+          // if ($('#tipo').val() == 'c') {
+            tipoo = '';
+          // }
           $.ajax({
             url: base_url + 'panel/compras_ordenes/ajax_producto/',
             dataType: 'json',
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: ''
+              tipo: tipoo
             },
             success: function (data) {
               response(data)
@@ -295,11 +345,81 @@
     });
   };
 
+  var autocompleteLabores = function () {
+    $('#cimplemento').autocomplete({
+      source: base_url+'panel/control_maquinaria/ajax_get_implemento/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this);
+
+        $this.css("background-color", "#B0FFB0");
+      }
+    }).keydown(function(event){
+      if(event.which == 8 || event == 46) {
+        var $this = $(this);
+
+        $this.css("background-color", "#FFD9B3");
+      }
+    });
+
+    $('#datosCombustible').on('focus', 'input#clabor:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/labores_codigo/ajax_get_labores/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+          $('#clabor_id').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $this = $(this), $tr = $this.parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $('#clabor_id').val('');
+        }
+      });
+    });
+  };
+
   /*
    |------------------------------------------------------------------------
    | Events
    |------------------------------------------------------------------------
    */
+  var tipoOrderActual = $('#tipo').find('option:selected').val();
+  var eventOnChangeTipo = function () {
+    $('#tipo').on('change', function(event) {
+      var $this      = $(this),
+          $folio     = $('#folio'),
+          $tableProd = $('#table-productos');
+
+      if ($tableProd.find('tbody tr').length > 0) {
+        noty({"text": 'Ya tiene productos para un tipo de salida, si desea cambiar de tipo elimine los productos del listado', "layout":"topRight", "type": 'error'});
+
+        $this.val(tipoOrderActual);
+      } else {
+        tipoOrderActual = $this.find('option:selected').val();
+        if(tipoOrderActual == 'r') {
+          $("#generalCodigo").show();
+          $("#datosCombustible").hide();
+        } else if(tipoOrderActual == 'c') {
+          $("#datosCombustible").show();
+          $("#generalCodigo").hide();
+        } else {
+          $("#generalCodigo").hide();
+          $("#datosCombustible").hide();
+        }
+      }
+    });
+
+    // $('#tipo').change();
+  };
+
   var eventCodigoBarras = function () {
     $('#fcodigo').on('keypress', function(event) {
       var $codigo = $(this);
@@ -390,6 +510,12 @@
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
         $fcodigo.val('');
+
+        // Si es combustible asigna el precio
+        if ($('#tipo').val() === 'c') {
+          $('#clitros').val(producto.cantidad);
+          $('#cprecio').val(producto.precio_unitario);
+        }
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -405,7 +531,7 @@
       var $parent = $(this).parent().parent();
       $parent.remove();
 
-      calculaTotal();
+      // calculaTotal();
     });
   };
 
@@ -420,8 +546,10 @@
   var eventChangeTraspaso = function () {
     $('#tid_almacen').change(function(event) {
       $('#groupCatalogos').show();
+       $('#transferirEmpresa').hide();
       if ($(this).val() != '') {
         $('#groupCatalogos').hide();
+        $('#transferirEmpresa').show();
       }
     });
   };
@@ -530,6 +658,38 @@
   // Regresa true si esta seleccionada una empresa si no false.
   var isEmpresaSelected = function () {
     return $('#empresaId').val() !== '';
+  };
+
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
+  };
+
+  var clearDatos = function () {
+    $('#table-productos tbody tr').remove();
+    $("#empresaAp, #empresaApId, #area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
+    $(".secCombustible").val('');
+
+    // calculaTotal();
   };
 
 });

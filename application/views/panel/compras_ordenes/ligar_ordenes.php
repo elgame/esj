@@ -118,6 +118,25 @@
                       </div>
                     </div> -->
                   </div>
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Tipo Documento
+                        <select name="tipo_documento" id="tipo_documento" class="span12">
+                          <option value="fa" <?php echo set_select('tipo_documento', 'fa'); ?>>Factura</option>
+                          <option value="nv" <?php echo set_select('tipo_documento', 'nv'); ?>>Remisión</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="span3">
+                    <div class="control-group">
+                      <div class="controls span11">
+                        Fecha Factura<input type="datetime-local" name="fecha_factura" class="span12" id="fecha_factura" value="<?php echo set_value('fecha_factura', $fecha); ?>">
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="row-fluid" id="group_pago_contado" style="display: none;">
                   <div class="span3">
@@ -258,6 +277,8 @@
                                               <option value="4" <?php echo $prod->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
                                               <option value="10.6667" <?php echo $prod->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                               <option value="16" <?php echo $prod->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                              <option value="6" <?php echo $prod->porcentaje_retencion === '6' ? "selected" : '' ?>>6 %</option>
+                                              <option value="8" <?php echo $prod->porcentaje_retencion === '8' ? "selected" : '' ?>>8 %</option>
                                             </select>
                                              <input type="hidden" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                          </td>

@@ -7,10 +7,11 @@ class centro_costo extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'centro_costo/ajax_get_centro_costo/',
     'centro_costo/merges/',
     'centro_costo/catalogo_xls/',
-    'centro_costo/show_view_agregar_productor/'
+    'centro_costo/show_view_agregar_productor/',
+    'centro_costo/ajax_get_centro_costo/',
+    'centro_costo/ajax_get_centros_costos/',
   );
 
   public function _remap($method){
@@ -197,11 +198,25 @@ class centro_costo extends MY_Controller {
   }
 
   /**
-   * Obtiene lostado de productores para el autocomplete, ajax
+   * Obtiene lostado de centros de costo para el autocomplete, ajax
    */
   public function ajax_get_centro_costo(){
     $this->load->model('centros_costos_model');
     $params = $this->centros_costos_model->getCentrosCostosAjax();
+
+    echo json_encode($params);
+  }
+
+  /**
+   * obtiene los centros espesificados en el string
+   */
+  public function ajax_get_centros_costos(){
+    $params = [];
+
+    if ($this->input->get('centrosCosto')) {
+      $this->load->model('centros_costos_model');
+      $params = $this->centros_costos_model->getCentrosCostosPagesAjax($this->input->get('centrosCosto'));
+    }
 
     echo json_encode($params);
   }
@@ -250,6 +265,9 @@ class centro_costo extends MY_Controller {
       array('field' => 'no_plantas',
             'label' => 'No de plantas',
             'rules' => ($val? 'required|numeric': '')),
+      array('field' => 'codigo',
+            'label' => 'Código',
+            'rules' => ($val? 'required': '')),
 
       array('field' => 'anios_credito',
             'label' => 'Años del crédito',

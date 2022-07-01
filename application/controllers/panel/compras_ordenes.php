@@ -16,6 +16,9 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/ajaxGetBoletas/',
+    'compras_ordenes/ajaxGetCompras/',
+    'compras_ordenes/ajaxGetSalidasAlmacen/',
+    'compras_ordenes/ajaxGetGastosCaja/',
     'compras_ordenes/imprimir_entrada/',
     'compras_ordenes/ticket/',
     'compras_ordenes/ajax_imprimir_recibo/',
@@ -25,6 +28,8 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/rpt_gastos_xls/',
     'compras_ordenes/rpt_ordenes_pdf/',
     'compras_ordenes/rpt_ordenes_xls/',
+    'compras_ordenes/activosGastos_pdf/',
+    'compras_ordenes/activosGastos_xls/',
     );
 
   public function _remap($method){
@@ -250,9 +255,14 @@ class compras_ordenes extends MY_Controller {
       'titulo' => (isset($_GET['w'])? ($_GET['w']=='c'? 'Orden de compra': 'Orden de requisición'): 'Orden de compra')
     );
 
+    $usoCfdi = new UsoCfdi();
+    $formPago = new FormaPago();
+
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_ordenes_model->departamentos();
     $params['unidades']      = $this->compras_ordenes_model->unidades();
+    $params['usoCfdi']       = $usoCfdi->get()->all();
+    $params['formPagos']     = $formPago->get()->all();
 
     if ( ! isset($_GET['m']))
     {
@@ -325,6 +335,73 @@ class compras_ordenes extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/compras_ordenes/modificar', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function modificar_ext()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      // array('general/buttons.toggle.js'),
+      array('general/keyjump.js'),
+      array('panel/compras_ordenes/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
+    ));
+
+    $this->load->model('compras_ordenes_model');
+    $this->load->model('compras_areas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Orden de compra'
+    );
+
+
+    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $this->configAddOrdenExt();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $response = $this->compras_ordenes_model->actualizarExt($_GET['id'], $_POST);
+
+      if ($response['passes'])
+      {
+        if (isset($_POST['autorizar']))
+        {
+          redirect(base_url('panel/compras_ordenes/modificar_ext/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&reload=true'));
+        }
+        else
+        {
+          redirect(base_url('panel/compras_ordenes/modificar_ext/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
+        }
+      }
+    }
+
+    $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
+    // echo "<pre>";
+    //   var_dump($params['orden']);
+    // echo "</pre>";exit;
+
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['reload']))
+      $params['reload'] = true;
+
+    $this->load->view('panel/compras_ordenes/modificar_ext', $params);
   }
 
   public function autorizar()
@@ -549,6 +626,44 @@ class compras_ordenes extends MY_Controller {
   }
 
 
+  public function activosGastos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_activos.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Compras por Producto');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['familias'] = $this->productos_model->getFamiliasAjax(['id_empresa' => $params['empresa']->id_empresa]);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/rptactivos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function activosGastos_pdf(){
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->getActivosGastosPdf();
+  }
+  public function activosGastos_xls(){
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->getActivosGastosXls();
+  }
+
+
   public function rpt_ordenes()
   {
     $this->carabiner->js(array(
@@ -609,7 +724,9 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
 
-    $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
+    $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+                ".(!empty($_GET['id_familia'])? "AND p.id_familia = '{$_GET['id_familia']}' ": '')."
+                AND".(strlen($_GET['term'])<3? " 1 = 2 AND ": "");
 
     $id_almacen = isset($_GET['id_almacen']{0}) && $_GET['id_almacen'] > 0? $_GET['id_almacen']: 1;
     $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'],
@@ -639,6 +756,30 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $productos = $this->compras_ordenes_model->getFactRem($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetCompras()
+  {
+    $this->load->model('compras_ordenes_model');
+    $productos = $this->compras_ordenes_model->getCompras($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetSalidasAlmacen()
+  {
+    $this->load->model('productos_salidas_model');
+    $productos = $this->productos_salidas_model->getSalidasAjax($_GET);
+
+    echo json_encode($productos);
+  }
+
+  public function ajaxGetGastosCaja()
+  {
+    $this->load->model('caja_chica_model');
+    $productos = $this->caja_chica_model->getGastosAjax($_GET);
 
     echo json_encode($productos);
   }
@@ -890,6 +1031,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
+      array('field' => 'fecha_factura',
+            'label' => 'Fecha Factura',
+            'rules' => 'required'),
 
       array('field' => 'condicionPago',
             'label' => 'Condicion de Pago',
@@ -897,6 +1041,10 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'plazoCredito',
             'label' => 'Plazo Credito',
             'rules' => ''),
+
+      array('field' => 'tipo_documento',
+            'label' => 'Tipo Documento',
+            'rules' => 'required'),
 
       array('field' => 'totalLetra',
             'label' => '',
@@ -960,6 +1108,46 @@ class compras_ordenes extends MY_Controller {
             'label' => 'UUID',
             'rules' => 'callback_uuid_check'),
     );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function configAddOrdenExt()
+  {
+    $this->load->library('form_validation');
+
+    $rules = [];
+
+    $rules[] = array('field' => 'es_vehiculo',
+                    'label' => 'Vehiculo',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculo',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculoId',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+
+    if ($this->input->post('es_vehiculo') == 'si')
+    {
+      $rules[count($rules)-1]['rules'] = 'required|numeric';
+
+      $rules[] = array('field' => 'tipo_vehiculo',
+                      'label' => 'Tipo vehiculo',
+                      'rules' => '');
+      if ($this->input->post('tipo_vehiculo') == 'g')
+      {
+        $rules[] = array('field' => 'dkilometros',
+                        'label' => 'Kilometros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dlitros',
+                        'label' => 'Litros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dprecio',
+                        'label' => 'Precio',
+                        'rules' => 'required|numeric');
+      }
+    }
 
     $this->form_validation->set_rules($rules);
   }

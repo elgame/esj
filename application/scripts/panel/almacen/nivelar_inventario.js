@@ -26,7 +26,51 @@ $(function(){
     }
   });
 
+  autocompleteConcepto();
+
 });
+
+var autocompleteConcepto = function () {
+  $("#dproducto").autocomplete({
+    source: function (request, response) {
+      if (isEmpresaSelected()) {
+        $.ajax({
+          url: base_url + 'panel/compras_ordenes/ajax_producto/',
+          dataType: 'json',
+          data: {
+            term : request.term,
+            ide: $('#did_empresa').val(),
+            tipo: 'p',
+            id_familia: $('#dfamilias').val(),
+            id_almacen: $('#id_almacen').val(),
+          },
+          success: function (data) {
+            response(data);
+          }
+        });
+      } else {
+        noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+      }
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $fconcepto    = $(this);
+      $fconcepto.css("background-color", "#B6E7FF");
+      $("#dproductoId").val(ui.item.id);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      var $fconcepto = $(this);
+      $(this).css("background-color", "#FDFC9A");
+      $("#dproductoId").val('');
+    }
+  });
+};
+
+var isEmpresaSelected = function () {
+  return $('#did_empresa').val() !== '';
+};
 
 function truncateDecimals (num, digits) {
     var numS = num.toString(),

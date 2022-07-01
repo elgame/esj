@@ -98,6 +98,7 @@ class productos_bajas_model extends CI_Model {
     );
 
     $this->db->insert('compras_salidas', $data);
+    $id_salida = $this->db->insert_id('compras_salidas_id_salida_seq');
 
     $this->load->model('inventario_model');
     $productos = array();
@@ -108,7 +109,7 @@ class productos_bajas_model extends CI_Model {
       $saldo = array_shift($res);
 
       $productos[] = array(
-        'id_salida'       => $this->db->insert_id(),
+        'id_salida'       => $id_salida,
         'id_producto'     => $_POST['productoId'][$key],
         'no_row'          => $key,
         'cantidad'        => $_POST['cantidad'][$key],

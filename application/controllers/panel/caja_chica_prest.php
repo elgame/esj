@@ -67,6 +67,7 @@ class caja_chica_prest extends MY_Controller {
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
       array('general/msgbox.js'),
+      array('general/supermodal.js'),
       array('general/util.js'),
       array('panel/caja_chica/cargar_prestamos.js'),
       // array('panel/caja_chica/areas_requisicion.js'),
@@ -683,7 +684,8 @@ class caja_chica_prest extends MY_Controller {
   public function print_prestamolp()
   {
     $this->load->model('caja_chica_prest_model');
-    $this->caja_chica_prest_model->printPrestamoLp($_GET['id'], $_GET['fecha']);
+    $fecha = isset($_GET['fecha'])? $_GET['fecha']: null;
+    $this->caja_chica_prest_model->printPrestamoLp($_GET['id'], $fecha);
   }
 
   public function print_prestamocp()

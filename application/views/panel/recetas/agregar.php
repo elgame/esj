@@ -35,9 +35,19 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" data-next="tipo" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" data-next="empresa_ap" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
                   <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
+                </div>
+              </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="empresa_ap">Empresa Aplicación </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="empresa_ap" class="span11" id="empresa_ap" value="<?php echo set_value('empresa_ap') ?>" data-next="tipo">
+                  </div>
+                  <input type="hidden" name="empresaId_ap" id="empresaId_ap" value="<?php echo set_value('empresaId_ap') ?>">
                 </div>
               </div><!--/control-group -->
 
@@ -45,7 +55,7 @@
                 <label class="control-label" for="formula">Formula </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo set_value('formula') ?>" placeholder="Selecciona una formula" required>
+                    <input type="text" name="formula" class="span11" id="formula" value="<?php echo set_value('formula') ?>" placeholder="Selecciona una formula">
                     <input type="hidden" name="formulaId" id="formulaId" value="<?php echo set_value('formulaId') ?>">
                   </div>
                 </div>
@@ -55,7 +65,7 @@
                 <label class="control-label" for="area">Cultivo</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña" readonly>
+                    <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña" required>
                   </div>
                   <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                 </div>
@@ -84,6 +94,7 @@
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
+                    <a href="#modalCentrosCostos" role="button" class="btn" data-toggle="modal"><i class="icon-plus" ></i></a>
                   </div>
                 </div>
                 <ul class="tags" id="tagsCCIds">
@@ -141,13 +152,14 @@
                     <option value="kg" <?php echo set_select('tipo', 'kg'); ?>>Kg</option>
                     <option value="lts" <?php echo set_select('tipo', 'lts'); ?>>Lts</option>
                   </select>
+                  <input type="hidden" id="tipooo" value="<?php echo (!empty($_POST['tipo'])? 'true': 'false') ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="folio_formula">Folio Formula</label>
                 <div class="controls">
-                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo set_value('folio_formula'); ?>" size="25" readonly required>
+                  <input type="text" name="folio_formula" class="span9" id="folio_formula" value="<?php echo set_value('folio_formula'); ?>" size="25" readonly>
                 </div>
               </div>
 
@@ -155,6 +167,13 @@
                 <label class="control-label" for="folio">Folio Receta</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $next_folio); ?>" size="25" readonly>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="folio_hoja">Folio Receta Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folio_hoja" class="span9" id="folio_hoja" value="<?php echo set_value('folio_hoja'); ?>" size="25">
                 </div>
               </div>
 
@@ -169,6 +188,15 @@
                 <label class="control-label" for="fecha_aplicacion">Fecha Aplicación</label>
                 <div class="controls">
                   <input type="date" name="fecha_aplicacion" class="span9" id="fecha_aplicacion" value="<?php echo set_value('fecha_aplicacion', date("Y-m-d")); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="calendario">Calendario</label>
+                <div class="controls">
+                  <select name="calendario" class="span9" id="calendario" data-next="formula" required>
+                  </select>
+                  <input type="hidden" id="calendariooo" value="<?php echo (empty($_POST['calendario'])? '': $_POST['calendario']) ?>">
                 </div>
               </div>
 
@@ -270,12 +298,12 @@
 
                 <div class="span3">
                   No plantas
-                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo set_value('no_plantas'); ?>" readonly data-next="carga1" style="display: none;">
+                  <input type="number" step="any" name="no_plantas" class="span12 sikey datoskl" id="no_plantas" value="<?php echo set_value('no_plantas'); ?>" data-next="carga1" style="display: none;">  <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-kg">
                   Kg Total
-                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo set_value('kg_totales'); ?>" readonly>
+                  <input type="number" step="any" name="kg_totales" class="span12 sikey datoskl" id="kg_totales" value="<?php echo set_value('kg_totales'); ?>">  <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -295,7 +323,7 @@
 
                 <div class="span3 datos-lts">
                   Lts de Cargas Extras
-                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo set_value('dosis_equipo_car2'); ?>" readonly>
+                  <input type="number" step="any" name="dosis_equipo_car2" class="span12 sikey datoskl" id="dosis_equipo_car2" value="<?php echo set_value('dosis_equipo_car2'); ?>">  <!-- readonly -->
                 </div>
 
                 <div class="span3 datos-lts">
@@ -384,13 +412,13 @@
                               <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $_POST['pcarga1'][$key] ?>" id="pcarga1" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga1[]" value="<?php echo $_POST['pcarga1'][$key] ?>" id="pcarga1" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td class="tipostyle" style="width: 80px;display: none;">
-                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $_POST['pcarga2'][$key] ?>" id="pcarga2" class="span12 vpositive" min="0" readonly>
+                                <input type="number" step="any" name="pcarga2[]" value="<?php echo $_POST['pcarga2'][$key] ?>" id="pcarga2" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
-                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $_POST['aplicacion_total'][$key] ?>" id="aplicacion_total" class="span12 vpositive" min="0" readonly>
+                              <input type="number" step="any" name="aplicacion_total[]" value="<?php echo $_POST['aplicacion_total'][$key] ?>" id="aplicacion_total" class="span12 vpositive" min="0"> <!-- readonly -->
                             </td>
                             <td style="width: 130px;">
                               <input type="number" step="any" name="precio[]" value="<?php echo $_POST['precio'][$key] ?>" id="precio" class="span12 vpositive" min="0">
@@ -436,6 +464,19 @@
     </div><!--/row-->
   </div><!--/row-->
 
+</div>
+
+<!-- Modal -->
+<div id="modalCentrosCostos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true" style="width: 40%;left: 45%;top: 40%;height: 300px;">
+  <div class="modal-body" style="max-height: 1500px;">
+    <label class="control-label" for="rangoCentrosCosto">Rango de Centros de Costo por Código</label>
+    <input type="text" name="rangoCentrosCosto" id="rangoCentrosCosto" value="" placeholder="1-4,5,7-9,8">
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    <button class="btn btn-primary" id="btnRangoCentrosCosto">Agregar</button>
+  </div>
 </div>
 
 <!-- Bloque de alertas -->

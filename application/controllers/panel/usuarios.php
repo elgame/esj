@@ -11,6 +11,8 @@ class usuarios extends MY_Controller {
     'usuarios/ajax_change_empresa/',
     'usuarios/ajax_get_usuario_priv/',
     'usuarios/ajax_update_priv/',
+    'usuarios/copiar_privilegios/',
+
   );
 
 	public function _remap($method){
@@ -118,7 +120,9 @@ class usuarios extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('libs/jquery.treeview.js'),
-				array('panel/usuarios/add_mod_frm.js')
+        array('general/supermodal.js'),
+        array('general/msgbox.js'),
+				array('panel/usuarios/add_mod_frm.js'),
 			));
 
 			$this->load->model('usuarios_model');
@@ -226,6 +230,58 @@ class usuarios extends MY_Controller {
   {
     $this->load->model('usuarios_model');
     $this->usuarios_model->updatePrivilegios($this->input->post('dprivilegios'), $this->input->post('id_usuario'), $this->input->post('id_empresa'));
+  }
+
+  public function copiar_privilegios()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('general/msgbox.js'),
+      // array('panel/compras_ordenes/agregar.js'),
+      // array('panel/compras/ligar_ordenes.js'),
+    ));
+
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    $this->configCopyPrivilegios();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->usuarios_model->copiarPrivilegios($_POST);
+
+      if($res_mdl['error'] == FALSE) {
+        redirect(base_url('panel/usuarios/copiar_privilegios/?'.MyString::getVarsLink(array('msg')).'&rel=true&msg=9'));
+      }
+    }
+
+    $params['empresas'] = $this->empresas_model->getEmpresas(500);
+    foreach ($params['empresas']['empresas'] as $key => $value) {
+      if ($value->id_empresa == $_GET['ide']) {
+        unset($params['empresas']['empresas'][$key]);
+      }
+    }
+    // echo "<pre>";
+    // var_dump($params);
+    // echo "</pre>";exit;
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    // $ids = explode(',', $_GET['ids']);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['rel']))
+      $params['reload'] = true;
+
+    $this->load->view('panel/empleados/copiar_privilegios', $params);
   }
 
 
@@ -399,6 +455,26 @@ class usuarios extends MY_Controller {
     return true;
   }
 
+  public function configCopyPrivilegios()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'empresaId',
+            'label' => 'Empresa',
+            'rules' => 'required'),
+      array('field' => 'usuarioId',
+            'label' => 'Usuario',
+            'rules' => 'required'),
+
+      array('field' => 'id_empresas[]',
+            'label' => 'Empresas a copiar',
+            'rules' => 'required')
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{
 		switch($tipo){
@@ -426,6 +502,10 @@ class usuarios extends MY_Controller {
 				$txt = 'El usuario se activó correctamente.';
 				$icono = 'success';
 				break;
+      case 9:
+        $txt = 'Se modificaron correctamente los privilegios de las empresas.';
+        $icono = 'success';
+        break;
 		}
 
 		return array(

@@ -53,6 +53,8 @@
           $show = false;
           $action = '';
         }
+
+        $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
       ?>
 
       <div class="span12">
@@ -191,25 +193,61 @@
                           </thead>
                           <tbody>
                             <?php
+                                  $tipoo = '';
                                   $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
                                   $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+                                  $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+                                  $totalpreslp_ef_rec = [];
                                   foreach ($caja['prestamos_lp'] as $prestamo) {
                                       $totalpreslp_salini += floatval($prestamo->saldo_ini);
                                       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
                                       $totalpreslp_salfin += floatval($prestamo->saldo_fin);
-                                      if ($prestamo->tipo == 'fi') {
+
+                                      if ($prestamo->tipo == 'efd') {
+                                        $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+                                        if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                          $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                        } else {
+                                          $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                        }
+                                      } elseif ($prestamo->tipo == 'ef') {
+                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                        // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                        //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                        // } else {
+                                        //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                        // }
+                                      } else {
                                         $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
                                         $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
                                         $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
                                       }
-                                      else {
-                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
-                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
-                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
-                                      }
-                                    ?>
+
+                                      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+                                        switch ($prestamo->tipo) {
+                                          case 'efd': $tipo = 'Efectivo Fijo'; break;
+                                          case 'ef': $tipo = 'Efectivo'; break;
+                                          default: $tipo = 'Fiscal'; break;
+                                        }
+                                        $tipoo = $prestamo->tipo;
+                            ?>
                                     <tr>
-                                      <td><?php echo $prestamo->categoria ?></td>
+                                      <td colspan="10"><strong><?php echo $tipo ?></strong></td>
+                                    </tr>
+                            <?php
+                                      }
+                            ?>
+                                    <tr>
+                                      <td><?php echo $prestamo->categoria ?>
+                                        <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom)?>" target="_blank" title="Imprimir vale prestamo">
+                                          <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                      </td>
                                       <td><?php echo $prestamo->empleado ?></td>
                                       <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
                                       <td><?php echo $prestamo->referencia ?></td>
@@ -255,6 +293,56 @@
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
+                                  <tr class="row-total">
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo Fijo</td>
+                                    <td><?php echo $totalpreslp_salini_efd ?></td>
+                                    <td><?php echo $totalpreslp_pago_dia_efd ?></td>
+                                    <td colspan="2"></td>
+                                    <td><?php echo $totalpreslp_salfin_efd ?></td>
+                                  </tr>
+
+                                  <tr class="row-total">
+                                    <td colspan="10"><strong>Recuperar Efectivo Fijo</strong></td>
+                                  </tr>
+                                  <tr class="row-total">
+                                    <td><strong>Saldo Anterior</strong></td>
+                                    <td><?php echo $caja['saldo_prest_fijo'] ?></td>
+                                    <td colspan="8"></td>
+                                  </tr>
+                            <?php
+                              $total_prestamos_recuperar = 0;
+                              if (count($totalpreslp_ef_rec) > 0) {
+                            ?>
+                                <tr class="row-total">
+                                  <td colspan="10"><strong>Cobro Prestamos Fijos</strong></td>
+                                </tr>
+                            <?php
+                                foreach ($totalpreslp_ef_rec as $key => $value) {
+                                  if ($value > 0) {
+                                    $total_prestamos_recuperar += $value;
+                            ?>
+                                <tr class="row-total">
+                                  <td><?php echo $key ?></td>
+                                  <td><?php echo $value ?></td>
+                                  <td colspan="8"></td>
+                                </tr>
+                            <?php
+                                  }
+                                }
+                              }
+                            ?>
+                            <tr class="row-total">
+                              <td><strong>Traspasos</strong></td>
+                              <td><?php echo $caja['traspasos'] ?></td>
+                              <td colspan="8"></td>
+                            </tr>
+                            <tr class="row-total">
+                              <td><strong>Saldo</strong></td>
+                              <td><?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?></td>
+                              <td colspan="8">
+                                <input type="hidden" name="saldo_prest_fijo" value="<?php echo $caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos'] ?>">
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -473,6 +561,258 @@
                       </div>
                     </div>
                     <!--/ Saldo empleados-->
+
+                    <!-- Deudores -->
+                    <?php $totalDeudores = 0; ?>
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-deudor">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="9">DEUDORES
+                                          <?php if ($show): ?>
+                                            <button type="button" class="btn btn-success" id="btn-add-deudor" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                          <?php endif ?>
+                                        </th>
+                                      </tr>
+                                      <tr>
+                                        <th>FECHA</th>
+                                        <th>TIPO</th>
+                                        <th>NOM</th>
+                                        <th>NOMBRE</th>
+                                        <th>CONCEPTO</th>
+                                        <th>PRESTADO</th>
+                                        <th>ABONOS</th>
+                                        <th>SALDO</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                        $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
+                                        $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
+
+                                        if (count($caja['deudores']) == 0 && isset($_POST['deudor_nombre']) && count($_POST['deudor_nombre']) > 0) {
+                                          foreach ($_POST['deudor_nombre'] as $key => $concepto) {
+                                            $totalDeudores += floatval($_POST['deudor_importe'][$key]); ?>
+                                              <tr>
+                                                <td style="">
+                                                  <input type="hidden" name="deudor_fecha[]" value="">
+                                                </td>
+                                                <td style="width: 80px;">
+                                                  <select name="deudor_tipo[]" style="width: 80px;">
+                                                    <option value="otros" <?php echo $_POST['deudor_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                                    <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                                    <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                                    <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                                    <option value="prestamo" <?php echo $_POST['deudor_tipo'][$key]=='prestamo'? 'selected': ''; ?>>Prestamo</option>
+                                                  </select>
+                                                </td>
+                                                <td style="width: 80px;">
+                                                  <select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura" <?php echo $readonly ?>>
+                                                    <?php foreach ($nomenclaturas as $n) { ?>
+                                                      <?php if ($n->tipo === 'f'): ?>
+                                                      <option value="<?php echo $n->id ?>" <?php echo $_POST['deudor_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                      <?php endif ?>
+                                                    <?php } ?>
+                                                  </select>
+                                                </td>
+                                                <td style="width: 200px;">
+                                                  <input type="text" name="deudor_nombre[]" value="<?php echo $_POST['deudor_nombre'][$key] ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $readonly.$mod_gas_readonly ?>>
+                                                  <input type="hidden" name="deudor_id_deudor[]" value="<?php echo $_POST['deudor_id_deudor'][$key] ?>" id="deudor_id_gasto">
+                                                  <input type="hidden" name="deudor_del[]" value="" id="deudor_del">
+                                                </td>
+                                                <td style="width: 200px;">
+                                                  <input type="text" name="deudor_concepto[]" value="<?php echo $_POST['deudor_concepto'][$key] ?>" class="span12 deudor-cargo" required <?php echo $readonly.$mod_gas_readonly ?>>
+                                                </td>
+                                                <td style="width: 80px;">
+                                                  <input type="text" name="deudor_importe[]" value="<?php echo $_POST['deudor_importe'][$key] ?>" class="span12 vpositive deudor-importe" <?php echo $readonly.$mod_gas_readonly ?>>
+                                                </td>
+                                                <td style="width: 80px;" class="deudor_abonos" data-abonos="0">
+                                                </td>
+                                                <td style="width: 80px;" class="deudor_saldo" data-saldo="0">
+                                                </td>
+                                                <td style="width: 30px;">
+                                                  <?php if ($modificar_gasto): ?>
+                                                    <button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                                  <?php endif ?>
+                                                </td>
+                                              </tr>
+                                      <?php }} else {
+                                        foreach ($caja['deudores'] as $deudor) {
+                                          $totalDeudores += floatval($deudor->saldo);
+                                        ?>
+                                        <tr>
+                                          <td style="width: 80px;">
+                                            <?php echo $deudor->fecha ?>
+                                            <input type="hidden" name="deudor_fecha[]" value="<?php echo $deudor->fecha ?>">
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <?php echo str_replace('_', ' ', $deudor->tipo); ?>
+                                            <input type="hidden" name="deudor_tipo[]" value="<?php echo $deudor->tipo ?>">
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <select name="deudor_nomenclatura[]" class="span12 deudor_nomenclatura" <?php echo $readonly ?>>
+                                              <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
+                                                <option value="<?php echo $n->id ?>" <?php echo $deudor->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
+                                              <?php } ?>
+                                            </select>
+                                          </td>
+                                          <td style="width: 200px;">
+                                            <input type="text" name="deudor_nombre[]" value="<?php echo $deudor->nombre ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
+                                            <input type="hidden" name="deudor_id_deudor[]" value="<?php echo $deudor->id_deudor ?>" id="deudor_id_gasto">
+                                            <input type="hidden" name="deudor_del[]" value="" id="deudor_del">
+                                            <a href="<?php echo base_url('panel/caja_chica/print_vale_deudor/?id='.$deudor->id_deudor.'&noCaja='.$deudor->no_caja)?>" target="_blank" title="Imprimir vale prestamo">
+                                              <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                          </td>
+                                          <td style="width: 200px;">
+                                            <input type="text" name="deudor_concepto[]" value="<?php echo $deudor->concepto ?>" class="span12 deudor-cargo" required <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <input type="text" name="deudor_importe[]" value="<?php echo $deudor->monto ?>" class="span12 vpositive deudor-importe" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
+                                          </td>
+                                          <td style="width: 80px;" class="deudor_abonos" data-abonos="<?php echo $deudor->abonos ?>">
+                                            <?php echo $deudor->abonos ?>
+                                          </td>
+                                          <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>" data-mismo="<?php echo $deudor->mismo_dia ?>">
+                                            <?php if ((!isset($caja['status']) || $caja['status'] === 't') && $show):
+                                              $noCajaDeudor = $_GET['fno_caja']+100;
+                                            ?>
+                                            <a class="btn_abonos_deudores" href="<?php echo base_url('panel/caja_chica/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$noCajaDeudor}&monto={$deudor->saldo}" ?>" style="" rel="superbox-50x500" title="Abonar">
+                                              <?php echo $deudor->saldo ?></a>
+                                            <?php else: ?>
+                                              <?php echo $deudor->saldo ?>
+                                            <?php endif ?>
+                                          </td>
+                                          <td style="width: 30px;">
+                                            <?php if ($modificar_gasto && $deudor->mismo_dia == '' && $show): ?>
+                                              <button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <?php endif ?>
+                                          </td>
+                                        </tr>
+                                      <?php }} ?>
+                                      <tr class="row-total">
+                                        <td colspan="2"></td>
+                                        <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
+                                        <td style="text-align: right; font-weight: bolder;">
+                                          <input type="text" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="total-deudores-pres-dia" style="text-align: right;" readonly>
+                                        </td>
+                                        <td style="text-align: right; font-weight: bolder;">ABONOS DEL DIA</td>
+                                        <td style="text-align: right; font-weight: bolder;">
+                                          <input type="text" value="<?php echo $caja['deudores_abonos_dia'] ?>" class="input-small vpositive" id="total-deudores-abono-dia" style="text-align: right;" readonly>
+                                        </td>
+                                        <td style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td><input type="text" value="<?php echo $totalDeudores ?>" class="input-small vpositive" id="total-deudores" style="text-align: right;" readonly></td>
+                                        <td></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Deudores -->
+
+                    <?php
+                    $totalAcreedores = $totalAcreedoresHoy = 0;
+                    ?>
+                    <!-- Acreedores -->
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-acreedor">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="8">ACREEDOR CAJA</th>
+                                      </tr>
+                                      <tr>
+                                        <th>FECHA</th>
+                                        <th>TIPO</th>
+                                        <th>NOMBRE</th>
+                                        <th>CONCEPTO</th>
+                                        <th>PRESTADO</th>
+                                        <th>ABONOS</th>
+                                        <th>SALDO</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                      if (count($caja['acreedores']) > 0) {
+                                        foreach ($caja['acreedores'] as $acreedor) {
+                                          $totalAcreedores += floatval($acreedor->saldo);
+                                          // if ($acreedor->mismo_dia) {
+                                          //   $totalAcreedoresHoy += floatval($acreedor->saldo);
+                                          // }
+                                        ?>
+                                        <tr>
+                                          <td style="width: 80px;">
+                                            <?php echo $acreedor->fecha ?>
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <?php echo str_replace('_', ' ', $acreedor->tipo); ?>
+                                          </td>
+                                          <td style="width: 200px;">
+                                            <?php echo $acreedor->nombre ?>
+                                          </td>
+                                          <td style="width: 200px;">
+                                            <?php echo $acreedor->concepto ?>
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <?php echo $acreedor->monto ?>
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <?php echo $acreedor->abonos ?>
+                                          </td>
+                                          <td style="width: 80px;">
+                                            <?php echo $acreedor->saldo ?>
+                                          </td>
+                                          <td style="width: 30px;">
+                                          </td>
+                                        </tr>
+                                      <?php }
+                                      } ?>
+                                      <tr class="row-total">
+                                        <td></td>
+                                        <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
+                                        <td style="text-align: right; font-weight: bolder;">
+                                          <input type="text" value="<?php echo $caja['acreedor_prest_dia'] ?>" class="input-small vpositive" id="total-acreddor-pres-dia" style="text-align: right;" readonly>
+                                        </td>
+                                        <td style="text-align: right; font-weight: bolder;">ABONOS DEL DIA</td>
+                                        <td style="text-align: right; font-weight: bolder;">
+                                          <input type="text" value="<?php echo $caja['acreedor_abonos_dia'] ?>" class="input-small vpositive" id="total-acreddor-abono-dia" style="text-align: right;" readonly>
+                                        </td>
+                                        <td style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td><input type="text" value="<?php echo $totalAcreedores ?>" class="input-small vpositive" id="total-acreddor" style="text-align: right;" readonly></td>
+                                        <td></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Acreedores -->
+
                 </div>
               </div>
             </div>

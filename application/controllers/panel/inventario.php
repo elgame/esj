@@ -14,6 +14,12 @@ class inventario extends MY_Controller {
     'inventario/cunproductos_pdf/',
     'inventario/cunproductos_xls/',
     'inventario/cseguimiento_pdf/',
+    'inventario/sproveedor_pdf/',
+    'inventario/sproveedor_xls/',
+
+    'inventario/cproductosOrden_pdf/',
+    'inventario/cproductosOrden_xls/',
+    'inventario/cproductoOrden_pdf/',
 
     'inventario/epu_pdf/',
     'inventario/epu_xls/',
@@ -25,6 +31,9 @@ class inventario extends MY_Controller {
     'inventario/pueps_pdf/',
     'inventario/eclasif_pdf/',
     'inventario/historial_nivelar_pdf/',
+
+    'inventario/rptExistencia2_pdf/',
+    'inventario/rptExistencia2_xls/',
 
     'inventario/ajax_get_familias/',
 
@@ -88,7 +97,7 @@ class inventario extends MY_Controller {
     $this->inventario_model->getCProveedorXls();
   }
 
-  public function cproductos()
+  public function sproveedor()
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
@@ -99,9 +108,47 @@ class inventario extends MY_Controller {
     $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Servicios por Proveedor');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/sproveedor',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function sproveedor_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getSProveedorPdf();
+
+  }
+  public function sproveedor_xls(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getSProveedorXls();
+  }
+
+  public function cproductos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Compras por Producto');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['familias'] = $this->productos_model->getFamiliasAjax(['id_empresa' => $params['empresa']->id_empresa]);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -127,6 +174,54 @@ class inventario extends MY_Controller {
   {
     $this->load->model('inventario_model');
     $this->inventario_model->getCSeguimientoPdf();
+  }
+
+
+  public function cproductosOrden()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+    $this->carabiner->css(array(
+      array('panel/tags.css', 'screen'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('productos_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Compras por Producto');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['familias'] = $this->productos_model->getFamiliasAjax(['id_empresa' => $params['empresa']->id_empresa]);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/cproductoOrdenes',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cproductosOrden_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProductosOrdenPdf();
+  }
+  public function cproductosOrden_xls(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProductosOrdenXls();
+  }
+  public function cproductoOrden_pdf()
+  {
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProductoOrdenPdf();
+  }
+  public function cseguimientoOrden_pdf()
+  {
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCSeguimientoOrdenPdf();
   }
 
   /**
@@ -255,6 +350,41 @@ class inventario extends MY_Controller {
       $this->load->model('inventario_model');
       $this->inventario_model->getPromediodf();
     }
+  }
+
+  public function rptExistencia2()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de inventario 2');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/inventario/rptExistencia2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rptExistencia2_pdf() {
+    $this->load->model('inventario_model');
+    $this->inventario_model->promedioAllPdf();
+  }
+  public function rptExistencia2_xls() {
+    $this->load->model('inventario_model');
+    $this->inventario_model->promedioAllXls();
   }
 
   /**
@@ -404,10 +534,11 @@ class inventario extends MY_Controller {
     {
       $res_mdl = $this->inventario_model->nivelar();
 
-      if ($res_mdl['passes'])
-      {
-        redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
-      }
+      // if ($res_mdl['passes'])
+      // {
+      //   redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      // }
+      $_GET['msg'] = $res_mdl['msg'];
     }
 
     $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
@@ -420,7 +551,17 @@ class inventario extends MY_Controller {
 
     $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);
     $id_almacen = isset($_GET['id_almacen'])? $_GET['id_almacen']: 1;
-    $params['data'] = $this->inventario_model->getNivelarData($id_familia, null, $id_almacen);
+
+    if (!empty($_GET['dproductoId'])) {
+      $params['data'] = $this->inventario_model->getNivelarData($id_familia, $_GET['dproductoId'], $id_almacen);
+    } else {
+      $params['data'] = array(
+        'productos'      => [],
+        'total_rows'     => 0,
+        'items_per_page' => 50,
+        'result_page'    => 0,
+      );
+    }
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

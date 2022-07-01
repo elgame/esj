@@ -13,7 +13,11 @@ class catalogos extends MY_Controller {
 			'catalogos/clocalidades/',
 			'catalogos/ccps/',
 			'catalogos/ccolonias/',
-			'catalogos/fraccionArancelaria/',
+      'catalogos/fraccionArancelaria/',
+      'catalogos/cnumEstacion/',
+      'catalogos/cclaveStcc/',
+      'catalogos/cclaveMatPeligro/',
+			'catalogos/cunidadPeso/',
 		);
 
 	public function _remap($method){
@@ -119,6 +123,54 @@ class catalogos extends MY_Controller {
   	$this->load->model('cfraccionarancelaria_model');
 
     echo json_encode($this->cfraccionarancelaria_model->getFraccionArancelaria($this->input->get('term')));
+  }
+
+  /**
+   * Obtiene un listado de estaciones para carta porte.
+   *
+   * @return json
+   */
+  public function cnumEstacion()
+  {
+    $this->load->model('cnum_estacion_model');
+
+    echo json_encode($this->cnum_estacion_model->get($this->input->get('term')));
+  }
+
+  /**
+   * Obtiene un listado de clave stcc para carta porte.
+   *
+   * @return json
+   */
+  public function cclaveStcc()
+  {
+    $this->load->model('cclave_stcc_model');
+
+    echo json_encode($this->cclave_stcc_model->get($this->input->get('term')));
+  }
+
+  /**
+   * Obtiene un listado de clave material peligroso para carta porte.
+   *
+   * @return json
+   */
+  public function cclaveMatPeligro()
+  {
+    $this->load->model('cclave_mat_peligro_model');
+
+    echo json_encode($this->cclave_mat_peligro_model->get($this->input->get('term')));
+  }
+
+  /**
+   * Obtiene un listado de unidad peso para carta porte.
+   *
+   * @return json
+   */
+  public function cunidadPeso()
+  {
+    $this->load->model('cunidad_peso_model');
+
+    echo json_encode($this->cunidad_peso_model->get($this->input->get('term')));
   }
 
 }

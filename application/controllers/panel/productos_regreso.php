@@ -7,6 +7,7 @@ class productos_regreso extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'productos_regreso/imprimir/',
     'productos_regreso/rpt_gastos_pdf/',
     'productos_regreso/rpt_gastos_xls/',
     'productos_regreso/imprimirticket/',
@@ -186,6 +187,11 @@ class productos_regreso extends MY_Controller {
     redirect(base_url('panel/productos_regreso/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
+  public function imprimir()
+  {
+    redirect(base_url('panel/compras_ordenes/ticket/?' . MyString::getVarsLink([])));
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -259,7 +265,7 @@ class productos_regreso extends MY_Controller {
           $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
           $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
           if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
-            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
+            $productos[] = str_replace('%', '%%', $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')');
           }
         }
       }

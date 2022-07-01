@@ -280,7 +280,7 @@ class banco_cuentas_model extends banco_model {
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
 			WHERE m.id_cuenta = {$this->input->get('id_cuenta')}
 				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}'
-				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
+				{$sql_todos} --AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
 				{$sqloperacion}
 			ORDER BY m.fecha ASC, m.id_movimiento ASC");
 
@@ -888,7 +888,7 @@ class banco_cuentas_model extends banco_model {
 		$data['concepto'] = substr($data['concepto'], 0, 120);
 
 		$this->db->insert('banco_movimientos', $data);
-		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
+		$id_movimiento = $this->db->insert_id('banco_movimientos_id_movimiento_seq');
 
 		// Bitacora
 		$data_cuenta = $this->getCuentaInfo($data['id_cuenta']);
@@ -1319,7 +1319,7 @@ class banco_cuentas_model extends banco_model {
 		}
 
 		$this->db->insert('banco_cuentas', $data);
-		$id_cuenta = $this->db->insert_id('banco_cuentas', 'id_cuenta');
+		$id_cuenta = $this->db->insert_id('banco_cuentas_id_cuenta_seq');
 
 		return array('error' => FALSE);
 	}

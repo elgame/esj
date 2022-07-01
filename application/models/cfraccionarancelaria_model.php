@@ -13,7 +13,8 @@ class cfraccionarancelaria_model extends CI_Model {
   {
     $sql = '';
     if (isset($term))
-      $sql .= " AND lower(numero) LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%'";
+      $sql .= " AND (lower(numero) LIKE '".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%' OR
+        lower(descripcion) LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%')";
     $res = $this->db->query(" SELECT id, numero, descripcion, unidad
         FROM otros.c_fraccion_arancelaria
         WHERE status = 't' {$sql}
@@ -21,12 +22,12 @@ class cfraccionarancelaria_model extends CI_Model {
         LIMIT {$limit}");
 
     $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
+    if($res->num_rows() > 0) {
+      foreach($res->result() as $itm) {
         $response[] = array(
-            'id'    => $itm->id,
-            'label' => $itm->numero,
-            'value' => $itm->numero,
+            'id'    => $itm->numero,
+            'label' => "{$itm->numero} - {$itm->descripcion}",
+            'value' => "{$itm->descripcion}",
             'item'  => $itm,
         );
       }

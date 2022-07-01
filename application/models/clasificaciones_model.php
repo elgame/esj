@@ -84,7 +84,7 @@ class clasificaciones_model extends CI_Model {
 
 		$this->db->insert('clasificaciones', $data);
 
-		$id_clasificacion = $this->db->insert_id('clasificaciones', 'id_clasificacion');
+		$id_clasificacion = $this->db->insert_id('clasificaciones_id_clasificacion_seq');
 
     // if (isset($_POST['fcalibres']))
     // {
@@ -200,24 +200,49 @@ class clasificaciones_model extends CI_Model {
 	public function ajaxClasificaciones($limit=20){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		if($this->input->get('type') !== false)
-			$sql .= " AND id_area = {$this->input->get('type')}";
+			$sql = " AND lower(c.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+		if($this->input->get('type') !== false){
+      // $idss = [$this->input->get('type')];
+      // if (isset($this->config->item('clasif_joins')[$this->input->get('type')])) {
+      //   $idss[] = $this->config->item('clasif_joins')[$this->input->get('type')];
+      // }
+      // $sql .= " AND id_area in(".implode(',', $idss).")";
+      $sql .= " AND c.id_area = {$this->input->get('type')}";
+    }
     if($this->input->get('inventario') !== false)
-      $sql .= " AND inventario = 't'";
-		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad, unidad_cantidad
-				FROM clasificaciones
-				WHERE status = true {$sql}
-				ORDER BY nombre ASC
+      $sql .= " AND c.inventario = 't'";
+		$res = $this->db->query(" SELECT c.id_clasificacion, c.id_area, c.nombre, c.status, c.iva,
+          c.id_unidad, c.unidad_cantidad, a.nombre AS area
+				FROM clasificaciones c
+          INNER JOIN areas a ON a.id_area = c.id_area
+				WHERE c.status = true {$sql}
+				ORDER BY c.nombre ASC
 				LIMIT {$limit}");
 
+    $con_inventario = false;
+    if ($this->input->get('inventario') !== false) {
+      $con_inventario = true;
+    }
+
+    $conArea = true;
+    if ($this->input->get('sinArea') == true) {
+      $conArea = false;
+    }
+
+    $this->load->model('produccion_model');
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
+        if ($con_inventario) {
+          $itm->inventario = $this->produccion_model->getInventarioData($itm->id_clasificacion)[0];
+          // echo "<pre>";
+          // var_dump($this->produccion_model->getInventarioData($itm->id_clasificacion));
+          // echo "</pre>";exit;
+        }
 				$response[] = array(
 						'id'    => $itm->id_clasificacion,
-						'label' => $itm->nombre,
-						'value' => $itm->nombre,
+						'label' => "{$itm->nombre}".($conArea? " - {$itm->area}": ""),
+						'value' => "{$itm->nombre}".($conArea? " - {$itm->area}": ""),
 						'item'  => $itm,
 				);
 			}

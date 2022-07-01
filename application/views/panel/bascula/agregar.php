@@ -234,6 +234,14 @@
                     </div>
                   </div>
 
+                  <div class="control-group" id="groupProveedorTabla" style="margin:0px 0px 2px 0px;">
+                    <label class="control-label" for="ptabla">Tabla/Lote</label>
+                    <div class="controls">
+                      <input type="text" name="ptabla" value="<?php echo set_value('ptabla', $this->input->post('ptabla')) ?>"
+                        id="ptabla" class="input-xlarge" placeholder="Tabla/Lote" <?php echo $disabled.$bmod['rancho']; ?>>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="groupCliente" style="display: none;">
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
@@ -536,19 +544,26 @@
 
               <div class="row-fluid">
                 <div class="span12">
-                  <div class="span4">
+                  <div class="span3">
                     <label for="ptotal_cajas">Total cajas</label>
                     <input type="text" name="ptotal_cajas"
                       value="<?php echo set_value('ptotal_cajas', $this->input->post('ptotal_cajas')) ?>" id="ptotal_cajas" class="input-medium vpositive" <?php echo $disabled ?> readonly>
                   </div>
 
-                  <div class="span4">
+                  <div class="span3">
                     <label for="ppesada">Pesada</label>
                     <input type="text" name="ppesada"
                       value="<?php echo set_value('ppesada', $this->input->post('ppesada')) ?>" id="ppesada" class="input-medium vpositive nokey" <?php echo $disabled ?>>
                   </div>
 
-                  <div class="span4">
+                  <div class="span3">
+                    <label for="pisr" style="cursor: pointer;">ISR</label>
+                    <input type="text" name="pisr"
+                      value="<?php echo set_value('pisr', $this->input->post('pisr')) ?>" id="pisr" class="input-medium vpositive" <?php echo $disabled ?> readonly style="cursor: pointer;">
+                    <input type="hidden" name="pisrPorcent" id="pisrPorcent" value="<?php echo set_value('pisrPorcent', $this->input->post('pisrPorcent')) ?>">
+                  </div>
+
+                  <div class="span3">
                     <label for="ptotal">Total</label>
                     <input type="text" name="ptotal"
                       value="<?php echo set_value('ptotal', $this->input->post('ptotal')) ?>" id="ptotal" class="input-medium vpositive" <?php echo $disabled ?> readonly>

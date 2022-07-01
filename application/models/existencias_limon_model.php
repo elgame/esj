@@ -91,36 +91,61 @@ class existencias_limon_model extends CI_Model {
   public function get($fecha, $noCaja, $id_area)
   {
     $id_empresa = 2;
+    $fechaa_inicioo = '2020-02-22';
 
     $info = array(
-      'saldo_inicial'       => 0,
-      'ventas'              => array(),
-      'compra_fruta'        => array(),
-      'produccion'          => array(),
-      'existencia_anterior' => [],
-      'existencia'          => [],
+      'saldo_inicial'         => 0,
+      'ventas'                => array(),
+      'ventas_industrial'     => array(),
+      'compra_fruta'          => array(),
+      'produccion'            => array(),
+      'gastos'                => array(),
+      'existencia_anterior'   => [],
+      'existencia'            => [],
+      'existencia_piso'       => [],
+      'existencia_reproceso'  => [],
+      'compra_fruta_empacada' => [],
+      'devolucion_fruta'      => [],
+      'costo_ventas'          => [],
+      'costo_ventas_fletes'   => [],
+      'comision_terceros'     => [],
+      'industrial'            => [],
     );
 
     $ventas = $this->db->query(
-      "SELECT f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion, c.nombre AS clasificacion, Sum(fp.cantidad) AS cantidad,
+      "SELECT f.id_factura, f.serie, f.folio, cl.nombre_fiscal, STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(fp.cantidad) AS cantidad,
         (Sum(fp.importe) / Sum(fp.cantidad)) AS precio, Sum(fp.importe) AS importe, u.id_unidad,
         Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(fp.cantidad) * u.cantidad) AS kilos,
-        fo.no_salida_fruta
+        fo.no_salida_fruta, ca.id_calibre, ca.nombre AS calibre, string_agg(fh.id_factura::text, ',') AS facturas
       FROM facturacion f
         INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+        INNER JOIN calibres ca ON ca.id_calibre = fp.id_calibres
         INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
         LEFT JOIN facturacion_otrosdatos fo ON f.id_factura = fo.id_factura
+        LEFT JOIN (SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
       WHERE f.id_empresa = {$id_empresa} AND f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 'f'
         AND c.id_area = {$id_area} AND Date(f.fecha) = '{$fecha}'
-      GROUP BY c.id_clasificacion, cl.id_cliente, f.id_factura, u.id_unidad, fo.id_factura
+        AND Date(f.fecha) >= '{$fechaa_inicioo}'
+      GROUP BY ca.id_calibre, cl.id_cliente, f.id_factura, u.id_unidad, fo.id_factura
       ORDER BY folio ASC"
     );
 
     if ($ventas->num_rows() > 0)
     {
       $info['ventas'] = $ventas->result();
+
+      if ($id_area == 2) { // limon
+        foreach ($info['ventas'] as $key => $value) {
+          if ($value->id_calibre == 133) { // INDUSTRIAL
+            $info['ventas_industrial'][] = $value;
+            unset($info['ventas'][$key]);
+          }
+        }
+      }
     }
 
 
@@ -135,6 +160,7 @@ class existencias_limon_model extends CI_Model {
         --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
       WHERE b.id_empresa = {$id_empresa} AND b.status = 't' AND b.intangible = 'f'
         AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
+        AND b.id_bonificacion IS NULL
       GROUP BY --b.id_bascula,
         c.id_calidad
         --, pr.id_proveedor
@@ -148,20 +174,22 @@ class existencias_limon_model extends CI_Model {
 
 
     $produccion = $this->db->query(
-      "SELECT c.id_clasificacion, c.nombre AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
+      "SELECT STRING_AGG(Distinct c.nombre, ', ') AS clasificacion, Sum(rrc.rendimiento) AS cantidad,
         Coalesce(elp.costo, 0) AS costo, (Coalesce(elp.costo, 0)*Sum(rrc.rendimiento)) AS importe, u.id_unidad,
         Coalesce(u.codigo, u.nombre) AS unidad, u.cantidad AS unidad_cantidad, (Sum(rrc.rendimiento) * u.cantidad) AS kilos,
-        elp.id AS id_produccion
+        elp.id AS id_produccion, ca.id_calibre, ca.nombre AS calibre
       FROM rastria_rendimiento rr
         INNER JOIN rastria_rendimiento_clasif rrc ON rr.id_rendimiento = rrc.id_rendimiento
+        INNER JOIN calibres ca ON ca.id_calibre = rrc.id_size
         INNER JOIN clasificaciones c ON c.id_clasificacion = rrc.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = rrc.id_unidad
-        LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_clasificacion = c.id_clasificacion
+        LEFT JOIN otros.existencias_limon_produccion elp ON (elp.id_calibre = ca.id_calibre
           AND elp.id_unidad = u.id_unidad AND Date(elp.fecha) = '{$fecha}')
-      WHERE rr.status = 't' AND c.id_area = {$id_area}
+      WHERE rr.status = 't' AND c.id_area = {$id_area} AND rrc.fruta_com = 'f'
         AND Date(rr.fecha) = '{$fecha}' AND (elp.no_caja = {$noCaja} OR elp.no_caja IS NULL)
-      GROUP BY c.id_clasificacion, u.id_unidad, elp.id
-      ORDER BY tipo ASC, id_clasificacion ASC, id_unidad ASC"
+        AND Date(rr.fecha) >= '{$fechaa_inicioo}'
+      GROUP BY ca.id_calibre, u.id_unidad, elp.id
+      ORDER BY id_calibre ASC, id_unidad ASC"
     );
 
     if ($produccion->num_rows() > 0)
@@ -169,23 +197,176 @@ class existencias_limon_model extends CI_Model {
       $info['produccion'] = $produccion->result();
     }
 
+    // Existencia piso
+    $id_calibree = ($id_area == 2? 135: 135); // A granel
+    $existencia_piso = $this->db->query(
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_existencia_piso ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($existencia_piso->num_rows() > 0)
+    {
+      $info['existencia_piso'] = $existencia_piso->result();
+    }
+
+    // Compra de fruta empacada
+    $id_calibree = ($id_area == 2? 135: 135); // A granel
+    $compra_fruta_empacada = $this->db->query(
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_compra_fruta ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($compra_fruta_empacada->num_rows() > 0)
+    {
+      $info['compra_fruta_empacada'] = $compra_fruta_empacada->result();
+    }
+
+    // Devolucion fruta
+    $id_calibree = ($id_area == 2? 135: 135); // A granel
+    $devolucion_fruta = $this->db->query(
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_devolucion_fruta ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($devolucion_fruta->num_rows() > 0)
+    {
+      $info['devolucion_fruta'] = $devolucion_fruta->result();
+    }
+
+    // Existencia reproceso
+    $existencia_reproceso = $this->db->query(
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_existencia_reproceso ele
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
+      WHERE Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($existencia_reproceso->num_rows() > 0)
+    {
+      $info['existencia_reproceso'] = $existencia_reproceso->result();
+    }
+
+    // Costo de ventas
+    $costo_ventas = $this->db->query(
+      "SELECT ele.id, ele.fecha, ele.no_caja, ele.nombre, ele.descripcion, ele.costo,
+        ele.cantidad, ele.importe
+      FROM otros.existencias_limon_descuentos_ventas ele
+      WHERE ele.tipo = 'cv' AND Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($costo_ventas->num_rows() > 0)
+    {
+      $info['costo_ventas'] = $costo_ventas->result();
+    }
+
+    // costo ventas fletes
+    if (count($info['ventas']) > 0) {
+      $raidss = $faidss = [];
+      foreach ($info['ventas'] as $keyv => $venta) {
+        $raidss[$venta->id_factura] = $venta->id_factura;
+
+        $ffacturas = explode(',', $venta->facturas);
+        if (isset($ffacturas) && count($ffacturas) > 0) {
+          foreach ($ffacturas as $keyf => $fac) {
+            if ($fac > 0) {
+              $faidss[$fac] = $fac;
+            }
+          }
+        }
+      }
+      $ridss = 'f:'.implode('\||f:', $raidss).'\|';
+      $fidss = 't:'.implode('\||t:', $faidss).'\|';
+      $costo_ventas_fletes = $this->db->query(
+        "SELECT co.id_orden, p.nombre_fiscal AS proveedor, co.folio, string_agg(distinct(cp.descripcion), ', ') AS descripcion,
+          Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, Sum(cp.total) AS total
+        FROM compras_ordenes co
+          INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+          INNER JOIN proveedores p ON p.id_proveedor = co.id_proveedor
+        WHERE co.status in('a', 'f') AND co.tipo_orden = 'f' and co.flete_de = 'v'
+          AND (co.ids_facrem SIMILAR TO '%({$ridss})%' OR co.ids_facrem SIMILAR TO '%({$fidss})%')
+        GROUP BY co.id_orden, p.nombre_fiscal"
+      );
+
+      if ($costo_ventas_fletes->num_rows() > 0)
+      {
+        $info['costo_ventas_fletes'] = $costo_ventas_fletes->result();
+      }
+    }
+
+    // Comisiones terceros
+    $comision_terceros = $this->db->query(
+      "SELECT ele.id, ele.fecha, ele.no_caja, ele.nombre, ele.descripcion, ele.costo,
+        ele.cantidad, ele.importe
+      FROM otros.existencias_limon_descuentos_ventas ele
+      WHERE ele.tipo = 'ct' AND Date(ele.fecha) = '{$fecha}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
+    );
+
+    if ($comision_terceros->num_rows() > 0)
+    {
+      $info['comision_terceros'] = $comision_terceros->result();
+    }
+
+
+    // industrial
+    $industrial = $this->db->query(
+      "SELECT eli.id_calibre, eli.id_unidad, eli.fecha, eli.no_caja, eli.costo, eli.kilos,
+        eli.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
+      FROM otros.existencias_limon_industrial eli
+        INNER JOIN calibres c ON c.id_calibre = eli.id_calibre
+        INNER JOIN unidades u ON u.id_unidad = eli.id_unidad
+      WHERE Date(eli.fecha) = '{$fecha}' AND eli.no_caja = {$noCaja}
+        AND eli.id_area = {$id_area}"
+    );
+
+    if ($industrial->num_rows() > 0)
+    {
+      $info['industrial'] = $industrial->row();
+    }
+
 
     $fecha_anterior = $this->db->query(
       "SELECT Date(fecha) AS fecha
-      FROM otros.existencias_limon_existencia
-      WHERE Date(fecha) < '{$fecha}' AND no_caja = {$noCaja}
+      FROM otros.existencias_limon
+      WHERE Date(fecha) < '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}
       ORDER BY fecha DESC
       LIMIT 1"
     )->row();
     $fecha_anterior = isset($fecha_anterior->fecha)? $fecha_anterior->fecha: MyString::suma_fechas($fecha, -1);
 
     $existencia_anterior = $this->db->query(
-      "SELECT ele.id_clasificacion, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
-        ele.cantidad, ele.importe, c.nombre AS clasificacion, Coalesce(u.codigo, u.nombre) AS unidad
+      "SELECT ele.id_calibre, ele.id_unidad, ele.fecha, ele.no_caja, ele.costo, ele.kilos,
+        ele.cantidad, ele.importe, c.nombre AS calibre, Coalesce(u.codigo, u.nombre) AS unidad,
+        u.cantidad AS unidad_cantidad, '' AS clasificacion
       FROM otros.existencias_limon_existencia ele
-        INNER JOIN clasificaciones c ON c.id_clasificacion = ele.id_clasificacion
+        INNER JOIN calibres c ON c.id_calibre = ele.id_calibre
         INNER JOIN unidades u ON u.id_unidad = ele.id_unidad
-      WHERE Date(ele.fecha) = '{$fecha_anterior}' AND ele.no_caja = {$noCaja}"
+      WHERE Date(ele.fecha) = '{$fecha_anterior}' AND ele.no_caja = {$noCaja}
+        AND ele.id_area = {$id_area}"
     );
 
     if ($existencia_anterior->num_rows() > 0)
@@ -196,71 +377,181 @@ class existencias_limon_model extends CI_Model {
 
     $existencia = [];
     foreach ($info['existencia_anterior'] as $key => $item) {
-      if (isset($existencia[$item->id_clasificacion.$item->id_unidad])) {
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad += $item->cantidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos    += $item->kilos;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe  += $item->importe;
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
-        $existencia[$item->id_clasificacion.$item->id_unidad]                   = new stdClass;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_clasificacion = $item->id_clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_unidad        = $item->id_unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->clasificacion    = $item->clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->unidad           = $item->unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad         = $item->cantidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos            = $item->kilos;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->costo            = $item->costo;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe          = $item->importe;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->no_caja          = $noCaja;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->fecha            = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['produccion'] as $key => $item) {
-      if (isset($existencia[$item->id_clasificacion.$item->id_unidad])) {
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad += $item->cantidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos    += $item->kilos;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe  += $item->importe;
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        if ($existencia[$item->id_calibre.$item->id_unidad]->costo == 0) {
+          $existencia[$item->id_calibre.$item->id_unidad]->costo         = $item->costo;
+        }
+
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe, 2);
       } else {
-        $existencia[$item->id_clasificacion.$item->id_unidad]                   = new stdClass;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_clasificacion = $item->id_clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_unidad        = $item->id_unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->clasificacion    = $item->clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->unidad           = $item->unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad         = $item->cantidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos            = $item->kilos;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->costo            = $item->costo;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe          = $item->importe;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->no_caja          = $noCaja;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->fecha            = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
     }
     foreach ($info['ventas'] as $key => $item) {
-      if (isset($existencia[$item->id_clasificacion.$item->id_unidad])) {
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad -= $item->cantidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos    -= $item->kilos;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe  -= $item->importe;
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= round($item->cantidad, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos, 2);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe, 2);
       } else {
-        $existencia[$item->id_clasificacion.$item->id_unidad]                   = new stdClass;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_clasificacion = $item->id_clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->id_unidad        = $item->id_unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->clasificacion    = $item->clasificacion;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->unidad           = $item->unidad;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->cantidad         = $item->cantidad*-1;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->kilos            = $item->kilos*-1;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->costo            = 0;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->importe          = $item->importe*-1;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->no_caja          = $noCaja;
-        $existencia[$item->id_clasificacion.$item->id_unidad]->fecha            = $fecha;
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = 0;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
       }
+    }
+    foreach ($info['existencia_reproceso'] as $key => $item) {
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad -= round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    -= round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  -= round($item->importe);
+      } else {
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe*-1;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
+      }
+    }
+    foreach ($info['existencia_piso'] as $key => $item) {
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
+      } else {
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
+      }
+    }
+    foreach ($info['compra_fruta_empacada'] as $key => $item) {
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
+      } else {
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
+      }
+    }
+    foreach ($info['devolucion_fruta'] as $key => $item) {
+      if (isset($existencia[$item->id_calibre.$item->id_unidad])) {
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad += round($item->cantidad);
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos    += round($item->kilos);
+        $existencia[$item->id_calibre.$item->id_unidad]->importe  += round($item->importe);
+      } else {
+        $existencia[$item->id_calibre.$item->id_unidad]                  = new stdClass;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_calibre      = $item->id_calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->id_unidad       = $item->id_unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->calibre         = $item->calibre;
+        $existencia[$item->id_calibre.$item->id_unidad]->clasificacion   = $item->clasificacion;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad          = $item->unidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->unidad_cantidad = $item->unidad_cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->cantidad        = $item->cantidad;
+        $existencia[$item->id_calibre.$item->id_unidad]->kilos           = $item->kilos;
+        $existencia[$item->id_calibre.$item->id_unidad]->costo           = $item->costo;
+        $existencia[$item->id_calibre.$item->id_unidad]->importe         = $item->importe;
+        $existencia[$item->id_calibre.$item->id_unidad]->no_caja         = $noCaja;
+        $existencia[$item->id_calibre.$item->id_unidad]->fecha           = $fecha;
+      }
+    }
+
+
+    $existencia_data = $this->db->query(
+      "SELECT id_calibre, id_unidad, costo
+      FROM otros.existencias_limon_existencia
+      WHERE Date(fecha) = '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}")->result();
+    $existencias_costos = [];
+    foreach ($existencia_data as $key => $item) {
+      $existencias_costos[$item->id_calibre.$item->id_unidad] = $item->costo;
+    }
+    foreach ($existencia as $key => $item) {
+      $existencia[$key]->costo   = round((isset($existencias_costos[$item->id_calibre.$item->id_unidad])? $existencias_costos[$item->id_calibre.$item->id_unidad]: 0), 2);
+      $existencia[$key]->importe = round($existencia[$key]->costo * $item->cantidad, 2);
+      $existencia[$key]->kilos   = round($item->unidad_cantidad*$item->cantidad, 2);
     }
     $info['existencia'] = $existencia;
 
-    $guardado = $this->db->query(
-      "SELECT id_clasificacion
-      FROM otros.existencias_limon_existencia
-      WHERE Date(fecha) = '{$fecha}' AND no_caja = {$noCaja}
-      LIMIT 1"
-    )->row();
-    $info['guardado'] = isset($guardado->id_clasificacion)? true: false;
+    // gastos
+    $info['gastos'] = $this->getCajaGastos($fecha, $noCaja);
+
+    // Dia guardado
+    $count_save = $this->db->query("SELECT Count(*) AS num
+      FROM otros.existencias_limon
+      WHERE fecha = '{$fecha}' AND no_caja = {$noCaja} AND id_area = {$id_area}")->row();
+    $info['guardado'] = $count_save->num > 0? true: false;
 
 
     return $info;
@@ -268,31 +559,213 @@ class existencias_limon_model extends CI_Model {
 
   public function guardar($data)
   {
-    $produccion_inst = array();
-    $produccion_updt = array();
+    $anio = date("Y");
+
+    // Dia guardado
+    $count_save = $this->db->query("SELECT Count(*) AS num
+      FROM otros.existencias_limon
+      WHERE fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}")->row();
+    if ($count_save->num == 0) {
+      $this->db->insert('otros.existencias_limon', ['fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja'], 'id_area' => $data['farea']]);
+    }
+
+    // Existencia de piso
+    $this->db->delete('otros.existencias_limon_existencia_piso', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    $existencias_piso = [];
+    if (!empty($data['existenciaPiso_id_unidad'])) {
+      foreach ($data['existenciaPiso_id_unidad'] as $key => $id_cat)
+      {
+        $existencias_piso[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['existenciaPiso_id_calibre'][$key],
+          'id_unidad'  => $data['existenciaPiso_id_unidad'][$key],
+          'costo'      => $data['existenciaPiso_costo'][$key],
+          'kilos'      => $data['existenciaPiso_kilos'][$key],
+          'cantidad'   => $data['existenciaPiso_cantidad'][$key],
+          'importe'    => $data['existenciaPiso_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+        );
+      }
+      if (count($existencias_piso) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_existencia_piso', $existencias_piso);
+      }
+    }
+
+    // Existencia de Reproceso
+    $this->db->delete('otros.existencias_limon_existencia_reproceso', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    $existencias_reproceso = [];
+    if (!empty($data['existenciaRepro_id_calibre'])) {
+      foreach ($data['existenciaRepro_id_calibre'] as $key => $id_cat)
+      {
+        $existencias_reproceso[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['existenciaRepro_id_calibre'][$key],
+          'id_unidad'  => $data['existenciaRepro_id_unidad'][$key],
+          'costo'      => $data['existenciaRepro_costo'][$key],
+          'kilos'      => $data['existenciaRepro_kilos'][$key],
+          'cantidad'   => $data['existenciaRepro_cantidad'][$key],
+          'importe'    => $data['existenciaRepro_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+        );
+      }
+      if (count($existencias_reproceso) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_existencia_reproceso', $existencias_reproceso);
+      }
+    }
+
+    // Compra de fruta empacada
+    $this->db->delete('otros.existencias_limon_compra_fruta', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    $compra_fruta_empacada = [];
+    if (!empty($data['frutaCompra_id_unidad'])) {
+      foreach ($data['frutaCompra_id_unidad'] as $key => $id_cat)
+      {
+        $compra_fruta_empacada[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['frutaCompra_id_calibre'][$key],
+          'id_unidad'  => $data['frutaCompra_id_unidad'][$key],
+          'costo'      => $data['frutaCompra_costo'][$key],
+          'kilos'      => $data['frutaCompra_kilos'][$key],
+          'cantidad'   => $data['frutaCompra_cantidad'][$key],
+          'importe'    => $data['frutaCompra_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+        );
+      }
+      if (count($compra_fruta_empacada) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_compra_fruta', $compra_fruta_empacada);
+      }
+    }
+
+    // Devolucion de fruta
+    $this->db->delete('otros.existencias_limon_devolucion_fruta', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    $devolucion_fruta = [];
+    if (!empty($data['devFruta_id_unidad'])) {
+      foreach ($data['devFruta_id_unidad'] as $key => $id_cat)
+      {
+        $devolucion_fruta[] = array(
+          'id_area'    => $data['farea'],
+          'id_calibre' => $data['devFruta_id_calibre'][$key],
+          'id_unidad'  => $data['devFruta_id_unidad'][$key],
+          'costo'      => $data['devFruta_costo'][$key],
+          'kilos'      => $data['devFruta_kilos'][$key],
+          'cantidad'   => $data['devFruta_cantidad'][$key],
+          'importe'    => $data['devFruta_importe'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'no_caja'    => $data['fno_caja'],
+        );
+      }
+      if (count($devolucion_fruta) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_devolucion_fruta', $devolucion_fruta);
+      }
+    }
+
+    // Costo de venta
+    $descuentos_ventas = [];
+    if (!empty($data['descuentoVentas_nombre'])) {
+      foreach ($data['descuentoVentas_nombre'] as $key => $id_cat)
+      {
+        if (intval($data['descuentoVentas_id'][$key]) > 0 && $data['descuentoVentas_delete'][$key] == 'true') {
+          $this->db->delete('otros.existencias_limon_descuentos_ventas', "id = {$data['descuentoVentas_id'][$key]}");
+        } elseif (intval($data['descuentoVentas_id'][$key]) > 0) {
+          $this->db->update('otros.existencias_limon_descuentos_ventas', [
+            'id_area'     => $data['farea'],
+            'nombre'      => $data['descuentoVentas_nombre'][$key],
+            'descripcion' => $data['descuentoVentas_descripcion'][$key],
+            'importe'     => $data['descuentoVentas_importe'][$key],
+            'tipo'        => 'cv',
+            'fecha'       => $data['fecha_caja_chica'],
+            'no_caja'     => $data['fno_caja'],
+          ], "id = {$data['descuentoVentas_id'][$key]}");
+        } else {
+          $descuentos_ventas[] = array(
+            'id_area'     => $data['farea'],
+            'nombre'      => $data['descuentoVentas_nombre'][$key],
+            'descripcion' => $data['descuentoVentas_descripcion'][$key],
+            'importe'     => $data['descuentoVentas_importe'][$key],
+            'tipo'        => 'cv',
+            'fecha'       => $data['fecha_caja_chica'],
+            'no_caja'     => $data['fno_caja'],
+          );
+        }
+      }
+      if (count($descuentos_ventas) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_descuentos_ventas', $descuentos_ventas);
+      }
+    }
+
+    // Comisiones terceros
+    $comisiones_terceros = [];
+    if (!empty($data['comisionTerceros_nombre'])) {
+      foreach ($data['comisionTerceros_nombre'] as $key => $id_cat)
+      {
+        if (intval($data['comisionTerceros_id'][$key]) > 0 && $data['comisionTerceros_delete'][$key] == 'true') {
+          $this->db->delete('otros.existencias_limon_descuentos_ventas', "id = {$data['comisionTerceros_id'][$key]}");
+        } elseif (intval($data['comisionTerceros_id'][$key]) > 0) {
+          $this->db->update('otros.existencias_limon_descuentos_ventas', [
+            'id_area'     => $data['farea'],
+            'nombre'      => $data['comisionTerceros_nombre'][$key],
+            'descripcion' => $data['comisionTerceros_descripcion'][$key],
+            'cantidad'    => $data['comisionTerceros_cantidad'][$key],
+            'costo'       => $data['comisionTerceros_costo'][$key],
+            'importe'     => $data['comisionTerceros_importe'][$key],
+            'tipo'        => 'ct',
+            'fecha'       => $data['fecha_caja_chica'],
+            'no_caja'     => $data['fno_caja'],
+          ], "id = {$data['comisionTerceros_id'][$key]}");
+        } else {
+          $comisiones_terceros[] = array(
+            'id_area'     => $data['farea'],
+            'nombre'      => $data['comisionTerceros_nombre'][$key],
+            'descripcion' => $data['comisionTerceros_descripcion'][$key],
+            'cantidad'    => $data['comisionTerceros_cantidad'][$key],
+            'costo'       => $data['comisionTerceros_costo'][$key],
+            'importe'     => $data['comisionTerceros_importe'][$key],
+            'tipo'        => 'ct',
+            'fecha'       => $data['fecha_caja_chica'],
+            'no_caja'     => $data['fno_caja'],
+          );
+        }
+      }
+      if (count($comisiones_terceros) > 0)
+      {
+        $this->db->insert_batch('otros.existencias_limon_descuentos_ventas', $comisiones_terceros);
+      }
+    }
 
     // Produccion
-    foreach ($data['produccion_costo'] as $key => $id_cat)
-    {
-      if ($data['produccion_id_produccion'][$key] > 0) {
-        $produccion_updt = array(
-          'id_clasificacion' => $data['produccion_id_clasificacion'][$key],
-          'id_unidad'        => $data['produccion_id_unidad'][$key],
-          'costo'            => $data['produccion_costo'][$key],
-          'importe'          => $data['produccion_importe'][$key],
-          'fecha'            => $data['fecha_caja_chica'],
-          'no_caja'          => $data['fno_caja'],
-        );
-        $this->db->update('otros.existencias_limon_produccion', $produccion_updt, "id = ".$data['produccion_id_produccion'][$key]);
-      } else {
-        $produccion_inst[] = array(
-          'id_clasificacion' => $data['produccion_id_clasificacion'][$key],
-          'id_unidad'        => $data['produccion_id_unidad'][$key],
-          'costo'            => $data['produccion_costo'][$key],
-          'importe'          => $data['produccion_importe'][$key],
-          'fecha'            => $data['fecha_caja_chica'],
-          'no_caja'          => $data['fno_caja'],
-        );
+    $produccion_inst = array();
+    $produccion_updt = array();
+    if (isset($data['produccion_costo'])) {
+      foreach ($data['produccion_costo'] as $key => $id_cat)
+      {
+        if ($data['produccion_id_produccion'][$key] > 0) {
+          $produccion_updt = array(
+            'id_calibre' => $data['produccion_id_calibre'][$key],
+            'id_unidad'  => $data['produccion_id_unidad'][$key],
+            'costo'      => $data['produccion_costo'][$key],
+            'importe'    => $data['produccion_importe'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+          );
+          $this->db->update('otros.existencias_limon_produccion', $produccion_updt, "id = ".$data['produccion_id_produccion'][$key]);
+        } else {
+          $produccion_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => $data['produccion_id_calibre'][$key],
+            'id_unidad'  => $data['produccion_id_unidad'][$key],
+            'costo'      => $data['produccion_costo'][$key],
+            'importe'    => $data['produccion_importe'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+          );
+        }
       }
     }
 
@@ -304,27 +777,137 @@ class existencias_limon_model extends CI_Model {
 
     // Existencia
     $existencia_inst = array();
-    foreach ($data['existencia_id_clasificacion'] as $key => $id_cat)
-    {
-      $this->db->delete('existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']}");
-      $existencia_inst[] = array(
-        'id_clasificacion' => $data['existencia_id_clasificacion'][$key],
-        'id_unidad'        => $data['existencia_id_unidad'][$key],
-        'fecha'            => $data['fecha_caja_chica'],
-        'no_caja'          => $data['fno_caja'],
-        'costo'            => $data['existencia_costo'][$key],
-        'kilos'            => $data['existencia_kilos'][$key],
-        'cantidad'         => $data['existencia_cantidad'][$key],
-        'importe'          => $data['existencia_importe'][$key],
-      );
+    $this->db->delete('otros.existencias_limon_existencia', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    if (isset($data['existencia_id_calibre'])) {
+      foreach ($data['existencia_id_calibre'] as $key => $id_cat)
+      {
+        if ($data['existencia_cantidad'][$key] != 0) {
+          $existencia_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => $data['existencia_id_calibre'][$key],
+            'id_unidad'  => $data['existencia_id_unidad'][$key],
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'costo'      => $data['existencia_costo'][$key],
+            'kilos'      => $data['existencia_kilos'][$key],
+            'cantidad'   => $data['existencia_cantidad'][$key],
+            'importe'    => $data['existencia_importe'][$key],
+          );
+        }
+      }
     }
     if (count($existencia_inst) > 0)
     {
       $this->db->insert_batch('otros.existencias_limon_existencia', $existencia_inst);
     }
 
+    // industrial
+    $industrial_inst = array();
+    $this->db->delete('otros.existencias_limon_industrial', "fecha = '{$data['fecha_caja_chica']}' AND no_caja = {$data['fno_caja']} AND id_area = {$data['farea']}");
+    if (isset($data['industrial_kilos'])) {
+      foreach ($data['industrial_kilos'] as $key => $id_cat)
+      {
+        if ($data['industrial_costo'][$key] > 0) {
+          $industrial_inst[] = array(
+            'id_area'    => $data['farea'],
+            'id_calibre' => 133, // industrial
+            'id_unidad'  => 49, // kilos a granel
+            'fecha'      => $data['fecha_caja_chica'],
+            'no_caja'    => $data['fno_caja'],
+            'costo'      => $data['industrial_costo'][$key],
+            'kilos'      => $data['industrial_kilos'][$key],
+            'importe'    => $data['industrial_importe'][$key],
+          );
+        }
+      }
+    }
+    if (count($industrial_inst) > 0)
+    {
+      $this->db->insert_batch('otros.existencias_limon_industrial', $industrial_inst);
+    }
+
+    // Gastos
+    if (isset($data['gasto_concepto']))
+    {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio_sig FROM otros.existencias_limon_gastos
+        WHERE folio_sig IS NOT NULL AND no_caja = {$data['fno_caja']} AND date_part('year', fecha) = {$anio}
+        ORDER BY folio_sig DESC LIMIT 1), 0 ) AS folio")->row();
+
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['gasto_concepto'] as $key => $gasto)
+      {
+        if (isset($data['gasto_del'][$key]) && $data['gasto_del'][$key] == 'true' &&
+          isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
+
+          // $this->db->delete('otros.existencias_limon_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+          $this->db->update('otros.existencias_limon_gastos', ['status' => 'f', 'fecha_cancelado' => $data['fecha_caja_chica']], "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            // 'folio'           => $data['gasto_folio'][$key],
+            'concepto'        => $gasto,
+            'nombre'          => $data['gasto_nombre'][$key],
+            'monto'           => $data['gasto_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            'id_area'         => $data['farea'],
+            $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+          );
+
+          $this->db->update('otros.existencias_limon_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } else {
+          $data_folio->folio += 1;
+          $gastos = array(
+            'folio_sig'                => $data_folio->folio,
+            'folio'                    => $data_folio->folio, //$data['gasto_folio'][$key],
+            'concepto'                 => $gasto,
+            'nombre'                   => $data['gasto_nombre'][$key],
+            'monto'                    => $data['gasto_importe'][$key],
+            'fecha'                    => $data['fecha_caja_chica'],
+            'no_caja'                  => $data['fno_caja'],
+            'id_area'                  => $data['farea'],
+            $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_usuario'               => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('otros.existencias_limon_gastos', $gastos);
+          $gastooidd = $this->db->insert_id('otros.existencias_limon_gastos_id_gasto_seq');
+          $gastos_ids['adds'][] = $gastooidd;
+        }
+      }
+
+      // if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+      //   $this->enviarEmail($gastos_ids);
+      //   // $this->db->insert_batch('otros.existencias_limon_gastos', $gastos);
+      // }
+    }
 
     return true;
+  }
+
+  public function getCajaGastos($fecha, $noCaja)
+  {
+    $sql = '';
+    $sql .= " AND cg.fecha = '{$fecha}'";
+
+    $response = [];
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto AS monto, cg.nombre,
+          cg.folio, ca.id_cat_codigos, ca.nombre AS cat_codigos, ca.codigo AS codigo_fin,
+          ar.id_area, ar.nombre AS area
+       FROM otros.existencias_limon_gastos cg
+         LEFT JOIN otros.cat_codigos AS ca ON ca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN areas AS ar ON ar.id_area = cg.id_area
+       WHERE cg.no_caja = {$noCaja} {$sql}
+       ORDER BY cg.id_gasto ASC"
+    );
+
+    if ($gastos->num_rows() > 0)
+    {
+      $response = $gastos->result();
+    }
+
+    return $response;
   }
 
 
@@ -378,6 +961,11 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetWidths(array(204));
     $pdf->Row(array('FECHA ' . $fecha), false, false);
 
+    $pdf->SetXY(6, $pdf->GetY());
+    $fechaTime = new DateTime($fecha);
+    // Obtiene la semana [01 - 52/53] y el dia de la semana [1 - 7]
+    $pdf->Row(array('SEMANA ' . $fechaTime->format("W")), false, false);
+
     $pdf->auxy = $pdf->GetY();
     $page_aux = $pdf->page;
 
@@ -392,14 +980,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
-    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(20, 18, 50, 32, 16, 18, 18, 12, 20));
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
 
     $venta_importe = $venta_kilos = $venta_cantidad = 0;
     foreach ($caja['ventas'] as $venta) {
@@ -420,6 +1008,7 @@ class existencias_limon_model extends CI_Model {
         $venta->serie.$venta->folio,
         $venta->no_salida_fruta,
         $venta->nombre_fiscal,
+        $venta->calibre,
         $venta->clasificacion,
         $venta->unidad,
         MyString::formatoNumero($venta->kilos, 2, '', false),
@@ -437,6 +1026,7 @@ class existencias_limon_model extends CI_Model {
       '',
       '',
       '',
+      '',
       MyString::formatoNumero($venta_kilos, 2, '', false),
       MyString::formatoNumero($venta_cantidad, 2, '', false),
       MyString::formatoNumero(($venta_importe/($venta_cantidad==0? 1: $venta_cantidad)), 2, '', false),
@@ -449,18 +1039,18 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(204));
-    $pdf->Row(array('EXISTENCIA'), true, 'B');
+    $pdf->Row(array('EXISTENCIA EMPACADA'), true, 'B');
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
     foreach ($caja['existencia'] as $existencia) {
@@ -476,9 +1066,121 @@ class existencias_limon_model extends CI_Model {
       $existencia_cantidad += floatval($existencia->cantidad);
       $existencia_importe  += floatval($existencia->importe);
 
+      if ($existencia->cantidad != 0 ) {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->clasificacion,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
+      }
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      MyString::formatoNumero($existencia_kilos, 2, '', false),
+      MyString::formatoNumero($existencia_cantidad, 2, '', false),
+      MyString::formatoNumero(($existencia_importe/($existencia_cantidad==0? 1: $existencia_cantidad)), 2, '', false),
+      MyString::formatoNumero($existencia_importe, 2, '', false),
+    ), false, 'B');
+
+    // Existencia de piso
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $existenciaPiso_kilos = $existenciaPiso_cantidad = $existenciaPiso_importe = 0;
+    foreach ($caja['existencia_piso'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existenciaPiso_kilos    += floatval($existencia->kilos);
+      $existenciaPiso_cantidad += floatval($existencia->cantidad);
+      $existenciaPiso_importe  += floatval($existencia->importe);
+
       $pdf->SetX(6);
       $pdf->Row(array(
-        $existencia->clasificacion,
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($existenciaPiso_kilos, 2, '', false),
+      MyString::formatoNumero($existenciaPiso_cantidad, 2, '', false),
+      MyString::formatoNumero(($existenciaPiso_importe/($existenciaPiso_cantidad==0? 1: $existenciaPiso_cantidad)), 2, '', false),
+      MyString::formatoNumero($existenciaPiso_importe, 2, '', false),
+    ), false, 'B');
+
+    // EXISTENCIA REPROCESO
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('EXISTENCIA REPROCESO'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $existenciaRePro_kilos = $existenciaRePro_cantidad = $existenciaRePro_importe = 0;
+    foreach ($caja['existencia_reproceso'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existenciaRePro_kilos    += floatval($existencia->kilos);
+      $existenciaRePro_cantidad += floatval($existencia->cantidad);
+      $existenciaRePro_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
         $existencia->unidad,
         MyString::formatoNumero($existencia->kilos, 2, '', false),
         MyString::formatoNumero($existencia->cantidad, 2, '', false),
@@ -492,12 +1194,119 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(
       '',
       '',
-      MyString::formatoNumero($existencia_kilos, 2, '', false),
-      MyString::formatoNumero($existencia_cantidad, 2, '', false),
-      MyString::formatoNumero(($existencia_importe/($existencia_cantidad==0? 1: $existencia_cantidad)), 2, '', false),
-      MyString::formatoNumero($existencia_importe, 2, '', false),
+      MyString::formatoNumero($existenciaRePro_kilos, 2, '', false),
+      MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
+      MyString::formatoNumero(($existenciaRePro_importe/($existenciaRePro_cantidad==0? 1: $existenciaRePro_cantidad)), 2, '', false),
+      MyString::formatoNumero($existenciaRePro_importe, 2, '', false),
     ), false, 'B');
 
+    // Compra de fruta empacada
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COMPRA DE FRUTA EMPACADA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $frutaCompra_kilos = $frutaCompra_cantidad = $frutaCompra_importe = 0;
+    foreach ($caja['compra_fruta_empacada'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $frutaCompra_kilos    += floatval($existencia->kilos);
+      $frutaCompra_cantidad += floatval($existencia->cantidad);
+      $frutaCompra_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($frutaCompra_kilos, 2, '', false),
+      MyString::formatoNumero($frutaCompra_cantidad, 2, '', false),
+      MyString::formatoNumero(($frutaCompra_importe/($frutaCompra_cantidad==0? 1: $frutaCompra_cantidad)), 2, '', false),
+      MyString::formatoNumero($frutaCompra_importe, 2, '', false),
+    ), false, 'B');
+
+    // Devolucion de fruta
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('DEVOLUCIÓN DE FRUTA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $devFruta_kilos = $devFruta_cantidad = $devFruta_importe = 0;
+    foreach ($caja['devolucion_fruta'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $devFruta_kilos    += floatval($existencia->kilos);
+      $devFruta_cantidad += floatval($existencia->cantidad);
+      $devFruta_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($devFruta_kilos, 2, '', false),
+      MyString::formatoNumero($devFruta_cantidad, 2, '', false),
+      MyString::formatoNumero(($devFruta_importe/($devFruta_cantidad==0? 1: $devFruta_cantidad)), 2, '', false),
+      MyString::formatoNumero($devFruta_importe, 2, '', false),
+    ), false, 'B');
 
     // COMPARA DE LIMON
     $pdf->SetFont('Arial','B', 7);
@@ -508,14 +1317,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(100, 30, 30, 40));
-    $pdf->Row(array('CLASIF', 'KILOS', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(40, 70, 25, 25, 40));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'KILOS', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(100, 30, 30, 40));
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(40, 70, 25, 25, 40));
 
     $compra_fruta_kilos = $compra_fruta_importe = 0;
     foreach ($caja['compra_fruta'] as $com_fruta) {
@@ -543,6 +1352,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->Row(array(
       '',
+      '',
       MyString::formatoNumero($compra_fruta_kilos, 2, '', false),
       MyString::formatoNumero(($compra_fruta_importe/($compra_fruta_kilos==0? 1: $compra_fruta_kilos)), 2, '', false),
       MyString::formatoNumero($compra_fruta_importe, 2, '', false),
@@ -554,18 +1364,18 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(204));
-    $pdf->Row(array('PRODUCCION'), true, 'B');
+    $pdf->Row(array('COSTO DE PRODUCCIÓN'), true, 'B');
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array( 30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
     foreach ($caja['produccion'] as $produccion) {
@@ -583,6 +1393,7 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $produccion->calibre,
         $produccion->clasificacion,
         $produccion->unidad,
         MyString::formatoNumero($produccion->kilos, 2, '', false),
@@ -595,6 +1406,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetX(6);
     $pdf->Row(array(
+      '',
       '',
       '',
       MyString::formatoNumero($produccion_kilos, 2, '', false),
@@ -613,14 +1425,14 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
-    $pdf->Row(array('CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(75, 25, 25, 25, 25, 30));
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
 
     $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
     foreach ($caja['existencia_anterior'] as $existencia_ant) {
@@ -638,6 +1450,7 @@ class existencias_limon_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
+        $existencia_ant->calibre,
         $existencia_ant->clasificacion,
         $existencia_ant->unidad,
         MyString::formatoNumero($existencia_ant->kilos, 2, '', false),
@@ -652,6 +1465,7 @@ class existencias_limon_model extends CI_Model {
     $pdf->Row(array(
       '',
       '',
+      '',
       MyString::formatoNumero($existencia_ant_kilos, 2, '', false),
       MyString::formatoNumero($existencia_ant_cantidad, 2, '', false),
       MyString::formatoNumero(($existencia_ant_importe/($existencia_ant_cantidad==0? 1: $existencia_ant_cantidad)), 2, '', false),
@@ -659,21 +1473,428 @@ class existencias_limon_model extends CI_Model {
     ), false, 'B');
 
 
+    // COSTO DE VENTAS
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COSTO DE VENTAS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C'));
+    $pdf->SetWidths(array(75, 95, 35));
+    $pdf->Row(array('NOMBRE', 'DESCRIPCION', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(75, 95, 35));
+
+    $costoVentas_importe = 0;
+    foreach ($caja['costo_ventas'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $costoVentas_importe += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->nombre,
+        $existencia->descripcion,
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($costoVentas_importe, 2, '', false),
+    ), false, 'B');
+
+    // FLETES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+1);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('FLETES'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
+    $pdf->Row(array('FOLIO', 'PROVEEDOR', 'CANTIDAD', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
+
+    $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
+    foreach ($caja['costo_ventas_fletes'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY) {
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $descuentoVentasFletes_cantidad += floatval($existencia->cantidad);
+      $descuentoVentasFletes_importe += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->folio,
+        $existencia->proveedor,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
+      MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // COMISIONES A TERCEROS
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COMISIONES A TERCEROS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(50, 65, 30, 30, 30));
+    $pdf->Row(array('NOMBRE', 'DESCRIPCION', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(50, 65, 30, 30, 30));
+
+    $comisionTerceros_cantidad = $comisionTerceros_importe = 0;
+    foreach ($caja['comision_terceros'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $comisionTerceros_cantidad  += floatval($existencia->cantidad);
+      $comisionTerceros_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->nombre,
+        $existencia->descripcion,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($comisionTerceros_cantidad, 2, '', false),
+      MyString::formatoNumero(($comisionTerceros_importe/($comisionTerceros_cantidad>0? $comisionTerceros_cantidad: 1)), 2, '', false),
+      MyString::formatoNumero($comisionTerceros_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // Ventas industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('VENTAS INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+
+    $venta_importe_ind = $venta_kilos_ind = $venta_cantidad_ind = 0;
+    foreach ($caja['ventas_industrial'] as $venta) {
+      if($pdf->GetY()+10 >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $venta_importe_ind += floatval($venta->importe);
+      $venta_kilos_ind += floatval($venta->kilos);
+      $venta_cantidad_ind += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->no_salida_fruta,
+        $venta->nombre_fiscal,
+        $venta->calibre,
+        $venta->clasificacion,
+        $venta->unidad,
+        MyString::formatoNumero($venta->kilos, 2, '', false),
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      MyString::formatoNumero($venta_kilos_ind, 2, '', false),
+      MyString::formatoNumero($venta_cantidad_ind, 2, '', false),
+      MyString::formatoNumero(($venta_importe_ind/($venta_cantidad_ind==0? 1: $venta_cantidad_ind)), 2, '', false),
+      MyString::formatoNumero($venta_importe_ind, 2, '', false),
+    ), false, 'B');
+
+
+    // industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+
+    $industrial_importe = $industrial_kilos = 0;
+    if (isset($caja['industrial']->costo)) {
+      $industrial_importe = $caja['industrial']->importe;
+      $industrial_kilos = $caja['industrial']->kilos;
+
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '', '',
+        MyString::formatoNumero($caja['industrial']->kilos, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->costo, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    // GASTOS GENERALES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('GASTOS GENERALES'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C'));
+    $pdf->SetWidths(array(80, 95, 30));
+    $pdf->Row(array('NOMBRE', 'CONCEPTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(80, 95, 30));
+
+    $totalGastos = 0;
+    foreach ($caja['gastos'] as $gasto) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalGastos  += floatval($gasto->monto);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $gasto->nombre,
+        $gasto->concepto,
+        MyString::formatoNumero($gasto->monto, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($totalGastos, 2, '', false),
+    ), false, 'B');
+
+
+    // TOTALES
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
+
+    $pdf->SetXY(6, $pdf->GetY()+0.3);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 30));
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $yaux = $pdf->GetY();
+    $pageaux = $pdf->page;
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS EXISTENCIA ANTERIOR', MyString::formatoNumero($existencia_ant_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS COMPRADOS', MyString::formatoNumero($compra_fruta_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(-) KGS EXISTENCIA EMPACADA', MyString::formatoNumero($existencia_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(=) KGS PROCESADOS', MyString::formatoNumero($existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS COMPRADOS EMPACADOS', MyString::formatoNumero($frutaCompra_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(-) KGS VENDIDOS', MyString::formatoNumero($venta_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('INDUSTRIAL KGS', MyString::formatoNumero($resultado_kilos, 2, '', false)), true, 'B');
+
+    if (count($pdf->pages) > $pageaux) {
+      $pdf->page = $pageaux;
+    }
+    $pdf->SetXY(130, $yaux);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 30));
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) VENTAS', MyString::formatoNumero($venta_importe, 2, '', false)), true, 'B');
+
+    $pdf->SetFont('Arial', '', 8);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) EXISTENCIA ANTERIOR', MyString::formatoNumero($existencia_ant_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COMPRA DE FRUTA', MyString::formatoNumero($compra_fruta_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) EXISTENCIA EMPACADA', MyString::formatoNumero($existencia_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COSTO DE MATERIA PRIMA', MyString::formatoNumero($compra_fruta_importe + $existencia_ant_importe - $existencia_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COSTO DE PRODUCCION', MyString::formatoNumero($produccion_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COMPRA DE FRUTA EMPACADA', MyString::formatoNumero($frutaCompra_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_importe, 2, '', false)), true, 'B');
+
+    $pdf->SetFont('Arial', '', 8);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COSTO DE VENTAS', MyString::formatoNumero($costoVentas_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) FLETES', MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COMISION A TERCEROS', MyString::formatoNumero($comisionTerceros_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) INDUSTRIAL', MyString::formatoNumero($industrial_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(=) RESULTADO DEL DIA', MyString::formatoNumero($resultado_importe, 2, '', false)), true, 'B');
+
     $pdf->page = count($pdf->pages);
     $pdf->Output('REPORTE_EXISTENCIAS.pdf', 'I');
 
   }
 
-  public function saltaPag(&$pdf)
-  {
-    if($pdf->GetY() >= $pdf->limiteY){
-      if (count($pdf->pages) > $pdf->page) {
-        $pdf->page++;
-        $pdf->SetXY(63, 10);
-      } else
-        $pdf->AddPage();
-    }
-  }
+
 
 
 }

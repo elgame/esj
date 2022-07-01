@@ -10,5 +10,5 @@ return array(
     'Symfony\\Component\\Translation\\' => array($vendorDir . '/symfony/translation'),
     'Illuminate\\' => array($vendorDir . '/tightenco/collect/src/Illuminate'),
     'Catalogos\\' => array($baseDir . '/application/libraries/catalogos'),
-    'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
+    '' => array($vendorDir . '/nesbot/carbon/src'),
 );

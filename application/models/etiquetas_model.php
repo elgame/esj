@@ -8,7 +8,67 @@ class etiquetas_model extends CI_Model {
 		parent::__construct();
 	}
 
-	
+	public function etiqueta1_pdf($data)
+  {
+    $empresa = $this->empresas_model->getInfoEmpresa($data['did_empresa'], true);
+    $logo = $this->imgGrayScale($empresa['info']->logo);
+
+    $pdf = new FPDF('P', 'mm', [50, 25]);
+    // $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+
+    $data['caja'] = str_pad($data['caja'], 6, "0", STR_PAD_LEFT);
+    $pdf->AddPage('L', [50, 25]);
+    $pdf->SetFont('Arial','B', 18);
+    $pdf->Text(21, 15, "C-{$data['caja']}");
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Image($logo, 1, 5, 18);
+
+    for ($rollo=0; $rollo < intval($data['rollos']); $rollo++) {
+      $pdf->AddPage('L', [50, 25]);
+      $pdf->Image($logo, 1, 5, 18);
+
+      $rollo1 = str_pad($rollo+1, 6, "0", STR_PAD_LEFT);
+
+      $pdf->SetFont('Arial', 'B', 12);
+      $pdf->Text(25, 9, "C-{$data['caja']}");
+      $pdf->Line(22, 13, 47, 13);
+      $pdf->Line(22, 13.2, 47, 13.2);
+      $pdf->Line(22, 13.4, 47, 13.4);
+      $pdf->SetFont('Arial','B', 12);
+      $pdf->Text(25, 19, "R-{$rollo1}");
+
+    }
+
+    // for ($i=intval($data['txtCvar']); $i < $consecutivo; $i++) {
+    //   unlink(RPATH."/panel/default/images/tmp/barcode{$i}.png");
+    //   unlink(RPATH."/panel/default/images/tmp/barcode2{$i}.png");
+    // }
+
+    $pdf->Output('etiquetas.pdf', 'I');
+  }
+
+  private function imgGrayScale($logo) {
+    $partes_ruta = pathinfo($logo);
+    $im = null;
+
+    if ($partes_ruta['extension'] == 'png') {
+      $im = imagecreatefrompng($logo);
+    } elseif ($partes_ruta['extension'] == 'jpg' || $partes_ruta['extension'] == 'jpeg') {
+      $im = imagecreatefromjpeg($logo);
+    }
+
+    $path = $logo;
+    if ($im && imagefilter($im, IMG_FILTER_GRAYSCALE)) {
+      if ($partes_ruta['extension'] == 'png') {
+        imagepng($im, "application/media/temp/{$partes_ruta['basename']}");
+      } elseif ($partes_ruta['extension'] == 'jpg' || $partes_ruta['extension'] == 'jpeg') {
+        imagejpeg($im, "application/media/temp/{$partes_ruta['basename']}");
+      }
+      $path = "application/media/temp/{$partes_ruta['basename']}";
+    }
+
+    return $path;
+  }
 
 	/**
 	 * Obtiene el listado de etiquetas para usar ajax

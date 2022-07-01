@@ -43,9 +43,15 @@
 
       <?php
         $readonly = '';
+        $only_bodega_gdl = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/bodega_gdl/');
+        $no_abrir_cortes = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/no_abrir_cortes/');
         $show = true;
         $display = '';
         $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
+
+        if (isset($caja['status']) && $caja['status'] === 'f') {
+          $show = !$no_abrir_cortes;
+        }
         if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_caja/'))
         {
           $readonly = 'readonly';
@@ -115,7 +121,8 @@
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/caja_chica/xls_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Excel</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -129,6 +136,8 @@
                 <div class="span12">
 
                     <!-- Ingresos por Reposicion-->
+                    <?php $totalIngresos = 0; ?>
+                    <?php if (!$only_bodega_gdl): ?>
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
@@ -159,7 +168,7 @@
                             <?php
                               $modificar_ingresos = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_ingresos/');
                               $mod_ing_readonly = !$modificar_ingresos && $readonly == ''? ' readonly': '';
-                              $totalIngresos = 0;
+
                               if (isset($_POST['ingreso_concepto'])) {
                                 foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
                                     $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
@@ -243,15 +252,17 @@
                         </table>
                       </div>
                     </div>
+                    <?php endif ?>
                     <!--/ Ingresos por Reposicion-->
 
                     <!-- Ingresos Clientes-->
                     <?php $totalIngresosRemisiones = 0; ?>
+                    <?php if (!$only_bodega_gdl): ?>
                     <div class="row-fluid">
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
-                          <?php if ($_GET['fno_caja'] == '4'): ?>
+                          <?php if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2'): ?>
                           <thead>
                             <tr>
                               <th colspan="7">INGRESOS CLIENTES
@@ -275,7 +286,7 @@
                           <?php endif ?>
                           <tbody>
                             <?php
-                            if ($_GET['fno_caja'] == '4') {
+                            if ($_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '2') {
                               if (isset($_POST['remision_concepto'])) {
                                 foreach ($_POST['remision_concepto'] as $key => $concepto) {
                                   // $totalIngresosRemisiones += floatval($_POST['otros_monto'][$key]);
@@ -301,7 +312,7 @@
                                       <input type="text" name="remision_concepto[]" value="<?php echo $concepto ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                       <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
                                     </td>
-                                    <td style=""><input type="text" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly ?>></td>
+                                    <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly ?>></td>
                                     <td style="width: 30px;">
                                       <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                       <input type="hidden" name="remision_del[]" value="" id="remision_del">
@@ -334,7 +345,7 @@
                                         <input type="text" name="remision_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                         <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
                                       </td>
-                                      <td style=""><input type="text" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
+                                      <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
                                       <td style="width: 30px;">
                                         <?php if (!$cajas_cerradas): ?>
                                           <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
@@ -374,11 +385,12 @@
                         </table>
                       </div>
                     </div>
+                    <?php endif ?>
                     <!--/ Ingresos Clientes-->
 
                     <?php
                     $totalTraspasos = 0;
-                    if ($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4'): ?>
+                    if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '6') && !$only_bodega_gdl): ?>
                     <!-- Traspasos -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
@@ -392,7 +404,7 @@
                                     <thead>
                                       <tr>
                                         <th colspan="2">TRASPASOS
-                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5')): ?>
+                                          <?php if (!$cajas_cerradas && ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6')): ?>
                                           <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
                                           <?php endif ?>
                                         </th>
@@ -400,12 +412,12 @@
                                         <th colspan="2">IMPORTE</th>
                                       </tr>
                                       <tr>
-                                        <th>TRASPASAR A</th>
-                                        <th>TIPO</th>
-                                        <th title="Afectar el fondo de la caja">AF. FONDO</th>
-                                        <th>CONCEPTO</th>
-                                        <th>CARGO</th>
-                                        <th></th>
+                                        <th style="width: 15%;">TRASPASAR A</th>
+                                        <th style="width: 15%;">TIPO</th>
+                                        <th style="width: 15%;" title="Afectar el fondo de la caja">AF. FONDO</th>
+                                        <th style="width: 37%;">CONCEPTO</th>
+                                        <th style="width: 15%;">CARGO</th>
+                                        <th style="width: 3%;"></th>
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -424,7 +436,9 @@
                                                 <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                                 <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                                 <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
+                                                <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
                                                 <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                                <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
                                               </select>
                                               <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
                                               <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
@@ -465,6 +479,7 @@
                                             <?php if ($traspaso->guardado == 't'): ?>
                                             <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
                                             <?php else: ?>
+                                              <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
                                               <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
                                             <?php endif ?>
                                           </td>
@@ -472,6 +487,7 @@
                                             <?php if ($traspaso->guardado == 't'): ?>
                                             <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
                                             <?php else: ?>
+                                              <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
                                               <?php echo $traspaso->monto ?>
                                             <?php endif ?>
                                           </td>
@@ -571,10 +587,179 @@
 
             <div class="span12" style="margin-left: 0px;">
 
+              <?php if ($_GET['fno_caja'] == '2'): ?>
+              <!-- PreGastos -->
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-pregastos">
+                              <thead>
+                                <tr>
+                                  <th colspan="6">PRE GASTOS
+                                    <?php if (!$cajas_cerradas): ?>
+                                    <button type="button" class="btn btn-success" id="btn-add-pregasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button>
+                                    <?php endif ?>
+                                  </th>
+                                  <th colspan="2">IMPORTE</th>
+                                </tr>
+                                <tr>
+                                  <th>COD AREA</th>
+                                  <th>EMPRESA</th>
+                                  <th>NOM</th>
+                                  <!-- <th>FOLIO</th> -->
+                                  <th>NOMBRE</th>
+                                  <th>CONCEPTO</th>
+                                  <th>REP</th>
+                                  <th>CARGO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                  $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
+                                  $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
+                                  $totalPreGastos = 0;
+                                  if (count($caja['pregastos']) == 0 && isset($_POST['gasto_pre_concepto']) && count($_POST['gasto_pre_concepto']) > 0) {
+                                    foreach ($_POST['gasto_pre_concepto'] as $key => $concepto) {
+                                      $totalPreGastos += floatval($_POST['gasto_pre_importe'][$key]); ?>
+                                        <tr>
+                                          <td style="">
+                                            <input type="hidden" name="gasto_pre_id_gasto[]" value="" id="gasto_id_gasto">
+                                            <input type="hidden" name="gasto_pre_del[]" value="" id="gasto_del">
+                                            <input type="text" name="pre_codigoArea[]" value="<?php echo $_POST['pre_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $_POST['pre_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
+                                            <input type="hidden" name="pre_codigoCampo[]" value="<?php echo $_POST['pre_codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
+                                            <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                            <input type="hidden" name="pre_area[]" value="<?php echo $_POST['pre_area'][$key] ?>" class="area span12">
+                                            <input type="hidden" name="pre_areaId[]" value="<?php echo $_POST['pre_areaId'][$key] ?>" class="areaId span12">
+                                            <input type="hidden" name="pre_rancho[]" value="<?php echo $_POST['pre_rancho'][$key] ?>" class="rancho span12">
+                                            <input type="hidden" name="pre_ranchoId[]" value="<?php echo $_POST['pre_ranchoId'][$key] ?>" class="ranchoId span12">
+                                            <input type="hidden" name="pre_centroCosto[]" value="<?php echo $_POST['pre_centroCosto'][$key] ?>" class="centroCosto span12">
+                                            <input type="hidden" name="pre_centroCostoId[]" value="<?php echo $_POST['pre_centroCostoId'][$key] ?>" class="centroCostoId span12">
+                                            <input type="hidden" name="pre_activos[]" value="<?php echo $_POST['pre_activos'][$key] ?>" class="activos span12">
+                                            <input type="hidden" name="pre_activoId[]" value="<?php echo $_POST['pre_activoId'][$key] ?>" class="activoId span12">
+                                            <input type="hidden" name="pre_empresaId[]" value="<?php echo $_POST['pre_empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="pre_sucursalId[]" value="<?php echo $_POST['pre_sucursalId'][$key] ?>" class="sucursalId span12">
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="gasto_pre_empresa[]" value="<?php echo $_POST['gasto_pre_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
+                                            <input type="hidden" name="gasto_pre_empresa_id[]" value="<?php echo $_POST['gasto_pre_empresa_id'][$key] ?>" class="vpositive gasto-cargo-id">
+                                          </td>
+                                          <td style="">
+                                            <select name="gasto_pre_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                              <?php foreach ($nomenclaturas as $n) { ?>
+                                                <?php if ($n->tipo === 'f'): ?>
+                                                <option value="<?php echo $n->id ?>" <?php echo $_POST['gasto_pre_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                                <?php endif ?>
+                                              <?php } ?>
+                                            </select>
+                                          </td>
+                                          <!-- <td style=""><input type="text" name="gasto_pre_folio[]" value="<?php echo $_POST['gasto_folio'][$key] ?>" class="span12 gasto-folio" <?php echo $readonly ?>></td> -->
+                                          <td style="">
+                                            <input type="text" name="gasto_pre_nombre[]" value="<?php echo $_POST['gasto_pre_nombre'][$key] ?>" class="span12 gasto-nombre"  <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="">
+                                            <input type="text" name="gasto_pre_concepto[]" value="<?php echo $_POST['gasto_pre_concepto'][$key] ?>" class="span12 gasto-concepto"  <?php echo $readonly ?>>
+                                          </td>
+                                          <td style="">
+                                            <input type="checkbox" value="si" class="gasto-reposicion" <?php echo $readonly; ?>>
+                                            <input type="hidden" name="gasto_pre_reposicion[]" value="<?php echo $_POST['gasto_pre_reposicion'][$key] ?>" class="gasto-reposicionhid">
+                                          </td>
+                                          <td style=""><input type="text" name="gasto_pre_importe[]" value="<?php echo $_POST['gasto_pre_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
+                                          <td style="">
+                                            <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                            <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
+                                          </td>
+                                        </tr>
+                                <?php }} else {
+                                  foreach ($caja['pregastos'] as $gasto) {
+                                    $totalPreGastos += floatval($gasto->monto);
+                                  ?>
+                                  <tr>
+                                    <td style="">
+                                      <input type="hidden" name="gasto_pre_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
+                                      <input type="hidden" name="gasto_pre_del[]" value="" id="gasto_del">
+                                      <input type="text" name="pre_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="pre_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
+                                      <input type="hidden" name="pre_codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
+                                      <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                      <input type="hidden" name="pre_area[]" value="<?php echo $gasto->area ?>" class="area span12">
+                                      <input type="hidden" name="pre_areaId[]" value="<?php echo $gasto->id_areac ?>" class="areaId span12">
+                                      <input type="hidden" name="pre_rancho[]" value="<?php echo $gasto->rancho ?>" class="rancho span12">
+                                      <input type="hidden" name="pre_ranchoId[]" value="<?php echo $gasto->id_rancho ?>" class="ranchoId span12">
+                                      <input type="hidden" name="pre_centroCosto[]" value="<?php echo $gasto->centro_costo ?>" class="centroCosto span12">
+                                      <input type="hidden" name="pre_centroCostoId[]" value="<?php echo $gasto->id_centro_costo ?>" class="centroCostoId span12">
+                                      <input type="hidden" name="pre_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
+                                      <input type="hidden" name="pre_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
+                                      <input type="hidden" name="pre_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="pre_sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
+                                      <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                    </td>
+                                    <td style="">
+                                      <input type="text" name="gasto_pre_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="gasto_pre_empresa_id[]" value="<?php echo $gasto->id_categoria ?>" class=" vpositive gasto-cargo-id">
+                                    </td>
+                                    <td style="">
+                                      <select name="gasto_pre_nomenclatura[]" class="span12 ingreso_nomenclatura" <?php echo $readonly.$mod_gas_readonly ?>>
+                                        <?php foreach ($nomenclaturas as $n) { ?>
+                                          <?php if ($n->tipo === 'f'): ?>
+                                          <option value="<?php echo $n->id ?>" <?php echo $gasto->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php endif ?>
+                                        <?php } ?>
+                                      </select>
+                                    </td>
+                                    <!-- <td style=""><input type="text" name="gasto_pre_folio[]" value="<?php echo $gasto->folio ?>" class="span12 gasto-folio" <?php echo $readonly.$mod_gas_readonly ?>></td> -->
+                                    <td style="">
+                                      <input type="text" name="gasto_pre_nombre[]" value="<?php echo $gasto->nombre ?>" class="span12 gasto-nombre" <?php echo $readonly.$mod_gas_readonly ?>>
+                                    </td>
+                                    <td style="">
+                                      <input type="text" name="gasto_pre_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                    </td>
+                                    <td style="">
+                                      <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly.$mod_gas_readonly; ?>>
+                                      <input type="hidden" name="gasto_pre_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
+                                    </td>
+                                    <td style=""><input type="text" name="gasto_pre_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
+                                    <td style="">
+                                      <?php if ($modificar_gasto): ?>
+                                        <?php if (!$cajas_cerradas): ?>
+                                          <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                          <button type="button" class="btn btn-danger btn-change-pregasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
+                                        <?php endif ?>
+                                        <button type="button" class="btn btn-info btn-show-cat" style="padding: 2px 7px 2px;"><i class="icon-edit"></i></button>
+                                      <?php endif ?>
+                                    </td>
+                                  </tr>
+                                <?php }} ?>
+                                <tr class="row-total">
+                                  <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2">
+                                    <input type="text" value="<?php echo $totalPreGastos ?>" class="vpositive" id="ttotal-pregastos" style="text-align: right;" readonly>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /PreGastos -->
+              <?php endif ?>
+
               <!-- Gastos x comprobar -->
               <?php
               $totalGastosComprobarTot = $totalGastosComprobar = 0;
-              if ($_GET['fno_caja'] === '2' || $_GET['fno_caja'] === '5'): ?>
+              if ($_GET['fno_caja'] === '2' || $_GET['fno_caja'] === '5' || $_GET['fno_caja'] === '6'): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -618,9 +803,9 @@
                                           <td style="">
                                             <input type="hidden" name="gasto_comprobar_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
-                                            <input type="text" name="comprobar_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
-                                            <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
+                                            <input type="text" name="comprobar_codigoArea[]" value="<?php echo $_POST['comprobar_codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $_POST['comprobar_codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
+                                            <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $_POST['comprobar_codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="comprobar_area[]" value="<?php echo $_POST['comprobar_area'][$key] ?>" class="area span12">
                                             <input type="hidden" name="comprobar_areaId[]" value="<?php echo $_POST['comprobar_areaId'][$key] ?>" class="areaId span12">
@@ -631,6 +816,7 @@
                                             <input type="hidden" name="comprobar_activos[]" value="<?php echo $_POST['comprobar_activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="comprobar_activoId[]" value="<?php echo $_POST['comprobar_activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $_POST['comprobar_empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="comprobar_sucursalId[]" value="<?php echo $_POST['comprobar_sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="gasto_comprobar_empresa[]" value="<?php echo $_POST['gasto_comprobar_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -675,8 +861,8 @@
                                     <td style="">
                                       <input type="hidden" name="gasto_comprobar_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_comprobar_del[]" value="" id="gasto_del">
-                                      <input type="text" name="comprobar_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
-                                      <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="comprobar_codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly.$readonlygc ?>>
+                                      <input type="hidden" name="comprobar_codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="comprobar_codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="comprobar_area[]" value="<?php echo $gasto->area ?>" class="area span12">
@@ -688,6 +874,7 @@
                                       <input type="hidden" name="comprobar_activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="comprobar_activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="comprobar_empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="comprobar_sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir Gasto comprobar">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -728,8 +915,9 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td></td>
-                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td>CANCELADOS DIA</td>
+                                  <td><input type="text" value="<?php echo $caja['gastos_comprobar_cancel'] ?>" class="vpositive" id="ttotal-gastos-cancelados_dia" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobarTot ?>" class="vpositive" id="ttotal-gastos-comprobar" style="text-align: right;" readonly></td>
                                   <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastosComprobar ?>" class="vpositive" id="ttotal-gastos-comprobar-dia" style="text-align: right;" readonly></td>
@@ -748,6 +936,8 @@
               <!-- /Gastos x comprobar -->
 
               <!-- Gastos -->
+              <?php $totalGastos = $totalGastosCaja2 = 0; ?>
+              <?php if (!$only_bodega_gdl): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -782,16 +972,21 @@
                                 <?php
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
-                                  $totalGastos = 0;
+
                                   if (count($caja['gastos']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
-                                      $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
+                                      $totalGastos += floatval($_POST['gasto_importe'][$key]);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        $totalGastosCaja2 += floatval($_POST['gasto_importe'][$key]);
+                                      }
+                                ?>
                                         <tr>
                                           <td style="">
                                             <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
-                                            <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="area[]" value="<?php echo $_POST['area'][$key] ?>" class="area span12">
@@ -803,6 +998,7 @@
                                             <input type="hidden" name="activos[]" value="<?php echo $_POST['activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="sucursalId[]" value="<?php echo $_POST['sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="gasto_empresa[]" value="<?php echo $_POST['gasto_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
@@ -837,13 +1033,19 @@
                                 <?php }} else {
                                   foreach ($caja['gastos'] as $gasto) {
                                     $totalGastos += floatval($gasto->monto);
+
+                                    if ($_GET['fno_caja'] == '2') {
+                                      // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                      $totalGastosCaja2 += $gasto->folio_ant > 0? -1*floatval($gasto->diferencia_comp_gasto): floatval($gasto->monto);
+                                      // $totalGastosCaja2 += $gasto->folio_ant > 0? abs(floatval($gasto->diferencia_comp_gasto)): floatval($gasto->monto);
+                                    }
                                   ?>
                                   <tr>
                                     <td style="">
                                       <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
-                                      <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="area[]" value="<?php echo $gasto->area ?>" class="area span12">
@@ -855,6 +1057,7 @@
                                       <input type="hidden" name="activos[]" value="<?php echo $gasto->activo ?>" class="activos span12">
                                       <input type="hidden" name="activoId[]" value="<?php echo $gasto->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="empresaId[]" value="<?php echo $gasto->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="sucursalId[]" value="<?php echo $gasto->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -893,11 +1096,20 @@
                                     </td>
                                   </tr>
                                 <?php }} ?>
+
                                 <tr class="row-total">
+                                <?php if ($_GET['fno_caja'] == '2'): ?>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL CON DIFERENCIA</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalGastosCaja2 ?>" class="vpositive" id="ttotal-gastos2" style="text-align: right;" readonly></td>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <?php else: ?>
                                   <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td colspan="2"><input type="text" value="<?php echo $totalGastos ?>" class="vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <?php endif ?>
                                   <td></td>
                                 </tr>
+
                               </tbody>
                             </table>
                           </div>
@@ -907,13 +1119,15 @@
                   </div>
                 </div>
               </div>
+              <?php endif ?>
               <!-- /Gastos -->
 
               <!-- Reposición de gastos -->
               <?php
-              $totalReposicionGastos = 0;
+              $totalReposicionGastos = $totalReposicionGastosCaja2 = 0;
               $totalReposicionGastosAnt = 0;
-              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5'):
+              if ($_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '6'):
+                $readonlyCaja2 = $_GET['fno_caja'] == '2'? ' readonly': '';
               ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -951,13 +1165,19 @@
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
                                   if (count($caja['reposicion_gastos']) == 0 && isset($_POST['reposicionGasto_concepto']) && count($_POST['reposicionGasto_concepto']) > 0) {
                                     foreach ($_POST['reposicionGasto_concepto'] as $key => $concepto) {
-                                      $totalReposicionGastos += floatval($_POST['reposicionGasto_importe'][$key]); ?>
+                                      $totalReposicionGastos += floatval($_POST['reposicionGasto_importe'][$key]);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                        $totalReposicionGastosCaja2 += floatval($_POST['reposicionGasto_importe'][$key]);
+                                      }
+                                ?>
                                         <tr>
                                           <td style="">
                                             <input type="hidden" name="reposicionGasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="hidden" name="reposicionGasto_del[]" value="" id="gasto_del">
-                                            <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
-                                            <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                            <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
                                             <input type="hidden" name="reposicionGasto_codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                             <input type="hidden" name="reposicionGasto_area[]" value="<?php echo $_POST['area'][$key] ?>" class="area span12">
@@ -969,6 +1189,7 @@
                                             <input type="hidden" name="reposicionGasto_activos[]" value="<?php echo $_POST['activos'][$key] ?>" class="activos span12">
                                             <input type="hidden" name="reposicionGasto_activoId[]" value="<?php echo $_POST['activoId'][$key] ?>" class="activoId span12">
                                             <input type="hidden" name="reposicionGasto_empresaId[]" value="<?php echo $_POST['empresaId'][$key] ?>" class="empresaId span12">
+                                            <input type="hidden" name="reposicionGasto_sucursalId[]" value="<?php echo $_POST['sucursalId'][$key] ?>" class="sucursalId span12">
                                           </td>
                                           <td style="">
                                             <input type="text" name="reposicionGasto_empresa[]" value="<?php echo $_POST['reposicionGasto_empresa'][$key] ?>" class="span12 reposiciong-cargo" required <?php echo $readonly ?>>
@@ -1005,6 +1226,12 @@
                                   foreach ($caja['reposicion_gastos'] as $reposiciong) {
                                     if ($reposiciong->fecha == $fecha) {
                                       $totalReposicionGastos += floatval($reposiciong->monto);
+
+                                      if ($_GET['fno_caja'] == '2') {
+                                        // folio_ant > 0 fue una comprobacion de gasto y suma la diferencia
+                                        // $totalReposicionGastosCaja2 += -1*floatval($reposiciong->diferencia_comp_gasto);
+                                        $totalReposicionGastosCaja2 += abs(floatval($reposiciong->diferencia_comp_gasto));
+                                      }
                                     }
                                     $totalReposicionGastosAnt += floatval($reposiciong->monto);
                                   ?>
@@ -1012,8 +1239,8 @@
                                     <td style="">
                                       <input type="hidden" name="reposicionGasto_id_gasto[]" value="<?php echo $reposiciong->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="hidden" name="reposicionGasto_del[]" value="" id="gasto_del">
-                                      <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $reposiciong->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required <?php echo $readonly.$mod_gas_readonly ?>>
-                                      <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $reposiciong->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="text" name="reposicionGasto_codigoArea[]" value="<?php echo $reposiciong->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" <?php echo $readonly.$mod_gas_readonly ?>>
+                                      <input type="hidden" name="reposicionGasto_codigoAreaId[]" value="<?php echo $reposiciong->id_area ?>" id="codigoAreaId" class="span12">
                                       <input type="hidden" name="reposicionGasto_codigoCampo[]" value="<?php echo $reposiciong->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <input type="hidden" name="reposicionGasto_area[]" value="<?php echo $reposiciong->area ?>" class="area span12">
@@ -1025,6 +1252,7 @@
                                       <input type="hidden" name="reposicionGasto_activos[]" value="<?php echo $reposiciong->activo ?>" class="activos span12">
                                       <input type="hidden" name="reposicionGasto_activoId[]" value="<?php echo $reposiciong->id_activo ?>" class="activoId span12">
                                       <input type="hidden" name="reposicionGasto_empresaId[]" value="<?php echo $reposiciong->id_empresa ?>" class="empresaId span12">
+                                      <input type="hidden" name="reposicionGasto_sucursalId[]" value="<?php echo $reposiciong->id_sucursal ?>" class="sucursalId span12">
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$reposiciong->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
@@ -1053,7 +1281,7 @@
                                       <input type="hidden" name="reposicionGasto_reposicion[]" value="<?php echo $reposiciong->reposicion ?>" class="reposiciong-reposicionhid">
                                       <input type="hidden" name="reposicionGasto_fechaComproGasto[]" value="<?php echo $reposiciong->fecha_compro_gasto ?>" class="reposiciong-fechaComproGasto">
                                     </td>
-                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
+                                    <td style=""><input type="text" name="reposicionGasto_importe[]" value="<?php echo $reposiciong->monto ?>" class="span12 vpositive reposiciong-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC.$readonlyCaja2 ?>></td>
                                     <td style="">
                                       <?php if ($modificar_gasto): ?>
                                         <?php if (!$cajas_cerradas): ?>
@@ -1065,10 +1293,14 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                  <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastosAnt ?>" class="vpositive" id="ttotal-reposicionGastosAnt" style="text-align: right;" readonly></td>
+                                  <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastosAnt ?>" class="vpositive" id="ttotal-reposicionGastosAnt" style="text-align: right;" readonly></td>
                                   <td colspan="1" style="text-align: right; font-weight: bolder;">TOTAL DIA</td>
-                                  <td colspan="2"><input type="text" value="<?php echo $totalReposicionGastos ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastos ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <?php if ($_GET['fno_caja'] == '2'): ?>
+                                  <td colspan="2" style="text-align: right; font-weight: bolder;">TOTAL DIA DIFERENCIA</td>
+                                  <td colspan="1"><input type="text" value="<?php echo $totalReposicionGastosCaja2 ?>" class="vpositive" id="ttotal-reposicionGastos" style="text-align: right;" readonly></td>
+                                  <?php endif ?>
                                   <td></td>
                                 </tr>
                               </tbody>
@@ -1084,6 +1316,8 @@
               <!-- /Reposición de gastos -->
 
               <!-- Deudores -->
+              <?php $totalDeudores = 0; ?>
+              <?php if (!$only_bodega_gdl): ?>
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
                   <div class="row-fluid">
@@ -1117,7 +1351,7 @@
                                 <?php
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
-                                  $totalDeudores = 0;
+
                                   if (count($caja['deudores']) == 0 && isset($_POST['deudor_nombre']) && count($_POST['deudor_nombre']) > 0) {
                                     foreach ($_POST['deudor_nombre'] as $key => $concepto) {
                                       $totalDeudores += floatval($_POST['deudor_importe'][$key]); ?>
@@ -1131,6 +1365,7 @@
                                               <option value="caja_limon" <?php echo $_POST['deudor_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
                                               <option value="caja_gastos" <?php echo $_POST['deudor_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
                                               <option value="caja_general" <?php echo $_POST['deudor_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                              <option value="caja_prestamo" <?php echo $_POST['deudor_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Prestamo</option>
                                             </select>
                                           </td>
                                           <td style="width: 80px;">
@@ -1239,11 +1474,12 @@
                   </div>
                 </div>
               </div>
+              <?php endif ?>
               <!-- /Deudores -->
 
               <?php
               $totalAcreedores = $totalAcreedoresHoy = 0;
-              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4')) { ?>
+              if (($_GET['fno_caja'] == '1' || $_GET['fno_caja'] == '2' || $_GET['fno_caja'] == '5' || $_GET['fno_caja'] == '4' || $_GET['fno_caja'] == '6') && !$only_bodega_gdl) { ?>
               <!-- Acreedores -->
               <div class="row-fluid" style="margin-top: 5px;">
                 <div class="span12">
@@ -1331,6 +1567,83 @@
               <!-- /Acreedores -->
               <?php } ?>
 
+              <?php
+              $totalEfcbodega = 0;
+              if (($_GET['fno_caja'] == '4')) { ?>
+              <!-- Efectivo Bodega Gdl -->
+              <div class="row-fluid" style="margin-top: 5px;">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <div class="span12">
+                      <div class="row-fluid">
+                        <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                        <div class="row-fluid">
+                          <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                            <table class="table table-striped table-bordered table-hover table-condensed" id="table-efcbodega">
+                              <thead>
+                                <tr>
+                                  <th colspan="6">
+                                    EFECTIVO BODEGA GDL
+                                    <button type="button" class="btn btn-success" id="btn-add-efcbodega" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                                  </th>
+                                </tr>
+                                <tr>
+                                  <th>FECHA</th>
+                                  <th>NOMBRE</th>
+                                  <th>CONCEPTO</th>
+                                  <th>MONTO</th>
+                                  <th>RECIBIDO</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <?php
+                                if (count($caja['efcbodega']) > 0) {
+                                  foreach ($caja['efcbodega'] as $bodega) {
+                                    $totalEfcbodega += floatval($bodega->monto);
+                                  ?>
+                                  <tr>
+                                    <td><?php echo $bodega->fecha ?></td>
+                                    <td>
+                                      <input type="text" name="efcbodega_nombre[]" value="<?php echo $bodega->nombre ?>" class="span12 efcbodega_nombre" required>
+                                      <input type="hidden" name="efcbodega_id[]" value="<?php echo $bodega->id_bodega ?>" class="span12 efcbodega_id">
+                                      <input type="hidden" name="efcbodega_del[]" value="" class="efcbodega_del">
+                                      <input type="hidden" name="efcbodega_fecha_recibido[]" value="<?php echo $bodega->fecha_recibido ?>" class="efcbodega_fecha_recibido">
+                                      <a href="<?php echo base_url('panel/caja_chica/print_vale_bod_gdl/?id='.$bodega->id_bodega.'&noCaja='.$bodega->no_caja)?>" target="_blank" title="Imprimir vale Bodega Gdl">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                    </td>
+                                    <td>
+                                      <input type="text" name="efcbodega_concepto[]" value="<?php echo $bodega->concepto ?>" class="span12 efcbodega_concepto" required>
+                                    </td>
+                                    <td>
+                                      <input type="text" name="efcbodega_monto[]" value="<?php echo $bodega->monto ?>" class="span12 vpositive efcbodega_monto" required>
+                                    </td>
+                                    <td>
+                                      <input type="checkbox" name="efcbodega_crecibido[]" value="si" <?php echo ($bodega->status == 't'? 'checked': '') ?> class="efcbodega_crecibido">
+                                      <input type="hidden" name="efcbodega_recibido[]" value="<?php echo $bodega->status ?>" class="efcbodega_recibido">
+                                    </td>
+                                    <td><button type="button" class="btn btn-danger btn-del-efcbodega" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  </tr>
+                                <?php }
+                                } ?>
+                                <tr class="row-total">
+                                  <td colspan="2"></td>
+                                  <td style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td><input type="text" value="<?php echo $totalEfcbodega ?>" class="input-small vpositive" id="total-efcbodega" style="text-align: right;" readonly></td>
+                                  <td colspan="2"></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Efectivo Bodega Gdl -->
+              <?php } ?>
+
               <!-- Tabulacion -->
               <div class="row-fluid">
                 <div class="span12">
@@ -1411,11 +1724,12 @@
                                 <td><input type="text" name="cheques_transito_total" value="<?php echo $caja['cheques_transito_total'] ?>" class="input-small vpositive" id="ttotal-cheques_transito_total" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
-                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores; ?>
+                                <?php $saldo_efetivo_tab_total = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1']; ?>
                                 <td>TOTAL EFECTIVO:</td> <!-- lo que esta tabulado -->
                                 <td><input type="text" name="efectivo_tab_total" value="<?php echo $totalEfectivo ?>" class="input-small vpositive" id="ttotal-efectivo_tab_total" style="text-align: right;" readonly>
                                   <input type="hidden" name="saldo_efetivo_tab_total" value="<?php echo $saldo_efetivo_tab_total ?>" class="input-small vpositive" id="saldo_efetivo_tab_total" style="text-align: right;" readonly></td>
                                   <input type="hidden" name="ffondo_caja" value="<?php echo $caja['fondo_caja'] ?>" class="input-small vpositive" id="ffondo_caja" style="text-align: right;" readonly></td>
+                                  <input type="hidden" name="gastosAcumuladosCaja1" value="<?php echo $caja['gastosAcumuladosCaja1'] ?>" class="input-small vpositive" id="gastosAcumuladosCaja1" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td colspan="2"><hr></td>
@@ -1453,6 +1767,10 @@
                                 <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
+                                <td>PAGO TOTAL GASTOS:</td>
+                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="tttotal-gastos" style="text-align: right;" readonly></td>
+                              </tr>
+                              <tr>
                                 <td>PAGO TOTAL PENDIENTE:</td>
                                 <td><input type="text" name="" value="<?php echo $totalBoletasPendientes ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
                               </tr>
@@ -1460,14 +1778,14 @@
                               <tr>
                                 <td>EFECT. DEL CORTE:</td>
                                 <?php
-                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+                                $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
 
                                 $totalFondoCaja = false;
                                 ?>
                                 <td><input type="text" name="saldo_corte"
                                   value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                                 <input type="hidden" name="total_diferencia"
-                                  value="<?php echo $totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                                  value="<?php echo -1*$totalEfectivoCorte ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                               </tr>
                               <?php if ($totalFondoCaja !== false): ?>
                               <tr>
@@ -1502,7 +1820,7 @@
                               </tr>
                               <tr>
                                 <td>PAGO TOTAL GASTOS:</td>
-                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
+                                <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="tttotal-gastos" style="text-align: right;" readonly></td>
                               </tr>
                               <tr>
                                 <td>TOTAL GASTOS X COMP:</td>
@@ -1546,6 +1864,18 @@
                                 //    - $totalDeudores - $totalBoletasPagadas;
 
                                 //   $totalFondoCaja = $totalEfectivoCorte + $caja['boletas_arecuperar_total'] + $totalDeudores + $totalBoletasPagadas;
+                                } elseif ($_GET['fno_caja'] === '2') {
+                                  $totalEfectivoCorte = $caja['saldo_inicial'] + $totalIngresos + $totalIngresosRemisiones + ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']) -
+                                    $totalGastosComprobar - $totalGastosCaja2 - $totalReposicionGastosCaja2 - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) +
+                                    $totalTraspasos + $caja['gastos_comprobar_cancel']; // - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total']
+
+                                  // echo "<pre>";
+                                  //   var_dump($caja['saldo_inicial'], $totalIngresos, $totalIngresosRemisiones, ($caja['acreedor_prest_dia']-$caja['acreedor_abonos_dia']),
+                                  //   $totalGastosComprobar, $totalGastosCaja2, $totalReposicionGastosCaja2, ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']),
+                                  //   $totalTraspasos, $caja['gastos_comprobar_cancel']);
+                                  // echo "</pre>";exit;
+
+                                  $totalFondoCaja = false;
                                 } else {
                                   $totalEfectivoCorte = $caja['fondo_caja'] + $totalAcreedores - $totalGastosComprobarTot - $totalGastos -
                                     $totalReposicionGastosAnt - $totalDeudores - $totalBoletasPagadas - $caja['boletas_arecuperar_total'] -
@@ -1581,7 +1911,8 @@
                           <?php } ?>
 
                           <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                            <div class="span3"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                            <div class="span3"><a href="<?php echo base_url('panel/caja_chica/xls_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Excel</a></div>
                           <?php }  ?>
                         </div>
                       </div>
@@ -1750,6 +2081,17 @@
             </div>
           </div>
 
+          <div class="control-group sucursales" style="display: none;">
+            <label class="control-label" for="sucursalId">Sucursal </label>
+            <div class="controls">
+              <div class="input-append span12">
+                <select name="sucursalId" class="span11" id="sucursalId" data-selected="">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+          </div><!--/control-group -->
+
           <div class="control-group" id="cultivosGrup">
             <label class="control-label" for="area">Cultivo / Actividad / Producto </label>
             <div class="controls">
@@ -1759,6 +2101,10 @@
               <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
             </div>
           </div><!--/control-group -->
+
+        </div>
+
+        <div class="span6">
 
           <div class="control-group" id="ranchosGrup">
             <label class="control-label" for="rancho">Areas / Ranchos / Lineas </label>
@@ -1770,9 +2116,6 @@
             </div>
           </div><!--/control-group -->
 
-        </div>
-
-        <div class="span6">
           <div class="control-group" id="centrosCostosGrup">
             <label class="control-label" for="centroCosto">Centro de costo </label>
             <div class="controls">
@@ -1871,6 +2214,7 @@
                 <th>Proveedor</th>
                 <th>Folio</th>
                 <th>Monto</th>
+                <th>Sin factura</th>
                 <th style="width: 70px;"></th>
               </tr>
             </thead>
@@ -1933,6 +2277,32 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="carga-gastosdirectos">Cargar</button>
+    </div>
+  </div>
+
+  <!-- Modal Cambiar pre gastos directos -->
+  <div id="modal-pregastos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Cambiar Pregastos</h3>
+    </div>
+    <div class="modal-body" style="max-height: 370px;">
+      <input type="hidden" id="pregastos_id_gasto" value="">
+
+      <div class="control-group span3">
+        <label class="control-label" for="pregasto_new">Cambiar Gasto</label>
+        <div class="controls">
+          <select name="pregasto_new" class="pregasto_new" id="pregasto_new">
+            <option value=""></option>
+            <option value="g">Gastos</option>
+            <option value="gc">Gastos por comprobar</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="cambiar-pregastos">Cambiar</button>
     </div>
   </div>
 

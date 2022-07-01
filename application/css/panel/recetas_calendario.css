@@ -1,0 +1,9 @@
+#calendar.fc {
+  width: 100%;
+  float: none;
+  height: 700px;
+}
+
+#calendar.fc .fc-content {
+  height: inherit;
+}

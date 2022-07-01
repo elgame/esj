@@ -31,17 +31,25 @@
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
-                <label for="ffecha1" style="margin-top: 15px;">Semana</label>
+                <label for="fregistro_patronal" style="margin-top: 15px;">Registro Patronal</label>
+                  <select name="fregistro_patronal" id="fregistro_patronal" class="input-medium">
+                    <option value=""></option>
+                    <?php foreach ($registros_patronales as $key => $regp): ?>
+                    <option value="<?php echo $regp ?>" <?php echo set_select_get('fregistro_patronal', $regp, ($this->input->get('fregistro_patronal') == $regp)); ?>><?php echo $regp ?></option>
+                    <?php endforeach ?>
+                </select>
+
+                <label for="ffecha1" style="margin-top: 15px;" class="txtTiponomin"><?php echo ucfirst($tipoNomina) ?></label>
                 <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {
-                      if ($semana['semana'] == $numSemanaSelected) {
+                      if ($semana[$tipoNomina] == $numSemanaSelected) {
                         $semana2 =  $semana;
                       }
                     ?>
-                    <option value="<?php echo $semana['semana'] ?>" <?php echo $semana['semana'] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana['semana']} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
+                    <option value="<?php echo $semana[$tipoNomina] ?>" <?php echo $semana[$tipoNomina] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana[$tipoNomina]} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
                   <?php }
                     $_GET['anio'] = isset($_GET['anio']) ? $_GET['anio'] : date("Y");
-                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2['semana'];
+                    $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2[$tipoNomina];
                     $_GET['empresaId'] = isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa;
                     $_GET['empresa'] = isset($_GET['empresa']) ? $_GET['empresa'] : $empresaDefault->nombre_fiscal;
                   ?>
@@ -86,7 +94,7 @@
                 </div>
                 <div class="span5" style="text-align: center;">
                   <div style="font-size: 1.5em;">
-                    <?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
+                    <?php echo ucfirst($tipoNomina)." <span class=\"label\" style=\"font-size: 1em;\">{$semana2[$tipoNomina]}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
                   </div>
                 </div>
                 <form action="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_rpt_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" target="_blank">
@@ -246,6 +254,8 @@
 
                           // Si es nueva (no esta guardada) el ptu se divide
                           if ($e->nomina_guardada === 'f') {
+                            // Ajuste de Ptu
+                            // ===================
                             $e->ptu_empleado_dias = $e->ptu_empleado_dias/2;
                             $e->ptu_empleado_percepciones = $e->ptu_empleado_percepciones/2;
                             $ptuEmpleado = $ptuEmpleado/2;
@@ -300,7 +310,7 @@
                           <?php
                               }
                           ?>
-                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId'].'&fregistro_patronal='.$_GET['fregistro_patronal']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php } ?>
                         </td>
                         <td style="display: none;<?php echo $bgColor ?>">

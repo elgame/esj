@@ -45,5 +45,9 @@ function calculaTotalPP($this) {
 
   });
 
-  $('#ptotal').val(total.toFixed(2));
+  if(calculaTotales){
+    calculaTotales();
+  } else {
+    $('#ptotal').val(total.toFixed(2));
+  }
 }

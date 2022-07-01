@@ -11,6 +11,8 @@ class cuentas_pagar extends MY_Controller {
 
     'cuentas_pagar/cuenta_pdf/',
     'cuentas_pagar/cuenta_xls/',
+    'cuentas_pagar/cuenta2_pdf/',
+    'cuentas_pagar/cuenta2_xls/',
 
     'cuentas_pagar/saldos_pdf/',
     'cuentas_pagar/saldos_xls/',
@@ -113,6 +115,49 @@ class cuentas_pagar extends MY_Controller {
   public function cuenta_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->cuentaProveedorExcel();
+  }
+
+  public function cuenta2()
+  {
+    $this->carabiner->css(array(
+      array('panel/cuentas_pagar_cobrar.css'),
+    ));
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      array('panel/almacen/cuentas_pagar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_pagar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por pagar');
+
+    if($this->input->get('did_empresa') == false){
+      $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $params['empresa']->id_empresa;
+      $_GET['dempresa'] = $params['empresa']->nombre_fiscal;
+    }
+
+    $params['data'] = $this->cuentas_pagar_model->getCuentaProveedorData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_pagar/cuentaProveedor2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cuenta2_pdf(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuenta2ProveedorPdf();
+  }
+  public function cuenta2_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuenta2ProveedorExcel();
   }
 
 

@@ -27,6 +27,7 @@ var addpaletas = (function($){
     eventOnSubmit();
 
     autocompleteClasifiLive();
+    autocompleteCalibreLive();
     autocompleteClientes();
 
     nuevoRegistro();
@@ -176,6 +177,31 @@ var addpaletas = (function($){
     });
   }
 
+  function autocompleteCalibreLive () {
+    $('#table_prod').on('focus', 'input#prod_dcalibre:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/rastreabilidad/ajax_get_calibres/?tipo=c',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('#prod_did_calibre').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#prod_did_calibre').val('');
+        }
+      });
+    });
+  }
+
   function autocompleteClientes () {
     $('#table_prod').on('focus', 'input#prod_cliente:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
@@ -260,6 +286,8 @@ var addpaletas = (function($){
       id_cliente: '',
       clasificacion: '',
       id_clasificacion: '',
+      calibre: '',
+      id_calibre: '',
       unidad: '',
       id_unidad: '',
       cantidad: '0',
@@ -283,6 +311,10 @@ var addpaletas = (function($){
         '<td>'+
           '<input type="text" name="prod_ddescripcion[]" value="'+prod.clasificacion+'" id="prod_ddescripcion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
           '<input type="hidden" name="prod_did_prod[]" value="'+prod.id_clasificacion+'" id="prod_did_prod" class="span12">'+
+        '</td>'+
+        '<td>'+
+          '<input type="text" name="prod_dcalibre[]" value="'+prod.calibre+'" id="prod_dcalibre" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+          '<input type="hidden" name="prod_did_calibre[]" value="'+prod.id_calibre+'" id="prod_did_calibre" class="span12">'+
         '</td>'+
         '<td>'+
           '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
@@ -475,6 +507,8 @@ var addpaletas = (function($){
               id_cliente       : data.cliente.id_cliente,
               clasificacion    : data.rendimientos[i].nombre,
               id_clasificacion : data.rendimientos[i].id_clasificacion,
+              calibre          : data.rendimientos[i].size,
+              id_calibre       : data.rendimientos[i].id_size,
               unidad           : data.rendimientos[i].unidad,
               id_unidad        : data.rendimientos[i].id_unidad,
               cantidad         : data.rendimientos[i].cajas,

@@ -192,7 +192,11 @@ class gastos extends MY_Controller {
     $rfcProv = !empty($_GET['rfc'])? trim(strtoupper($_GET['rfc'])): (isset($params['proveedor']['info']->rfc)? $params['proveedor']['info']->rfc: '');
     $params['rfc'] = $rfcProv;
 
-    $path = mb_convert_encoding("C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8"); // C:\DescargasXMLenlinea/
+    // $path = mb_convert_encoding("C:\Dropbox\Corporativo Gomez Gudiño/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8");
+    // $path = mb_convert_encoding("/media/winserver/corporativo/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos", "ISO-8859-1", "UTF-8");
+    $path = "/media/winserver/corporativo/{$params['empresa']['info']->nombre_fiscal}/CFDI Recibidos";
+
+    $params['files'] = '';
     if (is_dir($path)) {
       $response = MyFiles::searchXmlEnlinea($path, $rfcProv, $this->input->get('ffolio'),
         $this->input->get('ffecha1'), $this->input->get('ffecha2'));
@@ -473,12 +477,19 @@ class gastos extends MY_Controller {
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+      array('field' => 'sucursalId',
+            'label' => 'Sucursal',
+            'rules' => ''),
 
       array('field' => 'proveedorId',
             'label' => 'Proveedor',
             'rules' => 'required'),
       array('field' => 'proveedor',
             'label' => '',
+            'rules' => ''),
+
+      array('field' => 'proyecto',
+            'label' => 'Proyecto',
             'rules' => ''),
 
       array('field' => 'tipo_documento',
@@ -494,6 +505,9 @@ class gastos extends MY_Controller {
 
       array('field' => 'fecha',
             'label' => 'Fecha',
+            'rules' => 'required'),
+      array('field' => 'fecha_factura',
+            'label' => 'Fecha Factura',
             'rules' => 'required'),
 
       array('field' => 'condicionPago',
@@ -637,6 +651,9 @@ class gastos extends MY_Controller {
       array('field' => 'folio',
             'label' => 'Folio',
             'rules' => 'required|numeric|callback_serie_folio'),
+      array('field' => 'fecha_factura',
+            'label' => 'Fecha Factura',
+            'rules' => 'required'),
     );
 
     $this->form_validation->set_rules($rules);

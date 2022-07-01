@@ -75,7 +75,7 @@
   $(document).ready(function(){
 
     <?php if ($close) {?>
-        setInterval(function() {
+        setTimeout(function() {
           window.parent.$('#supermodal').modal('hide');
       }, 1000);
     <?php }?>

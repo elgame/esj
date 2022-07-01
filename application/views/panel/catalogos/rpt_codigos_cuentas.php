@@ -28,6 +28,15 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="sucursalId">Sucursal</label>
+                  <div class="controls">
+                    <select name="sucursalId" class="span11" id="sucursalId">
+                      <option></option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dproducto">Area de costo</label>
                   <div style="height:190px;overflow-y: scroll;background-color:#eee;">
                     <?php echo $vehiculos; ?>

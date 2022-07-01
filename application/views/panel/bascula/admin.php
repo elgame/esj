@@ -30,6 +30,10 @@
                 <input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
                   class="input-xlarge search-query" placeholder="Folio, Proveedor, Chofer, Camion, Placas" autofocus> |
 
+                <label for="dempresa">Empresa</label>
+                <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', $empresa_default->nombre_fiscal) ?>" size="73">
+                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa', $empresa_default->id_empresa) ?>"> |
+
                 <label for="farea">Area</label>
                 <select name="farea" class="input-medium" id="farea">
                   <option value=""></option>
@@ -65,6 +69,10 @@
                 <input type="submit" name="enviar" value="Buscar" class="btn">
               </fieldset>
             </form>
+
+            <?php if ($this->usuarios_model->tienePrivilegioDe('', 'bascula/aintangibles/')): ?>
+              <a href="<?php echo base_url('panel/bascula/import_boletas_intangibles/') ?>" class="btn btn-info" rel="superbox-50x450" title="Crear Boletas Intangibles"><i class="icon-upload"></i></a>
+            <?php endif ?>
 
             <?php
             echo $this->usuarios_model->getLinkPrivSm('bascula/agregar/', array(

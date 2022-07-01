@@ -296,8 +296,8 @@
                   '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                     '<option value="0">No retener</option>' +
                     '<option value="0.04">4%</option>' +
-                    '<option value="0.6666">2 Terceras</option>' +
-                    '<option value="1">100 %</option>' +
+                    '<option value="0.10667">2 Terceras</option>' +
+                    '<option value="0.16">100 %</option>' +
                   '</select>' +
                   '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
                   '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
@@ -335,7 +335,8 @@
 
         totalImporte   = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
         totalIva       = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-        totalRetencion = util.trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
+        totalRetencion = util.trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
+        // totalRetencion = util.trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
 
     $totalIva.val(totalIva);
     $totalRetencion.val(totalRetencion);
@@ -374,26 +375,27 @@
     });
 
     total_factura = parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones));
+    console.log( total_factura );
 
-    $('#importe-format').html(util.darFormatoNum(total_importes));
-    $('#total_importe').val(total_importes);
+    $('#importe-format').html(util.darFormatoNum(total_importes.toFixed(2)));
+    $('#total_importe').val(total_importes.toFixed(2));
 
-    $('#descuento-format').html(util.darFormatoNum(total_descuentos));
-    $('#total_descuento').val(total_descuentos);
+    $('#descuento-format').html(util.darFormatoNum(total_descuentos.toFixed(3)));
+    $('#total_descuento').val(total_descuentos.toFixed(3));
 
-    $('#subtotal-format').html(util.darFormatoNum(total_subtotal));
-    $('#total_subtotal').val(total_subtotal);
+    $('#subtotal-format').html(util.darFormatoNum(total_subtotal.toFixed(2)));
+    $('#total_subtotal').val(total_subtotal.toFixed(2));
 
-    $('#iva-format').html(util.darFormatoNum(total_ivas));
-    $('#total_iva').val(total_ivas);
+    $('#iva-format').html(util.darFormatoNum(total_ivas.toFixed(2)));
+    $('#total_iva').val(total_ivas.toFixed(2));
 
-    $('#retiva-format').html(util.darFormatoNum(total_retenciones));
-    $('#total_retiva').val(total_retenciones);
+    $('#retiva-format').html(util.darFormatoNum(total_retenciones.toFixed(2)));
+    $('#total_retiva').val(total_retenciones.toFixed(2));
 
-    $('#totfac-format').html(util.darFormatoNum(total_factura));
-    $('#total_totfac').val(total_factura);
+    $('#totfac-format').html(util.darFormatoNum(total_factura.toFixed(2)));
+    $('#total_totfac').val(total_factura.toFixed(2));
 
-    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()))
+    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toFixed(2).toString(), $('#moneda').val()))
 
   }
 

@@ -50,6 +50,7 @@
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
           cargaSemanas();
+          cargaRegistrosPatronales();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -149,7 +150,7 @@
 
       // metodo que recalcula el isr.
       ajaxGetEmpleado($parent);
-      // recalculaEmpleado($parent);
+      recalculaEmpleado($parent);
     });
   };
 
@@ -286,6 +287,10 @@
         $dcocina    = $parent.find('.descuento-cocina'),
         $isr        = $parent.find('.isr'),
         $fondo_ahorro = $parent.find('.fondo_ahorro'),
+        $totalPrestamosEmpleadoEf = $parent.find('.descuento-prestef'),
+        $totalDescuentoMaterial = $parent.find('.descuento-material'),
+        $pensionAlimenticia = $parent.find('.pension_alimenticia'),
+        $fonacot = $parent.find('.fonacot'),
 
         $bonos      = $parent.find('.bonos'),
         $otros      = $parent.find('.otros'),
@@ -385,12 +390,18 @@
                        parseFloat($bonos.val()) +
                        parseFloat($otros.val()) +
                        parseFloat($domingo.val()) -
-                       parseFloat($totalNomina.val()) -
-                       parseFloat($infonavit.val())-
+                       ($esta_asegurado.val() == 't'? parseFloat($totalNomina.val()): 0) -
+                       ($esta_asegurado.val() == 't'? parseFloat($infonavit.val()): 0) -
+                       ($esta_asegurado.val() == 't'? parseFloat($fondo_ahorro.val()): 0) -
                        parseFloat($prestamos.val()) -
                        parseFloat($playeras.val()) -
                        parseFloat($dotros.val()) -
-                       parseFloat($dcocina.val());
+                       parseFloat($dcocina.val()) -
+                       parseFloat($totalPrestamosEmpleadoEf.val()) -
+                       parseFloat($totalDescuentoMaterial.val()) -
+                       parseFloat($pensionAlimenticia.val()) -
+                       parseFloat($fonacot.val())
+                       ;
 
     $totalComplementoSpan.text(util.darFormatoNum(util.trunc2Dec(totalComplemento)));
     $totalComplemento.val(util.trunc2Dec(totalComplemento));
@@ -530,6 +541,7 @@
       data: {
         empresa_id: $('#empresaId').val(),
         anio: $('#anio').val(),
+        fregistro_patronal: $('#fregistro_patronal').val(),
         empleado_id: $tr.find('.empleado-id').val(),
         generar_nomina: $tr.find('.generar-nomina').val(),
         numSemana: $('#semanas').find('option:selected').val(),
@@ -546,6 +558,8 @@
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
         esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),
+        salario_diario_real: $tr.find('.salario-diario-real').val(),
+        salario_real: $tr.find('.sueldo-real').val(),
       },
     })
     .done(function(result) {
@@ -571,7 +585,8 @@
                   empresa_id: $('#empresaId').val(),
                   anio: $('#anio').val(),
                   semana: $('#semanas').find('option:selected').val(),
-                  tipo: 'se'
+                  tipo: 'se',
+                  registro_patronal: $('#fregistro_patronal').find('option:selected').val()
                 }, function(data, textStatus, xhr) {
                   alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
                   location.reload();
@@ -629,12 +644,32 @@
   var cargaSemanas = function () {
     $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
       function(data){
-        var html = '', i;
+        var html = '', i, tipoNomina = 'semana';
         console.log(data);
+
+        if (data.length > 0 && data[0]['quincena']) {
+          tipoNomina = 'quincena';
+        }
+
         for (i in data) {
-          html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
+          html += '<option value="'+data[i][tipoNomina]+'">'+data[i][tipoNomina]+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
         }
         $('#semanas').html(html);
+        $('.txtTiponomin').text(tipoNomina.charAt(0).toUpperCase() + tipoNomina.slice(1));
+    });
+  };
+
+  var cargaRegistrosPatronales = function () {
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_reg_patronales/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
+      function(data){
+        var html = '', i;
+        console.log(data);
+
+        html += '<option value=""></option>';
+        for (i in data.registros_patronales) {
+          html += '<option value="'+data.registros_patronales[i]+'">'+data.registros_patronales[i]+'</option>';
+        }
+        $('#fregistro_patronal').html(html);
     });
   };
 

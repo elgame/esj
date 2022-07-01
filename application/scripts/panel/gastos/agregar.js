@@ -3,6 +3,10 @@
 })(function ($, window) {
 
   $(function () {
+    getProyectos();
+    getSucursales();
+
+
     //Autocomplete cuentas contpaq
     $("#dcuenta_cpi").autocomplete({
         source: function(request, response) {
@@ -92,6 +96,9 @@
           $('#ranchoId').val('');
           $('#activos').val('');
           $('#activoId').val('');
+
+          getProyectos();
+          getSucursales();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -107,6 +114,9 @@
           $('#activos').val('');
           $('#activoId').val('');
           $('#groupCatalogos').hide();
+
+          getProyectos();
+          getSucursales();
         }
     });
 
@@ -238,6 +248,62 @@
   };
 
 
+  var getProyectos = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/proyectos/ajax_get_proyectos/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+              hhtml += '<option value="'+data[i].id+'">'+data[i].value+'</option>';
+            }
+
+            $('#proyecto').html(hhtml);
+          }
+      });
+    } else {
+      $('#proyecto').html(hhtml);
+    }
+  };
+
+  var getSucursales = function () {
+    var params = {
+      did_empresa: $('#empresaId').val()
+    };
+
+    hhtml = '<option value=""></option>';
+    if (params.did_empresa > 0) {
+      $.ajax({
+          url: base_url + 'panel/empresas/ajax_get_sucursales/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            if(data.length > 0) {
+              let idSelected = $('#sucursalId').data('selected'), selected = '';
+              for (var i = 0; i < data.length; i++) {
+                selected = (idSelected == data[i].id_sucursal? ' selected': '');
+                hhtml += '<option value="'+data[i].id_sucursal+'" '+selected+'>'+data[i].nombre_fiscal+'</option>';
+              }
+
+              $('#sucursalId').html(hhtml).attr('required', 'required');
+              $('.sucursales').show();
+            } else {
+              $('#sucursalId').html(hhtml).removeAttr('required');
+              $('.sucursales').hide();
+            }
+          }
+      });
+    } else {
+      $('#sucursalId').html(hhtml).removeAttr('required');
+      $('.sucursales').hide();
+    }
+  };
 
   var autocompleteCultivo = function () {
     $("#area").autocomplete({
@@ -439,9 +505,9 @@
   };
 
   var quitarOrdenGasto = function(event) {
-      event.preventDefault();
-      $(this).parent("span.label").remove();
-    }
+    event.preventDefault();
+    $(this).parent("span.label").remove();
+  }
 
 });
 

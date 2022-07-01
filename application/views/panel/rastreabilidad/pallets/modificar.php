@@ -352,6 +352,20 @@
 
 									</div>
 
+                  <div class="span2">
+                    <label class="span4" for="ffolio_int">Folio Interno </label>
+                    <input type="number" name="ffolio_int" id="ffolio_int" class="span8" value="<?php echo (isset($data->folio_int)? $data->folio_int: ''); ?>"
+                      maxlength="25" placeholder="Folio Int pallet" required data-next="fcertificado">
+                  </div>
+
+                  <div class="span2">
+                    <label class="span4" for="fcertificado">Certificado </label>
+                    <select name="fcertificado" id="fcertificado" class="span8" data-next="fclasificacion">
+                      <option value="N" <?php echo set_select('fcertificado', 'N', false, $data->certificado); ?>>No Certificado</option>
+                      <option value="C" <?php echo set_select('fcertificado', 'C', false, $data->certificado); ?>>Certificado</option>
+                    </select>
+                  </div>
+
                 </div>
                 <div class="clearfix"></div>
 

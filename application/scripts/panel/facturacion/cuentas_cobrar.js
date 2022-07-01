@@ -7,6 +7,8 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      loadSerieFolio(ui.item.id, true, ui.item);
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -35,11 +37,13 @@ $(function(){
     select: function( event, ui ) {
       $("#fid_cliente").val(ui.item.id);
       $("#dcliente").val(ui.item.label).css({'background-color': '#99FF99'});
+      $("#id_cliente").val(ui.item.id);
     }
   }).keydown(function(e){
     if (e.which === 8) {
      $(this).css({'background-color': '#FFD9B3'});
       $('#fid_cliente').val('');
+      $("#id_cliente").val('');
     }
   });
 
@@ -76,7 +80,36 @@ $(function(){
   modalAbonos.init();
 
   comPagos.init();
+
+  loadSerieFolio($('#did_empresa').val());
 });
+
+function loadSerieFolio (ide, forceLoad) {
+  var objselect = $('#fserie');
+
+  var url = 'panel/facturacion/get_series/?tipof=&ide=';
+
+  loader.create();
+    $.getJSON(base_url+url+ide,
+      function(res){
+        if(res.data) {
+          var html_option = '<option value=""></option>',
+              selected = '', serieSelected = '',
+              loadDefault = false;
+
+          let ser = '';
+          console.log($('#fserie1').val());
+          for (var i in res.data){
+            selected = res.data[i].serie == $('#fserie1').val()? ' selected': '';
+            html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+          }
+          objselect.html(html_option);
+        } else {
+          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+        }
+        loader.close();
+      });
+}
 
 //complemento de pagos
 var comPagos = (function($){
@@ -125,6 +158,14 @@ var comPagos = (function($){
 
       $('#listaComPago').on('click', '.removeComPago', function(event) {
         $(this).parent().remove();
+      });
+
+      $('#moneda').on('change', function(event) {
+        if ($(this).val() == 'MXN') {
+          $('#tipoCambio').val('').hide();
+        } else {
+          $('#tipoCambio').val('').show();
+        }
       });
     }
   }
@@ -222,7 +263,7 @@ var modalAbonos = (function($){
         msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'Alerta', this, function(){
           $enviar = true;
           $("#form").submit();
-        }, function (){}, 'top: 30% !important;');
+        }, function (){}, 'top: 60% !important;');
         return false;
       }else{ //es igual o menor el cargo
         return true;

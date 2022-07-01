@@ -81,6 +81,30 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIsrRetCobradoAc($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO COBRADO'"; //sanjorge
+    else{
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO COBRADO'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetCobradoAc'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIsrRetXCobrarAc($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO X COBRAR'"; //sanjorge
+    else{
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'ISR RETENIDO X COBRAR'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXCobrarAc'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaNCVenta($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //sanjorge
@@ -243,6 +267,34 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIvaRetXPagarArrend($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetXPagarArrend'")->row();
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIvaRetPagadoArrend($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetPagadoArrend'")->row();
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsPagarGasto($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsPagar{$tasa}Gasto'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsPagadoEgreso($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsPagado{$tasa}Egreso'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsCobrarVentas($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsCobrar{$tasa}Ventas'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIepsCobradoIngreso($tasa=6, $basic=true) {
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IepsCobrado{$tasa}Ingreso'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaIsrRetXPagarHono($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //sanjorge
@@ -282,14 +334,14 @@ class polizas_model extends CI_Model {
   public function getCuentaIsrRetXPagar($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //sanjorge
-    elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISR%'"; //francis -
-    elseif($this->empresaId==4) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Raul jorge
-    elseif($this->empresaId==3) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Gomez gudiño
-    elseif($this->empresaId==5) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
+    // elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISR%'"; //francis -
+    // elseif($this->empresaId==4) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Raul jorge
+    // elseif($this->empresaId==3) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //Gomez gudiño
+    // elseif($this->empresaId==5) $sql=" AND nombre like '%ISR RETENIDO BANCA2%'"; //vianey rocio
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
     else{
-      $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO----%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -297,6 +349,25 @@ class polizas_model extends CI_Model {
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIsrRetPagado($basic=true){
+    $sql = " AND nombre like '%ISR RETENIDO PAGADO%'"; //tests carga las de sanjorge
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetPagado'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIsrRetXPagarT($tasa=125, $basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXPagar{$tasa}'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIsrRetPagadoT($tasa=125, $basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetPagado{$tasa}'")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+
   public function getCuentaNCGasto($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //sanjorge
@@ -359,7 +430,7 @@ class polizas_model extends CI_Model {
     }
     return $cuenta;
   }
-  public function getCuentaNSueldo($basic=true, $departamento=null){
+  public function getCuentaNSueldo($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%SUELDOS%'"; //sanjorge
@@ -374,14 +445,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NSueldo': 'NSueldoProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNVacaciones($basic=true, $departamento=null){
+  public function getCuentaNVacaciones($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%VACACIONES%'"; //sanjorge
@@ -396,14 +469,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NVacaciones': 'NVacacionesProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNPrimaVacacional($basic=true, $departamento=null){
+  public function getCuentaNPrimaVacacional($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%PRIMA VACACIONAL%'"; //sanjorge
@@ -418,14 +493,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NPrimaVacacional': 'NPrimaVacacionalProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNAguinaldo($basic=true, $departamento=null){
+  public function getCuentaNAguinaldo($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%AGUINALDO%'"; //sanjorge
@@ -440,14 +517,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NAguinaldo': 'NAguinaldoProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNHorasHex($basic=true, $departamento=null){
+  public function getCuentaNHorasHex($basic=true, $departamento=null, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%COMPENSACION%'"; //sanjorge
@@ -462,14 +541,16 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NHorasHex': 'NHorasHexProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  private function getPAsistenciaContpaq($basic=true, $departamento=1)
+  private function getPAsistenciaContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1296'"; //sanjorge
@@ -485,144 +566,180 @@ class polizas_model extends CI_Model {
     else{
       $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NPAsistencia': 'NPAsistenciaProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
     // return (isset($data->cuenta)? $data->cuenta: '');
   }
-  private function getNIndemnizacionesContpaq($basic=true, $departamento=1)
+  private function getNIndemnizacionesContpaq($basic=true, $departamento=1, $registro_patronal='')
   {
-    $sql = '';
+    $sql = ' AND 1 = 2';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
     elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%INDEMNIZACIONES%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES2%'"; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
-    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
-    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
-    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
-    else{
-      $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    // elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    // elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    // elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    // elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    // else{
+    //   $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
       $tipo_cuenta = $departamento == 1? 'NIndemnizaciones': 'NIndemnizacionesProd';
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNominaPagar($basic=true){
-    $sql = '';
+  public function getCuentaNominaPagar($basic=true, $registro_patronal=''){
+    $sql = ' AND 1 = 2';
     if ($this->empresaId==2) $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%NOMINAS POR PAGAR%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
     if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NominaPagar'")->row();
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NominaPagar' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNSubsidio($basic=true){
+  public function getCuentaNSubsidio($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%SUBSIDIO AL EMPLEO%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //mamita
-    else{
-      $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NSubsidio'")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
+    if (empty($sql) || !isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NSubsidio' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNImss($basic=true){
+  public function getCuentaNImss($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IMSS RETENIDO%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%IMSS RETENIDO2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%IMSS RETENIDO%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NImss'")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%IMSS RETENIDO%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
+    if (empty($sql) || !isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NImss' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNVejez($basic=true){
+  public function getCuentaNVejez($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%CENSATIA Y VEJEZ%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%CENSATIA Y VEJEZ2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NVejez'")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
+    if (empty($sql) || !isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NVejez' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNInfonavit($basic=true){
+  public function getCuentaNInfonavit($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%INFONAVIT%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%CREDITO INFONAVIT2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NInfonavit'")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
+    if (empty($sql) || !isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NInfonavit' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
-  public function getCuentaNIsr($basic=true){
+  public function getCuentaNIsr($basic=true, $registro_patronal=''){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%ISPT ANTES DEL SUB%'"; //francis -
     elseif($this->empresaId==4) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=" AND nombre like '%ISPT ANTES DEL SUB2%'"; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
-    elseif($this->empresaId==14) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //mamita
-    else{
-      $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
-    }
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    if (!isset($data->cuenta)) {
-      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NIsr'")->row();
+    // elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
+    // elseif($this->empresaId==14) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //mamita
+    // else{
+    //   $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
+    // }
+
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql} {$registro_patronal}")->row();
+    if (empty($sql) || !isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NIsr' {$registro_patronal}")->row();
     }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaNPAlimen($basic=true, $registro_patronal=''){
+    $sql = '';
+    $registro_patronal = $registro_patronal != ''? " AND registro_patronal = '{$registro_patronal}'": '';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NPAlimen' {$registro_patronal}")->row();
+
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+
+  public function getTipoISRCompras($observaciones)
+  {
+    $observaciones = mb_strtoupper($observaciones, 'UTF-8');
+    $tipo = '';
+    if (strpos($observaciones, 'HONORARIOS') !== false) {
+      $tipo = 'ho';
+    } elseif (strpos($observaciones, 'RENTA') !== false) {
+      $tipo = 'ar';
+    }
+
+    return $tipo;
   }
 
 
@@ -759,6 +876,7 @@ class polizas_model extends CI_Model {
   {
     $response = array('data' => '', 'facturas' => array(), 'folio' => '');
     $sql = $sql2 = '';
+    $cuenta_cpi = '';
 
     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
       $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
@@ -798,7 +916,12 @@ class polizas_model extends CI_Model {
         $this->load->model('facturacion_model');
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
+                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '1'),
+                         );
 
         $this->uuidsADD = '';
         //Agregamos el header de la poliza
@@ -862,6 +985,10 @@ class polizas_model extends CI_Model {
 
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
+            $impuestos['isr_retenido']['importe']  = 0;
+            $impuestos['ieps_cobrar6']['importe']  = 0;
+            $impuestos['ieps_cobrar7']['importe']  = 0;
+            $impuestos['ieps_cobrar9']['importe']  = 0;
             //Colocamos los Ingresos de la factura (41040000)
             foreach ($inf_factura['productos'] as $key => $value)
             {
@@ -878,6 +1005,17 @@ class polizas_model extends CI_Model {
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+                $impuestos['isr_retenido']['importe']  += $value->isr;
+                if ($value->ieps > 0) {
+                  if ($value->porcentaje_ieps == 6) {
+                    $impuestos['ieps_cobrar6']['importe'] += $value->ieps;
+                  } elseif ($value->porcentaje_ieps == 7){
+                    $impuestos['ieps_cobrar7']['importe'] += $value->ieps;
+                  } elseif ($value->porcentaje_ieps == 9) {
+                    $impuestos['ieps_cobrar9']['importe'] += $value->ieps;
+                  }
+                }
+
                 $response['data'] .= $this->setEspacios('M',2).
                                 $this->setEspacios(($value->cuenta_cpi!=''? $value->cuenta_cpi: '41040000'),30).
                                 $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
@@ -975,7 +1113,9 @@ class polizas_model extends CI_Model {
         $this->load->model('facturacion_model');
 
         $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
+                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
+                         );
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -995,11 +1135,13 @@ class polizas_model extends CI_Model {
 
           $impuestos['iva_trasladar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
+          $impuestos['isr_retenido']['importe']  = 0;
           //Colocamos los Ingresos de la factura
           foreach ($inf_factura['productos'] as $key => $value)
           {
             $impuestos['iva_trasladar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+            $impuestos['isr_retenido']['importe']  += $value->isr;
             $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($this->getCuentaNCVenta(), 30).  //cuenta nc ventas
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
@@ -1097,7 +1239,7 @@ class polizas_model extends CI_Model {
         "SELECT id_compra
          FROM compras AS f
         WHERE status <> 'ca' AND id_nc IS NULL
-            AND poliza_diario = 'f'
+            AND poliza_diario = 'f' AND tipo_documento = 'fa'
            {$sql} {$sql_fecha1}
         ORDER BY id_compra ASC
         ");
@@ -1121,9 +1263,16 @@ class polizas_model extends CI_Model {
         $this->load->model('compras_model');
         $this->load->model('bascula_model');
 
-        $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '0'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '1'),
-                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'), );
+        $impuestos = array(
+                           'iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '0'),
+                           'iva_retenido'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_pagar6'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar7'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar9'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenerHo' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '1'),
+                           'isr_retener'   => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'),
+                           'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
+                          );
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -1144,15 +1293,58 @@ class polizas_model extends CI_Model {
 
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
-          $impuestos['isr_retenido']['importe']  = 0;
+          $impuestos['isr_retener']['importe']   = 0;
+          $impuestos['isr_retenidoxpagar125']['importe']   = 0;
+          $impuestos['isr_retenerHo']['importe'] = 0;
+          $impuestos['ieps_pagar6']['importe']   = 0;
+          $impuestos['ieps_pagar7']['importe']   = 0;
+          $impuestos['ieps_pagar9']['importe']   = 0;
           $productos_grups = array();
           //Colocamos los productos de la factura
           foreach ($inf_compra['productos'] as $key => $value)
           {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
+
+            $ret_iva_pos = ($value->retencion_iva/($value->importe>0 ? $value->importe : 1))*100;
+            $tipo_isr_ret = $this->getTipoISRCompras($inf_compra['info']->concepto);
+
+            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetxPagar();
+            if($ret_iva_pos > 15)
+            { // Asigana las cuentas de retencion al 100%
+              $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagar100();
+            }elseif($ret_iva_pos > 4.5)
+            { // Asigana las cuentas de honorarios o arrendamiento
+              if ($tipo_isr_ret == 'ar') { // Arrendamiento
+                $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarArrend();
+              } elseif ($tipo_isr_ret == 'ho') { // Honorarios
+                $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarHono();
+              }
+            }
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
-            $impuestos['isr_retenido']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+
+            if ($tipo_isr_ret == 'ar') { // Arrendamiento
+              $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            } elseif ($tipo_isr_ret == 'ho') { // Honorario
+              $impuestos['isr_retenerHo']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            }
+
+            if ($value->porcentaje_isr >= 1.248 && $value->porcentaje_isr <= 1.26) { // 1.25
+              $impuestos['isr_retenidoxpagar125']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            } else {
+              $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            }
+
+            if ($value->ieps > 0) {
+              if ($value->porcentaje_ieps == 6) {
+                $impuestos['ieps_pagar6']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 7){
+                $impuestos['ieps_pagar7']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 9) {
+                $impuestos['ieps_pagar9']['importe'] += $value->ieps;
+              }
+            }
             $value->cuenta_cpi = ($value->cuenta_cpi!=''? $value->cuenta_cpi: $this->getCuentaCuadreGasto() );
+
 
             if (array_key_exists($value->cuenta_cpi, $productos_grups))
             {
@@ -1312,7 +1504,7 @@ class polizas_model extends CI_Model {
         "SELECT id_compra
          FROM compras AS f
         WHERE status <> 'ca' AND status <> 'b'
-            AND poliza_diario = 'f' AND id_nc IS NOT NULL
+            AND poliza_diario = 'f' AND id_nc IS NOT NULL AND tipo_documento = 'fa'
            {$sql} {$sql_fecha}
         ORDER BY id_compra ASC
         ");
@@ -1472,6 +1664,18 @@ class polizas_model extends CI_Model {
           WHERE u.esta_asegurado = 't'
              {$sql2}
         )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, 0 AS sueldo_semanal,
+            0 AS vacaciones, 0 AS prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, 0 AS subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            0 AS indemnizaciones, 'ag' AS tipo, f.uuid
+          FROM nomina_aguinaldo AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
       ) AS n
       ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
       ");
@@ -1571,9 +1775,12 @@ class polizas_model extends CI_Model {
       {
         //Se obtienen los prestamos
         $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
-                               FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
-                               WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
-                               GROUP BY u.id")->result();
+           FROM nomina_fiscal_prestamos AS nfp
+            INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+            INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+           WHERE np.tipo = 'fi' AND u.esta_asegurado = 't'
+            AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+           GROUP BY u.id")->result();
 
         //Se obtienen los fondos_ahorro
         $fondos_ahorro = $this->db->query("SELECT u.id, u.fondo_ahorro_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.fondo_ahorro), 0) AS fondo_ahorro
@@ -1789,6 +1996,11 @@ class polizas_model extends CI_Model {
       $dias_desface = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['fid_empresa'])->get()->row()->dia_inicia_semana;
     }
 
+    if ($this->input->get('dregistro_patronal') != '') {
+      $sql .= " AND f.registro_patronal = '".$_GET['dregistro_patronal']."'";
+      $sql2 .= " AND f.registro_patronal = '".$_GET['dregistro_patronal']."'";
+    }
+
     $fecha = $_GET['ffecha1'];
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
@@ -1798,13 +2010,13 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, sueldo_semanal, vacaciones,
             prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto, fondo_ahorro,
-            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo, uuid
+            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo, uuid, otros_datos
       FROM (
         (
           SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
               f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
               f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
-              0 AS indemnizaciones, 'no' AS tipo, f.uuid
+              0 AS indemnizaciones, 'no' AS tipo, f.uuid, f.otros_datos::text
           FROM nomina_fiscal AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1816,15 +2028,27 @@ class polizas_model extends CI_Model {
           SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
             f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
             f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
-            f.indemnizaciones, 'fi' AS tipo, f.uuid
+            f.indemnizaciones, 'fi' AS tipo, f.uuid, ''::text AS otros_datos
           FROM finiquito AS f
             INNER JOIN usuarios AS u ON u.id = f.id_empleado
             INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
           WHERE u.esta_asegurado = 't'
              {$sql2}
         )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, 0 AS sueldo_semanal,
+            0 AS vacaciones, 0 AS prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, 0 AS subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            0 AS indemnizaciones, 'ag' AS tipo, f.uuid, ''::text AS otros_datos
+          FROM nomina_aguinaldo AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
       ) AS n
-      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
+      ORDER BY tipo DESC, semana ASC, id_empleado ASC, id_empresa ASC
       ");
 
     $nominas = $query->result();
@@ -1832,77 +2056,11 @@ class polizas_model extends CI_Model {
     {
       if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
         $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
-        $value->anio = $semana['anio'];
-        $value->semana = $semana['semana'];
+        $value->anio = ($semana['anio']? $semana['anio']: 0);
+        $value->semana = ($semana['semana']? $semana['semana']: 0);
         $value->fecha_inicio = $semana['fecha_inicio'];
-        $value->fecha_final = $semana['fecha_final'];
+        // $value->fecha_final = $semana['fecha_final'];
       }
-
-      /*if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
-      {
-        if ($value->departamento == "ADMINISTRACION") {
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal1   += $value->sueldo_semanal;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones1       += $value->vacaciones;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones1  += $value->indemnizaciones;
-        } else {
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional2 += $value->prima_vacacional;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
-          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones2  += $value->indemnizaciones;
-        }
-
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->vejez           += $value->vejez;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
-      }else{
-        $value->fecha_inicio1    = $value->fecha_final;
-        $value->fecha_inicio     = str_replace('-', '/', $value->fecha_inicio);
-        $value->fecha_final      = str_replace('-', '/', $value->fecha_final);
-        if ($value->departamento == "ADMINISTRACION") {
-          $value->sueldo_semanal1   = $value->sueldo_semanal;
-          $value->vacaciones1       = $value->vacaciones;
-          $value->prima_vacacional1 = $value->prima_vacacional;
-          $value->aguinaldo1        = $value->aguinaldo;
-          $value->horas_extras1     = $value->horas_extras;
-          $value->pasistencia1      = $value->pasistencia;
-          $value->indemnizaciones1  = $value->indemnizaciones;
-
-          $value->sueldo_semanal2   = 0;
-          $value->vacaciones2       = 0;
-          $value->prima_vacacional2 = 0;
-          $value->aguinaldo2        = 0;
-          $value->horas_extras2     = 0;
-          $value->pasistencia2      = 0;
-          $value->indemnizaciones2  = 0;
-        } else {
-          $value->sueldo_semanal1   = 0;
-          $value->vacaciones1       = 0;
-          $value->prima_vacacional1 = 0;
-          $value->aguinaldo1        = 0;
-          $value->horas_extras1     = 0;
-          $value->pasistencia1      = 0;
-          $value->indemnizaciones1  = 0;
-
-          $value->sueldo_semanal2   = $value->sueldo_semanal;
-          $value->vacaciones2       = $value->vacaciones;
-          $value->prima_vacacional2 = $value->prima_vacacional;
-          $value->aguinaldo2        = $value->aguinaldo;
-          $value->horas_extras2     = $value->horas_extras;
-          $value->pasistencia2      = $value->pasistencia;
-          $value->indemnizaciones2  = $value->indemnizaciones;
-        }
-        $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
-      }*/
     }
 
     if(count($nominas) > 0)
@@ -1923,10 +2081,14 @@ class polizas_model extends CI_Model {
       {
         if ($id_poliza != ($value->id_empresa.$value->anio.$value->semana)) {
           //Se obtienen los prestamos
-          $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
-                                 FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
-                                 WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
-                                 GROUP BY u.id")->result();
+          $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi,
+              (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre,
+              COALESCE(Sum(nfp.monto), 0) AS prestamo
+             FROM nomina_fiscal_prestamos AS nfp
+              INNER JOIN nomina_prestamos AS np ON nfp.id_prestamo = np.id_prestamo
+              INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
+             WHERE np.tipo = 'fi' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+             GROUP BY u.id")->result();
           $prestamos = new Collection($prestamos);
 
           //Se obtienen los fondos_ahorro
@@ -1938,7 +2100,7 @@ class polizas_model extends CI_Model {
 
           //Agregamos el header de la poliza
           $response['data'] .= $this->setEspacios('P',2).
-                              $this->setEspacios(str_replace('/', '', $value->fecha_final),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                              $this->setEspacios(str_replace('-', '', $value->fecha_final),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
                               $this->setEspacios('0',10). //iddiario
@@ -1960,7 +2122,7 @@ class polizas_model extends CI_Model {
         $iper = ($value->departamento == "ADMINISTRACION")? 1: 2;
         if($value->sueldo_semanal > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNSueldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNSueldo(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->sueldo_semanal) , 20).  //importe movimiento - retencion
@@ -1972,7 +2134,7 @@ class polizas_model extends CI_Model {
         }
         if($value->vacaciones > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNVacaciones(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNVacaciones(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->vacaciones) , 20).  //importe movimiento - retencion
@@ -1984,7 +2146,7 @@ class polizas_model extends CI_Model {
         }
         if($value->prima_vacacional > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNPrimaVacacional(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->prima_vacacional) , 20).  //importe movimiento - retencion
@@ -1996,7 +2158,7 @@ class polizas_model extends CI_Model {
         }
         if($value->aguinaldo > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNAguinaldo(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNAguinaldo(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->aguinaldo) , 20).  //importe movimiento - retencion
@@ -2008,7 +2170,7 @@ class polizas_model extends CI_Model {
         }
         if($value->horas_extras > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNHorasHex(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNHorasHex(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->horas_extras) , 20).  //importe movimiento - retencion
@@ -2020,7 +2182,7 @@ class polizas_model extends CI_Model {
         }
         if($value->pasistencia > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getPAsistenciaContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getPAsistenciaContpaq(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->pasistencia) , 20).  //importe movimiento - retencion
@@ -2032,7 +2194,7 @@ class polizas_model extends CI_Model {
         }
         if($value->indemnizaciones > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper),30).  //cuenta contpaq
+                          $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                           $this->setEspacios( $this->numero($value->indemnizaciones) , 20).  //importe movimiento - retencion
@@ -2046,19 +2208,19 @@ class polizas_model extends CI_Model {
         //Colocamos los abonos de la nomina
         if($value->total_neto > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNominaPagar(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNominaPagar(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->total_neto) , 20).  //importe movimiento - retencion
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios("NOMINAS POR PAGAR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios("{$value->id_empleado} NOMINAS POR PAGAR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
           $response['data'] .= $this->addLineUUID($value->uuid);
         }
         if(abs($value->subsidio) > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNSubsidio(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNSubsidio(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->subsidio*-1) , 20).  //importe movimiento - retencion
@@ -2070,7 +2232,7 @@ class polizas_model extends CI_Model {
         }
         if($value->imss > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNImss(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNImss(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->imss) , 20).  //importe movimiento - retencion
@@ -2082,7 +2244,7 @@ class polizas_model extends CI_Model {
         }
         if($value->vejez > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNVejez(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNVejez(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->vejez) , 20).  //importe movimiento - retencion
@@ -2094,7 +2256,7 @@ class polizas_model extends CI_Model {
         }
         if($value->infonavit > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNInfonavit(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNInfonavit(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->infonavit) , 20).  //importe movimiento - retencion
@@ -2106,7 +2268,7 @@ class polizas_model extends CI_Model {
         }
         if($value->isr > 0){
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($this->getCuentaNIsr(),30).  //cuenta contpaq
+                          $this->setEspacios($this->getCuentaNIsr(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, abono = 1
                           $this->setEspacios( $this->numero($value->isr) , 20).  //importe movimiento - retencion
@@ -2115,6 +2277,22 @@ class polizas_model extends CI_Model {
                           $this->setEspacios("ISR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
           $response['data'] .= $this->addLineUUID($value->uuid);
+        }
+        if (!empty($value->otros_datos) && $value->tipo == 'no') {
+          $otros_datos = json_decode($value->otros_datos);
+
+          if (isset($otros_datos->dePensionAlimenticia) && $otros_datos->dePensionAlimenticia > 0) {
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getCuentaNPAlimen(true, $_GET['dregistro_patronal']),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                            $this->setEspacios( $this->numero($otros_datos->dePensionAlimenticia) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("PensionAlimenticia Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+            $response['data'] .= $this->addLineUUID($value->uuid);
+          }
         }
         foreach ($prestamos->where('id', '=', $value->id_empleado) as $keyp => $prestamo)
         {
@@ -2202,7 +2380,8 @@ class polizas_model extends CI_Model {
             Sum(b.total_cajas) AS cajas,
             Sum(b.importe) AS importe,
             (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
-            p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi
+            p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi,
+            Sum(b.ret_isr) AS ret_isr, Max(b.ret_isr_porcent) AS ret_isr_porcent
          FROM bascula b
          JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
                  FROM bascula_compra
@@ -2210,7 +2389,7 @@ class polizas_model extends CI_Model {
          LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor
         WHERE b.status = true
            {$sql}
-        GROUP BY p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi
+        GROUP BY p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi, b.ret_isr_porcent
         ORDER BY p.nombre_fiscal ASC
         "
       );
@@ -2221,7 +2400,9 @@ class polizas_model extends CI_Model {
 
       $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
                            'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'), );
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1', 'percent' => '1.25'),
+                         );
 
       //Agregamos el header de la poliza
       $response['data'] .= $this->setEspacios('P',2).
@@ -2247,7 +2428,11 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
-        $total_proveedores += $value->importe;
+        $total_proveedores += $value->importe + $value->ret_isr;
+
+        if ($value->ret_isr_porcent == 1.25) {
+          $impuestos['isr_retenido125']['importe'] += $value->ret_isr;
+        }
       }
 
       //Colocamos el abono del total
@@ -2269,15 +2454,31 @@ class polizas_model extends CI_Model {
                         $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                         $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
                         $this->setEspacios('',4)."\r\n"; //segmento de negocio
-      $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                        $this->setEspacios($cuenta_cpi2,30).  //cuenta contpaq
-                        $this->setEspacios('PD'.$folio,10).  //referencia movimiento
-                        $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
-                        $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
-                        $this->setEspacios('0',10).  //iddiario poner 0
-                        $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                        $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
-                        $this->setEspacios('',4)."\r\n"; //segmento de negocio
+      // $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+      //                   $this->setEspacios($cuenta_cpi2,30).  //cuenta contpaq
+      //                   $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+      //                   $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
+      //                   $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
+      //                   $this->setEspacios('0',10).  //iddiario poner 0
+      //                   $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+      //                   $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+      //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
+
+      //Colocamos los impuestos de la factura
+      foreach ($impuestos as $key => $impuesto) {
+        if ($impuestos[$key]['importe'] > 0)
+        {
+          $response['data'] .= $this->setEspacios('M',2).
+                        $this->setEspacios($impuesto['cuenta_cpi'],30).
+                        $this->setEspacios('PD'.$folio,10).
+                        $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                        $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                        $this->setEspacios('0',10).
+                        $this->setEspacios('0.0',20).
+                        $this->setEspacios($this->input->get('fconcepto')." {$value->ret_isr_porcent}%",100).
+                        $this->setEspacios('',4)."\r\n";
+        }
+      }
     }
 
     $response['folio'] = $folio;
@@ -2319,11 +2520,13 @@ class polizas_model extends CI_Model {
         (
           SELECT
             bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/(f.total - nc.abononc))*f.importe_iva/100)) AS importe_iva,
-            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/(f.total - Coalesce(nc.abononc, 0)))*f.importe_iva/100)) AS importe_iva,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.isr/100)) AS isr,
+            c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
-            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid
+            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso, bmcp.uuid,
+            tieps.ieps, tieps.porcentaje_ieps
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -2338,23 +2541,38 @@ class polizas_model extends CI_Model {
               GROUP BY id_nc
             ) nc ON nc.id_factura = f.id_factura
             LEFT JOIN banco_movimientos_com_pagos AS bmcp ON bmcp.id_movimiento = bmf.id_movimiento
+
+            LEFT JOIN (
+              SELECT id_movimiento, String_agg(ieps::text, ',') AS ieps, String_agg(porcentaje_ieps::text, ',') AS porcentaje_ieps
+              FROM (
+                SELECT bmc.id_movimiento, cp.porcentaje_ieps, Sum(cp.ieps) AS ieps
+                FROM facturacion_productos cp
+                  INNER JOIN facturacion_abonos AS fa ON fa.id_factura = cp.id_factura
+                  INNER JOIN banco_movimientos_facturas AS bmc ON bmc.id_abono_factura = fa.id_abono
+                WHERE cp.porcentaje_ieps in(6,7,9)
+                GROUP BY bmc.id_movimiento, cp.porcentaje_ieps
+              ) e
+              GROUP BY id_movimiento
+            ) tieps ON bmf.id_movimiento = tieps.id_movimiento
           WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
              {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
              AND f.id_abono_factura IS NULL AND (bmcp.status = 'facturada' OR bmcp.status IS NULL)
           GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), bmcp.uuid
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha),
+            bmcp.uuid, tieps.ieps, tieps.porcentaje_ieps
           ORDER BY bmf.id_movimiento ASC
         )
         UNION
         (
           SELECT
             bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
-            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva,
+            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS isr,
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
             0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
             'banco'::character varying AS tipoo,
-            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso, bmcp.uuid
+            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso, bmcp.uuid,
+            '' AS ieps, '' AS porcentaje_ieps
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
@@ -2382,8 +2600,18 @@ class polizas_model extends CI_Model {
       $impuestos = array(
         'iva_trasladar'  => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '0'),
         'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
-        'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'),
-        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetCobradoAc(), 'importe' => 0, 'tipo' => '0'),
+
+        'ieps_cobrar6' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrar7' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrar9' => array('cuenta_cpi' => $this->getCuentaIepsCobrarVentas(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_cobrado6' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrado7' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_cobrado9' => array('cuenta_cpi' => $this->getCuentaIepsCobradoIngreso(9), 'importe' => 0, 'tipo' => '1'),
+      );
 
       $folio = $this->input->get('ffolio');
       //Contenido de la Poliza
@@ -2422,6 +2650,7 @@ class polizas_model extends CI_Model {
 
           $importe_iva = $value->importe_iva;
           $importe_retencion = $value->retencion_iva;
+          $importe_retencion_isr = $value->isr;
           // Quitamos la opcion que ponga todo el iva en el primer pago
           // $facturasIds = explode(',', $value->idfacturas);
           // foreach ($facturasIds as $keyi => $facid)
@@ -2440,10 +2669,35 @@ class polizas_model extends CI_Model {
           // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
           $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;
           $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+          $impuestos['isr_retener']['importe']    = $importe_retencion_isr;
+          $impuestos['isr_retenido']['importe']   = $importe_retencion_isr;
 
           $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
           $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
+
+          $impuestos['ieps_cobrar6']['importe'] = 0;
+          $impuestos['ieps_cobrar7']['importe'] = 0;
+          $impuestos['ieps_cobrar9']['importe'] = 0;
+          $impuestos['ieps_cobrado6']['importe'] = 0;
+          $impuestos['ieps_cobrado7']['importe'] = 0;
+          $impuestos['ieps_cobrado9']['importe'] = 0;
+          if (!empty($value->ieps)) {
+            $aieps = explode(',', $value->ieps);
+            $aieps_porc = explode(',', $value->porcentaje_ieps);
+            foreach ($aieps as $kieps => $ieps) {
+              if ($aieps_porc[$kieps] == 6) {
+                $impuestos['ieps_cobrar6']['importe'] += $ieps;
+                $impuestos['ieps_cobrado6']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 7){
+                $impuestos['ieps_cobrar7']['importe'] += $ieps;
+                $impuestos['ieps_cobrado7']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 9) {
+                $impuestos['ieps_cobrar9']['importe'] += $ieps;
+                $impuestos['ieps_cobrado9']['importe'] += $ieps;
+              }
+            }
+          }
 
           //Colocamos el Cargo al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -2588,15 +2842,17 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT
         fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono,
-        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov
+        bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov,
+        bf.uuid, Sum(f.ret_isr) AS ret_isr
       FROM bascula_pagos AS fa
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
         INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
         INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula
         INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
+        LEFT JOIN bascula_facturas AS bf ON fa.id_pago = bf.id_pago
       WHERE fa.status = 't' AND fa.poliza_egreso = 'f' AND fa.tipo_pago <> 'cheque'
          {$sql}
-      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi
+      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bf.uuid
       ORDER BY fa.id_pago ASC
       ");
 
@@ -2612,7 +2868,10 @@ class polizas_model extends CI_Model {
         'iva_acreditar'  => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
         'iva_acreditado' => array('cuenta_cpi' => $this->getCuentaIvaAcreditado(), 'importe' => 0, 'tipo' => '0'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '1'),
+      );
 
       //Contenido de la Poliza
       foreach ($data as $key => $value)
@@ -2647,6 +2906,8 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
+
         //Colocamos el Abono al Banco que se deposito el dinero
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -2657,6 +2918,30 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $response['data'] .= $this->addLineUUID($value->uuid);
+
+        // impuestos
+        $ret_isr_porcent = round($value->ret_isr*100/($subtotal+$value->ret_isr), 2);
+        if ($ret_isr_porcent <= 1.26) {
+          $impuestos['isr_retenidoxpagar125']['importe'] = $value->ret_isr;
+          $impuestos['isr_retenidopagado125']['importe'] = $value->ret_isr;
+        }
+        //Colocamos los impuestos de la factura
+        foreach ($impuestos as $key => $impuesto) {
+          if ($impuestos[$key]['importe'] > 0)
+          {
+            $response['data'] .= $this->setEspacios('M',2).
+                          $this->setEspacios($impuesto['cuenta_cpi'],30).
+                          $this->setEspacios($value->ref_movimiento.'Fruta',10).
+                          $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                          $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                          $this->setEspacios('0',10).
+                          $this->setEspacios('0.0',20).
+                          $this->setEspacios($value->nombre_fiscal." {$ret_isr_porcent}%",100).
+                          $this->setEspacios('',4)."\r\n";
+          }
+        }
+
         // //Colocamos el Abono al Proveedor que realizo el pago
         // foreach ($data_frutas as $key => $value_fruta)
         // {
@@ -2670,6 +2955,11 @@ class polizas_model extends CI_Model {
         //                   $this->setEspacios($value->concepto.' (Boleta:'.$value_fruta->folio.')',100). //concepto
         //                   $this->setEspacios('',4)."\r\n"; //segmento de negocio
         // }
+
+        if (!empty($this->uuidsADD)) {
+          $response['data'] .= $this->uuidsADD;
+          $this->uuidsADD = '';
+        }
 
         $ffolio++;
       }
@@ -2715,7 +3005,9 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
+            0 AS porcentaje_isr125, 0 AS retencion_isr125
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2735,7 +3027,9 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, 0 AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
+            0 AS porcentaje_isr125, 0 AS retencion_isr125
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -2756,7 +3050,9 @@ class polizas_model extends CI_Model {
             COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
+            0 AS porcentaje_isr125, 0 AS retencion_isr125
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -2788,17 +3084,45 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio, bm.uuid,
+            tieps.ieps, tieps.porcentaje_ieps, String_agg(UPPER(f.concepto), ', ') AS observaciones,
+            tisr125.porcentaje_isr125, tisr125.retencion_isr125
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
             INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
-          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
+            LEFT JOIN (
+              SELECT id_movimiento, String_agg(ieps::text, ',') AS ieps, String_agg(porcentaje_ieps::text, ',') AS porcentaje_ieps
+              FROM (
+                SELECT bmc.id_movimiento, cp.porcentaje_ieps, Sum(cp.ieps) AS ieps
+                FROM compras_productos cp
+                  INNER JOIN compras_abonos AS fa ON fa.id_compra = cp.id_compra
+                  INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+                WHERE cp.id_compra IS NOT NULL AND cp.porcentaje_ieps in(6,7,9)
+                GROUP BY bmc.id_movimiento, cp.porcentaje_ieps
+              ) e
+              GROUP BY id_movimiento
+            ) tieps ON bm.id_movimiento = tieps.id_movimiento
+            LEFT JOIN (
+              SELECT id_movimiento, porcentaje_isr AS porcentaje_isr125, Sum(retencion_isr) AS retencion_isr125
+              FROM (
+                SELECT bmc.id_movimiento, cp.porcentaje_isr, Sum(cp.retencion_isr) AS retencion_isr
+                FROM compras_productos cp
+                  INNER JOIN compras_abonos AS fa ON fa.id_compra = cp.id_compra
+                  INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+                WHERE cp.id_compra IS NOT NULL AND cp.porcentaje_isr > 1.20 AND cp.porcentaje_isr < 1.30
+                GROUP BY bmc.id_movimiento, cp.porcentaje_isr
+              ) e
+              GROUP BY id_movimiento, porcentaje_isr
+            ) tisr125 ON bm.id_movimiento = tisr125.id_movimiento
+          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f' AND f.tipo_documento = 'fa'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio, bm.uuid
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha),
+            bm.tcambio, bm.uuid, tieps.ieps, tieps.porcentaje_ieps,
+            tisr125.porcentaje_isr125, tisr125.retencion_isr125
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -2809,7 +3133,9 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio, bm.uuid,
+            '' AS ieps, '' AS porcentaje_ieps, '' AS observaciones,
+            0 AS porcentaje_isr125, 0 AS retencion_isr125
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -2858,16 +3184,42 @@ class polizas_model extends CI_Model {
         'iva_acreditar'  => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'),
-        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
-        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
-        'ieps_acreditado'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-        'ieps_acreditar'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
+        'isr_retenerHo'  => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidoHo' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoHono(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retener'    => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenido'   => array('cuenta_cpi' => $this->getCuentaIsrRetPagado(), 'importe' => 0, 'tipo' => '1'),
+        'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '0'),
+        'isr_retenidopagado125' => array('cuenta_cpi' => $this->getCuentaIsrRetPagadoT(125), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagado6'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(6), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado7'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(7), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagado9'   => array('cuenta_cpi' => $this->getCuentaIepsPagadoEgreso(9), 'importe' => 0, 'tipo' => '0'),
+        'ieps_pagar6'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar7'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '1'),
+        'ieps_pagar9'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
+      );
 
       $folio = $this->input->get('ffolio');
       $aux_idmovimiento = 0;
       //Contenido de la Poliza de las facturas de compra
       foreach ($data as $key => $value)
       {
+        $impuestos['iva_acreditado']['importe'] = 0;
+        $impuestos['iva_acreditar']['importe'] = 0;
+        $impuestos['iva_retener']['importe'] = 0;
+        $impuestos['iva_retenido']['importe'] = 0;
+        $impuestos['isr_retenerHo']['importe'] = 0;
+        $impuestos['isr_retenidoHo']['importe'] = 0;
+        $impuestos['isr_retener']['importe'] = 0;
+        $impuestos['isr_retenido']['importe'] = 0;
+        $impuestos['isr_retenidoxpagar125']['importe'] = 0;
+        $impuestos['isr_retenidopagado125']['importe'] = 0;
+        $impuestos['ieps_pagado6']['importe'] = 0;
+        $impuestos['ieps_pagado7']['importe'] = 0;
+        $impuestos['ieps_pagado9']['importe'] = 0;
+        $impuestos['ieps_pagar6']['importe'] = 0;
+        $impuestos['ieps_pagar7']['importe'] = 0;
+        $impuestos['ieps_pagar9']['importe'] = 0;
+
         if ($value->tipoo == 'facturas')
         {
           //Agregamos el header de la poliza
@@ -2893,21 +3245,71 @@ class polizas_model extends CI_Model {
             $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagar100();
             $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagado100();
           }elseif($ret_iva_pos > 4.5)
-          { // Asigana las cuentas de honorarios
-            $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagarHono();
-            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagadoHono();
+          { // Asigana las cuentas de honorarios o arrendamiento
+            if ($this->getTipoISRCompras($value->observaciones) == 'ar') { // Arrendamiento
+              $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagarArrend();
+              $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagadoArrend();
+            } else { // Honorarios
+              $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagarHono();
+              $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagadoHono();
+            }
           }
-          $impuestos['iva_retener']['importe']    = $value->retencion_iva; //$factor*$value->retencion_iva/100;
-          $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+          $impuestos['iva_retener']['importe']  = $value->retencion_iva; //$factor*$value->retencion_iva/100;
+          $impuestos['iva_retenido']['importe'] = $impuestos['iva_retener']['importe'];
 
-          $impuestos['isr_retener']['importe']    = $value->retencion_isr; //
-          $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+          $impuestos['isr_retener']['importe']    = 0;
+          $impuestos['isr_retenido']['importe']   = 0;
+          $impuestos['isr_retenerHo']['importe']  = 0;
+          $impuestos['isr_retenidoHo']['importe'] = 0;
+          if ($value->retencion_isr > 0) {
+            $bandisr = true;
+            if ($this->getTipoISRCompras($value->observaciones) == 'ar') { // Arrendamiento
+              $impuestos['isr_retener']['importe']    = $value->retencion_isr;
+              $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+              $bandisr = false;
+            } elseif ($this->getTipoISRCompras($value->observaciones) == 'ho') { // Honorario
+              $impuestos['isr_retenerHo']['importe']    = $value->retencion_isr;
+              $impuestos['isr_retenidoHo']['importe']   = $impuestos['isr_retenerHo']['importe'];
+              $bandisr = false;
+            }
+
+            if ($value->porcentaje_isr125 > 0) {
+              $impuestos['isr_retenidoxpagar125']['importe'] = $value->retencion_isr125;
+              $impuestos['isr_retenidopagado125']['importe'] = $impuestos['isr_retenidoxpagar125']['importe'];
+            } elseif($bandisr){ // cualquier isr
+              $impuestos['isr_retener']['importe']    = $value->retencion_isr;
+              $impuestos['isr_retenido']['importe']   = $impuestos['isr_retener']['importe'];
+            }
+          }
 
           $impuestos['iva_acreditar']['importe']  = $value->importe_iva; //$factor*($value->importe_iva)/100;
           $impuestos['iva_acreditado']['importe'] = $impuestos['iva_acreditar']['importe'];
 
-          $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
-          $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
+          // $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
+          // $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
+
+          $impuestos['ieps_pagar6']['importe'] = 0;
+          $impuestos['ieps_pagado6']['importe'] = 0;
+          $impuestos['ieps_pagar7']['importe'] = 0;
+          $impuestos['ieps_pagado7']['importe'] = 0;
+          $impuestos['ieps_pagar9']['importe'] = 0;
+          $impuestos['ieps_pagado9']['importe'] = 0;
+          if (!empty($value->ieps)) {
+            $aieps = explode(',', $value->ieps);
+            $aieps_porc = explode(',', $value->porcentaje_ieps);
+            foreach ($aieps as $kieps => $ieps) {
+              if ($aieps_porc[$kieps] == 6) {
+                $impuestos['ieps_pagar6']['importe'] += $ieps;
+                $impuestos['ieps_pagado6']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 7){
+                $impuestos['ieps_pagar7']['importe'] += $ieps;
+                $impuestos['ieps_pagado7']['importe'] += $ieps;
+              } elseif ($aieps_porc[$kieps] == 9) {
+                $impuestos['ieps_pagar9']['importe'] += $ieps;
+                $impuestos['ieps_pagado9']['importe'] += $ieps;
+              }
+            }
+          }
 
           $subtotal = $subtotal2 = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
 

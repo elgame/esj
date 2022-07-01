@@ -20,6 +20,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/add_finiquito/',
     'nomina_fiscal/ajax_add_prenomina_empleado/',
     'nomina_fiscal/ajax_get_semana/',
+    'nomina_fiscal/ajax_get_reg_patronales/',
     'nomina_fiscal/ajax_add_nomina_ptu_empleado/',
     'nomina_fiscal/ajax_add_nomina_aguinaldo_empleado/',
     'nomina_fiscal/ajax_add_nomina_terminada/',
@@ -62,8 +63,14 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/show_import_asistencias/',
     'nomina_fiscal/parcheGeneraXML/',
 
+    'nomina_fiscal/show_import_nomina_corona/',
+    'nomina_fiscal/download_descuentos_corona/',
+
     'nomina_fiscal/cuadro_antiguedad_pdf/',
     'nomina_fiscal/cuadro_antiguedad_xls/',
+
+    'nomina_fiscal/nominas_empleados_pdf/',
+    'nomina_fiscal/nominas_empleados_xls/',
   );
 
   public function _remap($method)
@@ -83,31 +90,40 @@ class nomina_fiscal extends MY_Controller {
 
   public function parcheGeneraXML()
   {
-    $nominas = $this->db->query("SELECT nf.*, u.rfc FROM nomina_fiscal nf
-      INNER JOIN usuarios u ON u.id = nf.id_empleado WHERE nf.anio = 2019 AND nf.uuid <> ''
-      ORDER BY nf.id_empresa ASC")->result();
-    $this->load->library('cfdi');
-    $auxempresa = 0;
+    $nominas = $this->db->query("SELECT * FROM public.nomina_fiscal WHERE id_empresa = 2 and semana = 48")->result();
     foreach ($nominas as $key => $value) {
-      if ($auxempresa != $value->id_empresa) {
-        $this->cfdi->cargaDatosFiscales($value->id_empresa);
-        $auxempresa = $value->id_empresa;
-      }
-      $this->cfdi->anio = $value->anio;
-      $this->cfdi->semana = $value->semana;
-      $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
+      $cfdi_ext = strlen(trim($value->cfdi_ext))>0? "'".pg_escape_string($value->cfdi_ext)."'": 'NULL';
+      $otros_datos = strlen(trim($value->otros_datos))>0? "'".pg_escape_string($value->otros_datos)."'": 'NULL';
+      echo "INSERT INTO public.nomina_fiscal(id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, fecha, dias_trabajados, salario_diario, salario_integral, subsidio, sueldo_semanal, bonos, otros, subsidio_pagado, vacaciones, prima_vacacional_grabable, prima_vacacional_exento, prima_vacacional, aguinaldo_grabable, aguinaldo_exento, aguinaldo, total_percepcion, imss, vejez, isr, infonavit, subsidio_cobrado, prestamos, deduccion_otros, total_deduccion, total_neto, id_empleado_creador, ptu_exento, ptu_grabable, ptu, id_puesto, salario_real, sueldo_real, total_no_fiscal, horas_extras, horas_extras_grabable, horas_extras_excento, descuento_playeras, xml, uuid, utilidad_empresa, descuento_otros, domingo, esta_asegurado, fondo_ahorro, pasistencia, despensa, cfdi_ext, descuento_cocina, otros_datos)
+            VALUES ({$value->id_empleado}, {$value->id_empresa}, {$value->anio}, {$value->semana}, '{$value->fecha_inicio}', '{$value->fecha_final}', '{$value->fecha}', {$value->dias_trabajados}, {$value->salario_diario}, {$value->salario_integral}, {$value->subsidio}, {$value->sueldo_semanal}, {$value->bonos}, {$value->otros}, {$value->subsidio_pagado}, {$value->vacaciones}, {$value->prima_vacacional_grabable}, {$value->prima_vacacional_exento}, {$value->prima_vacacional}, {$value->aguinaldo_grabable}, {$value->aguinaldo_exento}, {$value->aguinaldo}, {$value->total_percepcion}, {$value->imss}, {$value->vejez}, {$value->isr}, {$value->infonavit}, {$value->subsidio_cobrado}, {$value->prestamos}, {$value->deduccion_otros}, {$value->total_deduccion}, {$value->total_neto}, {$value->id_empleado_creador}, {$value->ptu_exento}, {$value->ptu_grabable}, {$value->ptu}, {$value->id_puesto}, {$value->salario_real}, {$value->sueldo_real}, {$value->total_no_fiscal}, {$value->horas_extras}, {$value->horas_extras_grabable}, {$value->horas_extras_excento}, {$value->descuento_playeras}, '".pg_escape_string($value->xml)."', '{$value->uuid}', {$value->utilidad_empresa}, {$value->descuento_otros}, {$value->domingo}, '{$value->esta_asegurado}', {$value->fondo_ahorro}, {$value->pasistencia}, {$value->despensa}, {$cfdi_ext}, {$value->descuento_cocina}, {$otros_datos});\n\n";
     }
 
-    // $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
-    //   ORDER BY f.id_empresa ASC")->result();
+
+    // $nominas = $this->db->query("SELECT nf.*, u.rfc FROM nomina_fiscal nf
+    //   INNER JOIN usuarios u ON u.id = nf.id_empleado WHERE nf.anio = 2019 AND nf.uuid <> ''
+    //   ORDER BY nf.id_empresa ASC")->result();
+    // $this->load->library('cfdi');
     // $auxempresa = 0;
     // foreach ($nominas as $key => $value) {
     //   if ($auxempresa != $value->id_empresa) {
     //     $this->cfdi->cargaDatosFiscales($value->id_empresa);
     //     $auxempresa = $value->id_empresa;
     //   }
-    //   $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    //   $this->cfdi->anio = $value->anio;
+    //   $this->cfdi->semana = $value->semana;
+    //   $this->cfdi->guardarXMLNomina($value->xml, $value->rfc);
     // }
+
+    // // $nominas = $this->db->query("SELECT f.* FROM facturacion f WHERE Date(f.fecha) BETWEEN '2019-01-01' AND '2019-05-30' AND f.uuid <> ''
+    // //   ORDER BY f.id_empresa ASC")->result();
+    // // $auxempresa = 0;
+    // // foreach ($nominas as $key => $value) {
+    // //   if ($auxempresa != $value->id_empresa) {
+    // //     $this->cfdi->cargaDatosFiscales($value->id_empresa);
+    // //     $auxempresa = $value->id_empresa;
+    // //   }
+    // //   $this->cfdi->guardarXMLFactura($value->xml, $this->cfdi->rfc, $value->serie, $value->folio, $value->fecha);
+    // // }
   }
 
   public function rpt_dim()
@@ -184,10 +200,12 @@ class nomina_fiscal extends MY_Controller {
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
     $filtros = array(
-      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
-      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
-      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
-      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'calcMes'     => isset($_GET['calcMes']) ? $_GET['calcMes'] : false,
+      'semana'      => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
@@ -208,17 +226,21 @@ class nomina_fiscal extends MY_Controller {
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
 
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
-    $filtros['semana'] = $filtros['semana'] != ''? $filtros['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
+    $filtros['semana'] = $filtros['semana'] != ''? $filtros['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -234,7 +256,8 @@ class nomina_fiscal extends MY_Controller {
     $data_nom_guar = $this->db->query("SELECT Count(*) AS num
       FROM nomina_fiscal_guardadas
       WHERE id_empresa = {$filtros['empresaId']} AND anio = {$filtros['anio']}
-        AND semana = {$filtros['semana']} AND tipo = 'se'")->row();
+        AND semana = {$filtros['semana']} AND tipo = 'se'
+        AND registro_patronal = '{$filtros['regPatronal']}'")->row();
     $params['nominas_generadas'] = $data_nom_guar->num > 0? true: false;
 
     // Total de nominas de los empleados generadas.
@@ -291,6 +314,7 @@ class nomina_fiscal extends MY_Controller {
       'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
       'asegurado'   => true,
       'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
@@ -317,16 +341,26 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
+
+    // // Ajuste de Ptu
+    // // ===================
+    // $this->load->model('nomina_ajustes_model');
+    // $this->nomina_ajustes_model->confAjustePtu2019()->ajustePtu2019($params['empleados']);
+    // // echo "<pre>";
+    // // var_dump($params['empleados']);
+    // // echo "</pre>";exit;
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -349,6 +383,9 @@ class nomina_fiscal extends MY_Controller {
         $params['nominas_generadas'] = true;
       }
     }
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     // Indica si ya se generaron todas las nominas de los empleados de la semana.
     $params['nominas_finalizadas'] = false;
@@ -389,10 +426,11 @@ class nomina_fiscal extends MY_Controller {
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
     $filtros = array(
-      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
-      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
-      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
-      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'semana'      => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'        => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'empresaId'   => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'    => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
 
@@ -425,15 +463,16 @@ class nomina_fiscal extends MY_Controller {
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
 
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+    $params['tipoNomina'] = ($dia == 15? 'quincena': 'semana');
 
     // Determina cual es la semana que dejara seleccionada en la vista.
-    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
-    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes(null, 0, $dia);
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual[$params['tipoNomina']];
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], ($dia == 15? 15: 7));
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -456,6 +495,9 @@ class nomina_fiscal extends MY_Controller {
         $params['nominas_generadas'] = true;
       }
     }
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($filtros['empresaId'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
 
     // Indica si ya se generaron todas las nominas de los empleados de la semana.
     $params['nominas_finalizadas'] = false;
@@ -684,6 +726,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los dias de la semana.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empresa']->dia_inicia_semana);
     $params['semana'] = $semana;
+    $_POST['dia_inicia_semana'] = $params['empresa']->dia_inicia_semana;
 
     if (isset($_POST['id_empresa'])) {
       $this->configImportarAsistencias();
@@ -694,7 +737,11 @@ class nomina_fiscal extends MY_Controller {
       else
       {
         $this->load->model('nomina_fiscal_otros_model');
-        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias($semana);
+        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias2($semana);
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $res_mdl['error'] = '503';
+          $params['resumen'] = $res_mdl['resumen'];
+        }
 
         $_GET['msg'] = $res_mdl['error'];
       }
@@ -717,6 +764,91 @@ class nomina_fiscal extends MY_Controller {
   | Asigna las reglas para validar un articulo al agregarlo
   */
   public function configImportarAsistencias()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required|is_natural'),
+      array('field' => 'semana',
+            'label' => 'Semana',
+            'rules' => 'required|is_natural'),
+      array('field' => 'anio',
+            'label' => 'Año',
+            'rules' => 'required|is_natural'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function show_import_nomina_corona()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Fiscal - Importar Nomina Corona');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
+    // Obtiene la informacion de la empresa.
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+
+    // Obtiene los dias de la semana.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empresa']->dia_inicia_semana);
+    $params['semana'] = $semana;
+
+    if (isset($_POST['id_empresa'])) {
+      $this->configImportarNominaCorona();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('nomina_fiscal_otros_model');
+        $res_mdl = $this->nomina_fiscal_otros_model->importNominaCorina($semana);
+        $_GET['msg'] = $res_mdl['error'];
+
+        if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {
+          $params['resumen'] = $res_mdl['resumen'];
+          $_GET['msg'] = '556';
+        }
+
+      }
+    }
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '550')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/nomina_fiscal/importar_nomina_corona', $params);
+  }
+
+  public function download_descuentos_corona()
+  {
+    if (!empty($_GET['id']) && !empty($_GET['sem']) && !empty($_GET['anio'])) {
+      $this->load->model('nomina_fiscal_otros_model');
+      $this->nomina_fiscal_otros_model->descargarNominaCorona($_GET);
+    }
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function configImportarNominaCorona()
   {
     $this->load->library('form_validation');
     $rules = array(
@@ -1075,6 +1207,38 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_otros_model->getCuadroAntiguedadXls();
   }
 
+  public function nominas_empleados()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_nominas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado'] = $this->info_empleado['info'];
+    $params['seo']           = array('titulo' => 'Reporte Acumulado Nominas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_acumulado_nominas',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function nominas_empleados_pdf() {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getAcumuladoNominasEmpleadosXls(true);
+  }
+  public function nominas_empleados_xls() {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->getAcumuladoNominasEmpleadosXls();
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -1170,10 +1334,20 @@ class nomina_fiscal extends MY_Controller {
     echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia, $anio));
   }
 
+  public function ajax_get_reg_patronales()
+  {
+    $this->load->model('empresas_model');
+
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['did_empresa'], true)['info'];
+    $params['registros_patronales'] = explode('|', (isset($params['empresa']->registro_patronal)? $params['empresa']->registro_patronal: ''));
+
+    echo json_encode($params);
+  }
+
   public function nomina_fiscal_pdf()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    $this->nomina_fiscal_model->pdfNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio'], $_GET['fregistro_patronal']);
   }
 
   public function nomina_fiscal_rpt_pdf()
@@ -1194,14 +1368,14 @@ class nomina_fiscal extends MY_Controller {
   public function nomina_fiscal_banco()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId'], $_GET['anio'], $_GET['fregistro_patronal']);
   }
 
   public function recibo_nomina_pdf()
   {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+    $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId'], null, $_GET['fregistro_patronal']);
   }
 
   public function recibo_tfiniquito_pdf()
@@ -1215,7 +1389,7 @@ class nomina_fiscal extends MY_Controller {
   {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId']);
+    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId'], $_GET['fregistro_patronal']);
   }
 
   public function asistencia_pdf()
@@ -1261,10 +1435,10 @@ class nomina_fiscal extends MY_Controller {
 
   public function cancelar()
   {
-    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}))
+    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}) && !empty($_GET['fregistro_patronal']))
     {
       $this->load->model('nomina_fiscal_model');
-      $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
+      $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId'], $_GET['fregistro_patronal']);
 
       // if ($response['cancelada']) {
       //   $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $_GET['empresaId'], 'anio' => $_GET['anio'],
@@ -1438,6 +1612,39 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 502:
         $txt = 'Ocurrió un error al leer el archivo de asistencias.';
+        $icono = 'error';
+        break;
+      case 503:
+        $txt = 'Las asistencias se guardaron correctamente, pero hay algunos detalles en algunos trabajadores.';
+        $icono = 'error';
+        break;
+
+      case 550:
+        $txt = 'La nomina se cargo correctamente.';
+        $icono = 'success';
+        break;
+      case 551:
+        $txt = 'Ocurrió un error al subir el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 552:
+        $txt = 'Ocurrió un error al leer el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 553:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 554:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 555:
+        $txt = 'La empresa, semana y/o año son erróneos en el archivo de nomina.';
+        $icono = 'error';
+        break;
+      case 556:
+        $txt = 'La nomina se cargo correctamente, hay algunos errores en los trabajadores.';
         $icono = 'error';
         break;
     }

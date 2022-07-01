@@ -11,6 +11,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/ajax_get_categorias/',
     'caja_chica/cerrar_caja/',
     'caja_chica/print_caja/',
+    'caja_chica/xls_caja/',
     'caja_chica/rpt_gastos_pdf/',
     'caja_chica/rpt_gastos_xls/',
     'caja_chica/rpt_ingresos_pdf/',
@@ -20,6 +21,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/print_vale_ipr/',
     'caja_chica/print_vale_tras/',
     'caja_chica/print_vale_deudor/',
+    'caja_chica/print_vale_bod_gdl/',
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
@@ -29,6 +31,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/agregar_abono_deudor/',
     'caja_chica/quitar_abono_deudor/',
     'caja_chica/ajax_registra_gasto_comp/',
+    'caja_chica/ajax_cambiar_pregasto/',
   );
 
   public function _remap($method)
@@ -153,6 +156,27 @@ class caja_chica extends MY_Controller {
 
     $this->load->view('panel/header',$params);
     $this->load->view('panel/caja_chica/index5',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function caja6()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja6/', true);
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => $privilegio->nombre);
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index6',$params);
     $this->load->view('panel/footer',$params);
   }
 
@@ -810,6 +834,12 @@ class caja_chica extends MY_Controller {
     echo json_encode($this->caja_chica_model->ajaxRegGastosComprobar($_POST));
   }
 
+  public function ajax_cambiar_pregasto()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->ajaxCambiarPreGastos($_POST));
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -969,6 +999,17 @@ class caja_chica extends MY_Controller {
       $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
   }
 
+  public function xls_caja()
+  {
+    $this->load->model('caja_chica_model');
+    if ($_GET['fno_caja'] == 'prest1') {
+      $_GET['fno_caja'] = '1';
+      $this->load->model('caja_chica_prest_model');
+      $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+    } else
+      $this->caja_chica_model->xlsCaja($_GET['ffecha'], $_GET['fno_caja']);
+  }
+
   public function print_vale()
   {
     $this->load->model('caja_chica_model');
@@ -1020,6 +1061,17 @@ class caja_chica extends MY_Controller {
       $this->caja_chica_model->printValeDeudor($_GET['id'], $_GET['noCaja']);
     else{
       $params['url'] = 'panel/caja_chica/print_vale_deudor/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_bod_gdl()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeBodGdl($_GET['id'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_bod_gdl/?id='.$_GET['id'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }

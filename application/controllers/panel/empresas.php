@@ -6,7 +6,11 @@ class empresas extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('empresas/ajax_get_empresas/');
+	private $excepcion_privilegio = array(
+    'empresas/ajax_get_empresas/',
+    'empresas/ajax_get_sucursales/',
+
+  );
 
 	public function _remap($method){
 
@@ -178,6 +182,13 @@ class empresas extends MY_Controller {
 		echo json_encode($params);
 	}
 
+  public function ajax_get_sucursales(){
+    $this->load->model('empresas_model');
+    $params = $this->empresas_model->getSucursales($this->input->get('did_empresa'));
+
+    echo json_encode($params);
+  }
+
 	/**
 	 * Configura los metodos de agregar y modificar
 	 */
@@ -234,7 +245,7 @@ class empresas extends MY_Controller {
             'rules' => 'max_length[50]'),
         array('field' => 'dregistro_patronal',
             'label' => 'Régimen fiscal',
-            'rules' => 'max_length[20]'),
+            'rules' => 'max_length[200]'),
 
 				array('field'	=> 'dpass',
 						'label'	=> 'Clave',

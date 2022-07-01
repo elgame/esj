@@ -118,6 +118,17 @@
                 </div>
               </div><!--/control-group -->
 
+              <?php if (!empty($orden['info'][0]->id_sucursal)): ?>
+              <div class="control-group">
+                <label class="control-label" for="empresa">Sucursal </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <?php echo $orden['info'][0]->sucursal ?>
+                  </div>
+                </div>
+              </div><!--/control-group -->
+              <?php endif ?>
+
               <div class="control-group">
                 <label class="control-label" for="proveedor">Proveedor</label>
                 <div class="controls">
@@ -229,6 +240,35 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="folioHoja">Folio Hoja</label>
+                <div class="controls">
+                  <input type="text" name="folioHoja" class="span9" id="folioHoja" value="<?php echo set_value('folioHoja', $orden['info'][0]->folio_hoja); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="duso_cfdi">Uso de CFDI</label>
+                <div class="controls">
+                  <select name="duso_cfdi" class="span9" id="duso_cfdi">
+                    <?php foreach ($usoCfdi as $key => $usoCfd) { ?>
+                      <option value="<?php echo $usoCfd['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfd['key'], ($orden['info'][0]->uso_cfdi == $usoCfd['key'])); ?>><?php echo $usoCfd['key'].' - '.$usoCfd['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dforma_pago">Forma de Pago</label>
+                <div class="controls">
+                  <select name="dforma_pago" class="span9" id="dforma_pago">
+                    <?php foreach ($formPagos as $key => $formPago) { ?>
+                      <option value="<?php echo $formPago['key'] ?>" <?php echo set_select('dforma_pago', $formPago['key'], ($orden['info'][0]->forma_pago == $formPago['key'])); ?>><?php echo $formPago['key'].' - '.$formPago['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="tipoPago">Tipo de Pago</label>
                 <div class="controls">
                   <select name="tipoPago" class="span9" id="tipoPago" <?php echo $disabled ?>>
@@ -237,6 +277,15 @@
                   </select>
                 </div>
               </div>
+
+              <?php if (isset($orden['info'][0]->proyecto['info'])): ?>
+              <div class="control-group">
+                <label class="control-label" for="tipoPago">Proyecto asignado</label>
+                <div class="controls">
+                  <?php echo $orden['info'][0]->proyecto['info']->nombre ?>
+                </div>
+              </div>
+              <?php endif ?>
 
               <div class="control-group" <?php echo ($orden['info'][0]->tipo_orden === 'f' && $orden['info'][0]->flete_de === 'v'? '': 'style="display:none;"'); ?> id="fletesFactura">
                 <label class="control-label" for="tipoPago">Ligar Factura/Remision</label>
@@ -595,7 +644,7 @@
                           <th>PRODUCTO</th>
                           <th>PRESEN.</th>
                           <th>UNIDAD</th>
-                          <th>CANT.</th>
+                          <th>CANT / PIEZAS</th>
                           <th>FALTANTES</th>
                           <th>P.U.</th>
                           <th>IVA</th>
@@ -636,8 +685,8 @@
                                   <input type="hidden" name="concepto[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
                                   <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                               </td>
-                              <td style="width: 160px;">
-                                <select name="presentacion[]">
+                              <td style="width: 80px;">
+                                <select name="presentacion[]" style="width: 80px;">
                                   <option value="<?php echo $_POST['presentacion'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant'][$key] ?>"><?php echo $_POST['presentacionText'][$key] ?></option>
                                 </select>
                                 <input type="hidden" name="presentacionCant[]" value="<?php echo $_POST['presentacionCant'][$key] ?>" id="presentacionCant" class="span12">
@@ -650,13 +699,14 @@
                                   <?php } ?>
                                 </select>
                               </td>
-                              <td style="width: 65px;">
-                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
+                              <td style="width: 100px;">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0"> |
+                                  <input type="number" step="any" name="piezas[]" value="<?php echo $_POST['piezas'][$key] ?>" id="piezas" class="span12 vpositive" min="0">
                               </td>
-                              <td style="width: 65px;">
+                              <td style="width: 100px;">
                                   <input type="number" step="any" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
                               </td>
-                              <td style="width: 90px;">
+                              <td style="width: 100px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">
                               </td>
                               <td style="width: 66px;">
@@ -678,6 +728,8 @@
                                     <option value="4" <?php echo $_POST['ret_iva'][$key] === '4' ? "selected" : '' ?>>4%</option>
                                     <option value="10.6667" <?php echo $_POST['ret_iva'][$key] === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                     <option value="16" <?php echo $_POST['ret_iva'][$key] === '16' ? "selected" : '' ?>>100 %</option>
+                                    <option value="6" <?php echo $_POST['ret_iva'][$key] === '6' ? "selected" : '' ?>>6 %</option>
+                                    <option value="8" <?php echo $_POST['ret_iva'][$key] === '8' ? "selected" : '' ?>>8 %</option>
                                   </select>
                                    <input type="hidden" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
                                </td>
@@ -690,8 +742,9 @@
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
                               </td>
-                              <td>
-                                  <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12 vpositive">
+                              <td style="width: 150px;">
+                                  <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
+                                  <input type="hidden" name="observaciones[]" value="<?php echo $_POST['observaciones'][$key] ?>" id="observaciones" class="span12">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>
@@ -769,9 +822,9 @@
                                      <input type="hidden" name="concepto[]" value="<?php echo $prod->descripcion ?>" id="concepto" class="span12">
                                      <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
                                  </td>
-                                 <td style="width: 160px;<?php echo $redBg ?>">
+                                 <td style="width: 80px;<?php echo $redBg ?>">
                                     <?php if ($prod->id_presentacion){ ?>
-                                      <select name="presentacion[]" <?php echo $readonly ?>>
+                                      <select name="presentacion[]" <?php echo $readonly ?> style="width: 80px;">
                                         <option value="<?php echo $prod->id_presentacion ?>" data-cantidad="<?php echo $prod->presen_cantidad ?>"><?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?></option>
                                       </select>
                                       <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
@@ -791,13 +844,14 @@
                                      <?php } ?>
                                    </select>
                                  </td>
-                                 <td style="width: 65px;<?php echo $redBg ?>">
-                                     <input type="number" step="any" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="0" <?php echo $readonly ?>>
+                                 <td style="width: 120px;<?php echo $redBg ?>">
+                                     <input type="number" step="any" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="0" <?php echo $readonly ?>> |
+                                     <input type="number" step="any" name="piezas[]" value="<?php echo $prod->piezas ?>" id="piezas" class="span12 vpositive" min="0">
                                  </td>
-                                 <td style="width: 65px;<?php echo $redBg ?>">
+                                 <td style="width: 120px;<?php echo $redBg ?>">
                                      <input type="number" step="any" name="faltantes[]" value="<?php echo $prod->faltantes ?>" id="faltantes" class="span12 vpositive" min="0" <?php echo $readonly ?>>
                                  </td>
-                                 <td style="width: 90px;<?php echo $redBg ?>">
+                                 <td style="width: 120px;<?php echo $redBg ?>">
                                      <input type="text" name="valorUnitario[]" value="<?php echo $pu ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
@@ -819,6 +873,8 @@
                                       <option value="4" <?php echo $prod->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
                                       <option value="10.6667" <?php echo $prod->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
                                       <option value="16" <?php echo $prod->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                      <option value="6" <?php echo $prod->porcentaje_retencion === '6' ? "selected" : '' ?>>6 %</option>
+                                      <option value="8" <?php echo $prod->porcentaje_retencion === '8' ? "selected" : '' ?>>8 %</option>
                                     </select>
                                      <input type="hidden" name="retTotal[]" value="<?php echo $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                  </td>
@@ -831,8 +887,9 @@
                                      <input type="hidden" name="importe[]" value="<?php echo $prod->importe ?>" id="importe" class="span12 vpositive">
                                      <input type="hidden" name="total[]" value="<?php echo $prod->total ?>" id="total" class="span12 vpositive">
                                  </td>
-                                 <td style="<?php echo $redBg ?>">
+                                 <td style="width: 150px;<?php echo $redBg ?>">
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
+                                    <input type="hidden" name="observaciones[]" value="<?php echo $prod->observaciones ?>" id="observaciones" class="span12">
                                 </td>
                                  <td style="width: 35px;<?php echo $redBg ?>">
                                   <?php if ($showButton && $prod->status != 'a'){ ?>
