@@ -1827,6 +1827,7 @@ class facturacion_model extends privilegios_model{
         'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
         'retencion_iva'       => $this->input->post('total_retiva'),
         'ieps'                => floatval($this->input->post('total_ieps')),
+        'isr'                 => floatval($this->input->post('total_isr')),
         'cfdi_ext'            => json_encode($cfdi_ext),
       );
 
