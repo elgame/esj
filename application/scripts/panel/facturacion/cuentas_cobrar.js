@@ -81,7 +81,9 @@ $(function(){
 
   comPagos.init();
 
-  loadSerieFolio($('#did_empresa').val());
+  if($('#did_empresa').length > 0) {
+    loadSerieFolio($('#did_empresa').val());
+  }
 });
 
 function loadSerieFolio (ide, forceLoad) {
