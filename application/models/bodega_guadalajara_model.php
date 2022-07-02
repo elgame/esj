@@ -152,6 +152,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Existencia del dia por empresa
     foreach ($info['existencia_dia'] as $key => $value) {
+      $value->empresa = isset($value->empresa)? $value->empresa: '';
       $info['existencia_dia_empresas']["{$value->id_categoria}-".(isset($value->categoria)? $value->categoria: $value->empresa)][] = $value;
     }
 
