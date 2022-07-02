@@ -67,6 +67,11 @@
                   <option value="r" <?php echo set_select_get('ftipodoc', 'r'); ?>>Remisiones</option>
                 </select>
 
+                <label for="fserie">Serie</label>
+                <select name="fserie" id="fserie" class="input-large search-query">
+                </select>
+                <input type="hidden" name="fserie1" id="fserie1" value="<?php echo set_value_get('fserie'); ?>">
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>

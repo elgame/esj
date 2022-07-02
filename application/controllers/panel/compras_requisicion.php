@@ -127,6 +127,7 @@ class compras_requisicion extends MY_Controller {
       array('general/util.js'),
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('panel/compras_ordenes/pasteimage.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));
@@ -225,6 +226,7 @@ class compras_requisicion extends MY_Controller {
       array('general/util.js'),
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('panel/compras_ordenes/pasteimage.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));

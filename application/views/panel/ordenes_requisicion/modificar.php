@@ -392,6 +392,11 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="span12" style="text-align: center;">
+                    <input type="hidden" name="dimg_gas" id="dimg_gas" value="">
+                    <img id="img_show_gas" src="<?php echo base_url((isset($orden['info'][0]->img_gas)? $orden['info'][0]->img_gas: 'application/images/ctrl-v.jpg')) ?>" style="height: 250px;width: auto;border: 3px #000 solid;">
+                  </div>
                 </div>
 
                </div> <!-- /box-body -->
@@ -641,7 +646,7 @@
                           <th rowspan="2" style="vertical-align: middle;">PROVEEDOR</th>
                           <th rowspan="2" style="vertical-align: middle;">CODIGO AREA</th>
                           <th rowspan="2" style="vertical-align: middle;">CODIGO PROD.</th>
-                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
+                          <th rowspan="2" style="vertical-align: middle;">CANT / PIEZAS</th>
                           <th rowspan="2" style="vertical-align: middle;">UNIDAD PRESEN.</th>
                           <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
                           <!-- <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
@@ -699,7 +704,8 @@
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $concepto->num_row ?>" class="span12">
                             </td>
                             <td style="width: 120px;">
-                                <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">
+                                <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">/
+                                <input type="number" step="any" name="piezas[]" value="<?php echo ($concepto->piezas) ?>" id="piezas" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
                               <select name="unidad[]" id="unidad" class="span12">

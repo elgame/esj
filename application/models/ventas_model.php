@@ -124,7 +124,8 @@ class Ventas_model extends privilegios_model{
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
-                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real')
+                fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real,
+                fp.isr, fp.porcentaje_isr')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', 'u.nombre = fp.unidad', 'left')
@@ -285,6 +286,7 @@ class Ventas_model extends privilegios_model{
       'importe_iva'         => $this->input->post('total_iva'),
       'retencion_iva'       => $this->input->post('total_retiva'),
       'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
@@ -337,7 +339,7 @@ class Ventas_model extends privilegios_model{
     }
 
     // Si tiene el # de Salida de fruta
-    if ($this->input->post('dno_salida_fruta') !== false) {
+    if ($this->input->post('dno_salida_fruta') !== false && $this->input->post('dno_salida_fruta') != '') {
       $this->db->insert('facturacion_otrosdatos', [
         'id_factura'       => $id_venta,
 
@@ -435,6 +437,8 @@ class Ventas_model extends privilegios_model{
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => $_POST['dieps_total'][$key],
           'porcentaje_ieps'       => $_POST['dieps'][$key],
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],
@@ -658,6 +662,7 @@ class Ventas_model extends privilegios_model{
       'importe_iva'         => $this->input->post('total_iva'),
       'retencion_iva'       => $this->input->post('total_retiva'),
       'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
@@ -789,6 +794,8 @@ class Ventas_model extends privilegios_model{
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => $_POST['dieps_total'][$key],
           'porcentaje_ieps'       => $_POST['dieps'][$key],
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'kilos'                 => ($_POST['prod_dcantidad'][$key] * $dunidad_c), //$_POST['prod_dkilos'][$key],
           'cajas'                 => $_POST['prod_dcajas'][$key],

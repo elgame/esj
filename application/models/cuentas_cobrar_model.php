@@ -1702,6 +1702,10 @@ class cuentas_cobrar_model extends privilegios_model{
       $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
     }
 
+    if($this->input->get('fserie') != ''){
+      $sql_clientes .= " AND serie = '".$this->input->get('fserie')."'";
+    }
+
     $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito, id_factura,
         id_empresa, fecha, serie, folio, concepto, subtotal, importe_iva, total, total_cambio, tipo_cambio,
         is_factura, fecha_vencimiento, a_id_abono, a_serie, a_folio, a_fecha, a_concepto, a_abono

@@ -559,11 +559,11 @@
                                         </button>
                                         <ul class="dropdown-menu impuestosEx" style="width: 250px;">
                                           <li class="clearfix">
-                                            <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                            <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
                                             <input type="hidden" name="dieps_total[]" value="<?php echo $_POST['dieps_total'][$k] ?>" id="dieps_total" class="span12">
                                           </li>
                                           <li class="clearfix">
-                                            <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                            <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
                                             <input type="hidden" name="disr_total[]" value="<?php echo $_POST['disr_total'][$k] ?>" id="disr_total" class="span12">
                                           </li>
                                         </ul>
@@ -675,11 +675,11 @@
                                   </button>
                                   <ul class="dropdown-menu impuestosEx" style="width: 250px;">
                                     <li class="clearfix">
-                                      <label class="pull-left">% IEPS:</label> <input type="number" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                      <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
                                       <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
                                     </li>
                                     <li class="clearfix">
-                                      <label class="pull-left">% Ret ISR:</label> <input type="number" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                      <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
                                       <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
                                     </li>
                                   </ul>
@@ -759,8 +759,8 @@
                       </tr>
                       <tr>
                         <td>Ret. Isr</td>
-                        <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0))?></td>
-                        <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->ieps : 0); ?>">
+                        <td id="isr-format"><?php echo MyString::formatoNumero(set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0))?></td>
+                        <input type="hidden" name="total_isr" id="total_isr" value="<?php echo set_value('total_isr', isset($borrador) ? $borrador['info']->isr : 0); ?>">
                       </tr>
                       <tr>
                         <td>Ret. IVA</td>

@@ -865,8 +865,8 @@ class facturacion_model extends privilegios_model{
           'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
           'ieps'                  => (isset($_POST['dieps_total'][$key])? $_POST['dieps_total'][$key]: 0),
           'porcentaje_ieps'       => (isset($_POST['dieps'][$key])? $_POST['dieps'][$key]: 0),
-          'isr'                   => (isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0),
-          'porcentaje_isr'        => (isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0),
+          'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+          'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
           'ids_pallets'           => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           'ids_remisiones'        => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
           'kilos'                 => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
@@ -907,7 +907,7 @@ class facturacion_model extends privilegios_model{
             'retencionCedular'        => '0',
             'retencionCedularPorcent' => '0',
             'retencionIsr'            => floatval((isset($_POST['disr_total'][$key])? $_POST['disr_total'][$key]: 0)),
-            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['dieps'][$key]: 0)),
+            'retencionIsrPorcent'     => floatval((isset($_POST['disr'][$key])? $_POST['disr'][$key]: 0)),
             'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
             'retencionIvaPorcent'     => ($_POST['prod_dreten_iva_porcent'][$key]*100),
             'retencionIvc'            => '0',
@@ -1835,6 +1835,7 @@ class facturacion_model extends privilegios_model{
         'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
         'retencion_iva'       => $this->input->post('total_retiva'),
         'ieps'                => floatval($this->input->post('total_ieps')),
+        'isr'                 => floatval($this->input->post('total_isr')),
         'cfdi_ext'            => json_encode($cfdi_ext),
       );
 
@@ -1897,6 +1898,8 @@ class facturacion_model extends privilegios_model{
             'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
             'ieps'                  => $_POST['dieps_total'][$key],
             'porcentaje_ieps'       => $_POST['dieps'][$key],
+            'isr'                   => (isset($_POST['disr_total'][$key])? floatval($_POST['disr_total'][$key]): 0),
+            'porcentaje_isr'        => (isset($_POST['disr'][$key])? floatval($_POST['disr'][$key]): 0),
             'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
             'ids_remisiones'        => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
             'kilos'                 => $_POST['prod_dkilos'][$key],
@@ -2217,7 +2220,7 @@ class facturacion_model extends privilegios_model{
                     'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
       foreach ($res[0] as $key => $value)
       {
-        if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
+        if($tipo != '' && isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
           unset($res[0][$key]);
       }
 
@@ -4980,6 +4983,15 @@ class facturacion_model extends privilegios_model{
 
       $pdf->SetXY(186, $pdf->GetY());
       $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->ieps/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
+    }
+
+    if ($factura['info']->isr > 0)
+    {
+      $pdf->SetXY(156, $pdf->GetY() + 5);
+      $pdf->Cell(30, 5, "{$this->lang->line('factura_totales_iva_retenido', 'ISR Retenido')}", 1, 0, 'C', 1);
+
+      $pdf->SetXY(186, $pdf->GetY());
+      $pdf->Cell(30, 5,MyString::formatoNumero(($factura['info']->isr/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
     }
 
     if ($factura['info']->retencion_iva > 0)

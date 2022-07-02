@@ -644,7 +644,7 @@
                           <th>PRODUCTO</th>
                           <th>PRESEN.</th>
                           <th>UNIDAD</th>
-                          <th>CANT.</th>
+                          <th>CANT / PIEZAS</th>
                           <th>FALTANTES</th>
                           <th>P.U.</th>
                           <th>IVA</th>
@@ -700,7 +700,8 @@
                                 </select>
                               </td>
                               <td style="width: 100px;">
-                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0"> |
+                                  <input type="number" step="any" name="piezas[]" value="<?php echo $_POST['piezas'][$key] ?>" id="piezas" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 100px;">
                                   <input type="number" step="any" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
@@ -844,7 +845,8 @@
                                    </select>
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
-                                     <input type="number" step="any" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="0" <?php echo $readonly ?>>
+                                     <input type="number" step="any" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="0" <?php echo $readonly ?>> |
+                                     <input type="number" step="any" name="piezas[]" value="<?php echo $prod->piezas ?>" id="piezas" class="span12 vpositive" min="0">
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
                                      <input type="number" step="any" name="faltantes[]" value="<?php echo $prod->faltantes ?>" id="faltantes" class="span12 vpositive" min="0" <?php echo $readonly ?>>

@@ -7,6 +7,8 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      loadSerieFolio(ui.item.id, true, ui.item);
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -78,7 +80,40 @@ $(function(){
   modalAbonos.init();
 
   comPagos.init();
+
+  if($('#did_empresa').length > 0) {
+    loadSerieFolio($('#did_empresa').val());
+  }
 });
+
+function loadSerieFolio (ide, forceLoad) {
+  if (ide > 0){
+    var objselect = $('#fserie');
+
+    var url = 'panel/facturacion/get_series/?tipof=&ide=';
+
+    loader.create();
+      $.getJSON(base_url+url+ide,
+        function(res){
+          if(res.data) {
+            var html_option = '<option value=""></option>',
+                selected = '', serieSelected = '',
+                loadDefault = false;
+
+            let ser = '';
+            console.log($('#fserie1').val());
+            for (var i in res.data){
+              selected = res.data[i].serie == $('#fserie1').val()? ' selected': '';
+              html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+            }
+            objselect.html(html_option);
+          } else {
+            noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+          }
+          loader.close();
+        });
+  }
+}
 
 //complemento de pagos
 var comPagos = (function($){

@@ -92,6 +92,18 @@ class compras_requisicion_model extends CI_Model {
     return $response;
   }
 
+  public function saveImage($dimg_gas)
+  {
+    $path = '';
+    if (!empty($dimg_gas)) {
+      $parts = explode(';', $dimg_gas);
+      $data = base64_decode($parts[1]);
+      $path = APPPATH."images/ordenes/".md5(date("Y-m-d H:i:s")).".{$parts[0]}";
+      file_put_contents($path, $data);
+    }
+
+    return $path;
+  }
   /**
    * Agrega una orden de compra
    *
@@ -119,6 +131,8 @@ class compras_requisicion_model extends CI_Model {
       'folio_hoja'      => (!empty($this->input->post('folioHoja'))? $_POST['folioHoja']: NULL),
       'uso_cfdi'        => (!empty($this->input->post('duso_cfdi'))? $_POST['duso_cfdi']: 'G03'),
       'forma_pago'      => (!empty($this->input->post('dforma_pago'))? $_POST['dforma_pago']: '99'),
+
+      'img_gas'         => $this->saveImage($this->input->post('dimg_gas')),
     );
 
     // Si es un gasto son requeridos los campos de catálogos
@@ -260,6 +274,7 @@ class compras_requisicion_model extends CI_Model {
           'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
           'descripcion'          => $concepto,
           'cantidad'             => $cantidad,
+          'piezas'               => (isset($_POST['piezas'][$key])? floatval($_POST['piezas'][$key]): 0),
           'precio_unitario'      => $pu,
           'importe'              => $_POST['importe'.$value][$key],
           'iva'                  => $_POST['trasladoTotal'.$value][$key],
@@ -405,6 +420,10 @@ class compras_requisicion_model extends CI_Model {
         'uso_cfdi'        => (!empty($this->input->post('duso_cfdi'))? $_POST['duso_cfdi']: 'G03'),
         'forma_pago'      => (!empty($this->input->post('dforma_pago'))? $_POST['dforma_pago']: '99'),
       );
+
+      if (($urlimgd = $this->saveImage($this->input->post('dimg_gas'))) !== '') {
+        $data['img_gas'] = $urlimgd;
+      }
 
       // Si es un gasto son requeridos los campos de catálogos
       if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a'
@@ -572,6 +591,7 @@ class compras_requisicion_model extends CI_Model {
             'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
             'descripcion'          => $concepto,
             'cantidad'             => $cantidad,
+            'piezas'               => (isset($_POST['piezas'][$key])? floatval($_POST['piezas'][$key]): 0),
             'precio_unitario'      => $pu,
             'importe'              => $_POST['importe'.$value][$key],
             'iva'                  => $_POST['trasladoTotal'.$value][$key],
@@ -666,6 +686,7 @@ class compras_requisicion_model extends CI_Model {
           'folio_hoja'          => (!empty($data->folio_hoja)? $data->folio_hoja: NULL),
           'uso_cfdi'            => (!empty($data->uso_cfdi)? $data->uso_cfdi: 'G03'),
           'forma_pago'          => (!empty($data->forma_pago)? $data->forma_pago: '99'),
+          'img_gas'             => (!empty($data->img_gas)? $data->img_gas: NULL),
         );
 
         $dataOrdenCats['requisiciones'][] = [
@@ -791,6 +812,7 @@ class compras_requisicion_model extends CI_Model {
             'id_presentacion'      => $prod->id_presentacion !== '' ? $prod->id_presentacion : null,
             'descripcion'          => $prod->descripcion,
             'cantidad'             => $prod->cantidad,
+            'piezas'               => $prod->piezas,
             'precio_unitario'      => $prod->precio_unitario,
             'importe'              => $prod->importe,
             'iva'                  => $prod->iva,
@@ -1043,7 +1065,8 @@ class compras_requisicion_model extends CI_Model {
               co.ids_facrem, co.ids_compras, co.ids_salidas_almacen, co.ids_gastos_caja,
               co.flete_de, co.id_almacen, ca.nombre AS almacen,
               co.id_area, co.id_activo, co.id_empresa_ap,
-              otros_datos, co.id_proyecto, co.folio_hoja, co.uso_cfdi, co.forma_pago
+              otros_datos, co.id_proyecto, co.folio_hoja, co.uso_cfdi, co.forma_pago,
+              co.img_gas
       FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
@@ -1071,7 +1094,7 @@ class compras_requisicion_model extends CI_Model {
           "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal AS proveedor,
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
-                  cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
+                  cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe, cp.piezas,
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,

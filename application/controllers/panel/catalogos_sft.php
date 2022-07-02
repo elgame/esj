@@ -17,8 +17,10 @@ class catalogos_sft extends MY_Controller {
 			'catalogos_sft/ajax_get_codigos/',
 			'catalogos_sft/ajax_get_codigosauto/',
 
-			'catalogos_sft/rpt_codigos_cuentas_pdf/',
+      'catalogos_sft/rpt_codigos_cuentas_pdf/',
 			'catalogos_sft/rpt_codigos_cuentas_xls/',
+
+			'catalogos_sft/rpt_codigos_compras_piezas_pdf/',
 
       'catalogos_sft/rpt_codigos_cuentas_salidas_pdf/',
       'catalogos_sft/rpt_codigos_cuentas_salidas_xls/',
@@ -468,6 +470,38 @@ class catalogos_sft extends MY_Controller {
   {
     $this->load->model('catalogos_sft_model');
     $this->catalogos_sft_model->rpt_codigos_cuentas_xls();
+  }
+
+  public function rpt_codigos_compras_piezas()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.treeview.css', 'screen')
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.treeview.js'),
+      array('panel/catalogos/rpt_codigos_cuentas.js'),
+    ));
+
+    $this->load->model('catalogos_sft_model');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte Compras x Piezas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $this->catalogos_sft_model->class_treeAreas = 'treeviewcustom';
+    $params['vehiculos'] = $this->catalogos_sft_model->getFrmCatCodigos();
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/catalogos/rpt_codigos_compras',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_codigos_compras_piezas_pdf()
+  {
+    $this->load->model('catalogos_sft_model');
+    $this->catalogos_sft_model->rpt_codigos_compras_piezas_pdf();
   }
 
   public function rpt_codigos_cuentas_salidas()

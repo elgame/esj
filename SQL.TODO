@@ -1,6 +1,26 @@
 
- ☐ isr factura
-   -- pcc
+ ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
+ ✔ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área @done (22-06-21 19:38)
+   -- lap|san
+   ALTER TABLE public.compras_requisicion_productos ADD COLUMN piezas double precision DEFAULT 0;
+   ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
+      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
+ ☐ Descargas masivas de remisiones
+ ☐ Nomina corona
+   - catalogo de ranchos
+   - catalogo de tablas por rancho, numero de he
+   - catalogo de labores con precio de pago
+   - Apartado para capturar las actividades diaras ver foto, opcion de modificar actvidades ya registradas
+   - Reportes de costos de nomina
+   - Reporte de avances de labores por rancho
+   - Reporte concentrado de sueldo por trabajador
+   - Imprimir formato de trabajadores por rancho, asignarle al trabajador el rancho
+ ☐ Agregar imágenes a las ordenes de compra
+   --lap|san
+   ALTER TABLE public.compras_requisicion ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
+   ALTER TABLE public.compras_ordenes ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
+ ✔ isr factura @done (22-05-31 14:05)
+   -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN isr double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.facturacion_productos ADD COLUMN porcentaje_isr double precision NOT NULL DEFAULT 0;
