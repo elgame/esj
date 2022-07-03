@@ -455,7 +455,7 @@ class bascula_model extends CI_Model {
     }
 
     try {
-      $this->snapshotCam2 = file_get_contents($this->config->item('snapshot_cam2'));
+      // $this->snapshotCam2 = file_get_contents($this->config->item('snapshot_cam2'));
     } catch (Exception $e) {
       $this->snapshotCam2 = '';
     }
