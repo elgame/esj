@@ -94,6 +94,7 @@ class caja_chica_prest_model extends CI_Model {
       'saldo_inicial'       => 0,
       'fondos_caja'         => array(),
       'prestamos_lp'        => array(),
+      'materiales'          => [],
       'prestamos'           => array(),
       'prestamos_dia'       => array(),
       'pagos'               => array(),
@@ -163,7 +164,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_fiscal_prestamos
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
+      WHERE np.close = 'f' AND np.tipo <> 'mt' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
       ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
     );
 
@@ -177,6 +178,47 @@ class caja_chica_prest_model extends CI_Model {
           ++$item->no_pagos;
         if (round($item->saldo_ini, 2) == 0)
           unset($info['prestamos_lp'][$key]);
+      }
+    }
+
+    // DESCUENTO MATERIALES
+    $prestamos = $this->db->query(
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria,
+        COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+      FROM nomina_prestamos np
+      INNER JOIN usuarios u ON u.id = np.id_usuario
+      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
+      LEFT JOIN (
+        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+        WHERE nfp.fecha < '{$fecha}'
+        GROUP BY np.id_prestamo
+      ) pai ON np.id_prestamo = pai.id_prestamo
+      LEFT JOIN (
+        SELECT id_prestamo, no_ticket, monto AS pago_dia
+        FROM nomina_fiscal_prestamos
+        WHERE fecha = '{$fecha}'
+      ) abd ON np.id_prestamo = abd.id_prestamo
+      WHERE np.close = 'f' AND np.tipo = 'mt' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
+      ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
+    );
+
+    if ($prestamos->num_rows() > 0)
+    {
+      $info['materiales'] = $prestamos->result();
+      foreach ($info['materiales'] as $key => $item) {
+        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
+        $item->saldo_fin = round($item->saldo_ini - $item->pago_dia, 2);
+        if ($item->pago_dia > 0)
+          ++$item->no_pagos;
+        if (round($item->saldo_ini, 2) == 0)
+          unset($info['materiales'][$key]);
       }
     }
 
