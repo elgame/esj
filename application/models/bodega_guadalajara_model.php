@@ -470,7 +470,7 @@ class bodega_guadalajara_model extends CI_Model {
           'precio_unitario'  => $exist->precio_unitario,
           'importe'          => $exist->importe,
           'id_clasificacion' => $exist->id_clasificacion,
-          'id_categoria'     => $exist->id_categoria,
+          'id_categoria'     => ($exist->id_categoria > 0? $exist->id_categoria: NULL),
         );
         ++$key;
       }
