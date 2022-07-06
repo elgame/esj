@@ -1863,6 +1863,10 @@ class caja_chica_prest_model extends CI_Model {
 
   public function printPrestamoLp($ticket, $fecha=null)
   {
+    $titulo = 'CAJA DE PRESTAMOS';
+    if (!empty($_GET['herr'])) {
+      $titulo = "DESCUENTO DE MATERIALES \nY/O HERRAMIENTAS";
+    }
     $tipo = false;
     $sql1 = "id_prestamo = {$ticket}";
     $sql2 = "np.id_prestamo = {$ticket}";
@@ -1915,10 +1919,10 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetXY(0, 0);
 
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(45));
     $pdf->SetXY(0, $pdf->GetY()-5);
-    $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
+    $pdf->Row(array($titulo), false, false);
     if ($tipo) {
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(0, $pdf->GetY()-3);

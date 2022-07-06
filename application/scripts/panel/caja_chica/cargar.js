@@ -73,6 +73,7 @@
     $('#frmcajachica').submit(function(event) {
       $('#btnGuardar').attr('disabled', 'disabled');
       $('#btnGuardar2').attr('disabled', 'disabled');
+      $('#logo1').focus();
       if ($('#btnGuardar').length == 0) {
         event.preventDefault();
       }

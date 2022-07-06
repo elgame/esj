@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/ventas_dia/vd_pdf/'); ?>" method="GET" id="frmverform" class="form-search" target="rdeReporte">
+            <form action="<?php echo base_url('panel/ventas_dia/vd_pdf/'); ?>" method="GET" id="frmventasdia" class="form-search" target="rdeReporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group">
