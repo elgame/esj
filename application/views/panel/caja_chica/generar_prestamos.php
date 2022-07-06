@@ -641,7 +641,7 @@
                             ?>
                                     <tr>
                                       <td><?php echo $prestamo->categoria ?>
-                                        <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom)?>" target="_blank" title="Imprimir vale prestamo">
+                                        <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom."&herr=1")?>" target="_blank" title="Imprimir vale prestamo">
                                           <i class="ico icon-print" style="cursor:pointer"></i></a>
                                       </td>
                                       <td><?php echo $prestamo->empleado ?></td>

@@ -45,6 +45,7 @@
         $readonly = '';
         $only_bodega_gdl = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/bodega_gdl/');
         $no_abrir_cortes = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/no_abrir_cortes/');
+        $modificar_campos = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_caja_campos/');
         $show = true;
         $display = '';
         $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
@@ -89,7 +90,7 @@
                 <?php
                 $logo = $_GET['fno_caja']==5? '/application/images/transporte.png': '/application/images/logo.png';
                 ?>
-                <img alt="logo" src="<?php echo base_url().$logo; ?>" height="54">
+                <img id="logo1" alt="logo" src="<?php echo base_url().$logo; ?>" height="54">
               </div>
               <div class="span2" style="text-align: right;">
                 <div class="row-fluid">
@@ -347,7 +348,7 @@
                                       </td>
                                       <td style=""><input type="number" step="any" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
                                       <td style="width: 30px;">
-                                        <?php if (!$cajas_cerradas): ?>
+                                        <?php if (!$cajas_cerradas && $modificar_campos): ?>
                                           <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                         <?php endif ?>
                                         <input type="hidden" name="remision_del[]" value="" id="remision_del">
@@ -492,7 +493,7 @@
                                             <?php endif ?>
                                           </td>
                                           <td style="width: 30px;">
-                                            <?php if (!$cajas_cerradas && $traspaso->guardado == 't'): ?>
+                                            <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
                                             <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                             <?php endif ?>
                                           </td>
@@ -728,7 +729,7 @@
                                     <td style=""><input type="text" name="gasto_pre_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlyCC ?>></td>
                                     <td style="">
                                       <?php if ($modificar_gasto): ?>
-                                        <?php if (!$cajas_cerradas): ?>
+                                        <?php if (!$cajas_cerradas && $modificar_campos): ?>
                                           <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                           <button type="button" class="btn btn-danger btn-change-pregasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
                                         <?php endif ?>
@@ -905,7 +906,7 @@
                                     <td style=""><input type="text" name="gasto_comprobar_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly.$mod_gas_readonly.$readonlygc.$readonlyCC ?>></td>
                                     <td style="width: 50px">
                                       <?php if ($modificar_gasto): ?>
-                                        <?php if (!$cajas_cerradas): ?>
+                                        <?php if (!$cajas_cerradas && $modificar_campos): ?>
                                           <button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                           <button type="button" class="btn btn-info btn-show-comp-gasto" style="padding: 2px 7px 2px;"><i class="icon-check"></i></button>
                                         <?php endif ?>
