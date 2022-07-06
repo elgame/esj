@@ -94,6 +94,7 @@ class caja_chica_prest_model extends CI_Model {
       'saldo_inicial'       => 0,
       'fondos_caja'         => array(),
       'prestamos_lp'        => array(),
+      'materiales'          => [],
       'prestamos'           => array(),
       'prestamos_dia'       => array(),
       'pagos'               => array(),
@@ -163,7 +164,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_fiscal_prestamos
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
+      WHERE np.close = 'f' AND np.tipo <> 'mt' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
       ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
     );
 
@@ -177,6 +178,47 @@ class caja_chica_prest_model extends CI_Model {
           ++$item->no_pagos;
         if (round($item->saldo_ini, 2) == 0)
           unset($info['prestamos_lp'][$key]);
+      }
+    }
+
+    // DESCUENTO MATERIALES
+    $prestamos = $this->db->query(
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria,
+        COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+      FROM nomina_prestamos np
+      INNER JOIN usuarios u ON u.id = np.id_usuario
+      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
+      LEFT JOIN (
+        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+        WHERE nfp.fecha < '{$fecha}'
+        GROUP BY np.id_prestamo
+      ) pai ON np.id_prestamo = pai.id_prestamo
+      LEFT JOIN (
+        SELECT id_prestamo, no_ticket, monto AS pago_dia
+        FROM nomina_fiscal_prestamos
+        WHERE fecha = '{$fecha}'
+      ) abd ON np.id_prestamo = abd.id_prestamo
+      WHERE np.close = 'f' AND np.tipo = 'mt' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
+      ORDER BY tipo ASC, categoria ASC, fecha ASC, id_prestamo_nom ASC"
+    );
+
+    if ($prestamos->num_rows() > 0)
+    {
+      $info['materiales'] = $prestamos->result();
+      foreach ($info['materiales'] as $key => $item) {
+        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
+        $item->saldo_fin = round($item->saldo_ini - $item->pago_dia, 2);
+        if ($item->pago_dia > 0)
+          ++$item->no_pagos;
+        if (round($item->saldo_ini, 2) == 0)
+          unset($info['materiales'][$key]);
       }
     }
 
@@ -1256,6 +1298,140 @@ class caja_chica_prest_model extends CI_Model {
       MyString::formatoNumero($totalprescp_salfin, 2, '$', false),
       ), true, 'B');
 
+    // DESCUENTOS MATERIALES
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(206));
+    $pdf->SetXY(6, $pdf->GetY()+3);
+    $pdf->Row(array('DESCUENTO DE MATERIALES Y/O HERRAMIENTAS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+
+    $tipoo = '';
+    $empresaaux = '';
+    $first = false;
+    // $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
+    $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+    $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+    $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+    $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+    $totalpreslp_ef_rec = [];
+    foreach ($caja['materiales'] as $key => $prestamo) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
+      // if ($prestamo->tipo == 'efd') {
+      //   $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+      //   $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+      //   $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+      //   if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+      //     $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+      //   } else {
+      //     $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+      //   }
+      // } elseif ($prestamo->tipo == 'ef') {
+      //   $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+      //   $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+      //   $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+      //   // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+      //   //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+      //   // } else {
+      //   //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+      //   // }
+      // } else {
+        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
+      // }
+
+      if ($empresaaux != $prestamo->categoria) {
+        if ($first) {
+          $pdf->SetFont('Arial', 'B', 7);
+          $pdf->SetX(120);
+          $pdf->SetFillColor(255, 255, 255);
+          $pdf->SetAligns(array('R', 'R', 'R', 'C', 'R', 'R'));
+          $pdf->SetWidths(array(18, 18, 18, 10, 10, 18));
+          $pdf->Row(array('SUMAS',
+            MyString::formatoNumero($totalpreslp_grup_salini, 2, '$', false),
+            MyString::formatoNumero($totalpreslp_grup_pago_dia, 2, '$', false),
+            '', '',
+            MyString::formatoNumero($totalpreslp_grup_salfin, 2, '$', false),
+            ), true, 'B');
+
+          $pdf->SetY($pdf->GetY()+5);
+        }
+        $totalpreslp_grup_salini = $totalpreslp_grup_pago_dia = $totalpreslp_grup_salfin = 0;
+        $empresaaux = $prestamo->categoria;
+      }
+      $first = true;
+      $totalpreslp_grup_salini   += floatval($prestamo->saldo_ini);
+      $totalpreslp_grup_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_grup_salfin   += floatval($prestamo->saldo_fin);
+
+      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+        switch ($prestamo->tipo) {
+          case 'efd': $tipo = 'Efectivo Fijo'; break;
+          case 'ef': $tipo = 'Efectivo'; break;
+          default: $tipo = 'Fiscal'; break;
+        }
+        $tipoo = $prestamo->tipo;
+
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->SetWidths(array(206));
+        $pdf->SetAligns(array('L', 'R', 'R', 'C', 'R', 'R'));
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetX(6);
+        $pdf->Row(array($tipo), true, 'B');
+      }
+
+      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $prestamo->categoria,
+        $prestamo->empleado,
+        MyString::fechaAT($prestamo->fecha),
+        $prestamo->referencia.' '.($prestamo->tipo_nombre),
+        MyString::formatoNumero($prestamo->monto, 2, '', false),
+        MyString::formatoNumero($prestamo->saldo_ini, 2, '', false),
+        MyString::formatoNumero($prestamo->pago_dia, 2, '', false),
+        $prestamo->no_pagos.'/'.$prestamo->tno_pagos,
+        $prestamo->no_ticket,
+        MyString::formatoNumero($prestamo->saldo_fin, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(120);
+    $pdf->Row(array('Suma',
+      MyString::formatoNumero($totalpreslp_salini_fi, 2, '$', false),
+      MyString::formatoNumero($totalpreslp_pago_dia_fi, 2, '$', false),
+      '', '',
+      MyString::formatoNumero($totalpreslp_salfin_fi, 2, '$', false),
+      ), true, 'B');
+
     // PRESTAMOS DEL DIA
     $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
@@ -1687,6 +1863,10 @@ class caja_chica_prest_model extends CI_Model {
 
   public function printPrestamoLp($ticket, $fecha=null)
   {
+    $titulo = 'CAJA DE PRESTAMOS';
+    if (!empty($_GET['herr'])) {
+      $titulo = "DESCUENTO DE MATERIALES \nY/O HERRAMIENTAS";
+    }
     $tipo = false;
     $sql1 = "id_prestamo = {$ticket}";
     $sql2 = "np.id_prestamo = {$ticket}";
@@ -1739,10 +1919,10 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetXY(0, 0);
 
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(45));
     $pdf->SetXY(0, $pdf->GetY()-5);
-    $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
+    $pdf->Row(array($titulo), false, false);
     if ($tipo) {
       $pdf->SetAligns(array('C'));
       $pdf->SetXY(0, $pdf->GetY()-3);

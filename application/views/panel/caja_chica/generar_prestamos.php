@@ -562,6 +562,125 @@
                     </div>
                     <!--/ Saldo empleados-->
 
+                    <!-- Descuento de materiales -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamolp">
+                          <thead>
+                            <tr>
+                              <th colspan="9">DESCUENTO DE MATERIALES Y/O HERRAMIENTAS
+                                <!-- <button type="button" class="btn btn-success" id="btn-add-prestamo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
+                              </th>
+                              <th colspan="1">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>EMPRESA</th>
+                              <th>TRABAJADOR</th>
+                              <th>FECHA</th>
+                              <th>REFERENCIA</th>
+                              <th>CARGO <br> PRESTAMOS</th>
+                              <th>SALDOS <br> INICIALES</th>
+                              <th>ABONO <br> DEL DIA</th>
+                              <th>No.</th>
+                              <th>TICKET <br> INGRESO</th>
+                              <th>SALDOS <br> FINALES</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                                  $tipoo = '';
+                                  $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+                                  $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
+                                  $totalpreslp_salini_efd = $totalpreslp_pago_dia_efd = $totalpreslp_salfin_efd = 0;
+                                  $totalpreslp_ef_rec = [];
+                                  foreach ($caja['materiales'] as $prestamo) {
+                                      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+                                      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+                                      $totalpreslp_salfin += floatval($prestamo->saldo_fin);
+
+                                      // if ($prestamo->tipo == 'efd') {
+                                      //   $totalpreslp_salini_efd += floatval($prestamo->saldo_ini);
+                                      //   $totalpreslp_pago_dia_efd += floatval($prestamo->pago_dia);
+                                      //   $totalpreslp_salfin_efd += floatval($prestamo->saldo_fin);
+
+                                      //   if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                      //     $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                      //   } else {
+                                      //     $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                      //   }
+                                      // } elseif ($prestamo->tipo == 'ef') {
+                                      //   $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+                                      //   $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+                                      //   $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+
+                                      //   // if (isset($totalpreslp_ef_rec[$prestamo->categoria])) {
+                                      //   //   $totalpreslp_ef_rec[$prestamo->categoria] += $prestamo->pago_dia;
+                                      //   // } else {
+                                      //   //   $totalpreslp_ef_rec[$prestamo->categoria] = $prestamo->pago_dia;
+                                      //   // }
+                                      // } else {
+                                        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
+                                      // }
+
+                                      if ($tipoo != $prestamo->tipo && $prestamo->tipo != 'mt') {
+                                        switch ($prestamo->tipo) {
+                                          case 'efd': $tipo = 'Efectivo Fijo'; break;
+                                          case 'ef': $tipo = 'Efectivo'; break;
+                                          default: $tipo = 'Fiscal'; break;
+                                        }
+                                        $tipoo = $prestamo->tipo;
+                            ?>
+                                    <tr>
+                                      <td colspan="10"><strong><?php echo $tipo ?></strong></td>
+                                    </tr>
+                            <?php
+                                      }
+                            ?>
+                                    <tr>
+                                      <td><?php echo $prestamo->categoria ?>
+                                        <a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->id_prestamo_nom."&herr=1")?>" target="_blank" title="Imprimir vale prestamo">
+                                          <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                      </td>
+                                      <td><?php echo $prestamo->empleado ?></td>
+                                      <td><?php echo MyString::fechaAT($prestamo->fecha) ?></td>
+                                      <td><?php echo $prestamo->referencia ?></td>
+                                      <td><?php echo $prestamo->monto ?></td>
+                                      <td><?php echo $prestamo->saldo_ini ?></td>
+                                      <td><?php echo $prestamo->pago_dia ?></td>
+                                      <td><?php echo $prestamo->no_pagos.'/'.$prestamo->tno_pagos ?></td>
+                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->no_ticket."&fecha=".$fecha_caja_chica)?>"
+                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->no_ticket>0? 'block': 'none') ?>">
+                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->no_ticket ?></a></td>
+                                      <td>
+                                        <?php if ($priv_saldar_prestamo): ?>
+                                          <a href="<?php echo base_url('panel/caja_chica_prest/saldar_prestamos/?id='.$prestamo->id_prestamo_nom."&fecha=".$fecha_caja_chica."&fno_caja=".$_GET['fno_caja'])?>"
+                                            onclick="msb.confirm('Estas seguro saldar este préstamo? \n No se podrá revertir.', 'Prestamos', this); return false;">
+                                        <?php endif ?>
+
+                                        <?php echo $prestamo->saldo_fin ?>
+
+                                        <?php if ($priv_saldar_prestamo): ?>
+                                          </a>
+                                        <?php endif ?>
+                                      </td>
+                                    </tr>
+                            <?php } ?>
+                                <tr class="row-total">
+                                  <td colspan="5" style="text-align: right; font-weight: bolder;">Suma</td>
+                                  <td><?php echo $totalpreslp_salini_fi ?></td>
+                                  <td><?php echo $totalpreslp_pago_dia_fi ?></td>
+                                  <td colspan="2"></td>
+                                  <td><?php echo $totalpreslp_salfin_fi ?></td>
+                                </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Descuento de materiales -->
+
                     <!-- Deudores -->
                     <?php $totalDeudores = 0; ?>
                     <div class="row-fluid" style="margin-top: 5px;">
