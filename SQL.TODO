@@ -1,4 +1,13 @@
-
+ ☐ Reporte de compras de productos y productos regresados en almacen
+ ☐ Reporte de salidas de almacen por usuario
+ ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
+ ☐ En compras y ventas poner opcion para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
+   --lap
+   ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
+   ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;
+   COMMENT ON COLUMN public.compras_requisicion_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
+   ALTER TABLE public.compras_productos ADD COLUMN ieps_sub boolean DEFAULT false;
+   COMMENT ON COLUMN public.compras_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
    --lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Caja campos',247,false,'caja_chica/modificar_caja_campos/','edit',false);
@@ -8,6 +17,8 @@
    ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
  ✔ Descargas masivas de remisiones @done (22-07-06 13:31)
+   -- lap|san
+   ALTER TABLE public.facturacion_otrosdatos ADD COLUMN orden_compra character varying(50) COLLATE pg_catalog."default";
  ☐ Nomina corona
    - catalogo de ranchos
    - catalogo de tablas por rancho, numero de he
@@ -21,7 +32,7 @@
    --lap|san
    ALTER TABLE public.compras_requisicion ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
    ALTER TABLE public.compras_ordenes ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
- ☐ En compras y ventas poner opcion para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
+
  ✔ isr factura @done (22-05-31 14:05)
    -- pcc|lap|san
    ALTER TABLE public.facturacion ADD COLUMN isr double precision DEFAULT 0;

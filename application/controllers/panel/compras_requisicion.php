@@ -801,6 +801,9 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'iepsPorcent[]',
             'label' => '',
             'rules' => ''),
+      array('field' => 'iepsSub[]',
+            'label' => '',
+            'rules' => ''),
 
       array('field' => 'totalImporte1',
             'label' => 'Subtotal',

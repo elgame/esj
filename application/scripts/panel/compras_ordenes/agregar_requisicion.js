@@ -768,6 +768,7 @@
         $fprecio.val(ui.item.item.precio_unitario);
         $funidad.val(ui.item.item.id_unidad);
         $fieps.val(ui.item.item.ieps);
+        $fieps.attr('data-sub', ui.item.item.ieps_subtotal);
 
         if (ui.item.item.inventario) {
           // var entradas = parseFloat(ui.item.item.inventario.entradas),
@@ -1260,6 +1261,7 @@
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
           'unidad': $funidad.find('option:selected').val(),
           'ieps': $fieps.val(),
+          'ieps_sub': $fieps.attr('data-sub'),
           'traslado': $ftraslado.find('option:selected').val(),
           'tipo_moneda': $ftipo_moneda.val(),
           'tipo_cambio': $ftipo_cambio.val(),
@@ -1285,7 +1287,8 @@
         $fcodigo.val('');
         $ftipo_cambio.val('');
         $fretencionIva.val('0');
-        $fIsrPercent.val('')
+        $fIsrPercent.val('');
+        $fieps.val('').attr('data-sub', 'f');
         $("#productos #show_info_prod").show().find('span').text('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
@@ -1610,6 +1613,7 @@
                               '</td>' +
                               '<td style="width: 66px;">' +
                                   '<input type="text" name="iepsPorcent[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
+                                  '<input type="hidden" name="iepsSub[]" value="'+(producto['ieps_sub']? producto['ieps_sub']: 'f')+'" id="iepsSub" class="span12">' +
                               '</td>' +
                               '<td>' +
                                 '<input type="text" name="observacion[]" value="" id="observacion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -1751,6 +1755,7 @@
         $ieps        = $tr.find('#iepsPorcent'), // Input hidden iva total
         $ret_iva     = $tr.find('#ret_iva'), // Select ret_iva
         $ret_isrPorcent = $tr.find('#ret_isrPorcent'), // ret_isrPorcent
+        $iepsSub     = $tr.find('#iepsSub'),
         totalImporte = 0,
         totalIva     = 0,
         totalIeps    = 0,
@@ -1761,8 +1766,14 @@
     for (var i = 0; i < $precio_uni.length; i++) {
 
       totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni[i].val() || 0)));
-      totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
-      totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100);
+      totalIeps = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100);
+      console.log('iva con el ieps', $iepsSub.val());
+      if($iepsSub.val() == 't') {
+        totalIva = util.trunc2Dec(((totalImporte+totalIeps) * parseFloat($iva.find('option:selected').val())) / 100);
+      } else {
+        totalIva = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
+      }
+
       totalRet     = util.trunc2Dec(totalImporte * (parseFloat($ret_iva.find('option:selected').val()) / 100) );
       totalRetIsr  = util.trunc2Dec(totalImporte * (parseFloat($ret_isrPorcent.val()) / 100) );
       total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);

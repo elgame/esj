@@ -588,7 +588,7 @@
                     </div><!--/span1 -->
                     <div class="span1">
                       <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
-                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
+                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%" data-sub="f">
                     </div><!--/span1 -->
                     <div class="span2">
                       <label for="ftipo_moneda" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Tipo de cambio</label>
@@ -805,6 +805,7 @@
                                         </td>
                                         <td style="width: 66px;">
                                             <input type="text" name="iepsPorcent[]" value="<?php echo $_POST['iepsPorcent'][$key] ?>" id="iepsPorcent" class="span12">
+                                            <input type="hidden" name="iepsSub[]" value="<?php echo $_POST['iepsSub'][$key] ?>" id="iepsSub" class="span12">
                                         </td>
                                         <td>
                                           <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
