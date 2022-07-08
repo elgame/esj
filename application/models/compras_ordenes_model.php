@@ -507,6 +507,7 @@ class compras_ordenes_model extends CI_Model {
           'status'               => $statusp,
           'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => $prod_id_compra,
           // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
@@ -895,7 +896,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones
+                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones, cp.ieps_sub
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -1292,6 +1293,7 @@ class compras_ordenes_model extends CI_Model {
         'observaciones'        => $_POST['observaciones'][$key],
         'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+        'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
         'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
         'id_compra'            => $prod_id_compra,
         // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
@@ -1336,6 +1338,7 @@ class compras_ordenes_model extends CI_Model {
           'observaciones'        => $_POST['observaciones'][$key],
           'ieps'                 => ($faltantesProd * $pu * floatval($_POST['iepsPorcent'][$key])/100),
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => NULL,
           // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,

@@ -783,6 +783,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'dno_trazabilidad',
               'label'   => 'No Trazabilidad',
               'rules'   => 'max_length[15]|callback_check_trazabilidad'),
+        array('field'   => 'dorden_compra',
+              'label'   => 'Orden de compra',
+              'rules'   => 'max_length[50]'),
 
         array('field'   => 'remitente_nombre',
               'label'   => 'Nombre Remitente',

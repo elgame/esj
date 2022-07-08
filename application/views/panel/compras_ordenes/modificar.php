@@ -721,6 +721,7 @@
                               <td style="width: 66px;">
                                 <input type="text" name="iepsPorcent[]" value="<?php echo $_POST['iepsPorcent'][$key] ?>" id="iepsPorcent" class="span12">
                                 <input type="hidden" name="iepsTotal[]" value="<?php echo $_POST['iepsTotal'][$key] ?>" id="iepsTotal" class="span12">
+                                <input type="hidden" name="iepsSub[]" value="<?php echo $_POST['iepsSub'][$key] ?>" id="iepsSub" class="span12">
                               </td>
                               <td style="width: 66px;">
                                   <select name="ret_iva[]" id="ret_iva" class="span12">
@@ -866,6 +867,7 @@
                                  <td style="width: 66px;">
                                    <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" <?php echo $readonly ?> class="span12">
                                    <input type="hidden" name="iepsTotal[]" value="<?php echo $prod->ieps ?>" id="iepsTotal" class="span12">
+                                   <input type="hidden" name="iepsSub[]" value="<?php echo $prod->ieps_sub ?>" id="iepsSub" class="span12">
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                     <select name="ret_iva[]" id="ret_iva" class="span12">

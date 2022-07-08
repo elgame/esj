@@ -143,6 +143,14 @@
                     </div>
                   </div>
 
+                  <div class="control-group" style="background-color: #e4ffd7">
+                    <label class="control-label" for="dorden_compra">Orden de compra</label>
+                    <div class="controls">
+                      <input type="text" name="dorden_compra" class="span9" id="dorden_compra"
+                        value="<?php echo set_value('dorden_compra', isset($borrador) ? $borrador['info']->no_trazabilidad : ''); ?>" placeholder="">
+                    </div>
+                  </div>
+
                   <div class="control-group">
                     <label class="control-label" for="es_carta_porte">Carta Porte</label>
                     <div class="controls">

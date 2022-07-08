@@ -95,7 +95,7 @@ class facturacion_model extends privilegios_model{
 	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db
-      ->select("f.*, fo.no_trazabilidad, fo.id_paleta_salida")
+      ->select("f.*, fo.no_trazabilidad, fo.orden_compra, fo.id_paleta_salida")
       ->from('facturacion as f')
       ->join('facturacion_otrosdatos as fo', 'f.id_factura = fo.id_factura', 'left')
       ->where("f.id_factura = {$idFactura}")
@@ -735,7 +735,8 @@ class facturacion_model extends privilegios_model{
       if ($this->input->post('dno_trazabilidad') !== false) {
         $this->db->insert('facturacion_otrosdatos', [
           'id_factura'      => $idFactura,
-          'no_trazabilidad' => $this->input->post('dno_trazabilidad')
+          'no_trazabilidad' => $this->input->post('dno_trazabilidad'),
+          'orden_compra'    => $this->input->post('dorden_compra')
         ]);
       }
 
@@ -6090,7 +6091,7 @@ class facturacion_model extends privilegios_model{
 
       $pdf->SetXY(10, $pdf->GetY());
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->Row2(array("Queda estrictamente prohibido exportar a los Estados Unidos los productos de limón que nuestra empresa {$factura['info']->empresa->nombre_fiscal}, le suministre para su distribución en el territorio mexicano, asi como el uso de nuestra información empresarial tales como ID Number y el numero de registro FDA de nuestras instalaciones para fines de exportación. Esta información solo podrá ser utilizada bajo nuestro consentimiento que deba constar por escrito mediante la previa orden de compra . Cualquier acto contrario efectuado por el cliente a lo señalado será directamente responsable dejando a salvo a la empresa de cualquier tipo de reclamación que se quiera atribuir a la empresa {$factura['info']->empresa->nombre_fiscal} por parte de las autoridades competentes; toda vez que la compra que se hace en esta ocasión y que ampara la factura número {$factura['info']->serie}{$factura['info']->folio} que se origina de la orden de compra numero …. Es exclusivamente para venta y distribución en territorio mexicano." ), false, false, 18);
+      $pdf->Row2(array("Queda estrictamente prohibido exportar a los Estados Unidos los productos de limón que nuestra empresa {$factura['info']->empresa->nombre_fiscal}, le suministre para su distribución en el territorio mexicano, asi como el uso de nuestra información empresarial tales como ID Number y el numero de registro FDA de nuestras instalaciones para fines de exportación. Esta información solo podrá ser utilizada bajo nuestro consentimiento que deba constar por escrito mediante la previa orden de compra. Cualquier acto contrario efectuado por el cliente a lo señalado será directamente responsable dejando a salvo a la empresa de cualquier tipo de reclamación que se quiera atribuir a la empresa {$factura['info']->empresa->nombre_fiscal} por parte de las autoridades competentes; toda vez que la compra que se hace en esta ocasión y que ampara la factura número {$factura['info']->serie}{$factura['info']->folio} que se origina de la orden de compra numero {$factura['info']->orden_compra}. Es exclusivamente para venta y distribución en territorio mexicano." ), false, false, 18);
     }
 
     ////////////////////

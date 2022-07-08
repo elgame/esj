@@ -286,6 +286,7 @@ class compras_requisicion_model extends CI_Model {
           'observacion'          => $_POST['observacion'][$key],
           'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
@@ -603,6 +604,7 @@ class compras_requisicion_model extends CI_Model {
             'observacion'          => $_POST['observacion'][$key],
             'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
             'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+            'ieps_sub'             => isset($_POST['iepsSub'][$key]) ? $_POST['iepsSub'][$key] : 'f',
             'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
             // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
             // $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
@@ -824,6 +826,7 @@ class compras_requisicion_model extends CI_Model {
             'observacion'          => $prod->observacion,
             'ieps'                 => $prod->ieps,
             'porcentaje_ieps'      => $prod->porcentaje_ieps,
+            'ieps_sub'             => $prod->ieps_sub,
             'tipo_cambio'          => $prod->tipo_cambio,
             // 'id_area'              => $prod->id_area,
             $prod->campo           => $prod->id_area,
@@ -1100,7 +1103,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo,
-                  activos, cp.observaciones
+                  activos, cp.observaciones, cp.ieps_sub
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
