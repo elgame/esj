@@ -307,6 +307,10 @@
 
       var $table = $('#table-prestamos').find('tbody .row-total'),
           tr =  '<tr>'+
+                  '<td style="width: 100px;">'+
+                    '<input type="text" name="prestamo_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;">'+
+                    '<input type="hidden" name="prestamo_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
+                  '</td>'+
                   '<td style="width: 120px;">'+
                   '  <input type="text" name="prestamo_concepto[]" value="" class="span12">'+
                   '</td>'+
@@ -330,8 +334,9 @@
                   '</td>'+
                   '<td style="width: 50px;">'+
                   '  <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">'+
-                  '    <option value="t">Prestamo</option>'+
-                  '    <option value="f">Pago</option>'+
+                  '    <option value="dev">Devolucion (-)</option>'+
+                  '    <option value="true">Prestamo (-)</option>'+
+                  '    <option value="false">Pago (+)</option>'+
                   '  </select>'+
                   '</td>'+
                   '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
