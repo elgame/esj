@@ -410,7 +410,7 @@
                                           ?>
                                               <tr>
                                                 <td style="width: 100px;">
-                                                  <input type="text" name="prestamo_empresa[]" value="<?php echo $_POST['prestamo_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                                  <input type="text" name="prestamo_empresa[]" value="<?php echo $_POST['prestamo_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" <?php echo $readonly ?>>
                                                   <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $_POST['prestamo_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
                                                 </td>
                                                 <td style="width: 120px;">
@@ -455,7 +455,7 @@
                                         ?>
                                           <tr>
                                             <td style="width: 100px;">
-                                              <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->empresa ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                              <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->empresa ?>" class="input-small gasto-cargo" style="width: 150px;" <?php echo $readonly ?>>
                                               <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $prestamo->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
                                             </td>
                                             <td style="width: 120px;">
