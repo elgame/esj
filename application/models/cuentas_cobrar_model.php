@@ -58,27 +58,46 @@ class cuentas_cobrar_model extends privilegios_model{
         Sum(iva) AS iva,
         Sum(abonos) AS abonos,
         Sum(saldo)::numeric(12, 2) AS saldo,
-        SUM(saldo_cambio) as saldo_cambio
+        SUM(saldo_cambio) as saldo_cambio,
+        (SUM(plazo_credito) / Count(plazo_credito))::Numeric(10, 0) as plazo_credito,
+        SUM(vencidas) as vencidas
       FROM
       (
         SELECT
-          c.id_cliente,
-          c.nombre_fiscal,
-          Sum(f.total) AS total,
-          Sum(f.importe_iva) AS iva,
-          COALESCE(Sum(faa.abonos),0) as abonos,
-          COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-          (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
-        FROM
-          clientes AS c
-        INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-        LEFT JOIN (
+          sal1.id_cliente,
+          sal1.nombre_fiscal,
+          Sum(sal1.total) AS total,
+          Sum(sal1.iva) AS iva,
+          Sum(sal1.plazo_credito) / Count(sal1.plazo_credito) AS plazo_credito,
+          Sum(sal1.abonos) as abonos,
+          Sum(sal1.saldo) AS saldo,
+          Sum(sal1.saldo_cambio) AS saldo_cambio,
+          Sum(sal1.vencidas) AS vencidas
+        FROM (
           SELECT
-          d.id_cliente,
-          d.id_factura,
-          Sum(d.abonos) AS abonos
+            c.id_cliente,
+            c.nombre_fiscal,
+            Sum(f.total) AS total,
+            Sum(f.importe_iva) AS iva,
+            Sum(f.plazo_credito) AS plazo_credito,
+            COALESCE(Sum(faa.abonos),0) as abonos,
+            COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0)::Numeric(15, 2) AS saldo,
+            (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio,
+            Sum(CASE WHEN Date(Date(f.fecha) + (f.plazo_credito || ' days')::interval) < Date(now()) THEN
+              COALESCE(f.total - COALESCE(faa.abonos, 0), 0)
+             ELSE
+              0
+             END)::Numeric(15, 2) AS vencidas
           FROM
-          (
+            clientes AS c
+          INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+          LEFT JOIN (
+            SELECT
+            d.id_cliente,
+            d.id_factura,
+            Sum(d.abonos) AS abonos
+            FROM
+            (
             SELECT
               f.id_cliente,
               f.id_factura,
@@ -101,18 +120,20 @@ class cuentas_cobrar_model extends privilegios_model{
             WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
               AND Date(f.fecha) <= '{$fecha}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
-          ) AS d
-          GROUP BY d.id_cliente, d.id_factura
-        ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-        LEFT JOIN (
-          SELECT id_remision, id_factura, status
-          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-        ) fh ON f.id_factura = fh.id_remision
-        WHERE f.status <> 'ca' AND f.status <> 'b'
-          AND f.id_abono_factura IS NULL AND id_nc IS NULL
-          AND Date(f.fecha) <= '{$fecha}'{$sql}
-          AND COALESCE(fh.id_remision, 0) = 0
-        GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
+            ) AS d
+            GROUP BY d.id_cliente, d.id_factura
+          ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+          LEFT JOIN (
+            SELECT id_remision, id_factura, status
+            FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+          ) fh ON f.id_factura = fh.id_remision
+          WHERE f.status <> 'ca' AND f.status <> 'b'
+            AND f.id_abono_factura IS NULL AND id_nc IS NULL
+            AND Date(f.fecha) <= '{$fecha}'{$sql}
+            AND COALESCE(fh.id_remision, 0) = 0
+          GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio, f.fecha,f.plazo_credito
+        ) sal1
+        GROUP BY sal1.id_cliente, sal1.nombre_fiscal
       ) AS sal
       GROUP BY id_cliente, nombre_fiscal
       HAVING Sum(saldo)::numeric(12, 2) > 0 OR SUM(saldo_cambio) > 0",
@@ -144,16 +165,20 @@ class cuentas_cobrar_model extends privilegios_model{
   /**
    * Descarga el listado de cuentas por pagar en formato pdf
    */
-  public function cuentasCobrarPdf(){
+  public function cuentasCobrarPdf($pdf=null) {
     $this->load->library('mypdf');
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $showw = false;
+    if (is_null($pdf)) {
+      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $showw = true;
+    }
 
-    if ($empresa['info']->logo !== '')
+    if ($empresa['info']->logo !== '' && file_exists($empresa['info']->logo))
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
@@ -164,16 +189,17 @@ class cuentas_cobrar_model extends privilegios_model{
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'R', 'R', 'R', 'R');
-    $widths = array(85, 30, 30, 30, 30);
-    $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Saldo TC');
+    $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(85, 35, 35, 30, 30, 20, 30);
+    $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Vencido', 'Dias Cred.', 'Saldo TC');
 
     $res = $this->getCuentasCobrarData(9999999999);
 
     $total_saldo_cambio = $total_cargos = $total_abonos = $total_saldo = 0;
+    $total_vencido = 0;
     foreach($res['cuentas'] as $key => $item){
       $band_head = false;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+      if($pdf->GetY() >= $pdf->limiteY || $key == 0){ //salta de pagina si exede el max
         $pdf->AddPage();
 
         $pdf->SetFont('Arial','B',8);
@@ -191,12 +217,15 @@ class cuentas_cobrar_model extends privilegios_model{
         MyString::formatoNumero($item->total, 2, '$', false),
         MyString::formatoNumero($item->abonos, 2, '$', false),
         MyString::formatoNumero($item->saldo, 2, '$', false),
+        MyString::formatoNumero($item->vencidas, 2, '$', false),
+        MyString::formatoNumero($item->plazo_credito, 0, '', false),
         MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
         );
       $total_cargos += $item->total;
       $total_abonos += $item->abonos;
       $total_saldo += $item->saldo;
       $total_saldo_cambio += $item->saldo_cambio;
+      $total_vencido += $item->vencidas;
 
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
@@ -211,10 +240,16 @@ class cuentas_cobrar_model extends privilegios_model{
       MyString::formatoNumero($total_cargos, 2, '$', false),
       MyString::formatoNumero($total_abonos, 2, '$', false),
       MyString::formatoNumero($total_saldo, 2, '$', false),
+      MyString::formatoNumero($total_vencido, 2, '$', false),
+      '',
       MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
 
-    $pdf->Output('cuentas_x_cobrar.pdf', 'I');
+    if ($showw) {
+      $pdf->Output('cuentas_x_cobrar.pdf', 'I');
+    } else {
+      return $pdf;
+    }
   }
 
   public function cuentasCobrarExcel(){
@@ -241,12 +276,14 @@ class cuentas_cobrar_model extends privilegios_model{
 
     $row +=3;
     $xls->excelContent($worksheet, $row, $data_fac, array(
-      'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Saldo TC'),
+      'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Vencido', 'Dias Cred.', 'Saldo TC'),
       'conte' => array(
         array('name' => 'nombre', 'format' => 'format4', 'sum' => -1),
         array('name' => 'total', 'format' => 'format4', 'sum' => 0),
         array('name' => 'abonos', 'format' => 'format4', 'sum' => 0),
         array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
+        array('name' => 'vencidas', 'format' => 'format4', 'sum' => 0),
+        array('name' => 'plazo_credito', 'format' => 'format4', 'sum' => -1),
         array('name' => 'saldo_cambio', 'format' => 'format4', 'sum' => 0),
         )
       ));
@@ -258,6 +295,35 @@ class cuentas_cobrar_model extends privilegios_model{
 
     $xls->workbook->send('cuentas_cobrar.xls');
     $xls->workbook->close();
+  }
+
+  public function cuentasCobrarAllPdf() {
+    $this->load->library('mypdf');
+
+    $empresas = $this->db->query("SELECT id_empresa, nombre_fiscal, rfc,
+        sucursal, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, status
+      FROM empresas
+      WHERE status = 't'
+      ORDER BY nombre_fiscal ASC")->result();
+
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+    foreach ($empresas as $key => $emp) {
+      $_GET['did_empresa'] = $emp->id_empresa;
+      // $pdf->AddPage();
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(255,255,255);
+      $pdf->SetFillColor(160,160,160);
+      $pdf->SetX(6);
+      $pdf->SetAligns(['L']);
+      $pdf->SetWidths([260]);
+      $pdf->Row([$emp->nombre_fiscal], true);
+
+      $pdf = $this->cuentasCobrarPdf($pdf);
+    }
+
+    $pdf->Output('cuentas_x_cobrar_all.pdf', 'I');
   }
 
 

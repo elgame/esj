@@ -26,6 +26,8 @@
               <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a> |
+              <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_all_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+              <i class="icon-print"></i> Imprimir Todos</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Estado cuenta</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
