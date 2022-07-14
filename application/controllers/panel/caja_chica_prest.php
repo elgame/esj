@@ -11,6 +11,7 @@ class caja_chica_prest extends MY_Controller {
     'caja_chica_prest/ajax_get_categorias/',
     'caja_chica_prest/cerrar_caja/',
     'caja_chica_prest/print_caja/',
+    'caja_chica_prest/xls_caja/',
     'caja_chica_prest/rpt_gastos_pdf/',
     'caja_chica_prest/rpt_gastos_xls/',
     'caja_chica_prest/rpt_ingresos_pdf/',
@@ -677,7 +678,6 @@ class caja_chica_prest extends MY_Controller {
 
   public function xls_caja()
   {
-    $_GET['fno_caja'] = '1';
     $this->load->model('caja_chica_prest_model');
     $this->caja_chica_prest_model->xlsCaja($_GET['ffecha'], $_GET['fno_caja']);
   }

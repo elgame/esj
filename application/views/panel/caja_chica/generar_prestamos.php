@@ -99,6 +99,7 @@
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
                     <div class="span4"><a href="<?php echo base_url('panel/caja_chica_prest/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/caja_chica_prest/xls_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Excel</a></div>
                   <?php }  ?>
                 </div>
               </div>
