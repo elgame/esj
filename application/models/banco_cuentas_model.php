@@ -1530,7 +1530,7 @@ class banco_cuentas_model extends banco_model {
         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
         INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
       WHERE 1 = 1 {$sql}
-      ORDER BY e.id_empresa ASC, bc.alias ASC, bm.id_movimiento ASC");
+      ORDER BY e.num_orden ASC, bc.alias ASC, bm.id_movimiento ASC");
     //bm.status = 't'
     if($query->num_rows() > 0) {
     	$aux = '';

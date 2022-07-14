@@ -675,6 +675,13 @@ class caja_chica_prest extends MY_Controller {
     $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
   }
 
+  public function xls_caja()
+  {
+    $_GET['fno_caja'] = '1';
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->xlsCaja($_GET['ffecha'], $_GET['fno_caja']);
+  }
+
   public function print_fondo()
   {
     $this->load->model('caja_chica_prest_model');

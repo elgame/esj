@@ -1,9 +1,13 @@
- ☐ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito
+ ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
+ ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
+   --lap|san
+   ALTER TABLE public.empresas ADD COLUMN num_orden integer;
  ☐ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas
  ☐ Reporte de compras de productos y productos regresados en almacen
- ☐ Reporte de salidas de almacen por usuario
+ ☐ Reporte de salidas de almacén por usuario
+ ☐ Caja de prestamos exportar a excel
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
- ☐ En compras y ventas poner opcion para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
+ ☐ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
    --lap
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;

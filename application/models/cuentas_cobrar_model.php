@@ -165,7 +165,7 @@ class cuentas_cobrar_model extends privilegios_model{
   /**
    * Descarga el listado de cuentas por pagar en formato pdf
    */
-  public function cuentasCobrarPdf($pdf=null) {
+  public function cuentasCobrarPdf($pdf=null, $num=0) {
     $this->load->library('mypdf');
 
     $this->load->model('empresas_model');
@@ -173,9 +173,11 @@ class cuentas_cobrar_model extends privilegios_model{
 
     // Creación del objeto de la clase heredada
     $showw = false;
+    $first = false;
     if (is_null($pdf)) {
       $pdf = new MYpdf('L', 'mm', 'Letter');
       $showw = true;
+      $first = true;
     }
 
     if ($empresa['info']->logo !== '' && file_exists($empresa['info']->logo))
@@ -194,45 +196,54 @@ class cuentas_cobrar_model extends privilegios_model{
     $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Vencido', 'Dias Cred.', 'Saldo TC');
 
     $res = $this->getCuentasCobrarData(9999999999);
-
     $total_saldo_cambio = $total_cargos = $total_abonos = $total_saldo = 0;
     $total_vencido = 0;
-    foreach($res['cuentas'] as $key => $item){
-      $band_head = false;
-      if($pdf->GetY() >= $pdf->limiteY || $key == 0){ //salta de pagina si exede el max
-        $pdf->AddPage();
+    if (count($res['cuentas']) > 0) {
+      foreach($res['cuentas'] as $key => $item){
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key == 0){ //salta de pagina si exede el max
+          if ($showw && $key == 0) {
+            $pdf->AddPage();
+          } elseif ($key > 0 && $pdf->GetY() >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
 
-        $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
-        $pdf->SetFillColor(160,160,160);
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array($item->nombre,
+          MyString::formatoNumero($item->total, 2, '$', false),
+          MyString::formatoNumero($item->abonos, 2, '$', false),
+          MyString::formatoNumero($item->saldo, 2, '$', false),
+          MyString::formatoNumero($item->vencidas, 2, '$', false),
+          MyString::formatoNumero($item->plazo_credito, 0, '', false),
+          MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
+          );
+        $total_cargos += $item->total;
+        $total_abonos += $item->abonos;
+        $total_saldo += $item->saldo;
+        $total_saldo_cambio += $item->saldo_cambio;
+        $total_vencido += $item->vencidas;
+
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($datos, false);
       }
-
-      $pdf->SetFont('Arial','',8);
-      $pdf->SetTextColor(0,0,0);
-      $datos = array($item->nombre,
-        MyString::formatoNumero($item->total, 2, '$', false),
-        MyString::formatoNumero($item->abonos, 2, '$', false),
-        MyString::formatoNumero($item->saldo, 2, '$', false),
-        MyString::formatoNumero($item->vencidas, 2, '$', false),
-        MyString::formatoNumero($item->plazo_credito, 0, '', false),
-        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
-        );
-      $total_cargos += $item->total;
-      $total_abonos += $item->abonos;
-      $total_saldo += $item->saldo;
-      $total_saldo_cambio += $item->saldo_cambio;
-      $total_vencido += $item->vencidas;
-
-      $pdf->SetX(6);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-      $pdf->Row($datos, false);
     }
 
+    $pdf->SetFillColor(160,160,160);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
     $pdf->SetX(6);
     $pdf->SetFont('Arial','B',8);
     $pdf->SetTextColor(255,255,255);
@@ -244,6 +255,7 @@ class cuentas_cobrar_model extends privilegios_model{
       '',
       MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
+
 
     if ($showw) {
       $pdf->Output('cuentas_x_cobrar.pdf', 'I');
@@ -304,23 +316,34 @@ class cuentas_cobrar_model extends privilegios_model{
         sucursal, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, status
       FROM empresas
       WHERE status = 't'
-      ORDER BY nombre_fiscal ASC")->result();
+      ORDER BY num_orden ASC")->result();
 
     $pdf = new MYpdf('L', 'mm', 'Letter');
-
     $pdf->show_head = false;
+    $pdf->limiteY = 190;
+
+    $pdf->AddPage();
+    $pdf->SetFont('Arial','B',11);
+    $pdf->SetXY(46, 11);
+    $pdf->Cell(206, 6, 'Cuentas por cobrar', 0, 0, 'C');
+    $pdf->SetXY(6, 23);
+
+
     foreach ($empresas as $key => $emp) {
       $_GET['did_empresa'] = $emp->id_empresa;
-      // $pdf->AddPage();
+      if($pdf->GetY() >= $pdf->limiteY) {
+        $pdf->AddPage();
+      }
       $pdf->SetFont('Arial','B',8);
       $pdf->SetTextColor(255,255,255);
       $pdf->SetFillColor(160,160,160);
       $pdf->SetX(6);
       $pdf->SetAligns(['L']);
-      $pdf->SetWidths([260]);
+      $pdf->SetWidths([265]);
       $pdf->Row([$emp->nombre_fiscal], true);
 
-      $pdf = $this->cuentasCobrarPdf($pdf);
+      $pdf = $this->cuentasCobrarPdf($pdf, $key);
+      $pdf->SetY($pdf->GetY()+5);
     }
 
     $pdf->Output('cuentas_x_cobrar_all.pdf', 'I');
