@@ -2,7 +2,7 @@
  ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
    --lap|san|pcc
    ALTER TABLE public.empresas ADD COLUMN num_orden integer;
- ☐ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas
+ ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
  ☐ Reporte de compras de productos y productos regresados en almacen
  ☐ Reporte de salidas de almacén por usuario
  ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
