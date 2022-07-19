@@ -75,6 +75,13 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="fieps">IEPS junto al Subtotal </label>
+                <div class="controls">
+                  <input type="checkbox" name="ieps_subtotal" id="ieps_subtotal" value="si" <?php echo set_checkbox('ieps_subtotal') ?>>
+                </div>
+              </div>
+
               <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">

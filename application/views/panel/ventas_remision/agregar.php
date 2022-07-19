@@ -372,6 +372,8 @@
                             $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
                             $_POST['isCert'][$key] = $p->certificado === 't' ? '1' : '0';
 
+                            $_POST['prod_ieps_subtotal'][$key] = $p->ieps_subtotal;
+
                             $cfdi_extp = json_decode($p->cfdi_ext);
                             $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
                             $_POST['pclave_unidad_cod'][$key] = $cfdi_extp->clave_unidad->key;
@@ -415,6 +417,7 @@
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                   <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
                                   <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
+                                  <input type="hidden" name="prod_ieps_subtotal[]" value="<?php echo $_POST['prod_ieps_subtotal'][$k] ?>" id="prod_ieps_subtotal" class="span12">
                                   <!-- <input type="hidden" name="id_size_rendimiento[]" value="<?php //echo $_POST['id_size_rendimiento'][$k] ?>" id="id_size_rendimiento" class="span12"> -->
                                 </td>
                                 <td>
@@ -521,6 +524,7 @@
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                       <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
                       <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
+                      <input type="hidden" name="prod_ieps_subtotal[]" value="f" id="prod_ieps_subtotal" class="span12">
                       <!-- <input type="hidden" name="id_size_rendimiento[]" value="" id="id_size_rendimiento" class="span12"> -->
                     </td>
                     <td>

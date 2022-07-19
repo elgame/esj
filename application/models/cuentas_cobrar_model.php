@@ -136,7 +136,8 @@ class cuentas_cobrar_model extends privilegios_model{
         GROUP BY sal1.id_cliente, sal1.nombre_fiscal
       ) AS sal
       GROUP BY id_cliente, nombre_fiscal
-      HAVING Sum(saldo)::numeric(12, 2) > 0 OR SUM(saldo_cambio) > 0",
+      HAVING Sum(saldo)::numeric(12, 2) > 0 OR SUM(saldo_cambio) > 0
+      ORDER BY saldo DESC",
       $params, true);
     $res = $this->db->query($query['query']);
 

@@ -77,6 +77,7 @@ class clasificaciones_model extends CI_Model {
             'cuenta_cpi2'     => count($this->input->post('fcuentas'))>0? json_encode($this->input->post('fcuentas')): [],
             'codigo'          => $this->input->post('fcodigo'),
             'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
+            'ieps_subtotal'   => $this->input->post('ieps_subtotal')=='si'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
             // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
@@ -121,6 +122,7 @@ class clasificaciones_model extends CI_Model {
             'cuenta_cpi2'  => count($this->input->post('fcuentas'))>0? json_encode($this->input->post('fcuentas')): [],
             'codigo'       => $this->input->post('fcodigo'),
             'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
+            'ieps_subtotal'   => $this->input->post('ieps_subtotal')=='si'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
             // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
@@ -157,7 +159,7 @@ class clasificaciones_model extends CI_Model {
       $id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
 
 		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad,
-                                  cuenta_cpi2, codigo, inventario, clave_prod_serv, clave_unidad" )
+                                  cuenta_cpi2, codigo, inventario, clave_prod_serv, clave_unidad, ieps_subtotal" )
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
@@ -212,7 +214,7 @@ class clasificaciones_model extends CI_Model {
     if($this->input->get('inventario') !== false)
       $sql .= " AND c.inventario = 't'";
 		$res = $this->db->query(" SELECT c.id_clasificacion, c.id_area, c.nombre, c.status, c.iva,
-          c.id_unidad, c.unidad_cantidad, a.nombre AS area
+          c.id_unidad, c.unidad_cantidad, a.nombre AS area, c.ieps_subtotal
 				FROM clasificaciones c
           INNER JOIN areas a ON a.id_area = c.id_area
 				WHERE c.status = true {$sql}
