@@ -250,7 +250,42 @@
                               <td>
                                   <input type="text" name="observacion[]" value="<?php echo $prod->descripcion ?>" id="observacion" class="span12">
                               </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
+                              <td style="width: 35px;">
+                                <div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>
+                                  <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                    <div class="arrow"></div><h3 class="popover-title">Otros</h3>
+                                    <div class="popover-content">
+                                      <table>
+                                        <tr>
+                                          <td style="width: 66px;">Ret IVA</td>
+                                          <td style="width: 66px;">Ret ISR</td>
+                                          <td style="width: 66px;">IEPS</td>
+                                        </tr>
+                                        <tr>
+                                          <td style="width: 66px;">
+                                              <select name="ret_iva[]" id="ret_iva" class="span12">
+                                                <option value="0" <?php echo $prod->porcentaje_retencion === '0' ? "selected" : '' ?>>No retener</option>
+                                                <option value="4" <?php echo $prod->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
+                                                <option value="10.6667" <?php echo $prod->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
+                                                <option value="16" <?php echo $prod->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                                <option value="6" <?php echo $prod->porcentaje_retencion === '6' ? "selected" : '' ?>>6 %</option>
+                                                <option value="8" <?php echo $prod->porcentaje_retencion === '8' ? "selected" : '' ?>>8 %</option>
+                                              </select>
+                                          </td>
+                                          <td style="width: 66px;">
+                                              <input type="text" name="ret_isrPorcent[]" value="<?php echo $prod->porcentaje_isr ?>" id="ret_isrPorcent" class="span12">
+                                          </td>
+                                          <td style="width: 66px;">
+                                              <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
+                                              <input type="hidden" name="iepsSub[]" value="<?php echo $prod->ieps ?>" id="iepsSub" class="span12">
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
+                              </td>
                             </tr>
                           <?php }} ?>
                       </tbody>
@@ -287,6 +322,12 @@
                     <td>IVA</td>
                     <td>
                       <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', 0), 2, '$', false)?>">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>IEPS</td>
+                    <td>
+                      <input type="text" name="totalIeps" id="totalIeps" value="<?php echo MyString::formatoNumero(set_value('totalIeps', 0), 2, '$', false)?>">
                     </td>
                   </tr>
                   <tr>

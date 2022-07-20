@@ -25,6 +25,8 @@
     eventOnChangeCondicionPago();
     eventOnChangeMetodoPago();
 
+    eventBtnListaOtros();
+
     calculaTotal();
   });
 
@@ -246,6 +248,16 @@
     });
   };
 
+  var eventBtnListaOtros = function () {
+    $('#table-productos').on('click', "#btnListOtros", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden"))
+        $parent.find(".popover").show(80);
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
+
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
       var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
@@ -346,7 +358,7 @@
 
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
-    $('#table-productos').on('keyup', '#cantidad, #valorUnitario', function(e) {
+    $('#table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent();
@@ -354,7 +366,7 @@
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotalProducto($tr);
       }
-    }).on('change', '#cantidad, #valorUnitario', function(event) {
+    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent', function(event) {
       var $tr = $(this).parent().parent();
       calculaTotalProducto($tr);
     });
@@ -362,7 +374,7 @@
 
   // Evento onchange del select iva en la tabla.
   var eventOnChangeTraslado = function () {
-    $('#table-productos').on('change', '#traslado', function(event) {
+    $('#table-productos').on('change', '#traslado, #ret_iva, #ret_isrPorcent', function(event) {
       var $this = $(this),
           $tr   = $this.parent().parent();
 
@@ -616,9 +628,16 @@
         $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
         $total             = $tr.find('#total'), // Input hidden iva total
 
+        $ieps           = $tr.find('#iepsPorcent'), // Input hidden iva total
+        $ret_iva        = $tr.find('#ret_iva'), // Select ret_iva
+        $ret_isrPorcent = $tr.find('#ret_isrPorcent'), // ret_isrPorcent
+        $iepsSub        = $tr.find('#iepsSub'),
+
         totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
         totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
         totalRet     = util.trunc2Dec(totalImporte * 0.04),
+        totalIeps    = util.trunc2Dec(totalImporte * $ieps.val() / 100),
+        totalRetIsr  = util.trunc2Dec(totalImporte * $ret_isrPorcent.val() / 100),
         total        = util.trunc2Dec(totalImporte + totalIva);
 
     if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
