@@ -2,11 +2,16 @@
  ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
    --lap|san|pcc
    ALTER TABLE public.empresas ADD COLUMN num_orden integer;
+   --lap|san
+   ALTER TABLE public.empresas ADD COLUMN nombre_corto character varying COLLATE pg_catalog."default";
  ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
  ☐ Reporte de compras de productos y productos regresados en almacen
  ☐ Reporte de salidas de almacén por usuario
  ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
+   --san
+    ALTER TABLE public.productos_familias ADD COLUMN is_certif boolean DEFAULT false;
+    COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
  ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
    --lap|pcc|san
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;

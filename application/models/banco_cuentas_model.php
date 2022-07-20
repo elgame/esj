@@ -1525,7 +1525,7 @@ class banco_cuentas_model extends banco_model {
     $query = $this->db->query(
       "SELECT bm.id_movimiento, Date(bm.fecha) AS fecha, bm.numero_ref, initcap(bm.metodo_pago) AS tipo,
       	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta, bm.tipo tipomov,
-      	bm.status
+      	bm.status, e.nombre_corto
       FROM banco_movimientos bm
         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
         INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
@@ -1563,14 +1563,14 @@ class banco_cuentas_model extends banco_model {
 
     $fecha = new DateTime($_GET['ffecha1']);
     $fecha2 = new DateTime($_GET['ffecha2']);
+    $isSameDate = ($fecha == $fecha2);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
-    $pdf->titulo2 = "REPORTE BANCOS ACUMULADO POR EMPRESA";
-    $pdf->titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')." DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
-    // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
-    // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
+    $pdf->titulo2 = ($isSameDate? "REPORTE BANCOS DEL DIA": "REPORTE BANCOS ACUMULADO POR EMPRESA");
+    $pdf->titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')."\n";
+    $pdf->titulo3 .= ($isSameDate? "{$fecha->format('d/m/Y')}": "{$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}");
 
     $pdf->AliasNbPages();
 	  $pdf->AddPage();
@@ -1582,19 +1582,21 @@ class banco_cuentas_model extends banco_model {
 
     $aligns = array('L', 'L', 'L', 'R', 'R', 'L', 'L');
     $widths = array(18, 40, 15, 22, 22, 48, 40);
-    $header = array('Fecha', 'Cuenta', 'Tipo', 'Ingreso', 'Retiro', 'Beneficiario', 'Descripcion');
+    $header = array(($isSameDate? 'Empresa': 'Fecha'), 'Cuenta', 'Tipo', 'Ingreso', 'Retiro', 'Beneficiario', 'Descripcion');
 
     $total_importes_ingre = $total_importes_total_ingre = $total_importes_egre = $total_importes_total_egre = 0;
 
     foreach($data as $key => $movimiento)
     {
-	    $pdf->SetFont('helvetica','B',8);
-    	$pdf->SetX(6);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(205));
-      $pdf->Row(array(
-        $movimiento[0]->nombre_fiscal
-      ), false, false);
+      if (!$isSameDate) {
+  	    $pdf->SetFont('helvetica','B',8);
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(205));
+        $pdf->Row(array(
+          $movimiento[0]->nombre_fiscal
+        ), false, false);
+      }
 
       $total_importes_ingre = $total_importes_egre = 0;
       foreach ($movimiento as $keym => $mov) {
@@ -1621,7 +1623,7 @@ class banco_cuentas_model extends banco_model {
 	      $pdf->SetAligns($aligns);
 	      $pdf->SetWidths($widths);
 	      $pdf->Row(array(
-	          MyString::fechaAT($mov->fecha),
+	          ($isSameDate? $mov->nombre_corto: MyString::fechaAT($mov->fecha)),
 	          $mov->cuenta,
 	          substr($mov->tipo, 0, 5),
 	          $mov->tipomov=='t'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
