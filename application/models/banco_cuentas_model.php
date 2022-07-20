@@ -1567,9 +1567,9 @@ class banco_cuentas_model extends banco_model {
 
     $this->load->library('mypdf');
     switch ($_GET['ftipo']) {
-      case 'a': $tipo = "INGRESOS/EGRESOS" break;
-      case 'i': $tipo = "INGRESOS" break;
-      default: $tipo = "EGRESOS" break;
+      case 'a': $tipo = "INGRESOS/EGRESOS"; break;
+      case 'i': $tipo = "INGRESOS"; break;
+      default: $tipo = "EGRESOS"; break;
     }
 
     // Creación del objeto de la clase heredada
