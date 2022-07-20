@@ -7,8 +7,8 @@
  ☐ Reporte de salidas de almacén por usuario
  ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
- ☐ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
-   --lap|pcc
+ ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
+   --lap|pcc|san
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;
    COMMENT ON COLUMN public.compras_requisicion_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
@@ -16,7 +16,6 @@
    COMMENT ON COLUMN public.compras_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
    ALTER TABLE public.clasificaciones ADD COLUMN ieps_subtotal boolean DEFAULT false;
    ALTER TABLE public.facturacion_productos ADD COLUMN ieps_subtotal boolean DEFAULT false;
-   -- pcc
    ALTER TABLE public.compras_notas_credito_productos ADD COLUMN retencion_isr double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_isr real NOT NULL DEFAULT 0;
    ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_ieps real NOT NULL DEFAULT (0)::real;
