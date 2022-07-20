@@ -16,6 +16,11 @@
    COMMENT ON COLUMN public.compras_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
    ALTER TABLE public.clasificaciones ADD COLUMN ieps_subtotal boolean DEFAULT false;
    ALTER TABLE public.facturacion_productos ADD COLUMN ieps_subtotal boolean DEFAULT false;
+   -- pcc
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN retencion_isr double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_isr real NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_ieps real NOT NULL DEFAULT (0)::real;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN ieps real NOT NULL DEFAULT (0)::real;
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
    --lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Caja campos',247,false,'caja_chica/modificar_caja_campos/','edit',false);

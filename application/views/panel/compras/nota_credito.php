@@ -159,7 +159,7 @@
 
                         <?php if (isset($_POST['concepto'])) {
                               foreach ($_POST['concepto'] as $key => $concepto) { ?>
-                            <tr>
+                            <tr class="rowprod">
                               <td style="width: 70px;">
                                 <?php echo $_POST['codigo'][$key] ?>
                                 <input type="hidden" name="codigo[]" value="<?php echo $_POST['codigo'][$key] ?>" class="span12">
@@ -207,7 +207,7 @@
                           <?php }} else {
                             foreach ($compra['productos'] as $prod) {
                           ?>
-                            <tr>
+                            <tr class="rowprod">
                               <td style="width: 70px;">
                                 <?php echo $prod->codigo ?>
                                 <input type="hidden" name="codigo[]" value="<?php echo $prod->codigo ?>" class="span12">
@@ -274,10 +274,12 @@
                                           </td>
                                           <td style="width: 66px;">
                                               <input type="text" name="ret_isrPorcent[]" value="<?php echo $prod->porcentaje_isr ?>" id="ret_isrPorcent" class="span12">
+                                              <input type="hidden" name="isrTotal[]" value="<?php echo $prod->retencion_isr ?>" id="isrTotal" class="span12">
                                           </td>
                                           <td style="width: 66px;">
                                               <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
-                                              <input type="hidden" name="iepsSub[]" value="<?php echo $prod->ieps ?>" id="iepsSub" class="span12">
+                                              <input type="hidden" name="iepsTotal[]" value="<?php echo $prod->ieps ?>" id="iepsTotal" class="span12">
+                                              <input type="hidden" name="iepsSub[]" value="<?php echo $prod->ieps_sub ?>" id="iepsSub" class="span12">
                                           </td>
                                         </tr>
                                       </table>
@@ -333,6 +335,10 @@
                   <tr>
                     <td>RET.</td>
                     <td><input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo MyString::formatoNumero(set_value('totalRetencion', 0), 2, '$', false)?>"></td>
+                  </tr>
+                  <tr>
+                    <td>ISR.</td>
+                    <td><input type="text" name="totalIsr" id="totalIsr" value="<?php echo MyString::formatoNumero(set_value('totalIsr', 0), 2, '$', false)?>"></td>
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>

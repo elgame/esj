@@ -1269,6 +1269,7 @@ class polizas_model extends CI_Model {
                            'ieps_pagar6'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '0'),
                            'ieps_pagar7'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '0'),
                            'ieps_pagar9'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '0'),
                            'isr_retenerHo' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '1'),
                            'isr_retener'   => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '1'),
                            'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '1'),
@@ -1299,6 +1300,7 @@ class polizas_model extends CI_Model {
           $impuestos['ieps_pagar6']['importe']   = 0;
           $impuestos['ieps_pagar7']['importe']   = 0;
           $impuestos['ieps_pagar9']['importe']   = 0;
+          $impuestos['ieps_pagar']['importe']   = 0;
           $productos_grups = array();
           //Colocamos los productos de la factura
           foreach ($inf_compra['productos'] as $key => $value)
@@ -1308,7 +1310,7 @@ class polizas_model extends CI_Model {
             $ret_iva_pos = ($value->retencion_iva/($value->importe>0 ? $value->importe : 1))*100;
             $tipo_isr_ret = $this->getTipoISRCompras($inf_compra['info']->concepto);
 
-            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetxPagar();
+            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetXPagar();
             if($ret_iva_pos > 15)
             { // Asigana las cuentas de retencion al 100%
               $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagar100();
@@ -1341,6 +1343,8 @@ class polizas_model extends CI_Model {
                 $impuestos['ieps_pagar7']['importe'] += $value->ieps;
               } elseif ($value->porcentaje_ieps == 9) {
                 $impuestos['ieps_pagar9']['importe'] += $value->ieps;
+              } else {
+                $impuestos['ieps_pagar']['importe'] += $value->ieps;
               }
             }
             $value->cuenta_cpi = ($value->cuenta_cpi!=''? $value->cuenta_cpi: $this->getCuentaCuadreGasto() );
@@ -1516,9 +1520,17 @@ class polizas_model extends CI_Model {
 
         $this->load->model('compras_model');
 
-        $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
-                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
-                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'), );
+        $impuestos = array(
+                           'iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
+                           'iva_retenido'  => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+                           'ieps_pagar6'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(6), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_pagar7'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(7), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_pagar9'   => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
+                           'ieps_pagar'    => array('cuenta_cpi' => $this->getCuentaIepsPagarGasto(9), 'importe' => 0, 'tipo' => '1'),
+                           'isr_retenerHo' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarHono(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retener'   => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenidoxpagar125' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagarT(125), 'importe' => 0, 'tipo' => '0'),
+                         );
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -1548,14 +1560,55 @@ class polizas_model extends CI_Model {
           $response['data'] .= $this->addLineUUID($inf_factura['info']->uuid);
 
           $impuestos['iva_acreditar']['importe'] = 0;
-          $impuestos['iva_retenido']['importe']  = 0;
-          $impuestos['isr_retenido']['importe']  = 0;
+          $impuestos['iva_retenido']['importe'] = 0;
+          $impuestos['ieps_pagar6']['importe'] = 0;
+          $impuestos['ieps_pagar7']['importe'] = 0;
+          $impuestos['ieps_pagar9']['importe'] = 0;
+          $impuestos['ieps_pagar']['importe'] = 0;
+          $impuestos['isr_retenerHo']['importe'] = 0;
+          $impuestos['isr_retener']['importe'] = 0;
+          $impuestos['isr_retenidoxpagar125']['importe'] = 0;
           //Colocamos los Ingresos de la factura
           foreach ($inf_factura['productos'] as $key => $value)
           {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
+            // $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+            // $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+
+            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetXPagar();
+            if($value->porcentaje_retencion > 15)
+            { // Asigana las cuentas de retencion al 100%
+              $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagar100();
+            }elseif($value->porcentaje_retencion > 4.5)
+            { // Asigana las cuentas de honorarios o arrendamiento
+              // if ($tipo_isr_ret == 'ar') { // Arrendamiento
+              //   $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarArrend();
+              // } elseif ($tipo_isr_ret == 'ho') { // Honorarios
+              //   $impuestos['iva_retenido']['cuenta_cpi'] = $this->getCuentaIvaRetXPagarHono();
+              // }
+            }
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
-            $impuestos['isr_retenido']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+
+            if ($value->porcentaje_isr >= 1.248 && $value->porcentaje_isr <= 1.26) { // 1.25
+              $impuestos['isr_retenidoxpagar125']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            } else {
+              $impuestos['isr_retener']['importe']  += isset($value->retencion_isr)? $value->retencion_isr: 0;
+            }
+
+            if ($value->ieps > 0) {
+              if ($value->porcentaje_ieps == 6) {
+                $impuestos['ieps_pagar6']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 7){
+                $impuestos['ieps_pagar7']['importe'] += $value->ieps;
+              } elseif ($value->porcentaje_ieps == 9) {
+                $impuestos['ieps_pagar9']['importe'] += $value->ieps;
+              } else {
+                $impuestos['ieps_pagar']['importe'] += $value->ieps;
+              }
+            }
+
+
+
             $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($this->getCuentaNCGasto(), 30).  //cuenta nc ventas
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).

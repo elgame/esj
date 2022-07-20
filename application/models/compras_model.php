@@ -145,7 +145,7 @@ class compras_model extends privilegios_model{
                 cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                 cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva, cp.retencion_isr,
                 cp.ieps, cp.porcentaje_ieps, cp.porcentaje_isr,
-                cp.porcentaje_retencion, cp.status, pr.cuenta_cpi
+                cp.porcentaje_retencion, cp.status, pr.cuenta_cpi, cp.ieps_sub
           FROM compras_productos AS cp
             LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
             LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -158,9 +158,10 @@ class compras_model extends privilegios_model{
       {
         $response['productos'][] = new stdClass;
         $response['productos'][count($response['productos'])-1]->iva             = $response['info']->importe_iva;
-        $response['productos'][count($response['productos'])-1]->ieps            = 0;
-        $response['productos'][count($response['productos'])-1]->porcentaje_ieps = 0;
+        $response['productos'][count($response['productos'])-1]->ieps            = $response['info']->importe_ieps;
+        $response['productos'][count($response['productos'])-1]->porcentaje_ieps = round($response['info']->importe_ieps*100/$response['info']->subtotal, 2);
         $response['productos'][count($response['productos'])-1]->retencion_iva   = $response['info']->retencion_iva;
+        $response['productos'][count($response['productos'])-1]->porcentaje_retencion  = round($response['info']->retencion_iva*100/$response['info']->subtotal, 2);
         $response['productos'][count($response['productos'])-1]->importe         = $response['info']->subtotal;
         $response['productos'][count($response['productos'])-1]->retencion_isr   = $response['info']->retencion_isr;
         $response['productos'][count($response['productos'])-1]->porcentaje_isr  = round($response['info']->retencion_isr*100/$response['info']->subtotal, 2);
@@ -465,7 +466,8 @@ class compras_model extends privilegios_model{
                   cnc.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cnc.descripcion, cnc.cantidad, cnc.precio_unitario, cnc.importe,
                   cnc.iva, cnc.retencion_iva, cnc.total, cnc.porcentaje_iva,
-                  cnc.porcentaje_retencion, cnc.observacion, pr.cuenta_cpi
+                  cnc.porcentaje_retencion, cnc.observacion, pr.cuenta_cpi,
+                  cnc.retencion_isr, cnc.porcentaje_isr, cnc.porcentaje_ieps, cnc.ieps
            FROM compras_notas_credito_productos AS cnc
              LEFT JOIN productos AS pr ON pr.id_producto = cnc.id_producto
              LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cnc.id_presentacion
@@ -477,10 +479,21 @@ class compras_model extends privilegios_model{
         if($response['info']->isgasto == 't')
         {
           $response['productos'][] = new stdClass;
-          $response['productos'][count($response['productos'])-1]->iva           = $response['info']->importe_iva;
-          $response['productos'][count($response['productos'])-1]->retencion_iva = $response['info']->retencion_iva;
-          $response['productos'][count($response['productos'])-1]->importe       = $response['info']->total;
-          $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
+          // $response['productos'][count($response['productos'])-1]->iva           = $response['info']->importe_iva;
+          // $response['productos'][count($response['productos'])-1]->retencion_iva = $response['info']->retencion_iva;
+          // $response['productos'][count($response['productos'])-1]->importe       = $response['info']->total;
+          // $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
+          // $response['productos'][count($response['productos'])-1]->ieps          = $response['info']->importe_ieps;
+
+          $response['productos'][count($response['productos'])-1]->iva             = $response['info']->importe_iva;
+          $response['productos'][count($response['productos'])-1]->ieps            = $response['info']->importe_ieps;
+          $response['productos'][count($response['productos'])-1]->porcentaje_ieps = round($response['info']->importe_ieps*100/$response['info']->subtotal, 2);
+          $response['productos'][count($response['productos'])-1]->retencion_iva   = $response['info']->retencion_iva;
+          $response['productos'][count($response['productos'])-1]->porcentaje_retencion  = round($response['info']->retencion_iva*100/$response['info']->subtotal, 2);
+          $response['productos'][count($response['productos'])-1]->importe         = $response['info']->subtotal;
+          $response['productos'][count($response['productos'])-1]->retencion_isr   = $response['info']->retencion_isr;
+          $response['productos'][count($response['productos'])-1]->porcentaje_isr  = round($response['info']->retencion_isr*100/$response['info']->subtotal, 2);
+          $response['productos'][count($response['productos'])-1]->cuenta_cpi      = $response['info']->cuenta_cpi_gst; //Cuenta del gasto
         }
 
         return $response;
@@ -524,9 +537,14 @@ class compras_model extends privilegios_model{
       $datos['isgasto'] = 't';
     }
 
-    if (isset($data['totalRetencionIsr']))
+    if (isset($data['totalIsr']))
     {
-      $datos['retencion_isr'] = $data['totalRetencionIsr'];
+      $datos['retencion_isr'] = $data['totalIsr'];
+    }
+
+    if (isset($data['totalIeps']))
+    {
+      $datos['importe_ieps'] = $data['totalIeps'];
     }
 
     if (isset($data['observaciones']) && $data['observaciones'] !== '')
@@ -567,21 +585,25 @@ class compras_model extends privilegios_model{
     foreach ($data['concepto'] as $key => $concepto)
     {
       $productos[] = array(
-        'id_compra' => $id,
-        'num_row' => $key,
-        'id_producto' => $data['productoId'][$key],
-        // 'id_presentacion' => $data['asdasd'][$key],
-        'descripcion' => $concepto,
-        'cantidad' => $data['cantidad'][$key],
-        'precio_unitario' => $data['valorUnitario'][$key],
-        'importe' => $data['importe'][$key],
-        'iva' => $data['trasladoTotal'][$key],
-        'retencion_iva' => $data['retTotal'][$key],
-        'total' => $data['total'][$key],
-        'porcentaje_iva' => $data['trasladoPorcent'][$key],
+        'id_compra'            => $id,
+        'num_row'              => $key,
+        'id_producto'          => $data['productoId'][$key],
+        // 'id_presentacion'   => $data['asdasd'][$key],
+        'descripcion'          => $concepto,
+        'cantidad'             => $data['cantidad'][$key],
+        'precio_unitario'      => $data['valorUnitario'][$key],
+        'importe'              => $data['importe'][$key],
+        'iva'                  => $data['trasladoTotal'][$key],
+        'retencion_iva'        => $data['retTotal'][$key],
+        'total'                => $data['total'][$key],
+        'porcentaje_iva'       => $data['trasladoPorcent'][$key],
         'porcentaje_retencion' => 0,
-        'observacion' => $data['observacion'][$key],
-        'id_unidad' => $data['unidad'][$key],
+        'observacion'          => $data['observacion'][$key],
+        'id_unidad'            => $data['unidad'][$key],
+        'retencion_isr'        => floatval(isset($data['isrTotal'][$key])? $data['isrTotal'][$key]: 0),
+        'porcentaje_isr'       => floatval(isset($data['ret_isrPorcent'][$key])? $data['ret_isrPorcent'][$key]: 0),
+        'porcentaje_ieps'      => floatval(isset($data['iepsPorcent'][$key])? $data['iepsPorcent'][$key]: 0),
+        'ieps'                 => floatval(isset($data['iepsTotal'][$key])? $data['iepsTotal'][$key]: 0),
       );
     }
 

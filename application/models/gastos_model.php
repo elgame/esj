@@ -34,6 +34,7 @@ class gastos_model extends privilegios_model{
       'status'          => $data['condicionPago'] ===  'co' ? 'p' : 'p',
       'retencion_iva'   => $data['ret_iva'],
       'retencion_isr'   => $data['ret_isr'],
+      'importe_ieps'    => $data['ieps'],
       'id_area'         => ($data['areaId']? $data['areaId']: NULL),
       // 'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
       // 'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
