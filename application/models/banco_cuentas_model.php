@@ -1566,10 +1566,16 @@ class banco_cuentas_model extends banco_model {
     $isSameDate = ($fecha == $fecha2);
 
     $this->load->library('mypdf');
+    switch ($_GET['ftipo']) {
+      case 'a': $tipo = "INGRESOS/EGRESOS" break;
+      case 'i': $tipo = "INGRESOS" break;
+      default: $tipo = "EGRESOS" break;
+    }
+
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo2 = ($isSameDate? "REPORTE BANCOS DEL DIA": "REPORTE BANCOS ACUMULADO POR EMPRESA");
-    $pdf->titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')."\n";
+    $pdf->titulo3 = $tipo."\n";
     $pdf->titulo3 .= ($isSameDate? "{$fecha->format('d/m/Y')}": "{$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}");
 
     $pdf->AliasNbPages();
