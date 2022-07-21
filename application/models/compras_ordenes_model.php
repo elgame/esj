@@ -514,6 +514,7 @@ class compras_ordenes_model extends CI_Model {
           $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'retencion_isr'        => $_POST['ret_isrTotal'][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+          'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
         );
 
         if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
@@ -896,7 +897,8 @@ class compras_ordenes_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones, cp.ieps_sub
+                  Date(cp.fecha_aceptacion) AS fecha_aceptacion, cp.folio_aceptacion, cp.observaciones,
+                  cp.ieps_sub, cp.no_certificado
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion

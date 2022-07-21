@@ -1564,6 +1564,9 @@
                         '<div class="arrow"></div><h3 class="popover-title">Activos</h3>'+
                         '<div class="popover-content">'+
                           '<div class="control-group" style="width: 375px;">'+
+                            '<input type="text" name="noCertificado[]" class="span11" value="" placeholder="No Certificado">'+
+                          '</div>'+
+                          '<div class="control-group" style="width: 375px;">'+
                             '<input type="text" name="observacionesP[]" class="span11 observacionesP" value="" placeholder="Observaciones">'+
                           '</div>'+
                           '<div class="control-group activosGrup" style="width: 375px;display: '+ ($('#tipoOrden').find('option:selected').val() !== 'f'? 'block' : 'none') +';">'+

@@ -9,9 +9,11 @@
  ☐ Reporte de salidas de almacén por usuario
  ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
-   --san
+   --lap
     ALTER TABLE public.productos_familias ADD COLUMN is_certif boolean DEFAULT false;
     COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
+    ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    ALTER TABLE public.compras_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
  ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
    --lap|pcc|san
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
