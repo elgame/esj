@@ -117,6 +117,7 @@ class nomina_fiscal_model extends CI_Model {
     $descuentoOtros = $descuentoOtros ?: 0;
     $utilidadEmpresa = $utilidadEmpresa ?: 0;
 
+    $field_salario_diario = 'nf.salario_diario, nptu.salario_diario, nagui.salario_diario, u.salario_diario';
     $sql_nm_guardadas2 = '';
     $nm_tipo = 'se';
     if ($tipo === null || $tipo === 'ag')
@@ -124,12 +125,14 @@ class nomina_fiscal_model extends CI_Model {
       $sql .= " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
       $sql_nm_guardadas2 = " (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) AND ";
       $nm_tipo = $tipo===null? 'se': 'ag';
+      $field_salario_diario = 'nagui.salario_diario, nf.salario_diario, nptu.salario_diario, u.salario_diario';
     }
     else if($tipo === 'ptu')
     {
       $sql .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0";
       $sqlg .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0";
       $nm_tipo = 'pt';
+      $field_salario_diario = 'nptu.salario_diario, nf.salario_diario, nagui.salario_diario, u.salario_diario';
     }
 
     // si la nomina esta guardada
@@ -160,7 +163,7 @@ class nomina_fiscal_model extends CI_Model {
                 u.curp,
                 DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
                 nf.id_puesto, u.id_departamente,
-                COALESCE(nf.salario_diario, nptu.salario_diario, nagui.salario_diario, u.salario_diario) AS salario_diario,
+                COALESCE({$field_salario_diario}) AS salario_diario,
                 COALESCE(nf.salario_real, u.salario_diario_real) AS salario_diario_real,
                 nf.infonavit,
                 nf.fondo_ahorro,
@@ -6868,7 +6871,7 @@ class nomina_fiscal_model extends CI_Model {
         $fondo_ahorro1        += $_POST['fondo_ahorro'][$key];
         $descuento_playeras1  += $_POST['descuento_playeras'][$key];
         $descuento_otros1     += $_POST['descuento_otros'][$key];
-        $descuento_cocina1    += $_POST['descuento_cocina1'][$key];
+        $descuento_cocina1    += $_POST['descuento_cocina'][$key];
         $ttotal_pagar1        += $total_pagar;
         $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
         $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
