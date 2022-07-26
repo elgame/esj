@@ -12034,6 +12034,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $tipoNomina = $empresa['info']->dia_inicia_semana == 15? 'quincena': 'semana';
     // $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
     //   WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
 
