@@ -1044,9 +1044,9 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
-    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
@@ -1140,11 +1140,12 @@ class caja_chica_prest_model extends CI_Model {
         $pdf->Row(array($tipo), true, 'B');
       }
 
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetAligns(array('L','L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
       $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
+        $prestamo->id_prestamo_nom,
         $prestamo->categoria,
         $prestamo->empleado,
         MyString::fechaAT($prestamo->fecha),
@@ -1309,14 +1310,14 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
-    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
+    $pdf->Row(array('FOLIO', 'EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET', 'SALDOS FINALES'), FALSE, FALSE);
 
     $pdf->SetFont('Arial','', 7);
     $pdf->SetXY(6, $pdf->GetY());
-    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-    $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
 
     $tipoo = '';
     $empresaaux = '';
@@ -1405,11 +1406,12 @@ class caja_chica_prest_model extends CI_Model {
         $pdf->Row(array($tipo), true, 'B');
       }
 
-      $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
-      $pdf->SetWidths(array(20, 48, 16, 30, 18, 18, 18, 10, 10, 18));
+      $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+      $pdf->SetWidths(array(10, 20, 48, 16, 20, 18, 18, 18, 10, 10, 18));
       $pdf->SetFont('Arial','', 7);
       $pdf->SetX(6);
       $pdf->Row(array(
+        $prestamo->id_prestamo_nom,
         $prestamo->categoria,
         $prestamo->empleado,
         MyString::fechaAT($prestamo->fecha),
