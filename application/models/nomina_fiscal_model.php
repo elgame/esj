@@ -117,7 +117,9 @@ class nomina_fiscal_model extends CI_Model {
     $descuentoOtros = $descuentoOtros ?: 0;
     $utilidadEmpresa = $utilidadEmpresa ?: 0;
 
+    $field_esta_asegurado = 'nf.esta_asegurado, nptu.esta_asegurado, nagui.esta_asegurado';
     $field_salario_diario = 'nf.salario_diario, nptu.salario_diario, nagui.salario_diario, u.salario_diario';
+    $field_salario_integral = 'nf.salario_integral, nptu.salario_integral, nagui.salario_integral, 0';
     $sql_nm_guardadas2 = '';
     $nm_tipo = 'se';
     if ($tipo === null || $tipo === 'ag')
@@ -125,14 +127,20 @@ class nomina_fiscal_model extends CI_Model {
       $sql .= " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
       $sql_nm_guardadas2 = " (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) AND ";
       $nm_tipo = $tipo===null? 'se': 'ag';
+
+      $field_esta_asegurado = 'nagui.esta_asegurado, nf.esta_asegurado, nptu.esta_asegurado';
       $field_salario_diario = 'nagui.salario_diario, nf.salario_diario, nptu.salario_diario, u.salario_diario';
+      $field_salario_integral = 'nagui.salario_integral, nf.salario_integral, nptu.salario_integral, 0';
     }
     else if($tipo === 'ptu')
     {
       $sql .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0";
       $sqlg .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0";
       $nm_tipo = 'pt';
+
+      $field_esta_asegurado = 'nptu.esta_asegurado, nf.esta_asegurado, nagui.esta_asegurado';
       $field_salario_diario = 'nptu.salario_diario, nf.salario_diario, nagui.salario_diario, u.salario_diario';
+      $field_salario_integral = 'nptu.salario_integral, nf.salario_integral, nagui.salario_integral, 0';
     }
 
     // si la nomina esta guardada
@@ -158,12 +166,13 @@ class nomina_fiscal_model extends CI_Model {
                 (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
                 COALESCE(u.apellido_paterno, '') AS apellido_paterno, COALESCE(u.apellido_materno, '') AS apellido_materno, u.nombre AS nombre2,
                 u.banco,
-                COALESCE(nf.esta_asegurado, nptu.esta_asegurado, nagui.esta_asegurado) AS esta_asegurado,
+                COALESCE({$field_esta_asegurado}) AS esta_asegurado,
                 't' AS nomina_guardada,
                 u.curp,
                 DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
                 nf.id_puesto, u.id_departamente,
                 COALESCE({$field_salario_diario}) AS salario_diario,
+                COALESCE({$field_salario_integral}) AS salario_integral,
                 COALESCE(nf.salario_real, u.salario_diario_real) AS salario_diario_real,
                 nf.infonavit,
                 nf.fondo_ahorro,
@@ -10973,7 +10982,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(50, 35, 35, 35, 30));
-      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+      $salario_integral = !empty($empleado->salario_integral)? $empleado->salario_integral: $empleado->nomina->salario_diario_integrado;
+      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$salario_integral}", "S.B.C: {$salario_integral}", 'Cotiza fijo'), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
