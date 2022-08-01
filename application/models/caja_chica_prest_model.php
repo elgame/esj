@@ -1313,12 +1313,12 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(20, 48));
     $pdf->SetX(6);
-    $pdf->Row(array('Traspasos', MyString::formatoNumero($caja['traspasos'], 2, '$', false)), false, 'B');
+    $pdf->Row(array('Traspasos', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, 'B');
 
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(20, 48));
     $pdf->SetX(6);
-    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos']), 2, '$', false) ), false, 'B');
+    $pdf->Row(array('Saldo', MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos), 2, '$', false) ), false, 'B');
 
 
     // PRESTAMOS A CORTO PLAZO
