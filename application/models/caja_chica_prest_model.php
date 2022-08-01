@@ -398,7 +398,7 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     // Traspasos
-    $traspasos = $this->getTraspasos($fecha, 'caja_prestamo', true, (!$all? " AND bt.status = 't'": ''));
+    $traspasos = $this->getTraspasos($fecha, 'prest1', false, (!$all? " AND bt.status = 't'": ''));
     $info['traspasos'] = $traspasos;
 
     if (true) {
@@ -444,7 +444,7 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     if (true) {
-      $ddNoCaja = '1, 2, 3, 4, 5';
+      $ddNoCaja = '1, 2, 3, 4, 5, 6';
       $ddTipo = 'caja_prestamo';
 
       // acreedores
@@ -572,7 +572,7 @@ class caja_chica_prest_model extends CI_Model {
     return $info;
   }
 
-  public function getTraspasos($fecha, $tno_caja, $total=false, $sql = '')
+  public function getTraspasos1($fecha, $tno_caja, $total=false, $sql = '')
   {
     if ($total) {
       $traspaso = $this->db->query(
@@ -590,6 +590,46 @@ class caja_chica_prest_model extends CI_Model {
         false AS guardado, bt.tipo_caja
        FROM public.cajachica_traspasos bt
        WHERE bt.fecha = '{$fecha}' AND bt.tipo_caja = '{$tno_caja}' {$sql}
+       ORDER BY bt.folio ASC"
+    );
+
+    return $traspaso->result();
+  }
+
+  public function getTraspasos($fecha, $noCaja, $total=false, $sql = '')
+  {
+    $noCaja = $noCaja == 'prest1'? 0: $noCaja;
+    if ($total) {
+      $traspaso = $this->db->query(
+        "SELECT Sum(bt.monto) AS monto
+         FROM public.cajachica_traspasos bt
+         WHERE bt.fecha <= '{$fecha}' AND bt.no_caja = {$noCaja} {$sql}"
+      )->row();
+      return $traspaso->monto;
+    }
+
+    $tno_caja = '';
+    if ($noCaja == 1) {
+      $tno_caja = 'caja_limon';
+    } elseif ($noCaja == 2) {
+      $tno_caja = 'caja_gastos';
+    } elseif ($noCaja == 4) {
+      $tno_caja = 'caja_general';
+    } elseif ($noCaja == 5) {
+      $tno_caja = 'caja_fletes';
+    } elseif ($noCaja == 6) {
+      $tno_caja = 'caja_plasticos';
+    } elseif ($noCaja == 0) {
+      $tno_caja = "caja_prestamo";
+    }
+
+    $traspaso = $this->db->query(
+      "SELECT bt.id_traspaso, bt.concepto, bt.monto, bt.fecha, bt.no_caja, bt.no_impresiones,
+        bt.id_usuario, bt.fecha_creacion, bt.afectar_fondo, bt.folio, bt.status,
+        (CASE bt.no_caja WHEN {$noCaja} THEN bt.tipo ELSE (NOT bt.tipo) END) AS tipo,
+        (CASE bt.no_caja WHEN {$noCaja} THEN true ELSE false END) AS guardado, bt.tipo_caja
+       FROM public.cajachica_traspasos bt
+       WHERE bt.fecha = '{$fecha}' AND (bt.no_caja = {$noCaja} OR bt.tipo_caja = '{$tno_caja}') {$sql}
        ORDER BY bt.folio ASC"
     );
 
@@ -1024,13 +1064,58 @@ class caja_chica_prest_model extends CI_Model {
       $pdf->Row(array(
         $fondoc->categoria,
         $fondoc->empresa,
-        $fondoc->fecha,
+        MyString::fechaAT($fondoc->fecha),
         $fondoc->referencia,
         MyString::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false),
         MyString::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false),
         MyString::formatoNumero($saldofc, 2, '', false),
         $fondoc->id_fondo
       ), false, 'B');
+    }
+
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(205, 25));
+      $pdf->Row(array('TRASPASOS'), true, true);
+
+      $pdf->SetFont('Arial','', 6.5);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('C', 'L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 20, 20, 125, 25));
+      $pdf->Row(array('FOLIO', 'TIPO', 'AF. FONDO', 'CONCEPTO', 'IMPORTE'), true, true);
+      $pdf->SetFont('Arial','', 6);
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = [[100, 100, 100]];
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $traspaso->folio,
+          ($traspaso->tipo=='t'? 'Ingreso': 'Egreso'),
+          ($traspaso->afectar_fondo=='t'? 'Si': 'No'),
+          ($traspaso->status == 't'? $traspaso->concepto: 0),
+          MyString::formatoNumero(
+            ($traspaso->status == 't'? $traspaso->monto: 0),
+            2, '', false)), false, true, $colortxt);
+      }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
     }
 
     // PRESTAMOS A LARGO PLAZO

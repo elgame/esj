@@ -765,6 +765,7 @@ class caja_chica_model extends CI_Model {
 
   public function getTraspasos($fecha, $noCaja, $total=false, $sql = '')
   {
+    $noCaja = $noCaja == 'prest1'? 0: $noCaja;
     if ($total) {
       $traspaso = $this->db->query(
         "SELECT Sum(bt.monto) AS monto
@@ -785,6 +786,8 @@ class caja_chica_model extends CI_Model {
       $tno_caja = 'caja_fletes';
     } elseif ($noCaja == 6) {
       $tno_caja = 'caja_plasticos';
+    } elseif ($noCaja == 0) {
+      $tno_caja = 'caja_prestamo';
     }
 
     $traspaso = $this->db->query(

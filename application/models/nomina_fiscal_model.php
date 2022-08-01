@@ -10902,7 +10902,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $cfdi_ext = json_decode($nomina->cfdi_ext);
     // echo "<pre>";
-    //   var_dump($nomina, $xml);
+    //   var_dump($cfdi_ext, $nomina, $xml);
     // echo "</pre>";exit;
 
     $show = false;
@@ -10981,9 +10981,10 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetXY(6, $pdf->GetY() + 0);
       $pdf->SetAligns(array('L', 'L'));
+      $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
       $pdf->SetWidths(array(50, 35, 35, 35, 30));
       $salario_integral = !empty($empleado->salario_integral)? $empleado->salario_integral: $empleado->nomina->salario_diario_integrado;
-      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$salario_integral}", "S.B.C: {$salario_integral}", 'Cotiza fijo'), false, false, null, 1, 1);
+      $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$salario_integral}", "S.B.C: {$salario_integral}", 'Cotiza fijo'), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
