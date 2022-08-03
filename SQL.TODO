@@ -6,6 +6,8 @@
    ALTER TABLE public.empresas ADD COLUMN nombre_corto character varying COLLATE pg_catalog."default";
  ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
  ☐ Reporte de compras de productos y productos regresados en almacen
+   -- lap|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Existencia por unidades de salida',369,true,'inventario/epus/','print',true);
  ✔ Reporte de salidas de almacén por usuario @done (22-07-22 19:31)
    -- lap|san
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Usuarios',366,true,'productos_salidas/rpt_salidas_usuarios/','print',true);
