@@ -264,14 +264,14 @@
                                           </td>
                                           <td style="width: 60px;">
                                             <?php if ($traspaso->guardado == 't'): ?>
-                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                            <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
                                             <?php else: ?>
-                                              <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                              <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>>
                                               <?php echo $traspaso->monto ?>
                                             <?php endif ?>
                                           </td>
                                           <td style="width: 30px;">
-                                            <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
+                                            <?php if ($traspaso->guardado == 't'): ?>
                                             <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                             <?php endif ?>
                                           </td>
