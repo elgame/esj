@@ -3512,6 +3512,12 @@ class nomina_fiscal_model extends CI_Model {
       $y = $pdf->GetY();
       foreach ($empleados as $key => $empleado)
       {
+        $nomina1 = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_ptu
+          WHERE id_empleado = {$empleado->id} AND id_empresa = {$empresaId}
+          AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
+          AND registro_patronal = '{$filtros['regPatronal']}'")->row();
+        $cfdi_ext = json_decode($nomina1->cfdi_ext);
+
         if($departamento->id_departamento == $empleado->id_departamente)
         {
           if($dep_tiene_empleados)
@@ -11329,6 +11335,12 @@ class nomina_fiscal_model extends CI_Model {
       $y = $pdf->GetY();
       foreach ($empleados as $key => $empleado)
       {
+        $nomina1 = $this->db->query("SELECT uuid, xml, cfdi_ext FROM nomina_ptu
+          WHERE id_empleado = {$empleado->id} AND id_empresa = {$empresaId}
+          AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
+          AND registro_patronal = '{$filtros['regPatronal']}'")->row();
+        $cfdi_ext = json_decode($nomina1->cfdi_ext);
+
         if($departamento->id_departamento == $empleado->id_departamente)
         {
           if($dep_tiene_empleados)
