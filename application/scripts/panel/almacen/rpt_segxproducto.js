@@ -6,6 +6,7 @@ $(function(){
         ffecha2: $("#ffecha2").val(),
         dempresa: $("#dempresa").val(),
         did_empresa: $("#did_empresa").val(),
+        sucursalId: $("#sucursalId").val(),
         // dcon_mov: $("#dcon_mov:checked").val(),
 
         ids_productos: [],

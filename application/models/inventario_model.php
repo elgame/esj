@@ -1007,7 +1007,7 @@ class inventario_model extends privilegios_model{
   public function getCUnProductosXls()
   {
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");
+    header("Content-Disposition: attachment; filename=seguimiento_producto.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
@@ -1015,31 +1015,36 @@ class inventario_model extends privilegios_model{
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    if ($this->input->get('sucursalId') > 0) {
+      $sucursal = $this->empresas_model->infoSucursal($this->input->get('sucursalId'));
+    }
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Reporte de seguimientos x Producto';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $titulo3 .= isset($sucursal)? $sucursal->nombre_fiscal: '';
 
 
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="8" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="8" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="8" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="8"></td>
         </tr>';
       $html .= '<tr style="font-weight:bold">
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Proveedor</td>
-        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Concepto</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">P. Unitario</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
@@ -1061,7 +1066,8 @@ class inventario_model extends privilegios_model{
               <td style="width:400px;border:1px solid #000;">'.$producto->fecha.'</td>
               <td style="width:150px;border:1px solid #000;">'.$producto->serie.' '.$producto->folio.'</td>
               <td style="width:150px;border:1px solid #000;">'.$producto->proveedor.'</td>
-              <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.' '.$producto->abreviatura.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
               <td style="width:150px;border:1px solid #000;">'.$producto->precio_unitario.'</td>
               <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
               <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
@@ -1076,18 +1082,18 @@ class inventario_model extends privilegios_model{
         }
         $html .= '
           <tr style="font-weight:bold">
-            <td colspan="6">Total</td>
+            <td colspan="7">Total</td>
             <td style="border:1px solid #000;">'.$proveedor_total.'</td>
           </tr>
           <tr>
-            <td colspan="6"></td>
+            <td colspan="8"></td>
           </tr>';
       }
     }
 
     $html .= '
         <tr style="font-weight:bold">
-          <td colspan="6">Total General</td>
+          <td colspan="7">Total General</td>
           <td style="border:1px solid #000;">'.$total_general.'</td>
         </tr>
       </tbody>
