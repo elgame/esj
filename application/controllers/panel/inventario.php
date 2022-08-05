@@ -244,6 +244,7 @@ class inventario extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte de seguimientos x Producto');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa']->id_empresa);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

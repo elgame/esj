@@ -825,6 +825,10 @@ class inventario_model extends privilegios_model{
       }
     }
 
+    if (intval($this->input->get('sucursalId')) > 0) {
+      $sql .= " AND c.id_sucursal = ".$this->input->get('sucursalId');
+    }
+
       // if($this->input->get('fid_producto') != '')
       // {
       //   $idsproveedores .= " AND p.id_producto = ".$this->input->get('fid_producto');
@@ -844,7 +848,8 @@ class inventario_model extends privilegios_model{
                 pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, COALESCE(cp.importe, 0) AS importe,
                 COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total, cp.proveedor
             FROM
-              productos AS p LEFT JOIN (
+              productos AS p
+              LEFT JOIN (
                 SELECT cp.id_producto, c.serie, c.folio, Date(c.fecha) AS fecha, cp.cantidad, cp.importe,
                   (cp.iva - cp.retencion_iva) AS impuestos, cp.total, cp.precio_unitario, pr.nombre_fiscal AS proveedor
                 FROM compras AS c
@@ -890,6 +895,10 @@ class inventario_model extends privilegios_model{
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
+    if ($this->input->get('sucursalId') > 0) {
+      $sucursal = $this->empresas_model->infoSucursal($this->input->get('sucursalId'));
+    }
+
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -902,6 +911,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo2 = 'Reporte de seguimientos x Producto';
     // $pdf->titulo3 = (isset($res[0]->nombre)?'PRODUCTO: '.$res[0]->nombre:'')."\n";
     $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= isset($sucursal)? $sucursal->nombre_fiscal: '';
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
