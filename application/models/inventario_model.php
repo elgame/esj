@@ -803,7 +803,7 @@ class inventario_model extends privilegios_model{
    */
   public function getCUnProductosData()
   {
-    $sql_com = $sql = '';
+    $sql_suc = $sql_com = $sql = '';
     $idsproveedores = $idsproveedores2 = '' ;
 
     //Filtros para buscar
@@ -826,7 +826,7 @@ class inventario_model extends privilegios_model{
     }
 
     if (intval($this->input->get('sucursalId')) > 0) {
-      $sql .= " AND c.id_sucursal = ".$this->input->get('sucursalId');
+      $sql_suc .= " AND co.id_sucursal = ".$this->input->get('sucursalId');
     }
 
       // if($this->input->get('fid_producto') != '')
@@ -854,7 +854,12 @@ class inventario_model extends privilegios_model{
                   (cp.iva - cp.retencion_iva) AS impuestos, cp.total, cp.precio_unitario, pr.nombre_fiscal AS proveedor
                 FROM compras AS c
                   INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
-                  INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
+                  INNER JOIN (
+                    SELECT cp.*
+                    FROM compras_ordenes co
+                      INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                    WHERE cp.id_producto = {$product} {$sql_suc}
+                  ) AS cp ON cf.id_orden = cp.id_orden
                   INNER JOIN proveedores AS pr ON pr.id_proveedor = c.id_proveedor
                 WHERE cp.id_producto IS NOT NULL {$idsproveedores2} AND cp.id_producto = {$product} {$sql} AND
                   Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
