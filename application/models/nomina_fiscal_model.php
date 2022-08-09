@@ -3516,7 +3516,7 @@ class nomina_fiscal_model extends CI_Model {
           WHERE id_empleado = {$empleado->id} AND id_empresa = {$empresaId}
           AND anio = {$semana['anio']} AND semana = {$semana[$tipoNomina]}
           AND registro_patronal = '{$filtros['regPatronal']}'")->row();
-        $cfdi_ext = json_decode($nomina1->cfdi_ext);
+        $cfdi_ext = isset($nomina1->cfdi_ext)? json_decode($nomina1->cfdi_ext): null;
 
         if($departamento->id_departamento == $empleado->id_departamente)
         {
