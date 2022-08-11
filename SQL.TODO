@@ -1,3 +1,4 @@
+ ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
  ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
  ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
    --lap|san|pcc
@@ -18,6 +19,26 @@
     COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
     ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
     ALTER TABLE public.compras_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    --lap|san
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN id_orden bigint;
+    COMMENT ON COLUMN public.facturacion_seg_cert.id_orden IS 'Orden del certificado o linea captura';
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    COMMENT ON COLUMN public.facturacion_seg_cert.no_certificado IS 'Orden del certificado o linea captura';
+    CREATE OR REPLACE VIEW public.no_certificados_compras
+       AS
+       SELECT co.id_orden, co.folio,
+         e.id_empresa,
+          e.nombre_fiscal AS empresa,
+          cp.no_certificado,
+          COALESCE(fsc.id_factura, 0::bigint) AS reg
+         FROM compras_ordenes co
+           JOIN compras_productos cp ON co.id_orden = cp.id_orden
+           JOIN empresas e ON e.id_empresa = co.id_empresa
+           LEFT JOIN facturacion_seg_cert fsc ON fsc.id_orden = cp.id_orden AND fsc.no_certificado::text = cp.no_certificado::text
+        WHERE cp.no_certificado IS NOT NULL AND fsc.id_factura IS NULL;
+
+      ALTER TABLE public.no_certificados_compras
+          OWNER TO programa;
  ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
    --lap|pcc|san
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;

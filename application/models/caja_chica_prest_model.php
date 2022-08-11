@@ -1840,6 +1840,55 @@ class caja_chica_prest_model extends CI_Model {
       </tr>';
     }
 
+    // Traspasos
+    $totalTraspasos = 0;
+    if (count($caja['traspasos']) > 0) {
+      $html .= '<tr><td></td></tr>
+      <tr><td></td></tr>
+      <tr style="font-weight:bold">
+        <td colspan="10" style="border:1px solid #000;background-color: #cccccc;">TRASPASOS</td>
+      </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">TIPO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">AF. FONDO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+      </tr>';
+
+      $codigoAreas = array();
+      foreach ($caja['traspasos'] as $key => $traspaso)
+      {
+        $colortxt = [[100, 100, 100]];
+        if ($traspaso->status == 't') {
+          $totalTraspasos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+          $colortxt = [[0, 0, 0]];
+        }
+
+        $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$traspaso->folio.'</td>
+          <td style="border:1px solid #000;">'.($traspaso->tipo=='t'? 'Ingreso': 'Egreso').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->afectar_fondo=='t'? 'Si': 'No').'</td>
+          <td style="border:1px solid #000;">'.($traspaso->status == 't'? $traspaso->concepto: 0).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero(($traspaso->status == 't'? $traspaso->monto: 0), 2, '', false).'</td>
+        </tr>';
+      }
+
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(180, 25));
+      $pdf->Row(array('SUMA: ', MyString::formatoNumero($totalTraspasos, 2, '$', false)), false, true);
+
+      $html .= '<tr style="font-weight:bold">
+        <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">SUMAS: </td>
+        <td colspan="1" style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($totalTraspasos, 2, '$', false).'</td>
+      </tr>';
+    }
+
     // PRESTAMOS A LARGO PLAZO
     $html .= '<tr><td></td></tr>
       <tr><td></td></tr>
@@ -2015,7 +2064,7 @@ class caja_chica_prest_model extends CI_Model {
 
     $html .= '<tr style="">
       <td colspan="5" style="border:1px solid #000;">Saldo</td>
-      <td colspan="5" style="border:1px solid #000;">'.MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$caja['traspasos']), 2, '$', false).'</td>
+      <td colspan="5" style="border:1px solid #000;">'.MyString::formatoNumero(($caja['saldo_prest_fijo']+$total_prestamos_recuperar-$totalTraspasos), 2, '$', false).'</td>
     </tr>';
 
 

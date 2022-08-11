@@ -774,6 +774,8 @@
                   $_POST['cert_certificado51'][]       = $prodesp->certificado;
                   $_POST['cert_bultos51'][]            = $prodesp->bultos;
                   $_POST['cert_num_operacion51'][]     = $prodesp->num_operacion;
+                  $_POST['cert_no_certificado51'][]    = $prodesp->no_certificado;
+                  $_POST['cert_id_orden51'][]          = $prodesp->id_orden;
                 }
               }
 
@@ -806,6 +808,13 @@
                     <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo $_POST['cert_num_operacion51'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
                   </div>
                 </div>
+                <div class="control-group">
+                  <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
+                  <div class="controls" style="margin-left: 0">
+                    <input type="text" name="cert_no_certificado51[]" class="span12 sikey field-check cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo $_POST['cert_no_certificado51'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
+                    <input type="hidden" name="cert_id_orden51[]" class="span12 sikey field-check" id="cert_id_orden51" value="<?php echo $_POST['cert_id_orden51'][$key] ?>">
+                  </div>
+                </div>
               </div>
             <?php }
             } else { ?>
@@ -832,7 +841,14 @@
                 <div class="control-group">
                   <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
+                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="cert_no_certificado51">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
+                  <div class="controls" style="margin-left: 0">
+                    <input type="text" name="cert_no_certificado51[]" class="span12 sikey field-check cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo set_value('cert_no_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
+                    <input type="hidden" name="cert_id_orden51[]" class="span12 sikey field-check" id="cert_id_orden51" value="<?php echo set_value('cert_id_orden51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_orden : ''); ?>">
                   </div>
                 </div>
               </div>
@@ -857,6 +873,8 @@
                 $_POST['cert_certificado52'][]       = $prodesp->certificado;
                 $_POST['cert_bultos52'][]            = $prodesp->bultos;
                 $_POST['cert_num_operacion52'][]     = $prodesp->num_operacion;
+                $_POST['cert_no_certificado52'][]    = $prodesp->no_certificado;
+                $_POST['cert_id_orden52'][]          = $prodesp->id_orden;
               }
             }
 
@@ -889,6 +907,13 @@
                     <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo $_POST['cert_num_operacion52'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
                   </div>
                 </div>
+                <div class="control-group">
+                  <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
+                  <div class="controls" style="margin-left: 0">
+                    <input type="text" name="cert_no_certificado52[]" class="span12 sikey field-check cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo $_POST['cert_no_certificado52'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
+                    <input type="hidden" name="cert_id_orden52[]" class="span12 sikey field-check" id="cert_id_orden52" value="<?php echo $_POST['cert_id_orden52'][$key] ?>">
+                  </div>
+                </div>
               </div>
             <?php }
             } else { ?>
@@ -916,6 +941,13 @@
                   <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
                   <div class="controls" style="margin-left: 0">
                     <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo set_value('cert_num_operacion52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
+                  <div class="controls" style="margin-left: 0">
+                    <input type="text" name="cert_no_certificado52[]" class="span12 sikey field-check cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo set_value('cert_no_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
+                    <input type="hidden" name="cert_id_orden52[]" class="span12 sikey field-check" id="cert_id_orden52" value="<?php echo set_value('cert_id_orden52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_orden : ''); ?>">
                   </div>
                 </div>
               </div>
@@ -1085,6 +1117,31 @@
       <button class="btn btn-primary" id="BtnAddClientePallets">Agregar Pallets</button>
     </div>
   </div><!--/modal pallets -->
+
+  <!-- Modal No Certificados compras -->
+  <div id="modal-no-certificados" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">No Certificados Compras</h3>
+    </div>
+    <div class="modal-body" style="max-height: 370px;">
+      <table id="lista_certificados_modal" class="table table-striped table-bordered table-hover table-condensed">
+        <caption></caption>
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Empresa</th>
+            <th>Certificado</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    </div>
+  </div>
 
 </div>
 

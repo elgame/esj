@@ -11,6 +11,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajax_producto/',
     'compras_ordenes/ajax_get_folio/',
     'compras_ordenes/ajax_get_producto_all/',
+    'compras_ordenes/ajax_no_certificados/',
 
     'compras_ordenes/ligar/',
     'compras_ordenes/imprimir_recibo_faltantes/',
@@ -791,6 +792,15 @@ class compras_ordenes extends MY_Controller {
 
     echo json_encode($productos);
   }
+
+  public function ajax_no_certificados()
+  {
+    $this->load->model('compras_ordenes_model');
+    $certs = $this->compras_ordenes_model->getNoCertificados($_GET);
+
+    echo json_encode($certs);
+  }
+
 
   /*
    |------------------------------------------------------------------------

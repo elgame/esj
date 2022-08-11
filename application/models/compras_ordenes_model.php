@@ -1302,6 +1302,7 @@ class compras_ordenes_model extends CI_Model {
         $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
         'retencion_isr'        => $_POST['ret_isrTotal'][$key],
         'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
+        'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
       );
 
       if ($statusp === 'a') {
@@ -1890,6 +1891,22 @@ class compras_ordenes_model extends CI_Model {
           {$area}
         ORDER BY b.folio DESC
         LIMIT 100");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
+  }
+
+  public function getNoCertificados($datos)
+  {
+    $sql = isset($datos['empresaId']{0})? " AND id_empresa = {$datos['empresaId']}": '';
+
+    $query = $this->db->query("SELECT *
+        FROM no_certificados_compras
+        WHERE 1 = 1 {$sql}
+        ORDER BY folio DESC
+        LIMIT 300");
     $response = array();
     if($query->num_rows() > 0)
       $response = $query->result();
