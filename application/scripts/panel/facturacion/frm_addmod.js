@@ -560,6 +560,7 @@ $(function(){
 
 var modalCfdiRel = function () {
   $('#btnCfdiRelPrev').on('click', function(event) {
+    console.log('ddssssssss');
     $('#modal-cfdiRelPrev').modal('show');
 
     $('#BtnClearCfdiRel').hide();

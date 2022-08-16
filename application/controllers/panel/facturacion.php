@@ -408,12 +408,14 @@ class facturacion extends MY_Controller {
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
     $tipoDeComprobante = new TipoDeComprobante();
+    $tipoRelacion      = new TipoRelacion();
     // $monedas           = new Monedas();
 
     $params['metodosPago']       = $metodosPago->get()->all();
     $params['formaPago']         = $formaPago->get()->all();
     $params['usoCfdi']           = $usoCfdi->get()->all();
     $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+    $params['tipoRelacion']      = $tipoRelacion->get()->all();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -594,7 +596,7 @@ class facturacion extends MY_Controller {
     $callback_isValidDate      = 'callback_isValidDate';
     $callback_val_total        = 'callback_val_total';
     $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    if ($borrador)
+    if ($borrador || true)
     {
       // $callback_seriefolio_check = '';
       $callback_isValidDate      = '';

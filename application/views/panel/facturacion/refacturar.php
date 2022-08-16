@@ -307,6 +307,21 @@
               </div>
               <?php }?>
 
+              <div style="text-align: center;">
+                <button type="button" id="btnCfdiRelPrev" class="btn">Sustitución de CFDI</button>
+                <input type="hidden" name="cfdiRelPrev" id="cfdiRelPrev" value="<?php echo set_value('cfdiRelPrev'); ?>">
+                <br>
+                <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
+                <br>
+                <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: none;width: 55%;">
+                  <?php
+                  $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04';
+                  foreach ($tipoRelacion as $key => $tipoRel) { ?>
+                    <option value="<?php echo $tipoRel['key'] ?>" <?php echo set_select('cfdiRelPrevTipo', $tipoRel['key'], ($cfdirel === $tipoRel['key'] ? true : false)); ?>><?php echo $tipoRel['key'].' - '.$tipoRel['value'] ?></option>
+                  <?php } ?>
+                </select>
+              </div>
+
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
@@ -369,10 +384,15 @@
                             $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
                             $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
                             $_POST['prod_dmedida_id'][$key]         = $p->id_unidad;
+                            $_POST['dieps_total'][$key]             = $p->ieps;
+                            $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
+                            $_POST['disr_total'][$key]              = $p->isr;
+                            $_POST['disr'][$key]                    = $p->porcentaje_isr;
 
                             $_POST['prod_dclase'][$key]             = $p->clase;
                             $_POST['prod_dpeso'][$key]              = $p->peso;
                             $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
+                            $_POST['prod_ieps_subtotal'][$key] = $p->ieps_subtotal;
 
                             $cfdi_extp = json_decode($p->cfdi_ext);
                             $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
@@ -423,6 +443,7 @@
                                   <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
                                   <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
                                   <input type="hidden" name="id_size_rendimiento[]" value="<?php echo $_POST['id_size_rendimiento'][$k] ?>" id="id_size_rendimiento" class="span12">
+                                  <input type="hidden" name="prod_ieps_subtotal[]" value="<?php echo $_POST['prod_ieps_subtotal'][$k] ?>" id="prod_ieps_subtotal" class="span12">
                                 </td>
                                 <td class="cporte" style="<?php echo $displayCPorte; ?>">
                                   <input type="text" name="prod_dclase[]" value="<?php echo $_POST['prod_dclase'][$k] ?>" id="prod_dclase" class="span12" style="width: 50px;">
@@ -481,6 +502,21 @@
                                   <input type="hidden" name="isCert[]" value="<?php echo $_POST['isCert'][$k] ?>" class="certificado">
                                 </td>
                                 <td>
+                                  <div class="btn-group">
+                                    <button type="button" class="btn impuestosEx">
+                                      <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu impuestosEx" style="width: 250px;">
+                                      <li class="clearfix">
+                                        <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="<?php echo $_POST['dieps'][$k] ?>" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                                        <input type="hidden" name="dieps_total[]" value="<?php echo $_POST['dieps_total'][$k] ?>" id="dieps_total" class="span12">
+                                      </li>
+                                      <li class="clearfix">
+                                        <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="<?php echo $_POST['disr'][$k] ?>" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                                        <input type="hidden" name="disr_total[]" value="<?php echo $_POST['disr_total'][$k] ?>" id="disr_total" class="span12">
+                                      </li>
+                                    </ul>
+                                  </div>
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                 </td>
                               </tr>
@@ -525,6 +561,7 @@
                       <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
                       <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
                       <input type="hidden" name="id_size_rendimiento[]" value="" id="id_size_rendimiento" class="span12">
+                      <input type="hidden" name="prod_ieps_subtotal[]" value="f" id="prod_ieps_subtotal" class="span12">
                     </td>
                     <td class="cporte" style="<?php echo $displayCPorte ?>">
                       <input type="text" name="prod_dclase[]" value="" id="prod_dclase" class="span12 sikey" style="width: 50px;" data-next="prod_dpeso">
@@ -579,7 +616,24 @@
                       <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
                     </td>
                     <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
-                    <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                    <td>
+                      <div class="btn-group">
+                        <button type="button" class="btn impuestosEx">
+                          <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu impuestosEx" style="width: 250px;">
+                          <li class="clearfix">
+                            <label class="pull-left">% IEPS:</label> <input type="number" step="any" name="dieps[]" value="0" id="dieps" max="100" min="0" class="span9 pull-right vpositive">
+                            <input type="hidden" name="dieps_total[]" value="0" id="dieps_total" class="span12">
+                          </li>
+                          <li class="clearfix">
+                            <label class="pull-left">% Ret ISR:</label> <input type="number" step="any" name="disr[]" value="0" id="disr" max="100" min="0" class="span9 pull-right vpositive">
+                            <input type="hidden" name="disr_total[]" value="0" id="disr_total" class="span12">
+                          </li>
+                        </ul>
+                      </div>
+                      <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -935,6 +989,23 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddClientePallets">Agregar Pallets</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal -->
+  <div id="modal-cfdiRelPrev" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Sustitución de CFDI</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="file" id="fileCfdiRelPrev" placeholder="XML Factura" accept="text/xml">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary hide" id="BtnClearCfdiRel">Quitar</button>
     </div>
   </div><!--/modal pallets -->
 

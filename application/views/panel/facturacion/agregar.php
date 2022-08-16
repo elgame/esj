@@ -416,6 +416,7 @@
                                 $_POST['prod_dcajas'][$key]             = $p->cajas;
                                 $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
                                 $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+                                $_POST['prod_dmedida_id'][$key]         = $p->id_unidad;
                                 $_POST['dieps_total'][$key]             = $p->ieps;
                                 $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
                                 $_POST['disr_total'][$key]              = $p->isr;
