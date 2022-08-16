@@ -35,7 +35,7 @@
            JOIN compras_productos cp ON co.id_orden = cp.id_orden
            JOIN empresas e ON e.id_empresa = co.id_empresa
            LEFT JOIN facturacion_seg_cert fsc ON fsc.id_orden = cp.id_orden AND fsc.no_certificado::text = cp.no_certificado::text
-        WHERE cp.no_certificado IS NOT NULL AND fsc.id_factura IS NULL;
+        WHERE cp.no_certificado IS NOT NULL AND cp.no_certificado <> '' AND fsc.id_factura IS NULL;
 
       ALTER TABLE public.no_certificados_compras
           OWNER TO programa;
