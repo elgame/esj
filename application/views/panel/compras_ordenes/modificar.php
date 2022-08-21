@@ -746,6 +746,7 @@
                               <td style="width: 150px;">
                                   <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
                                   <input type="hidden" name="observaciones[]" value="<?php echo $_POST['observaciones'][$key] ?>" id="observaciones" class="span12">
+                                  <input type="hidden" name="noCertificado[]" value="<?php echo $_POST['noCertificado'][$key] ?>" id="noCertificado" class="span12">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>
@@ -892,6 +893,7 @@
                                  <td style="width: 150px;<?php echo $redBg ?>">
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
                                     <input type="hidden" name="observaciones[]" value="<?php echo $prod->observaciones ?>" id="observaciones" class="span12">
+                                    <input type="hidden" name="noCertificado[]" value="<?php echo $prod->no_certificado ?>" id="noCertificado" class="span12">
                                 </td>
                                  <td style="width: 35px;<?php echo $redBg ?>">
                                   <?php if ($showButton && $prod->status != 'a'){ ?>

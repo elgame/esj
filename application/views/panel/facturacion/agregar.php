@@ -416,6 +416,7 @@
                                 $_POST['prod_dcajas'][$key]             = $p->cajas;
                                 $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
                                 $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+                                $_POST['prod_dmedida_id'][$key]         = $p->id_unidad;
                                 $_POST['dieps_total'][$key]             = $p->ieps;
                                 $_POST['dieps'][$key]                   = $p->porcentaje_ieps;
                                 $_POST['disr_total'][$key]              = $p->isr;
@@ -424,6 +425,8 @@
                                 $_POST['prod_dclase'][$key]             = $p->clase;
                                 $_POST['prod_dpeso'][$key]              = $p->peso;
                                 $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
+
+                                $_POST['prod_ieps_subtotal'][$key] = $p->ieps_subtotal;
 
                                 $cfdi_extp = json_decode($p->cfdi_ext);
                                 $_POST['pclave_unidad'][$key]     = '';
@@ -477,6 +480,7 @@
                                       <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
                                       <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
                                       <input type="hidden" name="id_size_rendimiento[]" value="<?php echo $_POST['id_size_rendimiento'][$k] ?>" id="id_size_rendimiento" class="span12">
+                                      <input type="hidden" name="prod_ieps_subtotal[]" value="<?php echo $_POST['prod_ieps_subtotal'][$k] ?>" id="prod_ieps_subtotal" class="span12">
                                     </td>
                                     <td class="cporte" style="<?php echo $displayCPorte; ?>">
                                       <input type="text" name="prod_dclase[]" value="<?php echo $_POST['prod_dclase'][$k] ?>" id="prod_dclase" class="span12" style="width: 50px;">
@@ -594,6 +598,7 @@
                                 <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
                                 <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
                                 <input type="hidden" name="id_size_rendimiento[]" value="" id="id_size_rendimiento" class="span12">
+                                <input type="hidden" name="prod_ieps_subtotal[]" value="f" id="prod_ieps_subtotal" class="span12">
                               </td>
                               <td class="cporte" style="<?php echo $displayCPorte ?>">
                                 <input type="text" name="prod_dclase[]" value="" id="prod_dclase" class="span12 sikey" style="width: 50px;" data-next="prod_dpeso">

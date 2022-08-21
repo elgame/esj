@@ -373,6 +373,13 @@
             <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
+                  IEPS <input type="text" name="ieps" class="span12 vpositive" id="ieps" value="<?php echo set_value('ieps', '0'); ?>">
+                </div>
+              </div>
+            </div>
+            <div class="span4">
+              <div class="control-group">
+                <div class="controls span9">
                   TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', '0'); ?>" readonly>
                 </div>
               </div>

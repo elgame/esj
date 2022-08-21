@@ -65,6 +65,13 @@
       }
     });
 
+    $('#ieps').on('keyup', function(event) {
+      var key = event.which;
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        total();
+      }
+    });
+
     $("#dlitros, #dprecio").on('keyup', function(event) {
       var key = event.which;
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
@@ -238,12 +245,15 @@
         $subtotal = $('#subtotal'),
         $ret_iva = $('#ret_iva'),
         $ret_isr = $('#ret_isr'),
+        $ieps = $('#ieps'),
         $iva = $('#iva');
 
     $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) +
                                parseFloat($iva.val()||0) -
                                parseFloat($ret_iva.val()||0) -
-                               parseFloat($ret_isr.val()||0))
+                               parseFloat($ret_isr.val()||0) +
+                               parseFloat($ieps.val()||0)
+                              )
     );
   };
 

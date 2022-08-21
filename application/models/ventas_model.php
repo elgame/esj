@@ -125,7 +125,7 @@ class Ventas_model extends privilegios_model{
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext,
                 fp.ieps, fp.porcentaje_ieps, cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real,
-                fp.isr, fp.porcentaje_isr,
+                fp.isr, fp.porcentaje_isr, fp.ieps_subtotal,
                 cc.id_categoria, cc.abreviatura as categoria')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
@@ -454,6 +454,7 @@ class Ventas_model extends privilegios_model{
           'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
+          'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
         );
 
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
@@ -663,6 +664,8 @@ class Ventas_model extends privilegios_model{
       'subtotal'            => $this->input->post('total_subtotal'),
       'importe_iva'         => $this->input->post('total_iva'),
       'retencion_iva'       => $this->input->post('total_retiva'),
+      'ieps'                => floatval($this->input->post('total_ieps')),
+      'isr'                 => floatval($this->input->post('total_isr')),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
@@ -750,10 +753,10 @@ class Ventas_model extends privilegios_model{
       if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $did_unidad = (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL);
-        $dunidad_c = 1;
+        $dunidad_c = NULL;
         if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
           $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
-          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: 1;
+          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
         }
 
         // Para descontar del inventario de productos de produccion
@@ -809,6 +812,7 @@ class Ventas_model extends privilegios_model{
           'id_calibres'           => ($_POST['prod_did_tamanio_prod'][$key] !== ''? $_POST['prod_did_tamanio_prod'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'cfdi_ext'              => json_encode($cfdi_ext),
+          'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
         );
 
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))

@@ -526,6 +526,7 @@ function calculaTotalProducto ($tr, $calculaT) {
       $isr        = $tr.find('#disr'),
       $retencion  = $tr.find('#dreten_iva'),
       $importe    = $tr.find('#prod_importe'),
+      $iepsSub    = $tr.find('#prod_ieps_subtotal'),
 
       $totalIva       = $tr.find('#prod_diva_total'),
       $totalRetencion = $tr.find('#prod_dreten_iva_total'),
@@ -533,12 +534,18 @@ function calculaTotalProducto ($tr, $calculaT) {
       $totalIsr       = $tr.find('#disr_total'),
 
       totalImporte   = trunc2Dec(parseFloat($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0) ),
-      totalIva       = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100),
+      // totalIva       = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100),
       totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val())),
       totalIeps      = trunc2Dec(((totalImporte) * (parseFloat($ieps.val())||0) ) / 100),
       totalIsr       = trunc2Dec(((totalImporte) * (parseFloat($isr.val())||0) ) / 100)
       ;
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
+  console.log('iva con el ieps', $iepsSub.val());
+  if($iepsSub.val() == 't') {
+    totalIva = trunc2Dec(((totalImporte+totalIeps) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100)
+  } else {
+    totalIva = trunc2Dec(((totalImporte) * (parseFloat($iva.find('option:selected').val()) || 0) ) / 100);
+  }
 
   $totalIva.val(totalIva);
   $totalIeps.val(totalIeps);
@@ -579,7 +586,8 @@ function addProducto(unidades, prod) {
   var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
       ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false,
       prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '',
-      prod_dtamanio_prod = '', prod_did_tamanio_prod = '';
+      prod_dtamanio_prod = '', prod_did_tamanio_prod = '',
+      prod_ieps_subtotal = 'f';
 
   // Pasa los gastos a la otra tabla
   pasaGastosTabla();
@@ -611,6 +619,7 @@ function addProducto(unidades, prod) {
     idUnidad    = prod.id_unidad ? prod.id_unidad : ''; // id_unidad del rendimiento.
     unidad      = prod.unidad ? prod.unidad : '';
     prod_nombre += ' ' + unidad; // le concatena la unidad del rendmiento al la descripcion.
+    prod_ieps_subtotal = prod.ieps_subtotal;
 
     idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
@@ -723,6 +732,7 @@ function addProducto(unidades, prod) {
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
+                  '<input type="hidden" name="prod_ieps_subtotal[]" value="'+prod_ieps_subtotal+'" id="prod_ieps_subtotal" class="span12">' +
                   // '<input type="hidden" name="id_size_rendimiento[]" value="'+idSize+'" id="id_size_rendimiento" class="span12">' +
                 '</td>' +
                 '<td>' +
@@ -1089,6 +1099,7 @@ function autocompleteClasifi () {
       $this.css("background-color", "#B0FFB0");
       $tr.find('#prod_did_prod').val(ui.item.id);
       // $tr.find('#prod_dpreciou').val(ui.item.item.precio);
+      $tr.find('#prod_ieps_subtotal').val(ui.item.item.ieps_subtotal);
 
       $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
       $tr.find('#prod_dmedida_id').val(ui.item.item.id_unidad);

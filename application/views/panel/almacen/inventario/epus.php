@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/inventario/cunproductos_pdf/'); ?>" method="GET" class="form-search" id="form" target="frame_reporte">
+            <form id="form" action="<?php echo base_url('panel/inventario/epus_pdf/'); ?>" method="GET" class="form-search" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -29,42 +29,48 @@
                   </div>
                 </div>
 
-                <div class="control-group sucursales" style="display: none;">
-                  <label class="control-label" for="sucursalId">Sucursal </label>
-                  <div class="controls">
-                    <div class="input-append span12">
-                      <select name="sucursalId" class="span11" id="sucursalId">
-                        <option></option>
-                        <?php foreach ($sucursales as $key => $sucur) { ?>
-                          <option value="<?php echo $sucur->id_sucursal ?>" <?php echo set_select('sucursalId', $sucur->id_departamento); ?>><?php echo $depa->nombre_fiscal ?></option>
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-                </div><!--/control-group -->
-
                 <div class="control-group">
-                  <label class="control-label" for="fproducto">Producto</label>
+                  <label class="control-label" for="did_almacen">Almacen</label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="fproducto" value="" id="fproducto" class="span9" placeholder="Buscar">
-                      <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="fid_producto" value="" id="fid_producto">
-                    </div>
-                    <div class="clearfix"></div>
-                    <div style="height:130px;overflow-y: scroll;background-color:#eee;">
-                      <ul id="lista_proveedores" style="list-style: none;margin-left: 4px;">
-                      </ul>
+                      <select name="did_almacen" id="did_almacen" class="span11">
+                        <option value=""></option>
+                      <?php $default = '';
+                      foreach ($almacenes['almacenes'] as $key => $value) { ?>
+                        <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('did_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
+                      <?php } ?>
+                      </select>
                     </div>
                   </div>
                 </div>
 
-                <!-- <div class="control-group">
-                  <label class="control-label" for="dcon_mov">Con Movimientos</label>
-                  <div class="controls">
-                    <input type="checkbox" name="dcon_mov" value="si" id="dcon_mov" >
+                <div class="control-group">
+                  <label class="control-label" for="fproducto">Familias</label>
+                  <div class="controls" style="height:150px;overflow-y: scroll;background-color:#eee;">
+                    <ul id="lista_familias" style="list-style: none;">
+                  <?php foreach ($data['familias'] as $key => $value)
+                  {
+                  ?>
+                    <li><label><input type="checkbox" name="ffamilias[]" class="familiass" value="<?php echo $value->id_familia; ?>" checked> <?php echo $value->nombre; ?></label></li>
+                  <?php
+                  } ?>
+                    </ul>
                   </div>
-                </div> -->
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fproducto">Producto</label>
+                  <div class="controls">
+                    <input type="text" name="fproducto" data-add="false"
+                      value="<?php echo set_value_get('fproducto', $this->input->get('fproducto')) ?>" id="fproducto" class="span12" placeholder="Nombre">
+                    <input type="hidden" name="fid_producto" value="<?php echo set_value_get('fid_producto', $this->input->get('fid_producto')) ?>" id="fid_producto">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> |
+                  <label for="con_movimiento">Con Movimientos <input type="checkbox" name="con_movimiento" id="con_movimiento" value="si"> </label>
+                </div>
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
@@ -81,18 +87,15 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <div class="row-fluid">
-        <div class="box span12">
-          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/inventario/cunproductos_xls'); ?>" class="linksm" target="_blank">
-            <i class="icon-table"></i> Excel</a>
-
-          <div class="box-content">
-            <div class="row-fluid">
-              <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/inventario/cunproductos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
-            </div>
+      <div class="box span12">
+        <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/inventario/epus_xls'); ?>" class="linksm" target="_blank">
+          <i class="icon-table"></i> Excel</a>
+        <div class="box-content">
+          <div class="row-fluid">
+            <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/inventario/epus_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
           </div>
-        </div><!--/span-->
-      </div><!--/row-->
+        </div>
+      </div><!--/span-->
 
     </div><!--/#content.span9-->
 

@@ -78,6 +78,7 @@ $(function(){
   autocompleteRanchos();
   autocompleteCentroCosto();
   autocompleteActivos();
+  autocompleteUsuarios();
 });
 
 // Autocomplete para las empresas.
@@ -299,3 +300,21 @@ function addProducto(event){
 function removeProducto(event){
   $(this).parent('li').remove();
 }
+
+var autocompleteUsuarios = function () {
+    $("#fusuario").autocomplete({
+      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $fusuario =  $(this);
+
+        $fusuario.css("background-color", "#A1F57A");
+        $("#fid_usuario").val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {$("#fusuario").css("background-color", "#FFD071");
+        $("#fid_usuario").val('');
+      }
+    });
+  };

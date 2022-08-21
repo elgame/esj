@@ -25,6 +25,8 @@
     eventOnChangeCondicionPago();
     eventOnChangeMetodoPago();
 
+    eventBtnListaOtros();
+
     calculaTotal();
   });
 
@@ -246,6 +248,16 @@
     });
   };
 
+  var eventBtnListaOtros = function () {
+    $('#table-productos').on('click', "#btnListOtros", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden"))
+        $parent.find(".popover").show(80);
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
+
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
       var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
@@ -346,25 +358,25 @@
 
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
-    $('#table-productos').on('keyup', '#cantidad, #valorUnitario', function(e) {
+    $('#table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent, #ret_isrPorcent', function(e) {
       var key = e.which,
           $this = $(this),
-          $tr = $this.parent().parent();
+          $tr = $this.parents("tr.rowprod");
 
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotalProducto($tr);
       }
-    }).on('change', '#cantidad, #valorUnitario', function(event) {
-      var $tr = $(this).parent().parent();
+    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent, #ret_isrPorcent', function(event) {
+      var $tr = $(this).parents("tr.rowprod");
       calculaTotalProducto($tr);
     });
   };
 
   // Evento onchange del select iva en la tabla.
   var eventOnChangeTraslado = function () {
-    $('#table-productos').on('change', '#traslado', function(event) {
+    $('#table-productos').on('change', '#traslado, #ret_iva', function(event) {
       var $this = $(this),
-          $tr   = $this.parent().parent();
+          $tr   = $this.parents("tr.rowprod");
 
       $tr.find('#trasladoPorcent').val($this.find('option:selected').val());
       calculaTotalProducto($tr);
@@ -376,7 +388,7 @@
     var $table = $('#table-productos');
 
     $table.on('click', 'button#btnDelProd', function(event) {
-      var $parent = $(this).parent().parent();
+      var $parent = $(this).parents("tr.rowprod");
       $parent.remove();
 
       calculaTotal();
@@ -461,7 +473,7 @@
     //   // ya existe en la tabla y si existe le suma 1 a la cantidad.
     //   var check = productoIsSelected(producto.id);
     //   if (check[0]) {
-    //     var $parent = check[1].parent().parent(),
+    //     var $parent = check[1].parents("tr.rowprod"),
     //         $cantidad = $parent.find('input#cantidad');
 
     //     exist = true;
@@ -569,6 +581,8 @@
     var total_importes = 0,
         total_ivas     = 0,
         total_ret      = 0,
+        total_isr      = 0,
+        total_ieps     = 0,
         total_orden    = 0;
 
      $('input#importe').each(function(i, e) {
@@ -589,7 +603,17 @@
      });
      total_ret = util.trunc2Dec(total_ret);
 
-     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) - parseFloat(total_ret);
+     $('input#isrTotal').each(function(i, e) {
+       total_isr += parseFloat($(this).val());
+     });
+     total_isr = util.trunc2Dec(total_isr);
+
+     $('input#iepsTotal').each(function(i, e) {
+       total_ieps += parseFloat($(this).val());
+     });
+     total_ieps = util.trunc2Dec(total_ieps);
+
+     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_ret) - parseFloat(total_isr);
 
     $('#importe-format').html(util.darFormatoNum(total_subtotal));
      $('#totalImporte').val(total_subtotal);
@@ -599,6 +623,12 @@
 
      $('#retencion-format').html(util.darFormatoNum(total_ret));
      $('#totalRetencion').val(total_ret);
+
+     $('#retencion-format').html(util.darFormatoNum(total_ieps));
+     $('#totalIeps').val(total_ieps);
+
+     $('#retencion-format').html(util.darFormatoNum(total_isr));
+     $('#totalIsr').val(total_isr);
 
      $('#total-format').html(util.darFormatoNum(total_orden));
      $('#totalOrden').val(total_orden);
@@ -616,17 +646,39 @@
         $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
         $total             = $tr.find('#total'), // Input hidden iva total
 
-        totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
-        totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-        totalRet     = util.trunc2Dec(totalImporte * 0.04),
-        total        = util.trunc2Dec(totalImporte + totalIva);
+        $ieps           = $tr.find('#iepsPorcent'), // Input hidden iva total
+        $iepsTotal      = $tr.find('#iepsTotal'), // Input hidden iva total
+        $ret_iva        = $tr.find('#ret_iva'), // Select ret_iva
+        $ret_isrPorcent = $tr.find('#ret_isrPorcent'), // ret_isrPorcent
+        $isrTotal       = $tr.find('#isrTotal'), // ret_isrPorcent
+        $iepsSub        = $tr.find('#iepsSub'),
 
-    if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
+        totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
+        totalIeps    = util.trunc2Dec(totalImporte * $ieps.val() / 100);
+
+        console.log('iva con el ieps', $iepsSub.val(), totalImporte, totalIeps);
+        if($iepsSub.val() == 't') {
+          var totalIva = util.trunc2Dec(((totalImporte+totalIeps) * parseFloat($iva.find('option:selected').val())) / 100);
+        } else {
+          var totalIva = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
+        }
+        var totalRet     = util.trunc2Dec(totalImporte * (parseFloat($ret_iva.find('option:selected').val()) / 100)),
+        totalRetIsr  = util.trunc2Dec(totalImporte * (parseFloat($ret_isrPorcent.val()) / 100)),
+        total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
+
+    if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f' || totalRet >= 0) {
       total -= parseFloat(totalRet);
       $totalRet.val(totalRet);
     }
 
+    console.log('totalRetIsr', totalRetIsr, $ret_isrPorcent.val());
+    if (totalRetIsr >= 0) {
+      total -= parseFloat(totalRetIsr);
+      $isrTotal.val(totalRetIsr);
+    }
+
     $totalIva.val(totalIva);
+    $iepsTotal.val(totalIeps);
     $importe.parent().find('span').text(util.darFormatoNum(totalImporte));
     $importe.val(totalImporte);
     $total.val(total);

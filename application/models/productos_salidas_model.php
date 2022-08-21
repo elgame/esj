@@ -2045,6 +2045,171 @@ class productos_salidas_model extends CI_Model {
   }
 
   /**
+   * Reporte salidas de usuarios
+   */
+  public function getUsuariosSalidasData()
+  {
+    $sqlr = $sqlc = $sql = '';
+    $sqcol = [
+      'fields' => ", '' AS color, '' AS tipo_apli",
+      'table' => ''
+    ];
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $sql .= " AND Date(co.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    if($this->input->get('fid_usuario') != ''){
+      $sql .= " AND u.id = ".$this->input->get('fid_usuario');
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND co.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('did_almacen') > 0) {
+      $sql .= " AND co.id_almacen = ".$this->input->get('did_almacen');
+    }
+
+    if ($this->input->get('empresaApId') > 0) {
+      $sql .= " AND co.id_empresa_ap = ".$this->input->get('empresaApId');
+    }
+
+    if ($this->input->get('areaId') > 0) {
+      $sql .= " AND co.id_area = ".$this->input->get('areaId');
+    }
+
+    if ($this->input->get('activoId') > 0) {
+      $sql .= " AND co.id_activo = ".$this->input->get('activoId');
+    }
+
+    if(is_array($this->input->get('ranchoId'))){
+      $sqlr .= " AND csr.id_rancho IN (".implode(',', $this->input->get('ranchoId')).")";
+    }
+
+    if(is_array($this->input->get('centroCostoId'))){
+      $sqlc .= " AND cscc.id_centro_costo IN (".implode(',', $this->input->get('centroCostoId')).")";
+    }
+
+    $res = $this->db->query(
+    "SELECT *
+    FROM (
+      SELECT
+        co.id_salida, co.fecha_creacion AS fecha_salida, co.folio::text folio_salida,
+        co.solicito, String_agg(DISTINCT cscc.centro_costo, ',') AS centro_costo,
+        String_agg(DISTINCT csr.ranchos, ',') AS ranchos, (u.nombre || ' ' || u.apellido_paterno) AS usuario
+      FROM compras_salidas co
+        INNER JOIN usuarios u ON u.id = co.id_empleado
+        LEFT JOIN (
+          SELECT csr.id_salida, String_agg(DISTINCT r.nombre, ',') AS ranchos
+          FROM compras_salidas_rancho csr
+            INNER JOIN otros.ranchos r ON r.id_rancho = csr.id_rancho
+          WHERE 1 = 1 {$sqlr}
+          GROUP BY csr.id_salida
+        ) csr ON csr.id_salida = co.id_salida
+        LEFT JOIN (
+          SELECT cscc.id_salida, String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') AS centro_costo
+          FROM compras_salidas_centro_costo cscc
+            LEFT JOIN otros.centro_costo cc ON cc.id_centro_costo = cscc.id_centro_costo
+          WHERE 1 = 1 {$sqlc}
+          GROUP BY cscc.id_salida
+          HAVING String_agg(DISTINCT Coalesce(cc.codigo, cc.nombre), ',') IS NOT NULL
+        ) cscc ON cscc.id_salida = co.id_salida
+      WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
+      GROUP BY co.id_salida, u.id
+    ) t
+    ORDER BY fecha_salida ASC
+    ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+      $response = $res->result();
+
+    return $response;
+  }
+
+  public function getUsuariosSalidasPdf(){
+    $res = $this->getUsuariosSalidasData();
+
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+    $this->load->model('productos_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte Salidas por Usuario';
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? "Almacen: {$almacen['info']->nombre} | ": '');
+    $pdf->titulo3 .= ($this->input->get('area')? "Cultivo: {$this->input->get('area')} | " : '');
+    $pdf->titulo3 .= ($this->input->get('ranchoText')? "Ranchos: ".implode(', ', $this->input->get('ranchoText'))." | " : '');
+    $pdf->titulo3 .= ($this->input->get('centroCostoText')? "Centros: ".implode(', ', $this->input->get('centroCostoText'))." | " : '');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'L');
+    $widths = array(20, 20, 56, 56, 56, 56);
+    $header = array('Fecha', 'Folio', 'Reg Salida', 'Solicito', 'Centros Costo', 'Ranchos');
+
+    $total_importe = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY()+10 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(
+        substr($item->fecha_salida, 0, 19),
+        $item->folio_salida,
+        $item->usuario,
+        $item->solicito,
+        $item->centro_costo,
+        $item->ranchos,
+      );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->SetMyLinks(array('', base_url('panel/productos_salidas/ver/?id='.$item->id_salida) ));
+      $pdf->Row($datos, false);
+    }
+
+    // $pdf->SetFont('Arial','B',8);
+    // $pdf->SetXY(6, $pdf->GetY());
+    // $pdf->SetAligns(['R', 'R']);
+    // $pdf->SetWidths([200, 30]);
+    // $pdf->Row(array('TOTAL',
+    //   MyString::formatoNumero($total_importe, 2, '', false),
+    //   ), false, true);
+
+    $pdf->Output('salidas_usuarios.pdf', 'I');
+  }
+
+  /**
    * Reporte salidas de productos x codigo
    */
   public function getProductosSalidasCodPdf(){

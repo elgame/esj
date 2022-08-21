@@ -132,7 +132,7 @@ class facturacion_model extends privilegios_model{
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
                 cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext, fp.ieps, fp.porcentaje_ieps,
-                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr", false)
+                cal.nombre AS areas_calibre, cal.id_calibre, fp.porcentaje_iva_real, fp.isr, fp.porcentaje_isr, fp.ieps_subtotal", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades_unq as u', "u.nombre = fp.unidad", 'left')
@@ -878,6 +878,7 @@ class facturacion_model extends privilegios_model{
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'no_identificacion'     => $_POST['no_identificacion'][$key],
           'cfdi_ext'              => json_encode($cfdi_extpp),
+          'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
         );
 
         $addProdApi = true;
@@ -914,6 +915,7 @@ class facturacion_model extends privilegios_model{
             'trasladoIshPorcent'      => '0',
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
             'trasladoIvaPorcent'      => ($tipoDeComprobante !== 'T'? $_POST['prod_diva_porcent'][$key]: '16'),
+            'desglosarIeps'           => ($_POST['prod_ieps_subtotal'][$key] === 't' ? false : true),
             'valorUnitario'           => $_POST['prod_dpreciou'][$key],
           );
         }
@@ -1920,6 +1922,7 @@ class facturacion_model extends privilegios_model{
             'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
             'no_identificacion'     => $_POST['no_identificacion'][$key],
             'cfdi_ext'              => json_encode($cfdi_extpp),
+            'ieps_subtotal'         => $_POST['prod_ieps_subtotal'][$key] === 't' ? 't' : 'f',
           );
 
           if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))

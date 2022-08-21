@@ -920,28 +920,42 @@ class catalogos_sft_model extends CI_Model{
                 SELECT
                   ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
                   Date(c.fecha) fecha_compra, (c.serie || c.folio) folio_compra, cp.descripcion producto,
-                  cp.total importe
+                  cp.total importe, oranc.areas
                 FROM compras_ordenes co
                   INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
                   LEFT JOIN compras c ON c.id_compra = cp.id_compra
+                  LEFT JOIN (
+                    SELECT cor.id_orden, STRING_AGG(r.nombre, ', ') AS areas
+                    FROM compras_ordenes_rancho cor
+                      LEFT JOIN otros.ranchos r ON r.id_rancho = cor.id_rancho
+                    WHERE r.id_rancho > 0
+                    GROUP BY cor.id_orden
+                  ) oranc ON oranc.id_orden = co.id_orden
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_compras}
                   AND cp.status = 'a' AND co.status <> 'ca'
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   ('Caja #' || cg.no_caja || ' ' || cg.concepto) producto,
-                  cg.monto AS importe
+                  cg.monto AS importe, oranc.areas
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
                   INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+                  LEFT JOIN (
+                    SELECT cor.id_gasto, STRING_AGG(r.nombre, ', ') AS areas
+                    FROM cajachica_gastos cor
+                      LEFT JOIN otros.ranchos r ON r.id_rancho = cor.id_rancho
+                    WHERE r.id_rancho > 0
+                    GROUP BY cor.id_gasto
+                  ) oranc ON oranc.id_gasto = cg.id_gasto
                 WHERE ca.id_cat_codigos In({$ids_hijos}) AND cg.status = 't'
                   AND cg.tipo <> 'pre' {$sql_caja}
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', Labor ' || csl.nombre || ' ' || ndl.horas || 'hrs') producto,
-                  ndl.importe
+                  ndl.importe, '' AS areas
                 FROM nomina_trabajos_dia_labores ndl
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndl.id_area
                   INNER JOIN compras_salidas_labores csl ON csl.id_labor = ndl.id_labor
@@ -951,7 +965,7 @@ class catalogos_sft_model extends CI_Model{
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndh.fecha) fecha_orden, ''::text folio_orden,
                   NULL fecha_compra, NULL folio_compra,
                   (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || ', horas Ext ' || ndh.horas) producto,
-                  ndh.importe
+                  ndh.importe, '' AS areas
                 FROM nomina_trabajos_dia_hrsext ndh
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = ndh.id_area
                   INNER JOIN usuarios u ON u.id = ndh.id_usuario
@@ -977,7 +991,7 @@ class catalogos_sft_model extends CI_Model{
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf = new MYpdf('L', 'mm', 'Letter');
     $pdf->show_head = true;
 
     if ($empresa['info']->logo !== '')
@@ -998,11 +1012,11 @@ class catalogos_sft_model extends CI_Model{
     // $links = array('', '', '', '');
     $pdf->SetY(30);
     $aligns = array('L', 'R');
-    $widths = array(170, 35);
-    $header = array('Nombre', 'Importe');
-    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R');
-    $widths2 = array(18, 18, 18, 18, 60, 45, 29);
-    $header2 = array('Fecha O', 'Folio O', 'Fecha C', 'Folio C', 'C Costo', 'Producto', 'Importe');
+    $widths = array(177, 29, 45);
+    $header = array('Nombre', 'Importe', '');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'L', 'L');
+    $widths2 = array(18, 18, 18, 18, 60, 45, 29, 45);
+    $header2 = array('Fecha O', 'Folio O', 'Fecha C', 'Folio C', 'C Costo', 'Producto', 'Importe', 'Areas');
 
     $lts_combustible = 0;
     $horas_totales = 0;
@@ -1022,7 +1036,7 @@ class catalogos_sft_model extends CI_Model{
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        // $pdf->Row($header, true);
 
         if (isset($vehiculo->detalle)) {
           $pdf->SetX(6);
@@ -1071,6 +1085,7 @@ class catalogos_sft_model extends CI_Model{
             $item->nombre,
             $item->producto,
             MyString::formatoNumero($item->importe, 2, '', false),
+            $item->areas,
           );
 
           $pdf->SetX(6);
@@ -1145,6 +1160,7 @@ class catalogos_sft_model extends CI_Model{
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Areas</td>
       </tr>';
     }
     $lts_combustible = $horas_totales = 0;
@@ -1168,6 +1184,7 @@ class catalogos_sft_model extends CI_Model{
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->areas.'</td>
             </tr>';
         }
       }

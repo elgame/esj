@@ -2057,7 +2057,7 @@ class bodega_guadalajara_model extends CI_Model {
       'utilidadporbulto' => ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1),
       'clientes'         => $totalSal+$saldoVentas,
     ];
-    if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
+    if (false && $this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
       $this->printEstadoResultado($pdf, $estadoResult);
       // $pdf->SetFillColor(240, 240, 240);
       // $pdf->SetAligns(array('C'));
@@ -2091,13 +2091,15 @@ class bodega_guadalajara_model extends CI_Model {
       // $pdf->Row(array('UTILIDAD POR BULTO', MyString::formatoNumero( ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1) , 2, '$', false)), true, 'B');
       // $pdf->SetX(80);
       // $pdf->Row(array('CLIENTES', MyString::formatoNumero( $totalSal+$saldoVentas , 2, '$', false)), true, 'B');
+    } else {
+      $pdf->SetY($pdf->GetY()+35);
     }
 
     // EXISTENCIA DEL DIA POR EMPRESA
-    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetFont('Arial','B', 8);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(140));
     $pdf->Row(array('EXISTENCIA DEL DIA POR EMPRESA'), false, false);

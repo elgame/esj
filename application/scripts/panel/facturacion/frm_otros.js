@@ -188,6 +188,8 @@ function extrasProductosEspeciales() {
     grup.find('#cert_certificado51').val('');
     grup.find('#cert_bultos51').val('');
     grup.find('#cert_num_operacion51').val('');
+    grup.find('#cert_no_certificado51').val('').on('click', openNoCertModal);
+    grup.find('#cert_id_orden51').val('');
 
     $modal.find('.modal-body').append(grup);
 
@@ -208,6 +210,8 @@ function extrasProductosEspeciales() {
     grup.find('#cert_certificado52').val('');
     grup.find('#cert_bultos52').val('');
     grup.find('#cert_num_operacion52').val('');
+    grup.find('#cert_no_certificado52').val('').on('click', openNoCertModal);
+    grup.find('#cert_id_orden52').val('');
 
     $modal.find('.modal-body').append(grup);
 
@@ -216,6 +220,53 @@ function extrasProductosEspeciales() {
     });
   });
 
+  $('#form .modal input.cert_no_certificado51').each(function () {
+    $(this).on('click', openNoCertModal);
+  });
+  $('#form .modal input.cert_no_certificado52').each(function () {
+    $(this).on('click', openNoCertModal);
+  });
+
+  let $cerSelInt = null;
+  function openNoCertModal() {
+    $cerSelInt = $(this).parents('.control-group');
+    console.log($cerSelInt);
+    $('#modal-no-certificados').modal('show');
+  }
+
+  $('#modal-no-certificados').on('show', function () {
+    $.getJSON(base_url+'panel/compras_ordenes/ajax_no_certificados', function(json, textStatus) {
+      var html = '';
+      for (var key in json) {
+        html += '<tr class="row_certs" '+
+          'data-idorden="'+json[key].id_orden+'" data-idempresa="'+json[key].id_empresa+'" '+
+          'data-nocertificado="'+json[key].no_certificado+'" '+
+          '>'+
+            '<td class="cursorp row_certs">'+json[key].folio+'</td>'+
+            '<td class="cursorp row_certs">'+json[key].empresa+'</td>'+
+            '<td class="cursorp row_certs">'+json[key].no_certificado+'</td>'+
+          '</tr>';
+      }
+
+      $('#modal-no-certificados #lista_certificados_modal tbody').html(html);
+      $("#lista_certificados_modal").filterTable();
+      $("#modal-no-certificados #lista_certificados_modal td.row_certs").on('dblclick', selectNoCert);
+    });
+  });
+
+  function selectNoCert() {
+    $tr = $(this).parents('tr.row_certs');
+    if($("#modal-certificado51 .cert_no_certificado51[value="+$tr.data('nocertificado')+"]").length == 0 &&
+      $("#modal-certificado52 .cert_no_certificado52[value="+$tr.data('nocertificado')+"]").length == 0) {
+      $cerSelInt.find('#cert_no_certificado51').val($tr.data('nocertificado'));
+      $cerSelInt.find('#cert_no_certificado52').val($tr.data('nocertificado'));
+      $cerSelInt.find('#cert_id_orden51').val($tr.data('idorden'));
+      $cerSelInt.find('#cert_id_orden52').val($tr.data('idorden'));
+      $('#modal-no-certificados').modal('hide');
+    } else {
+      alert("El Certificado ya esta seleccionado en esta factura.");
+    }
+  }
 }
 
 

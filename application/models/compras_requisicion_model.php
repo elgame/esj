@@ -293,7 +293,8 @@ class compras_requisicion_model extends CI_Model {
           'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
           'observaciones'        => (!empty($_POST['observacionesP'][$key])? $_POST['observacionesP'][$key]: ''),
-          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+          'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL),
+          'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
         );
       }
     }
@@ -613,7 +614,8 @@ class compras_requisicion_model extends CI_Model {
             'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
             'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
             'observaciones'        => (!empty($_POST['observacionesP'][$key])? $_POST['observacionesP'][$key]: ''),
-            'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL)
+            'activos'              => (!empty($_POST['activosP'][$key])? str_replace('”', '"', $_POST['activosP'][$key]): NULL),
+            'no_certificado'       => (!empty($_POST['noCertificado'][$key])? $_POST['noCertificado'][$key]: '')
           );
         }
       }
@@ -833,6 +835,7 @@ class compras_requisicion_model extends CI_Model {
             'retencion_isr'        => $prod->retencion_isr,
             'porcentaje_isr'       => $prod->porcentaje_isr,
             'observaciones'        => $prod->observaciones,
+            'no_certificado'       => $prod->no_certificado
           );
           $rows_compras++;
         }
@@ -1103,7 +1106,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_cat_codigos' ELSE 'id_cat_codigos' END) AS campo,
-                  activos, cp.observaciones, cp.ieps_sub
+                  activos, cp.observaciones, cp.ieps_sub, cp.no_certificado
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto

@@ -680,6 +680,10 @@ class compras_requisicion extends MY_Controller {
             'label' => 'Observaciones del producto',
             'rules' => ''),
 
+      array('field' => 'noCertificado[]',
+            'label' => 'No Certificado',
+            'rules' => ''),
+
       array('field' => 'proveedorId[]',
             'label' => 'Proveedor',
             'rules' => 'numeric'),

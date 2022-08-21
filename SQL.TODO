@@ -1,44 +1,67 @@
- ☐ Reporte de compras de productos y productos regresados en almacen
- ☐ Reporte de salidas de almacen por usuario
+ ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
+ ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
+ ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
+   --lap|san|pcc
+   ALTER TABLE public.empresas ADD COLUMN num_orden integer;
+   --lap|san|pcc
+   ALTER TABLE public.empresas ADD COLUMN nombre_corto character varying COLLATE pg_catalog."default";
+ ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
+ ✔ Reporte de compras de productos y productos regresados en almacen @done (22-08-03 00:14)
+   -- lap|san|pcc
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Existencia por unidades de salida',369,true,'inventario/epus/','print',true);
+ ✔ Reporte de salidas de almacén por usuario @done (22-07-22 19:31)
+   -- lap|san|pcc
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Usuarios',366,true,'productos_salidas/rpt_salidas_usuarios/','print',true);
+ ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
- ☐ En compras y ventas poner opcion para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma
-   --lap
+   --lap|san|pcc
+    ALTER TABLE public.productos_familias ADD COLUMN is_certif boolean DEFAULT false;
+    COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
+    ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    ALTER TABLE public.compras_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    --lap|san
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN id_orden bigint;
+    COMMENT ON COLUMN public.facturacion_seg_cert.id_orden IS 'Orden del certificado o linea captura';
+    ALTER TABLE public.facturacion_seg_cert ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
+    COMMENT ON COLUMN public.facturacion_seg_cert.no_certificado IS 'Orden del certificado o linea captura';
+    CREATE OR REPLACE VIEW public.no_certificados_compras
+       AS
+       SELECT co.id_orden, co.folio,
+         e.id_empresa,
+          e.nombre_fiscal AS empresa,
+          cp.no_certificado,
+          COALESCE(fsc.id_factura, 0::bigint) AS reg
+         FROM compras_ordenes co
+           JOIN compras_productos cp ON co.id_orden = cp.id_orden
+           JOIN empresas e ON e.id_empresa = co.id_empresa
+           LEFT JOIN facturacion_seg_cert fsc ON fsc.id_orden = cp.id_orden AND fsc.no_certificado::text = cp.no_certificado::text
+        WHERE cp.no_certificado IS NOT NULL AND cp.no_certificado <> '' AND fsc.id_factura IS NULL;
+
+      ALTER TABLE public.no_certificados_compras
+          OWNER TO programa;
+ ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
+   --lap|pcc|san
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;
    COMMENT ON COLUMN public.compras_requisicion_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
    ALTER TABLE public.compras_productos ADD COLUMN ieps_sub boolean DEFAULT false;
    COMMENT ON COLUMN public.compras_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
-  ✔ bodega gdl @done (22-07-01 11:42)
-    CREATE TABLE otros.bodega_rastreo_efectivo
-      (
-          id_rastreo bigserial NOT NULL,
-          no_caja integer NOT NULL DEFAULT 1,
-          fecha date NOT NULL,
-          nombre character varying(500) COLLATE pg_catalog."default" NOT NULL,
-          nota character varying(500) COLLATE pg_catalog."default" NOT NULL,
-          monto double precision NOT NULL DEFAULT (0)::double precision,
-          fecha_rastreo timestamp without time zone DEFAULT now(),
-          id_usuario bigint,
-          fecha_creacion timestamp without time zone DEFAULT now(),
-          no_impresiones integer NOT NULL DEFAULT 0,
-          CONSTRAINT bodega_rastreo_efectivo_pkey PRIMARY KEY (id_rastreo),
-          CONSTRAINT bodega_rastreo_efectivo_id_usuario_fkey FOREIGN KEY (id_usuario)
-              REFERENCES public.usuarios (id) MATCH SIMPLE
-              ON UPDATE CASCADE
-              ON DELETE CASCADE
-      ) TABLESPACE pg_default;
-      ALTER TABLE otros.bodega_rastreo_efectivo OWNER to programa;
-
+   ALTER TABLE public.clasificaciones ADD COLUMN ieps_subtotal boolean DEFAULT false;
+   ALTER TABLE public.facturacion_productos ADD COLUMN ieps_subtotal boolean DEFAULT false;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN retencion_isr double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_isr real NOT NULL DEFAULT 0;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_ieps real NOT NULL DEFAULT (0)::real;
+   ALTER TABLE public.compras_notas_credito_productos ADD COLUMN ieps real NOT NULL DEFAULT (0)::real;
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
-   --lap|san
+   --lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Caja campos',247,false,'caja_chica/modificar_caja_campos/','edit',false);
  ✔ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área @done (22-06-21 19:38)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN piezas double precision DEFAULT 0;
    ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
  ✔ Descargas masivas de remisiones @done (22-07-06 13:31)
-   -- lap|san
+   -- lap|san|pcc
    ALTER TABLE public.facturacion_otrosdatos ADD COLUMN orden_compra character varying(50) COLLATE pg_catalog."default";
  ☐ Nomina corona
    - catalogo de ranchos
@@ -50,7 +73,7 @@
    - Reporte concentrado de sueldo por trabajador
    - Imprimir formato de trabajadores por rancho, asignarle al trabajador el rancho
  ✔ Agregar imágenes a las ordenes de compra @done (22-07-06 13:31)
-   --lap|san
+   --lap|san|pcc
    ALTER TABLE public.compras_requisicion ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
    ALTER TABLE public.compras_ordenes ADD COLUMN img_gas character varying(200) COLLATE pg_catalog."default" DEFAULT NULL::character varying;
 

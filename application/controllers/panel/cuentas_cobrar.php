@@ -16,6 +16,8 @@ class cuentas_cobrar extends MY_Controller {
 
     'cuentas_cobrar/saldos_pdf/',
     'cuentas_cobrar/saldos_xls/',
+    'cuentas_cobrar/saldos_all_pdf/',
+    'cuentas_cobrar/saldos_all_xls/',
 
     'cuentas_cobrar/imprimir_abono/',
 
@@ -83,6 +85,15 @@ class cuentas_cobrar extends MY_Controller {
   public function saldos_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->cuentasCobrarExcel();
+  }
+
+  public function saldos_all_pdf(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentasCobrarAllPdf();
+  }
+  public function saldos_all_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentasCobrarAllExcel();
   }
 
   public function estado_cuenta_pdf(){

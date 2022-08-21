@@ -793,6 +793,10 @@
                                   <div class="popover-content">
 
                                     <div class="control-group" style="width: 375px;">
+                                      <input type="text" name="noCertificado[]" class="span11" value="<?php echo $concepto->no_certificado ?>" placeholder="No Certificado">
+                                    </div>
+
+                                    <div class="control-group" style="width: 375px;">
                                       <input type="text" name="observacionesP[]" class="span11" value="<?php echo $concepto->observaciones ?>" placeholder="Observaciones">
                                     </div>
 

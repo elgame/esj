@@ -31,6 +31,8 @@ class inventario extends MY_Controller {
     'inventario/pueps_pdf/',
     'inventario/eclasif_pdf/',
     'inventario/historial_nivelar_pdf/',
+    'inventario/epus_pdf/',
+    'inventario/epus_comp_pdf/',
 
     'inventario/rptExistencia2_pdf/',
     'inventario/rptExistencia2_xls/',
@@ -242,6 +244,7 @@ class inventario extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte de seguimientos x Producto');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['sucursales'] = $this->empresas_model->getSucursales($params['empresa']->id_empresa);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -297,6 +300,41 @@ class inventario extends MY_Controller {
   public function epu_xls(){
     $this->load->model('inventario_model');
     $this->inventario_model->getEPUXls();
+  }
+
+  public function epus()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Existencia por unidades con devoluciones');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['data'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/inventario/epus',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function epus_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getEPUSPdf();
+  }
+  public function epus_comp_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getEPUSComPdf();
   }
 
   public function saldos_xls(){
