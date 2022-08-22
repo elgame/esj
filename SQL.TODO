@@ -19,7 +19,6 @@
     COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
     ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
     ALTER TABLE public.compras_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
-    --lap|san
     ALTER TABLE public.facturacion_seg_cert ADD COLUMN id_orden bigint;
     COMMENT ON COLUMN public.facturacion_seg_cert.id_orden IS 'Orden del certificado o linea captura';
     ALTER TABLE public.facturacion_seg_cert ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
