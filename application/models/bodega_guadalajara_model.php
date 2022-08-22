@@ -2057,7 +2057,7 @@ class bodega_guadalajara_model extends CI_Model {
       'utilidadporbulto' => ($totalVentas-($totalExisAnt+$totalIngresos-$totalExisD-$totalPrestamos)-$totalGastos)/($bultosVentas>0? $bultosVentas: 1),
       'clientes'         => $totalSal+$saldoVentas,
     ];
-    if (false && $this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
+    if ($this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) {
       $this->printEstadoResultado($pdf, $estadoResult);
       // $pdf->SetFillColor(240, 240, 240);
       // $pdf->SetAligns(array('C'));
