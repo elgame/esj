@@ -14,6 +14,7 @@ $(function(){
 
   $("#form").submit(function(){
     var result = validaProductosEspecials();
+    console.log(result, $("#privAddDescripciones").length);
     if(result == false)
     {
       event.preventDefault();
@@ -1546,6 +1547,7 @@ var loadModalSegCert = function (idClasificacion) {
   // sus datos.
   if (idClasificacion === '49') {
     $('#modal-seguro').modal('show');
+    $("#pproveedor_seguro").focus();
   }
 
   // Si la clasificacion es el supervisor de carga abre modal
@@ -1557,6 +1559,7 @@ var loadModalSegCert = function (idClasificacion) {
   // muestra el modal para agregar sus datos.
   if (idClasificacion === '51' || idClasificacion === '52') {
     $('#modal-certificado'+idClasificacion).modal('show');
+    $("#pproveedor_certificado"+idClasificacion).focus();
   }
 };
 
@@ -1637,6 +1640,7 @@ var enabledCloseModal = function (idModal) {
         close = false;
       }
     });
+
     if (close) {
       $modal.find('#btnClose').prop('disabled', '');
     } else {

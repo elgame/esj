@@ -169,6 +169,7 @@ class facturacion extends MY_Controller {
         array('bootstrap/bootstrap-tab.js'),
         array('bootstrap/bootstrap-tooltip.js'),
         array('libs/jquery.numeric.js'),
+        array('libs/jquery.filtertable.min.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
         array('panel/facturacion/gastos_productos.js'),
