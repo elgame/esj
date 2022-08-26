@@ -61,7 +61,7 @@
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
  ✔ Descargas masivas de remisiones @done (22-07-06 13:31)
    -- lap|san|pcc
-   ALTER TABLE public.facturacion_otrosdatos ADD COLUMN orden_compra character varying(50) COLLATE pg_catalog."default";
+     ALTER TABLE public.facturacion_otrosdatos ADD COLUMN orden_compra character varying(50) COLLATE pg_catalog."default";
  ☐ Nomina corona
    - catalogo de ranchos
    - catalogo de tablas por rancho, numero de he
