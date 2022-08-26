@@ -12740,10 +12740,14 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semanaa, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'anio' => $semana['anio'],
-                'dia_inicia_semana' => $dia,
-                'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
-              );
+    $filtros = array(
+      'semana'      => $semana[$tipoNomina],
+      'anio'        => $semana['anio'],
+      'empresaId'   => $empresaId,
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'dia_inicia_semana' => $dia,
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
+    );
     $empleados = $this->nomina(
           $configuraciones, $filtros,
           $empleadoId,
@@ -12834,7 +12838,8 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY() + 0);
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(50, 35, 35, 35, 30));
-        $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+        $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
+        $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -13112,9 +13117,14 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones($semana['anio']);
-    $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
-      'anio' => $semana['anio'],
-      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']);
+    $filtros = array(
+      'semana'      => $semana[$tipoNomina],
+      'anio'        => $semana['anio'],
+      'empresaId'   => $empresaId,
+      'regPatronal' => isset($_GET['fregistro_patronal']) ? $_GET['fregistro_patronal'] : '',
+      'dia_inicia_semana' => $dia,
+      'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
+    );
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ag' );
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
@@ -13210,7 +13220,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 0);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(50, 35, 35, 35, 30));
-      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+      $fechaa = isset($cfdi_ext->data[0]->ex_FechaInicioRelLaboral) ? $cfdi_ext->data[0]->ex_FechaInicioRelLaboral : $empleado->fecha_entrada;
+      $pdf->Row(array("Fecha Ingr: {$fechaa}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
