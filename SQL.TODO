@@ -1,20 +1,20 @@
  ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
  ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
  ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)
-   --lap|san|pcc
+   --lap|san|pcc|gdl
    ALTER TABLE public.empresas ADD COLUMN num_orden integer;
-   --lap|san|pcc
+   --lap|san|pcc|gdl
    ALTER TABLE public.empresas ADD COLUMN nombre_corto character varying COLLATE pg_catalog."default";
  ✔ Reporte codigos cuentas, reporte de gastos, meter el Areas / Ranchos / Lineas @done (22-07-15 09:44)
  ✔ Reporte de compras de productos y productos regresados en almacen @done (22-08-03 00:14)
-   -- lap|san|pcc
+   -- lap|san|pcc|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Existencia por unidades de salida',369,true,'inventario/epus/','print',true);
  ✔ Reporte de salidas de almacén por usuario @done (22-07-22 19:31)
-   -- lap|san|pcc
+   -- lap|san|pcc|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Salidas por Usuarios',366,true,'productos_salidas/rpt_salidas_usuarios/','print',true);
  ✔ Caja de prestamos exportar a excel @done (22-07-14 10:48)
  ☐ En ordenes de compra poner campo para que capturen el No de Certificado y esos en la factura poder seleccionarlos
-   --lap|san|pcc
+   --lap|san|pcc|gdl
     ALTER TABLE public.productos_familias ADD COLUMN is_certif boolean DEFAULT false;
     COMMENT ON COLUMN public.productos_familias.is_certif IS 'indica si los productos de la familia son para capturar certificados de ventas (facturas)';
     ALTER TABLE public.compras_requisicion_productos ADD COLUMN no_certificado character varying(200) COLLATE pg_catalog."default";
@@ -38,8 +38,51 @@
 
       ALTER TABLE public.no_certificados_compras
           OWNER TO programa;
+    -- pcc|san
+    CREATE OR REPLACE VIEW public.no_certificados_rpt
+         AS
+         SELECT oc.id_orden,
+            oc.folio_orden,
+            oc.fecha_orden,
+            oc.empresa_orden,
+            oc.no_certificado,
+            v.id_factura,
+            v.folio_venta,
+            v.fecha_venta,
+            v.empresa_venta,
+            v.certificado
+           FROM ( SELECT co.id_orden,
+                    co.folio AS folio_orden,
+                    date(co.fecha_creacion) AS fecha_orden,
+                    e.id_empresa,
+                    e.nombre_fiscal AS empresa_orden,
+                    cp.no_certificado
+                   FROM compras_ordenes co
+                     JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                     JOIN empresas e ON e.id_empresa = co.id_empresa
+                  WHERE cp.no_certificado IS NOT NULL AND cp.no_certificado::text <> ''::text) oc
+             LEFT JOIN ( SELECT f.id_factura,
+                    f.serie::text || f.folio AS folio_venta,
+                    date(f.fecha) AS fecha_venta,
+                    e.id_empresa,
+                    e.nombre_fiscal AS empresa_venta,
+                    fsc.certificado,
+                    fsc.no_certificado,
+                    fsc.id_orden
+                   FROM facturacion f
+                     JOIN facturacion_seg_cert fsc ON f.id_factura = fsc.id_factura
+                     JOIN empresas e ON e.id_empresa = f.id_empresa
+                     LEFT JOIN ( SELECT remisiones_historial.id_remision,
+                            remisiones_historial.id_factura,
+                            remisiones_historial.status
+                           FROM remisiones_historial
+                          WHERE remisiones_historial.status::text <> 'ca'::text AND remisiones_historial.status::text <> 'b'::text) fh ON f.id_factura = fh.id_remision
+                  WHERE f.status::text <> 'ca'::text AND f.status::text <> 'b'::text AND f.id_abono_factura IS NULL AND f.id_nc IS NULL AND fsc.no_certificado::text <> ''::text AND COALESCE(fh.id_remision, 0::bigint) = 0) v ON v.id_orden = oc.id_orden AND v.no_certificado::text = oc.no_certificado::text;
+
+        ALTER TABLE public.no_certificados_rpt
+            OWNER TO programa;
  ✔ En compras y ventas poner opción para calcular el iva sumando el ieps, poner en los productos para q calcule de esa forma @done (22-07-20 13:29)
-   --lap|pcc|san
+   --lap|pcc|san|gdl
    ALTER TABLE public.productos ADD COLUMN ieps_subtotal boolean NOT NULL DEFAULT false;
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN ieps_sub boolean DEFAULT false;
    COMMENT ON COLUMN public.compras_requisicion_productos.ieps_sub IS 'indica si ese producto el iva se calcula sumando el ieps';
@@ -52,10 +95,10 @@
    ALTER TABLE public.compras_notas_credito_productos ADD COLUMN porcentaje_ieps real NOT NULL DEFAULT (0)::real;
    ALTER TABLE public.compras_notas_credito_productos ADD COLUMN ieps real NOT NULL DEFAULT (0)::real;
  ✔ Caja de prestamos imprimir recibo del prestamo @done (22-06-21 18:26)
-   --lap|san|pcc
+   --lap|san|pcc|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar Caja campos',247,false,'caja_chica/modificar_caja_campos/','edit',false);
  ✔ En ordenes poner el campo de piezas opcional, y hacer un reporte con filtro de fechas y código de área @done (22-06-21 19:38)
-   -- lap|san|pcc
+   -- lap|san|pcc|gdl
    ALTER TABLE public.compras_requisicion_productos ADD COLUMN piezas double precision DEFAULT 0;
    ALTER TABLE public.compras_productos ADD COLUMN piezas double precision DEFAULT 0;
       INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Compras X Piezas',367,true,'catalogos_sft/rpt_codigos_compras_piezas/','print',true);
