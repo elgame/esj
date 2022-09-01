@@ -746,9 +746,22 @@
                               <td style="width: 150px;">
                                   <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
                                   <input type="hidden" name="observaciones[]" value="<?php echo $_POST['observaciones'][$key] ?>" id="observaciones" class="span12">
-                                  <input type="hidden" name="noCertificado[]" value="<?php echo $_POST['noCertificado'][$key] ?>" id="noCertificado" class="span12">
                               </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
+                              <td style="width: 35px;">
+                                <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                  <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                    <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
+                                    <div class="popover-content">
+
+                                      <div class="control-group" style="width: 375px;">
+                                        <input type="text" name="noCertificado[]" value="<?php echo $_POST['noCertificado'][$key] ?>" id="noCertificado" class="span12" placeholder="No Certificado">
+                                      </div>
+
+                                    </div>
+                                  </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
+                              </td>
                             </tr>
                           <?php  }} else {
                                $retencionisr = $subtotal = $iva = $ieps = $total = $retencion = 0;
@@ -893,9 +906,20 @@
                                  <td style="width: 150px;<?php echo $redBg ?>">
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
                                     <input type="hidden" name="observaciones[]" value="<?php echo $prod->observaciones ?>" id="observaciones" class="span12">
-                                    <input type="hidden" name="noCertificado[]" value="<?php echo $prod->no_certificado ?>" id="noCertificado" class="span12">
                                 </td>
-                                 <td style="width: 35px;<?php echo $redBg ?>">
+                                <td style="width: 35px;<?php echo $redBg ?>">
+                                  <div style="position:relative;"><button type="button" class="btn btn-inverse" id="btnListActivos"><i class="icon-font"></i></button>
+                                    <div class="popover fade left in" style="top:-55.5px;left:-411px;margin-right: 43px;">
+                                      <div class="arrow"></div><h3 class="popover-title">Activos / Certificados</h3>
+                                      <div class="popover-content">
+
+                                        <div class="control-group" style="width: 375px;">
+                                          <input type="text" name="noCertificado[]" value="<?php echo $prod->no_certificado ?>" id="noCertificado" class="span12" placeholder="No Certificado" <?php echo $readonly ?>>
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div>
                                   <?php if ($showButton && $prod->status != 'a'){ ?>
                                     <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
                                   <?php } ?>
