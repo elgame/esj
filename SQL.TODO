@@ -1,3 +1,7 @@
+
+ ☐
+   --san|lap
+   ALTER TABLE public.bascula_pagos ADD COLUMN created_at timestamp without time zone DEFAULT now();
  ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
  ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)
  ✔ Brenda, Reporte acumulado por empresa, ordenar de esa forma @done (22-07-13 10:19)

@@ -182,6 +182,8 @@ class bascula_model extends CI_Model {
         $new_boleta = true;
 
         $this->addSnapshot($idb, $data['accion']);
+
+        $this->logBitacora($logBitacora, $idb, $data, $usuario_auth, null, true, true);
       }
 
       $data2 = array(
@@ -3628,7 +3630,7 @@ class bascula_model extends CI_Model {
     $this->db->update('bascula', array('accion' => 'p', 'fecha_pago' => date("Y-m-d H:i:s")), array('id_bascula' => $idBascula));
   }
 
-  public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true)
+  public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true, $new = false)
   {
     // if (isset($data['tipo']) && $data['tipo'] == 'sa') {
     //   return 'sa';
@@ -3649,30 +3651,31 @@ class bascula_model extends CI_Model {
     // Array asoc que asocia el nombre del campo de la tabla con un nombre
     // mas entendible para el usuario.
     $campos = array(
-      'tipo'            => 'Tipo',
-      'id_area'         => 'Area',
-      'id_empresa'      => 'Empresa',
-      'id_cliente'      => 'Cliente',
-      'id_proveedor'    => 'Proveedor',
-      'id_productor'    => 'Productor',
-      'rancho'          => 'Rancho',
-      'id_camion'       => 'Camion',
-      'id_chofer'       => 'Chofer',
-      'kilos_bruto'     => 'Kilos Brutos',
-      'kilos_tara'      => 'Kilos Tara',
-      'cajas_prestadas' => 'Cajas Prestadas',
-      'kilos_neto'      => 'Kilos Neto',
-      'no_lote'         => 'No. Lote',
+      'folio'               => 'Folio',
+      'tipo'                => 'Tipo',
+      'id_area'             => 'Area',
+      'id_empresa'          => 'Empresa',
+      'id_cliente'          => 'Cliente',
+      'id_proveedor'        => 'Proveedor',
+      'id_productor'        => 'Productor',
+      'rancho'              => 'Rancho',
+      'id_camion'           => 'Camion',
+      'id_chofer'           => 'Chofer',
+      'kilos_bruto'         => 'Kilos Brutos',
+      'kilos_tara'          => 'Kilos Tara',
+      'cajas_prestadas'     => 'Cajas Prestadas',
+      'kilos_neto'          => 'Kilos Neto',
+      'no_lote'             => 'No. Lote',
       'chofer_es_productor' => 'Chofer es productor',
-      'id_bonificacion' => 'Bonificacion',
-      'importe'         => 'Importe',
-      'total_cajas'     => 'Total Cajas',
-      'obcervaciones'   => 'Observaciones',
-      'accion'          => 'Accion',
-      'certificado'     => 'Certificado',
-      'intangible'      => 'Intangible',
-      'fecha_pago'      => 'Fecha de pago',
-      'status'      => 'Estado boleta',
+      'id_bonificacion'     => 'Bonificacion',
+      'importe'             => 'Importe',
+      'total_cajas'         => 'Total Cajas',
+      'obcervaciones'       => 'Observaciones',
+      'accion'              => 'Accion',
+      'certificado'         => 'Certificado',
+      'intangible'          => 'Intangible',
+      'fecha_pago'          => 'Fecha de pago',
+      'status'              => 'Estado boleta',
     );
 
     // Campos que son ids, para facilitar la busqueda de sus valores.
@@ -3689,9 +3692,11 @@ class bascula_model extends CI_Model {
     // Obtiene la informacion de la pesada.
     $info = $this->getBasculaInfo($idBascula);
 
-    // echo "<pre>";
-    //   var_dump($info['info'][0], $data);
-    // echo "</pre>";exit;
+    if ($new) {
+      foreach ($info['info'][0] as $key => $value) {
+        $info['info'][0]->{$key} = '';
+      }
+    }
 
     $camposEditados = array();
     $fecha = date('Y-m-d H:i:s');
@@ -3756,17 +3761,19 @@ class bascula_model extends CI_Model {
             $despues = $data[$campoDb];
           }
 
-          $camposEditados[] = array(
-            'id_usuario_auth'     => (is_numeric($usuario_auth)? $usuario_auth: NULL),
-            'id_usuario_logueado' => $this->session->userdata['id_usuario'],
-            'id_bascula'          => $idBascula,
-            'fecha'               => $fecha,
-            'no_edicion'          => $noEdicion,
-            'antes'               => $antes,
-            'despues'             => $despues,
-            'campo'               => $campos[$campoDb],
-            'tipo'                => $logBitacora,
-          );
+          if (isset($campos[$campoDb])) {
+            $camposEditados[] = array(
+              'id_usuario_auth'     => (is_numeric($usuario_auth)? $usuario_auth: NULL),
+              'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+              'id_bascula'          => $idBascula,
+              'fecha'               => $fecha,
+              'no_edicion'          => $noEdicion,
+              'antes'               => $antes,
+              'despues'             => $despues,
+              'campo'               => $campos[$campoDb],
+              'tipo'                => $logBitacora,
+            );
+          }
         }
       }
     }
