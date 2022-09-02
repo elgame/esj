@@ -508,7 +508,7 @@
                       <?php if (isset($_POST['pcajas'])) {
                               foreach ($_POST['pcajas'] as $key => $caja) {
                       ?>
-                                <tr data-kneto="">
+                                <tr data-kneto="<?php echo $this->input->post('pkilos_neto') ?>">
                                   <td><?php echo $caja ?>
                                     <input type="hidden" name="pnum_registro[]" value="<?php echo $_POST['pnum_registro'][$key] ?>" id="pnum_registro">
                                     <input type="hidden" name="pcajas[]" value="<?php echo $caja ?>" id="pcajas">

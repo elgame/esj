@@ -718,6 +718,7 @@ $(function(){
     $importe.val(precio);
     $tdimporte.html(precio);
 
+    console.log('ppromedio', promedio, cajas, kilos, precio, kilosNeto, parseFloat(kilos));
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
   });
 
@@ -765,9 +766,6 @@ $(function(){
   });
 
   // $('#form').submit(function ($t) {
-
-  //   console.log($t);
-
   //   return false;
 
   //   if ($('input#pstatus').is(':checked')) {
@@ -831,8 +829,24 @@ $(function(){
     .done(function(resp) {
       console.log(resp);
       if (resp.passes) {
-        $('#autorizar').val(resp.user_id);
-        $('#form').submit();
+        let totalKg = parseFloat($('#pkilos_neto').val())||0;
+        let totalKgVal = 0;
+        if($('#ptipo').val() == 'en' && totalKg > 0) {
+          $('#tableCajas #pkilos').each(function(index, el) {
+            totalKgVal += parseFloat($(el).val())||0;
+          });
+
+          if(totalKg != totalKgVal) {
+            noty({"text": 'Los Kilos Neto no son los mismo que los de las cajas. (' + totalKg + ' <> ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          } else {
+            $('#autorizar').val(resp.user_id);
+            $('#form').submit();
+          }
+        } else {
+          $('#autorizar').val(resp.user_id);
+          $('#form').submit();
+        }
+        console.log(totalKg, totalKgVal);
       } else {
         noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
       }
@@ -1016,6 +1030,7 @@ var validaCalidad = function (calidad) {
 };
 
 var calculaTotales = function (trIndex, kilosNeto) {
+  console.log('calculaTotales', kilosNeto);
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
@@ -1023,14 +1038,15 @@ var calculaTotales = function (trIndex, kilosNeto) {
       $pisrPorcent  = $('#pisrPorcent'),
       $area         = $('#parea'),
 
-      kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
-      totalCajas = 0,
+      kilosNeto   = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
+      totalCajas  = 0,
       totalCajasP = 0,
       isrTotal    = 0,
-      total      = 0,
+      total       = 0,
 
       trIndex = trIndex || 0;
 
+  console.log('calculaTotales', kilosNeto);
   // Recorre todas las cajas/calidades para obtener el total de cajas.
   $('input#pcajas').each(function(e, i) {
     totalCajas += parseFloat($(this).val());
