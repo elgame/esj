@@ -743,7 +743,23 @@ $(function(){
       }
 
       $form.attr('action', $form.attr('action') + printt);
-      $form.submit();
+
+      let totalKg = parseFloat($('#pkilos_neto').val())||0;
+      let totalKgVal = 0;
+      if($('#ptipo').val() == 'en' && totalKg > 0) {
+        $('#tableCajas #pkilos').each(function(index, el) {
+          totalKgVal += parseFloat($(el).val())||0;
+        });
+
+        if(totalKg < totalKgVal) {
+          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+        } else {
+          $form.submit();
+        }
+      } else {
+        $form.submit();
+      }
+      console.log(totalKg, totalKgVal);
     } else {
       var win=window.open($('#btnPrint').attr('href'), '_blank');
       win.focus();
@@ -751,6 +767,7 @@ $(function(){
   };
 
   $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
+    event.preventDefault();
     $.ajax({
       url: base_url + 'panel/bascula/puede_modificar/',
       type: 'get',
@@ -768,8 +785,8 @@ $(function(){
             totalKgVal += parseFloat($(el).val())||0;
           });
 
-          if(totalKg != totalKgVal) {
-            noty({"text": 'Los Kilos Neto no son los mismo que los de las cajas. (' + totalKg + ' <> ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if(totalKg < totalKgVal) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#form').submit();
           }
@@ -852,8 +869,8 @@ $(function(){
             totalKgVal += parseFloat($(el).val())||0;
           });
 
-          if(totalKg != totalKgVal) {
-            noty({"text": 'Los Kilos Neto no son los mismo que los de las cajas. (' + totalKg + ' <> ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if(totalKg < totalKgVal) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#autorizar').val(resp.user_id);
             $('#form').submit();
