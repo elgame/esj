@@ -760,8 +760,24 @@ $(function(){
     .done(function(response) {
       if (response.puede_modificar == false)
         location.reload();
-      else
-        $('#form').submit();
+      else {
+        let totalKg = parseFloat($('#pkilos_neto').val())||0;
+        let totalKgVal = 0;
+        if($('#ptipo').val() == 'en' && totalKg > 0) {
+          $('#tableCajas #pkilos').each(function(index, el) {
+            totalKgVal += parseFloat($(el).val())||0;
+          });
+
+          if(totalKg != totalKgVal) {
+            noty({"text": 'Los Kilos Neto no son los mismo que los de las cajas. (' + totalKg + ' <> ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          } else {
+            $('#form').submit();
+          }
+        } else {
+          $('#form').submit();
+        }
+        console.log(totalKg, totalKgVal);
+      }
     });
   });
 
