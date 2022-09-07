@@ -751,8 +751,8 @@ $(function(){
           totalKgVal += parseFloat($(el).val())||0;
         });
 
-        if(totalKg < totalKgVal) {
-          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+        if((totalKg+5) < totalKgVal) {
+          noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
         } else {
           $form.submit();
         }
@@ -785,8 +785,8 @@ $(function(){
             totalKgVal += parseFloat($(el).val())||0;
           });
 
-          if(totalKg < totalKgVal) {
-            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if((totalKg+5) < totalKgVal) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#form').submit();
           }
@@ -869,8 +869,8 @@ $(function(){
             totalKgVal += parseFloat($(el).val())||0;
           });
 
-          if(totalKg < totalKgVal) {
-            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos. (' + totalKg + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
+          if((totalKg+5) < totalKgVal) {
+            noty({"text": 'Los Kilos de las Cajas no pueden ser mayor a los Kilos Netos ' + totalKg + '. (' + (totalKg+5) + ' >= ' + totalKgVal + ')', "layout":"topRight", "type": 'error'});
           } else {
             $('#autorizar').val(resp.user_id);
             $('#form').submit();

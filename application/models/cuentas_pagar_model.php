@@ -36,13 +36,16 @@ class cuentas_pagar_model extends privilegios_model{
 			$sqlt .= " AND f.id_proveedor = '".$this->input->get('fid_proveedor')."'";
 		}
 
+    if($this->input->get('ftipodoc') != '') {
+      $sql .= " AND f.tipo_documento = '".$this->input->get('ftipodoc')."'";
+    }
+
 		$this->load->model('empresas_model');
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
 	    if($this->input->get('did_empresa') != '' && $this->input->get('did_empresa') != 'all'){
 	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
 		$query = BDUtil::pagination(
@@ -286,6 +289,10 @@ class cuentas_pagar_model extends privilegios_model{
       $sqlp1 = " AND f.id_proveedor = '".$this->input->get('id_proveedor')."'";
       $sqlp2 = " AND c.id_proveedor = '".$this->input->get('id_proveedor')."'";
       $sqlp3 = " AND id_proveedor = '".$this->input->get('id_proveedor')."'";
+    }
+
+    if($this->input->get('ftipodoc') != '') {
+      $sql .= " AND f.tipo_documento = '".$this->input->get('ftipodoc')."'";
     }
 
     $sql_only_sel_table = $sql_only_sel_where = $sql_only_sel_order = $sql_only_sel_fiels = '';
