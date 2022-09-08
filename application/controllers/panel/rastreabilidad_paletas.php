@@ -276,9 +276,10 @@ class rastreabilidad_paletas extends MY_Controller {
       array('field' => 'prod_ddescripcion[]',
             'label' => 'Clasificacion',
             'rules' => ''),
+
       array('field' => 'prod_did_prod[]',
             'label' => 'Clasificacion',
-            'rules' => 'required|is_natural_no_zero'),
+            'rules' => 'required|is_natural_no_zero|callback_chkexporta'),
       array('field' => 'prod_dmedida[]',
             'label' => 'Medida',
             'rules' => ''),
@@ -312,6 +313,45 @@ class rastreabilidad_paletas extends MY_Controller {
     //   $this->form_validation->set_message('chkboleta', "La boleta {$_POST['boletasSalidasFolio']} ya esta registrada en otra paleta de salida, intenta con otra.");
     //   return false;
     // }else
+      return true;
+  }
+
+  public function chkexporta($ids_clasificacion)
+  {
+    $msgg = '';
+    if (count($_POST['prod_did_prod']) > 0) {
+      if ($_POST['tipo'] == 'lo' || $_POST['tipo'] == 'na') {
+        $idss = implode(',', $_POST['prod_did_prod']);
+        $classs = $this->db->query("SELECT Upper(nombre) AS nombre FROM clasificaciones WHERE id_clasificacion in({$idss})")->result();
+        foreach ($classs as $key => $clas) {
+          if (strpos($clas->nombre, 'CONVENCIONAL') === false) {
+            $msgg .= "No es una clasificacion Convencional -> {$clas->nombre}<br \>";
+          }
+        }
+      } else { // exportacion
+        foreach ($_POST['pallets_id'] as $key => $value) {
+          if ($value > 0) {
+            $idss[] = $value;
+          }
+        }
+        $idss = implode(',', $idss);
+        $classs = $this->db->query("SELECT rp.folio, Upper(c.nombre) AS nombre
+          FROM rastria_pallets rp
+            INNER JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+            INNER JOIN clasificaciones c ON c.id_clasificacion = rpr.id_clasificacion
+          WHERE rp.id_pallet in({$idss})")->result();
+        foreach ($classs as $key => $clas) {
+          if (strpos($clas->nombre, 'EXPORTACION') === false) {
+            $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de Exportacion -> {$clas->nombre}<br \>";
+          }
+        }
+      }
+    }
+
+    if($msgg != ''){
+      $this->form_validation->set_message('chkexporta', $msgg);
+      return false;
+    }else
       return true;
   }
 

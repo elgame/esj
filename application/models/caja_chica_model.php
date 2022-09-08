@@ -274,6 +274,23 @@ class caja_chica_model extends CI_Model {
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
       );
+      // "SELECT pr.id_proveedor, pr.nombre_fiscal as proveedor, Sum(b.importe)::Numeric(12, 2) AS importe
+      //   FROM bascula b
+      //     INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+      //     INNER JOIN areas a ON a.id_area = b.id_area
+      //     LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
+      //     LEFT JOIN (
+      //       SELECT bpbb.* FROM bascula_pagos bp
+      //         LEFT JOIN bascula_pagos_basculas bpbb ON bp.id_pago = bpbb.id_pago
+      //       WHERE bp.status = 't' and Date(bp.created_at) <= '2022-08-31'
+      //     ) bpb ON b.id_bascula = bpb.id_bascula
+      //   WHERE a.tipo = 'fr' AND DATE(b.fecha_bruto) <= '{$fecha}'
+      //     AND b.fecha_pago IS NOT NULL
+      //     AND DATE(b.fecha_pago) >= '2017-01-01'
+      //     AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL
+      //     {$sql}
+      //   GROUP BY pr.id_proveedor
+      //   ORDER BY proveedor ASC"
 
       if ($boletas->num_rows() > 0)
       {

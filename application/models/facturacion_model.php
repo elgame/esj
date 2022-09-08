@@ -952,8 +952,8 @@ class facturacion_model extends privilegios_model{
               'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
               'pol_seg'          => null,
               'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
-              'id_orden'         => $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer],
-              'no_certificado'   => $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+              'id_orden'         => (!empty($_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+              'no_certificado'   => (!empty($_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
             );
             ++$nrow_seg_cer;
           }
@@ -1959,8 +1959,8 @@ class facturacion_model extends privilegios_model{
                 'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
                 'pol_seg'          => null,
                 'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'id_orden'         => $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer],
-                'no_certificado'   => $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'id_orden'         => (!empty($_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_id_orden'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
+                'no_certificado'   => (!empty($_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer])? $_POST['cert_no_certificado'.$_POST['prod_did_prod'][$key]][$keysecer]: null),
               );
               ++$nrow_seg_cer;
             }
