@@ -3232,13 +3232,15 @@ class nomina_fiscal_model extends CI_Model {
     $empleados = $this->nomina($configuraciones, $filtros);
     $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
+    $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
+
     $content           = array();
     $contentSantr      = array();
     $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
     $contadorBanorte   = 1;
-    $cuentaSantr       = '92001449876'; // Cuenta cargo santander empaque
+    $cuentaSantr       = $cuentasSantander[$empresaId]; // Cuenta cargo santander empaque
     $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
     $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;

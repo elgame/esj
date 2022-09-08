@@ -319,30 +319,32 @@ class rastreabilidad_paletas extends MY_Controller {
   public function chkexporta($ids_clasificacion)
   {
     $msgg = '';
-    if (count($_POST['prod_did_prod']) > 0) {
-      if ($_POST['tipo'] == 'lo' || $_POST['tipo'] == 'na') {
-        $idss = implode(',', $_POST['prod_did_prod']);
-        $classs = $this->db->query("SELECT Upper(nombre) AS nombre FROM clasificaciones WHERE id_clasificacion in({$idss})")->result();
-        foreach ($classs as $key => $clas) {
-          if (strpos($clas->nombre, 'CONVENCIONAL') === false) {
-            $msgg .= "No es una clasificacion Convencional -> {$clas->nombre}<br \>";
+    if (isset($_POST['empresaId']) && ($_POST['empresaId'] == 2 || $_POST['empresaId'] == 15)) {
+      if (count($_POST['prod_did_prod']) > 0) {
+        if ($_POST['tipo'] == 'lo' || $_POST['tipo'] == 'na') {
+          $idss = implode(',', $_POST['prod_did_prod']);
+          $classs = $this->db->query("SELECT Upper(nombre) AS nombre FROM clasificaciones WHERE id_clasificacion in({$idss})")->result();
+          foreach ($classs as $key => $clas) {
+            if (strpos($clas->nombre, 'CONVENCIONAL') === false) {
+              $msgg .= "No es una clasificacion Convencional -> {$clas->nombre}<br \>";
+            }
           }
-        }
-      } else { // exportacion
-        foreach ($_POST['pallets_id'] as $key => $value) {
-          if ($value > 0) {
-            $idss[] = $value;
+        } else { // exportacion
+          foreach ($_POST['pallets_id'] as $key => $value) {
+            if ($value > 0) {
+              $idss[] = $value;
+            }
           }
-        }
-        $idss = implode(',', $idss);
-        $classs = $this->db->query("SELECT rp.folio, Upper(c.nombre) AS nombre
-          FROM rastria_pallets rp
-            INNER JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
-            INNER JOIN clasificaciones c ON c.id_clasificacion = rpr.id_clasificacion
-          WHERE rp.id_pallet in({$idss})")->result();
-        foreach ($classs as $key => $clas) {
-          if (strpos($clas->nombre, 'EXPORTACION') === false) {
-            $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de Exportacion -> {$clas->nombre}<br \>";
+          $idss = implode(',', $idss);
+          $classs = $this->db->query("SELECT rp.folio, Upper(c.nombre) AS nombre
+            FROM rastria_pallets rp
+              INNER JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+              INNER JOIN clasificaciones c ON c.id_clasificacion = rpr.id_clasificacion
+            WHERE rp.id_pallet in({$idss})")->result();
+          foreach ($classs as $key => $clas) {
+            if (strpos($clas->nombre, 'EXPORTACION') === false) {
+              $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de Exportacion -> {$clas->nombre}<br \>";
+            }
           }
         }
       }
