@@ -65,6 +65,7 @@
       </div>
 
       <form action="<?php echo base_url('panel/bascula/agregar?'.MyString::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
+        <input type="hidden" id="userId" value="<?php echo $this->session->userdata('id_usuario') ?>">
 
         <?php if ($accion === 'en') { ?>
           <button type="button" class="btn btn-info" id="btnSetFocoKilosTara">Cargar Kilos Tara</button>
