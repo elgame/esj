@@ -5822,6 +5822,7 @@ class caja_chica_model extends CI_Model {
             INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
             INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
           WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            AND ci.otro = 'f' AND ci.status = 't'
             {$sql} {$sql2}
           ORDER BY id_categoria ASC, fecha ASC");
       $response['movimientos'] = $movimientos->result();
