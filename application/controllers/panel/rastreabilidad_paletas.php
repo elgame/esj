@@ -319,7 +319,12 @@ class rastreabilidad_paletas extends MY_Controller {
   public function chkexporta($ids_clasificacion)
   {
     $msgg = '';
-    if (isset($_POST['empresaId']) && ($_POST['empresaId'] == 2 || $_POST['empresaId'] == 15)) {
+
+    $result = $this->db->query("SELECT id_area FROM bascula WHERE id_bascula = {$_POST['boletasSalidasId']} ")->row();
+
+    // limon, empaque y gubalu
+    if (isset($result->id_area) && $result->id_area == 2 &&
+      isset($_POST['empresaId']) && ($_POST['empresaId'] == 2 || $_POST['empresaId'] == 15)) {
       if (count($_POST['prod_did_prod']) > 0) {
         if ($_POST['tipo'] == 'lo' || $_POST['tipo'] == 'na') {
           $idss = implode(',', $_POST['prod_did_prod']);
