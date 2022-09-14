@@ -1293,6 +1293,58 @@ class cuentas_pagar_model extends privilegios_model{
 		return $response;
 	}
 
+  public function historialAbonosPdf(){
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = false;
+
+    $res = $this->getDetalleVentaFacturaData();
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
+
+    $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFont('Arial','B', 10);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(205));
+    $pdf->Row(array("Proveedor: {$res['proveedor']->nombre_fiscal}"), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(40, 40, 125));
+    $pdf->Row(array(
+      "Factura: {$res['cobro'][0]->serie}{$res['cobro'][0]->folio}",
+      "Fecha: {$res['cobro'][0]->fecha}",
+      "Total: ".number_format($res['cobro'][0]->total)
+    ), false, false);
+
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(20, 80, 20));
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('Fecha', 'Concepto', 'Abono'), false, true);
+    $pdf->SetFont('Arial','', 9);
+    foreach ($res['abonos'] as $key => $value) {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array(
+        $value->fecha,
+        $value->concepto,
+        '$'.number_format($value->abono)
+      ), false, true);
+    }
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFont('Arial','B', 10);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(205));
+    $pdf->Row(array("Saldo: $".number_format($res['saldo'])), false, false);
+
+    $pdf->Output('cuentas_proveedor.pdf', 'I');
+  }
+
 
 	/**
 	 * Abonos de facturas y ventas
