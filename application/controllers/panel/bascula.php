@@ -2326,6 +2326,7 @@ class bascula extends MY_Controller {
     //    WHERE id_bascula = {$_GET['idb']}"
     // )->row()->fecha_pago;
 
+    $this->bascula_model->pagarBoleta($_GET['idb']);
     $this->bascula_model->logBitacora(
       true,
       $_GET['idb'],
@@ -2335,7 +2336,6 @@ class bascula extends MY_Controller {
       false
     );
 
-    $this->bascula_model->pagarBoleta($_GET['idb']);
     echo json_encode(array('passes' => true));
   }
 

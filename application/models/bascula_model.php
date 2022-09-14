@@ -360,9 +360,9 @@ class bascula_model extends CI_Model {
     // if (is_numeric($usuario_auth))
     // {
     // }
-    $this->logBitacora($logBitacora, $id, $data, $usuario_auth, $cajas, $all);
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
+
     if ( ! is_null($cajas) && count($cajas) > 0)
     {
       foreach ($cajas as $key => $caja)
@@ -381,6 +381,8 @@ class bascula_model extends CI_Model {
         $this->db->insert_batch('bascula_productos', $cajas);
       }
     }
+
+    $this->logBitacora($logBitacora, $id, $data, $usuario_auth, $cajas, $all);
 
     return array('passes' => true);
   }
@@ -3998,6 +4000,11 @@ class bascula_model extends CI_Model {
     if (isset($_GET['boletaId']) && $_GET['boletaId'])
     {
       $sql .= " AND ba.id_bascula = {$_GET['boletaId']}";
+    }
+
+    if (isset($_GET['folio']) && $_GET['folio'])
+    {
+      $sql .= " AND ba.folio = {$_GET['folio']}";
     }
 
     $query = $this->db->query(
