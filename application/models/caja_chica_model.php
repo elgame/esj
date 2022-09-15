@@ -3630,17 +3630,22 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($caja['fondo_caja'], 2, '$', false)), false, false);
 
       $pdf->SetX(153);
-      $pdf->Row(array('SALDOS X RECUP', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
+      $pdf->Row(array('SALDOS X RECUP (+)', MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false)), false, false);
       $pdf->SetX(153);
-      $pdf->Row(array('CHEQUES EN TRANSITO', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
+      $pdf->Row(array('CHEQUES EN TRANSITO (+)', MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false)), false, false);
       if ($totalDeudores > 0) {
         $pdf->SetX(153);
-        $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
+        $pdf->Row(array('TOTAL DEUDORES (+)', MyString::formatoNumero(($totalDeudores), 2, '$', false)), false, false);
       }
       if ($totalAcreedores > 0) {
         $pdf->SetX(153);
-        $pdf->Row(array('TOTAL ACREEDORES', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
+        $pdf->Row(array('TOTAL ACREEDORES (-)', MyString::formatoNumero(($totalAcreedores), 2, '$', false)), false, false);
       }
+      if ($caja['gastosAcumuladosCaja1'] > 0) {
+        $pdf->SetX(153);
+        $pdf->Row(array('TOTAL GASTOS (+)', MyString::formatoNumero(($caja['gastosAcumuladosCaja1']), 2, '$', false)), false, false);
+      }
+
       $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $pdf->SetX(153);
       $pdf->Row(array('SALDO EFECTIVO', MyString::formatoNumero($saldoEfectivo, 2, '$', false)), false, false);

@@ -4029,7 +4029,7 @@ class bascula_model extends CI_Model {
        INNER JOIN empresas em ON em.id_empresa = ba.id_empresa
        INNER JOIN areas ar ON ar.id_area = ba.id_area
        WHERE 1=1 {$sql} {$sql2}
-       ORDER BY bb.id_bascula, bb.fecha, bb.no_edicion
+       ORDER BY bb.id_bascula, bb.id, bb.fecha, bb.no_edicion
     ");
 
     return $query->result();
