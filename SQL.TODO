@@ -327,7 +327,7 @@
 
  ✔ En reporte de ieps (devoluciones_iva/rpt_ieps) poner el mismo reporte sacando los datos de las facturas, @done (21-10-27 14:30)
    en ese mismo reporte pero de compras cuando son productos con presentacion multiplica de nuevo la cantidad de la precentacion
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de IEPS ventas',501,true,'devoluciones_iva/rpt_ieps_ventas/','print',true);
  ✔ En produccion poner imprimir el listado de lotes capturados @done (21-10-27 12:31)
  ✔ Poner en la poliza de nomina la cuenta de descuento de pension alimenticia Cta 21112000 @done (21-09-23 15:29)
