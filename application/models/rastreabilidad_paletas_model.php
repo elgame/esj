@@ -605,9 +605,9 @@ class rastreabilidad_paletas_model extends privilegios_model {
     } else { // exportación
       $pdf->SetXY(6, $pdf->GetY()+2);
       $pallets = [];
-      for ($i=0; $i < 13; $i++) {
+      for ($i=0; $i < 15; $i++) {
         $exist = isset($data['pallets'][($i*2)+1]);
-        if ($i !== 12 || ($i == 12 && $exist)) {
+        // if ($i !== 14 || ($i == 14 && $exist)) {
           $pallets[0][$i] = ($i*2)+1;
           $pallets[1][$i] = ($exist? $data['pallets'][($i*2)+1]->clasificaciones: '');
           $pallets[2][$i] = ($exist? $data['pallets'][($i*2)+1]->no_cajas." {$data['pallets'][($i*2)+1]->unidades}": '');
@@ -622,39 +622,39 @@ class rastreabilidad_paletas_model extends privilegios_model {
           $pallets[7][$i] = ($exist? "{$data['pallets'][($i+1)*2]->folio_int}-{$cajastxt}": '');
           $pallets[8][$i] = ($exist? ">{$data['pallets'][($i+1)*2]->calibres}": '');
           $pallets[9][$i] = ($i+1)*2;
-        }
+        // }
       }
-      $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
-      $pdf->SetWidths([20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20]);
+      $pdf->SetAligns(['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C']);
+      $pdf->SetWidths([18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18]);
       $pdf->SetFont('Arial', '', 8);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[0], false, false);
       $pdf->SetFont('Arial', '', 6);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[1], true, true);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[2], true, true);
       $pdf->SetFont('Arial', '', 5);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[3], true, true);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[4], true, true);
 
       $pdf->SetFillColor(230, 230, 230);
 
       $pdf->SetFont('Arial', '', 6);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[5], true, true);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[6], true, true);
       $pdf->SetFont('Arial', '', 5);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[7], true, true);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[8], true, true);
       $pdf->SetFillColor(200, 200, 200);
       $pdf->SetFont('Arial', '', 8);
-      $pdf->SetX(6);
+      $pdf->SetX(4.5);
       $pdf->Row($pallets[9], false, false);
     }
 

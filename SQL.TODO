@@ -1,8 +1,12 @@
 
- ☐ Bascula poner quien cierra la boleta
+ ✔ Bascula poner quien cierra la boleta @done (22-09-21 17:11)
+   -- lap|san
+   COMMENT ON COLUMN public.bascula.id_usuario IS 'usuario que registro la boleta';
+   ALTER TABLE public.bascula ADD COLUMN id_usuario_cerro bigint;
+   COMMENT ON COLUMN public.bascula.id_usuario_cerro IS 'usuario que cerro la boleta';
  ✔ Remisiones no guarda los certificados y borra productos @done (22-09-07 20:10)
  ☐ Poner historial de ordenes de compras cuando faltan productos, poner opcion de imprimir historial de ordenes subscuentes
- ☐ Poner opcion de imprimir historial de abonos en cuentas por pagar de una factura (abonos)
+ ✔ Poner opcion de imprimir historial de abonos en cuentas por pagar de una factura (abonos) @done (22-09-21 14:05)
  ☐ Buscar bascula, buscar lectores
  ✔ Validar exportacion y nacional en papeletas de salida @done (22-09-07 20:11)
    --san|lap

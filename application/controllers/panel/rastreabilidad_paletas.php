@@ -238,6 +238,9 @@ class rastreabilidad_paletas extends MY_Controller {
       array('field' => 'tipo',
             'label' => 'Tipo',
             'rules' => 'required'),
+      array('field' => 'tipoNP',
+            'label' => 'TipoNP',
+            'rules' => ''),
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
@@ -331,10 +334,11 @@ class rastreabilidad_paletas extends MY_Controller {
           $classs = $this->db->query("SELECT Upper(nombre) AS nombre FROM clasificaciones WHERE id_clasificacion in({$idss})")->result();
           foreach ($classs as $key => $clas) {
             if (strpos($clas->nombre, 'CONVENCIONAL') === false) {
-              $msgg .= "No es una clasificacion Convencional -> {$clas->nombre}<br \>";
+              $msgg .= "No es una clasificacion CONVENCIONAL -> {$clas->nombre}<br \>";
             }
           }
         } else { // exportacion
+          $tipo_val = $this->input->post('tipoNP') == 'si'? 'CONVENCIONAL': 'EXPORTACION';
           foreach ($_POST['pallets_id'] as $key => $value) {
             if ($value > 0) {
               $idss[] = $value;
@@ -347,8 +351,8 @@ class rastreabilidad_paletas extends MY_Controller {
               INNER JOIN clasificaciones c ON c.id_clasificacion = rpr.id_clasificacion
             WHERE rp.id_pallet in({$idss})")->result();
           foreach ($classs as $key => $clas) {
-            if (strpos($clas->nombre, 'EXPORTACION') === false) {
-              $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de Exportacion -> {$clas->nombre}<br \>";
+            if (strpos($clas->nombre, $tipo_val) === false) {
+              $msgg .= "Pallet: {$clas->folio}, No es una clasificacion de {$tipo_val} -> {$clas->nombre}<br \>";
             }
           }
         }

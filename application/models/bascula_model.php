@@ -119,7 +119,7 @@ class bascula_model extends CI_Model {
       {
         $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
           WHERE folio = {$this->input->post('pfolio')} AND tipo = '{$this->input->post('ptipo')}'
-          AND id_area = {$this->input->post('parea')}")->row();
+            AND id_area = {$this->input->post('parea')}")->row();
         if ($result->num > 0) {
           $_POST['pfolio'] = $this->getSiguienteFolio($this->input->post('ptipo'), $this->input->post('parea'));
         }
@@ -270,6 +270,10 @@ class bascula_model extends CI_Model {
           $data2['fecha_pago'] = NULL;
         }
 
+        // Si se cierra la boleta se registra quien la cerro
+        if (!empty($_GET['p']) && $_GET['p'] == 't') {
+          $data2['id_usuario_cerro'] = $this->session->userdata('id_usuario');
+        }
       }
 
       if ($_POST['ptipo'] === 'en')
@@ -524,6 +528,7 @@ class bascula_model extends CI_Model {
                 b.certificado,
                 b.intangible,
                 (u.nombre || ' ' || u.apellido_paterno) AS creadox,
+                (uc.nombre || ' ' || uc.apellido_paterno) AS cerradox,
                 (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario,
                 b.no_trazabilidad")
       ->from("bascula AS b")
@@ -535,6 +540,7 @@ class bascula_model extends CI_Model {
       ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "left")
       ->join('otros.productor AS pr', 'pr.id_productor = b.id_productor', "left")
       ->join('usuarios AS u', 'u.id = b.id_usuario', "left")
+      ->join('usuarios AS uc', 'uc.id = b.id_usuario_cerro', "left")
 
       ->where("b.id_bascula", $id)
       ->or_where('b.folio', $folio)
