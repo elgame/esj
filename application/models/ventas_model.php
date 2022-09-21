@@ -468,6 +468,8 @@ class Ventas_model extends privilegios_model{
               'bultos'           => 0,
               'certificado'      => null,
               'num_operacion'    => null,
+              'id_orden'         => null,
+              'no_certificado'   => null,
             );
             ++$nrow_seg_cer;
           }
@@ -508,6 +510,8 @@ class Ventas_model extends privilegios_model{
               'bultos'           => $_POST['supcarga_bultos'][$keysecer],
               'pol_seg'          => null,
               'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+              'id_orden'         => null,
+              'no_certificado'   => null,
             );
             ++$nrow_seg_cer;
           }
@@ -828,6 +832,8 @@ class Ventas_model extends privilegios_model{
               'bultos'           => 0,
               'certificado'      => null,
               'num_operacion'    => null,
+              'id_orden'         => null,
+              'no_certificado'   => null,
             );
             ++$nrow_seg_cer;
           }
@@ -868,6 +874,8 @@ class Ventas_model extends privilegios_model{
               'bultos'           => $_POST['supcarga_bultos'][$keysecer],
               'pol_seg'          => null,
               'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+              'id_orden'         => null,
+              'no_certificado'   => null,
             );
             ++$nrow_seg_cer;
           }
