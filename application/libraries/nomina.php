@@ -667,7 +667,10 @@ class nomina
    */
   public function pPremioPuntualidad()
   {
-    $premioPuntualidad = $this->empleado->nomina->sueldo * ($this->empresaConfig->puntualidad / 100);
+    $dias = $this->empleado->dias_trabajados==7? 1: ($this->empleado->dias_trabajados - floor($this->empleado->dias_trabajados));
+    $septimo = $this->empleado->salario_diario * $dias;
+    $sueldo = $this->empleado->nomina->sueldo - $septimo;
+    $premioPuntualidad = $sueldo * ($this->empresaConfig->puntualidad / 100);
     $premioPuntualidad = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioPuntualidad;
 
     return array(
@@ -688,7 +691,10 @@ class nomina
    */
   public function pPremioAsistencia()
   {
-    $premioAsistencia = $this->empleado->nomina->sueldo * ($this->empresaConfig->asistencia / 100);
+    $dias = $this->empleado->dias_trabajados==7? 1: ($this->empleado->dias_trabajados - floor($this->empleado->dias_trabajados));
+    $septimo = $this->empleado->salario_diario * $dias;
+    $sueldo = $this->empleado->nomina->sueldo - $septimo;
+    $premioAsistencia = $sueldo * ($this->empresaConfig->asistencia / 100);
     $premioAsistencia = $this->empleado->ttipo_nnomina == 'quincena'? 0: $premioAsistencia;
 
     return array(
