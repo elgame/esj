@@ -2327,14 +2327,6 @@ class bascula extends MY_Controller {
     // )->row()->fecha_pago;
 
     $this->bascula_model->pagarBoleta($_GET['idb']);
-    $this->bascula_model->logBitacora(
-      true,
-      $_GET['idb'],
-      array('accion' => 'p', 'fecha_pago' => date("Y-m-d H:i:s")),
-      $this->session->userdata['id_usuario'],
-      null,
-      false
-    );
 
     echo json_encode(array('passes' => true));
   }

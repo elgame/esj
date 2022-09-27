@@ -3635,7 +3635,26 @@ class bascula_model extends CI_Model {
 
   public function pagarBoleta($idBascula)
   {
-    $this->db->update('bascula', array('accion' => 'p', 'fecha_pago' => date("Y-m-d H:i:s")), array('id_bascula' => $idBascula));
+    $bascula = $this->getBasculaInfo($idBascula, 0, $basic_info=true, [], $idBascula);
+    if ($bascula['info'][0]->accion == 'p') {
+      $accion = 'sa';
+      $fecha = null;
+    } else {
+      $accion = 'p';
+      $fecha = date("Y-m-d H:i:s");
+    }
+
+    $this->bascula_model->logBitacora(
+      true,
+      $idBascula,
+      array('accion' => $accion, 'fecha_pago' => $fecha),
+      $this->session->userdata['id_usuario'],
+      null,
+      false
+    );
+
+    $this->db->update('bascula', array('accion' => $accion, 'fecha_pago' => $fecha), array('id_bascula' => $idBascula));
+
   }
 
   public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true, $new = false)

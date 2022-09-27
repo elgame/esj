@@ -1318,7 +1318,7 @@ class cuentas_pagar_model extends privilegios_model{
     $pdf->Row(array(
       "Factura: {$res['cobro'][0]->serie}{$res['cobro'][0]->folio}",
       "Fecha: {$res['cobro'][0]->fecha}",
-      "Total: ".number_format($res['cobro'][0]->total)
+      "Total: ".number_format($res['cobro'][0]->total, 2)
     ), false, false);
 
     $pdf->SetAligns(array('L', 'L', 'L'));
@@ -1331,7 +1331,7 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->Row(array(
         $value->fecha,
         $value->concepto,
-        '$'.number_format($value->abono)
+        '$'.number_format($value->abono, 2)
       ), false, true);
     }
 
@@ -1340,7 +1340,7 @@ class cuentas_pagar_model extends privilegios_model{
     $pdf->SetTextColor(0,0,0);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(205));
-    $pdf->Row(array("Saldo: $".number_format($res['saldo'])), false, false);
+    $pdf->Row(array("Saldo: $".number_format($res['saldo'], 2)), false, false);
 
     $pdf->Output('cuentas_proveedor.pdf', 'I');
   }

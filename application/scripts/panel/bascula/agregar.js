@@ -816,11 +816,12 @@ $(function(){
 
   $('#pstatus').on('click', function(event) {
 
-    var $this = $(this);
+    var $this = $(this),
+    $pagada = $this.hasClass('active');
 
-    if ($this.hasClass('active') === false) {
+    // if ($pagada === false) {
 
-      msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+      msb.confirm('Estas seguro de ' + ($pagada? 'quitar el pago a': 'pagar') + ' la boleta?', 'Bascula', this, function($this, $obj)
       {
         console.log('test', parseInt($('#pidb').val()));
         if ((parseInt($('#pidb').val())||0) > 0) {
@@ -829,7 +830,7 @@ $(function(){
             url: base_url + 'panel/bascula/ajax_pagar_boleta/',
             type: 'get',
             dataType: 'json',
-            data: {idb: $('#pidb').val()},
+            data: { idb: $('#pidb').val(), pagada: $pagada },
           })
           .done(function() {
             // location.reload();
@@ -841,7 +842,7 @@ $(function(){
       }, function () {
         $('#pstatus').trigger('click');
       });
-    }
+    // }
 
   });
 
