@@ -1357,9 +1357,9 @@ class caja_chica_model extends CI_Model {
             'id_rancho'       => (!empty($data['reposicionGasto_ranchoId'][$key])? $data['reposicionGasto_ranchoId'][$key]: NULL),
             'id_centro_costo' => (!empty($data['reposicionGasto_centroCostoId'][$key])? $data['reposicionGasto_centroCostoId'][$key]: NULL),
             'id_activo'       => (!empty($data['reposicionGasto_activoId'][$key])? $data['reposicionGasto_activoId'][$key]: NULL),
-            'fecha_compro_gasto' => (!empty($data['reposicionGasto_fechaComproGasto'][$key])?
-                                      $data['reposicionGasto_fechaComproGasto'][$key]:
-                                      ($data['reposicionGasto_reposicion'][$key]=='t'? $data['fecha_caja_chica']: NULL)),
+            // 'fecha_compro_gasto' => (!empty($data['reposicionGasto_fechaComproGasto'][$key])?
+            //                           $data['reposicionGasto_fechaComproGasto'][$key]:
+            //                           ($data['reposicionGasto_reposicion'][$key]=='t'? $data['fecha_caja_chica']: NULL)),
           );
 
           // Bitacora
