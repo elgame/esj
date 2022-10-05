@@ -4544,7 +4544,7 @@ class caja_chica_model extends CI_Model {
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
         </tr>';
       }
-      if ($totalDeudores > 0) {
+      if ($caja['gastosAcumuladosCaja1'] > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
           <td style="border:1px solid #000;background-color: #cccccc;">TOTAL GASTOS (+)</td>
