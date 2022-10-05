@@ -2508,7 +2508,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY() - 2);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FECHA IMPRESION ' . MyString::fechaAT(Date("Y-m-d"))), false, false);
+    $pdf->Row(array('IMPRESION ' . MyString::fechaAT(Date("Y-m-d")). ' '.Date("H:i")), false, false);
 
     // Saldo inicial
     $pdf->SetXY(6, $pdf->GetY() + 3);
