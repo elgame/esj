@@ -3740,10 +3740,10 @@ class caja_chica_model extends CI_Model {
   }
 
   public function xlsCaja($fecha, $noCajas){
-    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    // header("Content-Disposition: attachment; filename=caja_chica.xls");
-    // header("Pragma: no-cache");
-    // header("Expires: 0");
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=caja_chica.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
     $this->load->model('compras_areas_model');
     $this->load->model('catalogos_sft_model');
