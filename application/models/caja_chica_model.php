@@ -3740,10 +3740,10 @@ class caja_chica_model extends CI_Model {
   }
 
   public function xlsCaja($fecha, $noCajas){
-    header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=caja_chica.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    // header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    // header("Content-Disposition: attachment; filename=caja_chica.xls");
+    // header("Pragma: no-cache");
+    // header("Expires: 0");
 
     $this->load->model('compras_areas_model');
     $this->load->model('catalogos_sft_model');
@@ -4520,38 +4520,45 @@ class caja_chica_model extends CI_Model {
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
         </tr>';
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
         </tr>';
 
       if ($totalDeudores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
         </tr>';
       }
       if ($totalAcreedores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES (-)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
         </tr>';
       }
-      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      if ($totalDeudores > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL GASTOS (+)</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($caja['gastosAcumuladosCaja1']), 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
           <td style="border:1px solid #000;background-color: #cccccc;">SALDO EFECTIVO</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($saldoEfectivo, 2, '$', false).'</td>
         </tr>';
 
-      $pdf->SetY($pdf->GetY()+5);
       if ($totalIngresos > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
