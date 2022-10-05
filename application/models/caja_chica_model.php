@@ -4473,7 +4473,7 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 1) {
       $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
       $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
-      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
 
       $html .= '<tr style="font-weight:bold">
