@@ -11,6 +11,7 @@ class existencias_limon extends MY_Controller {
     'existencias_limon/ajax_get_categorias/',
     'existencias_limon/cerrar_caja/',
     'existencias_limon/print_caja/',
+    'existencias_limon/print_caja2/',
     'existencias_limon/rpt_gastos_pdf/',
     'existencias_limon/rpt_gastos_xls/',
     'existencias_limon/rpt_ingresos_pdf/',
@@ -176,6 +177,12 @@ class existencias_limon extends MY_Controller {
   {
     $this->load->model('existencias_limon_model');
     $this->existencias_limon_model->printCaja($_GET['ffecha'], $_GET['fno_caja'], $_GET['farea']);
+  }
+
+  public function print_caja2()
+  {
+    $this->load->model('existencias_limon_model');
+    $this->existencias_limon_model->printCaja2($_GET['ffecha'], $_GET['fno_caja'], $_GET['farea']);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')
