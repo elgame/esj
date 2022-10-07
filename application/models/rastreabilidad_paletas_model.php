@@ -374,7 +374,7 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $no_remisionar = false;
     foreach ($datos as $key => $value) {
       if (($value->id_empresa == 2 || $value->id_empresa == 3 || $value->id_empresa == 7 || $value->id_empresa == 15 || $value->id_empresa == 13)) {
-        if (strpos($value->clasificacion, 'EXPORTACION') !== false) {
+        if (strpos($value->clasificacion, 'LIMON VERDE') !== false) {
           if (strpos($value->cliente, 'SAN JORGE PRODUCE') === false) {
             $no_remisionar = true;
           }

@@ -338,7 +338,7 @@ class rastreabilidad_paletas extends MY_Controller {
             }
           }
         } else { // exportacion
-          $tipo_val = $this->input->post('tipoNP') == 'si'? 'CONVENCIONAL': 'EXPORTACION';
+          $tipo_val = $this->input->post('tipoNP') == 'si'? 'CONVENCIONAL': 'LIMON VERDE';
           foreach ($_POST['pallets_id'] as $key => $value) {
             if ($value > 0) {
               $idss[] = $value;
