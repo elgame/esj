@@ -1,4 +1,9 @@
 
+ ☐ Reporte de existencia nuevo reporte como el del correo
+     autenticacion bioetrico
+      vb, c#
+      Reporte de asistencia, cargar las fotos de las checadas
+      asistencias cargadas desde la base de datos
  ✔ Bascula poner quien cierra la boleta @done (22-09-21 17:11)
    -- lap|san
    COMMENT ON COLUMN public.bascula.id_usuario IS 'usuario que registro la boleta';
