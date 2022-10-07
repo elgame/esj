@@ -358,17 +358,29 @@ class rastreabilidad_paletas_model extends privilegios_model {
     $result = $this->db->query("SELECT ps.id_paleta_salida, ps.id_empresa,
         psp.id_cliente, psp.id_clasificacion, psp.clasificacion, psp.id_unidad,
         psp.unidad, Sum(psp.cantidad) AS cantidad, Sum(psp.kilos) AS kilos,
-        (Sum(u.cantidad)/Coalesce(NULLIF(Count(u.cantidad), 0), 1)) AS cantidad_c
+        (Sum(u.cantidad)/Coalesce(NULLIF(Count(u.cantidad), 0), 1)) AS cantidad_c,
+        Upper(c.nombre_fiscal) AS cliente
       FROM otros.paletas_salidas ps
         INNER JOIN otros.paletas_salidas_productos psp ON ps.id_paleta_salida = psp.id_paleta_salida
         INNER JOIN unidades u ON u.id_unidad = psp.id_unidad
+        INNER JOIN clientes c ON c.id_cliente = psp.id_cliente
       WHERE ps.id_paleta_salida =  {$id_paleta}
-      GROUP BY ps.id_paleta_salida, psp.id_cliente, psp.id_clasificacion, psp.clasificacion, psp.id_unidad, psp.unidad
+      GROUP BY ps.id_paleta_salida, psp.id_cliente, psp.id_clasificacion,
+        psp.clasificacion, psp.id_unidad, psp.unidad, c.nombre_fiscal
       ORDER BY id_cliente ASC");
 
     $datos = $result->result();
     $remisiones = [];
+    $no_remisionar = false;
     foreach ($datos as $key => $value) {
+      if (($value->id_empresa == 2 || $value->id_empresa == 3 || $value->id_empresa == 7 || $value->id_empresa == 15 || $value->id_empresa == 13)) {
+        if (strpos($value->clasificacion, 'EXPORTACION') !== false) {
+          if (strpos($value->cliente, 'SAN JORGE PRODUCE') === false) {
+            $no_remisionar = true;
+          }
+        }
+      }
+
       if (!isset($remisiones[$value->id_cliente])) {
         $cfdi_ext = [
           'tipoDeComprobante' => 'I',
@@ -467,9 +479,14 @@ class rastreabilidad_paletas_model extends privilegios_model {
       ];
     }
 
-    $this->load->model('ventas_model');
-    $this->ventas_model->addNotaVentaData($remisiones);
-    $this->db->update('otros.paletas_salidas', ['status' => 'f'], "id_paleta_salida = {$id_paleta}");
+    if (!$no_remisionar) {
+      $this->load->model('ventas_model');
+      $this->ventas_model->addNotaVentaData($remisiones);
+      $this->db->update('otros.paletas_salidas', ['status' => 'f'], "id_paleta_salida = {$id_paleta}");
+      return ['status' => true, 'msg' => '6'];
+    } else {
+      return ['status' => false, 'msg' => '9'];
+    }
   }
 
   public function paleta_pdf($id_paleta, $pdf=null){

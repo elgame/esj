@@ -5,7 +5,7 @@
       Reporte de asistencia, cargar las fotos de las checadas
       asistencias cargadas desde la base de datos
  ✔ Bascula poner quien cierra la boleta @done (22-09-21 17:11)
-   -- lap|san
+   -- lap|san|pcc
    COMMENT ON COLUMN public.bascula.id_usuario IS 'usuario que registro la boleta';
    ALTER TABLE public.bascula ADD COLUMN id_usuario_cerro bigint;
    COMMENT ON COLUMN public.bascula.id_usuario_cerro IS 'usuario que cerro la boleta';
@@ -14,7 +14,7 @@
  ✔ Poner opcion de imprimir historial de abonos en cuentas por pagar de una factura (abonos) @done (22-09-21 14:05)
  ☐ Buscar bascula, buscar lectores
  ✔ Validar exportacion y nacional en papeletas de salida @done (22-09-07 20:11)
-   --san|lap
+   --san|lap|pcc
    ALTER TABLE public.bascula_pagos ADD COLUMN created_at timestamp without time zone DEFAULT now();
  ☐ poner limite de credito en clientes y validar al hacer facturas o remisiones
  ✔ Reporte cuentas por cobrar, pendientes por cobrar, meter columna saldo vencido y dias de credito @done (22-07-13 10:16)

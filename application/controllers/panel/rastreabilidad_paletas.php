@@ -173,8 +173,8 @@ class rastreabilidad_paletas extends MY_Controller {
   public function remisionar()
   {
     $this->load->model('rastreabilidad_paletas_model');
-    $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
-    redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
+    $result = $this->rastreabilidad_paletas_model->remisionarPapeleta($this->input->get('id'));
+    redirect(base_url('panel/rastreabilidad_paletas/?'.MyString::getVarsLink(array('msg')).'&msg='.$result['msg']));
   }
 
   /**
@@ -406,6 +406,10 @@ class rastreabilidad_paletas extends MY_Controller {
         break;
       case 8:
         $txt = 'La papeleta de salida se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $icono = 'error';
+        break;
+      case 9:
+        $txt = 'Se esta intentando remisionar exportación a un cliente diferente de SAN JORGE PRODUCE';
         $icono = 'error';
         break;
     }

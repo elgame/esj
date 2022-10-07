@@ -1894,6 +1894,1011 @@ class existencias_limon_model extends CI_Model {
 
   }
 
+  public function printCaja2($fecha, $noCajas, $id_area)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $caja = $this->get($fecha, $noCajas, $id_area);
+
+    // echo "<pre>";
+    //   var_dump($caja);
+    // echo "</pre>";exit;
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+    $pdf->titulo2 = "REPORTES RENDIMIENTOS DE LIMON";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->limiteY = 235; //limite de alto
+
+    // Reporte caja
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(240, 240, 240);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array($pdf->titulo2), true, true, null, 3);
+
+    $pdf->Image(APPPATH.(str_replace(APPPATH, '', '/images/logo.png')), 6, 15, 50);
+    $pdf->Ln(20);
+
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+
+    // Fecha
+    $pdf->SetXY(6, $pdf->GetY() - 20);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array(MyString::dia($fecha) . ': ' . MyString::fechaATexto($fecha, '/c')), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $fechaTime = new DateTime($fecha);
+    // Obtiene la semana [01 - 52/53] y el dia de la semana [1 - 7]
+    $pdf->Row(array('SEMANA ' . $fechaTime->format("W")), false, false);
+
+    $pdf->auxy = $pdf->GetY();
+    $page_aux = $pdf->page;
+
+
+    // Existencia Anterior
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, 32);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // $pdf->Row(array('EXISTENCIA ANTERIOR'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(54, 30, 20, 20, 18, 18, 22));
+    $pdf->Row(array('EXISTENCIA ANTERIOR', 'CALIBRE', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), true, 'B');
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 20, 20, 18, 18, 22));
+
+    $existencia_ant_kilos = $existencia_ant_cantidad = $existencia_ant_importe = 0;
+    foreach ($caja['existencia_anterior'] as $existencia_ant) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existencia_ant_kilos    += floatval($existencia_ant->kilos);
+      $existencia_ant_cantidad += floatval($existencia_ant->cantidad);
+      $existencia_ant_importe  += floatval($existencia_ant->importe);
+
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        $existencia_ant->calibre,
+        // $existencia_ant->clasificacion,
+        $existencia_ant->unidad,
+        MyString::formatoNumero($existencia_ant->kilos, 2, '', false),
+        MyString::formatoNumero($existencia_ant->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia_ant->costo, 2, '', false),
+        MyString::formatoNumero($existencia_ant->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(60);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($existencia_ant_kilos, 2, '', false),
+      MyString::formatoNumero($existencia_ant_cantidad, 2, '', false),
+      MyString::formatoNumero(($existencia_ant_importe/($existencia_ant_cantidad==0? 1: $existencia_ant_cantidad)), 2, '', false),
+      MyString::formatoNumero($existencia_ant_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('EXIST ANT'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($existencia_ant_importe, 2, '', false)), false, 'B');
+
+
+    // COMPARA DE LIMON
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // $pdf->Row(array('COMPRA DE FRUTA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(54, 38, 20, 20, 20, 30));
+    $pdf->Row(array('MATERIA PRIMA:', 'CALIBRE', 'KILOS', 'CAJAS', 'PRECIO', 'IMPORTE'), true, 'B');
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(38, 20, 20, 20, 30));
+
+    $compra_fruta_kilos = $compra_fruta_cajas = $compra_fruta_importe = 0;
+    foreach ($caja['compra_fruta'] as $com_fruta) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $compra_fruta_kilos += floatval($com_fruta->kilos);
+      $compra_fruta_cajas += floatval(0);
+      $compra_fruta_importe += floatval($com_fruta->importe);
+
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        $com_fruta->calidad,
+        MyString::formatoNumero($com_fruta->kilos, 2, '', false),
+        MyString::formatoNumero('0', 2, '', false),
+        MyString::formatoNumero($com_fruta->precio, 2, '', false),
+        MyString::formatoNumero($com_fruta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(60);
+    $pdf->Row(array(
+      '',
+      MyString::formatoNumero($compra_fruta_kilos, 2, '', false),
+      MyString::formatoNumero($compra_fruta_cajas, 2, '', false),
+      MyString::formatoNumero(($compra_fruta_importe/($compra_fruta_kilos==0? 1: $compra_fruta_kilos)), 2, '', false),
+      MyString::formatoNumero($compra_fruta_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('COMPRAS'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($compra_fruta_importe, 2, '', false)), false, 'B');
+
+
+    // Compra de fruta empacada
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // $pdf->Row(array('COMPRA DE FRUTA EMPACADA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
+    $pdf->Row(array('COMPRA DE FRUTA EMPACADA', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
+
+    $frutaCompra_kilos = $frutaCompra_cantidad = $frutaCompra_importe = 0;
+    foreach ($caja['compra_fruta_empacada'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $frutaCompra_kilos    += floatval($existencia->kilos);
+      $frutaCompra_cantidad += floatval($existencia->cantidad);
+      $frutaCompra_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(60);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($frutaCompra_kilos, 2, '', false),
+      MyString::formatoNumero($frutaCompra_cantidad, 2, '', false),
+      MyString::formatoNumero(($frutaCompra_importe/($frutaCompra_cantidad==0? 1: $frutaCompra_cantidad)), 2, '', false),
+      MyString::formatoNumero($frutaCompra_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('COMPRAS'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($frutaCompra_importe, 2, '', false)), false, 'B');
+
+
+    // Devolucion de fruta
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(204));
+    // $pdf->Row(array('DEVOLUCIÓN DE FRUTA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(54, 30, 20, 18, 18, 18, 24));
+    $pdf->Row(array('DEVOLUCIÓN DE FRUTA', 'CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), true, 'B');
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 20, 18, 18, 18, 24));
+
+    $devFruta_kilos = $devFruta_cantidad = $devFruta_importe = 0;
+    foreach ($caja['devolucion_fruta'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $devFruta_kilos    += floatval($existencia->kilos);
+      $devFruta_cantidad += floatval($existencia->cantidad);
+      $devFruta_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(60);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(60);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($devFruta_kilos, 2, '', false),
+      MyString::formatoNumero($devFruta_cantidad, 2, '', false),
+      MyString::formatoNumero(($devFruta_importe/($devFruta_cantidad==0? 1: $devFruta_cantidad)), 2, '', false),
+      MyString::formatoNumero($devFruta_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('DEVOLUCIÓN'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($devFruta_importe, 2, '', false)), false, 'B');
+
+
+    // Ventas
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('VENTAS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'BULTOS', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+
+    $venta_importe = $venta_kilos = $venta_cantidad = 0;
+    foreach ($caja['ventas'] as $venta) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $venta_importe += floatval($venta->importe);
+      $venta_kilos += floatval($venta->kilos);
+      $venta_cantidad += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->no_salida_fruta,
+        $venta->nombre_fiscal,
+        $venta->calibre,
+        $venta->clasificacion,
+        $venta->unidad,
+        MyString::formatoNumero($venta->kilos, 2, '', false),
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      MyString::formatoNumero($venta_kilos, 2, '', false),
+      MyString::formatoNumero($venta_cantidad, 2, '', false),
+      MyString::formatoNumero(($venta_importe/($venta_cantidad==0? 1: $venta_cantidad)), 2, '', false),
+      MyString::formatoNumero($venta_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // Existencia
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('EXISTENCIA EMPACADA'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+
+    $existencia_kilos = $existencia_cantidad = $existencia_importe = 0;
+    foreach ($caja['existencia'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existencia_kilos    += floatval($existencia->kilos);
+      $existencia_cantidad += floatval($existencia->cantidad);
+      $existencia_importe  += floatval($existencia->importe);
+
+      if ($existencia->cantidad != 0 ) {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $existencia->calibre,
+          $existencia->clasificacion,
+          $existencia->unidad,
+          MyString::formatoNumero($existencia->kilos, 2, '', false),
+          MyString::formatoNumero($existencia->cantidad, 2, '', false),
+          MyString::formatoNumero($existencia->costo, 2, '', false),
+          MyString::formatoNumero($existencia->importe, 2, '', false),
+        ), false, 'B');
+      }
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      MyString::formatoNumero($existencia_kilos, 2, '', false),
+      MyString::formatoNumero($existencia_cantidad, 2, '', false),
+      MyString::formatoNumero(($existencia_importe/($existencia_cantidad==0? 1: $existencia_cantidad)), 2, '', false),
+      MyString::formatoNumero($existencia_importe, 2, '', false),
+    ), false, 'B');
+
+    // Existencia de piso
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('EXISTENCIA DE PISO'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $existenciaPiso_kilos = $existenciaPiso_cantidad = $existenciaPiso_importe = 0;
+    foreach ($caja['existencia_piso'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existenciaPiso_kilos    += floatval($existencia->kilos);
+      $existenciaPiso_cantidad += floatval($existencia->cantidad);
+      $existenciaPiso_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($existenciaPiso_kilos, 2, '', false),
+      MyString::formatoNumero($existenciaPiso_cantidad, 2, '', false),
+      MyString::formatoNumero(($existenciaPiso_importe/($existenciaPiso_cantidad==0? 1: $existenciaPiso_cantidad)), 2, '', false),
+      MyString::formatoNumero($existenciaPiso_importe, 2, '', false),
+    ), false, 'B');
+
+    // EXISTENCIA REPROCESO
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('EXISTENCIA REPROCESO'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'CANTIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(65, 30, 25, 25, 25, 35));
+
+    $existenciaRePro_kilos = $existenciaRePro_cantidad = $existenciaRePro_importe = 0;
+    foreach ($caja['existencia_reproceso'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $existenciaRePro_kilos    += floatval($existencia->kilos);
+      $existenciaRePro_cantidad += floatval($existencia->cantidad);
+      $existenciaRePro_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->calibre,
+        $existencia->unidad,
+        MyString::formatoNumero($existencia->kilos, 2, '', false),
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($existenciaRePro_kilos, 2, '', false),
+      MyString::formatoNumero($existenciaRePro_cantidad, 2, '', false),
+      MyString::formatoNumero(($existenciaRePro_importe/($existenciaRePro_cantidad==0? 1: $existenciaRePro_cantidad)), 2, '', false),
+      MyString::formatoNumero($existenciaRePro_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // Produccion
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COSTO DE PRODUCCIÓN'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array( 30, 65, 20, 20, 20, 20, 30));
+    $pdf->Row(array('CALIBRE', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(30, 65, 20, 20, 20, 20, 30));
+
+    $produccion_kilos = $produccion_cantidad = $produccion_importe = 0;
+    foreach ($caja['produccion'] as $produccion) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $produccion_kilos    += floatval($produccion->kilos);
+      $produccion_cantidad += floatval($produccion->cantidad);
+      $produccion_importe  += floatval($produccion->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $produccion->calibre,
+        $produccion->clasificacion,
+        $produccion->unidad,
+        MyString::formatoNumero($produccion->kilos, 2, '', false),
+        MyString::formatoNumero($produccion->cantidad, 2, '', false),
+        MyString::formatoNumero($produccion->costo, 2, '', false),
+        MyString::formatoNumero($produccion->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      MyString::formatoNumero($produccion_kilos, 2, '', false),
+      MyString::formatoNumero($produccion_cantidad, 2, '', false),
+      MyString::formatoNumero(($produccion_importe/($produccion_cantidad==0? 1: $produccion_cantidad)), 2, '', false),
+      MyString::formatoNumero($produccion_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // COSTO DE VENTAS
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COSTO DE VENTAS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C'));
+    $pdf->SetWidths(array(75, 95, 35));
+    $pdf->Row(array('NOMBRE', 'DESCRIPCION', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(75, 95, 35));
+
+    $costoVentas_importe = 0;
+    foreach ($caja['costo_ventas'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $costoVentas_importe += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->nombre,
+        $existencia->descripcion,
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($costoVentas_importe, 2, '', false),
+    ), false, 'B');
+
+    // FLETES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+1);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('FLETES'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
+    $pdf->Row(array('FOLIO', 'PROVEEDOR', 'CANTIDAD', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R'));
+    $pdf->SetWidths(array(25, 100, 40, 40));
+
+    $descuentoVentasFletes_cantidad = $descuentoVentasFletes_importe = 0;
+    foreach ($caja['costo_ventas_fletes'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY) {
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $descuentoVentasFletes_cantidad += floatval($existencia->cantidad);
+      $descuentoVentasFletes_importe += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->folio,
+        $existencia->proveedor,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($descuentoVentasFletes_cantidad, 2, '', false),
+      MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // COMISIONES A TERCEROS
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('COMISIONES A TERCEROS'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(50, 65, 30, 30, 30));
+    $pdf->Row(array('NOMBRE', 'DESCRIPCION', 'CANTIDAD', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(50, 65, 30, 30, 30));
+
+    $comisionTerceros_cantidad = $comisionTerceros_importe = 0;
+    foreach ($caja['comision_terceros'] as $existencia) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $comisionTerceros_cantidad  += floatval($existencia->cantidad);
+      $comisionTerceros_importe  += floatval($existencia->importe);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $existencia->nombre,
+        $existencia->descripcion,
+        MyString::formatoNumero($existencia->cantidad, 2, '', false),
+        MyString::formatoNumero($existencia->costo, 2, '', false),
+        MyString::formatoNumero($existencia->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($comisionTerceros_cantidad, 2, '', false),
+      MyString::formatoNumero(($comisionTerceros_importe/($comisionTerceros_cantidad>0? $comisionTerceros_cantidad: 1)), 2, '', false),
+      MyString::formatoNumero($comisionTerceros_importe, 2, '', false),
+    ), false, 'B');
+
+
+    // Ventas industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('VENTAS INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(18, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+    $pdf->Row(array('FOLIO', 'SF', 'CLIENTE', 'CALIBRE PROD.', 'CLASIF', 'UNIDAD', 'KILOS', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(20, 18, 35, 20, 27, 16, 18, 18, 12, 20));
+
+    $venta_importe_ind = $venta_kilos_ind = $venta_cantidad_ind = 0;
+    foreach ($caja['ventas_industrial'] as $venta) {
+      if($pdf->GetY()+10 >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $venta_importe_ind += floatval($venta->importe);
+      $venta_kilos_ind += floatval($venta->kilos);
+      $venta_cantidad_ind += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->no_salida_fruta,
+        $venta->nombre_fiscal,
+        $venta->calibre,
+        $venta->clasificacion,
+        $venta->unidad,
+        MyString::formatoNumero($venta->kilos, 2, '', false),
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      MyString::formatoNumero($venta_kilos_ind, 2, '', false),
+      MyString::formatoNumero($venta_cantidad_ind, 2, '', false),
+      MyString::formatoNumero(($venta_importe_ind/($venta_cantidad_ind==0? 1: $venta_cantidad_ind)), 2, '', false),
+      MyString::formatoNumero($venta_importe_ind, 2, '', false),
+    ), false, 'B');
+
+
+    // industrial
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('INDUSTRIAL'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->chkSaltaPag([6, $pdf->GetY()]);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+    $pdf->Row(array('CALIBRE', 'UNIDAD', 'KILOS', 'COSTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(56, 56, 30, 30, 30));
+
+    $industrial_importe = $industrial_kilos = 0;
+    if (isset($caja['industrial']->costo)) {
+      $industrial_importe = $caja['industrial']->importe;
+      $industrial_kilos = $caja['industrial']->kilos;
+
+      $pdf->SetFont('Arial','B', 7);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '', '',
+        MyString::formatoNumero($caja['industrial']->kilos, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->costo, 2, '', false),
+        MyString::formatoNumero($caja['industrial']->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    // GASTOS GENERALES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('GASTOS GENERALES'), true, 'B');
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C'));
+    $pdf->SetWidths(array(80, 95, 30));
+    $pdf->Row(array('NOMBRE', 'CONCEPTO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(80, 95, 30));
+
+    $totalGastos = 0;
+    foreach ($caja['gastos'] as $gasto) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalGastos  += floatval($gasto->monto);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $gasto->nombre,
+        $gasto->concepto,
+        MyString::formatoNumero($gasto->monto, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      MyString::formatoNumero($totalGastos, 2, '', false),
+    ), false, 'B');
+
+
+    // TOTALES
+    $resultado_importe = $venta_importe - ($compra_fruta_importe + $existencia_ant_importe - $existencia_importe) - $produccion_importe - $frutaCompra_importe - $devFruta_importe - ($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe) + $industrial_importe;
+    $resultado_kilos = $existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos - $venta_kilos + $frutaCompra_kilos + $devFruta_kilos;
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('ESTADO DE RESULTADO'), true, 'B');
+
+    $pdf->SetXY(6, $pdf->GetY()+0.3);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 30));
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $yaux = $pdf->GetY();
+    $pageaux = $pdf->page;
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS EXISTENCIA ANTERIOR', MyString::formatoNumero($existencia_ant_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS COMPRADOS', MyString::formatoNumero($compra_fruta_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(-) KGS EXISTENCIA EMPACADA', MyString::formatoNumero($existencia_kilos, 2, '', false)), true, false);
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(=) KGS PROCESADOS', MyString::formatoNumero($existencia_ant_kilos + $compra_fruta_kilos - $existencia_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS COMPRADOS EMPACADOS', MyString::formatoNumero($frutaCompra_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(+) KGS DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('(-) KGS VENDIDOS', MyString::formatoNumero($venta_kilos, 2, '', false)), true, 'B');
+
+    ($pdf->GetY()+10 >= $pdf->limiteY)? $pdf->AddPage(): '';
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Row(array('INDUSTRIAL KGS', MyString::formatoNumero($resultado_kilos, 2, '', false)), true, 'B');
+
+    if (count($pdf->pages) > $pageaux) {
+      $pdf->page = $pageaux;
+    }
+    $pdf->SetXY(130, $yaux);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(60, 30));
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) VENTAS', MyString::formatoNumero($venta_importe, 2, '', false)), true, 'B');
+
+    $pdf->SetFont('Arial', '', 8);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) EXISTENCIA ANTERIOR', MyString::formatoNumero($existencia_ant_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COMPRA DE FRUTA', MyString::formatoNumero($compra_fruta_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) EXISTENCIA EMPACADA', MyString::formatoNumero($existencia_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COSTO DE MATERIA PRIMA', MyString::formatoNumero($compra_fruta_importe + $existencia_ant_importe - $existencia_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COSTO DE PRODUCCION', MyString::formatoNumero($produccion_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) COMPRA DE FRUTA EMPACADA', MyString::formatoNumero($frutaCompra_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) DEVOLUCION DE FRUTA', MyString::formatoNumero($devFruta_importe, 2, '', false)), true, 'B');
+
+    $pdf->SetFont('Arial', '', 8);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COSTO DE VENTAS', MyString::formatoNumero($costoVentas_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) FLETES', MyString::formatoNumero($descuentoVentasFletes_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) COMISION A TERCEROS', MyString::formatoNumero($comisionTerceros_importe, 2, '', false)), true, false);
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(-) GASTOS DE VENTAS', MyString::formatoNumero($costoVentas_importe + $descuentoVentasFletes_importe + $comisionTerceros_importe, 2, '', false)), true, 'B');
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(+) INDUSTRIAL', MyString::formatoNumero($industrial_importe, 2, '', false)), true, 'B');
+
+    $pdf->chkSaltaPag([120, 10]);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->SetXY(120, $pdf->GetY());
+    $pdf->Row(array('(=) RESULTADO DEL DIA', MyString::formatoNumero($resultado_importe, 2, '', false)), true, 'B');
+
+    $pdf->page = count($pdf->pages);
+    $pdf->Output('REPORTE_EXISTENCIAS.pdf', 'I');
+
+  }
+
 
 
 

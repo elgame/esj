@@ -2504,8 +2504,14 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(104));
     $pdf->Row(array('FECHA ' . MyString::fechaAT($fecha)), false, false);
 
+    // Fecha dia
+    $pdf->SetXY(6, $pdf->GetY() - 2);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array('IMPRESION ' . MyString::fechaAT(Date("Y-m-d")). ' '.Date("H:i")), false, false);
+
     // Saldo inicial
-    $pdf->SetXY(6, $pdf->GetY() + 5);
+    $pdf->SetXY(6, $pdf->GetY() + 3);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
@@ -4473,7 +4479,7 @@ class caja_chica_model extends CI_Model {
     if ($noCajas == 1) {
       $ttotal_parcial = ($caja['boletas_arecuperar_total'] + $caja['cheques_transito_total'] + $totalEfectivo);
       $ttotal_caja_asignada = ($ttotal_parcial - $totalAcreedores + $totalDeudores);
-      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores;
+      $totalEfectivoCorte = $caja['fondo_caja'] - $ttotal_parcial + $totalAcreedores - $totalDeudores - $caja['gastosAcumuladosCaja1'];
       $totalFondoCaja = false;
 
       $html .= '<tr style="font-weight:bold">
@@ -4520,38 +4526,45 @@ class caja_chica_model extends CI_Model {
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">SALDOS X RECUP (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['boletas_arecuperar_total'], 2, '$', false).'</td>
         </tr>';
 
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">CHEQUES EN TRANSITO (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($caja['cheques_transito_total'], 2, '$', false).'</td>
         </tr>';
 
       if ($totalDeudores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL DEUDORES (+)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalDeudores), 2, '$', false).'</td>
         </tr>';
       }
       if ($totalAcreedores > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
-          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL ACREEDORES (-)</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($totalAcreedores), 2, '$', false).'</td>
         </tr>';
       }
-      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores;
+      if ($caja['gastosAcumuladosCaja1'] > 0) {
+        $html .= '<tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="border:1px solid #000;background-color: #cccccc;">TOTAL GASTOS (+)</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($caja['gastosAcumuladosCaja1']), 2, '$', false).'</td>
+        </tr>';
+      }
+
+      $saldoEfectivo = $caja['fondo_caja'] - $caja['boletas_arecuperar_total'] - $caja['cheques_transito_total'] - $totalDeudores + $totalAcreedores - $caja['gastosAcumuladosCaja1'];
       $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
           <td style="border:1px solid #000;background-color: #cccccc;">SALDO EFECTIVO</td>
           <td style="border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero($saldoEfectivo, 2, '$', false).'</td>
         </tr>';
 
-      $pdf->SetY($pdf->GetY()+5);
       if ($totalIngresos > 0) {
         $html .= '<tr style="font-weight:bold">
           <td style="border:1px solid #000;background-color: #cccccc;"></td>
