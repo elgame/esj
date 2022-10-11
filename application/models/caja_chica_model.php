@@ -2511,7 +2511,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('IMPRESION ' . MyString::fechaAT(Date("Y-m-d")). ' '.Date("H:i")), false, false);
 
     // Saldo inicial
-    $pdf->SetXY(6, $pdf->GetY() + 3);
+    $pdf->SetXY(6, $pdf->GetY() );
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
