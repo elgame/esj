@@ -1,5 +1,22 @@
 
- ☐ Reporte de existencia nuevo reporte como el del correo
+ ☐ Reporte de existencia nuevo reporte como el del correo (Reporte de rendimiento de limon nuevo)
+   -- lap
+    ALTER TABLE public.calibres ADD COLUMN "order" integer DEFAULT 99999;
+    UPDATE calibres SET order = 1 WHERE id_calibre = 105;
+    UPDATE calibres SET order = 2 WHERE id_calibre = 106;
+    UPDATE calibres SET order = 3 WHERE id_calibre = 107;
+    UPDATE calibres SET order = 4 WHERE id_calibre = 108;
+    UPDATE calibres SET order = 5 WHERE id_calibre = 109;
+    UPDATE calibres SET order = 6 WHERE id_calibre = 110;
+    UPDATE calibres SET order = 8 WHERE id_calibre = 123;
+    UPDATE calibres SET order = 7 WHERE id_calibre = 122;
+    UPDATE calibres SET order = 6 WHERE id_calibre = 132;
+    UPDATE calibres SET order = 3 WHERE id_calibre = 128;
+    UPDATE calibres SET order = 2 WHERE id_calibre = 127;
+    UPDATE calibres SET order = 1 WHERE id_calibre = 125;
+    UPDATE calibres SET order = 9 WHERE id_calibre = 112;
+    UPDATE calibres SET order = 4 WHERE id_calibre = 113;
+    UPDATE calibres SET order = 0 WHERE id_calibre = 118;
      autenticacion bioetrico
       vb, c#
       Reporte de asistencia, cargar las fotos de las checadas

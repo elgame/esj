@@ -82,7 +82,7 @@
                   <div class="span12">Saldo Inicial <input type="text" name="saldo_inicial" value="<?php echo set_value('saldo_inicial', $caja['saldo_inicial']) ?>" id="saldo_inicial" class="input-medium vpositive" <?php echo $readonly ?>></div>
                 </div>
               </div>
-              <div class="span4">
+              <div class="span6">
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" id="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
                   <input type="hidden" name="farea" id="farea" value="<?php echo $farea; ?>">
@@ -96,7 +96,8 @@
                   <?php } ?>
 
                   <?php if ($caja['guardado']) { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/existencias_limon/print_caja?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span3"><a href="<?php echo base_url('panel/existencias_limon/print_caja2?farea='.$farea.'&'.MyString::getVarsLink(array('msg', 'farea'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir 2</a></div>
                   <?php }  ?>
                 </div>
               </div>
