@@ -176,7 +176,7 @@ class cuentas_cobrar_model extends privilegios_model{
     $showw = false;
     $first = false;
     if (is_null($pdf)) {
-      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf = new MYpdf('P', 'mm', 'Letter');
       $showw = true;
       $first = true;
     }
@@ -193,8 +193,10 @@ class cuentas_cobrar_model extends privilegios_model{
     $pdf->SetFont('Arial','',8);
 
     $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R');
-    $widths = array(85, 35, 35, 30, 30, 20, 30);
-    $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Vencido', 'Dias Cred.', 'Saldo TC');
+    $widths = array(75, 30, 30, 25, 25, 15, 30);
+    $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Vencido', 'D. Cred.',
+      // 'Saldo TC'
+    );
 
     $res = $this->getCuentasCobrarData(9999999999);
 
@@ -228,7 +230,7 @@ class cuentas_cobrar_model extends privilegios_model{
           MyString::formatoNumero($item->saldo, 2, '$', false),
           MyString::formatoNumero($item->vencidas, 2, '$', false),
           MyString::formatoNumero($item->plazo_credito, 0, '', false),
-          MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
+          // MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
           );
         $total_cargos += $item->total;
         $total_abonos += $item->abonos;
@@ -242,23 +244,23 @@ class cuentas_cobrar_model extends privilegios_model{
         $pdf->Row($datos, false);
       }
 
-      $pdf->SetFont('Arial','',8);
-      $pdf->SetTextColor(0,0,0);
-      $datos = array($item->nombre,
-        MyString::formatoNumero($item->total, 2, '$', false),
-        MyString::formatoNumero($item->abonos, 2, '$', false),
-        MyString::formatoNumero($item->saldo, 2, '$', false),
-        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
-        );
-      $total_cargos += $item->total;
-      $total_abonos += $item->abonos;
-      $total_saldo += $item->saldo;
-      $total_saldo_cambio += $item->saldo_cambio;
+      // $pdf->SetFont('Arial','',8);
+      // $pdf->SetTextColor(0,0,0);
+      // $datos = array($item->nombre,
+      //   MyString::formatoNumero($item->total, 2, '$', false),
+      //   MyString::formatoNumero($item->abonos, 2, '$', false),
+      //   MyString::formatoNumero($item->saldo, 2, '$', false),
+      //   // MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
+      //   );
+      // $total_cargos += $item->total;
+      // $total_abonos += $item->abonos;
+      // $total_saldo += $item->saldo;
+      // $total_saldo_cambio += $item->saldo_cambio;
 
-      $pdf->SetX(6);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-      $pdf->Row($datos, false);
+      // $pdf->SetX(6);
+      // $pdf->SetAligns($aligns);
+      // $pdf->SetWidths($widths);
+      // $pdf->Row($datos, false);
     }
 
     $pdf->SetFillColor(160,160,160);
@@ -273,11 +275,24 @@ class cuentas_cobrar_model extends privilegios_model{
       MyString::formatoNumero($total_saldo, 2, '$', false),
       MyString::formatoNumero($total_vencido, 2, '$', false),
       '',
-      MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
+      // MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
 
 
+      if ($this->input->get('did_empresa') == 11 &&
+        $this->input->get('ffecha1') == $this->input->get('ffecha2') &&
+        $this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/show_totales_c/')) { // ESJ BODEGA
+        $this->load->model('bodega_guadalajara_model');
+        $caja = $this->bodega_guadalajara_model->printCaja($this->input->get('ffecha1'), 1, true);
+
+        $pdf->SetTextColor(0,0,0);
+        if ($pdf->GetY() > 200) {
+          $pdf->AddPage();
+        }
+        $this->bodega_guadalajara_model->printEstadoResultado($pdf, $caja['estadoResult'], 10);
+      }
     if ($showw) {
+
       $pdf->Output('cuentas_x_cobrar.pdf', 'I');
     } else {
       return $pdf;
