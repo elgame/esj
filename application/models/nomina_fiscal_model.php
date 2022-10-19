@@ -3575,7 +3575,8 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 0);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(35, 35, 25, 35, 70));
-          $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $empleado->dias_trabajados * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
+          $dias_reales = $empleado->dias_trabajados == 7? 6: intval($empleado->dias_trabajados);
+          $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $dias_reales * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
