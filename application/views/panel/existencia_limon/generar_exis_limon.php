@@ -611,6 +611,7 @@
                               <th colspan="4">COMPRA DE LIMON</th>
                             </tr>
                             <tr>
+                              <th>EMPRESA</th>
                               <th>CALIDAD</th>
                               <th>KILOS</th>
                               <th>PRECIO</th>
@@ -625,6 +626,7 @@
                                   $compra_fruta_importe += floatval($com_fruta->importe);
                             ?>
                                 <tr>
+                                  <td><?php echo $com_fruta->nombre_fiscal ?></td>
                                   <td><?php echo $com_fruta->calidad ?></td>
                                   <td><?php echo $com_fruta->kilos ?></td>
                                   <td><?php echo $com_fruta->precio ?></td>

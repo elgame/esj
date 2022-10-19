@@ -150,20 +150,18 @@ class existencias_limon_model extends CI_Model {
 
 
     $compra_fruta = $this->db->query(
-      "SELECT -- b.folio,
-        -- pr.nombre_fiscal,
+      "SELECT e.nombre_fiscal,
         c.id_calidad, c.nombre AS calidad, Sum(bc.kilos) AS kilos,
-        (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe, (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
+        (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe,
+        (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
       FROM bascula b
         INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
         INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
-        --INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-      WHERE b.id_empresa = {$id_empresa} AND b.status = 't' AND b.intangible = 'f'
+        INNER JOIN empresas e ON e.id_empresa = b.id_empresa
+      WHERE b.id_empresa in({$id_empresa}, 15) AND b.status = 't' AND b.intangible = 'f'
         AND b.id_area = {$id_area} AND Date(b.fecha_bruto) = '{$fecha}'
         AND b.id_bonificacion IS NULL
-      GROUP BY --b.id_bascula,
-        c.id_calidad
-        --, pr.id_proveedor
+      GROUP BY c.id_calidad, e.id_empresa
       ORDER BY id_calidad ASC"
     );
 
