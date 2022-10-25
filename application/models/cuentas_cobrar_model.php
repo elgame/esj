@@ -289,7 +289,13 @@ class cuentas_cobrar_model extends privilegios_model{
         if ($pdf->GetY() > 200) {
           $pdf->AddPage();
         }
+        $auxp = $pdf->page;
+        $auxy = $pdf->GetY();
         $this->bodega_guadalajara_model->printEstadoResultado($pdf, $caja['estadoResult'], 10);
+        $pdf->page = $auxp;
+        $this->bodega_guadalajara_model->printGastosDiaArea($pdf, $caja, 90, $auxy);
+        $this->bodega_guadalajara_model->printIngresosDia($pdf, $caja, 90);
+        $this->bodega_guadalajara_model->printCorteCaja($pdf, $caja, 90);
       }
     if ($showw) {
 
