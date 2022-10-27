@@ -22,6 +22,7 @@ class rastreabilidad extends MY_Controller {
 
     'rastreabilidad/rpl_pdf/',
     'rastreabilidad/rrs_pdf/',
+    'rastreabilidad/rrs_xls/',
     'rastreabilidad/ajax_get_lotes/',
     'rastreabilidad/rrl_pdf/',
     'rastreabilidad/rrl_xls/',
@@ -440,6 +441,14 @@ class rastreabilidad extends MY_Controller {
     {
       $this->load->model('rastreabilidad_model');
       $this->rastreabilidad_model->rrs_pdf();
+    }
+  }
+  public function rrs_xls()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['flotes']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrsXls();
     }
   }
 

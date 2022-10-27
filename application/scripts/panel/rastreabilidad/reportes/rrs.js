@@ -16,6 +16,19 @@ $(function(){
     }
   });
 
+  $('#form-search').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          farea: $("#farea").val(),
+          flotes: $("#flotes").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   $('#frmventasdia').on('submit', function(event) {
     var linkDownXls = $("#linkDownXls"),
         url = {
