@@ -99,5 +99,35 @@ $(function(){
       });
     });
   }
+
+  // Autocomplete proveedores
+  $("#dproveedor").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+
+      params.did_empresa = 2;
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_proveedor").val(ui.item.id);
+      $("#dproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#did_proveedor').val('');
+    }
+  });
 });
 
