@@ -96,6 +96,7 @@ class existencias_limon_model extends CI_Model {
     $info = array(
       'saldo_inicial'         => 0,
       'ventas'                => array(),
+      'certificados'          => array(),
       'ventas_industrial'     => array(),
       'compra_fruta'          => array(),
       'produccion'            => array(),
@@ -134,12 +135,14 @@ class existencias_limon_model extends CI_Model {
       ORDER BY folio ASC"
     );
 
+    $ids_ventas = [];
     if ($ventas->num_rows() > 0)
     {
       $info['ventas'] = $ventas->result();
 
       if ($id_area == 2) { // limon
         foreach ($info['ventas'] as $key => $value) {
+          $ids_ventas[] = $value->id_factura;
           if ($value->id_calibre == 133) { // INDUSTRIAL
             $info['ventas_industrial'][] = $value;
             unset($info['ventas'][$key]);
@@ -148,6 +151,33 @@ class existencias_limon_model extends CI_Model {
       }
     }
 
+    if (count($ids_ventas) > 0) {
+      $certificados = $this->db->query(
+        "SELECT f.id_factura, f.serie, f.folio, cl.nombre_fiscal, c.id_clasificacion,
+          c.nombre AS clasificacion, fp.cantidad, (fp.importe / fp.cantidad) AS precio,
+          fp.importe, fc.proveedores, fc.certificado, fc.no_certificado
+        FROM facturacion f
+          INNER JOIN clientes cl ON cl.id_cliente = f.id_cliente
+          INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+          INNER JOIN clasificaciones c ON c.id_clasificacion = fp.id_clasificacion
+          LEFT JOIN (
+            SELECT id_factura, id_clasificacion, STRING_AGG(Distinct p.nombre_fiscal, ',') AS proveedores,
+              STRING_AGG(Distinct fsc.certificado, ',') AS certificado,
+              STRING_AGG(Distinct fsc.no_certificado, ',') AS no_certificado
+            FROM facturacion_seg_cert fsc
+              INNER JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
+            GROUP BY id_factura, id_clasificacion
+          ) fc ON (f.id_factura = fc.id_factura AND  c.id_clasificacion = fc.id_clasificacion)
+        WHERE f.id_factura In(".implode(',', $ids_ventas).")
+        AND c.id_clasificacion in(49,52,51,53)
+        ORDER BY folio ASC"
+      );
+
+      if ($certificados->num_rows() > 0)
+      {
+        $info['certificados'] = $certificados->result();
+      }
+    }
 
     $compra_fruta = $this->db->query(
       "SELECT e.nombre_fiscal,
@@ -3622,7 +3652,66 @@ class existencias_limon_model extends CI_Model {
 
     $pdf->SetXY(188, $pdf->GetY()+21);
 
+    // Certificados
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(182));
+    $pdf->Row(array('CERTIFICADOS'), true, 'B');
 
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(22, 60, 40, 15, 20, 25));
+    $pdf->Row(array('FOLIO', 'PROVEEDORES', 'TIPO', 'CANTIDAD', 'PRECIO', 'IMPORTE'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(22, 60, 40, 15, 20, 25));
+
+    $cert_importe = $cert_kilos = $cert_cantidad = 0;
+    foreach ($caja['certificados'] as $venta) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $cert_importe += floatval($venta->importe);
+      $cert_cantidad += floatval($venta->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $venta->serie.$venta->folio,
+        $venta->proveedores,
+        $venta->clasificacion,
+        MyString::formatoNumero($venta->cantidad, 2, '', false),
+        MyString::formatoNumero($venta->precio, 2, '', false),
+        MyString::formatoNumero($venta->importe, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array(
+      '',
+      '',
+      '',
+      MyString::formatoNumero($cert_cantidad, 2, '', false),
+      MyString::formatoNumero(($cert_importe/($cert_cantidad==0? 1: $cert_cantidad)), 2, '', false),
+      MyString::formatoNumero($cert_importe, 2, '', false),
+    ), false, 'B');
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(22));
+    $pdf->SetXY(188, $pdf->GetY()-11);
+    $pdf->Row(array('CERTIFICADOS'), false, 'B');
+    $pdf->SetXY(188, $pdf->GetY());
+    $pdf->Row(array(MyString::formatoNumero($cert_importe, 2, '', false)), false, 'B');
 
 
 
