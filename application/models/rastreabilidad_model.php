@@ -1523,10 +1523,16 @@ class rastreabilidad_model extends CI_Model {
     $no_lotess = [];
     $sqllots = '';
     foreach ($response['boletas'] as $key => $value) {
-      $no_lotess[$value->no_lote] = $value->fecha_tara;
-      $sqllots .= " OR (Date(rr.fecha) = '{$value->fecha_tara}' AND rr.lote = {$value->no_lote})";
+      if (trim($value->no_lote) != '') {
+        $no_lotess[$value->no_lote] = $value->fecha_tara;
+        $sqllots .= " OR (Date(rr.fecha) = '{$value->fecha_tara}' AND rr.lote = {$value->no_lote})";
+      }
     }
-    $sqllots = substr($sqllots, 3);
+    if ($sqllots != '') {
+      $sqllots = " AND (".substr($sqllots, 3).")";
+    } else {
+      return false;
+    }
 
     // Obtenemos los rendimientos x lote
     $query = $this->db->query(
@@ -1547,7 +1553,7 @@ class rastreabilidad_model extends CI_Model {
         INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
         INNER JOIN areas AS a ON a.id_area = rr.id_area
       WHERE rr.status = 't' AND a.id_area = {$_GET['farea']}
-        AND ({$sqllots})
+        {$sqllots}
       ORDER BY rr.fecha ASC");
     if($query->num_rows() > 0)
       $response['rendimientos'] = $query->result();
@@ -1584,11 +1590,15 @@ class rastreabilidad_model extends CI_Model {
   {
     // Obtiene los datos del reporte.
     $data = $this->rrs_fechas_data($completo);
+    if ($data === false) {
+      return '';
+    }
     // echo "<pre>";
     //   var_dump($data);
     // echo "</pre>";exit;
 
     $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -1598,7 +1608,7 @@ class rastreabilidad_model extends CI_Model {
       $pdf->titulo2 = "REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO";
     }
     if(isset($data['rendimientos'][0]))
-      $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} | LOTE: {$data['rendimientos'][0]->lote_ext} | AREA: {$data['rendimientos'][0]->area}\n";
+      $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')} | AREA: {$data['rendimientos'][0]->area}\n";
     // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
     // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
 
@@ -1798,6 +1808,168 @@ class rastreabilidad_model extends CI_Model {
 
 
     $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+  public function rrsXls2($completo=false)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rrs_pdf2.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $data = $this->rrs_fechas_data($completo);
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    // Creación del objeto de la clase heredada
+    $titulo1 = "REPORTE VOLUMEN DE MASAS - # BIT-41";
+    $titulo2 = $titulo3 = '';
+    if ($completo) {
+      $titulo2 = "REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO";
+    }
+    if(isset($data['rendimientos'][0]))
+      $titulo3 = "DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')} | AREA: {$data['rendimientos'][0]->area}\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="8" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="8" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="8" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="8"></td>
+        </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRODUCTOR</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">K Bruto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">K Tara</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">K Neto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Certificado</td>
+      </tr>';
+
+    $total_kilos_bruto = 0;
+    $total_kilos_tara = 0;
+    $total_kilos_neto = 0;
+    $total_kilos_neto_cer = 0;
+    // Listado de boletas
+    foreach($data['boletas'] as $key => $boleta)
+    {
+      $total_kilos_bruto    += $boleta->kilos_bruto;
+      $total_kilos_tara     += $boleta->kilos_tara;
+      $total_kilos_neto     += $boleta->kilos_neto;
+      $total_kilos_neto_cer += ($boleta->certificado=='t'? $boleta->kilos_neto: 0);
+
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$boleta->fecha_tara.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$boleta->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$boleta->nombre_fiscal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->kilos_bruto, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->kilos_tara, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->kilos_neto, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.($boleta->certificado=='t'? 'Si': 'No').'</td>
+        </tr>';
+    }
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3">TOTALES</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_bruto, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_tara, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_neto, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_neto_cer, 2, '', false).'</td>
+        </tr>
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8"></td></tr>';
+
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Lote</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Clasificacion</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Otros</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Rendimiento</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Kilos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">T Kilos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Certificado</td>
+      </tr>';
+    $total_rendimiento = 0;
+    $total_kilos_total = 0;
+    foreach($data['rendimientos'] as $key => $boleta)
+    {
+      $total_rendimiento += $boleta->rendimiento;
+      $total_kilos_total += $boleta->kilos_total;
+
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$boleta->fecha.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$boleta->lote_ext.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$boleta->clasificacion.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->rendimiento, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->kilos, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($boleta->kilos_total, 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;">'.($boleta->certificado=='t'? 'Si': 'No').'</td>
+        </tr>';
+    }
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTALES</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_rendimiento, 2, '', false).'</td>
+          <td colspan="2" style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_total, 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.''.'</td>
+        </tr>
+        <tr><td colspan="8"></td></tr>
+        <tr><td colspan="8"></td></tr>';
+
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;">Entro</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_neto, 2, '', false).'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;">Empacado</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_total, 2, '', false).'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;">Industrial</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero($total_kilos_neto-$total_kilos_total, 2, '', false).'</td>
+        </tr>
+        <tr><td colspan="6"></td></tr>
+        <tr><td colspan="6"></td></tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha P</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Pallet</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha V</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Venta</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+      </tr>';
+    $total_pcajas = 0;
+    $total_pkilos = 0;
+    foreach($data['pallets'] as $key => $boleta)
+    {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.MyString::fechaAT($boleta->fecha).'</td>
+          <td style="width:150px;border:1px solid #000;">'.$boleta->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.MyString::fechaAT($boleta->fecha_venta).'</td>
+          <td style="width:150px;border:1px solid #000;">'.$boleta->serie.$boleta->foliov.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$boleta->nombre_fiscal.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
    /**

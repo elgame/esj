@@ -29,6 +29,20 @@ $(function(){
     console.log(linkDownXls.attr('href'));
   });
 
+  $('#form-search2').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          farea: $("#farea").val(),
+          'did_proveedor': $("#did_proveedor").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   $('#frmventasdia').on('submit', function(event) {
     var linkDownXls = $("#linkDownXls"),
         url = {

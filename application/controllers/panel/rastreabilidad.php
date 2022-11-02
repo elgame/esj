@@ -509,10 +509,10 @@ class rastreabilidad extends MY_Controller {
   }
   public function rrs2_xls()
   {
-    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['flotes']))
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['did_proveedor']))
     {
       $this->load->model('rastreabilidad_model');
-      $this->rastreabilidad_model->rrsXls();
+      $this->rastreabilidad_model->rrsXls2();
     }
   }
 

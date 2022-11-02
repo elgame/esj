@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/rastreabilidad/rrs2_pdf/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
+            <form action="<?php echo base_url('panel/rastreabilidad/rrs2_pdf/'); ?>" method="GET" id="form-search2" class="form-search" target="rdeReporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group">
