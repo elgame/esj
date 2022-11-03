@@ -893,7 +893,7 @@ class polizas_model extends CI_Model {
     if ($this->input->get('fid_empresa') != '')
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
 
-    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = intval(abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1);
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1090,7 +1090,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = intval(abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1);
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1229,7 +1229,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = intval(abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1);
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1494,7 +1494,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = intval(abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1);
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
