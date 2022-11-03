@@ -630,6 +630,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'cfdiRelPrev',
               'label'   => 'CFDIREl',
               'rules'   => ''),
+        array('field'   => 'cfdiRelPrevTipo',
+              'label'   => 'CFDI Rel Prev',
+              'rules'   => ''),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',

@@ -345,9 +345,9 @@
                     <br>
                     <span id="cfdiRelPrevText"><?php echo set_value('cfdiRelPrev'); ?></span>
                     <br>
-                    <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: none;width: 55%;">
+                    <?php $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04'; ?>
+                    <select name="cfdiRelPrevTipo" id="cfdiRelPrevTipo" style="display: <?php echo (set_value('cfdiRelPrev') != '' ? 'initial' : 'none'); ?>;width: 55%;">
                       <?php
-                      $cfdirel = !empty($_POST['cfdiRelPrevTipo']) ? $_POST['cfdiRelPrevTipo'] : '04';
                       foreach ($tipoRelacion as $key => $tipoRel) { ?>
                         <option value="<?php echo $tipoRel['key'] ?>" <?php echo set_select('cfdiRelPrevTipo', $tipoRel['key'], ($cfdirel === $tipoRel['key'] ? true : false)); ?>><?php echo $tipoRel['key'].' - '.$tipoRel['value'] ?></option>
                       <?php } ?>
