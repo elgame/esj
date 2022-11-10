@@ -323,7 +323,10 @@ class rastreabilidad extends MY_Controller {
       'titulo' => 'Reporte Rastreabilidad del Producto'
     );
     $this->load->model('areas_model');
+    $this->load->model('empresas_model');
     $this->load->model('calidades_model');
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
     $params['areas']     = $this->areas_model->getAreas(false);
     $itm_select = '';

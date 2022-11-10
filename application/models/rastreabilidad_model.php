@@ -690,23 +690,29 @@ class rastreabilidad_model extends CI_Model {
       }else
         $sql .= " AND bc.id_calidad = 0";
 
+      if ($this->input->get('did_empresa') != '') {
+        $sql .= " AND b.id_empresa = {$_GET['did_empresa']}";
+      }
+
       $query = $this->db->query(
         "SELECT b.id_bascula,
                 b.folio,
                 b.no_lote,
                 b.fecha_tara,
                 b.chofer_es_productor,
-                p.nombre_fiscal,
+                p.nombre_fiscal AS proveedor,
+                p2.nombre_fiscal AS productor,
                 c.nombre,
                 Sum(bc.cajas) AS cajas,
                 Sum(bc.kilos) AS kilos
         FROM bascula AS b
           INNER JOIN bascula_compra AS bc ON bc.id_bascula = b.id_bascula
-          INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          LEFT JOIN otros.productor AS p2 ON p2.id_productor = b.id_productor
           LEFT JOIN choferes AS c ON c.id_chofer = b.id_chofer
         WHERE b.status = true AND b.tipo = 'en' AND b.accion IN('sa', 'p', 'b')
           {$sql}
-        GROUP BY b.id_bascula, b.folio, b.no_lote, b.fecha_tara, b.chofer_es_productor, p.nombre_fiscal, c.nombre
+        GROUP BY b.id_bascula, b.folio, b.no_lote, b.fecha_tara, b.chofer_es_productor, p.nombre_fiscal, p2.nombre_fiscal, c.nombre
         ORDER BY b.no_lote ASC, b.folio ASC
         "
       );
@@ -727,6 +733,12 @@ class rastreabilidad_model extends CI_Model {
       // Obtiene los datos del reporte.
       $data = $this->rrp_data();
 
+      $this->load->model('empresas_model');
+      $empresa = null;
+      if ($this->input->get('did_empresa') != '') {
+        $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa']);
+      }
+
       if(isset($data['calidad']['info']->nombre)){
         $calidad_nombre = $data['calidad']['info']->nombre;
       }else
@@ -738,6 +750,10 @@ class rastreabilidad_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+      if ($empresa) {
+        $pdf->titulo1 = $empresa['info']->nombre;
+        $pdf->logo = $empresa['info']->logo;
+      }
       $pdf->titulo2 = "# BIT-40 <{$calidad_nombre}>"; // "REPORTE RASTREABILIDAD DEL PRODUCTO <{$calidad_nombre}>";
       $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}\n";
       $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
@@ -801,8 +817,9 @@ class rastreabilidad_model extends CI_Model {
           $pdf->Row(array(
               $boleta->no_lote,
               $boleta->folio,
-              ($boleta->chofer_es_productor=='t'? $boleta->nombre: ''),
-              $boleta->nombre_fiscal,
+              // ($boleta->chofer_es_productor=='t'? $boleta->nombre: ''),
+              $boleta->productor,
+              $boleta->proveedor,
               MyString::formatoNumero($boleta->cajas, 2, ''),
               MyString::formatoNumero($boleta->kilos, 2, ''),
             ), false);
