@@ -1460,8 +1460,11 @@ class inventario_model extends privilegios_model{
       }
 
       $response = array();
-      $productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
-            COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
+      $productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura,
+            (COALESCE(cp.cantidad, 0) - COALESCE(pnc.cantidad, 0)) AS cantidad,
+            (COALESCE(cp.importe, 0) - COALESCE(pnc.importe, 0)) AS importe,
+            (COALESCE(cp.impuestos, 0) - COALESCE(pnc.impuestos, 0)) AS impuestos,
+            (COALESCE(cp.total, 0) - COALESCE(pnc.total, 0)) AS total,
             pf.nombre AS familia, cp.codigo_area, cp.centros_costos
         FROM productos AS p
           INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
@@ -1474,22 +1477,17 @@ class inventario_model extends privilegios_model{
             FROM compras_ordenes AS co
               -- INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
               INNER JOIN (
-                SELECT pc.id_producto, pc.id_compra, pc.id_orden, (Sum(pc.cantidad) - Coalesce(Sum(pnc.cantidad), 0)) AS cantidad,
-                  (Sum(pc.importe) - Coalesce(Sum(pnc.importe), 0)) AS importe,
-                  (Sum(pc.impuestos) - Coalesce(Sum(pnc.impuestos), 0)) AS impuestos,
-                  (Sum(pc.total) - Coalesce(Sum(pnc.total), 0)) AS total
+                SELECT pc.id_producto, pc.id_compra, pc.id_orden,
+                  (Sum(pc.cantidad)) AS cantidad,
+                  (Sum(pc.importe)) AS importe,
+                  (Sum(pc.impuestos)) AS impuestos,
+                  (Sum(pc.total)) AS total
                 FROM (
                     SELECT cp.id_compra, cp.id_producto, cp.id_orden, cp.cantidad, cp.importe, (cp.iva - cp.retencion_iva) AS impuestos, cp.total
                     FROM compras_ordenes c
                       INNER JOIN compras_productos AS cp ON c.id_orden = cp.id_orden
                     WHERE c.status <> 'ca' AND cp.id_producto IS NOT NULL
                   ) AS pc
-                  LEFT JOIN (
-                    SELECT c.id_nc AS id_compra, ncp.id_producto, ncp.cantidad, ncp.importe, (ncp.iva - ncp.retencion_iva) AS impuestos, ncp.total
-                    FROM compras c
-                      INNER JOIN compras_notas_credito_productos ncp ON c.id_compra = ncp.id_compra
-                    WHERE c.tipo = 'nc' AND c.status <> 'ca'
-                  ) AS pnc ON (pc.id_compra = pnc.id_compra AND pc.id_producto = pnc.id_producto)
                 GROUP BY pc.id_producto, pc.id_compra, pc.id_orden
               ) AS cp ON co.id_orden = cp.id_orden
               INNER JOIN compras c ON c.id_compra = cp.id_compra
@@ -1513,7 +1511,16 @@ class inventario_model extends privilegios_model{
               Date({$tipoFecha}) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
             GROUP BY cp.id_producto
           ) AS cp ON p.id_producto = cp.id_producto
-          {$idsproveedores}
+          LEFT JOIN (
+            SELECT ncp.id_producto, Sum(ncp.cantidad) AS cantidad, Sum(ncp.importe) AS importe,
+              Sum(ncp.iva - ncp.retencion_iva) AS impuestos, Sum(ncp.total) AS total
+            FROM compras c
+              INNER JOIN compras_notas_credito_productos ncp ON c.id_compra = ncp.id_compra
+            WHERE c.tipo = 'nc' AND c.status <> 'ca' AND c.id_empresa = '{$_GET['did_empresa']}' AND
+              Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            GROUP BY ncp.id_producto
+          ) AS pnc ON p.id_producto = pnc.id_producto
+        {$idsproveedores}
         ORDER BY pf.nombre ASC, p.nombre ASC");
       $response = $productos->result();
 

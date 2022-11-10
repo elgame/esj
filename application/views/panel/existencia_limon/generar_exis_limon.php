@@ -1133,6 +1133,98 @@
                     </div>
                     <!-- /Gastos -->
 
+                    <!-- MANO DE OBRA E INSUMOS -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-manoo-insumos">
+                          <thead>
+                            <tr>
+                              <th colspan="6">MANO DE OBRA E INSUMOS</th>
+                              <th>
+                                <button type="button" class="btn btn-success" id="btnAddManooInsumos"><i class="icon-plus"></i></button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>DESCRIPCION</th>
+                              <th>UNIDAD</th>
+                              <th>CANTIDAD</th>
+                              <th>KILOS</th>
+                              <th>COSTO</th>
+                              <th>IMPORTE</th>
+                              <th>OPC</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            $manooInsumos_kilos = $manooInsumos_cantidad = $manooInsumos_importe = 0;
+                            if (isset($_POST['manooInsumos_id_unidad'])) {
+                              foreach ($_POST['manooInsumos_id_unidad'] as $keyp => $manoinsumos) {
+                                $manooInsumos_kilos    += floatval($_POST['manooInsumos_kilos'][$keyp]);
+                                $manooInsumos_cantidad += floatval($_POST['manooInsumos_cantidad'][$keyp]);
+                                $manooInsumos_importe  += floatval($_POST['manooInsumos_importe'][$keyp]);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="manooInsumos_descripcion[]" value="<?php echo $_POST['manooInsumos_descripcion'][$keyp] ?>" class="span12 manooInsumos_descripcion" required>
+                                </td>
+                                <td>
+                                  <select name="manooInsumos_id_unidad[]" class="span12 manooInsumos_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $_POST['manooInsumos_id_unidad'][$keyp]? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="manooInsumos_cantidad[]" value="<?php echo $_POST['manooInsumos_cantidad'][$keyp] ?>" class="span12 vpositive manooInsumos_cantidad" required></td>
+                                <td><input type="text" name="manooInsumos_kilos[]" value="<?php echo $_POST['manooInsumos_kilos'][$keyp] ?>" class="span12 vpositive manooInsumos_kilos" readonly></td>
+                                <td><input type="text" name="manooInsumos_costo[]" value="<?php echo $_POST['manooInsumos_costo'][$keyp] ?>" class="span12 vpositive manooInsumos_costo" required></td>
+                                <td><input type="text" name="manooInsumos_importe[]" value="<?php echo $_POST['manooInsumos_importe'][$keyp] ?>" class="span12 vpositive manooInsumos_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger manooInsumos_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php }
+                            } ?>
+                            <?php
+                              foreach ($caja['manooInsumos'] as $manoinsumos) {
+                                $manooInsumos_kilos    += floatval($manoinsumos->kilos);
+                                $manooInsumos_cantidad += floatval($manoinsumos->cantidad);
+                                $manooInsumos_importe  += floatval($manoinsumos->importe);
+                            ?>
+                              <tr>
+                                <td>
+                                  <input type="text" name="manooInsumos_descripcion[]" value="<?php echo $manoinsumos->descripcion ?>" class="span12 manooInsumos_descripcion" required>
+                                </td>
+                                <td>
+                                  <select name="manooInsumos_id_unidad[]" class="span12 manooInsumos_id_unidad" required>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->id_unidad ?>" data-cantidad="<?php echo $u->cantidad ?>" <?php echo ($u->id_unidad == $manoinsumos->id_unidad? 'selected': '') ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
+                                  </select>
+                                </td>
+                                <td><input type="text" name="manooInsumos_cantidad[]" value="<?php echo $manoinsumos->cantidad ?>" class="span12 vpositive manooInsumos_cantidad" required></td>
+                                <td><input type="text" name="manooInsumos_kilos[]" value="<?php echo $manoinsumos->kilos ?>" class="span12 vpositive manooInsumos_kilos" readonly></td>
+                                <td><input type="text" name="manooInsumos_costo[]" value="<?php echo $manoinsumos->costo ?>" class="span12 vpositive manooInsumos_costo" required></td>
+                                <td><input type="text" name="manooInsumos_importe[]" value="<?php echo $manoinsumos->importe ?>" class="span12 vpositive manooInsumos_importe" readonly></td>
+                                <td style="width: 30px;">
+                                  <button type="button" class="btn btn-danger manooInsumos_del" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                </td>
+                              </tr>
+                            <?php } ?>
+
+                            <tr class="footer">
+                              <th></th>
+                              <th id="manooInsumosCantidad"><?php echo $manooInsumos_cantidad ?></th>
+                              <th id="manooInsumosKilos"><?php echo $manooInsumos_kilos ?></th>
+                              <th colspan="2"></th>
+                              <th id="manooInsumosImporte"><?php echo $manooInsumos_importe ?></th>
+                              <th></th>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ MANO DE OBRA E INSUMOS -->
+
                 </div>
               </div>
             </div>

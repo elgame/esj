@@ -3,6 +3,31 @@
  ✔ Reporte rastreabilidad @done (22-11-02 12:50) lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Rastreabilidad y seguimiento 2',363,true,'rastreabilidad/rrs2/','print',true);
  ☐ Reporte de existencia nuevo reporte como el del correo (Reporte de rendimiento de limon nuevo)
+   -- lap
+   CREATE TABLE otros.existencias_limon_manoobra_insumo
+      (
+          id bigserial NOT NULL,
+          id_unidad integer NOT NULL,
+          id_area integer NOT NULL DEFAULT 2,
+          descripcion character varying(200),
+          fecha date NOT NULL,
+          no_caja integer NOT NULL DEFAULT 1,
+          costo double precision NOT NULL DEFAULT 0,
+          kilos double precision NOT NULL DEFAULT 0,
+          cantidad double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL DEFAULT 0,
+          CONSTRAINT existencias_limon_manoobra_insumo_pkey PRIMARY KEY (id),
+          CONSTRAINT existencias_limon_manoobra_insumo_id_area_fkey FOREIGN KEY (id_area)
+              REFERENCES public.areas (id_area) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT existencias_limon_manoobra_insumo_id_unidad_fkey FOREIGN KEY (id_unidad)
+              REFERENCES public.unidades (id_unidad) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.existencias_limon_manoobra_insumo OWNER to programa;
+      COMMENT ON TABLE otros.existencias_limon_manoobra_insumo IS 'Cuando regresan fruta de una venta';
    -- lap|san|pcc
     ALTER TABLE public.calibres ADD COLUMN "order" integer DEFAULT 99999;
     UPDATE calibres SET "order" = 1 WHERE id_calibre = 105;
