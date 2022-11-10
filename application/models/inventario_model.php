@@ -1755,18 +1755,19 @@ class inventario_model extends privilegios_model{
     $productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(Sum(cp.cantidad), 0) AS cantidad,
         COALESCE(Sum(cp.importe), 0) AS importe, COALESCE(Sum(cp.impuestos), 0) AS impuestos, COALESCE(Sum(cp.total), 0) AS total,
         cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
-      FROM
-        productos AS p LEFT JOIN (
+      FROM productos AS p
+        LEFT JOIN (
           SELECT cp.id_producto, c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, co.id_orden,
             Date(co.fecha_aceptacion) AS fechao, co.folio AS folioo,
             cp.cantidad, cp.importe, cp.impuestos, cp.total
           FROM compras AS c
             -- INNER JOIN compras_productos AS cp ON c.id_compra = cp.id_compra
             INNER JOIN (
-              SELECT pc.id_producto, pc.id_compra, pc.id_orden, (Sum(pc.cantidad) - Coalesce(Sum(pnc.cantidad), 0)) AS cantidad,
-                (Sum(pc.importe) - Coalesce(Sum(pnc.importe), 0)) AS importe,
-                (Sum(pc.impuestos) - Coalesce(Sum(pnc.impuestos), 0)) AS impuestos,
-                (Sum(pc.total) - Coalesce(Sum(pnc.total), 0)) AS total
+              SELECT pc.id_producto, pc.id_compra, pc.id_orden,
+                Sum(pc.cantidad) AS cantidad,
+                Sum(pc.importe) AS importe,
+                Sum(pc.impuestos) AS impuestos,
+                Sum(pc.total) AS total
               FROM (
                   SELECT c.id_compra, cp.id_producto, cp.id_orden, cp.cantidad, cp.importe, (cp.iva - cp.retencion_iva) AS impuestos, cp.total
                   FROM compras c
@@ -1796,6 +1797,18 @@ class inventario_model extends privilegios_model{
             ) AS cor ON cor.id_orden = co.id_orden
           WHERE c.status <> 'ca' AND c.tipo = 'c' AND cp.id_producto = {$idsproveedores} {$sql} AND
             Date({$tipoFecha}) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+
+          UNION ALL
+
+          SELECT ncp.id_producto, c.id_nc AS id_compra, Date(c.fecha) AS fecha, c.serie, c.folio,
+            null AS id_orden, null AS fechao, null AS folioo,
+            (ncp.cantidad*-1) AS cantidad, (ncp.importe*-1) AS importe, (ncp.iva - ncp.retencion_iva)*-1 AS impuestos,
+            (ncp.total*-1) AS total
+          FROM compras c
+            INNER JOIN compras_notas_credito_productos ncp ON c.id_compra = ncp.id_compra
+          WHERE c.tipo = 'nc' AND c.status <> 'ca' AND ncp.id_producto = {$idsproveedores} AND
+            c.id_empresa = '{$_GET['did_empresa']}' AND
+            Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
         ) AS cp ON p.id_producto = cp.id_producto
         INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
       WHERE p.id_producto = {$idsproveedores}
