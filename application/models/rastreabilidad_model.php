@@ -751,7 +751,7 @@ class rastreabilidad_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
       if ($empresa) {
-        $pdf->titulo1 = $empresa['info']->nombre;
+        $pdf->titulo1 = $empresa['info']->nombre_fiscal;
         $pdf->logo = $empresa['info']->logo;
       }
       $pdf->titulo2 = "# BIT-40 <{$calidad_nombre}>"; // "REPORTE RASTREABILIDAD DEL PRODUCTO <{$calidad_nombre}>";
