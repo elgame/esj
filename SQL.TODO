@@ -3,7 +3,7 @@
  ✔ Reporte rastreabilidad @done (22-11-02 12:50) lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Rastreabilidad y seguimiento 2',363,true,'rastreabilidad/rrs2/','print',true);
  ☐ Reporte de existencia nuevo reporte como el del correo (Reporte de rendimiento de limon nuevo)
-   -- lap
+   -- lap|san
    CREATE TABLE otros.existencias_limon_manoobra_insumo
       (
           id bigserial NOT NULL,
