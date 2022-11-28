@@ -183,8 +183,8 @@ class existencias_limon_model extends CI_Model {
     $compra_fruta = $this->db->query(
       "SELECT e.nombre_fiscal,
         c.id_calidad, c.nombre AS calidad, Sum(bc.kilos) AS kilos,
-        (Sum(bc.importe) / Sum(bc.kilos)) AS precio, Sum(bc.importe) AS importe,
-        (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
+        (Sum(bc.importe) / Coalesce(NULLIF(Sum(bc.kilos), 0), 1)) AS precio,
+        Sum(bc.importe) AS importe, (NULLIF(c.id_calidad, 2) IS NULL) AS is_fruta
       FROM bascula b
         INNER JOIN bascula_compra bc ON b.id_bascula = bc.id_bascula
         INNER JOIN calidades c ON c.id_calidad = bc.id_calidad
