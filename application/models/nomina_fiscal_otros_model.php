@@ -1430,6 +1430,40 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     }
   }
 
+  public function importNomina($filtros)
+  {
+    $this->load->model('nomina_trabajos2_model');
+    $data = $this->nomina_trabajos2_model->totalesXTrabajador($filtros);
+
+    foreach ($data as $key => $value) {
+      if (!empty($value->id_reg)) {
+        $this->db->update('nomina_fiscal_monto_real', [
+          'id_empleado'     => $value->id_usuario,
+          'id_empresa'      => $value->id_empresa,
+          'anio'            => $value->anio,
+          'semana'          => $value->semana,
+          'dias_trabajados' => 0,
+          'monto'           => $value->importe,
+          'bono'            => 0,
+        ], "id_empleado = {$value->id_usuario} AND id_empresa = {$value->id_empresa} AND anio = {$value->anio} AND semana = {$value->semana}");
+      } else {
+        $this->db->insert('nomina_fiscal_monto_real', [
+          'id_empleado'     => $value->id_usuario,
+          'id_empresa'      => $value->id_empresa,
+          'anio'            => $value->anio,
+          'semana'          => $value->semana,
+          'dias_trabajados' => 0,
+          'monto'           => $value->importe,
+          'bono'            => 0,
+        ]);
+      }
+    }
+
+    $val_res = ['error' => '550'];
+
+    return $val_res;
+  }
+
   public function importNominaCorina($semana)
   {
     $config['upload_path'] = APPPATH.'media/temp/';

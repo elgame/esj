@@ -815,7 +815,12 @@ class nomina_fiscal extends MY_Controller {
       else
       {
         $this->load->model('nomina_fiscal_otros_model');
-        $res_mdl = $this->nomina_fiscal_otros_model->importNominaCorina($semana);
+        if (isset($_POST['btnActividades'])) {
+          $filtros = array_merge($semana, $_POST);
+          $res_mdl = $this->nomina_fiscal_otros_model->importNomina($filtros);
+        } else {
+          $res_mdl = $this->nomina_fiscal_otros_model->importNominaCorina($semana);
+        }
         $_GET['msg'] = $res_mdl['error'];
 
         if (isset($res_mdl['resumen']) && count($res_mdl['resumen']) > 0) {

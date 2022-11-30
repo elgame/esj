@@ -26,7 +26,7 @@ class labores_codigo_model extends CI_Model {
     }
 
     $query = BDUtil::pagination(
-        "SELECT id_labor, codigo, nombre, status
+        "SELECT id_labor, codigo, nombre, costo, status
         FROM compras_salidas_labores
         WHERE 1 = 1 {$sql}
         ORDER BY (nombre) ASC
@@ -97,11 +97,12 @@ class labores_codigo_model extends CI_Model {
 
   public function ajaxLabores()
   {
-    $sql = '';
+    $sql = " AND (lower(nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+      OR Lower(codigo) = '".mb_strtolower($_GET['term'])."')";
     $res = $this->db->query("
         SELECT *
         FROM compras_salidas_labores
-        WHERE status = 't' AND lower(nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+        WHERE status = 't' {$sql}
         ORDER BY nombre ASC
         LIMIT 20");
 

@@ -38,6 +38,9 @@
                 <label for="ffecha" style="margin-top: 15px;">Dia</label>
                 <input type="date" name="ffecha" id="ffecha" value="<?php echo $fecha ?>">
 
+                <label for="buscar">Buscar</label>
+                <input type="text" name="buscar" class="input-xlarge search-query" id="buscar" value="<?php echo set_value_get('buscar'); ?>" size="73" placeholder="Nombre">
+
                 <input type="submit" name="enviar" value="Ir" class="btn">
               </div>
             </form>
@@ -121,7 +124,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <?php foreach ($tareas_dia as $key => $tarea): ?>
+                  <?php foreach ($tareas_dia['tareas_dia'] as $key => $tarea): ?>
                     <tr>
                       <td><?php echo $tarea->trabajador ?></td>
                       <td><?php echo $tarea->labor ?></td>
@@ -154,6 +157,25 @@
                   <?php endforeach ?>
                 </tbody>
               </table>
+
+              <?php
+              //Paginacion
+              $this->pagination->initialize(array(
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
+                  'total_rows'    => $tareas_dia['total_rows'],
+                  'per_page'      => $tareas_dia['items_per_page'],
+                  'cur_page'      => $tareas_dia['result_page']*$tareas_dia['items_per_page'],
+                  'page_query_string' => TRUE,
+                  'num_links'     => 1,
+                  'anchor_class'  => 'pags corner-all',
+                  'num_tag_open'  => '<li>',
+                  'num_tag_close' => '</li>',
+                  'cur_tag_open'  => '<li class="active"><a href="#">',
+                  'cur_tag_close' => '</a></li>'
+              ));
+              $pagination = $this->pagination->create_links();
+              echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+              ?>
             </div>
           </div>
         </div><!--/span-->

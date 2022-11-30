@@ -60,6 +60,7 @@ class nomina_trabajos2 extends MY_Controller {
       'semana'    => '',
       'anio'      => date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'buscar'    => isset($_GET['buscar']) ? $_GET['buscar'] : '',
     );
 
     $_GET['anio'] = $filtros['anio'];

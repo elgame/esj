@@ -562,7 +562,13 @@ class Usuarios_model extends privilegios_model {
    * Obtiene el listado de empresas para usar en peticiones Ajax.
    */
   public function getUsuariosAjax(){
-    $sql = "";
+    $sql = "(lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+           lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+           lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')";
+    if (is_numeric($this->input->get('term'))) {
+      $sql = "id = {$_GET['term']}";
+    }
+
     if($this->input->get('empleados')!='')
       $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
@@ -583,9 +589,6 @@ class Usuarios_model extends privilegios_model {
                 DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
         WHERE
-              (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-               lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
-               lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
           {$sql}
         ORDER BY nombre ASC
         LIMIT 20");

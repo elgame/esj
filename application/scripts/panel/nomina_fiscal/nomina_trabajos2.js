@@ -359,7 +359,7 @@
           );
           noty({"text": 'Se guardo', "layout":"topRight", "type": 'success'});
 
-          $('#dempleadoId').val('');
+          // $('#dempleadoId').val('');
           $('#dlabor').val('');
           $('#dlaborId').val('');
           $('#dcosto').val('');
@@ -369,6 +369,7 @@
           $('#areaId').val('');
           $('#tagsRanchoIds').html('');
           $('#tagsCCIds').html('');
+          $('#dempleado').focus();
         }
       }, "json");
     } else {

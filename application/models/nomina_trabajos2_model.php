@@ -93,6 +93,16 @@ class nomina_trabajos2_model extends CI_Model {
 
   public function getActividades($fecha, $id_empresa, $filtros = [])
   {
+    //paginacion
+    $this->load->library('pagination');
+    $params = array(
+        'result_items_per_page' => '100',
+        'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
+    );
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+
     $data = array();
 
     $sql_str = '';
@@ -100,7 +110,11 @@ class nomina_trabajos2_model extends CI_Model {
       $sql_str .= " AND u.id = {$filtros['id_trabajador']}";
     }
 
-    $sql = $this->db->query(
+    if (isset($filtros['buscar']) && $filtros['buscar'] != '') {
+      $sql_str .= " AND Lower(u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) LIKE '%".mb_strtolower($filtros['buscar'], 'UTF-8')."%'";
+    }
+
+    $sql =
       "SELECT nt2.id_empresa, e.nombre_fiscal AS empresa, nt2.id_usuario,
         (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
         nt2.fecha, nt2.rows, nt2.id_labor, l.nombre AS labor, nt2.id_area, a.nombre AS cultivo,
@@ -111,15 +125,16 @@ class nomina_trabajos2_model extends CI_Model {
         INNER JOIN compras_salidas_labores l ON l.id_labor = nt2.id_labor
         LEFT JOIN areas a ON a.id_area = nt2.id_area
       WHERE e.id_empresa = {$id_empresa} AND nt2.fecha = '{$fecha}' {$sql_str}
-      ORDER BY trabajador ASC, rows ASC
-      ");
+      ORDER BY trabajador ASC, rows ASC";
+    $sql = BDUtil::pagination($sql, $params, true);
+    $query = $this->db->query($sql['query']);
 
     $response = array();
-    if ($sql->num_rows() > 0) {
-      // $data = $sql->result();
+    if ($query->num_rows() > 0) {
+      $dataa = $query->result();
       $aux = '';
       $aux_area = '';
-      foreach ($sql->result() as $key => $value) {
+      foreach ($dataa as $key => $value) {
         $value->centros_costos = $this->db->query(
           "SELECT cc.id_centro_costo, cc.nombre, ntd.num
           FROM nomina_trabajos_dia2_centro_costo ntd
@@ -142,6 +157,12 @@ class nomina_trabajos2_model extends CI_Model {
       }
     }
 
+    $response = array(
+        'tareas_dia'     => $response,
+        'total_rows'     => isset($sql['total_rows'])? $sql['total_rows']: 0,
+        'items_per_page' => isset($params['result_items_per_page'])? $params['result_items_per_page']: 0,
+        'result_page'    => isset($params['result_page'])? $params['result_page']: 0
+    );
     return $response;
   }
 
@@ -195,6 +216,35 @@ class nomina_trabajos2_model extends CI_Model {
         ORDER BY nombre ASC
         ")->result();
     }
+
+    return $response;
+  }
+
+  /**
+   * @param  array(
+      'id_empresa',
+      'anio',
+      'semana',
+    )
+   * @return [type]
+   */
+  public function totalesXTrabajador($filtros)
+  {
+    $query = $this->db->query("SELECT u.id AS id_usuario,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS trabajador,
+        nt2.anio, nt2.semana, Sum(nt2.avance) AS avance, Sum(nt2.importe) AS importe,
+        (Sum(nt2.importe) / Coalesce(Nullif(Sum(nt2.avance), 0), 1))::Numeric(12, 2) AS costo,
+        nfmr.id AS id_reg, nt2.id_empresa
+      FROM nomina_trabajos_dia2 nt2
+        INNER JOIN usuarios u ON u.id = nt2.id_usuario
+        LEFT JOIN nomina_fiscal_monto_real nfmr ON (nfmr.id_empleado = u.id AND
+          nfmr.id_empresa = nt2.id_empresa AND nfmr.anio = nt2.anio AND
+          nfmr.semana = nt2.semana)
+      WHERE nt2.id_empresa = {$filtros['id_empresa']}
+        AND nt2.anio = {$filtros['anio']} and nt2.semana = {$filtros['semana']}
+      GROUP BY u.id, nt2.anio, nt2.semana, nt2.id_empresa, nfmr.id
+      ORDER BY trabajador ASC");
+    $response = $query->result();
 
     return $response;
   }

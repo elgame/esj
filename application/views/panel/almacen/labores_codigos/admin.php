@@ -51,6 +51,7 @@
                 <tr>
                   <th>Nombre</th>
                   <th>Codigo</th>
+                  <th>Costo</th>
                   <th>Estado</th>
                   <th>Opc</th>
                 </tr>
@@ -60,6 +61,7 @@
                 <tr>
                   <td><?php echo $labor->nombre; ?></td>
                   <td><?php echo $labor->codigo; ?></td>
+                  <td><?php echo $labor->costo; ?></td>
                   <td><?php
                           $texto = 'ELIMINADA';
                           $label = 'warning';
