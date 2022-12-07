@@ -97,7 +97,7 @@ class cuentas_pagar_model extends privilegios_model{
 							GROUP BY ffaa.id_proveedor
 						) AS faa ON c.id_proveedor = faa.id_proveedor
 					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
-						AND Date(f.fecha) <= '{$fecha}'{$sql}
+						AND Date(f.fecha_factura) <= '{$fecha}'{$sql}
 					GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos
 				)
 			) AS tsaldos
