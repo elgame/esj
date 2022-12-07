@@ -3234,7 +3234,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
 
-    $content           = array();
+    $content           = array(); //BBVA Bancomer
     $contentSantr      = array();
     $contentBanorte    = array();
     $contador          = 1;
@@ -14228,7 +14228,7 @@ class nomina_fiscal_model extends CI_Model {
     echo $html;
   }
 
-  public function descargarTxtBancoAguinaldo($semana, $empresaId, $anio=null)
+  public function descargarTxtBancoAguinaldo($semana, $empresaId, $anio=null, $regPatronal='')
   {
     $anio = $anio==null?date("Y"):$anio;
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
@@ -14241,18 +14241,21 @@ class nomina_fiscal_model extends CI_Model {
     $configuraciones = $this->configuraciones($anio);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana[$tipoNomina], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia, 'anio' => $semana['anio'],
+      'regPatronal' => $regPatronal,
       'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => '0', 'con_aguinaldo' => '1']
     );
     $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $nombre = "PAGO-{$semana['anio']}-{$tipoNomina}-{$semana[$tipoNomina]}.txt";
 
-    $content           = array();
+    $cuentasSantander = [2 => '92001449876', 12 => '65506721517'];
+
+    $content           = array(); //BBVA Bancomer
     $contentSantr      = array();
     $contentBanorte    = array();
     $contador          = 1;
     $contadorSantr     = 1;
     $contadorBanorte   = 1;
-    $cuentaSantr       = '92001449876'; // Cuenta cargo santander
+    $cuentaSantr       = $cuentasSantander[$empresaId]; // Cuenta cargo santander empaque
     $cuentaBanorte     = '0102087623'; // Cuenta cargo banorte empaque
     $emisoraBanorte    = '21071'; // Emisora banorte empaque
     $total_nominaSantr = 0;
@@ -14323,6 +14326,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $zip->addFromString('SANTANDER.txt', $contentSantr);
       $zip->addFromString('BBVA Bancomer.txt', $content);
+      $zip->addFromString("NI{$emisoraBanorte}01.PAG", $contentBanorte);
 
       $zip->close();
     }
