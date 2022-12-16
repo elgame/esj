@@ -1,5 +1,5 @@
 <?php
-class ventas_model extends privilegios_model{
+class estado_resultado_trans_model extends privilegios_model{
 
 	function __construct(){
 		parent::__construct();
@@ -17,7 +17,7 @@ class ventas_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getVentas($perpage = '40', $sql2='')
+	public function getEstadosRes($perpage = '40', $sql2='')
   {
 		$sql = '';
     //paginacion
@@ -30,50 +30,48 @@ class ventas_model extends privilegios_model{
 
     //Filtros para buscar
     if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql = " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql = " AND Date(er.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
     elseif($this->input->get('ffecha1') != '')
-      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+      $sql = " AND Date(er.fecha) = '".$this->input->get('ffecha1')."'";
     elseif($this->input->get('ffecha2') != '')
-      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+      $sql = " AND Date(er.fecha) = '".$this->input->get('ffecha2')."'";
 
-    // if($this->input->get('fserie') != '')
-    //  $sql .= " AND c.serie = '".$this->input->get('fserie')."'";
-    if($this->input->get('ffolio') != '')
-      $sql .= " AND f.folio = '".$this->input->get('ffolio')."'";
-    if($this->input->get('fstatus') != '')
-      $sql .= " AND f.status = '".$this->input->get('fstatus')."'";
-    if($this->input->get('fid_cliente') != '')
-      $sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
-    if($this->input->get('did_empresa') != '')
-      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    if($this->input->get('fbuscar') != '' && is_numeric($this->input->get('fbuscar')))
+      $sql .= " AND er.folio = '".$this->input->get('fbuscar')."'";
+    // if($this->input->get('fstatus') != '')
+    //   $sql .= " AND er.status = '".$this->input->get('fstatus')."'";
+    $empresa_default = $this->empresas_model->getDefaultEmpresa();
+    if($this->input->get('did_empresa') != '') {
+      $sql .= " AND er.id_empresa = '".$this->input->get('did_empresa')."'";
+    } else {
+      $sql .= " AND er.id_empresa = '".$empresa_default->id_empresa."'";
+    }
 
-    if($this->input->get('dobserv') != '')
-      $sql .= " AND lower(f.Observaciones) LIKE '%".$this->input->get('dobserv')."%'";
+    if($this->input->get('fbuscar') != '')
+      $sql .= " AND (
+        lower(c.nombre) LIKE '%".mb_strtolower($this->input->get('fbuscar'), 'UTF-8')."%' OR
+        lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fbuscar'), 'UTF-8')."%')";
 
     $query = BDUtil::pagination("
-        SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
-                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada,
-                COALESCE(fh.id_remision, 0) AS facturada, f.cfdi_ext
-        FROM facturacion AS f
-        INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
-        INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-        LEFT JOIN (SELECT id_remision, id_factura, status
-                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-        ) fh ON f.id_factura = fh.id_remision
-        WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
-        ORDER BY f.fecha DESC, f.folio DESC, f.serie DESC
+        SELECT er.id, er.fecha, er.folio, c.nombre AS chofer,
+          e.nombre_fiscal AS empresa, p.nombre AS activo, er.status
+        FROM otros.estado_resultado_trans AS er
+          INNER JOIN empresas AS e ON e.id_empresa = er.id_empresa
+          INNER JOIN choferes AS c ON c.id_chofer = er.id_chofer
+          INNER JOIN productos AS p ON p.id_producto = er.id_activo
+        WHERE er.status = 't' ".$sql.$sql2."
+        ORDER BY er.fecha DESC, er.folio DESC
         ", $params, true);
     $res = $this->db->query($query['query']);
 
     $response = array(
-        'fact'           => array(),
+        'res_trans'      => array(),
         'total_rows'     => $query['total_rows'],
         'items_per_page' => $params['result_items_per_page'],
         'result_page'    => $params['result_page']
     );
     if($res->num_rows() > 0)
-      $response['fact'] = $res->result();
+      $response['res_trans'] = $res->result();
 
     return $response;
 	}
