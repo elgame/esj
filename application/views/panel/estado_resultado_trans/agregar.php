@@ -134,18 +134,18 @@
               <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
                 <thead>
                   <tr>
-                    <th colspan="7">VENTAS
+                    <th colspan="10">VENTAS
                       <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right;">Remisiones</a>
                     </th>
-                    <th colspan="2">IMPORTE</th>
                   </tr>
                   <tr>
-                    <th>EMPRESA</th>
-                    <th>REMISION</th>
-                    <th>FECHA REM</th>
-                    <th>NOM</th>
-                    <th colspan="3">NOMBRE</th>
-                    <th>ABONO</th>
+                    <th>FECHA</th>
+                    <th>FOLIO</th>
+                    <th colspan="3">CLIENTE</th>
+                    <th>CONCEPTO</th>
+                    <th>CANTIDAD</th>
+                    <th>PRECIO</th>
+                    <th>IMPORTE</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -182,7 +182,7 @@
                             <input type="hidden" name="remision_del[]" value="" id="remision_del">
                           </td>
                         </tr>
-                    <?php }} else {
+                    <?php }} elseif(isset($caja['remisiones'])) {
                         foreach ($caja['remisiones'] as $remision) {
                           // $totalIngresosRemisiones += floatval($otro->monto);
                         ?>
@@ -223,16 +223,17 @@
                     foreach ($_POST['remision_concepto'] as $key => $remision) {
                         $totalIngresosRemisiones += floatval($_POST['remision_importe'][$key]);
                       ?>
-                  <?php }} else {
+                  <?php }} elseif(isset($caja['remisiones'])) {
                     foreach ($caja['remisiones'] as $remision) {
                         $totalIngresosRemisiones += floatval($remision->monto);
                       ?>
                   <?php }} ?>
 
                   <tr class='row-total'>
-                    <td colspan="7"></td>
-                    <td style=""><input type="text" name="total_ingresosRemisiones" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresosRemisiones, 2, '')) ?>" class="span12" id="total-ingresosRemisiones" maxlength="500" readonly style="text-align: right;"></td>
-                    <td></td>
+                    <td colspan="9"></td>
+                    <td style="">
+                      <input type="text" name="total_ingresosRemisiones" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresosRemisiones, 2, '')) ?>" class="span12" id="total-ingresosRemisiones" readonly style="text-align: right;">
+                    </td>
                   </tr>
 
                 </tbody>
@@ -240,414 +241,368 @@
             </div>
           </div>
 
-          <!-- Modal Seguro-->
-          <div id="modal-seguro" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-header">
-              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
-              <h3 id="myModalLabel">Informacion Seguro</h3>
-              <button type="button" class="btn pull-right" id="btn_seguro_add"><i class="icon-plus"></i></button>
+          <!-- SUELDOS -->
+          <?php $totalSueldos = 0; ?>
+          <div class="row-fluid" style="margin-top: 5px;">
+            <div class="span12">
+              <div class="row-fluid">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-traspasos">
+                          <thead>
+                            <tr>
+                              <th colspan="2">SUELDOS
+                                <button type="button" class="btn btn-success" id="btn-add-traspaso" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                              </th>
+                              <th colspan="2"></th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th style="width: 15%;">FECHA</th>
+                              <th style="width: 30%;">PROVEEDOR</th>
+                              <th style="width: 37%;">CONCEPTO</th>
+                              <th style="width: 15%;">IMPORTE</th>
+                              <th style="width: 3%;"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              if (isset($_POST['traspaso_concepto'])) {
+                                foreach ($_POST['traspaso_concepto'] as $key => $concepto) {
+                                  $totalSueldos += ($_POST['traspaso_tipo'][$key] == 't'? 1: -1) * floatval($_POST['traspaso_importe'][$key]); ?>
+                                <tr>
+                                  <td>
+                                    <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                      <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                      <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                    </select> -->
+                                    <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
+                                      <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                      <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                      <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                      <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
+                                      <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
+                                      <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                      <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
+                                    </select>
+                                    <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
+                                    <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                  </td>
+                                  <td></td>
+                                  <td>
+                                    <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
+                                      <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
+                                      <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
+                                    </select>
+                                  </td>
+                                  <td style="">
+                                    <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                  </td>
+                                  <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                  <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                </tr>
+                            <?php }} else {
+                              if (isset($caja['traspasos']))
+                              foreach ($caja['traspasos'] as $traspaso) {
+                                $totalSueldos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                              ?>
+                              <tr>
+                                <td>
+                                  <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
+                                  <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
+                                  <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
+                                  <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                  <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
+                                    <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                </td>
+                                <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
+                                <td>
+                                  <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
+                                  <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
+                                </td>
+                                <td style="">
+                                  <?php if ($traspaso->guardado == 't'): ?>
+                                  <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                  <?php else: ?>
+                                    <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                    <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
+                                  <?php endif ?>
+                                </td>
+                                <td style="width: 60px;">
+                                  <?php if ($traspaso->guardado == 't'): ?>
+                                  <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                  <?php else: ?>
+                                    <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                    <?php echo $traspaso->monto ?>
+                                  <?php endif ?>
+                                </td>
+                                <td style="width: 30px;">
+                                  <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
+                                  <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                  <?php endif ?>
+                                </td>
+                              </tr>
+                            <?php }} ?>
+                            <tr class="row-total">
+                              <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                              <td><input type="text" value="<?php echo $totalSueldos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                              <td colspan="3"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">
-            <?php
-            if (isset($borrador) && isset($borrador['seguro'])){
-              foreach ($borrador['seguro'] as $sp => $prodesp) {
-                $_POST['pproveedor_seguro'][] = $prodesp->proveedor;
-                $_POST['seg_id_proveedor'][]  = $prodesp->id_proveedor;
-                $_POST['seg_poliza'][]        = $prodesp->pol_seg;
-              }
-            }
+          </div>
+          <!-- /SUELDOS -->
 
-            if (isset($_POST['seg_id_proveedor']) && count($_POST['seg_id_proveedor']) > 0) {
-              foreach ($_POST['seg_id_proveedor'] as $key => $value) {
-            ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_seguro[]" value="<?php echo $_POST['pproveedor_seguro'][$key] ?>" id="pproveedor_seguro" class="span12 sikey field-check pproveedor_seguro" placeholder="Proveedor" data-next="seg_poliza">
-                    <input type="hidden" name="seg_id_proveedor[]" value="<?php echo $_POST['seg_id_proveedor'][$key] ?>" id="seg_id_proveedor" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="seg_poliza[]" class="span12 sikey field-check" id="seg_poliza" value="<?php echo $_POST['seg_poliza'][$key] ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
-                  </div>
-                </div>
-              </div>
-            <?php }
-            } else { ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_seguro[]" value="<?php echo set_value('pproveedor_seguro[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->proveedor : '') ?>" id="pproveedor_seguro" class="span12 sikey field-check pproveedor_seguro" placeholder="Proveedor" data-next="seg_poliza">
-                    <input type="hidden" name="seg_id_proveedor[]" value="<?php echo set_value('seg_id_proveedor[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->id_proveedor : '') ?>" id="seg_id_proveedor" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="seg_poliza[]" class="span12 sikey field-check" id="seg_poliza" value="<?php echo set_value('seg_poliza[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->pol_seg : ''); ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
-                  </div>
-                </div>
-              </div>
-            <?php } ?>
-            </div>
-            <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['seguro']) ? '' : 'disabled' ?>>Cerrar</button>
+          <div class="row-fluid">
+            <?php $totalRepMant = 0; ?>
+            <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+            <div class="span12" style="margin-top: 1px;">
+              <table class="table table-striped table-bordered table-hover table-condensed" id="table-repmant">
+                <thead>
+                  <tr>
+                    <th colspan="10">REP Y MTTO DE EQUIPO TRASPORTE
+                      <a href="#modal-repmant" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-repmant" style="padding: 2px 7px 2px; float: right;">Gastos</a>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>FECHA</th>
+                    <th>FOLIO</th>
+                    <th colspan="3">PROVEEDOR</th>
+                    <th>DESCRIPCION</th>
+                    <th>CANTIDAD</th>
+                    <th>PRECIO</th>
+                    <th>IMPORTE</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php
+                    if (isset($_POST['remision_concepto'])) {
+                      foreach ($_POST['remision_concepto'] as $key => $concepto) {
+                        // $totalRepMant += floatval($_POST['otros_monto'][$key]);
+                      ?>
+                        <tr>
+                          <td style="">
+                            <input type="text" name="repmant_empresa[]" value="<?php echo $_POST['repmant_empresa'][$key] ?>" class="span12 gasto-cargo" style="" required <?php echo $readonly ?>>
+                            <input type="hidden" name="repmant_empresa_id[]" value="<?php echo $_POST['repmant_empresa_id'][$key] ?>" class="vpositive gasto-cargo-id">
+                            <input type="hidden" name="repmant_row[]" value="" class="vpositive repmant_row">
+                          </td>
+                          <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $_POST['repmant_numero'][$key] ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
+                          <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $_POST['repmant_fecha'][$key] ?>" class="repmant_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
+                          <td style="width: 40px;">
+                            <select name="repmant_nomenclatura[]" class="repmant_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
+                              <?php foreach ($nomenclaturas as $n) { ?>
+                                <?php if ($n->tipo === 't'): ?>
+                                <option value="<?php echo $n->id ?>" <?php echo $_POST['repmant_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                <?php endif ?>
+                              <?php } ?>
+                            </select>
+                          </td>
+                          <td colspan="3">
+                            <input type="text" name="repmant_concepto[]" value="<?php echo $concepto ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
+                            <input type="hidden" name="repmant_id[]" value="<?php echo $_POST['repmant_id'][$key] ?>" class="remision-id span12" required>
+                          </td>
+                          <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $_POST['repmant_importe'][$key] ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly ?>></td>
+                          <td style="width: 30px;">
+                            <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                            <input type="hidden" name="repmant_del[]" value="" id="repmant_del">
+                          </td>
+                        </tr>
+                    <?php }} elseif(isset($caja['remisiones'])) {
+                        foreach ($caja['remisiones'] as $remision) {
+                          // $totalRepMant += floatval($otro->monto);
+                        ?>
+                          <tr>
+                            <td style="">
+                              <input type="text" name="repmant_empresa[]" value="<?php echo $remision->empresa ?>" class="span12 gasto-cargo" style="" required <?php echo $readonly ?>>
+                              <input type="hidden" name="repmant_empresa_id[]" value="<?php echo $remision->id_categoria ?>" class="vpositive gasto-cargo-id">
+                              <input type="hidden" name="repmant_row[]" value="<?php echo $remision->row ?>" class="vpositive repmant_row">
+                              <a href="<?php echo base_url('panel/caja_chica/print_vale_rm/?fecha='.$remision->fecha.'&id_remision='.$remision->id_remision.'&row='.$remision->row.'&noCaja='.$remision->no_caja)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                <i class="ico icon-print" style="cursor:pointer"></i></a>
+                            </td>
+                            <td style=""><input type="text" name="repmant_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive " placeholder="" readonly style="" <?php echo $readonly ?>></td>
+                            <td style=""><input type="date" name="repmant_fecha[]" value="<?php echo $remision->fecha_rem ?>" class="repmant_fecha" placeholder="fecha" style="" <?php echo $readonly ?>></td>
+                            <td style="width: 40px;">
+                              <select name="repmant_nomenclatura[]" class="repmant_nomenclatura" style="width: 70px;" <?php echo $readonly.$mod_ing_readonly ?>>
+                                <?php foreach ($nomenclaturas as $n) { ?>
+                                  <?php if ($n->tipo === 't'): ?>
+                                  <option value="<?php echo $n->id ?>" <?php echo $remision->id_nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                  <?php endif ?>
+                                <?php } ?>
+                              </select>
+                            </td>
+                            <td colspan="3">
+                              <input type="text" name="repmant_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
+                              <input type="hidden" name="repmant_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
+                            </td>
+                            <td style=""><input type="number" step="any" name="repmant_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive " placeholder="Importe" required <?php echo $readonly.$readonlyCC ?>></td>
+                            <td style="width: 30px;">
+                              <?php if (!$cajas_cerradas && $modificar_campos): ?>
+                                <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                              <?php endif ?>
+                              <input type="hidden" name="repmant_del[]" value="" id="repmant_del">
+                            </td>
+                          </tr>
+                  <?php }} ?>
+
+                  <?php if (isset($_POST['repmant_concepto'])) {
+                    foreach ($_POST['repmant_concepto'] as $key => $repmant) {
+                        $totalRepMant += floatval($_POST['repmant_importe'][$key]);
+                      ?>
+                  <?php }} elseif(isset($caja['repmantes'])) {
+                    foreach ($caja['repmantes'] as $repmant) {
+                        $totalRepMant += floatval($repmant->monto);
+                      ?>
+                  <?php }} ?>
+
+                  <tr class='row-total'>
+                    <td colspan="9"></td>
+                    <td style="">
+                      <input type="text" name="total_repmante" value="<?php echo MyString::float(MyString::formatoNumero($totalRepMant, 2, '')) ?>" class="span12" id="total-repmante" readonly style="text-align: right;">
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- Modal Certificados -->
-          <div id="modal-certificado51" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-header">
-              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
-              <h3 id="myModalLabel">Informacion Certificado</h3>
-              <button type="button" class="btn pull-right" id="btn_certificado51_add"><i class="icon-plus"></i></button>
-            </div>
-            <div class="modal-body">
-              <?php
-              if (isset($borrador) && isset($borrador['certificado51'])){
-                foreach ($borrador['certificado51'] as $sp => $prodesp) {
-                  $_POST['pproveedor_certificado51'][] = $prodesp->proveedor;
-                  $_POST['cert_id_proveedor51'][]      = $prodesp->id_proveedor;
-                  $_POST['cert_certificado51'][]       = $prodesp->certificado;
-                  $_POST['cert_bultos51'][]            = $prodesp->bultos;
-                  $_POST['cert_num_operacion51'][]     = $prodesp->num_operacion;
-                  $_POST['cert_no_certificado51'][]    = $prodesp->no_certificado;
-                  $_POST['cert_id_orden51'][]          = $prodesp->id_orden;
-                }
-              }
-
-              if (isset($_POST['cert_id_proveedor51']) && count($_POST['cert_id_proveedor51']) > 0) {
-                foreach ($_POST['cert_id_proveedor51'] as $key => $value) {
-              ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_certificado51[]" value="<?php echo $_POST['pproveedor_certificado51'][$key]; ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
-                    <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo $_POST['cert_id_proveedor51'][$key]; ?>" id="cert_id_proveedor51" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo $_POST['cert_certificado51'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo $_POST['cert_bultos51'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo $_POST['cert_num_operacion51'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_no_certificado51[]" class="span12 sikey cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo $_POST['cert_no_certificado51'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
-                    <input type="hidden" name="cert_id_orden51[]" class="span12 sikey" id="cert_id_orden51" value="<?php echo $_POST['cert_id_orden51'][$key] ?>">
+          <!-- GASTOS -->
+          <?php $totalGastos = 0; ?>
+          <div class="row-fluid" style="margin-top: 5px;">
+            <div class="span12">
+              <div class="row-fluid">
+                <div class="span12">
+                  <div class="row-fluid">
+                    <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
+                          <thead>
+                            <tr>
+                              <th colspan="2">GASTOS
+                                <button type="button" class="btn btn-success" id="btn-add-gastos" style="padding: 2px 7px 2px;margin-right: 2px;"><i class="icon-plus"></i></button>
+                              </th>
+                              <th colspan="2"></th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th style="width: 15%;">FECHA</th>
+                              <th style="width: 30%;">PROVEEDOR</th>
+                              <th style="width: 37%;">CONCEPTO</th>
+                              <th style="width: 15%;">IMPORTE</th>
+                              <th style="width: 3%;"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              if (isset($_POST['gastos_concepto'])) {
+                                foreach ($_POST['gastos_concepto'] as $key => $concepto) {
+                                  $totalGastos += floatval($_POST['traspaso_importe'][$key]); ?>
+                                <tr>
+                                  <td>
+                                    <!-- <select name="traspaso_tipo[]" class="span12 ingreso_nomenclatura" <?php echo $readonly ?>>
+                                      <option value="t" <?php echo $_POST['traspaso_tipo'][$key] == 't' ? 'selected' : '' ?>>Ingreso</option>
+                                      <option value="f" <?php echo $_POST['traspaso_tipo'][$key] == 'f' ? 'selected' : '' ?>>Egreso</option>
+                                    </select> -->
+                                    <select name="traspaso_tipo[]" class="span12 traspaso_tipo">
+                                      <option value="otros" <?php echo $_POST['traspaso_tipo'][$key]=='otros'? 'selected': ''; ?>>Otros</option>
+                                      <option value="caja_limon" <?php echo $_POST['traspaso_tipo'][$key]=='caja_limon'? 'selected': ''; ?>>Caja limón</option>
+                                      <option value="caja_gastos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_gastos'? 'selected': ''; ?>>Caja gastos</option>
+                                      <option value="caja_fletes" <?php echo $_POST['traspaso_tipo'][$key]=='caja_fletes'? 'selected': ''; ?>>Caja fletes</option>
+                                      <option value="caja_plasticos" <?php echo $_POST['traspaso_tipo'][$key]=='caja_plasticos'? 'selected': ''; ?>>Caja Plasticos Gdl</option>
+                                      <option value="caja_general" <?php echo $_POST['traspaso_tipo'][$key]=='caja_general'? 'selected': ''; ?>>Caja Distribuidora</option>
+                                      <option value="caja_prestamo" <?php echo $_POST['traspaso_tipo'][$key]=='caja_prestamo'? 'selected': ''; ?>>Caja Préstamo</option>
+                                    </select>
+                                    <input type="hidden" name="traspaso_id_traspaso[]" value="" id="traspaso_id_traspaso">
+                                    <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                  </td>
+                                  <td></td>
+                                  <td>
+                                    <select name="traspaso_afectar_fondo[]" class="span12 traspaso_afectar_fondo">
+                                      <option value="f" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 'f' ? 'selected' : '' ?>>No</option>
+                                      <option value="t" <?php echo $_POST['traspaso_afectar_fondo'][$key] == 't' ? 'selected' : '' ?>>Si</option>
+                                    </select>
+                                  </td>
+                                  <td style="">
+                                    <input type="text" name="traspaso_concepto[]" value="<?php echo $_POST['traspaso_concepto'][$key] ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                  </td>
+                                  <td style="width: 60px;"><input type="text" name="traspaso_importe[]" value="<?php echo $_POST['traspaso_importe'][$key] ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly ?>></td>
+                                  <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                </tr>
+                            <?php }} else {
+                              if (isset($caja['traspasos']))
+                              foreach ($caja['traspasos'] as $traspaso) {
+                                $totalGastos += ($traspaso->tipo == 't'? 1: -1) * floatval($traspaso->monto);
+                              ?>
+                              <tr>
+                                <td>
+                                  <?php echo ucfirst(str_replace('_', ' ', $traspaso->tipo_caja)); ?>
+                                  <input type="hidden" name="traspaso_tipo[]" value="<?php echo $traspaso->tipo_caja ?>">
+                                  <input type="hidden" name="traspaso_id_traspaso[]" value="<?php echo $traspaso->id_traspaso ?>" id="traspaso_id_traspaso">
+                                  <input type="hidden" name="traspaso_del[]" value="" id="traspaso_del">
+                                  <a href="<?php echo base_url('panel/caja_chica/print_vale_tras/?id_traspaso='.$traspaso->id_traspaso.'&noCaja='.$traspaso->no_caja)?>" target="_blank" title="Imprimir Gasto comprobar">
+                                    <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                </td>
+                                <td><?php echo $traspaso->tipo == 't' ? 'Ingreso' : 'Egreso' ?></td>
+                                <td>
+                                  <?php echo $traspaso->afectar_fondo == 't' ? 'Si' : 'No'; ?>
+                                  <input type="hidden" name="traspaso_afectar_fondo[]" value="<?php echo $traspaso->afectar_fondo ?>">
+                                </td>
+                                <td style="">
+                                  <?php if ($traspaso->guardado == 't'): ?>
+                                  <input type="text" name="traspaso_concepto[]" value="<?php echo $traspaso->concepto ?>" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                  <?php else: ?>
+                                    <input type="hidden" name="traspaso_concepto[]" value="-@-" class="span12 traspaso-concepto" <?php echo $readonly ?>>
+                                    <?php echo $traspaso->concepto." (Traspasado de caja No {$traspaso->no_caja})" ?>
+                                  <?php endif ?>
+                                </td>
+                                <td style="width: 60px;">
+                                  <?php if ($traspaso->guardado == 't'): ?>
+                                  <input type="text" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                  <?php else: ?>
+                                    <input type="hidden" name="traspaso_importe[]" value="<?php echo $traspaso->monto ?>" class="span12 vpositive traspaso-importe" <?php echo $readonly.$readonlyCC ?>>
+                                    <?php echo $traspaso->monto ?>
+                                  <?php endif ?>
+                                </td>
+                                <td style="width: 30px;">
+                                  <?php if (!$cajas_cerradas && $modificar_campos && $traspaso->guardado == 't'): ?>
+                                  <button type="button" class="btn btn-danger btn-del-traspaso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                  <?php endif ?>
+                                </td>
+                              </tr>
+                            <?php }} ?>
+                            <tr class="row-total">
+                              <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                              <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-traspasos" style="text-align: right;" readonly></td>
+                              <td colspan="3"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            <?php }
-            } else { ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_certificado51[]" value="<?php echo set_value('pproveedor_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->proveedor : '') ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
-                    <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo set_value('cert_id_proveedor51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_proveedor : '') ?>" id="cert_id_proveedor51" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo set_value('cert_bultos51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->bultos : ''); ?>" placeholder="Bultos" data-next="cert_num_operacion51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="cert_no_certificado51">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_no_certificado51" style="width: auto;">Certificado de compra</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_no_certificado51[]" class="span12 sikey cursorp cert_no_certificado51" id="cert_no_certificado51" value="<?php echo set_value('cert_no_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado51" readonly>
-                    <input type="hidden" name="cert_id_orden51[]" class="span12 sikey" id="cert_id_orden51" value="<?php echo set_value('cert_id_orden51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_orden : ''); ?>">
-                  </div>
-                </div>
-              </div>
-            <?php } ?>
-            </div>
-            <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado51']) ? '' : 'disabled' ?>>Cerrar</button>
             </div>
           </div>
-          <div id="modal-certificado52" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-header">
-              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
-              <h3 id="myModalLabel">Informacion Certificado</h3>
-              <button type="button" class="btn pull-right" id="btn_certificado52_add"><i class="icon-plus"></i></button>
-            </div>
-            <div class="modal-body">
-            <?php
-            if (isset($borrador) && isset($borrador['certificado52'])){
-              foreach ($borrador['certificado52'] as $sp => $prodesp) {
-                $_POST['pproveedor_certificado52'][] = $prodesp->proveedor;
-                $_POST['cert_id_proveedor52'][]      = $prodesp->id_proveedor;
-                $_POST['cert_certificado52'][]       = $prodesp->certificado;
-                $_POST['cert_bultos52'][]            = $prodesp->bultos;
-                $_POST['cert_num_operacion52'][]     = $prodesp->num_operacion;
-                $_POST['cert_no_certificado52'][]    = $prodesp->no_certificado;
-                $_POST['cert_id_orden52'][]          = $prodesp->id_orden;
-              }
-            }
+          <!-- /GASTOS -->
 
-            if (isset($_POST['cert_id_proveedor52']) && count($_POST['cert_id_proveedor52']) > 0) {
-              foreach ($_POST['cert_id_proveedor52'] as $key => $value) {
-            ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_certificado52[]" value="<?php echo $_POST['pproveedor_certificado52'][$key]; ?>" id="pproveedor_certificado52" class="span12 sikey field-check pproveedor_certificado52" placeholder="Proveedor" data-next="cert_certificado52">
-                    <input type="hidden" name="cert_id_proveedor52[]" value="<?php echo $_POST['cert_id_proveedor52'][$key]; ?>" id="cert_id_proveedor52" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo $_POST['cert_certificado52'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_bultos52[]" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo $_POST['cert_bultos52'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo $_POST['cert_num_operacion52'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_no_certificado52[]" class="span12 sikey cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo $_POST['cert_no_certificado52'][$key] ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
-                    <input type="hidden" name="cert_id_orden52[]" class="span12 sikey" id="cert_id_orden52" value="<?php echo $_POST['cert_id_orden52'][$key] ?>">
-                  </div>
-                </div>
-              </div>
-            <?php }
-            } else { ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_certificado52[]" value="<?php echo set_value('pproveedor_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->proveedor : '') ?>" id="pproveedor_certificado52" class="span12 sikey field-check pproveedor_certificado52" placeholder="Proveedor" data-next="cert_certificado52">
-                    <input type="hidden" name="cert_id_proveedor52[]" value="<?php echo set_value('cert_id_proveedor52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_proveedor : '') ?>" id="cert_id_proveedor52" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_bultos52[]" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo set_value('cert_bultos52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->bultos : ''); ?>" placeholder="Bultos" data-next="cert_num_operacion52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo set_value('cert_num_operacion52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="cert_no_certificado52" style="width: auto;">Certificado de compra</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_no_certificado52[]" class="span12 sikey cursorp cert_no_certificado52" id="cert_no_certificado52" value="<?php echo set_value('cert_no_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->no_certificado : ''); ?>" placeholder="Num Certificado" data-next="pproveedor_certificado52" readonly>
-                    <input type="hidden" name="cert_id_orden52[]" class="span12 sikey" id="cert_id_orden52" value="<?php echo set_value('cert_id_orden52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_orden : ''); ?>">
-                  </div>
-                </div>
-              </div>
-            <?php } ?>
-            </div>
-            <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado52']) ? '' : 'disabled' ?>>Cerrar</button>
-            </div>
-          </div>
-
-          <!-- Modal Supervisor carga -->
-          <div id="modal-supcarga" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-header">
-              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
-              <h3 id="myModalLabel">Informacion Supervisor de carga</h3>
-              <button type="button" class="btn pull-right" id="btn_supcarga_add"><i class="icon-plus"></i></button>
-            </div>
-            <div class="modal-body">
-            <?php
-            if (isset($borrador) && isset($borrador['supcarga'])){
-              foreach ($borrador['supcarga'] as $sp => $prodesp) {
-                $_POST['pproveedor_supcarga'][]    = $prodesp->proveedor;
-                $_POST['supcarga_id_proveedor'][]  = $prodesp->id_proveedor;
-                $_POST['supcarga_numero'][]        = $prodesp->certificado;
-                $_POST['supcarga_bultos'][]        = $prodesp->bultos;
-                $_POST['supcarga_num_operacion'][] = $prodesp->num_operacion;
-              }
-            }
-
-            if (isset($_POST['supcarga_id_proveedor']) && count($_POST['supcarga_id_proveedor']) > 0) {
-              foreach ($_POST['supcarga_id_proveedor'] as $key => $value) {
-            ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_supcarga[]" value="<?php echo $_POST['pproveedor_supcarga'][$key] ?>" id="pproveedor_supcarga" class="span12 sikey field-check pproveedor_supcarga" placeholder="Proveedor" data-next="supcarga_numero">
-                    <input type="hidden" name="supcarga_id_proveedor[]" value="<?php echo $_POST['supcarga_id_proveedor'][$key] ?>" id="supcarga_id_proveedor" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_numero[]" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo $_POST['supcarga_numero'][$key] ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_bultos[]" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo $_POST['supcarga_bultos'][$key] ?>" placeholder="Bultos" data-next="supcarga_num_operacion">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_num_operacion" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_num_operacion[]" class="span12 sikey field-check" id="supcarga_num_operacion" value="<?php echo $_POST['supcarga_num_operacion'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_supcarga">
-                  </div>
-                </div>
-              </div>
-            <?php }
-            } else { ?>
-              <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
-                <div class="control-group">
-                  <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_supcarga[]" value="<?php echo set_value('pproveedor_supcarga[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->proveedor : '') ?>" id="pproveedor_supcarga" class="span12 sikey field-check pproveedor_supcarga" placeholder="Proveedor" data-next="supcarga_numero">
-                    <input type="hidden" name="supcarga_id_proveedor[]" value="<?php echo set_value('supcarga_id_proveedor[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->id_proveedor : '') ?>" id="supcarga_id_proveedor" class="field-check">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_numero[]" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo set_value('supcarga_numero[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->certificado : ''); ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_bultos[]" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo set_value('supcarga_bultos[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->bultos : ''); ?>" placeholder="Bultos" data-next="supcarga_num_operacion">
-                  </div>
-                </div>
-                <div class="control-group">
-                  <label class="control-label" for="supcarga_num_operacion" style="width: auto;">Num Operacion</label>
-                  <div class="controls" style="margin-left: 0">
-                    <input type="text" name="supcarga_num_operacion[]" class="span12 sikey field-check" id="supcarga_num_operacion" value="<?php echo set_value('supcarga_num_operacion[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_supcarga">
-                  </div>
-                </div>
-              </div>
-            <?php } ?>
-            </div>
-            <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['supcarga']) ? '' : 'disabled' ?>>Cerrar</button>
-            </div>
-          </div>
 
         </form>
 
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
-
-  <!-- Modal -->
-  <div id="modal-pallets" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Pallets del Cliente</h3>
-    </div>
-    <div class="modal-body">
-      <div class="row-fluid">
-        <table class="table table-hover table-condensed" id="table-pallets-cliente">
-          <thead>
-            <tr>
-              <th></th>
-              <th># Folio</th>
-              <th>Cajas</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- <tr>
-              <th><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></th>
-              <th>9</th>
-              <th>100</th>
-              <th>2013-10-22</th>
-            </tr> -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-      <button class="btn btn-primary" id="BtnAddClientePallets">Agregar Pallets</button>
-    </div>
-  </div><!--/modal pallets -->
-
-  <!-- Modal No Certificados compras -->
-  <div id="modal-no-certificados" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px;left: 45%;">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">No Certificados Compras</h3>
-    </div>
-    <div class="modal-body" style="max-height: 370px;">
-      <table id="lista_certificados_modal" class="table table-striped table-bordered table-hover table-condensed">
-        <caption></caption>
-        <thead>
-          <tr>
-            <th>Folio</th>
-            <th>Empresa</th>
-            <th>Certificado</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-    </div>
-  </div>
 
 </div>
 
