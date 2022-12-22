@@ -4,6 +4,136 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado Resultado Transporte',0,true,'estado_resultado_trans/','globe',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',572,true,'estado_resultado_trans/agregar/','plus',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
+    -- lap
+    CREATE TABLE otros.estado_resultado_trans
+      (
+          id bigserial NOT NULL,
+          id_chofer bigint NOT NULL,
+          id_activo bigint NOT NULL,
+          fecha date NOT NULL,
+          folio bigint NOT NULL,
+          km_rec double precision,
+          vel_max double precision,
+          rep_lt_hist double precision,
+          rend_km_gps double precision,
+          rend_actual double precision,
+          rend_lts double precision,
+          rend_precio double precision,
+          id_gasto bigint,
+          id_creo bigint,
+          id_empresa bigint NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT estado_resultado_trans_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_id_activo_fkey FOREIGN KEY (id_activo)
+              REFERENCES public.productos (id_producto) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_chofer_fkey FOREIGN KEY (id_chofer)
+              REFERENCES public.choferes (id_chofer) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_creo_fkey FOREIGN KEY (id_creo)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_id_gasto_fkey FOREIGN KEY (id_gasto)
+              REFERENCES public.cajachica_gastos (id_gasto) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans.folio IS 'viaje, folio por camion';
+      COMMENT ON COLUMN otros.estado_resultado_trans.id_gasto IS 'gasto por comprobar de la caja chica 2 ';
+    CREATE TABLE otros.estado_resultado_trans_cods
+      (
+          id bigserial NOT NULL,
+          nombre character varying(150) COLLATE pg_catalog."default" NOT NULL,
+          status boolean DEFAULT true,
+          CONSTRAINT estado_resultado_trans_cods_pkey PRIMARY KEY (id)
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_cods OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_gastos
+      (
+          id bigserial NOT NULL,
+          id_estado bigint NOT NULL,
+          id_proveedor bigint NOT NULL,
+          id_cod bigint,
+          cantidad double precision,
+          precio double precision,
+          importe double precision,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_gastos_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_gastos_id_cod_fkey FOREIGN KEY (id_cod)
+              REFERENCES otros.estado_resultado_trans_cods (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_gastos_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_gastos_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+              REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_gastos OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans_gastos.id_cod IS 'Codigos de gastos para estado_resultado_trans';
+    CREATE TABLE otros.estado_resultado_trans_rep_mtto
+      (
+          id_estado bigint NOT NULL,
+          id_compra bigint NOT NULL,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_rep_mtto_pkey PRIMARY KEY (id_estado, id_compra),
+          CONSTRAINT estado_resultado_trans_rep_mtto_id_compra_fkey FOREIGN KEY (id_compra)
+              REFERENCES public.compras (id_compra) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_rep_mtto_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_rep_mtto OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_sueldos
+      (
+          id bigserial NOT NULL,
+          id_estado bigint NOT NULL,
+          id_proveedor bigint NOT NULL,
+          fecha date NOT NULL,
+          descripcion character varying(250) COLLATE pg_catalog."default",
+          importe double precision NOT NULL,
+          CONSTRAINT estado_resultado_trans_sueldos_pkey PRIMARY KEY (id),
+          CONSTRAINT estado_resultado_trans_sueldos_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_sueldos_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+              REFERENCES public.proveedores (id_proveedor) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_sueldos OWNER to programa;
+    CREATE TABLE otros.estado_resultado_trans_ventas
+      (
+          id_estado bigint NOT NULL,
+          id_remision bigint NOT NULL,
+          comprobacion boolean DEFAULT false,
+          CONSTRAINT estado_resultado_trans_ventas_pkey PRIMARY KEY (id_estado, id_remision),
+          CONSTRAINT estado_resultado_trans_ventas_id_estado_fkey FOREIGN KEY (id_estado)
+              REFERENCES otros.estado_resultado_trans (id) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE,
+          CONSTRAINT estado_resultado_trans_ventas_id_remision_fkey FOREIGN KEY (id_remision)
+              REFERENCES public.facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE
+              ON DELETE CASCADE
+      ) TABLESPACE pg_default;
+      ALTER TABLE otros.estado_resultado_trans_ventas OWNER to programa;
+      COMMENT ON COLUMN otros.estado_resultado_trans_ventas.comprobacion IS 'si: true, no: false';
  ✔ Reporte de asistencias por rango de fecha, empleado, faltas, asistencias, incapacidades @done (22-11-18 11:58)
    -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Asistencia',364,true,'nomina_fiscal/rpt_asistencias/','list-ol',true);
