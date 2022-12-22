@@ -1,16 +1,16 @@
 
  ☐ Apartado de viajes de camiones como el archivo Estim. Result. Eqpo Transp
-   -- lap
+   -- lap|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Estado Resultado Transporte',0,true,'estado_resultado_trans/','globe',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',572,true,'estado_resultado_trans/agregar/','plus',false);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',572,false,'estado_resultado_trans/cancelar/','remove',false);
  ✔ Reporte de asistencias por rango de fecha, empleado, faltas, asistencias, incapacidades @done (22-11-18 11:58)
-   -- lap|san
+   -- lap|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de Asistencia',364,true,'nomina_fiscal/rpt_asistencias/','list-ol',true);
- ✔ Reporte rastreabilidad @done (22-11-02 12:50) lap|san
+ ✔ Reporte rastreabilidad @done (22-11-02 12:50) lap|san|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Rastreabilidad y seguimiento 2',363,true,'rastreabilidad/rrs2/','print',true);
  ☐ Reporte de existencia nuevo reporte como el del correo (Reporte de rendimiento de limon nuevo)
-   -- lap|san
+   -- lap|san|pcc
    CREATE TABLE otros.existencias_limon_manoobra_insumo
       (
           id bigserial NOT NULL,
